@@ -1,0 +1,37 @@
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Node.js
+node_modules/
+.pnpm-store/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Unity generated files
+game/[Ll]ibrary/
+game/[Tt]emp/
+game/[Oo]bj/
+game/[Bb]uild/
+game/[Bb]uilds/
+game/[Ll]ogs/
+game/[Uu]ser[Ss]ettings/
+game/[Mm]emoryCaptures/
+game/[Rr]ecordings/
+
+# IDE and operating system files
+.vs/
+.idea/
+.vscode/
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.sln.docstates
+.DS_Store
+Thumbs.db
+*.stackdump

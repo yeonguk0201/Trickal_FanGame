@@ -1,0 +1,17 @@
+* text=auto eol=lf
+*.md text working-tree-encoding=UTF-8
+*.ts text working-tree-encoding=UTF-8
+*.tsx text working-tree-encoding=UTF-8
+*.cs text working-tree-encoding=UTF-8
+*.json text working-tree-encoding=UTF-8
+*.yml text working-tree-encoding=UTF-8
+*.yaml text working-tree-encoding=UTF-8
+*.env.example text working-tree-encoding=UTF-8
+*.anim filter=lfs diff=lfs merge=lfs -text
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.ogg filter=lfs diff=lfs merge=lfs -text
+*.fbx filter=lfs diff=lfs merge=lfs -text
