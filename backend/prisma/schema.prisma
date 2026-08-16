@@ -4,11 +4,88 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  nickname  String   @unique @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  runs Run[]
+
+  @@map("users")
+}
+
+model Character {
+  id          String   @id @db.VarChar(64)
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  runs Run[]
+
+  @@map("characters")
+}
+
+model Item {
+  id          String   @id @db.VarChar(64)
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  rarity      String   @db.VarChar(32)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  runItems RunItem[]
+
+  @@map("items")
+}
+
+model Run {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  characterId  String   @map("character_id") @db.VarChar(64)
+  startedAt    DateTime @map("started_at") @db.Timestamptz(3)
+  endedAt      DateTime @map("ended_at") @db.Timestamptz(3)
+  playTime     Int      @map("play_time")
+  reachedFloor Int      @map("reached_floor")
+  isCleared    Boolean  @map("is_cleared")
+  killCount    Int      @default(0) @map("kill_count")
+  deathReason  String?  @map("death_reason") @db.VarChar(32)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Restrict)
+  runItems  RunItem[]
+
+  @@index([userId], map: "runs_user_id_idx")
+  @@index([characterId], map: "runs_character_id_idx")
+  @@index([isCleared], map: "runs_is_cleared_idx")
+  @@map("runs")
+}
+
+model RunItem {
+  id         String    @id @default(uuid()) @db.Uuid
+  runId      String    @map("run_id") @db.Uuid
+  itemId     String    @map("item_id") @db.VarChar(64)
+  floor      Int
+  acquiredAt DateTime? @map("acquired_at") @db.Timestamptz(3)
+  itemOrder  Int       @map("item_order")
+
+  run  Run  @relation(fields: [runId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, itemOrder], map: "run_items_run_id_item_order_key")
+  @@index([itemId], map: "run_items_item_id_idx")
+  @@map("run_items")
 }
