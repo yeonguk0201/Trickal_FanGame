@@ -22,6 +22,11 @@ game/[Uu]ser[Ss]ettings/
 game/[Mm]emoryCaptures/
 game/[Rr]ecordings/
 
+# Unity-generated IDE project files
+game/*.csproj
+game/*.sln
+game/*.slnx
+
 # IDE and operating system files
 .vs/
 .idea/

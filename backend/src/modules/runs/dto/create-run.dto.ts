@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
@@ -69,6 +69,7 @@ export class CreateRunDto {
   killCount: number;
 
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? null : value))
   @IsEnum(DeathReason)
   deathReason?: DeathReason | null;
 
