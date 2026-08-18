@@ -33,6 +33,7 @@ export class RunsRepository {
         data: {
           userId: dto.userId,
           characterId: dto.characterId,
+          gameVersion: dto.gameVersion,
           startedAt: new Date(dto.startedAt),
           endedAt: new Date(dto.endedAt),
           playTime: dto.playTime,

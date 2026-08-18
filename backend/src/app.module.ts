@@ -6,9 +6,15 @@ import { HealthController } from './health/health.controller';
 import { HealthService } from './health/health.service';
 import { PrismaModule } from './database/prisma.module';
 import { RunsModule } from './modules/runs/runs.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, RunsModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    RunsModule,
+    UsersModule,
+  ],
   controllers: [AppController, HealthController],
   providers: [AppService, HealthService],
 })

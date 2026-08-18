@@ -43,6 +43,10 @@ export class CreateRunDto {
   @MaxLength(64)
   characterId: string;
 
+  @IsString()
+  @MaxLength(32)
+  gameVersion: string;
+
   @IsISO8601({ strict: true })
   startedAt: string;
 

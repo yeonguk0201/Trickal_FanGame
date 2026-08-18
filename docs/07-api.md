@@ -211,6 +211,7 @@ POST /api/runs
 {
   "userId": "user-uuid",
   "characterId": "character-a",
+  "gameVersion": "0.1.0",
   "startedAt": "2026-08-14T20:00:00Z",
   "endedAt": "2026-08-14T20:10:23Z",
   "playTime": 623,
@@ -246,6 +247,7 @@ POST /api/runs
 |---|---|---:|---|
 | `userId` | UUID | O | 유저 ID |
 | `characterId` | string | O | 캐릭터 ID |
+| `gameVersion` | string | O | 게임 버전 |
 | `startedAt` | datetime | O | 게임 시작 시간 |
 | `endedAt` | datetime | O | 게임 종료 시간 |
 | `playTime` | integer | O | 플레이 시간(초) |
