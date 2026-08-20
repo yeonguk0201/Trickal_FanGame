@@ -59,6 +59,12 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
+            // Room entry zones and other non-combat triggers should not consume projectiles.
+            if (collider.isTrigger && target == null)
+            {
+                return;
+            }
+
             hasHit = true;
             if (target != null)
             {

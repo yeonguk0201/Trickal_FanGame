@@ -20,3 +20,23 @@
 4. Player에서 `PlayerAttack`을 비활성화하고 `PlayerProjectileAttack`을 추가한다. 생성한 `PlayerProjectile` Prefab을 `Projectile Prefab` 슬롯에 끌어 놓는다.
 
 방향키를 누르고 있는 동안 투사체가 발사된다. 초기 속도는 `발사 방향 × baseProjectileSpeed + 플레이어 현재 속도 × inheritedVelocityFactor`다. 기본값은 8과 0.25이며, 이동 방향으로 발사하면 조금 빨라지고 반대 방향 발사는 조금 느려진다.
+
+## 방 진행 루프
+
+`RoomController`가 방의 상태와 적 생명주기를 소유한다. 상태는 `Waiting → Combat → Cleared` 순서로 한 번만 진행하며, 이미 시작한 방에 재진입해도 적을 다시 만들지 않는다.
+
+1. 빈 오브젝트에 `BoxCollider2D`와 `RoomController`를 추가하고 Collider 크기를 방 내부에 맞춘다. Collider는 실행 시 자동으로 Trigger가 된다.
+2. 출구 오브젝트에 `BoxCollider2D`와 `DoorController`를 추가한 뒤 Room의 `Doors` 목록에 넣는다. 전투가 시작되면 Collider가 켜지고 전멸하면 꺼진다.
+3. 적 프리팹과 빈 오브젝트로 만든 스폰 지점들을 Room의 `Enemy Prefab`, `Spawn Points`에 연결한다. 적 프리팹에는 반드시 `Health`가 있어야 한다.
+4. 씬에 미리 둔 적을 사용할 때는 `Preplaced Enemies`에 넣는다. 이 적들은 입장 전에는 비활성화되고 전투 시작 시 등록·활성화된다.
+5. 씬에 `RunProgress`를 하나 두고 각 Room에 같은 인스턴스를 연결한다. Room의 `Floor Number`, `Room Number`가 입장 시 현재 진행 위치로 기록된다.
+
+플레이어가 방 Trigger에 처음 들어오면 문 잠금, 적 스폰, 사망 이벤트 등록이 순서대로 실행된다. 마지막 적의 `Health.Died`가 발생하면 방이 클리어되고 문이 열린다. 플레이어가 먼저 죽으면 진행 상태가 멈추며 문은 잠긴 상태로 유지된다.
+
+첫 달 범위에서는 두 개의 Room을 고정된 순서로 배치하고 첫 Room의 열린 출구가 두 번째 Room의 Trigger로 이어지게 구성한다. 랜덤 생성이나 방 선택은 이후로 미룬다.
+
+## 4주차 최소 Run 수직 슬라이스
+
+Unity 메뉴에서 **Trickal Fan Game > Setup Week 4 Vertical Slice**를 한 번 실행한다. 3주차 맵의 끝에 보스방과 `RunSession`이 추가된다. 보스는 플레이어를 향해 1.2초마다 피할 수 있는 투사체를 발사하며, 처치하면 클리어 Run을, 플레이어가 적 또는 보스에게 죽으면 사망 Run을 생성한다.
+
+`RunSession`은 시작·종료 시각, 실제 경과 초, 현재 층, 처치 수를 스냅샷으로 만들고 한 번만 전송한다. 화면 좌측 상단에는 저장 성공 또는 실패가 표시된다. API가 꺼져 있거나 요청에 실패해도 게임 진행은 멈추지 않는다. 이전의 `TestRunSender`는 파이프라인 점검용으로 남아 있지만 실제 플레이 결과에는 사용하지 않는다.

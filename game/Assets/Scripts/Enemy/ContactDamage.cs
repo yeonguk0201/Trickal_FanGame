@@ -1,5 +1,6 @@
 using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
+using TrickalFanGame.Run;
 using UnityEngine;
 
 namespace TrickalFanGame.Enemy
@@ -24,6 +25,7 @@ namespace TrickalFanGame.Enemy
                 return;
             }
 
+            target.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
             target.TakeDamage(damage);
             nextDamageTime = Time.time + cooldown;
         }
