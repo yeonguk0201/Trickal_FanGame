@@ -391,12 +391,14 @@ Unity에서 Run이 종료되면 다음과 같은 데이터가 생성된다.
     {
       "itemId": "item-01",
       "floor": 1,
-      "order": 1
+      "order": 1,
+      "acquiredAt": "2026-08-14T20:02:10Z"
     },
     {
       "itemId": "item-02",
       "floor": 2,
-      "order": 2
+      "order": 2,
+      "acquiredAt": "2026-08-14T20:05:30Z"
     }
   ]
 }

@@ -223,17 +223,20 @@ POST /api/runs
     {
       "itemId": "item-01",
       "floor": 1,
-      "order": 1
+      "order": 1,
+      "acquiredAt": "2026-08-14T20:02:10Z"
     },
     {
       "itemId": "item-02",
       "floor": 2,
-      "order": 2
+      "order": 2,
+      "acquiredAt": "2026-08-14T20:05:30Z"
     },
     {
       "itemId": "item-03",
       "floor": 3,
-      "order": 3
+      "order": 3,
+      "acquiredAt": "2026-08-14T20:08:45Z"
     }
   ]
 }
@@ -267,7 +270,8 @@ POST /api/runs
 {
   "itemId": "item-01",
   "floor": 1,
-  "order": 1
+  "order": 1,
+  "acquiredAt": "2026-08-14T20:02:10Z"
 }
 ```
 
@@ -276,6 +280,7 @@ POST /api/runs
 | `itemId` | string | O | 아이템 ID |
 | `floor` | integer | O | 획득한 층 |
 | `order` | integer | O | 획득 순서 |
+| `acquiredAt` | ISO 8601 string | O | Run 시작 시각과 종료 시각 사이의 UTC 획득 시각 |
 
 ---
 
@@ -297,6 +302,10 @@ characterId
 itemId
     ↓
 존재하는 Item인가?
+
+acquiredAt
+    ↓
+startedAt 이상, endedAt 이하인가?
 
 playTime
     ↓

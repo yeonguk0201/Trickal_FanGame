@@ -60,13 +60,18 @@ export class RunsService {
     const hasInvalidItemFloor = dto.items.some(
       (item) => item.floor > dto.reachedFloor,
     );
+    const hasInvalidAcquisitionTime = dto.items.some((item) => {
+      const acquiredAt = new Date(item.acquiredAt);
+      return acquiredAt < startedAt || acquiredAt > endedAt;
+    });
 
     if (
       endedAt <= startedAt ||
       (dto.isCleared && hasDeathReason) ||
       (!dto.isCleared && !hasDeathReason) ||
       !hasSequentialOrders ||
-      hasInvalidItemFloor
+      hasInvalidItemFloor ||
+      hasInvalidAcquisitionTime
     ) {
       throw new ApiException(
         HttpStatus.UNPROCESSABLE_ENTITY,

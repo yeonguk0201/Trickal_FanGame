@@ -22,9 +22,13 @@ namespace TrickalFanGame.Combat
             Destroy(gameObject, lifetime);
         }
 
-        public void Launch(Vector2 velocity, Health projectileOwner)
+        public void Launch(Vector2 velocity, Health projectileOwner, int configuredDamage = -1)
         {
             owner = projectileOwner;
+            if (configuredDamage > 0)
+            {
+                damage = configuredDamage;
+            }
             body.linearVelocity = velocity;
 
             foreach (Collider2D ownerCollider in owner.GetComponentsInChildren<Collider2D>())

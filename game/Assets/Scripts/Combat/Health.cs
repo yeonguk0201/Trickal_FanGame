@@ -43,5 +43,19 @@ namespace TrickalFanGame.Combat
             CurrentHealth = maxHealth;
             IsDead = false;
         }
+
+        public void AddMaxHealth(int amount, bool healAddedAmount)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            maxHealth += amount;
+            if (healAddedAmount && !IsDead)
+            {
+                CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
+            }
+        }
     }
 }

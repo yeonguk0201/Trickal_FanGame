@@ -1,6 +1,7 @@
 using System;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
+using TrickalFanGame.Item;
 using TrickalFanGame.Network;
 using TrickalFanGame.Player;
 using TrickalFanGame.Room;
@@ -15,10 +16,12 @@ namespace TrickalFanGame.Run
         [SerializeField] private PlayerDeathReason playerDeathReason;
         [SerializeField] private RunProgress runProgress;
         [SerializeField] private BossController boss;
+        [SerializeField] private PlayerInventory inventory;
 
         [Header("Run identity")]
         [SerializeField] private string userId = "00000000-0000-4000-8000-000000000001";
         [SerializeField] private string characterId = "character-a";
+        [SerializeField] private bool waitForCharacterSelection;
 
         [Header("Result status")]
         [SerializeField] private string statusMessage = "Run not started.";
@@ -26,9 +29,12 @@ namespace TrickalFanGame.Run
 
         private DateTime startedAt;
         private float startedRealtime;
+        private bool hasStarted;
         private bool hasEnded;
 
+        public bool HasStarted => hasStarted;
         public bool HasEnded => hasEnded;
+        public string CharacterId => characterId;
 
         public void Configure(Health configuredPlayer, RunProgress configuredProgress, BossController configuredBoss)
         {
@@ -36,6 +42,11 @@ namespace TrickalFanGame.Run
             runProgress = configuredProgress;
             boss = configuredBoss;
             playerDeathReason = playerHealth != null ? playerHealth.GetComponent<PlayerDeathReason>() : null;
+        }
+
+        public void SetWaitForCharacterSelection(bool shouldWait)
+        {
+            waitForCharacterSelection = shouldWait;
         }
 
         private void Awake()
@@ -58,13 +69,36 @@ namespace TrickalFanGame.Run
                     playerDeathReason = playerHealth.gameObject.AddComponent<PlayerDeathReason>();
                 }
             }
+
+            if (playerHealth != null && inventory == null)
+            {
+                inventory = playerHealth.GetComponent<PlayerInventory>();
+            }
         }
 
         private void Start()
         {
+            if (waitForCharacterSelection)
+            {
+                statusMessage = "Select a character to begin.";
+                return;
+            }
+
+            BeginRun(characterId);
+        }
+
+        public bool BeginRun(string selectedCharacterId)
+        {
+            if (hasStarted || hasEnded || string.IsNullOrWhiteSpace(selectedCharacterId))
+            {
+                return false;
+            }
+
+            characterId = selectedCharacterId;
             startedAt = DateTime.UtcNow;
             startedRealtime = Time.realtimeSinceStartup;
-            statusMessage = "Run in progress.";
+            hasStarted = true;
+            statusMessage = $"Run in progress: {characterId}.";
 
             if (playerHealth != null)
             {
@@ -74,6 +108,9 @@ namespace TrickalFanGame.Run
             {
                 boss.Died += OnBossDied;
             }
+
+            Debug.Log($"[RunSession] Started with character {characterId}.", this);
+            return true;
         }
 
         private void OnDestroy()
@@ -87,7 +124,7 @@ namespace TrickalFanGame.Run
 
         private void EndRun(bool isCleared, string deathReason)
         {
-            if (hasEnded)
+            if (!hasStarted || hasEnded)
             {
                 return;
             }
@@ -107,7 +144,7 @@ namespace TrickalFanGame.Run
                 isCleared = isCleared,
                 killCount = runProgress != null ? runProgress.KillCount : 0,
                 deathReason = deathReason,
-                items = Array.Empty<RunItemDto>()
+                items = BuildRunItems(endedAt)
             };
 
             statusMessage = isCleared ? "Run cleared. Saving result..." : "Run ended. Saving result...";
@@ -119,6 +156,36 @@ namespace TrickalFanGame.Run
             }
 
             ApiClient.Instance.PostRun(request, OnSaveSuccess, OnSaveFailure);
+        }
+
+        private RunItemDto[] BuildRunItems(DateTime endedAt)
+        {
+            if (inventory == null || inventory.AcquiredItems.Count == 0)
+            {
+                return Array.Empty<RunItemDto>();
+            }
+
+            RunItemDto[] result = new RunItemDto[inventory.AcquiredItems.Count];
+            for (int index = 0; index < result.Length; index++)
+            {
+                AcquiredItem item = inventory.AcquiredItems[index];
+                double elapsedSeconds = Math.Max(0d, item.AcquiredRealtime - startedRealtime);
+                DateTime acquiredAt = startedAt.AddSeconds(elapsedSeconds);
+                if (acquiredAt > endedAt)
+                {
+                    acquiredAt = endedAt;
+                }
+
+                result[index] = new RunItemDto
+                {
+                    itemId = item.ItemId,
+                    floor = item.Floor,
+                    order = item.Order,
+                    acquiredAt = acquiredAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                };
+            }
+
+            return result;
         }
 
         private void OnSaveSuccess(CreateRunResponse response)

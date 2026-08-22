@@ -40,3 +40,33 @@
 Unity 메뉴에서 **Trickal Fan Game > Setup Week 4 Vertical Slice**를 한 번 실행한다. 3주차 맵의 끝에 보스방과 `RunSession`이 추가된다. 보스는 플레이어를 향해 1.2초마다 피할 수 있는 투사체를 발사하며, 처치하면 클리어 Run을, 플레이어가 적 또는 보스에게 죽으면 사망 Run을 생성한다.
 
 `RunSession`은 시작·종료 시각, 실제 경과 초, 현재 층, 처치 수를 스냅샷으로 만들고 한 번만 전송한다. 화면 좌측 상단에는 저장 성공 또는 실패가 표시된다. API가 꺼져 있거나 요청에 실패해도 게임 진행은 멈추지 않는다. 이전의 `TestRunSender`는 파이프라인 점검용으로 남아 있지만 실제 플레이 결과에는 사용하지 않는다.
+
+## 5주차 아이템 수직 슬라이스
+
+Unity 메뉴에서 **Trickal Fan Game > Setup Week 5 Item Slice**를 한 번 실행한다. Player에 `PlayerInventory`가 추가되고 시작 방에 공격력, 최대 HP, 이동 속도 아이템과 공격력 중복 아이템이 배치된다. 메뉴는 `Assets/Items`에 DB seed와 같은 `item-01`~`item-03` ID를 가진 `ItemDefinition` 에셋도 생성한다.
+
+Play Mode에서 아이템과 접촉하면 Console에 아이템 이름과 현재 중첩 수가 출력된다. 공격력 아이템은 새 투사체의 피해량, 최대 HP 아이템은 최대·현재 HP, 이동 속도 아이템은 실제 이동 속도에 즉시 반영된다. 기본 중첩은 가산이며 `maxStacks`가 0이면 무제한, 양수면 해당 수가 상한이다.
+
+획득 기록은 중복을 포함해 1부터 순서대로 `PlayerInventory`에 남는다. Run 종료 시 `RunSession`이 실제 경과 시간을 UTC 시각으로 변환해 `itemId`, 획득 층, 순서, `acquiredAt`을 Backend에 전송한다.
+
+### 보상방과 보스 드롭
+
+Unity 메뉴에서 **Trickal Fan Game > Setup Week 5 Reward Drops**를 한 번 실행한다. 1층 두 번째 전투방 출구에 보상방 표식이 추가된다. 두 번째 전투방을 클리어한 뒤 표식에 진입하면 `item-01`~`item-03` 중 하나가 확정 드롭되며, 같은 표식에 다시 진입해도 보상은 한 번만 생성된다. 표식 안에서 마지막 적을 처치한 경우에도 클리어 이벤트를 받아 즉시 드롭된다.
+
+현재 보스는 1층 보스로 취급하여 처치 시 같은 풀에서 아이템 하나를 확정 드롭한다. 이 단계에서는 보스 처치가 Run 클리어를 발생시키지 않는다. 이후 3개 층을 연결할 때 1~2층 보스에는 드롭을 유지하고, 3층 최종 보스만 `isFinalBoss`로 설정해 아이템 없이 Run을 클리어한다.
+
+`RewardRoom`과 `BossItemDrop`은 공통 `ItemDropSource`를 사용한다. 드롭 풀에는 중복 획득 가능한 `ItemDefinition`을 넣으며, 한 보상 소스는 한 번만 드롭한다.
+
+### 3개 층 이동 뼈대
+
+Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Week 5 Three Floor Skeleton**을 한 번 실행한다. 기존 맵을 1층으로 사용하고 아래쪽에 고정 구조의 2층과 3층을 추가한다. 각 층은 일반 전투방 2개, 보상방 1개, 보스방 1개로 구성된다.
+
+1~2층 보스를 처치하면 아이템이 하나 드롭되고 청록색 층 출구가 활성화된다. 출구에 들어가면 같은 Player 오브젝트가 다음 층 시작점으로 이동하므로 현재 HP, 인벤토리, 아이템 효과가 유지된다. 3층 최종 보스는 아이템을 드롭하지 않고 `RunSession`의 클리어 처리를 실행한다.
+
+현재 방 배치는 층 이동과 상태 유지 검증을 위한 고정형이다. 랜덤 방 생성 단계에서는 전투방·보상방·보스방을 프리팹 또는 방 정의 데이터로 분리하고, 생성된 연결 그래프에 현재의 `RoomController`, `RewardRoom`, `FloorExit`를 배치한다.
+
+### 캐릭터 선택과 Run ID
+
+Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Week 5 Character Selection**을 한 번 실행한다. Play Mode가 시작되면 게임 시간이 멈추고 Character A 선택 화면이 나타난다. 선택하기 전에는 플레이어 이동과 공격이 비활성화되며, 선택한 뒤부터 Run 시간 측정과 플레이가 시작된다.
+
+캐릭터 정보는 `Assets/Characters/character-a.asset`의 `CharacterDefinition`으로 관리한다. 이 에셋의 `characterId`는 Backend seed의 `Character.id`와 동일한 `character-a`다. 캐릭터를 추가할 때는 같은 형식의 에셋을 만들고 `CharacterSelectionUI` 목록에 연결하면 된다. 선택된 ID는 `RunSession`의 `CreateRunRequest.characterId`에 기록된다.

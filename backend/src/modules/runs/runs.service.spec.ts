@@ -30,8 +30,18 @@ describe('RunsService', () => {
     killCount: 100,
     deathReason: null,
     items: [
-      { itemId: 'item-01', floor: 1, order: 1 },
-      { itemId: 'item-02', floor: 2, order: 2 },
+      {
+        itemId: 'item-01',
+        floor: 1,
+        order: 1,
+        acquiredAt: '2026-08-17T10:02:00.000Z',
+      },
+      {
+        itemId: 'item-02',
+        floor: 2,
+        order: 2,
+        acquiredAt: '2026-08-17T10:06:00.000Z',
+      },
     ],
   };
 
@@ -72,8 +82,8 @@ describe('RunsService', () => {
     const dto = {
       ...validDto,
       items: [
-        { itemId: 'item-01', floor: 1, order: 1 },
-        { itemId: 'item-02', floor: 2, order: 3 },
+        { ...validDto.items[0], order: 1 },
+        { ...validDto.items[1], order: 3 },
       ],
     };
 
@@ -82,6 +92,25 @@ describe('RunsService', () => {
       HttpStatus.UNPROCESSABLE_ENTITY,
       'INVALID_RUN_DATA',
     );
+  });
+
+  it('rejects an item acquired outside the run interval', async () => {
+    const dto = {
+      ...validDto,
+      items: [
+        {
+          ...validDto.items[0],
+          acquiredAt: '2026-08-17T10:11:00.000Z',
+        },
+      ],
+    };
+
+    await expectApiError(
+      service.create(dto),
+      HttpStatus.UNPROCESSABLE_ENTITY,
+      'INVALID_RUN_DATA',
+    );
+    expect(repository.findUser).not.toHaveBeenCalled();
   });
 
   it('rejects an unknown item', async () => {

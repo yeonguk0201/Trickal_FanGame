@@ -33,6 +33,9 @@ export class CreateRunItemDto {
   @IsInt()
   @Min(1)
   order: number;
+
+  @IsISO8601({ strict: true })
+  acquiredAt: string;
 }
 
 export class CreateRunDto {

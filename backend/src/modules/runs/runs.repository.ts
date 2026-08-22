@@ -51,6 +51,7 @@ export class RunsRepository {
             runId: run.id,
             itemId: item.itemId,
             floor: item.floor,
+            acquiredAt: new Date(item.acquiredAt),
             itemOrder: item.order,
           })),
         });

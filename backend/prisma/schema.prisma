@@ -80,7 +80,7 @@ model RunItem {
   runId      String    @map("run_id") @db.Uuid
   itemId     String    @map("item_id") @db.VarChar(64)
   floor      Int
-  acquiredAt DateTime? @map("acquired_at") @db.Timestamptz(3)
+  acquiredAt DateTime  @map("acquired_at") @db.Timestamptz(3)
   itemOrder  Int       @map("item_order")
 
   run  Run  @relation(fields: [runId], references: [id], onDelete: Cascade)

@@ -25,6 +25,7 @@ namespace TrickalFanGame.Network
         public string itemId;
         public int floor;
         public int order;
+        public string acquiredAt;
     }
 
     [Serializable]

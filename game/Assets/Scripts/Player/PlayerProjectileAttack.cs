@@ -12,10 +12,19 @@ namespace TrickalFanGame.Player
         [SerializeField, Min(0.01f)] private float baseProjectileSpeed = 8f;
         [SerializeField, Min(0f)] private float inheritedVelocityFactor = 0.25f;
         [SerializeField, Min(0f)] private float attackCooldown = 0.35f;
+        [SerializeField, Min(1)] private int baseDamage = 1;
 
         private Health health;
         private PlayerMovement movement;
         private float nextAttackTime;
+        private int damageBonus;
+
+        public int CurrentDamage => baseDamage + damageBonus;
+
+        public void AddDamageBonus(int amount)
+        {
+            damageBonus = Mathf.Max(0, damageBonus + amount);
+        }
 
         private void Awake()
         {
@@ -50,7 +59,7 @@ namespace TrickalFanGame.Player
 
             Vector2 velocity = direction * baseProjectileSpeed
                 + movement.CurrentVelocity * inheritedVelocityFactor;
-            projectile.Launch(velocity, health);
+            projectile.Launch(velocity, health, CurrentDamage);
         }
 
         private static bool TryReadAttackDirection(out Vector2 direction)

@@ -12,9 +12,16 @@ namespace TrickalFanGame.Player
         private Rigidbody2D body;
         private Health health;
         private Vector2 movement;
+        private float moveSpeedBonus;
 
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
         public Vector2 CurrentVelocity => body.linearVelocity;
+        public float CurrentMoveSpeed => moveSpeed + moveSpeedBonus;
+
+        public void AddMoveSpeedBonus(float amount)
+        {
+            moveSpeedBonus = Mathf.Max(0f, moveSpeedBonus + amount);
+        }
 
         private void Awake()
         {
@@ -39,7 +46,7 @@ namespace TrickalFanGame.Player
 
         private void FixedUpdate()
         {
-            body.linearVelocity = health.IsDead ? Vector2.zero : movement * moveSpeed;
+            body.linearVelocity = health.IsDead ? Vector2.zero : movement * CurrentMoveSpeed;
         }
 
         private static Vector2 ReadMovement()
