@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TrickalFanGame.Combat
@@ -10,7 +12,9 @@ namespace TrickalFanGame.Combat
 
         private Rigidbody2D body;
         private Health owner;
-        private bool hasHit;
+        private readonly HashSet<Health> damagedTargets = new();
+        private int remainingPierces;
+        private Action targetKilled;
 
         private void Awake()
         {
@@ -22,14 +26,26 @@ namespace TrickalFanGame.Combat
             Destroy(gameObject, lifetime);
         }
 
-        public void Launch(Vector2 velocity, Health projectileOwner, int configuredDamage = -1)
+        public void Launch(
+            Vector2 velocity,
+            Health projectileOwner,
+            int configuredDamage = -1,
+            int configuredPierces = 0,
+            Action configuredTargetKilled = null)
         {
             owner = projectileOwner;
             if (configuredDamage > 0)
             {
                 damage = configuredDamage;
             }
+            remainingPierces = Mathf.Max(0, configuredPierces);
+            targetKilled = configuredTargetKilled;
             body.linearVelocity = velocity;
+
+            if (owner == null)
+            {
+                return;
+            }
 
             foreach (Collider2D ownerCollider in owner.GetComponentsInChildren<Collider2D>())
             {
@@ -52,13 +68,13 @@ namespace TrickalFanGame.Combat
 
         private void Hit(Collider2D collider)
         {
-            if (hasHit || collider == null)
+            if (collider == null)
             {
                 return;
             }
 
             Health target = collider.GetComponentInParent<Health>();
-            if (target == owner)
+            if (target == owner || (target != null && damagedTargets.Contains(target)))
             {
                 return;
             }
@@ -69,13 +85,36 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
-            hasHit = true;
             if (target != null)
             {
+                bool wasAlive = !target.IsDead;
+                damagedTargets.Add(target);
                 target.TakeDamage(damage);
+                if (wasAlive && target.IsDead)
+                {
+                    targetKilled?.Invoke();
+                }
+
+                IgnoreTargetColliders(target);
+                if (remainingPierces > 0)
+                {
+                    remainingPierces--;
+                    return;
+                }
             }
 
             Destroy(gameObject);
+        }
+
+        private void IgnoreTargetColliders(Health target)
+        {
+            foreach (Collider2D targetCollider in target.GetComponentsInChildren<Collider2D>())
+            {
+                foreach (Collider2D projectileCollider in GetComponentsInChildren<Collider2D>())
+                {
+                    Physics2D.IgnoreCollision(projectileCollider, targetCollider);
+                }
+            }
         }
     }
 }
