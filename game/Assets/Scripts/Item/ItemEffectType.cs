@@ -4,6 +4,9 @@ namespace TrickalFanGame.Item
     {
         AttackDamage,
         MaxHealth,
-        MoveSpeed
+        MoveSpeed,
+        MultiShot,
+        Pierce,
+        HealOnKill
     }
 }

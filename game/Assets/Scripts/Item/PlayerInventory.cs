@@ -18,8 +18,13 @@ namespace TrickalFanGame.Item
         private PlayerMovement movement;
         private PlayerProjectileAttack attack;
 
+        public const string MultiShotItemId = "item-06";
+        public const string PierceItemId = "item-11";
+
         public IReadOnlyList<AcquiredItem> AcquiredItems => acquiredItems;
+        public bool IsMultiShotPierceSynergyActive { get; private set; }
         public event Action<ItemDefinition, int> ItemAcquired;
+        public event Action<string> SynergyActivated;
 
         private void Awake()
         {
@@ -50,6 +55,7 @@ namespace TrickalFanGame.Item
             int newStackCount = currentStacks + 1;
             stackCounts[definition.ItemId] = newStackCount;
             ApplyEffect(definition);
+            EvaluateSynergies();
 
             int floor = Mathf.Max(1, runProgress != null ? runProgress.CurrentFloor : 1);
             acquiredItems.Add(new AcquiredItem(
@@ -81,9 +87,35 @@ namespace TrickalFanGame.Item
                 case ItemEffectType.MoveSpeed:
                     movement.AddMoveSpeedBonus(definition.EffectValue);
                     break;
+                case ItemEffectType.MultiShot:
+                    attack.AddProjectiles(Mathf.RoundToInt(definition.EffectValue));
+                    break;
+                case ItemEffectType.Pierce:
+                    attack.AddPierce(Mathf.RoundToInt(definition.EffectValue));
+                    break;
+                case ItemEffectType.HealOnKill:
+                    attack.AddHealOnKill(Mathf.RoundToInt(definition.EffectValue));
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void EvaluateSynergies()
+        {
+            if (IsMultiShotPierceSynergyActive ||
+                GetStackCount(MultiShotItemId) == 0 ||
+                GetStackCount(PierceItemId) == 0)
+            {
+                return;
+            }
+
+            IsMultiShotPierceSynergyActive = true;
+            const string synergyName = "MULTI_SHOT + PIERCE";
+            SynergyActivated?.Invoke(synergyName);
+            Debug.Log(
+                $"[PlayerInventory] Synergy activated: {synergyName}. All multi-shot projectiles now pierce.",
+                this);
         }
     }
 }

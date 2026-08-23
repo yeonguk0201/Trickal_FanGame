@@ -564,7 +564,7 @@ MonoBehaviour:
   boss: {fileID: 1818688570}
   inventory: {fileID: 0}
   userId: 00000000-0000-4000-8000-000000000001
-  characterId: character-a
+  characterId: erpin
   waitForCharacterSelection: 1
   statusMessage: Run not started.
   lastRunId: 
@@ -1419,6 +1419,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
   - {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
+  - {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
+  - {fileID: 11400000, guid: d74271f8aaa7ee2428d026411a4e9e03, type: 2}
+  - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 1330461713}
 --- !u!61 &311465636
 BoxCollider2D:
@@ -1812,6 +1815,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
   - {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
+  - {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
+  - {fileID: 11400000, guid: d74271f8aaa7ee2428d026411a4e9e03, type: 2}
+  - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 1800309174}
 --- !u!61 &381461748
 BoxCollider2D:
@@ -6376,6 +6382,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
   - {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
+  - {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
+  - {fileID: 11400000, guid: d74271f8aaa7ee2428d026411a4e9e03, type: 2}
+  - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 587525194}
 --- !u!1 &1330461712
 GameObject:
@@ -6544,7 +6553,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Network.TestRunSender
   testUserId: 00000000-0000-4000-8000-000000000001
-  testCharacterId: character-a
+  testCharacterId: erpin
   sendAsCleared: 0
   lastRunId: 
   lastError: 
@@ -6675,6 +6684,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
   - {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
+  - {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
+  - {fileID: 11400000, guid: d74271f8aaa7ee2428d026411a4e9e03, type: 2}
+  - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 1401535381}
 --- !u!1 &1415547388
 GameObject:
@@ -8526,6 +8538,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
   - {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
+  - {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
+  - {fileID: 11400000, guid: d74271f8aaa7ee2428d026411a4e9e03, type: 2}
+  - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 559356490}
 --- !u!61 &1632398752
 BoxCollider2D:
@@ -9625,6 +9640,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
   - {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
+  - {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
+  - {fileID: 11400000, guid: d74271f8aaa7ee2428d026411a4e9e03, type: 2}
+  - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 1818688573}
 --- !u!1 &1838770895
 GameObject:
@@ -10654,6 +10672,7 @@ MonoBehaviour:
   inheritedVelocityFactor: 0.25
   attackCooldown: 0.35
   baseDamage: 1
+  multiShotSpreadAngle: 12
 --- !u!114 &2018927168
 MonoBehaviour:
   m_ObjectHideFlags: 0

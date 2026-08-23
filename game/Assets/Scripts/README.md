@@ -67,6 +67,17 @@ Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Week 5 
 
 ### 캐릭터 선택과 Run ID
 
-Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Week 5 Character Selection**을 한 번 실행한다. Play Mode가 시작되면 게임 시간이 멈추고 Character A 선택 화면이 나타난다. 선택하기 전에는 플레이어 이동과 공격이 비활성화되며, 선택한 뒤부터 Run 시간 측정과 플레이가 시작된다.
+Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Week 5 Character Selection**을 한 번 실행한다. Play Mode가 시작되면 게임 시간이 멈추고 에르핀 선택 화면이 나타난다. 선택하기 전에는 플레이어 이동과 공격이 비활성화되며, 선택한 뒤부터 Run 시간 측정과 플레이가 시작된다.
 
-캐릭터 정보는 `Assets/Characters/character-a.asset`의 `CharacterDefinition`으로 관리한다. 이 에셋의 `characterId`는 Backend seed의 `Character.id`와 동일한 `character-a`다. 캐릭터를 추가할 때는 같은 형식의 에셋을 만들고 `CharacterSelectionUI` 목록에 연결하면 된다. 선택된 ID는 `RunSession`의 `CreateRunRequest.characterId`에 기록된다.
+캐릭터 정보는 `Assets/Characters/erpin.asset`의 `CharacterDefinition`으로 관리한다. 이 에셋의 `characterId`는 Backend seed의 `Character.id`와 동일한 `erpin`이다. 캐릭터를 추가할 때는 같은 형식의 에셋을 만들고 `CharacterSelectionUI` 목록에 연결하면 된다. 선택된 ID는 `RunSession`의 `CreateRunRequest.characterId`에 기록된다.
+
+## 6주차 아이템 확장과 시너지
+
+Unity 메뉴에서 **Trickal Fan Game > Setup Week 6 Items and Synergy**를 실행한다. 기존 3종에 `item-06` 다중 투사체, `item-11` 관통 투사체, `item-08` 처치 회복이 추가되고 모든 보상방과 1~2층 보스의 드롭 풀이 6종으로 갱신된다.
+
+- 다중 투사체는 획득당 한 발을 추가하며 최대 2회 중첩된다.
+- 관통 투사체는 획득당 한 명의 적을 추가로 맞히며 최대 2회 중첩된다.
+- 처치 회복은 플레이어의 투사체로 적을 처치할 때마다 HP를 1 회복하며 최대 3회 중첩된다.
+- `MULTI_SHOT` + `PIERCE`는 획득 순서와 무관하게 한 번만 활성화된다. 활성화 로그가 Console에 출력되고, 이후 생성되는 모든 다중 투사체에 관통 횟수가 적용된다.
+
+스택 상한은 극단적인 조합에서 투사체 수와 회복량이 무한히 커지지 않도록 정한 밸런스 장치다. 층 이동은 같은 Player와 `PlayerInventory`를 유지하므로 아이템 스택과 시너지 활성 상태도 그대로 유지된다. Run 종료 기록에는 시너지를 별도 아이템으로 추가하지 않고, 두 원본 아이템 ID와 각각의 획득 순서를 기존 방식대로 남긴다.
