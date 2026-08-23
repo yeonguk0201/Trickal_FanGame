@@ -151,9 +151,9 @@ Player/
 Player
  └── Character
 현재:
-Character A
+에르핀
 향후:
-Character A
+에르핀
 Character B
 Character C
 7. Enemy
@@ -848,7 +848,7 @@ MVP 단계에서는 미래의 모든 확장을 고려하여 복잡한 구조를 
 Character
 향후:
 Character
-├── Character A
+├── 에르핀
 ├── Character B
 └── Character C
 실제 확장이 필요해지는 시점에 구조를 확장한다.

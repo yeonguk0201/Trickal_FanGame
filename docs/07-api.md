@@ -157,9 +157,10 @@ POST /api/runs
 ```text
 GET /api/users/:nickname
 GET /api/users/:nickname/runs
+PUT /api/users/:nickname/characters/:characterId/skills/:skillType
 ```
 
-유저 정보 및 전적 조회.
+유저 정보 및 전적 조회, 캐릭터 스킬 강화.
 
 ---
 
@@ -209,8 +210,9 @@ POST /api/runs
 
 ```json
 {
+  "clientRunId": "client-generated-run-uuid",
   "userId": "user-uuid",
-  "characterId": "character-a",
+  "characterId": "erpin",
   "gameVersion": "0.1.0",
   "startedAt": "2026-08-14T20:00:00Z",
   "endedAt": "2026-08-14T20:10:23Z",
@@ -248,6 +250,7 @@ POST /api/runs
 
 | Field | Type | Required | 설명 |
 |---|---|---:|---|
+| `clientRunId` | UUID | O | Unity가 Run 시작 시 생성하는 멱등성 식별자 |
 | `userId` | UUID | O | 유저 ID |
 | `characterId` | string | O | 캐릭터 ID |
 | `gameVersion` | string | O | 게임 버전 |
@@ -295,6 +298,10 @@ userId
     ↓
 존재하는 User인가?
 
+clientRunId
+    ↓
+이미 저장된 Run이면 기존 저장·경험치 결과를 반환하는가?
+
 characterId
     ↓
 존재하는 Character인가?
@@ -338,12 +345,29 @@ HTTP/1.1 201 Created
 {
   "success": true,
   "data": {
-    "runId": "run-uuid"
+    "runId": "run-uuid",
+    "experienceGained": 400,
+    "progress": {
+      "characterId": "erpin",
+      "level": 3,
+      "experience": 120,
+      "experienceToNextLevel": 900,
+      "skillPoints": 2,
+      "lowGradeSkillLevel": 1,
+      "highGradeSkillLevel": 1
+    }
   }
 }
 ```
 
-Unity는 생성된 Run ID를 저장할 수 있다.
+Unity는 생성된 Run ID와 Backend가 계산한 캐릭터 진행 결과를 표시한다. 한 Run의 경험치가 여러
+레벨 조건을 충족하면 Backend는 최대 Lv.19 또는 경험치 부족 시점까지 연속 레벨업하고, 상승한
+레벨 수만큼 스킬 포인트를 지급한다.
+
+같은 `clientRunId`와 동일한 Run 내용을 재전송하면 새 Run이나 경험치를 만들지 않고
+동일한 결과를 `200 OK`로 반환한다. 같은 `clientRunId`에 다른 Run 내용을 보내면
+`RUN_IDEMPOTENCY_CONFLICT`로 전체 요청을 거절한다.
+최초 저장은 `201 Created`를 사용한다.
 
 ---
 
@@ -420,7 +444,21 @@ GET /api/users/test-player
       "averagePlayTime": 582,
       "averageFloor": 2.4,
       "highestFloor": 5
-    }
+    },
+    "characterProgress": [
+      {
+        "characterId": "erpin",
+        "characterName": "에르핀",
+        "level": 3,
+        "maxLevel": 19,
+        "experience": 120,
+        "experienceToNextLevel": 900,
+        "skillPoints": 2,
+        "lowGradeSkillLevel": 1,
+        "highGradeSkillLevel": 1,
+        "maxSkillLevel": 10
+      }
+    ]
   }
 }
 ```
@@ -441,6 +479,68 @@ Highest Floor
 ```
 
 통계는 `runs` 데이터를 기반으로 Backend에서 계산한다.
+
+---
+
+# 9.4 Upgrade Character Skill
+
+캐릭터의 미사용 스킬 포인트 1을 소비해 지정한 스킬을 1레벨 강화한다.
+
+```http
+PUT /api/users/:nickname/characters/:characterId/skills/:skillType
+```
+
+`skillType`은 다음 안정적인 값을 사용한다.
+
+```text
+LOW_GRADE
+HIGH_GRADE
+```
+
+요청 본문에는 클라이언트가 원하는 다음 레벨을 전달한다.
+
+```json
+{
+  "targetLevel": 2
+}
+```
+
+`targetLevel`은 현재 레벨과 같거나 정확히 1 높아야 한다. 현재 레벨과 같으면 재전송으로 보고
+포인트를 다시 차감하지 않은 채 현재 상태를 반환한다. 현재 레벨보다 2 이상 높거나 낮으면
+`INVALID_SKILL_TARGET_LEVEL` 오류를 반환한다.
+
+Backend는 다음을 하나의 Transaction으로 처리한다.
+
+```text
+UserCharacterProgress 조회 및 잠금
+  → targetLevel과 현재 스킬 레벨 검증
+  → targetLevel이 현재와 같으면 현재 결과 반환
+  → skillPoints >= 1 검증
+  → 대상 스킬 레벨 < 10 검증
+  → skillPoints 1 차감
+  → 대상 스킬 레벨 1 증가
+  → 저장된 진행 상태 반환
+```
+
+성공 응답:
+
+```json
+{
+  "success": true,
+  "data": {
+    "characterId": "erpin",
+    "level": 3,
+    "experience": 120,
+    "experienceToNextLevel": 900,
+    "skillPoints": 1,
+    "lowGradeSkillLevel": 2,
+    "highGradeSkillLevel": 1
+  }
+}
+```
+
+스킬 포인트가 없으면 `SKILL_POINT_NOT_ENOUGH`, 이미 Lv.10이면 `SKILL_LEVEL_MAX`, 진행 데이터가
+없으면 `CHARACTER_PROGRESS_NOT_FOUND` 오류를 반환한다.
 
 ---
 
@@ -472,7 +572,7 @@ GET /api/users/test-player/runs?page=1&limit=20
 
 ```text
 ?result=clear
-?character=character-a
+?character=erpin
 ?sort=latest
 ```
 
@@ -489,8 +589,8 @@ MVP에서는 필요한 기능만 구현한다.
     {
       "runId": "run-001",
       "character": {
-        "id": "character-a",
-        "name": "Character A"
+        "id": "erpin",
+        "name": "에르핀"
       },
       "reachedFloor": 3,
       "playTime": 623,
@@ -501,8 +601,8 @@ MVP에서는 필요한 기능만 구현한다.
     {
       "runId": "run-002",
       "character": {
-        "id": "character-a",
-        "name": "Character A"
+        "id": "erpin",
+        "name": "에르핀"
       },
       "reachedFloor": 2,
       "playTime": 451,
@@ -551,8 +651,8 @@ GET /api/runs/run-uuid
       "nickname": "test-player"
     },
     "character": {
-      "id": "character-a",
-      "name": "Character A"
+      "id": "erpin",
+      "name": "에르핀"
     },
     "startedAt": "2026-08-14T20:00:00Z",
     "endedAt": "2026-08-14T20:10:23Z",
@@ -677,8 +777,8 @@ playTime ASC
       "rank": 1,
       "nickname": "player-a",
       "character": {
-        "id": "character-a",
-        "name": "Character A"
+        "id": "erpin",
+        "name": "에르핀"
       },
       "reachedFloor": 5,
       "playTime": 812,
@@ -688,8 +788,8 @@ playTime ASC
       "rank": 2,
       "nickname": "player-b",
       "character": {
-        "id": "character-a",
-        "name": "Character A"
+        "id": "erpin",
+        "name": "에르핀"
       },
       "reachedFloor": 4,
       "playTime": 921,
@@ -746,8 +846,8 @@ GET /api/statistics/characters
   "success": true,
   "data": [
     {
-      "characterId": "character-a",
-      "characterName": "Character A",
+      "characterId": "erpin",
+      "characterName": "에르핀",
       "totalRuns": 1520,
       "clears": 420,
       "winRate": 27.63,
@@ -878,6 +978,11 @@ MVP에서 사용할 주요 Error Code:
 | `CHARACTER_NOT_FOUND` | 캐릭터 없음 |
 | `ITEM_NOT_FOUND` | 아이템 없음 |
 | `RUN_NOT_FOUND` | Run 없음 |
+| `RUN_IDEMPOTENCY_CONFLICT` | 같은 clientRunId에 다른 Run 내용이 전송됨 |
+| `CHARACTER_PROGRESS_NOT_FOUND` | 캐릭터 진행 데이터 없음 |
+| `SKILL_POINT_NOT_ENOUGH` | 사용할 수 있는 스킬 포인트 부족 |
+| `SKILL_LEVEL_MAX` | 대상 스킬이 최대 Lv.10 |
+| `INVALID_SKILL_TARGET_LEVEL` | 현재 레벨과 일치하지 않는 강화 목표 |
 | `INVALID_RUN_DATA` | 잘못된 Run 데이터 |
 | `INTERNAL_SERVER_ERROR` | 서버 내부 오류 |
 
@@ -945,8 +1050,8 @@ Web Response:
 ```json
 {
   "character": {
-    "id": "character-a",
-    "name": "Character A"
+    "id": "erpin",
+    "name": "에르핀"
   }
 }
 ```
@@ -1040,6 +1145,10 @@ Retry 2
 ```
 
 구체적인 Retry 횟수와 Backoff 전략은 구현 단계에서 결정한다.
+
+Run 재시도는 최초 요청과 동일한 `clientRunId`를 반드시 사용한다. Backend는 이 값을 기준으로
+이미 저장된 Run인지 확인하며, 기존 Run이면 경험치와 스킬 포인트를 다시 지급하지 않고 최초 처리
+결과를 반환한다. 로컬 재전송 데이터에도 `clientRunId`를 함께 보존한다.
 
 ---
 
@@ -1279,6 +1388,8 @@ MVP에서는 다음 API만 구현한다.
 
 ```text
 POST /api/runs
+
+PUT /api/users/:nickname/characters/:characterId/skills/:skillType
 
 GET /api/users/:nickname
 

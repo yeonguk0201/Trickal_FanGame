@@ -479,7 +479,7 @@ Backend
 
 캐릭터 관련 데이터를 관리한다.
 현재는 1종만 존재하지만 향후 확장을 고려한다.
-Character A
+에르핀
 Character B
 Character C
 

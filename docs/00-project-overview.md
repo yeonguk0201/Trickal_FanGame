@@ -180,7 +180,7 @@ MVP에서는 실제 플레이 가능한 캐릭터를 **1종으로 제한**한다
 
 ```text
 Character
-├── Character A  ← MVP
+├── 에르핀  ← MVP
 ├── Character B  ← 향후 확장
 └── Character C  ← 향후 확장
 ```
