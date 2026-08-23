@@ -22,7 +22,7 @@ describe('UsersService', () => {
         runs: [
           {
             id: 'run-id',
-            character: { id: 'character-a', name: 'Character A' },
+            character: { id: 'erpin', name: '에르핀' },
             reachedFloor: 3,
             playTime: 600,
             isCleared: true,
@@ -41,7 +41,7 @@ describe('UsersService', () => {
       data: [
         {
           runId: 'run-id',
-          character: { id: 'character-a', name: 'Character A' },
+          character: { id: 'erpin', name: '에르핀' },
           reachedFloor: 3,
           playTime: 600,
           isCleared: true,

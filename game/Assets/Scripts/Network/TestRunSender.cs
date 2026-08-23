@@ -7,7 +7,7 @@ namespace TrickalFanGame.Network
     {
         [Header("Test Settings")]
         [SerializeField] private string testUserId = "00000000-0000-4000-8000-000000000001";
-        [SerializeField] private string testCharacterId = "character-a";
+        [SerializeField] private string testCharacterId = "erpin";
         [SerializeField] private bool sendAsCleared = false;
 
         [Header("Status")]

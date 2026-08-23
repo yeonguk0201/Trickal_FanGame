@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d3e791aa94f34c65bb981113a10bad11, type: 3}
-  m_Name: character-a
+  m_Name: erpin
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Character.CharacterDefinition
-  characterId: character-a
-  displayName: Character A
+  characterId: erpin
+  displayName: 에르핀
   description: "MVP \uAE30\uBCF8 \uD50C\uB808\uC774 \uCE90\uB9AD\uD130"

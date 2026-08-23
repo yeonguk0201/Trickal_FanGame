@@ -12,7 +12,7 @@ namespace TrickalFanGame.Editor
     {
         private const string RootName = "Week5 Character Selection";
         private const string CharacterFolder = "Assets/Characters";
-        private const string CharacterAssetPath = CharacterFolder + "/character-a.asset";
+        private const string CharacterAssetPath = CharacterFolder + "/erpin.asset";
 
         [MenuItem("Trickal Fan Game/Setup Week 5 Character Selection")]
         public static void Setup()
@@ -57,7 +57,7 @@ namespace TrickalFanGame.Editor
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
             Selection.activeGameObject = root;
-            Debug.Log("Week 5 character selection ready. Choose Character A to begin the Run.", root);
+            Debug.Log("Week 5 character selection ready. Choose Erpin to begin the Run.", root);
         }
 
         private static CharacterDefinition LoadOrCreateCharacter()
@@ -75,8 +75,8 @@ namespace TrickalFanGame.Editor
             }
 
             SerializedObject serialized = new(character);
-            serialized.FindProperty("characterId").stringValue = "character-a";
-            serialized.FindProperty("displayName").stringValue = "Character A";
+            serialized.FindProperty("characterId").stringValue = "erpin";
+            serialized.FindProperty("displayName").stringValue = "에르핀";
             serialized.FindProperty("description").stringValue = "MVP 기본 플레이 캐릭터";
             serialized.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(character);

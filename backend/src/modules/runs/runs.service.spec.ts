@@ -20,7 +20,7 @@ describe('RunsService', () => {
 
   const validDto: CreateRunDto = {
     userId: '00000000-0000-4000-8000-000000000001',
-    characterId: 'character-a',
+    characterId: 'erpin',
     gameVersion: '0.1.0',
     startedAt: '2026-08-17T10:00:00.000Z',
     endedAt: '2026-08-17T10:10:00.000Z',

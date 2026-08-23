@@ -20,7 +20,7 @@ namespace TrickalFanGame.Run
 
         [Header("Run identity")]
         [SerializeField] private string userId = "00000000-0000-4000-8000-000000000001";
-        [SerializeField] private string characterId = "character-a";
+        [SerializeField] private string characterId = "erpin";
         [SerializeField] private bool waitForCharacterSelection;
 
         [Header("Result status")]

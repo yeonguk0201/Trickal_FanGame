@@ -13,8 +13,8 @@ const prisma = new PrismaClient({
 });
 
 const character = {
-  id: 'character-a',
-  name: 'Character A',
+  id: 'erpin',
+  name: '에르핀',
   description: 'MVP 기본 플레이 캐릭터',
   isActive: true,
 };
@@ -30,6 +30,7 @@ const items = [
   ['item-08', '처치 회복', '적 처치 시 체력을 회복합니다.', 'RARE'],
   ['item-09', '피격 반격', '피격 시 반격 효과가 발생합니다.', 'RARE'],
   ['item-10', '추가 공격', '특정 조건에서 추가 공격이 발생합니다.', 'EPIC'],
+  ['item-11', '관통 투사체', '투사체가 적을 관통합니다.', 'RARE'],
 ] as const;
 
 async function main() {
