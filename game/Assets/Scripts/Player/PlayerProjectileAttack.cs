@@ -4,7 +4,8 @@ using UnityEngine.InputSystem;
 
 namespace TrickalFanGame.Player
 {
-    [RequireComponent(typeof(Health), typeof(PlayerMovement))]
+    [RequireComponent(typeof(Health), typeof(PlayerMovement), typeof(PlayerStats))]
+    [RequireComponent(typeof(PlayerCombatEvents), typeof(PlayerActionState))]
     public sealed class PlayerProjectileAttack : MonoBehaviour
     {
         [SerializeField] private Projectile projectilePrefab;
@@ -12,51 +13,57 @@ namespace TrickalFanGame.Player
         [SerializeField, Min(0.01f)] private float baseProjectileSpeed = 8f;
         [SerializeField, Min(0f)] private float inheritedVelocityFactor = 0.25f;
         [SerializeField, Min(0f)] private float attackCooldown = 0.35f;
-        [SerializeField, Min(1)] private int baseDamage = 1;
         [SerializeField, Range(0f, 45f)] private float multiShotSpreadAngle = 12f;
 
         private Health health;
         private PlayerMovement movement;
+        private PlayerStats stats;
+        private PlayerCombatEvents combatEvents;
+        private PlayerActionState actionState;
         private float nextAttackTime;
-        private int damageBonus;
-        private int additionalProjectileCount;
-        private int pierceCount;
-        private int healOnKill;
 
-        public int CurrentDamage => baseDamage + damageBonus;
-        public int ProjectileCount => 1 + additionalProjectileCount;
-        public int PierceCount => pierceCount;
-        public int HealOnKill => healOnKill;
+        public int CurrentDamage => stats.AttackDamage;
+        public int ProjectileCount => stats.ProjectileCount;
+        public int PierceCount => stats.PierceCount;
+        public int HealOnKill => stats.HealOnKill;
+        public bool CanAttack => !health.IsDead && actionState.CanBasicAttack;
 
-        public void AddDamageBonus(int amount)
+        public DamageContext CreateDamageContext()
         {
-            damageBonus = Mathf.Max(0, damageBonus + amount);
-        }
-
-        public void AddProjectiles(int amount)
-        {
-            additionalProjectileCount = Mathf.Max(0, additionalProjectileCount + amount);
-        }
-
-        public void AddPierce(int amount)
-        {
-            pierceCount = Mathf.Max(0, pierceCount + amount);
-        }
-
-        public void AddHealOnKill(int amount)
-        {
-            healOnKill = Mathf.Max(0, healOnKill + amount);
+            return new DamageContext(gameObject, DamageSourceType.PlayerProjectile, stats.AttackDamage);
         }
 
         private void Awake()
         {
             health = GetComponent<Health>();
             movement = GetComponent<PlayerMovement>();
+            stats = GetComponent<PlayerStats>();
+            combatEvents = GetComponent<PlayerCombatEvents>();
+            actionState = GetComponent<PlayerActionState>();
+        }
+
+        private void OnEnable()
+        {
+            if (combatEvents == null)
+            {
+                combatEvents = GetComponent<PlayerCombatEvents>();
+            }
+
+            combatEvents.EnemyKilled -= OnEnemyKilled;
+            combatEvents.EnemyKilled += OnEnemyKilled;
+        }
+
+        private void OnDisable()
+        {
+            if (combatEvents != null)
+            {
+                combatEvents.EnemyKilled -= OnEnemyKilled;
+            }
         }
 
         private void Update()
         {
-            if (health.IsDead || Time.time < nextAttackTime || !TryReadAttackDirection(out Vector2 direction))
+            if (!CanAttack || Time.time < nextAttackTime || !TryReadAttackDirection(out Vector2 direction))
             {
                 return;
             }
@@ -68,7 +75,7 @@ namespace TrickalFanGame.Player
                 return;
             }
 
-            nextAttackTime = Time.time + attackCooldown;
+            nextAttackTime = Time.time + attackCooldown / stats.AttackSpeed;
             Fire(direction);
         }
 
@@ -92,15 +99,17 @@ namespace TrickalFanGame.Player
 
             Vector2 velocity = direction * baseProjectileSpeed
                 + movement.CurrentVelocity * inheritedVelocityFactor;
-            projectile.Launch(velocity, health, CurrentDamage, pierceCount, OnTargetKilled);
+            projectile.Launch(velocity, health, CreateDamageContext(), stats.PierceCount);
         }
 
-        private void OnTargetKilled()
+        private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)
         {
-            int healedAmount = health.Heal(healOnKill);
+            int healedAmount = health.Heal(stats.HealOnKill);
             if (healedAmount > 0)
             {
-                Debug.Log($"[PlayerProjectileAttack] Healed {healedAmount} HP after defeating an enemy.", this);
+                Debug.Log(
+                    $"[PlayerProjectileAttack] Healed {healedAmount} HP after defeating {killEvent.Target.name}.",
+                    this);
             }
         }
 

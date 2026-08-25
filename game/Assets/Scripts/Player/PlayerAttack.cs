@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 namespace TrickalFanGame.Player
 {
-    [RequireComponent(typeof(Health))]
+    [RequireComponent(typeof(Health), typeof(PlayerCombatEvents), typeof(PlayerActionState))]
     public sealed class PlayerAttack : MonoBehaviour
     {
         [SerializeField, Min(1)] private int damage = 1;
@@ -16,20 +16,23 @@ namespace TrickalFanGame.Player
 
         private readonly Collider2D[] hitBuffer = new Collider2D[16];
         private Health health;
+        private PlayerActionState actionState;
         private ContactFilter2D targetFilter;
         private float nextAttackTime;
 
         public Vector2 AimDirection { get; private set; } = Vector2.down;
+        public bool CanAttack => !health.IsDead && actionState.CanBasicAttack;
 
         private void Awake()
         {
             health = GetComponent<Health>();
+            actionState = GetComponent<PlayerActionState>();
             targetFilter = new ContactFilter2D { useLayerMask = true, layerMask = targetLayers };
         }
 
         private void Update()
         {
-            if (health.IsDead || Time.time < nextAttackTime || !TryReadAttackDirection(out Vector2 direction))
+            if (!CanAttack || Time.time < nextAttackTime || !TryReadAttackDirection(out Vector2 direction))
             {
                 return;
             }
@@ -53,7 +56,7 @@ namespace TrickalFanGame.Player
                     continue;
                 }
 
-                target.TakeDamage(damage);
+                target.TakeDamage(new DamageContext(gameObject, DamageSourceType.PlayerAttack, damage));
             }
         }
 

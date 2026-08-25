@@ -26,7 +26,7 @@ namespace TrickalFanGame.Enemy
             }
 
             target.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
-            target.TakeDamage(damage);
+            target.TakeDamage(new DamageContext(gameObject, DamageSourceType.EnemyContact, damage));
             nextDamageTime = Time.time + cooldown;
         }
     }

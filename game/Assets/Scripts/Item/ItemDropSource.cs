@@ -7,17 +7,20 @@ namespace TrickalFanGame.Item
         [SerializeField] private ItemPickup pickupPrefab;
         [SerializeField] private ItemDefinition[] itemPool = System.Array.Empty<ItemDefinition>();
         [SerializeField] private Transform dropPoint;
+        [SerializeField] private Transform dropParent;
 
         public bool HasDropped { get; private set; }
 
         public void Configure(
             ItemPickup configuredPickupPrefab,
             ItemDefinition[] configuredItemPool,
-            Transform configuredDropPoint = null)
+            Transform configuredDropPoint = null,
+            Transform configuredDropParent = null)
         {
             pickupPrefab = configuredPickupPrefab;
             itemPool = configuredItemPool ?? System.Array.Empty<ItemDefinition>();
             dropPoint = configuredDropPoint;
+            dropParent = configuredDropParent;
         }
 
         public bool TryDrop()
@@ -41,7 +44,7 @@ namespace TrickalFanGame.Item
             }
 
             Vector3 position = dropPoint != null ? dropPoint.position : transform.position;
-            ItemPickup pickup = Instantiate(pickupPrefab, position, Quaternion.identity);
+            ItemPickup pickup = Instantiate(pickupPrefab, position, Quaternion.identity, dropParent);
             pickup.name = $"Reward - {definition.DisplayName}";
             pickup.Configure(definition);
             HasDropped = true;

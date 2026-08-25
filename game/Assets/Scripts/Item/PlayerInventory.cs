@@ -1,22 +1,19 @@
 using System;
 using System.Collections.Generic;
-using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
 using TrickalFanGame.Room;
 using UnityEngine;
 
 namespace TrickalFanGame.Item
 {
-    [RequireComponent(typeof(Health), typeof(PlayerMovement), typeof(PlayerProjectileAttack))]
+    [RequireComponent(typeof(PlayerStats))]
     public sealed class PlayerInventory : MonoBehaviour
     {
         [SerializeField] private RunProgress runProgress;
 
         private readonly List<AcquiredItem> acquiredItems = new();
         private readonly Dictionary<string, int> stackCounts = new();
-        private Health health;
-        private PlayerMovement movement;
-        private PlayerProjectileAttack attack;
+        private PlayerStats stats;
 
         public const string MultiShotItemId = "item-06";
         public const string PierceItemId = "item-11";
@@ -28,9 +25,7 @@ namespace TrickalFanGame.Item
 
         private void Awake()
         {
-            health = GetComponent<Health>();
-            movement = GetComponent<PlayerMovement>();
-            attack = GetComponent<PlayerProjectileAttack>();
+            stats = GetComponent<PlayerStats>();
             if (runProgress == null)
             {
                 runProgress = FindFirstObjectByType<RunProgress>();
@@ -79,22 +74,22 @@ namespace TrickalFanGame.Item
             switch (definition.EffectType)
             {
                 case ItemEffectType.AttackDamage:
-                    attack.AddDamageBonus(Mathf.RoundToInt(definition.EffectValue));
+                    stats.AddAttackDamage(Mathf.RoundToInt(definition.EffectValue));
                     break;
                 case ItemEffectType.MaxHealth:
-                    health.AddMaxHealth(Mathf.RoundToInt(definition.EffectValue), true);
+                    stats.AddMaxHealth(Mathf.RoundToInt(definition.EffectValue), true);
                     break;
                 case ItemEffectType.MoveSpeed:
-                    movement.AddMoveSpeedBonus(definition.EffectValue);
+                    stats.AddMoveSpeed(definition.EffectValue);
                     break;
                 case ItemEffectType.MultiShot:
-                    attack.AddProjectiles(Mathf.RoundToInt(definition.EffectValue));
+                    stats.AddProjectiles(Mathf.RoundToInt(definition.EffectValue));
                     break;
                 case ItemEffectType.Pierce:
-                    attack.AddPierce(Mathf.RoundToInt(definition.EffectValue));
+                    stats.AddPierce(Mathf.RoundToInt(definition.EffectValue));
                     break;
                 case ItemEffectType.HealOnKill:
-                    attack.AddHealOnKill(Mathf.RoundToInt(definition.EffectValue));
+                    stats.AddHealOnKill(Mathf.RoundToInt(definition.EffectValue));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

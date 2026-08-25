@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using TrickalFanGame.Room;
 using UnityEngine;
 
 namespace TrickalFanGame.Combat
@@ -7,14 +7,16 @@ namespace TrickalFanGame.Combat
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public sealed class Projectile : MonoBehaviour
     {
-        [SerializeField, Min(1)] private int damage = 1;
         [SerializeField, Min(0.01f)] private float lifetime = 2f;
 
         private Rigidbody2D body;
         private Health owner;
+        private DamageContext damageContext;
         private readonly HashSet<Health> damagedTargets = new();
         private int remainingPierces;
-        private Action targetKilled;
+
+        public DamageContext DamageContext => damageContext;
+        public bool IsLaunched => owner != null;
 
         private void Awake()
         {
@@ -29,17 +31,12 @@ namespace TrickalFanGame.Combat
         public void Launch(
             Vector2 velocity,
             Health projectileOwner,
-            int configuredDamage = -1,
-            int configuredPierces = 0,
-            Action configuredTargetKilled = null)
+            DamageContext configuredDamageContext,
+            int configuredPierces = 0)
         {
             owner = projectileOwner;
-            if (configuredDamage > 0)
-            {
-                damage = configuredDamage;
-            }
+            damageContext = configuredDamageContext;
             remainingPierces = Mathf.Max(0, configuredPierces);
-            targetKilled = configuredTargetKilled;
             body.linearVelocity = velocity;
 
             if (owner == null)
@@ -73,6 +70,12 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
+            if (collider.GetComponentInParent<DoorController>() != null)
+            {
+                StopAtBoundary();
+                return;
+            }
+
             Health target = collider.GetComponentInParent<Health>();
             if (target == owner || (target != null && damagedTargets.Contains(target)))
             {
@@ -87,13 +90,8 @@ namespace TrickalFanGame.Combat
 
             if (target != null)
             {
-                bool wasAlive = !target.IsDead;
                 damagedTargets.Add(target);
-                target.TakeDamage(damage);
-                if (wasAlive && target.IsDead)
-                {
-                    targetKilled?.Invoke();
-                }
+                target.TakeDamage(damageContext);
 
                 IgnoreTargetColliders(target);
                 if (remainingPierces > 0)
@@ -103,7 +101,29 @@ namespace TrickalFanGame.Combat
                 }
             }
 
-            Destroy(gameObject);
+            DestroyProjectile();
+        }
+
+        public void StopAtBoundary()
+        {
+            if (body != null)
+            {
+                body.linearVelocity = Vector2.zero;
+            }
+
+            DestroyProjectile();
+        }
+
+        private void DestroyProjectile()
+        {
+            if (Application.isPlaying)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                DestroyImmediate(gameObject);
+            }
         }
 
         private void IgnoreTargetColliders(Health target)
