@@ -26,6 +26,9 @@ Web
 최상위 구조는 다음을 기본으로 한다.
 project-root/
 │
+├── .agents/
+│   └── skills/            # 저장소 전용 Codex 워크플로
+│
 ├── game/
 │   └── ...
 │
@@ -38,6 +41,7 @@ project-root/
 ├── docs/
 │   └── ...
 │
+├── AGENTS.md              # 저장소 공통 개발 규칙
 ├── .gitignore
 ├── README.md
 └── package.json
@@ -47,6 +51,8 @@ game/	Unity 게임 클라이언트
 backend/	REST API 서버
 web/	전적 검색 웹 서비스
 docs/	프로젝트 설계 및 개발 문서
+.agents/skills/	저장소에서 반복 사용하는 Codex 작업 워크플로
+AGENTS.md	인코딩, 계약, Unity 안전성과 검증에 관한 저장소 공통 규칙
 
 
 3. Game Structure
@@ -201,9 +207,11 @@ ScriptableObjects/
 로그라이크의 방 단위 시스템을 담당한다.
 Room/
 ├── RoomController.cs
-├── RoomManager.cs
-├── RoomGenerator.cs
-├── RoomConnection.cs
+├── RoomGraphController.cs
+├── RoomNode.cs
+├── RoomDoorway.cs
+├── RoomCameraController.cs
+├── RoomGenerator.cs          # Phase F 랜덤 그래프 생성 시 추가
 ├── RoomState.cs
 └── RoomType.cs
 방은 다음과 같은 상태를 가질 수 있다.
@@ -1030,54 +1038,27 @@ Naming Convention 정의
 MVP 초기 구조 정의
 
 향후 확장 포인트 정의
-51. 설계 문서 완료 기준
-현재까지 작성한 설계 문서는 다음과 같다.
-00-project-overview.md
-        ↓
-01-tech-stack.md
-        ↓
-02-roadmap.md
-        ↓
-03-game-design.md
-        ↓
-04-architecture.md
-        ↓
-05-development-setup.md
-        ↓
-06-database.md
-        ↓
-07-api.md
-        ↓
-08-project-structure.md
-각 문서의 역할:
-00
-프로젝트가 무엇인가?
+51. 문서 역할
 
-01
-무슨 기술을 사용하는가?
+| 문서 | 역할 |
+|---|---|
+| `00-project-overview.md` | 프로젝트가 무엇인지 정의한다. |
+| `01-tech-stack.md` | 사용하는 기술과 선택 기준을 정의한다. |
+| `02-roadmap.md` | 장기 개발 순서와 Phase 완료 조건을 정의한다. |
+| `03-game-design.md` | 게임 규칙과 콘텐츠 범위를 정의한다. |
+| `04-architecture.md` | 시스템 연결과 데이터 흐름을 정의한다. |
+| `05-development-setup.md` | 개발 환경과 구현된 도구의 실행 방법을 정의한다. |
+| `06-database.md` | 저장 데이터와 Database 계약을 정의한다. |
+| `07-api.md` | 시스템 사이의 API 계약을 정의한다. |
+| `08-project-structure.md` | 실제 코드와 디렉터리의 책임을 정의한다. |
+| `09-first-month-plan.md` | 첫 달 실행 순서와 결과를 기록한다. |
+| `10-second-month-plan.md` | 둘째 달 실행 순서와 완료 조건을 관리한다. |
+| `11-artifact-reference.md` | 원작 아티팩트 조사 근거를 기록한다. |
+| `12-skill-system-plan.md` | 전투 스킬, 아이템과 메타 시스템의 확정 계약을 관리한다. |
+| `13-development-tooling-plan.md` | 생성기, 검증기, 계약 검사, 텔레메트리와 MCP 도입 계획을 관리한다. |
 
-02
-어떤 순서로 개발하는가?
-
-03
-게임은 어떻게 동작하는가?
-
-04
-시스템은 어떻게 연결되는가?
-
-05
-개발할 때 어떤 원칙을 따르는가?
-
-06
-어떤 데이터를 저장하는가?
-
-07
-시스템끼리 어떻게 통신하는가?
-
-08
-실제 코드는 어떻게 나눌 것인가?
 52. 다음 단계
-08-project-structure.md까지 완료하면 설계 단계의 1차 목표를 완료한다.
+`00`~`08` 문서로 설계 단계의 1차 목표를 완료하고, `09` 이후 문서에서 실행 계획과 후속 설계를 관리한다.
 다음 단계는 실제 개발 환경 구축이다.
 [설계]
 

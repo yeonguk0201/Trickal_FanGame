@@ -122,10 +122,12 @@ pnpm 11은 의존성의 설치 스크립트를 기본적으로 보류할 수 있
 
 ```text
 TrickalFanGame/
+├── .agents/              # 저장소 전용 Codex 스킬
 ├── game/                  # Unity 프로젝트
 ├── backend/               # NestJS + Prisma
 ├── web/                   # Next.js App Router
 ├── docs/
+├── AGENTS.md              # 저장소 공통 개발 규칙
 ├── .gitignore
 └── README.md
 ```
@@ -380,7 +382,28 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 
 ---
 
-## 17. 참고 자료
+## 17. 개발 보조 도구
+
+저장소 공통 불변 규칙은 루트 `AGENTS.md`에 둔다. 기능 하나를 계획부터 검증과 체크리스트 갱신까지 진행할 때는
+`.agents/skills/trickal-feature-cycle/SKILL.md`의 저장소 전용 스킬을 사용한다.
+
+향후 Unity 콘텐츠 생성기·검증기, Unity ↔ Backend 계약 검사, 플레이테스트 텔레메트리와 조건부 Unity MCP는
+[개발 생산성·검증 인프라 계획](./13-development-tooling-plan.md)에 따라 도입한다.
+
+현재 구현된 Phase C·D Unity 도구:
+
+- `Trickal Fan Game > Setup Phase C Lower Grade Skill`: Play Mode 밖에서 Player 컴포넌트와 SP 픽업·유도탄 프리팹을 생성 또는 갱신하고 씬을 저장한다.
+- `Trickal Fan Game > Verify Phase C Lower Grade Skill`: SP 경계, 처치 드롭, 입력 방향 중심 36° 부채꼴과 `1→3→2→4` 슬롯 순서, 0.08초 간격 4발 연사, 다수 적 거리순 배분, 현재 공격력 100% 중첩 폭발, 타깃 없음과 SP 부족 경로를 검사한다. 성공 시 Console에 `Phase C verification passed`가 출력되고 불변조건 위반 시 예외로 실패한다.
+- `Trickal Fan Game > Setup Phase D High Grade Skill`: Play Mode 밖에서 Player 행동 상태·고학년 스킬 컴포넌트와 적 넉백 수신기를 생성 또는 갱신하고 씬·적 프리팹을 저장한다. 재실행해도 중복 컴포넌트를 만들지 않는다.
+- `Trickal Fan Game > Verify Phase D High Grade Skill`: Q 쿨타임, 조향·무적 돌진, 행동·전환 게이트, 200% 범위 피해, 일반/보스 넉백 후 경직, 충돌 후 플레이어 무적 경직, 시간 만료 감속과 사망 정리를 검사한다. 성공 시 Console에 `Phase D verification passed`가 출력되고 불변조건 위반 시 예외로 실패한다.
+
+- 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
+- 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.
+- 개발 도구의 실행 실패가 게임 진행을 멈추는지 여부와 실패 종료 코드를 명확히 기록한다.
+
+---
+
+## 18. 참고 자료
 
 - Node.js Releases: https://nodejs.org/en/about/previous-releases
 - pnpm Installation: https://pnpm.io/installation

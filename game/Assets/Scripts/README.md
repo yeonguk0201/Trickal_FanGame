@@ -26,7 +26,7 @@
 `RoomController`가 방의 상태와 적 생명주기를 소유한다. 상태는 `Waiting → Combat → Cleared` 순서로 한 번만 진행하며, 이미 시작한 방에 재진입해도 적을 다시 만들지 않는다.
 
 1. 빈 오브젝트에 `BoxCollider2D`와 `RoomController`를 추가하고 Collider 크기를 방 내부에 맞춘다. Collider는 실행 시 자동으로 Trigger가 된다.
-2. 출구 오브젝트에 `BoxCollider2D`와 `DoorController`를 추가한 뒤 Room의 `Doors` 목록에 넣는다. 전투가 시작되면 Collider가 켜지고 전멸하면 꺼진다.
+2. 출구 오브젝트에 `BoxCollider2D`와 `DoorController`를 추가한 뒤 Room의 `Doors` 목록에 넣는다. 일반 문은 전투가 시작되면 Collider가 켜지고 전멸하면 꺼진다. 포탈형 방 전환 문만 `ConfigurePortalBarrier(true)`로 구성하여 열린 뒤에도 물리 장벽을 유지한다.
 3. 적 프리팹과 빈 오브젝트로 만든 스폰 지점들을 Room의 `Enemy Prefab`, `Spawn Points`에 연결한다. 적 프리팹에는 반드시 `Health`가 있어야 한다.
 4. 씬에 미리 둔 적을 사용할 때는 `Preplaced Enemies`에 넣는다. 이 적들은 입장 전에는 비활성화되고 전투 시작 시 등록·활성화된다.
 5. 씬에 `RunProgress`를 하나 두고 각 Room에 같은 인스턴스를 연결한다. Room의 `Floor Number`, `Room Number`가 입장 시 현재 진행 위치로 기록된다.
@@ -81,3 +81,41 @@ Unity 메뉴에서 **Trickal Fan Game > Setup Week 6 Items and Synergy**를 실�
 - `MULTI_SHOT` + `PIERCE`는 획득 순서와 무관하게 한 번만 활성화된다. 활성화 로그가 Console에 출력되고, 이후 생성되는 모든 다중 투사체에 관통 횟수가 적용된다.
 
 스택 상한은 극단적인 조합에서 투사체 수와 회복량이 무한히 커지지 않도록 정한 밸런스 장치다. 층 이동은 같은 Player와 `PlayerInventory`를 유지하므로 아이템 스택과 시너지 활성 상태도 그대로 유지된다. Run 종료 기록에는 시너지를 별도 아이템으로 추가하지 않고, 두 원본 아이템 ID와 각각의 획득 순서를 기존 방식대로 남긴다.
+
+## 7주차 전투 기반
+
+Player의 최대 HP, 공격력, 이동 속도, 공격 속도와 투사체 관련 아이템 효과는 `PlayerStats`가 소유한다. `PlayerInventory`는 획득 효과를 `PlayerStats`에 누적하고, `PlayerMovement`와 `PlayerProjectileAttack`은 현재 값을 읽어 동작한다.
+
+기본 투사체는 발사 시점의 공격력, 배율, 공격 주체와 `PlayerProjectile` 출처 종류를 `DamageContext`에 기록한다. `Projectile`은 관통하는 동안 같은 컨텍스트를 각 대상의 `Health`에 전달하며, `DamageCalculator`가 최종 피해를 계산한다. 기존 `Health.Damaged`와 `Health.Died` 이벤트는 유지되고, 출처가 필요한 소비자는 `Health.DamageApplied`에서 컨텍스트를 확인할 수 있다.
+
+Unity 메뉴에서 **Trickal Fan Game > Verify PlayerStats and Item Effects**와 **Trickal Fan Game > Verify Damage Context and Projectile**을 차례로 실행한다. 두 번째 검증은 현재 공격력과 출처, 중복 타격 방지, 관통, 일반 적 사망, 보스 피격·사망 이벤트가 유지되는지 확인한다.
+
+플레이어 피해로 `Health`가 사망 상태로 전환되면 Player의 `PlayerCombatEvents.EnemyKilled`가 대상과 마지막 `DamageContext`를 한 번 전달한다. `HealOnKill`은 이 이벤트의 첫 소비자이며, `PlayerProjectileAttack`이 활성화될 때 구독하고 비활성화될 때 해제한다. 이후 SP 드롭과 처치 시 연쇄 폭발은 기존 처치 판정을 복제하지 않고 같은 이벤트에 별도 구독자로 연결한다.
+
+Unity 메뉴에서 **Trickal Fan Game > Verify Player Combat Events**를 실행하면 플레이어 원인이 아닌 사망 제외, 중복 보고 차단, 연속 처치, 처치 회복과 구독 해제를 확인한다.
+
+## 7주차 고정 방 그래프
+
+Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Week 7 Fixed Room Graph**를 실행한다. 기존 연속형 임시 맵 루트는 비활성화되고, 안정적인 `roomId`를 가진 세 개의 `RoomNode`가 양방향 고정 그래프로 구성된다. 각 노드는 방 콘텐츠, 카메라 중심, 기본 입구와 출입구 연결을 소유한다.
+
+Play Mode에서는 현재 노드의 콘텐츠만 활성화된다. 방을 클리어하면 초록 문은 열림 색상으로 바뀌지만 물리 장벽은 유지되고, 문 안쪽의 출입구 영역에 일반 상태로 진입했을 때만 같은 Player를 목적지 입구로 순간이동시킨다. 돌진은 전환이 거부되는 동시에 초록 문 장벽에 막히며, 기본·보스 투사체도 문을 통과하지 못한다. 저학년 유도탄은 발사할 때 타깃이 배정된 탄만 벽과 문을 관통하고, 타깃 없이 발사된 탄은 벽과 문에서 폭발 없이 사라진다. 전환 직전에는 타깃 배정 여부와 관계없이 남아 있는 투사체를 모두 정리하여 다음 방 화면에 나타나지 않게 한다. 카메라는 목적지 중심으로 전환되고 이전 방 콘텐츠는 비활성화되며, 재방문해도 `RoomController.State`와 보상 획득 여부는 초기화되지 않는다.
+
+Unity 메뉴에서 **Trickal Fan Game > Verify Fixed Room Graph**를 실행한다. 검증기는 중복 방 ID, 누락·단방향 연결, 한 화면에 여러 방이 활성화되는 상태를 실패로 처리하고, 포탈 장벽의 상시 물리 차단, 기본·보스 및 무타깃 저학년 탄 차단, 타깃 배정 저학년 탄 통과, 전환 시 전체 투사체 정리, 플레이어와 카메라 전환, 양방향 재방문, 클리어·보상 상태 보존을 확인한다.
+
+## 7주차 저학년 스킬
+
+Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Phase C Lower Grade Skill**을 실행한다. Player에 `PlayerSP`, `PlayerSPDropper`, `PlayerSkill`이 추가되고 SP 픽업과 유도탄 프리팹이 생성·연결된다. Setup은 다시 실행해도 같은 프리팹과 Player 구성을 갱신한다.
+
+플레이어 피해로 적을 처치하면 25% 확률로 청록색 SP 픽업이 처치 위치에 생성된다. 접촉하면 SP가 최대 3까지 증가하며, 이미 최대여도 픽업은 사라진다. SP가 있을 때 Space를 누르면 1을 소비해 마지막 이동 방향 중심 36° 부채꼴의 슬롯을 왼쪽부터 1~4로 보아 `1→3→2→4` 순서로 첫 탄을 즉시, 나머지 세 탄을 0.08초 간격으로 발사한다. 네 탄은 부채꼴 방향으로 먼저 나간 뒤 각 타깃으로 유도되며, 적이 여러 명이면 거리순 라운드로빈으로 배분된다. 연사가 끝나기 전의 추가 Space는 SP를 소비하지 않는다. 각 탄의 폭발은 발사 시점 현재 공격력의 100%를 `PlayerSkillExplosion` 피해로 전달하고, 네 폭발에 같은 적이 들어오면 각각 중첩된다. 대상은 `Enemy` 레이어에서만 찾는다. 발사 시 타깃이 배정된 탄은 벽과 문을 관통한다. 대상이 없으면 같은 부채꼴을 유지해 나가되 벽이나 문에 닿거나 수명이 끝날 때 폭발 없이 사라진다.
+
+Unity 메뉴에서 **Trickal Fan Game > Verify Phase C Lower Grade Skill**을 실행한다. 검증기는 SP 상한·소비, 최대 SP 픽업 소멸, 처치 드롭, 36° 부채꼴과 `1→3→2→4` 발사 순서, 순차 네 발과 다수 적 배분, 400% 중첩 피해, 타깃 배정 탄의 벽 관통, 무타깃 탄의 벽 소멸, SP 부족 시 발사 거부를 확인한다.
+
+## 7주차 고학년 스킬
+
+Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Phase D High Grade Skill**을 실행한다. Player에 `PlayerActionState`와 `PlayerUltimate`가 추가되고 테스트 적 프리팹에 `KnockbackReceiver`가 연결된다. Setup은 다시 실행해도 같은 컴포넌트를 중복 생성하지 않는다.
+
+Q를 누르면 현재 이동 속도의 2배로 최대 10초 동안 무적 돌진한다. 공격용 화살표 키와 분리된 WASD로 조향하며 입력이 없으면 마지막 이동 방향을 유지한다. 벽 접촉은 돌진을 끝내지 않고 첫 적 접촉이나 제한 시간 도달이 돌진을 종료한다. 첫 접촉은 현재 공격력의 200% 범위 피해와 0.2초 넉백을 주며, 보스 넉백은 일반 적의 25%다. 넉백이 끝난 뒤 일반 적은 0.4초, 보스는 0.15초 동안 경직된다. 적 행동 스크립트는 `KnockbackReceiver.IsActive`를 확인해야 하며, 현재 추격과 보스 발사는 넉백·경직 동안 모두 멈춘다.
+
+적 충돌로 돌진이 끝나면 플레이어는 충돌 지점에 즉시 멈추고 0.4초 동안 무적 경직된다. 적 없이 제한 시간이 끝나면 무적 없이 0.25초 동안 돌진 방향으로 감속한다. 돌진과 두 회복 상태에서는 이동, 기본 공격, Space, Q, 방·층 전환이 모두 차단되고 회복이 끝난 뒤 함께 허용된다. 30초 쿨타임은 돌진 시작이 아니라 종료 시점부터 계산한다. `PlayerUltimate.DashEnded`는 `Impact` 또는 `Timeout` 종료 원인을 전달하므로 이후 넘어짐·제동 애니메이션을 분리해 연결할 수 있다.
+
+Unity 메뉴에서 **Trickal Fan Game > Verify Phase D High Grade Skill**을 실행한다. 검증기는 상태 재진입, Q 쿨타임, 조향·무적, 행동 게이트, 200% 범위 피해, 일반/보스 넉백과 경직, 벽 처리, 충돌 후 무적 경직, 시간 만료 감속과 사망 정리를 확인한다.
