@@ -7,10 +7,15 @@ namespace TrickalFanGame.Room
     {
         [SerializeField] private Collider2D blocker;
         [SerializeField] private SpriteRenderer visual;
+        [SerializeField] private bool remainBlockingWhenOpen;
         [SerializeField] private Color lockedColor = new(0.75f, 0.2f, 0.2f);
         [SerializeField] private Color openColor = new(0.2f, 0.75f, 0.3f);
 
         public bool IsLocked { get; private set; }
+        public bool IsPortalBarrier =>
+            remainBlockingWhenOpen || GetComponentInParent<RoomNode>() != null;
+        public bool IsPortalBarrierActive =>
+            IsPortalBarrier && blocker != null && blocker.enabled && !blocker.isTrigger;
 
         private void Awake()
         {
@@ -21,12 +26,21 @@ namespace TrickalFanGame.Room
         {
             EnsureReferences();
             IsLocked = isLocked;
-            blocker.enabled = isLocked;
+            blocker.enabled = isLocked || IsPortalBarrier;
+            blocker.isTrigger = false;
 
             if (visual != null)
             {
                 visual.color = isLocked ? lockedColor : openColor;
             }
+        }
+
+        public void ConfigurePortalBarrier(bool shouldRemainBlockingWhenOpen)
+        {
+            EnsureReferences();
+            remainBlockingWhenOpen = shouldRemainBlockingWhenOpen;
+            blocker.isTrigger = false;
+            blocker.enabled = IsLocked || IsPortalBarrier;
         }
 
         private void EnsureReferences()

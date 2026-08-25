@@ -15,11 +15,13 @@ namespace TrickalFanGame.Enemy
         private Rigidbody2D body;
         private Health health;
         private Health targetHealth;
+        private KnockbackReceiver knockback;
 
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
+            knockback = GetComponent<KnockbackReceiver>();
         }
 
         private void Start()
@@ -29,6 +31,11 @@ namespace TrickalFanGame.Enemy
 
         private void FixedUpdate()
         {
+            if (knockback != null && knockback.IsActive)
+            {
+                return;
+            }
+
             if (health.IsDead || !FindTargetIfNeeded() || targetHealth.IsDead)
             {
                 body.linearVelocity = Vector2.zero;

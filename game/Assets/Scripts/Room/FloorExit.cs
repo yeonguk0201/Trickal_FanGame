@@ -64,9 +64,18 @@ namespace TrickalFanGame.Room
             }
 
             PlayerMovement player = other.GetComponentInParent<PlayerMovement>();
-            if (player == null)
+            if (player != null)
             {
-                return;
+                TryEnter(player);
+            }
+        }
+
+        public bool TryEnter(PlayerMovement player)
+        {
+            if (!IsUnlocked || destination == null || player == null ||
+                player.GetComponent<PlayerActionState>()?.CanTransition == false)
+            {
+                return false;
             }
 
             Rigidbody2D body = player.GetComponent<Rigidbody2D>();
@@ -82,6 +91,7 @@ namespace TrickalFanGame.Room
 
             runProgress?.RecordRoomEntry(destinationFloor, 1);
             Debug.Log($"[FloorExit] Entered floor {destinationFloor}.", this);
+            return true;
         }
 
         private void SetUnlocked(bool unlocked)

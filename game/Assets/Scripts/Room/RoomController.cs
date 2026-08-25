@@ -158,7 +158,7 @@ namespace TrickalFanGame.Room
                     continue;
                 }
 
-                GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
+                GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation, transform);
                 Health enemyHealth = enemy.GetComponent<Health>();
                 if (enemyHealth == null)
                 {
