@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5840264429905698585}
   - component: {fileID: 2726524135096534971}
   - component: {fileID: 8647675937649764220}
+  - component: {fileID: 1425538479244399715}
   m_Layer: 6
   m_Name: TestEnemy
   m_TagString: Untagged
@@ -215,3 +216,17 @@ MonoBehaviour:
   detectionRange: 6
   stopDistance: 0.8
   target: {fileID: 0}
+--- !u!114 &1425538479244399715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5213069529628479123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
+  defaultDuration: 0.2
+  defaultStunDuration: 0.4

@@ -169,5 +169,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a66826eae32a76e458800039bdc541de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Projectile
-  damage: 1
   lifetime: 2
