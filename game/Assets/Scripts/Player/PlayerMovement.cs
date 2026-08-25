@@ -4,34 +4,56 @@ using UnityEngine.InputSystem;
 
 namespace TrickalFanGame.Player
 {
-    [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
+    [RequireComponent(typeof(Rigidbody2D), typeof(Health), typeof(PlayerStats))]
+    [RequireComponent(typeof(PlayerActionState))]
     public sealed class PlayerMovement : MonoBehaviour
     {
-        [SerializeField, Min(0f)] private float moveSpeed = 5f;
-
         private Rigidbody2D body;
         private Health health;
+        private PlayerStats stats;
+        private PlayerActionState actionState;
         private Vector2 movement;
-        private float moveSpeedBonus;
 
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
         public Vector2 CurrentVelocity => body.linearVelocity;
-        public float CurrentMoveSpeed => moveSpeed + moveSpeedBonus;
-
-        public void AddMoveSpeedBonus(float amount)
-        {
-            moveSpeedBonus = Mathf.Max(0f, moveSpeedBonus + amount);
-        }
+        public float CurrentMoveSpeed => stats.MoveSpeed;
 
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
+            stats = GetComponent<PlayerStats>();
+            actionState = GetComponent<PlayerActionState>();
         }
 
         private void Update()
         {
             if (health.IsDead)
+            {
+                movement = Vector2.zero;
+                return;
+            }
+
+            if (actionState.IsDashing)
+            {
+                Vector2 dashInput = ReadMovement();
+                if (dashInput.sqrMagnitude > 0.001f)
+                {
+                    actionState.TryUpdateDashDirection(dashInput);
+                    FacingDirection = dashInput;
+                }
+
+                movement = actionState.DashDirection;
+                return;
+            }
+
+            if (actionState.IsCoastRecovering)
+            {
+                movement = actionState.DashDirection;
+                return;
+            }
+
+            if (!actionState.CanMove)
             {
                 movement = Vector2.zero;
                 return;
@@ -46,7 +68,21 @@ namespace TrickalFanGame.Player
 
         private void FixedUpdate()
         {
-            body.linearVelocity = health.IsDead ? Vector2.zero : movement * CurrentMoveSpeed;
+            float speedMultiplier = actionState.IsDashing || actionState.IsCoastRecovering
+                ? actionState.DashSpeedMultiplier
+                : 1f;
+            body.linearVelocity = health.IsDead
+                ? Vector2.zero
+                : movement * CurrentMoveSpeed * speedMultiplier;
+        }
+
+        public void StopImmediately()
+        {
+            movement = Vector2.zero;
+            if (body != null)
+            {
+                body.linearVelocity = Vector2.zero;
+            }
         }
 
         private static Vector2 ReadMovement()
