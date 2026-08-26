@@ -97,6 +97,7 @@ namespace TrickalFanGame.Room
 
             HashSet<RoomNode> nodeSet = new();
             HashSet<string> ids = new(StringComparer.Ordinal);
+            HashSet<(int Floor, int Room)> addresses = new();
             foreach (RoomNode node in nodes)
             {
                 if (node == null)
@@ -114,6 +115,12 @@ namespace TrickalFanGame.Room
                 if (string.IsNullOrWhiteSpace(node.RoomId) || !ids.Add(node.RoomId))
                 {
                     error = $"Room ID '{node.RoomId}' is empty or duplicated.";
+                    return false;
+                }
+
+                if (!addresses.Add((node.FloorNumber, node.RoomNumber)))
+                {
+                    error = $"Floor/room key ({node.FloorNumber}, {node.RoomNumber}) is duplicated.";
                     return false;
                 }
 
@@ -141,7 +148,7 @@ namespace TrickalFanGame.Room
                         return false;
                     }
 
-                    if (!doorway.Destination.HasConnectionTo(node))
+                    if (!doorway.AllowsOneWay && !doorway.Destination.HasConnectionTo(node))
                     {
                         error = $"Connection {node.RoomId} -> {doorway.Destination.RoomId} has no return path.";
                         return false;
@@ -195,6 +202,14 @@ namespace TrickalFanGame.Room
             }
 
             foreach (BossProjectile projectile in FindObjectsByType<BossProjectile>(FindObjectsSortMode.None))
+            {
+                if (projectile.IsLaunched)
+                {
+                    projectile.StopAtBoundary();
+                }
+            }
+
+            foreach (EnemyProjectile projectile in FindObjectsByType<EnemyProjectile>(FindObjectsSortMode.None))
             {
                 if (projectile.IsLaunched)
                 {

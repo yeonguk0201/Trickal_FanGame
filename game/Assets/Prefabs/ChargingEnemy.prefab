@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5213069529628479123
+--- !u!1 &940017362510908874
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,29 +8,28 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6157331486542440955}
-  - component: {fileID: 4592771066635862529}
-  - component: {fileID: 6149828810831364249}
-  - component: {fileID: 4184832910138919893}
-  - component: {fileID: 2079928141612301653}
-  - component: {fileID: 5840264429905698585}
-  - component: {fileID: 2726524135096534971}
-  - component: {fileID: 8647675937649764220}
-  - component: {fileID: 1425538479244399715}
+  - component: {fileID: 1362367873183832585}
+  - component: {fileID: 2286362905269916434}
+  - component: {fileID: 1069191718306860402}
+  - component: {fileID: 4565774901391427119}
+  - component: {fileID: 3168567345977153766}
+  - component: {fileID: 5150705397390829690}
+  - component: {fileID: 1272730592166364801}
+  - component: {fileID: 7559610857830055514}
   m_Layer: 6
-  m_Name: TestEnemy
+  m_Name: ChargingEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6157331486542440955
+--- !u!4 &1362367873183832585
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5213069529628479123}
+  m_GameObject: {fileID: 940017362510908874}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2, y: 0, z: 0}
@@ -39,14 +38,14 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &4592771066635862529
+--- !u!212 &2286362905269916434
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5213069529628479123}
+  m_GameObject: {fileID: 940017362510908874}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -89,7 +88,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.5, b: 0.15, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -98,14 +97,14 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!50 &6149828810831364249
+--- !u!50 &1069191718306860402
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5213069529628479123}
+  m_GameObject: {fileID: 940017362510908874}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -121,17 +120,17 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
---- !u!58 &4184832910138919893
+--- !u!58 &4565774901391427119
 CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5213069529628479123}
+  m_GameObject: {fileID: 940017362510908874}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -161,68 +160,38 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
---- !u!114 &2079928141612301653
+--- !u!114 &3168567345977153766
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5213069529628479123}
+  m_GameObject: {fileID: 940017362510908874}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
-  maxHealth: 5
---- !u!114 &5840264429905698585
+  maxHealth: 7
+--- !u!114 &5150705397390829690
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5213069529628479123}
+  m_GameObject: {fileID: 940017362510908874}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b65f8e205289b64b91a50cb0721cb5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.TestEnemy
---- !u!114 &2726524135096534971
+--- !u!114 &1272730592166364801
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5213069529628479123}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damage: 1
-  cooldown: 1
---- !u!114 &8647675937649764220
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5213069529628479123}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f54127202aaa284d837f6e0e8434051, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyChase
-  moveSpeed: 2.5
-  detectionRange: 6
-  stopDistance: 0.8
-  target: {fileID: 0}
---- !u!114 &1425538479244399715
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5213069529628479123}
+  m_GameObject: {fileID: 940017362510908874}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
@@ -230,3 +199,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
+--- !u!114 &7559610857830055514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 940017362510908874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8519d63923347b69685ef5084a0a4e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ChargingEnemyController
+  detectionRange: 7
+  windupDuration: 0.65
+  dashSpeed: 8
+  dashDuration: 0.8
+  recoveryDuration: 0.6
+  chargeCooldown: 1.5
+  chargeDamage: 3
+  target: {fileID: 0}

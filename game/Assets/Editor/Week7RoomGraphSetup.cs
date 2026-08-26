@@ -15,84 +15,122 @@ namespace TrickalFanGame.Editor
     {
         private const string RootName = "Week7 Fixed Room Graph";
         private const string EnemyPrefabPath = "Assets/Prefabs/TestEnemy.prefab";
+        private const string RangedEnemyPrefabPath = "Assets/Prefabs/RangedEnemy.prefab";
+        private const string ChargingEnemyPrefabPath = "Assets/Prefabs/ChargingEnemy.prefab";
         private const string PickupPrefabPath = "Assets/Prefabs/ItemPickup.prefab";
-        private static readonly Vector2[] RoomCenters =
-        {
-            new(0f, -40f),
-            new(16f, -40f),
-            new(32f, -40f),
-        };
+        private const int FloorCount = 3;
+        private const int RoomsPerFloor = 3;
+        private const float RoomSpacing = 16f;
+        private const float FloorSpacing = 12f;
+        private const float FirstFloorY = -40f;
 
         [MenuItem("Trickal Fan Game/Setup Week 7 Fixed Room Graph")]
         public static void Setup()
         {
-            if (GameObject.Find(RootName) != null)
-            {
-                Debug.LogWarning($"{RootName} already exists. Setup was not run again.");
-                return;
-            }
-
+            GameObject existingRoot = GameObject.Find(RootName);
             PlayerMovement player = UnityEngine.Object.FindFirstObjectByType<PlayerMovement>();
             RunProgress progress = UnityEngine.Object.FindFirstObjectByType<RunProgress>();
             Camera mainCamera = Camera.main;
             GameObject enemyPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(EnemyPrefabPath);
+            GameObject rangedEnemyPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(RangedEnemyPrefabPath);
+            GameObject chargingEnemyPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ChargingEnemyPrefabPath);
             GameObject pickupObject = AssetDatabase.LoadAssetAtPath<GameObject>(PickupPrefabPath);
             ItemPickup pickupPrefab = pickupObject != null ? pickupObject.GetComponent<ItemPickup>() : null;
             ItemDefinition[] itemPool = LoadItemPool();
             if (player == null || progress == null || mainCamera == null || enemyPrefab == null ||
+                rangedEnemyPrefab == null || chargingEnemyPrefab == null ||
                 pickupPrefab == null || Array.Exists(itemPool, item => item == null))
             {
                 Debug.LogError(
-                    "Run the existing Week 5 setup first; Phase B reuses Player, RunProgress, Main Camera, and TestEnemy.prefab.");
+                    "Phase E-5 requires the Week 5 base scene and completed E-2/E-3 enemy prefabs.");
                 return;
             }
 
             Undo.IncrementCurrentGroup();
             int undoGroup = Undo.GetCurrentGroup();
-            Undo.SetCurrentGroupName("Setup Week 7 Fixed Room Graph");
+            Undo.SetCurrentGroupName("Setup Phase E-5 Three Floor Fixed Graph");
+
+            if (existingRoot != null)
+            {
+                if (progress.transform.IsChildOf(existingRoot.transform))
+                {
+                    Undo.SetTransformParent(progress.transform, null, "Preserve RunProgress while rebuilding graph");
+                }
+
+                Undo.DestroyObjectImmediate(existingRoot);
+            }
 
             GameObject root = CreateObject(RootName, null);
             RoomGraphController graph = Undo.AddComponent<RoomGraphController>(root);
             Sprite sprite = player.GetComponent<SpriteRenderer>()?.sprite;
-            RoomBuild[] rooms = new RoomBuild[RoomCenters.Length];
-            for (int index = 0; index < rooms.Length; index++)
+            RoomBuild[,] rooms = new RoomBuild[FloorCount, RoomsPerFloor];
+            List<RoomNode> nodes = new(FloorCount * RoomsPerFloor);
+            for (int floorIndex = 0; floorIndex < FloorCount; floorIndex++)
             {
-                rooms[index] = CreateRoom(
-                    root.transform,
-                    graph,
-                    index + 1,
-                    RoomCenters[index],
-                    progress,
-                    enemyPrefab,
-                    sprite,
-                    index + 1,
-                    pickupPrefab,
-                    itemPool);
+                int floorNumber = floorIndex + 1;
+                Transform floorRoot = CreateObject($"Floor {floorNumber}", root.transform).transform;
+                for (int roomIndex = 0; roomIndex < RoomsPerFloor; roomIndex++)
+                {
+                    int roomNumber = roomIndex + 1;
+                    Vector2 center = new(
+                        roomIndex * RoomSpacing,
+                        FirstFloorY - floorIndex * FloorSpacing);
+                    GameObject configuredEnemyPrefab = ResolveInitialEnemyPrefab(
+                        floorNumber,
+                        roomNumber,
+                        enemyPrefab,
+                        chargingEnemyPrefab,
+                        rangedEnemyPrefab);
+                    rooms[floorIndex, roomIndex] = CreateRoom(
+                        floorRoot,
+                        graph,
+                        floorNumber,
+                        roomNumber,
+                        center,
+                        progress,
+                        configuredEnemyPrefab,
+                        sprite,
+                        roomNumber,
+                        pickupPrefab,
+                        itemPool);
+                    nodes.Add(rooms[floorIndex, roomIndex].Node);
+                }
             }
 
-            for (int index = 0; index < rooms.Length; index++)
+            for (int floorIndex = 0; floorIndex < FloorCount; floorIndex++)
             {
-                List<RoomDoorway> connections = new();
-                if (index > 0)
+                for (int roomIndex = 0; roomIndex < RoomsPerFloor; roomIndex++)
                 {
-                    connections.Add(CreateDoorway(
-                        rooms[index], rooms[index - 1], rooms[index - 1].RightEntry, graph, false));
-                }
+                    List<RoomDoorway> connections = new();
+                    if (roomIndex > 0)
+                    {
+                        connections.Add(CreateDoorway(
+                            rooms[floorIndex, roomIndex],
+                            rooms[floorIndex, roomIndex - 1],
+                            rooms[floorIndex, roomIndex - 1].RightEntry,
+                            graph,
+                            false));
+                    }
 
-                if (index < rooms.Length - 1)
-                {
-                    connections.Add(CreateDoorway(
-                        rooms[index], rooms[index + 1], rooms[index + 1].LeftEntry, graph, true));
-                }
+                    if (roomIndex < RoomsPerFloor - 1)
+                    {
+                        connections.Add(CreateDoorway(
+                            rooms[floorIndex, roomIndex],
+                            rooms[floorIndex, roomIndex + 1],
+                            rooms[floorIndex, roomIndex + 1].LeftEntry,
+                            graph,
+                            true));
+                    }
 
-                rooms[index].Node.SetDoorways(connections.ToArray());
-                rooms[index].Controller.Configure(
-                    1,
-                    index + 1,
-                    progress,
-                    enemyPrefab,
-                    rooms[index].SpawnPoints,
-                    rooms[index].Doors);
+                    rooms[floorIndex, roomIndex].Node.SetDoorways(connections.ToArray());
+                    rooms[floorIndex, roomIndex].Controller.Configure(
+                        floorIndex + 1,
+                        roomIndex + 1,
+                        progress,
+                        rooms[floorIndex, roomIndex].EnemyPrefab,
+                        rooms[floorIndex, roomIndex].SpawnPoints,
+                        rooms[floorIndex, roomIndex].Doors);
+                }
             }
 
             CameraFollow cameraFollow = mainCamera.GetComponent<CameraFollow>();
@@ -103,10 +141,9 @@ namespace TrickalFanGame.Editor
             }
 
             roomCamera.Configure(cameraFollow);
-            RoomNode[] nodes = Array.ConvertAll(rooms, room => room.Node);
-            graph.Configure(nodes, nodes[0], player, roomCamera, progress);
+            graph.Configure(nodes.ToArray(), rooms[0, 0].Node, player, roomCamera, progress);
 
-            player.transform.position = rooms[0].LeftEntry.position;
+            player.transform.position = rooms[0, 0].LeftEntry.position;
             Undo.SetTransformParent(progress.transform, root.transform, "Move RunProgress to fixed room graph");
             DisableLegacyGameplayRoots(root);
 
@@ -115,15 +152,21 @@ namespace TrickalFanGame.Editor
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
             Selection.activeGameObject = root;
             Debug.Log(
-                "Week 7 fixed room graph ready. Green doors remain solid portal barriers; enter their inner trigger " +
-                "while in normal state to move the Player and camera. Targeted lower-grade shots may cross the barrier, " +
-                "but every launched projectile is cleared during an actual room transition.",
+                "Phase E-5 three-floor fixed graph ready: three floors with three internally connected rooms each. " +
+                "Floor-to-floor links remain intentionally unconfigured until Phase E-7.",
                 root);
+        }
+
+        [MenuItem("Trickal Fan Game/Setup Phase E-5 Three Floor Graph")]
+        private static void SetupPhaseE5()
+        {
+            Setup();
         }
 
         private static RoomBuild CreateRoom(
             Transform parent,
             RoomGraphController graph,
+            int floorNumber,
             int roomNumber,
             Vector2 center,
             RunProgress progress,
@@ -133,10 +176,10 @@ namespace TrickalFanGame.Editor
             ItemPickup pickupPrefab,
             ItemDefinition[] itemPool)
         {
-            GameObject nodeObject = CreateObject($"Room Node {roomNumber}", parent);
+            GameObject nodeObject = CreateObject($"Floor {floorNumber} Room Node {roomNumber}", parent);
             RoomNode node = Undo.AddComponent<RoomNode>(nodeObject);
-            GameObject content = CreateObject($"Room {roomNumber} Content", nodeObject.transform);
-            BuildArena(content.transform, center, sprite, roomNumber);
+            GameObject content = CreateObject($"Floor {floorNumber} Room {roomNumber} Content", nodeObject.transform);
+            BuildArena(content.transform, center, sprite, floorNumber, roomNumber);
 
             Transform cameraAnchor = CreateObject("Camera Anchor", nodeObject.transform).transform;
             cameraAnchor.position = center;
@@ -154,7 +197,15 @@ namespace TrickalFanGame.Editor
 
             if (roomNumber == 2)
             {
-                CreateReward(content.transform, center, progress, controller, pickupPrefab, itemPool, sprite);
+                CreateReward(
+                    content.transform,
+                    center,
+                    floorNumber,
+                    progress,
+                    controller,
+                    pickupPrefab,
+                    itemPool,
+                    sprite);
             }
 
             Transform[] spawnPoints = new Transform[enemyCount];
@@ -174,14 +225,14 @@ namespace TrickalFanGame.Editor
                     new Vector2(0.5f, 2.4f), sprite, new Color(0.28f, 0.35f, 0.48f));
             }
 
-            if (roomNumber == RoomCenters.Length)
+            if (roomNumber == RoomsPerFloor)
             {
                 CreateWall(content.transform, "Right Boundary Seal", center + Vector2.right * 5.75f,
                     new Vector2(0.5f, 2.4f), sprite, new Color(0.48f, 0.28f, 0.4f));
             }
             node.Configure(
-                $"floor-01-room-{roomNumber:00}",
-                1,
+                $"floor-{floorNumber:00}-room-{roomNumber:00}",
+                floorNumber,
                 roomNumber,
                 content,
                 cameraAnchor,
@@ -193,6 +244,7 @@ namespace TrickalFanGame.Editor
                 controller,
                 leftEntry,
                 rightEntry,
+                enemyPrefab,
                 spawnPoints,
                 new[] { leftDoor, rightDoor });
         }
@@ -200,13 +252,14 @@ namespace TrickalFanGame.Editor
         private static void CreateReward(
             Transform content,
             Vector2 center,
+            int floorNumber,
             RunProgress progress,
             RoomController prerequisiteRoom,
             ItemPickup pickupPrefab,
             ItemDefinition[] itemPool,
             Sprite sprite)
         {
-            GameObject rewardObject = CreateObject("Room 2 Reward", content);
+            GameObject rewardObject = CreateObject($"Floor {floorNumber} Room 2 Reward", content);
             rewardObject.transform.position = center;
             BoxCollider2D trigger = Undo.AddComponent<BoxCollider2D>(rewardObject);
             trigger.isTrigger = true;
@@ -219,7 +272,7 @@ namespace TrickalFanGame.Editor
             ItemDropSource source = Undo.AddComponent<ItemDropSource>(rewardObject);
             source.Configure(pickupPrefab, itemPool, dropPoint, content);
             RewardRoom reward = Undo.AddComponent<RewardRoom>(rewardObject);
-            reward.Configure(1, 2, progress, source, prerequisiteRoom);
+            reward.Configure(floorNumber, 2, progress, source, prerequisiteRoom);
         }
 
         private static RoomDoorway CreateDoorway(
@@ -258,12 +311,18 @@ namespace TrickalFanGame.Editor
             return door;
         }
 
-        private static void BuildArena(Transform parent, Vector2 center, Sprite sprite, int roomNumber)
+        private static void BuildArena(
+            Transform parent,
+            Vector2 center,
+            Sprite sprite,
+            int floorNumber,
+            int roomNumber)
         {
-            Color color = Color.Lerp(
+            Color floorColor = Color.Lerp(
                 new Color(0.28f, 0.35f, 0.48f),
                 new Color(0.48f, 0.28f, 0.4f),
-                (roomNumber - 1) / 2f);
+                (floorNumber - 1) / 2f);
+            Color color = Color.Lerp(floorColor, Color.white, (roomNumber - 1) * 0.04f);
             CreateWall(parent, "Top Wall", center + Vector2.up * 4f, new Vector2(12f, 0.5f), sprite, color);
             CreateWall(parent, "Bottom Wall", center + Vector2.down * 4f, new Vector2(12f, 0.5f), sprite, color);
             foreach (float x in new[] { -5.75f, 5.75f })
@@ -296,6 +355,26 @@ namespace TrickalFanGame.Editor
             renderer.sprite = sprite;
             renderer.color = color;
             target.transform.localScale = new Vector3(size.x, size.y, 1f);
+        }
+
+        private static GameObject ResolveInitialEnemyPrefab(
+            int floorNumber,
+            int roomNumber,
+            GameObject chaserPrefab,
+            GameObject chargingPrefab,
+            GameObject rangedPrefab)
+        {
+            if (floorNumber != 1)
+            {
+                return chaserPrefab;
+            }
+
+            return roomNumber switch
+            {
+                2 => chargingPrefab,
+                3 => rangedPrefab,
+                _ => chaserPrefab,
+            };
         }
 
         private static void DisableLegacyGameplayRoots(GameObject phaseBRoot)
@@ -349,6 +428,7 @@ namespace TrickalFanGame.Editor
                 RoomController controller,
                 Transform leftEntry,
                 Transform rightEntry,
+                GameObject enemyPrefab,
                 Transform[] spawnPoints,
                 DoorController[] doors)
             {
@@ -356,6 +436,7 @@ namespace TrickalFanGame.Editor
                 Controller = controller;
                 LeftEntry = leftEntry;
                 RightEntry = rightEntry;
+                EnemyPrefab = enemyPrefab;
                 SpawnPoints = spawnPoints;
                 Doors = doors;
             }
@@ -364,6 +445,7 @@ namespace TrickalFanGame.Editor
             public RoomController Controller { get; }
             public Transform LeftEntry { get; }
             public Transform RightEntry { get; }
+            public GameObject EnemyPrefab { get; }
             public Transform[] SpawnPoints { get; }
             public DoorController[] Doors { get; }
         }

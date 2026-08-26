@@ -112,16 +112,27 @@ namespace TrickalFanGame.Editor
                 first.Node.Configure("room-a", 1, 1, first.Content, first.CameraAnchor, first.Entry,
                     first.Node.Doorways);
 
+                second.Node.Configure("room-b", 1, 1, second.Content, second.CameraAnchor, second.Entry,
+                    second.Node.Doorways);
+                Assert(!graph.TryValidateConfiguration(out error) && error.Contains("Floor/room key"),
+                    "Duplicate floor/room coordinates must fail graph validation even when room IDs differ.");
+                second.Node.Configure("room-b", 1, 2, second.Content, second.CameraAnchor, second.Entry,
+                    second.Node.Doorways);
+
                 third.Node.SetDoorways(Array.Empty<RoomDoorway>());
                 Assert(!graph.TryValidateConfiguration(out error) && error.Contains("return path"),
                     "A one-way fixed graph connection must fail validation.");
+                secondToThird.Configure(graph, second.Node, third.Node, third.Entry, null, true);
+                Assert(graph.TryValidateConfiguration(out error),
+                    "An explicitly declared one-way graph connection must pass validation.");
+                secondToThird.Configure(graph, second.Node, third.Node, third.Entry);
                 third.Node.SetDoorways(new[] { thirdToSecond });
                 Assert(graph.TryValidateConfiguration(out error), error);
 
                 Debug.Log(
                     "Fixed room graph verification passed: stable IDs, reciprocal graph links, single-room visibility, " +
                     "portal barriers, target-aware lower-grade projectile passage, projectile transition cleanup, " +
-                    "player/camera transition, backtracking, " +
+                    "player/camera transition, backtracking, explicit one-way links, " +
                     "clear state, and reward state are valid.");
             }
             finally

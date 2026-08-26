@@ -10,6 +10,8 @@ namespace TrickalFanGame.Item
         [SerializeField] private BossController boss;
         [SerializeField] private ItemDropSource dropSource;
 
+        public bool IsFinalBoss => isFinalBoss;
+
         public void Configure(bool configuredIsFinalBoss, ItemDropSource configuredDropSource)
         {
             isFinalBoss = configuredIsFinalBoss;

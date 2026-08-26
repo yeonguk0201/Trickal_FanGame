@@ -12,6 +12,15 @@ namespace TrickalFanGame.Enemy
 
         private float nextDamageTime;
 
+        public int Damage => damage;
+        public float Cooldown => cooldown;
+
+        public void Configure(int configuredDamage, float configuredCooldown)
+        {
+            damage = Mathf.Max(1, configuredDamage);
+            cooldown = Mathf.Max(0f, configuredCooldown);
+        }
+
         private void OnCollisionStay2D(Collision2D collision)
         {
             if (Time.time < nextDamageTime)

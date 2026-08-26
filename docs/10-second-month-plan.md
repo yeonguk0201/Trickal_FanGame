@@ -344,33 +344,33 @@ Unity 방·몬스터 구성에서 기존 Setup 코드가 반복되면 이 주차
 
 ### 몬스터 확장
 
-- [ ] 추적형 몬스터 (기존 테스트 적 개선)
-- [ ] 원거리 공격 몬스터 1종
-- [ ] 돌진 또는 특수 패턴 몬스터 1종
-- [ ] 각 몬스터의 HP, 공격력, 이동 속도 차별화
+- [x] 추적형 몬스터 (기존 테스트 적 개선 — `Trickal Fan Game > Verify Phase E-1 Chaser Monster` 및 Play Mode 추적·돌진·방 재방문·벽/초록 문 확인, 2026-08-26)
+- [x] 원거리 공격 몬스터 1종 (`Setup Phase E-2 Ranged Enemy` 재실행·`Verify Phase E-2 Ranged Enemy`·Play Mode 확인, 2026-08-26)
+- [x] 돌진 또는 특수 패턴 몬스터 1종 (`Setup Phase E-3 Charging Enemy` 재실행·`Verify Phase E-3 Charging Enemy`·Play Mode 확인, 2026-08-26)
+- [x] 각 몬스터의 HP, 공격력, 이동 속도 차별화 (`Setup Phase E-4 Enemy Balance` 재실행·`Verify Phase E-4 Enemy Balance`·Play Mode 1~5 확인, 2026-08-26)
 
 ### 층 구성
 
-- [ ] 3개 층 구조 정의
-- [ ] 층별 방 2~3개 연결
+- [x] 3개 층 구조 정의 (`Setup Phase E-5 Three Floor Graph` 재실행·`Verify Phase E-5 Three Floor Graph`·Play Mode 확인, 2026-08-26)
+- [x] 층별 방 2~3개 연결 (각 층 내부 1↔2↔3 양방향 연결·E-5 검증 통과, 2026-08-26)
 - [x] 현재의 연속형 임시 맵을 한 화면에 한 방만 표시되는 구조로 전환 (2026-08-25 Play Mode 확인)
 - [x] 출입구 진입 시 다음 방으로 플레이어 이동 및 카메라 화면 전환 (2026-08-25 Play Mode 확인)
 - [x] 비활성 방의 클리어·보상 획득 상태 유지 (적 미재생성·보상 재지급 방지, 2026-08-25 Play Mode 확인)
-- [ ] 층별 등장 몬스터 구성
-- [ ] 층 보스 배치 (기존 보스 또는 변형)
-- [ ] 층 클리어 후 다음 층 이동
+- [x] 층별 등장 몬스터 구성 (6개 일반 전투방 고정 조합·혼합 스폰, 2026-08-26 Setup 재실행·검증기·1층 Play Mode 확인)
+- [x] 층 보스 배치 (각 층 3번 방 보스·1~2층 드롭, 2026-08-26 Setup 재실행·검증기·1층 Play Mode 확인)
+- [x] 층 클리어 후 다음 층 이동 (1→2층·2→3층 단방향 출구, Setup 재실행·검증기·전체 Play Mode 흐름 확인, 2026-08-27)
 
 ### 난이도
 
 - [ ] 층이 올라갈수록 몬스터 HP/공격력 증가
 - [ ] 층이 올라갈수록 방당 몬스터 수 증가 또는 조합 변화
-- [ ] 3층 최종 보스 배치
+- [x] 3층 최종 보스 배치 (`RunSession` 최종 보스 연결, 2026-08-26 Setup 재실행 및 검증기 확인)
 
 ### 진행 상태
 
-- [ ] RunProgress에 현재 층 기록
-- [ ] 층 이동 시 상태 갱신
-- [ ] 각 층에서 사망해도 정확한 층 기록
+- [x] RunProgress에 현재 층 기록 (Play Mode Console 확인, 2026-08-27)
+- [x] 층 이동 시 상태 갱신 (Play Mode Console 확인, 2026-08-27)
+- [x] 각 층에서 사망해도 정확한 층 기록 (Play Mode Console 확인, 2026-08-27)
 
 ### 랜덤 방 구성 순서
 

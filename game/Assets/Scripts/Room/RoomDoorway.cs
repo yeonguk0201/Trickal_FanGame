@@ -11,24 +11,29 @@ namespace TrickalFanGame.Room
         [SerializeField] private RoomNode destination;
         [SerializeField] private Transform destinationEntryPoint;
         [SerializeField] private RoomController requiredClearedRoom;
+        [SerializeField] private bool allowsOneWay;
 
         public RoomNode Source => source;
         public RoomNode Destination => destination;
         public Transform DestinationEntryPoint => destinationEntryPoint;
+        public RoomController RequiredClearedRoom => requiredClearedRoom;
         public bool IsOpen => requiredClearedRoom == null || requiredClearedRoom.State == RoomState.Cleared;
+        public bool AllowsOneWay => allowsOneWay;
 
         public void Configure(
             RoomGraphController configuredGraph,
             RoomNode configuredSource,
             RoomNode configuredDestination,
             Transform configuredDestinationEntryPoint,
-            RoomController configuredRequiredClearedRoom = null)
+            RoomController configuredRequiredClearedRoom = null,
+            bool configuredAllowsOneWay = false)
         {
             graph = configuredGraph;
             source = configuredSource;
             destination = configuredDestination;
             destinationEntryPoint = configuredDestinationEntryPoint;
             requiredClearedRoom = configuredRequiredClearedRoom;
+            allowsOneWay = configuredAllowsOneWay;
         }
 
         private void Awake()
@@ -38,16 +43,14 @@ namespace TrickalFanGame.Room
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (!IsOpen)
-            {
-                return;
-            }
-
             PlayerMovement player = other.GetComponentInParent<PlayerMovement>();
-            if (player != null)
-            {
-                graph?.TryTransition(source, destination, destinationEntryPoint, player);
-            }
+            TryEnter(player);
+        }
+
+        public bool TryEnter(PlayerMovement player)
+        {
+            return IsOpen && player != null && graph != null &&
+                   graph.TryTransition(source, destination, destinationEntryPoint, player);
         }
     }
 }

@@ -16,6 +16,7 @@ namespace TrickalFanGame.Room
 
         [Header("Encounter")]
         [SerializeField] private GameObject enemyPrefab;
+        [SerializeField] private GameObject[] enemyPrefabs = Array.Empty<GameObject>();
         [SerializeField] private Transform[] spawnPoints = Array.Empty<Transform>();
         [SerializeField] private Health[] preplacedEnemies = Array.Empty<Health>();
         [SerializeField] private DoorController[] doors = Array.Empty<DoorController>();
@@ -27,6 +28,11 @@ namespace TrickalFanGame.Room
         public int AliveEnemyCount => enemyDeathHandlers.Count;
         public bool HasStarted { get; private set; }
         public bool IsProgressionStopped { get; private set; }
+        public int FloorNumber => floorNumber;
+        public int RoomNumber => roomNumber;
+        public IReadOnlyList<GameObject> EnemyPrefabs => enemyPrefabs;
+        public IReadOnlyList<Transform> SpawnPoints => spawnPoints;
+        public IReadOnlyList<Health> PreplacedEnemies => preplacedEnemies;
 
         public event Action<RoomState> StateChanged;
 
@@ -42,6 +48,7 @@ namespace TrickalFanGame.Room
             roomNumber = Mathf.Max(1, configuredRoomNumber);
             runProgress = configuredRunProgress;
             enemyPrefab = configuredEnemyPrefab;
+            enemyPrefabs = Array.Empty<GameObject>();
             spawnPoints = configuredSpawnPoints ?? Array.Empty<Transform>();
             doors = configuredDoors ?? Array.Empty<DoorController>();
             SetDoorsLocked(false);
@@ -50,6 +57,57 @@ namespace TrickalFanGame.Room
         public void ConfigurePreplacedEnemies(Health[] configuredPreplacedEnemies)
         {
             preplacedEnemies = configuredPreplacedEnemies ?? Array.Empty<Health>();
+        }
+
+        public void ConfigureEnemyPrefabs(GameObject[] configuredEnemyPrefabs)
+        {
+            enemyPrefab = null;
+            enemyPrefabs = configuredEnemyPrefabs ?? Array.Empty<GameObject>();
+        }
+
+        public bool TryValidateEncounterConfiguration(out string error)
+        {
+            if (enemyPrefab != null && enemyPrefabs.Length > 0)
+            {
+                error = "A room cannot use both one repeated prefab and a per-spawn prefab list.";
+                return false;
+            }
+
+            if (enemyPrefabs.Length > 0 && enemyPrefabs.Length != spawnPoints.Length)
+            {
+                error = $"Per-spawn enemy prefab count {enemyPrefabs.Length} does not match spawn point count {spawnPoints.Length}.";
+                return false;
+            }
+
+            foreach (GameObject configuredPrefab in enemyPrefabs)
+            {
+                if (configuredPrefab == null || configuredPrefab.GetComponent<Health>() == null)
+                {
+                    error = "Every configured enemy prefab must exist and contain Health.";
+                    return false;
+                }
+            }
+
+            if (enemyPrefabs.Length > 0)
+            {
+                foreach (Transform spawnPoint in spawnPoints)
+                {
+                    if (spawnPoint == null)
+                    {
+                        error = "Per-spawn enemy configurations cannot contain a missing spawn point.";
+                        return false;
+                    }
+                }
+            }
+
+            if (enemyPrefab != null && enemyPrefab.GetComponent<Health>() == null)
+            {
+                error = "The repeated enemy prefab must contain Health.";
+                return false;
+            }
+
+            error = null;
+            return true;
         }
 
         private void Awake()
@@ -101,6 +159,12 @@ namespace TrickalFanGame.Room
                 return;
             }
 
+            if (!TryValidateEncounterConfiguration(out string error))
+            {
+                Debug.LogError($"{name}: Invalid encounter configuration. {error}", this);
+                return;
+            }
+
             HasStarted = true;
             playerHealth = enteringPlayerHealth;
             playerHealth.Died += OnPlayerDied;
@@ -146,6 +210,16 @@ namespace TrickalFanGame.Room
 
         private void SpawnConfiguredEnemies()
         {
+            if (enemyPrefabs.Length > 0)
+            {
+                for (int index = 0; index < spawnPoints.Length; index++)
+                {
+                    SpawnEnemy(enemyPrefabs[index], spawnPoints[index]);
+                }
+
+                return;
+            }
+
             if (enemyPrefab == null)
             {
                 return;
@@ -153,22 +227,27 @@ namespace TrickalFanGame.Room
 
             foreach (Transform spawnPoint in spawnPoints)
             {
-                if (spawnPoint == null)
-                {
-                    continue;
-                }
-
-                GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation, transform);
-                Health enemyHealth = enemy.GetComponent<Health>();
-                if (enemyHealth == null)
-                {
-                    Debug.LogError($"{name}: Enemy prefab must have a Health component.", enemy);
-                    Destroy(enemy);
-                    continue;
-                }
-
-                RegisterEnemy(enemyHealth);
+                SpawnEnemy(enemyPrefab, spawnPoint);
             }
+        }
+
+        private void SpawnEnemy(GameObject configuredPrefab, Transform spawnPoint)
+        {
+            if (configuredPrefab == null || spawnPoint == null)
+            {
+                return;
+            }
+
+            GameObject enemy = Instantiate(configuredPrefab, spawnPoint.position, spawnPoint.rotation, transform);
+            Health enemyHealth = enemy.GetComponent<Health>();
+            if (enemyHealth == null)
+            {
+                Debug.LogError($"{name}: Enemy prefab must have a Health component.", enemy);
+                Destroy(enemy);
+                return;
+            }
+
+            RegisterEnemy(enemyHealth);
         }
 
         private void OnEnemyDied(Health enemyHealth)

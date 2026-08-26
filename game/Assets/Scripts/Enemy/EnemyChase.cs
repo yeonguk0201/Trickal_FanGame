@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace TrickalFanGame.Enemy
 {
-    [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(Rigidbody2D), typeof(Health), typeof(KnockbackReceiver))]
     public sealed class EnemyChase : MonoBehaviour
     {
         [SerializeField, Min(0f)] private float moveSpeed = 2f;
@@ -17,11 +18,15 @@ namespace TrickalFanGame.Enemy
         private Health targetHealth;
         private KnockbackReceiver knockback;
 
+        public float MoveSpeed => moveSpeed;
+        public float DetectionRange => detectionRange;
+        public float StopDistance => stopDistance;
+        public bool IsMovementSuppressed => health == null || health.IsDead ||
+                                            (knockback != null && knockback.IsActive);
+
         private void Awake()
         {
-            body = GetComponent<Rigidbody2D>();
-            health = GetComponent<Health>();
-            knockback = GetComponent<KnockbackReceiver>();
+            CacheComponents();
         }
 
         private void Start()
@@ -31,8 +36,44 @@ namespace TrickalFanGame.Enemy
 
         private void FixedUpdate()
         {
-            if (knockback != null && knockback.IsActive)
+            TickChase();
+        }
+
+        private void OnDisable()
+        {
+            if (body != null)
             {
+                body.linearVelocity = Vector2.zero;
+            }
+        }
+
+        public void Configure(float configuredMoveSpeed, float configuredDetectionRange, float configuredStopDistance)
+        {
+            moveSpeed = Mathf.Max(0f, configuredMoveSpeed);
+            detectionRange = Mathf.Max(0f, configuredDetectionRange);
+            stopDistance = Mathf.Clamp(configuredStopDistance, 0f, detectionRange);
+        }
+
+        public void SetTarget(Transform configuredTarget)
+        {
+            target = configuredTarget;
+            targetHealth = target != null ? target.GetComponent<Health>() : null;
+        }
+
+        public void TickChase()
+        {
+            if (body == null || health == null || knockback == null)
+            {
+                CacheComponents();
+            }
+
+            if (knockback.IsActive)
+            {
+                if (!knockback.IsKnockedBack)
+                {
+                    body.linearVelocity = Vector2.zero;
+                }
+
                 return;
             }
 
@@ -51,6 +92,13 @@ namespace TrickalFanGame.Enemy
             }
 
             body.linearVelocity = offset / distance * moveSpeed;
+        }
+
+        private void CacheComponents()
+        {
+            body = GetComponent<Rigidbody2D>();
+            health = GetComponent<Health>();
+            knockback = GetComponent<KnockbackReceiver>();
         }
 
         private bool FindTargetIfNeeded()
