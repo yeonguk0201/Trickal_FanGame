@@ -4,9 +4,9 @@ namespace TrickalFanGame.Combat
 {
     public static class DamageCalculator
     {
-        public static int Calculate(DamageContext context)
+        public static float Calculate(DamageContext context)
         {
-            return Mathf.Max(0, Mathf.RoundToInt(context.BaseDamage * context.Multiplier));
+            return Mathf.Max(0f, context.BaseDamage * context.Multiplier);
         }
     }
 }

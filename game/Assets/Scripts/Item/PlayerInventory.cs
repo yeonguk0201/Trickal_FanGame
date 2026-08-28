@@ -74,10 +74,16 @@ namespace TrickalFanGame.Item
             switch (definition.EffectType)
             {
                 case ItemEffectType.AttackDamage:
-                    stats.AddAttackDamage(Mathf.RoundToInt(definition.EffectValue));
+                    stats.AddAttackDamage(definition.EffectValue);
+                    break;
+                case ItemEffectType.AttackDamagePercent:
+                    stats.AddAttackDamagePercent(definition.EffectValue);
+                    break;
+                case ItemEffectType.SkillDamagePercent:
+                    stats.AddSkillDamagePercent(definition.EffectValue);
                     break;
                 case ItemEffectType.MaxHealth:
-                    stats.AddMaxHealth(Mathf.RoundToInt(definition.EffectValue), true);
+                    stats.AddMaxHealth(definition.EffectValue, true);
                     break;
                 case ItemEffectType.MoveSpeed:
                     stats.AddMoveSpeed(definition.EffectValue);
@@ -89,7 +95,7 @@ namespace TrickalFanGame.Item
                     stats.AddPierce(Mathf.RoundToInt(definition.EffectValue));
                     break;
                 case ItemEffectType.HealOnKill:
-                    stats.AddHealOnKill(Mathf.RoundToInt(definition.EffectValue));
+                    stats.AddHealOnKill(definition.EffectValue);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -8,7 +8,7 @@ namespace TrickalFanGame.Player
     [RequireComponent(typeof(Health), typeof(PlayerCombatEvents), typeof(PlayerActionState))]
     public sealed class PlayerAttack : MonoBehaviour
     {
-        [SerializeField, Min(1)] private int damage = 1;
+        [SerializeField, Min(0.01f)] private float damage = 1f;
         [SerializeField, Min(0f)] private float attackRange = 1f;
         [SerializeField, Min(0f)] private float attackRadius = 0.5f;
         [SerializeField, Min(0f)] private float attackCooldown = 0.35f;

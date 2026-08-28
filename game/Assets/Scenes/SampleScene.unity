@@ -1149,6 +1149,74 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &43863913
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 43863915}
+  - component: {fileID: 43863914}
+  - component: {fileID: 43863916}
+  m_Layer: 0
+  m_Name: Phase F Floor Generator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &43863914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43863913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f323432f7aa4dc6acffda7735f0c70b, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.FloorGenerator
+  seed: 20260828
+  floorCount: 3
+  roomsPerFloor: 3
+  roomDefinitions:
+  - {fileID: 11400000, guid: 5d17e508fb296c74283f65174db784e2, type: 2}
+  - {fileID: 11400000, guid: 7ac88868298fcef42910b61142dcd918, type: 2}
+  - {fileID: 11400000, guid: d2d9250bc6cdce743be7738550951259, type: 2}
+  - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
+  - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
+--- !u!4 &43863915
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43863913}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &43863916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43863913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d69cc7e91404b9d926e15a6d51e60ef, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomGraphAssembler
+  generator: {fileID: 43863914}
+  graph: {fileID: 1265728904}
 --- !u!1 &52830883
 GameObject:
   m_ObjectHideFlags: 0
@@ -1649,7 +1717,7 @@ MonoBehaviour:
   enemyPrefab: {fileID: 0}
   enemyPrefabs:
   - {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
-  - {fileID: 940017362510908874, guid: e65ef9de4be55d4458e0b57203c22239, type: 3}
+  - {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
   spawnPoints:
   - {fileID: 1034663997}
   - {fileID: 523731566}
@@ -2048,7 +2116,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &143441811
 Transform:
   m_ObjectHideFlags: 0
@@ -2512,6 +2580,7 @@ MonoBehaviour:
   doorways:
   - {fileID: 657604861}
   - {fileID: 1893118558}
+  definition: {fileID: 11400000, guid: 7ac88868298fcef42910b61142dcd918, type: 2}
 --- !u!1 &188566641
 GameObject:
   m_ObjectHideFlags: 0
@@ -3331,7 +3400,7 @@ MonoBehaviour:
   runProgress: {fileID: 1750892776}
   enemyPrefab: {fileID: 0}
   enemyPrefabs:
-  - {fileID: 940017362510908874, guid: e65ef9de4be55d4458e0b57203c22239, type: 3}
+  - {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
   - {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
   spawnPoints:
   - {fileID: 1776075639}
@@ -7219,6 +7288,7 @@ MonoBehaviour:
   doorways:
   - {fileID: 1986560828}
   - {fileID: 1481157901}
+  definition: {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
 --- !u!1 &550362223
 GameObject:
   m_ObjectHideFlags: 0
@@ -10093,7 +10163,7 @@ MonoBehaviour:
   runProgress: {fileID: 1750892776}
   enemyPrefab: {fileID: 0}
   enemyPrefabs:
-  - {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+  - {fileID: 940017362510908874, guid: e65ef9de4be55d4458e0b57203c22239, type: 3}
   spawnPoints:
   - {fileID: 1062355376}
   preplacedEnemies: []
@@ -12457,7 +12527,7 @@ MonoBehaviour:
   runProgress: {fileID: 1750892776}
   enemyPrefab: {fileID: 0}
   enemyPrefabs:
-  - {fileID: 940017362510908874, guid: e65ef9de4be55d4458e0b57203c22239, type: 3}
+  - {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
   spawnPoints:
   - {fileID: 1482422337}
   preplacedEnemies: []
@@ -14874,7 +14944,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1128623748
 Transform:
   m_ObjectHideFlags: 0
@@ -15620,8 +15690,8 @@ MonoBehaviour:
   runProgress: {fileID: 1750892776}
   enemyPrefab: {fileID: 0}
   enemyPrefabs:
-  - {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
-  - {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+  - {fileID: 940017362510908874, guid: e65ef9de4be55d4458e0b57203c22239, type: 3}
+  - {fileID: 940017362510908874, guid: e65ef9de4be55d4458e0b57203c22239, type: 3}
   spawnPoints:
   - {fileID: 393183957}
   - {fileID: 1382981272}
@@ -15748,6 +15818,7 @@ MonoBehaviour:
   defaultEntryPoint: {fileID: 1232478368}
   doorways:
   - {fileID: 2040364863}
+  definition: {fileID: 11400000, guid: 7ac88868298fcef42910b61142dcd918, type: 2}
 --- !u!1 &1254008526
 GameObject:
   m_ObjectHideFlags: 0
@@ -19313,6 +19384,7 @@ MonoBehaviour:
   doorways:
   - {fileID: 832511456}
   - {fileID: 1674404691}
+  definition: {fileID: 11400000, guid: 5d17e508fb296c74283f65174db784e2, type: 2}
 --- !u!4 &1548584562
 Transform:
   m_ObjectHideFlags: 0
@@ -20679,6 +20751,7 @@ MonoBehaviour:
   doorways:
   - {fileID: 809870093}
   - {fileID: 466661378}
+  definition: {fileID: 11400000, guid: 5d17e508fb296c74283f65174db784e2, type: 2}
 --- !u!4 &1607973284
 Transform:
   m_ObjectHideFlags: 0
@@ -21559,6 +21632,7 @@ MonoBehaviour:
   doorways:
   - {fileID: 1720477367}
   - {fileID: 445056818}
+  definition: {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
 --- !u!1 &1669208019
 GameObject:
   m_ObjectHideFlags: 0
@@ -25260,6 +25334,7 @@ MonoBehaviour:
   defaultEntryPoint: {fileID: 1150739091}
   doorways:
   - {fileID: 1787192718}
+  definition: {fileID: 11400000, guid: 5d17e508fb296c74283f65174db784e2, type: 2}
 --- !u!4 &1922904121
 Transform:
   m_ObjectHideFlags: 0
@@ -26075,6 +26150,7 @@ MonoBehaviour:
   defaultEntryPoint: {fileID: 693943260}
   doorways:
   - {fileID: 188566643}
+  definition: {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
 --- !u!1001 &1980534202
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26443,6 +26519,7 @@ MonoBehaviour:
   defaultEntryPoint: {fileID: 593073216}
   doorways:
   - {fileID: 647614376}
+  definition: {fileID: 11400000, guid: d2d9250bc6cdce743be7738550951259, type: 2}
 --- !u!1 &2014031777
 GameObject:
   m_ObjectHideFlags: 0
@@ -28496,3 +28573,4 @@ SceneRoots:
   - {fileID: 385493273}
   - {fileID: 1265728905}
   - {fileID: 68205443}
+  - {fileID: 43863915}

@@ -26,6 +26,14 @@ namespace TrickalFanGame.Editor
             GameObject secondPlayer = CreatePlayer("Week6 Verification Player B", out _,
                 out PlayerStats secondStats, out _,
                 out PlayerProjectileAttack secondAttack, out PlayerInventory secondInventory);
+            ItemDefinition attackPercent = CreateDefinition(
+                "verification-attack-percent",
+                ItemEffectType.AttackDamagePercent,
+                0.7f);
+            ItemDefinition skillPercent = CreateDefinition(
+                "verification-skill-percent",
+                ItemEffectType.SkillDamagePercent,
+                0.5f);
 
             try
             {
@@ -41,6 +49,19 @@ namespace TrickalFanGame.Editor
                 Assert(firstInventory.TryAcquire(attackDamage), "Attack Boost should stack without a cap.");
                 Assert(firstStats.AttackDamage == 3 && firstAttack.CurrentDamage == 3,
                     "Stacked attack items should update PlayerStats and projectile damage.");
+
+                Assert(firstInventory.TryAcquire(attackPercent), "Attack +70% should be acquirable.");
+                Assert(firstInventory.TryAcquire(skillPercent), "Skill damage +50% should be acquirable.");
+                Assert(Mathf.Approximately(firstStats.AttackDamage, 5.1f) &&
+                       Mathf.Approximately(firstAttack.CurrentDamage, 5.1f),
+                    "Attack percent should multiply base plus flat attack without rounding.");
+                DamageContext skillDamage = new(
+                    firstPlayer,
+                    DamageSourceType.PlayerSkillExplosion,
+                    firstStats.AttackDamage,
+                    firstStats.SkillDamageMultiplier);
+                Assert(Mathf.Approximately(DamageCalculator.Calculate(skillDamage), 7.65f),
+                    "Skill damage percent should apply after current attack without intermediate rounding.");
 
                 firstHealth.TakeDamage(4);
                 Assert(firstInventory.TryAcquire(maxHealth), "Max Health Boost should be acquirable.");
@@ -89,6 +110,8 @@ namespace TrickalFanGame.Editor
             {
                 UnityEngine.Object.DestroyImmediate(firstPlayer);
                 UnityEngine.Object.DestroyImmediate(secondPlayer);
+                UnityEngine.Object.DestroyImmediate(attackPercent);
+                UnityEngine.Object.DestroyImmediate(skillPercent);
             }
         }
 
@@ -124,6 +147,21 @@ namespace TrickalFanGame.Editor
                 throw new InvalidOperationException($"Missing item definition: {itemId}");
             }
 
+            return definition;
+        }
+
+        private static ItemDefinition CreateDefinition(
+            string itemId,
+            ItemEffectType effectType,
+            float effectValue)
+        {
+            ItemDefinition definition = ScriptableObject.CreateInstance<ItemDefinition>();
+            SerializedObject serialized = new(definition);
+            serialized.FindProperty("itemId").stringValue = itemId;
+            serialized.FindProperty("displayName").stringValue = itemId;
+            serialized.FindProperty("effectType").enumValueIndex = (int)effectType;
+            serialized.FindProperty("effectValue").floatValue = effectValue;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
             return definition;
         }
 

@@ -211,7 +211,9 @@ Room/
 ├── RoomNode.cs
 ├── RoomDoorway.cs
 ├── RoomCameraController.cs
-├── RoomGenerator.cs          # Phase F 랜덤 그래프 생성 시 추가
+├── FloorGenerator.cs         # Phase F 결정적 층별 방 그래프 생성
+├── RoomDefinition.cs         # 검증된 방 단위와 몬스터 프리팹 조합 데이터
+├── RoomGraphAssembler.cs     # 생성 결과를 검증된 씬 방과 RoomGraphController에 바인딩
 ├── RoomState.cs
 └── RoomType.cs
 방은 다음과 같은 상태를 가질 수 있다.

@@ -102,7 +102,7 @@ namespace TrickalFanGame.Player
                 gameObject,
                 DamageSourceType.PlayerSkillExplosion,
                 stats.AttackDamage,
-                1f);
+                stats.SkillDamageMultiplier);
             nextProjectileIndex = 0;
             salvoStartTime = currentTime;
             nextShotTime = currentTime;

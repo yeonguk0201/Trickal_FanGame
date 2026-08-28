@@ -19,7 +19,7 @@ namespace TrickalFanGame.Enemy
             Vector2 position,
             Vector2 initialVelocity,
             GameObject source,
-            int attackDamage,
+            float attackDamage,
             Sprite sprite)
         {
             GameObject projectile = new GameObject("Boss Projectile");

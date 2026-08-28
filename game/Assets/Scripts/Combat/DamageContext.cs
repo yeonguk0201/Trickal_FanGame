@@ -7,7 +7,7 @@ namespace TrickalFanGame.Combat
         public DamageContext(
             GameObject source,
             DamageSourceType sourceType,
-            int baseDamage,
+            float baseDamage,
             float multiplier = 1f)
         {
             Source = source;
@@ -18,7 +18,7 @@ namespace TrickalFanGame.Combat
 
         public GameObject Source { get; }
         public DamageSourceType SourceType { get; }
-        public int BaseDamage { get; }
+        public float BaseDamage { get; }
         public float Multiplier { get; }
     }
 }

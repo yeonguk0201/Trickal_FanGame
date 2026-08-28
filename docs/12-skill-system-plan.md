@@ -215,13 +215,14 @@ SP 리소스 + SP 바닥 드롭
 플레이어 행동 상태 관리
 + 무적 돌진 + 충돌 피해 + 넉백 후 경직 + 종료 원인별 회복 + 쿨타임
         ↓
-[Phase E — 기존 MVP 콘텐츠]
+[완료 — Phase E 기존 MVP 콘텐츠]
 몬스터 3종 + 3개 층 구성
-+ 전체 Run 진행 검증
++ 전체 Run 진행 검증 (`Verify Phase E-8 Floor Difficulty Scaling`, 2026-08-27)
         ↓
-[Phase F — 랜덤 방 구성]
-검증된 방 프리팹으로 층별 방 그래프 생성
-+ 현재 방만 활성화 + 방문 상태 유지
+[완료 — Phase F 랜덤 방 구성]
+검증된 방 정의 데이터로 결정적 층별 방 그래프 생성 완료 (`Verify Phase F-1 Random Room Graph`, 2026-08-28)
++ 생성 결과를 검증된 방 인스턴스·출입구 및 `RoomGraphController`에 연결 완료 (`Verify Phase F-2 Generated Room Graph Binding`, 2026-08-28)
++ 현재 방만 활성화 + 재방문 클리어·보상 상태 유지 전체 Run 확인 (`Verify Phase F-2 Generated Room Graph Binding` 실행 후 사용자 확인, 2026-08-28)
         ↓
 [Phase G — 아이템 확장]
 아이템 4종 추가 + 10종 완성

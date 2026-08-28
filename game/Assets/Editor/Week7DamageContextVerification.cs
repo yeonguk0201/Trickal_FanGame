@@ -43,8 +43,8 @@ namespace TrickalFanGame.Editor
 
                 DamageContext enemyReceivedContext = default;
                 DamageContext bossReceivedContext = default;
-                int enemyReceivedDamage = 0;
-                int bossReceivedDamage = 0;
+                float enemyReceivedDamage = 0f;
+                float bossReceivedDamage = 0f;
                 enemyHealth.DamageApplied += (received, damage, _) =>
                 {
                     enemyReceivedContext = received;

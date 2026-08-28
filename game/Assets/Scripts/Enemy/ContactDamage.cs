@@ -7,17 +7,17 @@ namespace TrickalFanGame.Enemy
 {
     public sealed class ContactDamage : MonoBehaviour
     {
-        [SerializeField, Min(1)] private int damage = 1;
+        [SerializeField, Min(0.01f)] private float damage = 1f;
         [SerializeField, Min(0f)] private float cooldown = 1f;
 
         private float nextDamageTime;
 
-        public int Damage => damage;
+        public float Damage => damage;
         public float Cooldown => cooldown;
 
-        public void Configure(int configuredDamage, float configuredCooldown)
+        public void Configure(float configuredDamage, float configuredCooldown)
         {
-            damage = Mathf.Max(1, configuredDamage);
+            damage = Mathf.Max(0.01f, configuredDamage);
             cooldown = Mathf.Max(0f, configuredCooldown);
         }
 

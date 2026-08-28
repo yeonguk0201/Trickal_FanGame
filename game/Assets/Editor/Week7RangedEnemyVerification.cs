@@ -112,7 +112,7 @@ namespace TrickalFanGame.Editor
                 ranged.TickBehavior(101.5f);
                 Assert(fired.Count == 2, "The ranged enemy must fire again when its attack interval ends.");
 
-                int healthBeforeHit = playerHealth.CurrentHealth;
+                float healthBeforeHit = playerHealth.CurrentHealth;
                 Assert(first.TryHit(playerCollider), "A ranged projectile must recognize the player collider.");
                 Assert(first == null && playerHealth.CurrentHealth == healthBeforeHit - 1 &&
                        deathReason.CurrentReason == "ENEMY",

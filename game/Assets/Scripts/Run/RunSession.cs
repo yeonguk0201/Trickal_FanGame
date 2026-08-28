@@ -31,9 +31,11 @@ namespace TrickalFanGame.Run
         private float startedRealtime;
         private bool hasStarted;
         private bool hasEnded;
+        private bool shouldSaveResult = true;
 
         public bool HasStarted => hasStarted;
         public bool HasEnded => hasEnded;
+        public bool IsCleared { get; private set; }
         public string CharacterId => characterId;
 
         public void Configure(Health configuredPlayer, RunProgress configuredProgress, BossController configuredBoss)
@@ -47,6 +49,11 @@ namespace TrickalFanGame.Run
         public void SetWaitForCharacterSelection(bool shouldWait)
         {
             waitForCharacterSelection = shouldWait;
+        }
+
+        public void SetResultSavingEnabled(bool enabled)
+        {
+            shouldSaveResult = enabled;
         }
 
         private void Awake()
@@ -120,7 +127,11 @@ namespace TrickalFanGame.Run
         }
 
         private void OnPlayerDied() => EndRun(false, playerDeathReason != null ? playerDeathReason.CurrentReason : "UNKNOWN");
-        private void OnBossDied() => EndRun(true, null);
+        private void OnBossDied()
+        {
+            runProgress?.RecordKill();
+            EndRun(true, null);
+        }
 
         private void EndRun(bool isCleared, string deathReason)
         {
@@ -130,6 +141,7 @@ namespace TrickalFanGame.Run
             }
 
             hasEnded = true;
+            IsCleared = isCleared;
             runProgress?.StopProgression();
             var endedAt = DateTime.UtcNow;
             var request = new CreateRunRequest
@@ -146,6 +158,13 @@ namespace TrickalFanGame.Run
                 deathReason = deathReason,
                 items = BuildRunItems(endedAt)
             };
+
+            if (!shouldSaveResult)
+            {
+                statusMessage = isCleared ? "Run cleared." : "Run ended.";
+                Debug.Log($"[RunSession] {statusMessage} Result saving is disabled.", this);
+                return;
+            }
 
             statusMessage = isCleared ? "Run cleared. Saving result..." : "Run ended. Saving result...";
             if (ApiClient.Instance == null)

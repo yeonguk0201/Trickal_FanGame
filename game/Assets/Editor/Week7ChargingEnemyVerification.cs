@@ -104,7 +104,7 @@ namespace TrickalFanGame.Editor
                        Mathf.Approximately(enemyBody.linearVelocity.magnitude, 9f),
                     "The charging enemy must dash in its locked direction when windup ends.");
 
-                int healthBeforeHit = playerHealth.CurrentHealth;
+                float healthBeforeHit = playerHealth.CurrentHealth;
                 Assert(charging.TryResolveCollision(playerCollider, 0.7f) &&
                        playerHealth.CurrentHealth == healthBeforeHit - 2 &&
                        deathReason.CurrentReason == "ENEMY" &&

@@ -10,6 +10,8 @@ namespace TrickalFanGame.Editor
 {
     public static class Week7LowerGradeSkillVerification
     {
+        private const int VerificationEnemyLayer = 30;
+
         [MenuItem("Trickal Fan Game/Verify Phase C Lower Grade Skill")]
         public static void Verify()
         {
@@ -60,7 +62,7 @@ namespace TrickalFanGame.Editor
                 const float firstCastTime = 100f;
                 const float shotInterval = 0.08f;
                 const float fanSpacingAngle = 12f;
-                skill.Configure(projectileTemplate, LayerMask.GetMask("Enemy"), shotInterval, fanSpacingAngle);
+                skill.Configure(projectileTemplate, 1 << VerificationEnemyLayer, shotInterval, fanSpacingAngle);
                 skill.ProjectileLaunched += launched.Add;
                 Assert(playerSP.CurrentSP == playerSP.MaxSP,
                     "The skill verification must retain the capped SP from the pickup boundary check.");
@@ -92,7 +94,8 @@ namespace TrickalFanGame.Editor
                 {
                     HomingSkillProjectile projectile = launched[index];
                     Assert(projectile.Target == expectedTargets[index],
-                        "Three enemies must receive four shots in distance-ordered round-robin order.");
+                        "Three enemies must receive four shots in distance-ordered round-robin order. " +
+                        $"Shot {index + 1} targeted {projectile.Target?.name ?? "none"}.");
                     Assert(projectile.HasAssignedTarget,
                         "A projectile launched with a target must preserve its target-assigned collision rule.");
                     float expectedAngle = (expectedSlotOrder[index] - 1.5f) * fanSpacingAngle;
@@ -226,15 +229,15 @@ namespace TrickalFanGame.Editor
             return player;
         }
 
-        private static GameObject CreateEnemy(string name, Vector2 position, int maxHealth, out Health health)
+        private static GameObject CreateEnemy(string name, Vector2 position, float maxHealth, out Health health)
         {
             GameObject enemy = new(name);
-            enemy.layer = LayerMask.NameToLayer("Enemy");
+            enemy.layer = VerificationEnemyLayer;
             enemy.transform.position = position;
             enemy.AddComponent<CircleCollider2D>();
             health = enemy.AddComponent<Health>();
             SerializedObject serializedHealth = new(health);
-            serializedHealth.FindProperty("maxHealth").intValue = maxHealth;
+            serializedHealth.FindProperty("maxHealth").floatValue = maxHealth;
             serializedHealth.ApplyModifiedPropertiesWithoutUndo();
             InvokeLifecycle(health, "Awake");
             return enemy;

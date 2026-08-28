@@ -27,8 +27,8 @@ namespace TrickalFanGame.Editor
             Assert(charging.Health == 7 && charging.Damage == 3 && Mathf.Approximately(charging.Speed, 8f),
                 "Charging must use HP 7, charge damage 3, and dash speed 8.");
 
-            HashSet<int> healthValues = new() { chaser.Health, ranged.Health, charging.Health };
-            HashSet<int> damageValues = new() { chaser.Damage, ranged.Damage, charging.Damage };
+            HashSet<float> healthValues = new() { chaser.Health, ranged.Health, charging.Health };
+            HashSet<float> damageValues = new() { chaser.Damage, ranged.Damage, charging.Damage };
             HashSet<float> speedValues = new() { chaser.Speed, ranged.Speed, charging.Speed };
             Assert(healthValues.Count == 3 && damageValues.Count == 3 && speedValues.Count == 3,
                 "All three normal monsters must have distinct HP, damage, and movement-speed values.");
@@ -91,15 +91,15 @@ namespace TrickalFanGame.Editor
 
         private readonly struct EnemyProfile
         {
-            public EnemyProfile(int health, int damage, float speed)
+            public EnemyProfile(float health, float damage, float speed)
             {
                 Health = health;
                 Damage = damage;
                 Speed = speed;
             }
 
-            public int Health { get; }
-            public int Damage { get; }
+            public float Health { get; }
+            public float Damage { get; }
             public float Speed { get; }
         }
     }

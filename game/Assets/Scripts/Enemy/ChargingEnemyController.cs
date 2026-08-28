@@ -28,7 +28,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float dashDuration = 0.8f;
         [SerializeField, Min(0f)] private float recoveryDuration = 0.6f;
         [SerializeField, Min(0f)] private float chargeCooldown = 1.5f;
-        [SerializeField, Min(1)] private int chargeDamage = 2;
+        [SerializeField, Min(0.01f)] private float chargeDamage = 2f;
         [SerializeField] private Transform target;
 
         private Rigidbody2D body;
@@ -45,7 +45,7 @@ namespace TrickalFanGame.Enemy
         public Vector2 LockedDirection => lockedDirection;
         public float NextChargeTime => nextChargeTime;
         public float DashSpeed => dashSpeed;
-        public int ChargeDamage => chargeDamage;
+        public float ChargeDamage => chargeDamage;
         public bool IsActionSuppressed => health == null || health.IsDead ||
                                           (knockback != null && knockback.IsActive);
 
@@ -95,7 +95,7 @@ namespace TrickalFanGame.Enemy
             float configuredDashDuration,
             float configuredRecoveryDuration,
             float configuredChargeCooldown,
-            int configuredChargeDamage)
+            float configuredChargeDamage)
         {
             detectionRange = Mathf.Max(0f, configuredDetectionRange);
             windupDuration = Mathf.Max(0.01f, configuredWindupDuration);
@@ -103,7 +103,12 @@ namespace TrickalFanGame.Enemy
             dashDuration = Mathf.Max(0.01f, configuredDashDuration);
             recoveryDuration = Mathf.Max(0f, configuredRecoveryDuration);
             chargeCooldown = Mathf.Max(0f, configuredChargeCooldown);
-            chargeDamage = Mathf.Max(1, configuredChargeDamage);
+            chargeDamage = Mathf.Max(0.01f, configuredChargeDamage);
+        }
+
+        public void SetChargeDamage(float configuredChargeDamage)
+        {
+            chargeDamage = Mathf.Max(0.01f, configuredChargeDamage);
         }
 
         public void SetTarget(Transform configuredTarget)

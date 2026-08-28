@@ -22,10 +22,10 @@ namespace TrickalFanGame.Player
         private PlayerActionState actionState;
         private float nextAttackTime;
 
-        public int CurrentDamage => stats.AttackDamage;
+        public float CurrentDamage => stats.AttackDamage;
         public int ProjectileCount => stats.ProjectileCount;
         public int PierceCount => stats.PierceCount;
-        public int HealOnKill => stats.HealOnKill;
+        public float HealOnKill => stats.HealOnKill;
         public bool CanAttack => !health.IsDead && actionState.CanBasicAttack;
 
         public DamageContext CreateDamageContext()
@@ -104,8 +104,8 @@ namespace TrickalFanGame.Player
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)
         {
-            int healedAmount = health.Heal(stats.HealOnKill);
-            if (healedAmount > 0)
+            float healedAmount = health.Heal(stats.HealOnKill);
+            if (healedAmount > 0f)
             {
                 Debug.Log(
                     $"[PlayerProjectileAttack] Healed {healedAmount} HP after defeating {killEvent.Target.name}.",

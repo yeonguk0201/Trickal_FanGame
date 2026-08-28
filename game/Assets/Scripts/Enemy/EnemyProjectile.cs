@@ -28,7 +28,7 @@ namespace TrickalFanGame.Enemy
             Vector2 position,
             Vector2 direction,
             GameObject source,
-            int attackDamage,
+            float attackDamage,
             float speed,
             float lifetime,
             Sprite sprite)
@@ -59,7 +59,7 @@ namespace TrickalFanGame.Enemy
         public void Launch(
             Vector2 direction,
             GameObject source,
-            int attackDamage,
+            float attackDamage,
             float speed,
             float lifetime)
         {
@@ -69,7 +69,7 @@ namespace TrickalFanGame.Enemy
             }
 
             owner = source;
-            damageContext = new DamageContext(source, DamageSourceType.EnemyProjectile, Mathf.Max(1, attackDamage));
+            damageContext = new DamageContext(source, DamageSourceType.EnemyProjectile, Mathf.Max(0.01f, attackDamage));
             body.linearVelocity = direction.sqrMagnitude > 0.001f
                 ? direction.normalized * Mathf.Max(0f, speed)
                 : Vector2.zero;

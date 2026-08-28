@@ -61,7 +61,7 @@ namespace TrickalFanGame.Editor
                 int spBeforeBlockedCast = playerSP.CurrentSP;
                 Assert(!lowerGradeSkill.TryCast() && playerSP.CurrentSP == spBeforeBlockedCast && launchedCount == 0,
                     "Space must be blocked during dash without spending SP or launching projectiles.");
-                int healthBeforeInvulnerableHit = playerHealth.CurrentHealth;
+                float healthBeforeInvulnerableHit = playerHealth.CurrentHealth;
                 playerHealth.TakeDamage(new DamageContext(normalEnemy, DamageSourceType.EnemyContact, 5));
                 Assert(playerHealth.CurrentHealth == healthBeforeInvulnerableHit,
                     "Enemy damage must not reduce player HP during the invulnerable dash.");
@@ -95,7 +95,7 @@ namespace TrickalFanGame.Editor
                 Assert(!actionState.CanTransition && !actionState.CanBasicAttack &&
                        !actionState.CanUseLowerGradeSkill && movement.CurrentVelocity == Vector2.zero,
                     "Impact recovery must block movement, attacks, Space, and transitions at the collision point.");
-                int healthBeforeImpactRecoveryHit = playerHealth.CurrentHealth;
+                float healthBeforeImpactRecoveryHit = playerHealth.CurrentHealth;
                 playerHealth.TakeDamage(new DamageContext(normalEnemy, DamageSourceType.EnemyContact, 5));
                 Assert(playerHealth.CurrentHealth == healthBeforeImpactRecoveryHit,
                     "Impact recovery invulnerability must reject incoming damage.");
@@ -258,7 +258,7 @@ namespace TrickalFanGame.Editor
 
             health = enemy.AddComponent<Health>();
             SerializedObject serializedHealth = new(health);
-            serializedHealth.FindProperty("maxHealth").intValue = 30;
+            serializedHealth.FindProperty("maxHealth").floatValue = 30f;
             serializedHealth.ApplyModifiedPropertiesWithoutUndo();
             knockback = enemy.AddComponent<KnockbackReceiver>();
             BossController bossController = null;

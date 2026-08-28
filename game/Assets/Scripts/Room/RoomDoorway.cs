@@ -15,6 +15,7 @@ namespace TrickalFanGame.Room
 
         public RoomNode Source => source;
         public RoomNode Destination => destination;
+        public RoomGraphController Graph => graph;
         public Transform DestinationEntryPoint => destinationEntryPoint;
         public RoomController RequiredClearedRoom => requiredClearedRoom;
         public bool IsOpen => requiredClearedRoom == null || requiredClearedRoom.State == RoomState.Cleared;

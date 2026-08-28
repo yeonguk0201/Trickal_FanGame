@@ -101,7 +101,7 @@ namespace TrickalFanGame.Editor
         private static void SetMaxHealth(Health health, int maxHealth)
         {
             SerializedObject serializedHealth = new(health);
-            serializedHealth.FindProperty("maxHealth").intValue = maxHealth;
+            serializedHealth.FindProperty("maxHealth").floatValue = maxHealth;
             serializedHealth.ApplyModifiedPropertiesWithoutUndo();
         }
 

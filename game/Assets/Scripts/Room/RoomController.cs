@@ -203,6 +203,7 @@ namespace TrickalFanGame.Room
                 }
 
                 enemy.gameObject.SetActive(true);
+                FloorDifficultyScaler.ApplyScaling(enemy.gameObject, floorNumber);
                 enemy.ResetHealth();
                 RegisterEnemy(enemy);
             }
@@ -247,6 +248,7 @@ namespace TrickalFanGame.Room
                 return;
             }
 
+            FloorDifficultyScaler.ApplyScaling(enemy, floorNumber);
             RegisterEnemy(enemyHealth);
         }
 

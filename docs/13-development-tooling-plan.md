@@ -110,6 +110,8 @@
 - [x] 같은 Setup을 두 번 실행해도 중복 오브젝트나 에셋이 생성되지 않는다. (사용자 Unity 확인, 2026-08-26)
 - [x] 필수 참조 누락과 잘못된 설정을 검증기가 실패로 보고한다. (`RangedEnemy.prefab` 누락·잘못된 픽스처 실패 확인 후 최종 통과)
 - [x] 수동으로만 확인 가능한 항목과 자동 검증 항목이 구분되어 있다. (`Scripts/README.md`의 Setup·검증기·Play Mode 절차)
+- [x] Phase F 방 정의 Setup 재실행과 결정적 그래프의 seed·ID·연결·중복·누락 불변조건을 전용 검증기로 확인한다. (`Verify Phase F-1 Random Room Graph`, 2026-08-28)
+- [x] Phase F 생성 그래프 바인딩 Setup 재실행과 방 정의·몬스터·보상 활성화·출입구·멱등성 불변조건을 전용 검증기로 확인한다. (`Verify Phase F-2 Generated Room Graph Binding`, 2026-08-28)
 
 ### 중단 기준
 

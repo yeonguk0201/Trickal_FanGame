@@ -12,6 +12,7 @@ namespace TrickalFanGame.Room
         [SerializeField] private Transform cameraAnchor;
         [SerializeField] private Transform defaultEntryPoint;
         [SerializeField] private RoomDoorway[] doorways = Array.Empty<RoomDoorway>();
+        [SerializeField] private RoomDefinition definition;
 
         public string RoomId => roomId;
         public int FloorNumber => floorNumber;
@@ -20,6 +21,7 @@ namespace TrickalFanGame.Room
         public Transform CameraAnchor => cameraAnchor;
         public Transform DefaultEntryPoint => defaultEntryPoint;
         public RoomDoorway[] Doorways => doorways;
+        public RoomDefinition Definition => definition;
         public bool IsVisible => contentRoot != null && contentRoot.activeSelf;
         public bool HasBeenVisited { get; private set; }
 
@@ -44,6 +46,11 @@ namespace TrickalFanGame.Room
         public void SetDoorways(RoomDoorway[] configuredDoorways)
         {
             doorways = configuredDoorways ?? Array.Empty<RoomDoorway>();
+        }
+
+        public void ApplyGeneratedDefinition(RoomDefinition configuredDefinition)
+        {
+            definition = configuredDefinition;
         }
 
         public void SetVisible(bool visible)

@@ -11,7 +11,7 @@ namespace TrickalFanGame.Enemy
     {
         [SerializeField, Min(0.1f)] private float attackInterval = 1.2f;
         [SerializeField, Min(0.1f)] private float projectileSpeed = 4f;
-        [SerializeField, Min(1)] private int projectileDamage = 2;
+        [SerializeField, Min(0.01f)] private float projectileDamage = 2f;
 
         private Health health;
         private KnockbackReceiver knockback;
@@ -19,8 +19,15 @@ namespace TrickalFanGame.Enemy
         private float nextAttackTime;
         public event Action Died;
 
+        public float ProjectileDamage => projectileDamage;
+
         public bool IsActionSuppressed =>
             health != null && (health.IsDead || (knockback != null && knockback.IsActive));
+
+        public void SetProjectileDamage(float configuredProjectileDamage)
+        {
+            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+        }
 
         private void Awake()
         {

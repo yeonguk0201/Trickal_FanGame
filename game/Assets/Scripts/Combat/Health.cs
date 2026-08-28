@@ -5,15 +5,15 @@ namespace TrickalFanGame.Combat
 {
     public sealed class Health : MonoBehaviour, IDamageable
     {
-        [SerializeField, Min(1)] private int maxHealth = 10;
+        [SerializeField, Min(0.1f)] private float maxHealth = 10f;
 
-        public int CurrentHealth { get; private set; }
-        public int MaxHealth => maxHealth;
+        public float CurrentHealth { get; private set; }
+        public float MaxHealth => maxHealth;
         public bool IsDead { get; private set; }
         public bool IsInvulnerable { get; private set; }
 
-        public event Action<int, int> Damaged;
-        public event Action<DamageContext, int, int> DamageApplied;
+        public event Action<float, float> Damaged;
+        public event Action<DamageContext, float, float> DamageApplied;
         public event Action Died;
 
         private void Awake()
@@ -21,25 +21,25 @@ namespace TrickalFanGame.Combat
             ResetHealth();
         }
 
-        public void TakeDamage(int amount)
+        public void TakeDamage(float amount)
         {
             TakeDamage(new DamageContext(null, DamageSourceType.Unknown, amount));
         }
 
         public void TakeDamage(DamageContext context)
         {
-            int amount = DamageCalculator.Calculate(context);
+            float amount = DamageCalculator.Calculate(context);
             if (IsDead || IsInvulnerable || amount <= 0)
             {
                 return;
             }
 
-            int previousHealth = CurrentHealth;
-            CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
+            float previousHealth = CurrentHealth;
+            CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
             DamageApplied?.Invoke(context, previousHealth - CurrentHealth, CurrentHealth);
             Damaged?.Invoke(CurrentHealth, MaxHealth);
 
-            if (CurrentHealth != 0)
+            if (CurrentHealth > 0f)
             {
                 return;
             }
@@ -64,11 +64,11 @@ namespace TrickalFanGame.Combat
             IsInvulnerable = invulnerable && !IsDead;
         }
 
-        internal void SetMaxHealth(int value, bool healAddedAmount)
+        internal void SetMaxHealth(float value, bool healAddedAmount)
         {
-            int nextMaxHealth = Mathf.Max(1, value);
-            int addedAmount = nextMaxHealth - maxHealth;
-            if (addedAmount == 0)
+            float nextMaxHealth = Mathf.Max(0.1f, value);
+            float addedAmount = nextMaxHealth - maxHealth;
+            if (Mathf.Approximately(addedAmount, 0f))
             {
                 return;
             }
@@ -84,14 +84,14 @@ namespace TrickalFanGame.Combat
             }
         }
 
-        public int Heal(int amount)
+        public float Heal(float amount)
         {
             if (IsDead || amount <= 0 || CurrentHealth >= maxHealth)
             {
                 return 0;
             }
 
-            int previousHealth = CurrentHealth;
+            float previousHealth = CurrentHealth;
             CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
             return CurrentHealth - previousHealth;
         }

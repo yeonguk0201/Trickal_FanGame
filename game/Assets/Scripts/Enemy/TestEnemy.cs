@@ -26,7 +26,7 @@ namespace TrickalFanGame.Enemy
             health.Died -= OnDied;
         }
 
-        private void OnDamaged(int current, int maximum)
+        private void OnDamaged(float current, float maximum)
         {
             Debug.Log($"{name}: HP {current}/{maximum}");
         }
