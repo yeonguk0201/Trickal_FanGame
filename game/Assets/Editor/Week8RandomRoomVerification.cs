@@ -32,8 +32,8 @@ namespace TrickalFanGame.Editor
                 : null;
             Assert(generator != null,
                 "Missing Phase F Floor Generator. Run Setup Phase F-1 Random Room Definitions first.");
-            Assert(generator.Seed == Week8RandomRoomSetup.FixedVerificationSeed &&
-                   generator.FloorCount == FloorCount && generator.RoomsPerFloor == RoomsPerFloor,
+            Assert(!generator.HasRunSeed && generator.FloorCount == FloorCount &&
+                   generator.RoomsPerFloor == RoomsPerFloor,
                 "Phase F Floor Generator settings drifted from the verified three-floor configuration.");
             return generator;
         }
@@ -63,8 +63,14 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateDeterministicGraph(FloorGenerator generator)
         {
-            Assert(generator.TryGenerate(out GeneratedFloorGraph first, out string error), error);
-            Assert(generator.TryGenerate(out GeneratedFloorGraph second, out error), error);
+            Assert(generator.TryGenerateForSeed(
+                Week8RandomRoomSetup.FixedVerificationSeed,
+                out GeneratedFloorGraph first,
+                out string error), error);
+            Assert(generator.TryGenerateForSeed(
+                Week8RandomRoomSetup.FixedVerificationSeed,
+                out GeneratedFloorGraph second,
+                out error), error);
             Assert(first.TryValidate(out error), error);
             Assert(BuildSignature(first) == BuildSignature(second),
                 "The same fixed seed and definitions must generate the same graph.");
@@ -124,8 +130,8 @@ namespace TrickalFanGame.Editor
             FloorGenerator invalidGenerator = holder.AddComponent<FloorGenerator>();
             try
             {
-                invalidGenerator.Configure(1, 1, 2, CopyDefinitions(configuredGenerator));
-                Assert(!invalidGenerator.TryGenerate(out _, out string error) &&
+                invalidGenerator.Configure(1, 2, CopyDefinitions(configuredGenerator));
+                Assert(!invalidGenerator.TryGenerateForSeed(1, out _, out string error) &&
                        error.Contains("at least three", StringComparison.Ordinal),
                     "A floor with fewer than three rooms must fail explicitly.");
 
@@ -136,8 +142,8 @@ namespace TrickalFanGame.Editor
                     duplicated[0].RoomType,
                     CopyPrefabs(duplicated[0]));
                 duplicated[duplicated.Length - 1] = duplicate;
-                invalidGenerator.Configure(1, 1, 3, duplicated);
-                Assert(!invalidGenerator.TryGenerate(out _, out error) &&
+                invalidGenerator.Configure(1, 3, duplicated);
+                Assert(!invalidGenerator.TryGenerateForSeed(1, out _, out error) &&
                        error.Contains("duplicated", StringComparison.Ordinal),
                     "Duplicate room definition IDs must fail explicitly.");
                 UnityEngine.Object.DestroyImmediate(duplicate);

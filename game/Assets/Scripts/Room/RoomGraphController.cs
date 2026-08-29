@@ -20,6 +20,9 @@ namespace TrickalFanGame.Room
 
         public RoomNode CurrentNode { get; private set; }
         public IReadOnlyList<RoomNode> Nodes => nodes;
+        public RunProgress Progress => runProgress;
+        public PlayerMovement Player => player;
+        public RoomCameraController RoomCamera => roomCamera;
 
         public void Configure(
             RoomNode[] configuredNodes,
@@ -37,18 +40,11 @@ namespace TrickalFanGame.Room
 
         private void Start()
         {
-            if (!TryValidateConfiguration(out string error))
+            if (!TryInitializeStartingRoom(out string error))
             {
                 Debug.LogError($"{name}: Invalid room graph. {error}", this);
                 enabled = false;
-                return;
             }
-
-            ActivateOnly(startingNode);
-            CurrentNode = startingNode;
-            CurrentNode.MarkVisited();
-            roomCamera?.ShowRoom(CurrentNode.CameraAnchor);
-            runProgress?.RecordRoomEntry(CurrentNode.FloorNumber, CurrentNode.RoomNumber);
         }
 
         public bool TryTransition(
@@ -84,6 +80,43 @@ namespace TrickalFanGame.Room
             roomCamera?.ShowRoom(CurrentNode.CameraAnchor);
             runProgress?.RecordRoomEntry(CurrentNode.FloorNumber, CurrentNode.RoomNumber);
             nextTransitionTime = Time.unscaledTime + transitionCooldown;
+            return true;
+        }
+
+        public bool TryReplaceFloor(RoomNode[] configuredNodes, RoomNode configuredStart,
+            PlayerMovement transitioningPlayer, out string error)
+        {
+            nodes = configuredNodes ?? Array.Empty<RoomNode>();
+            startingNode = configuredStart;
+            return TryInitializeStartingRoom(transitioningPlayer, out error);
+        }
+
+        public bool TryInitializeStartingRoom(out string error)
+        {
+            return TryInitializeStartingRoom(player, out error);
+        }
+
+        public bool TryInitializeStartingRoom(PlayerMovement transitioningPlayer, out string error)
+        {
+            if (!TryValidateConfiguration(out error)) return false;
+            bool enteredDifferentRoom = CurrentNode != startingNode;
+            ActivateOnly(startingNode);
+            CurrentNode = startingNode;
+            CurrentNode.MarkVisited();
+            PlayerMovement targetPlayer = transitioningPlayer != null ? transitioningPlayer : player;
+            if (targetPlayer != null)
+            {
+                ClearTransientProjectiles();
+                MovePlayer(targetPlayer, startingNode.DefaultEntryPoint.position);
+            }
+            roomCamera?.ShowRoom(startingNode.CameraAnchor);
+            if (runProgress != null &&
+                (enteredDifferentRoom || runProgress.CurrentFloor != startingNode.FloorNumber ||
+                 runProgress.CurrentRoom != startingNode.RoomNumber))
+            {
+                runProgress.RecordRoomEntry(startingNode.FloorNumber, startingNode.RoomNumber);
+            }
+            error = null;
             return true;
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Security.Cryptography;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
@@ -9,6 +10,7 @@ using UnityEngine;
 
 namespace TrickalFanGame.Run
 {
+    [DefaultExecutionOrder(-300)]
     public sealed class RunSession : MonoBehaviour
     {
         [Header("References")]
@@ -32,11 +34,14 @@ namespace TrickalFanGame.Run
         private bool hasStarted;
         private bool hasEnded;
         private bool shouldSaveResult = true;
+        private static int? lastGeneratedRunSeed;
 
         public bool HasStarted => hasStarted;
         public bool HasEnded => hasEnded;
         public bool IsCleared { get; private set; }
         public string CharacterId => characterId;
+        public RunProgress Progress => runProgress;
+        public int RunSeed => runProgress != null && runProgress.HasRunSeed ? runProgress.RunSeed : 0;
 
         public void Configure(Health configuredPlayer, RunProgress configuredProgress, BossController configuredBoss)
         {
@@ -81,6 +86,8 @@ namespace TrickalFanGame.Run
             {
                 inventory = playerHealth.GetComponent<PlayerInventory>();
             }
+
+            EnsureRunSeed();
         }
 
         private void Start()
@@ -101,6 +108,11 @@ namespace TrickalFanGame.Run
                 return false;
             }
 
+            if (!EnsureRunSeed())
+            {
+                return false;
+            }
+
             characterId = selectedCharacterId;
             startedAt = DateTime.UtcNow;
             startedRealtime = Time.realtimeSinceStartup;
@@ -115,15 +127,61 @@ namespace TrickalFanGame.Run
             {
                 boss.Died += OnBossDied;
             }
+            if (runProgress != null)
+            {
+                runProgress.FinalBossCleared += OnFinalBossCleared;
+            }
 
-            Debug.Log($"[RunSession] Started with character {characterId}.", this);
+            Debug.Log($"[RunSession] Started with character {characterId} and seed {RunSeed}.", this);
             return true;
+        }
+
+        private bool EnsureRunSeed()
+        {
+            if (runProgress == null)
+            {
+                statusMessage = "Run cannot start without RunProgress.";
+                Debug.LogError($"[RunSession] {statusMessage}", this);
+                return false;
+            }
+
+            if (runProgress.HasRunSeed)
+            {
+                return true;
+            }
+
+            int generatedSeed = CreateRunSeed();
+            if (runProgress.TryInitializeRunSeed(generatedSeed, out string error))
+            {
+                return true;
+            }
+
+            statusMessage = $"Run seed initialization failed: {error}";
+            Debug.LogError($"[RunSession] {statusMessage}", this);
+            return false;
+        }
+
+        private static int CreateRunSeed()
+        {
+            byte[] bytes = new byte[sizeof(int)];
+            int generatedSeed;
+            do
+            {
+                using RandomNumberGenerator generator = RandomNumberGenerator.Create();
+                generator.GetBytes(bytes);
+                generatedSeed = BitConverter.ToInt32(bytes, 0);
+            }
+            while (lastGeneratedRunSeed.HasValue && generatedSeed == lastGeneratedRunSeed.Value);
+
+            lastGeneratedRunSeed = generatedSeed;
+            return generatedSeed;
         }
 
         private void OnDestroy()
         {
             if (playerHealth != null) playerHealth.Died -= OnPlayerDied;
             if (boss != null) boss.Died -= OnBossDied;
+            if (runProgress != null) runProgress.FinalBossCleared -= OnFinalBossCleared;
         }
 
         private void OnPlayerDied() => EndRun(false, playerDeathReason != null ? playerDeathReason.CurrentReason : "UNKNOWN");
@@ -132,6 +190,7 @@ namespace TrickalFanGame.Run
             runProgress?.RecordKill();
             EndRun(true, null);
         }
+        private void OnFinalBossCleared() => EndRun(true, null);
 
         private void EndRun(bool isCleared, string deathReason)
         {

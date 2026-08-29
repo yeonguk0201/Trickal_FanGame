@@ -248,44 +248,120 @@ Game
 
 ## 8. Room
 
-방 하나의 상태와 진행을 관리한다.
+방 시스템은 생성된 논리 방 데이터와 실제 Unity 방 인스턴스를 분리한다. 방의 좌표·종류·연결과
+Run 상태는 일반 C# 데이터가 소유하고, Prefab 인스턴스는 현재 상태를 표현하고 전투를 실행하는
+View 역할을 맡는다. ScriptableObject나 Prefab 자산에 방문·클리어·아티팩트 획득 상태를 저장하지 않는다.
 
 ### 책임
 
-- 방 진입
-- 적 생성
-- 전투 시작
-- 적 전멸 확인
-- 방 클리어
-- 문 잠금 / 해제
-- 보상
-  상태 예시:
-  Locked
-  ↓
-  Entered
-  ↓
-  Combat
-  ↓
-  Cleared
+- `GeneratedRoomNode`: 안정적인 room ID, 격자 좌표, 방 종류, 정의 ID와 방향별 연결
+- `RoomRunState`: 방문, 클리어, 아티팩트 획득 등 같은 Run에서 변하는 상태
+- `RoomDefinition`: RoomType과 Layout/Encounter 후보를 제공하는 정적 제작 데이터
+- `RoomPrefab`: 방 영역, 카메라 기준점, spawn point, 보상 지점과 4방향 문 슬롯
+- `RoomController`: 방 입장, 전투 시작, 적 전멸 확인, 클리어와 문 잠금/해제
+- `RoomGraphController`: 현재 방 활성화, 플레이어 배치, 카메라 전환과 방 사이 이동
+
+상태 예시:
+
+```text
+WAITING
+  ↓ 전투방 첫 입장
+COMBAT
+  ↓ 클리어 조건 달성
+CLEARED
+```
+
+시작방과 보물방처럼 전투가 없는 방은 RoomType 규칙에 따라 전투 상태를 생략한다. 방을 비활성화하거나
+Scene 인스턴스를 제거하더라도 `RoomRunState`가 남아 있어 재방문 시 적과 아티팩트를 다시 생성하지
+않아야 한다.
 
 ## 9. Floor
 
-여러 개의 Room을 하나의 층으로 관리한다.
+여러 개의 Room을 상하좌우 격자 그래프로 묶어 하나의 층으로 관리한다. `FloorGenerator`는 Unity
+Scene 오브젝트를 만들지 않고, seed와 생성 설정을 입력받아 순수한 `GeneratedFloorGraph`를 반환한다.
+`RoomGraphAssembler`가 생성 결과를 Room Prefab 인스턴스와 방향별 문 슬롯에 적용한다.
+방 수와 RoomType 같은 게임 규칙은 [게임 디자인](./03-game-design.md)을 기준으로 하고, 확장 아이디어는
+[아이작식 층·방 생성 구조와 Unity MVP 설계안](./drafts/Isaac_Style_Roguelike_Floor_Room_Design.md)을 참고한다.
 
 ### 책임
 
-- 층 시작
-- 방 구성
-- 방 이동
-- 보스방 관리
-- 층 클리어
-- 다음 층 이동
-  Floor
-  ├── Room
-  ├── Room
-  ├── Room
-  └── Boss Room
-  Floor는 Room 내부의 세부 전투 로직을 직접 처리하지 않는다.
+- 층별 seed와 목표 방 수 설정
+- 빈 상하좌우 좌표를 사용하는 Random Growth 그래프 생성
+- 시작방·일반방·보물방·보스방 배정
+- 시작방으로부터 거리 계산과 먼 끝방의 보스방 선택
+- 전체 연결성, 좌표 중복, 문 방향, 필수 방과 재시도 상한 검증
+- 현재 층의 Room Prefab 구성과 방향별 문 연결
+- 보스 클리어 후 다음 층으로 향하는 단방향 전환
+
+```text
+GeneratedFloorGraph
+├── FloorNumber / FloorSeed
+├── StartingRoomId / BossRoomId
+└── GeneratedRoomNode[]
+    ├── RoomId
+    ├── GridPosition
+    ├── RoomType / RoomDefinitionId
+    └── DirectionalConnections
+```
+
+MVP의 첫 설정은 층당 6~8방을 생성하고, 콘텐츠가 늘어난 뒤 8~12방까지 설정으로 확장한다.
+`floor-XX-room-YY`는 생성 순서에 따른 안정 키이며 격자 좌표와 분리한다. 같은 seed와 콘텐츠
+버전에서는 같은 room ID, 좌표, 연결, 방 종류와 콘텐츠 정의가 생성되어야 한다.
+
+### 9.1 방향별 문 슬롯
+
+모든 기본 Room Prefab은 좌·우·상·하 슬롯을 제공한다. 슬롯은 문 전환 트리거, 플레이어 진입점,
+전투 중 차단문과 미연결 방향 봉인 표현을 묶는다.
+
+```text
+Left  ↔ Right
+Up    ↔ Down
+```
+
+한 방향 슬롯에는 연결 하나만 배정한다. 생성 결과에 없는 방향은 트리거를 비활성화하고 벽으로
+봉인한다. `RoomGraphAssembler`는 목적지 ID가 미리 직렬화된 문을 찾지 않고, 생성된 방향 연결을
+사용 가능한 슬롯에 바인딩한다.
+
+### 9.2 생성과 콘텐츠 선택 분리
+
+그래프 생성과 방 내부 콘텐츠 선택은 서로 다른 책임으로 유지한다.
+
+```text
+FloorGenerator
+  → 방 수·좌표·연결·RoomType
+  → GeneratedFloorGraph
+
+RoomDefinition / RoomPrefab Catalog
+  → 지원 문 방향·층·난이도·Layout 후보
+  → RoomGraphAssembler
+
+Encounter Definition
+  → 검증된 spawn point와 몬스터 구성
+  → RoomController
+```
+
+`FloorGenerator`는 적 Prefab을 생성하지 않고, `RoomController`는 층의 연결 구조를 결정하지 않는다.
+장애물과 spawn point를 임의 좌표에 배치하지 않으며 검증된 Layout과 Encounter만 선택한다.
+
+### 9.3 생성 실패 처리
+
+생성기는 제한 횟수 안에서만 재시도한다. 각 시도는 원래 floor seed에서 안정적으로 파생한 attempt
+seed를 사용하며, 상한을 넘으면 누락된 불변조건과 seed를 포함한 오류를 반환한다. 실패를 숨기거나
+무한 반복하지 않는다.
+
+### 9.4 Editor Setup과 Verification
+
+Editor Setup은 RoomDefinition, Room Prefab, 방향 슬롯과 직렬화 참조를 구성하는 역할만 맡는다.
+런타임 Random Growth, RoomType 배정, seed 생성과 재방문 규칙을 Setup 코드에 숨기지 않는다.
+재실행 시 에셋·Prefab·컴포넌트를 중복 생성하지 않고 Undo와 dirty/save 처리를 제공한다.
+
+Verification은 다음 경계를 분리해 확인한다.
+
+- 순수 생성: 여러 seed의 결정성, 연결성, 좌표, 필수 방, 보스 거리와 재시도 상한
+- Prefab 계약: 4방향 슬롯, 진입점, 봉인과 spawn/보상 기준점
+- 바인딩: 생성 연결과 반대편 문 슬롯, 현재 방 단독 활성화
+- Run 수명: 층 이동과 재방문 중 seed·클리어·아티팩트 상태 유지
+- Setup 재실행: 중복 오브젝트·에셋·컴포넌트 없음
 
 ## 10. Boss
 
@@ -300,27 +376,73 @@ Boss
 ## 11. Run System
 
 Run은 게임 전체 플레이 세션을 관리하는 핵심 시스템이다.
+
+```text
 Run
-├── Run Start
+├── Run Seed
 ├── Character
-├── Floor
-├── Items
-├── Play Time
-├── Kill Count
+├── Generated Floor Graphs
+├── Room Run States
+├── Current Floor / Room
+├── Artifacts
+├── Play Time / Kill Count
 ├── Death
 └── Clear
-책임
-Run 시작
-선택 캐릭터 기록
-현재 층 관리
-플레이 시간 기록
-처치 수 기록
-아이템 획득 기록
-클리어 여부
-사망 정보
-Run 종료
-결과 데이터 생성
-Run이 종료되면 Backend에 전달할 RunResult를 생성한다.
+```
+
+### 11.1 책임 분리
+
+- `RunSession`: 새 Run 시작·종료, 캐릭터, 시작/종료 시간과 Backend 결과 전송 경계
+- `RunProgress`: 불변 run seed, 현재 층·방, 처치 수와 방별 Run 상태의 소유자
+- `FloorGenerator`: seed와 설정에서 결정적 층 그래프 생성
+- `RoomGraphAssembler`: 생성 그래프를 현재 층의 Prefab 인스턴스와 문 슬롯에 적용
+- `RoomGraphController`: 현재 방 활성화와 전환 처리
+
+Run이 종료되면 `RunSession`이 Backend에 전달할 RunResult를 생성한다. 생성 그래프와 방별 상태는
+MVP에서 로컬 Run 진행에만 사용하며 Unity와 Web이 Database에 직접 접근하지 않는다.
+
+### 11.2 Seed 소유권과 파생
+
+`RunSession`은 새 Run을 준비할 때 `UnityEngine.Random`과 독립적인 run seed를 한 번 생성하고
+`RunProgress`에 저장한다. 같은 Run에서는 seed를 교체할 수 없다.
+
+```text
+Run Seed
+  ├── Floor 1 Seed
+  │     ├── Topology Seed
+  │     └── Room Content Seeds
+  ├── Floor 2 Seed
+  └── Floor 3 Seed
+```
+
+층·방·재시도 seed는 명시적인 안정 해시 규칙으로 파생하며 프로세스마다 결과가 달라질 수 있는
+런타임 `GetHashCode()`에 의존하지 않는다. 그래프 알고리즘의 random stream과 방 콘텐츠 선택
+stream을 분리하여 한쪽의 추첨 횟수 변경이 다른 결과를 불필요하게 모두 바꾸지 않게 한다.
+고정 seed override는 Setup과 Verification에서만 사용한다.
+
+### 11.3 초기화 순서
+
+초기화는 다음 순서를 보장한다.
+
+```text
+RunSession
+  → run seed 생성·RunProgress 초기화
+  → FloorGenerator가 3개 층의 GeneratedFloorGraph 생성·검증
+  → 생성 결과와 RoomRunState 등록
+  → RoomGraphAssembler가 첫 층 Room Prefab 구성
+  → RoomGraphController가 시작방 하나만 활성화
+  → 플레이어·카메라·RunProgress를 시작방에 배치
+```
+
+MonoBehaviour의 임의 `Awake()` 순서에 생성 성공 여부를 맡기지 않는다. 현재 실행 순서 속성은
+안전망으로 유지하되, 상위 Run 초기화 경로가 각 단계의 성공·실패를 명시적으로 확인해야 한다.
+
+### 11.4 층 인스턴스 수명
+
+3개 층의 논리 그래프와 상태는 Run 동안 유지한다. Unity Room 인스턴스는 현재 층 단위로 구성하고
+현재 방 하나만 활성화한다. 다음 층으로 이동한 뒤 이전 층으로 돌아가지 않는 MVP 규칙에서는 이전
+층 View를 제거하거나 풀로 반환할 수 있지만, 논리 상태와 결과 기록은 Run 종료까지 유지한다.
+첫 구현은 안전성을 우선해 현재 층의 모든 방을 한 번에 구성하고 최적화는 측정 후 진행한다.
 
 ## 12. Unity UI
 
@@ -345,15 +467,23 @@ HUD
 ## 13. Unity Data
 
 게임에서 사용하는 데이터를 관리한다.
-예상 데이터:
-Data
-├── CharacterData
-├── EnemyData
-├── ItemData
-├── RoomData
-└── BossData
-가능한 경우 게임 로직과 데이터를 분리한다.
-예를 들어 아이템의 공격력 증가량이나 이름 같은 값은 코드에 직접 하드코딩하지 않고 데이터로 관리하는 것을 우선한다.
+
+데이터는 정적 제작 데이터, Run 생성 데이터, 가변 Run 상태와 Scene 실행 객체로 구분한다.
+
+| 구분 | 예 | 형태와 소유권 |
+|---|---|---|
+| 정적 제작 데이터 | CharacterDefinition, ItemDefinition, RoomDefinition, EncounterDefinition | ScriptableObject 또는 Catalog, 에셋 값만 저장 |
+| Run 생성 데이터 | GeneratedFloorGraph, GeneratedRoomNode, GridPosition, 방향 연결 | 일반 C# 데이터, seed로 재현 가능 |
+| 가변 Run 상태 | RoomRunState, 현재 층·방, 획득 아티팩트 | RunProgress가 소유, Run 종료까지 유지 |
+| Scene 실행 객체 | RoomController, Door Slot, 적·보상 인스턴스, 카메라 기준점 | Prefab/MonoBehaviour, 논리 데이터를 표시하고 실행 |
+
+ScriptableObject에는 `IsVisited`, `IsCleared`, `HasRewarded` 같은 Run 상태를 저장하지 않는다. 같은
+RoomDefinition을 여러 방이 선택해도 상태를 공유해서는 안 된다. Scene 객체를 다시 만들 때는 생성
+데이터와 `RoomRunState`를 적용해 동일한 문 연결, 클리어와 아티팩트 획득 상태를 복원한다.
+
+아이템의 공격력 증가량이나 이름 같은 정적 값도 코드에 직접 하드코딩하지 않고 데이터로 관리한다.
+보물방이 제공하는 아티팩트는 기존 Item 데이터 계약을 재사용한다. 상점과 엘리프 경제는 후속
+기능이며 Floor 생성 데이터에 구매 로직을 포함하지 않는다.
 
 ## 14. Unity Network
 
@@ -384,23 +514,21 @@ Character Select
 ↓
 Run Start
 ↓
-Floor
+Run Seed와 3개 층 논리 그래프 생성
 ↓
-Room
+첫 층 Room Prefab 구성
 ↓
-Combat
+시작방 활성화
 ↓
-Enemy Defeated
+격자 탐색과 일반방 전투
 ↓
-Item / Reward
+보물방 아티팩트 획득
 ↓
-Next Room
-↓
-Boss
+먼 끝방의 Boss
 ↓
 Floor Complete
 ↓
-Next Floor
+다음 층 그래프 View 구성
 ↓
 Final Boss
 ↓
@@ -824,6 +952,9 @@ Run 저장 X O O X
 ### Unity가 관리하는 데이터
 
 게임 실행 중 실시간으로 변하는 데이터.
+Run Seed
+Generated Floor Graphs
+Room Run States
 Player HP
 Current Room
 Current Floor
@@ -888,6 +1019,11 @@ RunResult 생성
 ↓
 Backend 전송
 
+Run seed, 층 그래프와 방별 방문·클리어 상태는 MVP에서 로컬 Run 진행과 재현 검증을 위한 Unity
+데이터다. 현재 Run Result API와 Database 계약에는 추가하지 않는다. 향후 버그 재현이나 통계 요구가
+명확해질 때 별도 계약 변경으로 검토하며, 그 경우 Backend DTO·서비스·Database·Unity DTO·Web
+소비 코드를 함께 갱신한다.
+
 ### 이유
 
 - 네트워크 요청 감소
@@ -908,6 +1044,10 @@ Backend 전송
 추가 몬스터
 추가 층
 추가 게임 모드
+층당 8~12방 확장
+상점과 엘리프 경제
+열쇠와 잠긴 보물방
+이벤트방·비밀방과 미니맵
 
 ### Backend
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TrickalFanGame.Item
@@ -10,6 +11,9 @@ namespace TrickalFanGame.Item
         [SerializeField] private Transform dropParent;
 
         public bool HasDropped { get; private set; }
+        public ItemPickup PickupPrefab => pickupPrefab;
+        public IReadOnlyList<ItemDefinition> ItemPool => itemPool;
+        public Transform DropParent => dropParent;
 
         public void Configure(
             ItemPickup configuredPickupPrefab,

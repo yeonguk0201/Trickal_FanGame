@@ -25,15 +25,23 @@ namespace TrickalFanGame.Editor
                 SceneManager.GetActiveScene(),
                 GraphRootName);
             Assert(assembler != null && graph != null &&
-                   assembler.Generator != null && assembler.Graph == graph,
+                   assembler.Generator != null && assembler.Graph == graph &&
+                   assembler.Progress == graph.Progress,
                 "Phase F-2 assembler is missing its generator or RoomGraphController binding.");
-            Assert(assembler.TryApplyGeneratedGraph(out string error), error);
+            Assert(assembler.TryApplyGeneratedGraphForVerification(
+                Week8RandomRoomSetup.FixedVerificationSeed,
+                out string error), error);
             Assert(graph.TryValidateConfiguration(out error), error);
-            Assert(assembler.Generator.TryGenerate(out GeneratedFloorGraph generated, out error), error);
+            Assert(assembler.Generator.TryGenerateForSeed(
+                Week8RandomRoomSetup.FixedVerificationSeed,
+                out GeneratedFloorGraph generated,
+                out error), error);
 
             string before = BuildAppliedSignature(graph);
             ValidateAppliedRooms(generated, graph);
-            Assert(assembler.TryApplyGeneratedGraph(out error), error);
+            Assert(assembler.TryApplyGeneratedGraphForVerification(
+                Week8RandomRoomSetup.FixedVerificationSeed,
+                out error), error);
             string after = BuildAppliedSignature(graph);
             Assert(before == after,
                 "Applying the same generated graph twice must preserve room, encounter, reward, and doorway bindings.");
@@ -141,8 +149,10 @@ namespace TrickalFanGame.Editor
                     Array.Empty<RoomDoorway>());
                 incompleteGraph.Configure(new[] { onlyNode }, onlyNode, null, null, null);
                 RoomGraphAssembler invalidAssembler = holder.AddComponent<RoomGraphAssembler>();
-                invalidAssembler.Configure(generator, incompleteGraph);
-                Assert(!invalidAssembler.TryApplyGeneratedGraph(out string error) &&
+                invalidAssembler.Configure(generator, incompleteGraph, null);
+                Assert(!invalidAssembler.TryApplyGeneratedGraphForVerification(
+                           Week8RandomRoomSetup.FixedVerificationSeed,
+                           out string error) &&
                        error.Contains("scene graph has 1", StringComparison.Ordinal),
                     "A generated/scene room-count mismatch must fail explicitly before applying changes.");
             }

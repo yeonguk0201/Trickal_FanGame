@@ -169,3 +169,11 @@ Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Phase E
 층 출구는 일반 방과 같은 `RoomGraphController` 전환 경로를 사용한다. 따라서 동일한 Player 오브젝트의 HP·인벤토리·아이템 효과를 유지하면서 발사 완료 투사체를 정리하고, 다음 층 1번 방만 표시하며 플레이어·카메라·`RunProgress`를 함께 이동한다. 고학년 돌진과 회복 중에는 기존 `PlayerActionState.CanTransition` 규칙에 따라 차단된다. 3층 최종 보스방에는 출구를 만들지 않으며 기존 `RunSession` 클리어가 Run을 종료한다.
 
 Setup 후 Unity 메뉴에서 **Trickal Fan Game > Verify Phase E-7 Floor Transitions**를 실행한다. 검증기는 E-5·E-6 회귀 검사, 정확히 두 개인 단방향 층 링크, 보스방 클리어 게이트, 다음 층 1번 방 목적지, 3층 출구 부재를 확인한다. 별도 런타임 픽스처로 클리어 전 진입 거부, 클리어 후 플레이어 이동·단일 방 표시·`RunProgress` 갱신, 떠난 출구의 재진입 거부도 검증한다. Play Mode에서는 1층과 2층 보스 처치 후 오른쪽 출구로 각각 다음 층에 진입하고, 3층 최종 보스 처치 시 층 이동 없이 Run이 종료되는지 확인한다.
+
+## Phase F-5 seed 기반 격자형 층
+
+Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Phase F-5 Seeded Grid Floors**를 두 번 실행한다. Setup은 6~8방·보스 최소 거리 3·재시도 32회 설정을 적용하고 `Assets/Rooms/Prefabs/room-grid-base.prefab`을 생성하거나 같은 GUID로 갱신한다. 프리팹은 좌·우·상·하 문 슬롯마다 전환 트리거, 반대편 진입점, 전투 차단문과 미연결 봉인 벽을 가진다. 실행 중에는 Run seed에서 세 층의 Topology와 콘텐츠 seed를 독립 파생하고 현재 층의 프리팹만 조립한다.
+
+Setup 후 **Trickal Fan Game > Verify Phase F-5 Seeded Grid Floors**를 실행한다. 검증기는 같은 seed 결정성, 여러 seed의 실제 변화, 6~8방 연결성과 필수 방, 안정 ID, 보스 최소 거리, 좌상·우하·좌우·상하 문 조합, 반대편 진입점, 미연결 봉인, 반복 Encounter 정책, 상태 복원, 제한 재시도 실패, 8~12방 설정 확장과 Setup 중복 방지를 확인한다.
+
+Play Mode에서는 새 Run을 시작해 각 층의 보스방까지 이동한다. 1~2층 보스를 처치하고 방 중앙 위쪽 출구로 다음 층 시작방에 들어간 뒤 HP·아티팩트·seed가 유지되는지 확인한다. 보물방을 방문한 뒤 인접 방을 왕복해 아티팩트가 다시 지급되지 않는지, 클리어한 전투방의 적이 다시 생성되지 않는지 확인한다. 마지막으로 3층 보스 처치 시 다음 층 출구 없이 기존 Run 클리어가 실행되는지 확인한다.

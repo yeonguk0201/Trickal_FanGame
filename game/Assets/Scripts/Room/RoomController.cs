@@ -23,6 +23,7 @@ namespace TrickalFanGame.Room
 
         private readonly Dictionary<Health, Action> enemyDeathHandlers = new();
         private Health playerHealth;
+        private RoomRunState runState;
 
         public RoomState State { get; private set; } = RoomState.Waiting;
         public int AliveEnemyCount => enemyDeathHandlers.Count;
@@ -35,6 +36,19 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<Health> PreplacedEnemies => preplacedEnemies;
 
         public event Action<RoomState> StateChanged;
+        public event Action<GameObject> EnemySpawned;
+
+        public void BindRunState(RoomRunState configuredState, bool startsCleared)
+        {
+            runState = configuredState;
+            if (runState != null && (runState.IsCleared || startsCleared))
+            {
+                if (startsCleared && !runState.IsCleared) runState.MarkCleared();
+                HasStarted = true;
+                State = RoomState.Cleared;
+                SetDoorsLocked(false);
+            }
+        }
 
         public void Configure(
             int configuredFloorNumber,
@@ -169,6 +183,7 @@ namespace TrickalFanGame.Room
             playerHealth = enteringPlayerHealth;
             playerHealth.Died += OnPlayerDied;
             runProgress?.RecordRoomEntry(floorNumber, roomNumber);
+            runState?.MarkVisited();
 
             ChangeState(RoomState.Combat);
             SetDoorsLocked(true);
@@ -249,6 +264,7 @@ namespace TrickalFanGame.Room
             }
 
             FloorDifficultyScaler.ApplyScaling(enemy, floorNumber);
+            EnemySpawned?.Invoke(enemy);
             RegisterEnemy(enemyHealth);
         }
 
@@ -270,6 +286,7 @@ namespace TrickalFanGame.Room
 
         private void ClearRoom()
         {
+            runState?.MarkCleared();
             ChangeState(RoomState.Cleared);
             SetDoorsLocked(false);
             UnsubscribeFromPlayer();

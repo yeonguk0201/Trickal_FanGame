@@ -58,7 +58,7 @@ namespace TrickalFanGame.Editor
             }
 
             Undo.RecordObject(generator, "Configure Phase F Floor Generator");
-            generator.Configure(FixedVerificationSeed, 3, 3, definitions);
+            generator.Configure(3, 3, definitions);
             EditorUtility.SetDirty(generator);
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
@@ -103,8 +103,8 @@ namespace TrickalFanGame.Editor
             }
 
             RecordGeneratedGraphObjects(graph, assembler);
-            assembler.Configure(generator, graph);
-            if (!assembler.TryApplyGeneratedGraph(out string error))
+            assembler.Configure(generator, graph, graph.Progress);
+            if (!assembler.TryApplyGeneratedGraphForVerification(FixedVerificationSeed, out string error))
             {
                 Debug.LogError($"Phase F-2 could not bind the generated graph. {error}", assembler);
                 Undo.RevertAllDownToGroup(undoGroup);
@@ -117,8 +117,28 @@ namespace TrickalFanGame.Editor
             EditorSceneManager.SaveScene(activeScene);
             Selection.activeGameObject = graph.gameObject;
             Debug.Log(
-                "Phase F-2 generated room graph binding ready: generated definitions and connections are " +
-                "applied to the nine verified room instances and their RoomGraphController doorways.",
+                "Phase F generated room graph binding ready: the fixed seed preview is applied only for Setup, " +
+                "while Play Mode uses the Run seed initialized by RunSession.",
+                assembler);
+        }
+
+        [MenuItem("Trickal Fan Game/Setup Phase F-4 Run Seed Lifecycle")]
+        public static void SetupRunSeedLifecycle()
+        {
+            SetupGraphBinding();
+            RoomGraphAssembler assembler = GameObject.Find(GeneratorObjectName)?
+                .GetComponent<RoomGraphAssembler>();
+            if (assembler == null || assembler.Generator == null || assembler.Graph == null ||
+                assembler.Progress == null)
+            {
+                Debug.LogError(
+                    "Phase F-4 requires the generated graph assembler to share RunProgress with the graph.");
+                return;
+            }
+
+            Debug.Log(
+                "Phase F-4 Run seed lifecycle setup ready: RunSession initializes the Run seed before runtime " +
+                "graph assembly, and the fixed seed remains limited to Setup and Verification previews.",
                 assembler);
         }
 

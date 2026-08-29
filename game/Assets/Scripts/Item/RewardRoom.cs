@@ -14,8 +14,15 @@ namespace TrickalFanGame.Item
         [SerializeField] private RoomController prerequisiteRoom;
 
         private bool isPlayerInside;
+        private RoomRunState runState;
 
         public bool HasRewarded { get; private set; }
+
+        public void BindRunState(RoomRunState configuredState)
+        {
+            runState = configuredState;
+            HasRewarded = runState != null && runState.HasClaimedArtifact;
+        }
 
         public void Configure(
             int configuredFloorNumber,
@@ -95,6 +102,7 @@ namespace TrickalFanGame.Item
 
             runProgress?.RecordRoomEntry(floorNumber, roomNumber);
             HasRewarded = dropSource != null && dropSource.TryDrop();
+            if (HasRewarded) runState?.MarkArtifactClaimed();
         }
     }
 }
