@@ -486,18 +486,18 @@ Vertical Slice에서 검증한 게임 구조를 MVP 범위까지 확장한다.
 - [x] 출입구 이동과 방 단위 카메라 전환
 - [x] 비활성 방의 클리어·보상 상태 보존
 - [x] 새 Run별 seed 생성과 같은 Run 내부 seed 유지 (`Verify Phase F-4 Run Seed Lifecycle`, 2026-08-28)
-- [ ] Scene 오브젝트와 분리된 층·방 생성 데이터
-- [ ] 층당 6~8방의 상하좌우 격자형 Random Growth 생성
-- [ ] 시작방·일반방·보물방·보스방 배정과 층당 보물방 최소 1개 보장
-- [ ] 시작방에서 먼 끝방의 보스방 선택
-- [ ] 좌·우·상·하 출입구와 반대편 진입점 바인딩
-- [ ] 생성 결과에 필요한 검증된 Room Prefab 인스턴스 구성
-- [ ] 같은 seed 결정성, 전체 연결성, 좌표 중복, 문 방향, 필수 방, 재시도 상한 검증
-- [ ] 격자형 3개 층 전체 Run에서 재방문 클리어·아티팩트 획득 상태 유지
-- [ ] 향후 설정만으로 층당 8~12방까지 확장 가능한 방 수 계약
-- [ ] 층 이동
-- [ ] 보스방
-- [ ] 최종 보스
+- [x] Scene 오브젝트와 분리된 층·방 생성 데이터 (`Verify Phase F-5 Seeded Grid Floors`, 2026-08-30)
+- [x] 층당 6~8방의 상하좌우 격자형 Random Growth 생성 (`Verify Phase F-5 Seeded Grid Floors`, 2026-08-30)
+- [x] 시작방·일반방·보물방·보스방 배정과 층당 보물방 최소 1개 보장 (`Verify Phase F-5 Seeded Grid Floors`, 2026-08-30)
+- [x] 시작방에서 먼 끝방의 보스방 선택 (`Verify Phase F-5 Seeded Grid Floors`, 2026-08-30)
+- [x] 좌·우·상·하 출입구와 반대편 진입점 바인딩 (`Verify Phase F-5 Seeded Grid Floors` 및 사용자 Play Mode 확인, 2026-08-30)
+- [x] 생성 결과에 필요한 검증된 Room Prefab 인스턴스 구성 (`Verify Phase F-5 Seeded Grid Floors`, 2026-08-30)
+- [x] 같은 seed 결정성, 전체 연결성, 좌표 중복, 문 방향, 필수 방, 재시도 상한 검증 (`Verify Phase F-5 Seeded Grid Floors`, 2026-08-30)
+- [x] 격자형 3개 층 전체 Run에서 재방문 클리어·아티팩트 획득 상태 유지 (`Verify Phase F-5 Seeded Grid Floors` 및 사용자 Play Mode 확인, 2026-08-30)
+- [x] 향후 설정만으로 층당 8~12방까지 확장 가능한 방 수 계약 (`Verify Phase F-5 Seeded Grid Floors`, 2026-08-30)
+- [x] 층 이동 (`Verify Phase F-5 Seeded Grid Floors` 1→2→3층 출구 진입, 2026-08-30)
+- [x] 보스방 (`Verify Phase F-5 Seeded Grid Floors`, 2026-08-30)
+- [x] 최종 보스 (`Verify Phase F-5 Seeded Grid Floors` 최종 `RunSession` 클리어, 2026-08-30)
 
 상점과 엘리프 경제, 열쇠와 잠긴 보물방, 이벤트방·비밀방은 격자 탐색과 보물방 아티팩트
 획득 흐름이 안정된 뒤의 후속 범위로 두며 Phase 4 필수 완료 조건에 포함하지 않는다.
