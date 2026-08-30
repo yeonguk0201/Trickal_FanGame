@@ -20,8 +20,6 @@ namespace TrickalFanGame.Editor
         private const string PickupPrefabPath = "Assets/Prefabs/ItemPickup.prefab";
         private const int FloorCount = 3;
         private const int RoomsPerFloor = 3;
-        private const float RoomSpacing = 16f;
-        private const float FloorSpacing = 12f;
         private const float FirstFloorY = -40f;
 
         [MenuItem("Trickal Fan Game/Setup Week 7 Fixed Room Graph")]
@@ -73,8 +71,8 @@ namespace TrickalFanGame.Editor
                 {
                     int roomNumber = roomIndex + 1;
                     Vector2 center = new(
-                        roomIndex * RoomSpacing,
-                        FirstFloorY - floorIndex * FloorSpacing);
+                        roomIndex * RoomLayout.RoomSpacingX,
+                        FirstFloorY - floorIndex * RoomLayout.RoomSpacingY);
                     GameObject configuredEnemyPrefab = ResolveInitialEnemyPrefab(
                         floorNumber,
                         roomNumber,
@@ -184,15 +182,17 @@ namespace TrickalFanGame.Editor
             Transform cameraAnchor = CreateObject("Camera Anchor", nodeObject.transform).transform;
             cameraAnchor.position = center;
             Transform leftEntry = CreateObject("Left Entry", nodeObject.transform).transform;
-            leftEntry.position = center + Vector2.left * 4.2f;
+            leftEntry.position = center + Vector2.left *
+                (RoomLayout.HorizontalTransitionCenter - RoomLayout.EntryInsetFromTransition);
             Transform rightEntry = CreateObject("Right Entry", nodeObject.transform).transform;
-            rightEntry.position = center + Vector2.right * 4.2f;
+            rightEntry.position = center + Vector2.right *
+                (RoomLayout.HorizontalTransitionCenter - RoomLayout.EntryInsetFromTransition);
 
             GameObject encounterObject = CreateObject("Encounter", content.transform);
             encounterObject.transform.position = center;
             BoxCollider2D encounterTrigger = Undo.AddComponent<BoxCollider2D>(encounterObject);
             encounterTrigger.isTrigger = true;
-            encounterTrigger.size = new Vector2(10f, 7f);
+            encounterTrigger.size = RoomLayout.EncounterSize;
             RoomController controller = Undo.AddComponent<RoomController>(encounterObject);
 
             if (roomNumber == 2)
@@ -212,23 +212,24 @@ namespace TrickalFanGame.Editor
             for (int index = 0; index < enemyCount; index++)
             {
                 Transform spawn = CreateObject($"Spawn {index + 1}", encounterObject.transform).transform;
-                float x = (index - (enemyCount - 1) * 0.5f) * 1.8f;
-                spawn.position = center + new Vector2(x, index % 2 == 0 ? 1.4f : -1.4f);
+                spawn.position = center + RoomLayout.SpawnPosition(index, enemyCount);
                 spawnPoints[index] = spawn;
             }
 
-            DoorController leftDoor = CreateBlockingDoor(content.transform, "Left Door", center + Vector2.left * 5.75f, sprite);
-            DoorController rightDoor = CreateBlockingDoor(content.transform, "Right Door", center + Vector2.right * 5.75f, sprite);
+            DoorController leftDoor = CreateBlockingDoor(content.transform, "Left Door",
+                center + Vector2.left * RoomLayout.HorizontalWallCenter, sprite);
+            DoorController rightDoor = CreateBlockingDoor(content.transform, "Right Door",
+                center + Vector2.right * RoomLayout.HorizontalWallCenter, sprite);
             if (roomNumber == 1)
             {
-                CreateWall(content.transform, "Left Boundary Seal", center + Vector2.left * 5.75f,
-                    new Vector2(0.5f, 2.4f), sprite, new Color(0.28f, 0.35f, 0.48f));
+                CreateWall(content.transform, "Left Boundary Seal", center + Vector2.left * RoomLayout.HorizontalWallCenter,
+                    new Vector2(RoomLayout.WallThickness, RoomLayout.DoorOpeningLength), sprite, new Color(0.28f, 0.35f, 0.48f));
             }
 
             if (roomNumber == RoomsPerFloor)
             {
-                CreateWall(content.transform, "Right Boundary Seal", center + Vector2.right * 5.75f,
-                    new Vector2(0.5f, 2.4f), sprite, new Color(0.48f, 0.28f, 0.4f));
+                CreateWall(content.transform, "Right Boundary Seal", center + Vector2.right * RoomLayout.HorizontalWallCenter,
+                    new Vector2(RoomLayout.WallThickness, RoomLayout.DoorOpeningLength), sprite, new Color(0.48f, 0.28f, 0.4f));
             }
             node.Configure(
                 $"floor-{floorNumber:00}-room-{roomNumber:00}",
@@ -263,9 +264,9 @@ namespace TrickalFanGame.Editor
             rewardObject.transform.position = center;
             BoxCollider2D trigger = Undo.AddComponent<BoxCollider2D>(rewardObject);
             trigger.isTrigger = true;
-            trigger.size = new Vector2(8f, 6f);
+            trigger.size = RoomLayout.RewardTriggerSize;
             GameObject markerObject = CreateObject("Reward Marker", rewardObject.transform);
-            markerObject.transform.position = center + Vector2.up * 2.8f;
+            markerObject.transform.position = center + Vector2.up * RoomLayout.FloorExitVerticalOffset;
             AddVisual(markerObject, sprite, new Vector2(0.7f, 0.7f), new Color(1f, 0.82f, 0.2f, 0.7f));
             Transform dropPoint = CreateObject("Drop Point", rewardObject.transform).transform;
             dropPoint.position = center;
@@ -286,10 +287,11 @@ namespace TrickalFanGame.Editor
                 isRightDoor ? "Right Transition" : "Left Transition",
                 source.Node.ContentRoot.transform);
             doorwayObject.transform.position = source.Node.CameraAnchor.position +
-                                               (isRightDoor ? Vector3.right : Vector3.left) * 5.15f;
+                                               (isRightDoor ? Vector3.right : Vector3.left) *
+                                               RoomLayout.HorizontalTransitionCenter;
             BoxCollider2D trigger = Undo.AddComponent<BoxCollider2D>(doorwayObject);
             trigger.isTrigger = true;
-            trigger.size = new Vector2(0.8f, 2.5f);
+            trigger.size = new Vector2(RoomLayout.TransitionThickness, RoomLayout.DoorOpeningLength);
             RoomDoorway doorway = Undo.AddComponent<RoomDoorway>(doorwayObject);
             doorway.Configure(graph, source.Node, destination.Node, destinationEntry, source.Controller);
             return doorway;
@@ -304,10 +306,13 @@ namespace TrickalFanGame.Editor
             GameObject doorObject = CreateObject(objectName, parent);
             doorObject.layer = LayerMask.NameToLayer("Environment");
             doorObject.transform.position = position;
-            AddVisual(doorObject, sprite, new Vector2(0.45f, 2.4f), new Color(0.2f, 0.75f, 0.3f));
+            AddVisual(doorObject, sprite,
+                new Vector2(RoomLayout.DoorThickness, RoomLayout.DoorLength),
+                new Color(0.2f, 0.75f, 0.3f));
             Undo.AddComponent<BoxCollider2D>(doorObject);
             DoorController door = Undo.AddComponent<DoorController>(doorObject);
             door.ConfigurePortalBarrier(true);
+            door.ConfigureVisualKind(DoorVisualKind.Normal);
             return door;
         }
 
@@ -323,14 +328,18 @@ namespace TrickalFanGame.Editor
                 new Color(0.48f, 0.28f, 0.4f),
                 (floorNumber - 1) / 2f);
             Color color = Color.Lerp(floorColor, Color.white, (roomNumber - 1) * 0.04f);
-            CreateWall(parent, "Top Wall", center + Vector2.up * 4f, new Vector2(12f, 0.5f), sprite, color);
-            CreateWall(parent, "Bottom Wall", center + Vector2.down * 4f, new Vector2(12f, 0.5f), sprite, color);
-            foreach (float x in new[] { -5.75f, 5.75f })
+            CreateWall(parent, "Top Wall", center + Vector2.up * RoomLayout.VerticalWallCenter,
+                new Vector2(RoomLayout.Width, RoomLayout.WallThickness), sprite, color);
+            CreateWall(parent, "Bottom Wall", center + Vector2.down * RoomLayout.VerticalWallCenter,
+                new Vector2(RoomLayout.Width, RoomLayout.WallThickness), sprite, color);
+            foreach (float x in new[] { -RoomLayout.HorizontalWallCenter, RoomLayout.HorizontalWallCenter })
             {
                 CreateWall(parent, x < 0 ? "Left Upper Wall" : "Right Upper Wall",
-                    center + new Vector2(x, 2.6f), new Vector2(0.5f, 2.8f), sprite, color);
+                    center + new Vector2(x, RoomLayout.VerticalWallSegmentCenter),
+                    new Vector2(RoomLayout.WallThickness, RoomLayout.VerticalWallSegmentLength), sprite, color);
                 CreateWall(parent, x < 0 ? "Left Lower Wall" : "Right Lower Wall",
-                    center + new Vector2(x, -2.6f), new Vector2(0.5f, 2.8f), sprite, color);
+                    center + new Vector2(x, -RoomLayout.VerticalWallSegmentCenter),
+                    new Vector2(RoomLayout.WallThickness, RoomLayout.VerticalWallSegmentLength), sprite, color);
             }
         }
 

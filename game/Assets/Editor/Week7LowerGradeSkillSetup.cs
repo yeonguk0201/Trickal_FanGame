@@ -79,7 +79,6 @@ namespace TrickalFanGame.Editor
         {
             Directory.CreateDirectory("Assets/Prefabs");
             GameObject instance = new("Homing Skill Projectile");
-            instance.transform.localScale = Vector3.one * 0.28f;
             SpriteRenderer renderer = instance.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
             renderer.color = new Color(0.25f, 0.8f, 1f);
@@ -89,6 +88,7 @@ namespace TrickalFanGame.Editor
             body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             CircleCollider2D collider = instance.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
+            ProjectileSizing.Apply(instance.transform, collider, ProjectileSizing.PlayerSkillScale);
             instance.AddComponent<HomingSkillProjectile>();
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(instance, ProjectilePrefabPath);

@@ -50,36 +50,59 @@ namespace TrickalFanGame.Editor
                     "The empty verification encounter should reach Cleared before leaving.");
                 SetAutoProperty(first.RewardRoom, "HasRewarded", true);
 
-                DoorController portalBarrier = CreatePortalBarrier(root.transform, out Collider2D portalCollider);
-                portalBarrier.SetLocked(true);
-                Assert(portalBarrier.IsLocked && portalBarrier.IsPortalBarrierActive,
-                    "A locked portal door must remain a solid barrier.");
-                portalBarrier.SetLocked(false);
-                Assert(!portalBarrier.IsLocked && portalBarrier.IsPortalBarrierActive,
-                    "An open portal door must stay physically solid while its transition trigger handles travel.");
-                DoorController legacyDoor = CreateLegacyDoor(root.transform, out Collider2D legacyCollider);
-                legacyDoor.SetLocked(true);
-                legacyDoor.SetLocked(false);
-                Assert(!legacyDoor.IsPortalBarrier && !legacyCollider.enabled,
-                    "Legacy non-portal doors must retain their existing passable-when-open behavior.");
+                DoorController transitionBlocker = CreateTransitionBlocker(
+                    root.transform, out Collider2D blockerCollider);
+                Collider2D transitionTrigger = firstToSecond.GetComponent<Collider2D>();
+                transitionBlocker.SetLocked(true);
+                Assert(transitionBlocker.IsLocked && transitionBlocker.IsPortalBarrierActive && blockerCollider.enabled,
+                    "A locked connection door must keep its solid blocker enabled.");
+                Assert(transitionTrigger.enabled && transitionTrigger.isTrigger,
+                    "Locking a connection door must not disable or solidify its separate transition trigger.");
 
                 Projectile boundaryBasic = CreateBasicProjectile(playerHealth);
-                InvokePrivate(boundaryBasic, "OnTriggerEnter2D", portalCollider);
-                Assert(boundaryBasic == null, "A basic projectile must be consumed by the portal barrier.");
+                InvokePrivate(boundaryBasic, "OnTriggerEnter2D", blockerCollider);
+                Assert(boundaryBasic == null, "A basic projectile must be consumed by a locked door blocker.");
                 HomingSkillProjectile untargetedHoming = CreateHomingProjectile(playerHealth);
-                InvokePrivate(untargetedHoming, "OnTriggerEnter2D", portalCollider);
+                InvokePrivate(untargetedHoming, "OnTriggerEnter2D", blockerCollider);
                 Assert(untargetedHoming == null,
-                    "An untargeted lower-grade projectile must be consumed by the portal barrier.");
+                    "An untargeted lower-grade projectile must be consumed by a locked door blocker.");
                 GameObject targetObject = CreateEnemyTarget(root.transform, out Health assignedTarget);
                 HomingSkillProjectile targetedHoming = CreateHomingProjectile(playerHealth, assignedTarget);
-                InvokePrivate(targetedHoming, "OnTriggerEnter2D", portalCollider);
+                InvokePrivate(targetedHoming, "OnTriggerEnter2D", blockerCollider);
                 Assert(targetedHoming != null && targetedHoming.HasAssignedTarget && !targetedHoming.DidExplode,
-                    "A targeted lower-grade projectile must pass through the portal barrier without exploding.");
+                    "A targeted lower-grade projectile must pass through a locked door blocker without exploding.");
                 targetedHoming.StopAtBoundary();
                 UnityEngine.Object.DestroyImmediate(targetObject);
                 BossProjectile boundaryBoss = CreateBossProjectile(playerHealth);
-                InvokePrivate(boundaryBoss, "OnTriggerEnter2D", portalCollider);
-                Assert(boundaryBoss == null, "An enemy projectile must be consumed by the portal barrier.");
+                InvokePrivate(boundaryBoss, "OnTriggerEnter2D", blockerCollider);
+                Assert(boundaryBoss == null, "An enemy projectile must be consumed by a locked door blocker.");
+
+                transitionBlocker.SetLocked(false);
+                Assert(!transitionBlocker.IsLocked && transitionBlocker.IsPortalBarrier &&
+                       transitionBlocker.IsPortalBarrierActive && blockerCollider.enabled,
+                    "An open connection door must remain a solid portal barrier.");
+                Assert(transitionTrigger.enabled && transitionTrigger.isTrigger,
+                    "Opening a connection door must leave its separate transition trigger enabled.");
+
+                Projectile openBoundaryBasic = CreateBasicProjectile(playerHealth);
+                InvokePrivate(openBoundaryBasic, "OnTriggerEnter2D", blockerCollider);
+                Assert(openBoundaryBasic == null,
+                    "An open portal barrier must keep basic projectiles inside the active room.");
+                HomingSkillProjectile openUntargetedHoming = CreateHomingProjectile(playerHealth);
+                InvokePrivate(openUntargetedHoming, "OnTriggerEnter2D", blockerCollider);
+                Assert(openUntargetedHoming == null,
+                    "An open portal barrier must keep untargeted skill projectiles inside the active room.");
+                BossProjectile openBoundaryBoss = CreateBossProjectile(playerHealth);
+                InvokePrivate(openBoundaryBoss, "OnTriggerEnter2D", blockerCollider);
+                Assert(openBoundaryBoss == null,
+                    "An open portal barrier must keep enemy projectiles inside the active room.");
+
+                transitionBlocker.SetLocked(true);
+                Assert(transitionBlocker.IsPortalBarrierActive,
+                    "Relocking a connection door must restore its physical blocker.");
+                transitionBlocker.SetLocked(false);
+                Assert(transitionBlocker.IsPortalBarrierActive && blockerCollider.enabled,
+                    "Reopening a connection door must preserve its portal barrier without stale state.");
 
                 Projectile leakedBasic = CreateBasicProjectile(playerHealth);
                 HomingSkillProjectile leakedHoming = CreateHomingProjectile(playerHealth);
@@ -131,7 +154,8 @@ namespace TrickalFanGame.Editor
 
                 Debug.Log(
                     "Fixed room graph verification passed: stable IDs, reciprocal graph links, single-room visibility, " +
-                    "portal barriers, target-aware lower-grade projectile passage, projectile transition cleanup, " +
+                    "locked door blockers, open portal barriers, active transition triggers, " +
+                    "target-aware lower-grade projectile passage, projectile transition cleanup, " +
                     "player/camera transition, backtracking, explicit one-way links, " +
                     "clear state, and reward state are valid.");
             }
@@ -182,7 +206,8 @@ namespace TrickalFanGame.Editor
         {
             GameObject doorwayObject = new($"{source.Node.RoomId} to {destination.Node.RoomId}");
             doorwayObject.transform.SetParent(source.Content.transform);
-            doorwayObject.AddComponent<BoxCollider2D>();
+            BoxCollider2D trigger = doorwayObject.AddComponent<BoxCollider2D>();
+            trigger.isTrigger = true;
             RoomDoorway doorway = doorwayObject.AddComponent<RoomDoorway>();
             doorway.Configure(graph, source.Node, destination.Node, destination.Entry);
             return doorway;
@@ -200,22 +225,14 @@ namespace TrickalFanGame.Editor
             return player;
         }
 
-        private static DoorController CreatePortalBarrier(Transform parent, out Collider2D barrierCollider)
+        private static DoorController CreateTransitionBlocker(Transform parent, out Collider2D blockerCollider)
         {
-            GameObject barrier = new("Room Graph Verification Portal Barrier");
-            barrier.transform.SetParent(parent);
-            barrierCollider = barrier.AddComponent<BoxCollider2D>();
-            DoorController door = barrier.AddComponent<DoorController>();
+            GameObject blocker = new("Room Graph Verification Transition Blocker");
+            blocker.transform.SetParent(parent);
+            blockerCollider = blocker.AddComponent<BoxCollider2D>();
+            DoorController door = blocker.AddComponent<DoorController>();
             door.ConfigurePortalBarrier(true);
             return door;
-        }
-
-        private static DoorController CreateLegacyDoor(Transform parent, out Collider2D doorCollider)
-        {
-            GameObject doorObject = new("Room Graph Verification Legacy Door");
-            doorObject.transform.SetParent(parent);
-            doorCollider = doorObject.AddComponent<BoxCollider2D>();
-            return doorObject.AddComponent<DoorController>();
         }
 
         private static Projectile CreateBasicProjectile(Health owner)

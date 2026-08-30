@@ -25,7 +25,8 @@ namespace TrickalFanGame.Editor
             RunProgress progress = UnityEngine.Object.FindFirstObjectByType<RunProgress>();
             ItemPickup pickup = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ItemPickup.prefab")?.GetComponent<ItemPickup>();
             ItemDefinition[] itemPool = LoadItemPool();
-            if (generator == null || graph == null || player == null || progress == null || pickup == null ||
+            if (generator == null || graph == null || graph.RoomCamera == null ||
+                graph.RoomCamera.GetComponent<Camera>() == null || player == null || progress == null || pickup == null ||
                 Array.Exists(itemPool, item => item == null))
             {
                 Debug.LogError("Phase F-5 requires the Phase F definitions, fixed graph references, player, and item assets.");
@@ -38,6 +39,13 @@ namespace TrickalFanGame.Editor
             EnsureFolder();
             RoomPrefab prefab = CreateOrUpdatePrefab(player.GetComponent<SpriteRenderer>()?.sprite, pickup, itemPool);
             if (prefab == null) { Undo.RevertAllDownToGroup(undoGroup); return; }
+
+            Undo.RecordObject(graph.RoomCamera, "Configure expanded room camera");
+            Camera layoutCamera = graph.RoomCamera.GetComponent<Camera>();
+            Undo.RecordObject(layoutCamera, "Configure expanded room camera size");
+            graph.RoomCamera.Configure(graph.RoomCamera.GetComponent<CameraFollow>());
+            EditorUtility.SetDirty(graph.RoomCamera);
+            EditorUtility.SetDirty(layoutCamera);
 
             RoomDefinition[] definitions = new RoomDefinition[generator.RoomDefinitions.Count];
             for (int i = 0; i < definitions.Length; i++) definitions[i] = generator.RoomDefinitions[i];
@@ -64,7 +72,7 @@ namespace TrickalFanGame.Editor
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
             Selection.activeGameObject = generator.gameObject;
-            Debug.Log("Phase F-5 setup ready: 6-8 room seeded grid generation, four-way room prefab slots, and current-floor runtime assembly are configured.", assembler);
+            Debug.Log("Phase F-5 setup ready: the shared 16x9 layout, 20x13 grid spacing, wall-aligned four-way doors, and current-floor runtime assembly are configured.", assembler);
         }
 
         private static RoomPrefab CreateOrUpdatePrefab(Sprite sprite, ItemPickup pickup, ItemDefinition[] itemPool)
@@ -79,13 +87,13 @@ namespace TrickalFanGame.Editor
 
                 GameObject encounterObject = Child(content.transform, "Encounter");
                 BoxCollider2D encounterTrigger = encounterObject.AddComponent<BoxCollider2D>();
-                encounterTrigger.isTrigger = true; encounterTrigger.size = new Vector2(10f, 7f);
+                encounterTrigger.isTrigger = true; encounterTrigger.size = RoomLayout.EncounterSize;
                 RoomController controller = encounterObject.AddComponent<RoomController>();
                 Transform[] spawns = new Transform[3];
                 for (int i = 0; i < spawns.Length; i++)
                 {
                     spawns[i] = Child(encounterObject.transform, $"Spawn {i + 1}").transform;
-                    spawns[i].localPosition = new Vector3((i - 1) * 2f, i % 2 == 0 ? 1.4f : -1.4f);
+                    spawns[i].localPosition = RoomLayout.SpawnPosition(i, spawns.Length);
                 }
                 controller.Configure(1, 1, null, null, spawns, Array.Empty<DoorController>());
 
@@ -96,7 +104,7 @@ namespace TrickalFanGame.Editor
 
                 GameObject rewardObject = Child(content.transform, "Treasure Reward");
                 BoxCollider2D rewardTrigger = rewardObject.AddComponent<BoxCollider2D>();
-                rewardTrigger.isTrigger = true; rewardTrigger.size = new Vector2(7f, 5f);
+                rewardTrigger.isTrigger = true; rewardTrigger.size = RoomLayout.RewardTriggerSize;
                 Transform dropPoint = Child(rewardObject.transform, "Drop Point").transform;
                 ItemDropSource dropSource = rewardObject.AddComponent<ItemDropSource>();
                 dropSource.Configure(pickup, itemPool, dropPoint, content.transform);
@@ -116,29 +124,40 @@ namespace TrickalFanGame.Editor
 
         private static RoomDoorSlot CreateSlot(Transform parent, RoomDoorDirection direction, Sprite sprite)
         {
-            Vector2 normal = direction switch
-            {
-                RoomDoorDirection.Left => Vector2.left, RoomDoorDirection.Right => Vector2.right,
-                RoomDoorDirection.Up => Vector2.up, _ => Vector2.down,
-            };
-            bool horizontal = direction == RoomDoorDirection.Left || direction == RoomDoorDirection.Right;
+            Vector2 normal = RoomLayout.Direction(direction);
+            bool horizontal = RoomLayout.IsSideDoor(direction);
             GameObject slotObject = Child(parent, $"{direction} Door Slot");
-            slotObject.transform.localPosition = normal * (horizontal ? 5.15f : 3.4f);
+            slotObject.transform.localPosition = normal * RoomLayout.TransitionCenter(direction);
             RoomDoorSlot slot = slotObject.AddComponent<RoomDoorSlot>();
             Transform entry = Child(slotObject.transform, "Entry Point").transform;
-            entry.localPosition = -normal * 0.95f;
+            entry.localPosition = -normal * RoomLayout.EntryInsetFromTransition;
             GameObject transition = Child(slotObject.transform, "Transition");
             BoxCollider2D trigger = transition.AddComponent<BoxCollider2D>();
-            trigger.isTrigger = true; trigger.size = horizontal ? new Vector2(0.8f, 2.2f) : new Vector2(2.2f, 0.8f);
+            trigger.isTrigger = true;
+            trigger.size = horizontal
+                ? new Vector2(RoomLayout.TransitionThickness, RoomLayout.DoorLength)
+                : new Vector2(RoomLayout.DoorLength, RoomLayout.TransitionThickness);
             RoomDoorway doorway = transition.AddComponent<RoomDoorway>();
             GameObject blockerObject = Child(slotObject.transform, "Blocking Door");
             blockerObject.layer = LayerMask.NameToLayer("Environment");
-            AddVisual(blockerObject, sprite, horizontal ? new Vector2(0.45f, 2.2f) : new Vector2(2.2f, 0.45f), new Color(0.2f, 0.75f, 0.3f));
+            blockerObject.transform.localPosition = normal * RoomLayout.TransitionInset;
+            AddVisual(blockerObject, sprite,
+                horizontal
+                    ? new Vector2(RoomLayout.DoorThickness, RoomLayout.DoorLength)
+                    : new Vector2(RoomLayout.DoorLength, RoomLayout.DoorThickness),
+                new Color(0.2f, 0.75f, 0.3f));
             blockerObject.AddComponent<BoxCollider2D>();
-            DoorController blocker = blockerObject.AddComponent<DoorController>(); blocker.ConfigurePortalBarrier(true);
+            DoorController blocker = blockerObject.AddComponent<DoorController>();
+            blocker.ConfigurePortalBarrier(true);
+            blocker.ConfigureVisualKind(DoorVisualKind.Normal);
             GameObject seal = Child(slotObject.transform, "Boundary Seal");
             seal.layer = LayerMask.NameToLayer("Environment");
-            AddVisual(seal, sprite, horizontal ? new Vector2(0.55f, 2.3f) : new Vector2(2.3f, 0.55f), new Color(0.3f, 0.34f, 0.43f));
+            seal.transform.localPosition = normal * RoomLayout.TransitionInset;
+            AddVisual(seal, sprite,
+                horizontal
+                    ? new Vector2(RoomLayout.SealThickness, RoomLayout.SealLength)
+                    : new Vector2(RoomLayout.SealLength, RoomLayout.SealThickness),
+                new Color(0.3f, 0.34f, 0.43f));
             seal.AddComponent<BoxCollider2D>();
             transition.SetActive(false); blockerObject.SetActive(false); seal.SetActive(true);
             slot.Configure(direction, doorway, entry, blocker, seal); return slot;
@@ -147,14 +166,18 @@ namespace TrickalFanGame.Editor
         private static void BuildWalls(Transform parent, Sprite sprite)
         {
             Color color = new(0.32f, 0.39f, 0.52f);
-            CreateWall(parent, "Top Left Wall", new Vector2(-3.6f, 4f), new Vector2(4.8f, 0.5f), sprite, color);
-            CreateWall(parent, "Top Right Wall", new Vector2(3.6f, 4f), new Vector2(4.8f, 0.5f), sprite, color);
-            CreateWall(parent, "Bottom Left Wall", new Vector2(-3.6f, -4f), new Vector2(4.8f, 0.5f), sprite, color);
-            CreateWall(parent, "Bottom Right Wall", new Vector2(3.6f, -4f), new Vector2(4.8f, 0.5f), sprite, color);
-            CreateWall(parent, "Left Upper Wall", new Vector2(-5.75f, 2.7f), new Vector2(0.5f, 2.6f), sprite, color);
-            CreateWall(parent, "Left Lower Wall", new Vector2(-5.75f, -2.7f), new Vector2(0.5f, 2.6f), sprite, color);
-            CreateWall(parent, "Right Upper Wall", new Vector2(5.75f, 2.7f), new Vector2(0.5f, 2.6f), sprite, color);
-            CreateWall(parent, "Right Lower Wall", new Vector2(5.75f, -2.7f), new Vector2(0.5f, 2.6f), sprite, color);
+            float horizontalCenter = RoomLayout.HorizontalWallSegmentCenter;
+            float verticalCenter = RoomLayout.VerticalWallSegmentCenter;
+            Vector2 horizontalSize = new(RoomLayout.HorizontalWallSegmentLength, RoomLayout.WallThickness);
+            Vector2 verticalSize = new(RoomLayout.WallThickness, RoomLayout.VerticalWallSegmentLength);
+            CreateWall(parent, "Top Left Wall", new Vector2(-horizontalCenter, RoomLayout.VerticalWallCenter), horizontalSize, sprite, color);
+            CreateWall(parent, "Top Right Wall", new Vector2(horizontalCenter, RoomLayout.VerticalWallCenter), horizontalSize, sprite, color);
+            CreateWall(parent, "Bottom Left Wall", new Vector2(-horizontalCenter, -RoomLayout.VerticalWallCenter), horizontalSize, sprite, color);
+            CreateWall(parent, "Bottom Right Wall", new Vector2(horizontalCenter, -RoomLayout.VerticalWallCenter), horizontalSize, sprite, color);
+            CreateWall(parent, "Left Upper Wall", new Vector2(-RoomLayout.HorizontalWallCenter, verticalCenter), verticalSize, sprite, color);
+            CreateWall(parent, "Left Lower Wall", new Vector2(-RoomLayout.HorizontalWallCenter, -verticalCenter), verticalSize, sprite, color);
+            CreateWall(parent, "Right Upper Wall", new Vector2(RoomLayout.HorizontalWallCenter, verticalCenter), verticalSize, sprite, color);
+            CreateWall(parent, "Right Lower Wall", new Vector2(RoomLayout.HorizontalWallCenter, -verticalCenter), verticalSize, sprite, color);
         }
 
         private static void CreateWall(Transform parent, string name, Vector2 position, Vector2 size, Sprite sprite, Color color)
