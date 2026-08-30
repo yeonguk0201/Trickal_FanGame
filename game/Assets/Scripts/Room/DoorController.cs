@@ -2,16 +2,30 @@ using UnityEngine;
 
 namespace TrickalFanGame.Room
 {
+    public enum DoorVisualKind
+    {
+        Normal,
+        Boss,
+    }
+
     [RequireComponent(typeof(Collider2D))]
     public sealed class DoorController : MonoBehaviour
     {
+        public static readonly Color NormalLockedColor = new(0.12f, 0.42f, 0.18f);
+        public static readonly Color NormalOpenColor = new(0.2f, 0.75f, 0.3f);
+        public static readonly Color BossLockedColor = new(0.34f, 0.12f, 0.5f);
+        public static readonly Color BossOpenColor = new(0.64f, 0.28f, 0.84f);
+
         [SerializeField] private Collider2D blocker;
         [SerializeField] private SpriteRenderer visual;
         [SerializeField] private bool remainBlockingWhenOpen;
-        [SerializeField] private Color lockedColor = new(0.75f, 0.2f, 0.2f);
+        [SerializeField] private DoorVisualKind visualKind;
+        [SerializeField] private Color lockedColor = new(0.12f, 0.42f, 0.18f);
         [SerializeField] private Color openColor = new(0.2f, 0.75f, 0.3f);
 
         public bool IsLocked { get; private set; }
+        public DoorVisualKind VisualKind => visualKind;
+        public Color VisualColor => visual != null ? visual.color : Color.clear;
         public bool IsPortalBarrier =>
             remainBlockingWhenOpen || GetComponentInParent<RoomNode>() != null;
         public bool IsPortalBarrierActive =>
@@ -41,6 +55,18 @@ namespace TrickalFanGame.Room
             remainBlockingWhenOpen = shouldRemainBlockingWhenOpen;
             blocker.isTrigger = false;
             blocker.enabled = IsLocked || IsPortalBarrier;
+        }
+
+        public void ConfigureVisualKind(DoorVisualKind configuredKind)
+        {
+            EnsureReferences();
+            visualKind = configuredKind;
+            lockedColor = configuredKind == DoorVisualKind.Boss ? BossLockedColor : NormalLockedColor;
+            openColor = configuredKind == DoorVisualKind.Boss ? BossOpenColor : NormalOpenColor;
+            if (visual != null)
+            {
+                visual.color = IsLocked ? lockedColor : openColor;
+            }
         }
 
         private void EnsureReferences()

@@ -177,13 +177,16 @@ namespace TrickalFanGame.Room
             GameObject nextRoot = new($"Generated Floor {floorNumber:00}");
             nextRoot.transform.SetParent(transform, false);
             Dictionary<string, RoomPrefab> instances = new(StringComparer.Ordinal);
+            Dictionary<string, GeneratedRoomNode> generatedNodes = new(StringComparer.Ordinal);
             List<RoomNode> nodes = new(floor.Nodes.Count);
             foreach (GeneratedRoomNode generatedNode in floor.Nodes)
             {
                 RoomPrefab instance = Instantiate(roomPrefab, nextRoot.transform);
                 instance.name = generatedNode.RoomId;
                 instance.transform.localPosition = new Vector3(
-                    generatedNode.GridPosition.X * 16f, generatedNode.GridPosition.Y * 12f, 0f);
+                    generatedNode.GridPosition.X * RoomLayout.RoomSpacingX,
+                    generatedNode.GridPosition.Y * RoomLayout.RoomSpacingY,
+                    0f);
                 if (!instance.TryValidate(out error)) { DestroyFloor(nextRoot); return false; }
 
                 RoomNode node = instance.Node;
@@ -209,7 +212,9 @@ namespace TrickalFanGame.Room
                         runProgress, instance.RewardRoom.GetComponent<ItemDropSource>(), instance.Controller);
                     instance.RewardRoom.BindRunState(state);
                 }
-                instances.Add(generatedNode.RoomId, instance); nodes.Add(node);
+                instances.Add(generatedNode.RoomId, instance);
+                generatedNodes.Add(generatedNode.RoomId, generatedNode);
+                nodes.Add(node);
             }
 
             foreach (GeneratedRoomNode generatedNode in floor.Nodes)
@@ -227,6 +232,10 @@ namespace TrickalFanGame.Room
                         destination = destinationPrefab.Node;
                         entry = destinationPrefab.FindSlot(GeneratedFloorGraph.Opposite(direction)).EntryPoint;
                         doorways.Add(slot.Doorway);
+                        bool isBossConnection = generatedNode.Role == GeneratedRoomRole.Boss ||
+                                                generatedNodes[connection.DestinationRoomId].Role == GeneratedRoomRole.Boss;
+                        slot.Blocker.ConfigureVisualKind(
+                            isBossConnection ? DoorVisualKind.Boss : DoorVisualKind.Normal);
                     }
                     slot.Bind(graph, instance.Node, destination, entry, instance.Controller);
                 }
@@ -262,11 +271,18 @@ namespace TrickalFanGame.Room
 
             GameObject portalObject = new($"Floor {floor.FloorNumber} Exit");
             portalObject.transform.SetParent(bossRoom.Node.ContentRoot.transform, false);
-            portalObject.transform.localPosition = Vector3.up * 2.6f;
+            portalObject.transform.localPosition = Vector3.up * RoomLayout.FloorExitVerticalOffset;
+            portalObject.transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+            SpriteRenderer indicator = portalObject.AddComponent<SpriteRenderer>();
+            RoomDoorSlot visualSource = bossRoom.FindSlot(RoomDoorDirection.Up);
+            indicator.sprite = visualSource != null && visualSource.Seal != null
+                ? visualSource.Seal.GetComponent<SpriteRenderer>()?.sprite
+                : null;
+            indicator.sortingOrder = 1;
             BoxCollider2D collider = portalObject.AddComponent<BoxCollider2D>();
-            collider.size = new Vector2(1.2f, 1.2f);
+            collider.size = Vector2.one;
             FloorAdvancePortal portal = portalObject.AddComponent<FloorAdvancePortal>();
-            portal.Configure(this, bossRoom.Controller, floor.FloorNumber + 1);
+            portal.Configure(this, bossRoom.Controller, floor.FloorNumber + 1, indicator);
         }
 
         private static Transform[] CopySpawnPoints(IReadOnlyList<Transform> source, int maximumCount)
