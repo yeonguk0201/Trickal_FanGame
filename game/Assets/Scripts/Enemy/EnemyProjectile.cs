@@ -40,7 +40,6 @@ namespace TrickalFanGame.Enemy
             }
 
             projectileObject.transform.position = position;
-            projectileObject.transform.localScale = Vector3.one * 0.3f;
             SpriteRenderer renderer = projectileObject.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
             renderer.color = new Color(0.2f, 0.8f, 1f);
@@ -50,6 +49,7 @@ namespace TrickalFanGame.Enemy
             projectileBody.gravityScale = 0f;
             CircleCollider2D collider = projectileObject.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
+            ProjectileSizing.Apply(projectileObject.transform, collider, ProjectileSizing.RangedEnemyScale);
 
             EnemyProjectile projectile = projectileObject.AddComponent<EnemyProjectile>();
             projectile.Launch(direction, source, attackDamage, speed, lifetime);

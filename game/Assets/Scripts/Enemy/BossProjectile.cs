@@ -25,7 +25,6 @@ namespace TrickalFanGame.Enemy
             GameObject projectile = new GameObject("Boss Projectile");
             projectile.name = "Boss Projectile";
             projectile.transform.position = position;
-            projectile.transform.localScale = Vector3.one * 0.35f;
             SpriteRenderer renderer = projectile.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
             renderer.color = new Color(0.9f, 0.2f, 0.25f);
@@ -34,6 +33,7 @@ namespace TrickalFanGame.Enemy
             body.gravityScale = 0f;
             CircleCollider2D collider = projectile.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
+            ProjectileSizing.Apply(projectile.transform, collider, ProjectileSizing.BossScale);
             BossProjectile controller = projectile.AddComponent<BossProjectile>();
             controller.velocity = initialVelocity;
             controller.damageContext = new DamageContext(

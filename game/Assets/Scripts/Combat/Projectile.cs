@@ -4,6 +4,26 @@ using UnityEngine;
 
 namespace TrickalFanGame.Combat
 {
+    public static class ProjectileSizing
+    {
+        public const float BaseColliderRadius = 0.5f;
+        public const float PlayerBasicScale = 0.5f;
+        public const float PlayerSkillScale = 0.28f;
+        public const float RangedEnemyScale = 0.3f;
+        public const float BossScale = 0.35f;
+
+        public static void Apply(Transform projectileTransform, CircleCollider2D collider, float scale)
+        {
+            projectileTransform.localScale = Vector3.one * scale;
+            collider.radius = BaseColliderRadius;
+        }
+
+        public static float WorldCollisionRadius(float scale)
+        {
+            return BaseColliderRadius * scale;
+        }
+    }
+
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public sealed class Projectile : MonoBehaviour
     {
