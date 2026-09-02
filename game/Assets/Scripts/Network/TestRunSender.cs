@@ -39,6 +39,7 @@ namespace TrickalFanGame.Network
 
             var request = new CreateRunRequest
             {
+                clientRunId = Guid.NewGuid().ToString(),
                 userId = testUserId,
                 characterId = testCharacterId,
                 gameVersion = Application.version,

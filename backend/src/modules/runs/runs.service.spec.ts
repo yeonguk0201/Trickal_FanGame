@@ -6,19 +6,19 @@ jest.mock('../../database/prisma.service', () => ({
 
 import { ApiException } from '../../common/exceptions/api.exception';
 import { CreateRunDto, DeathReason } from './dto/create-run.dto';
-import { RunsRepository } from './runs.repository';
+import {
+  RunsRepository,
+  RunsRepositoryError,
+  type PersistRunResult,
+} from './runs.repository';
 import { RunsService } from './runs.service';
 
 describe('RunsService', () => {
   let service: RunsService;
-  let repository: {
-    findUser: jest.Mock;
-    findActiveCharacter: jest.Mock;
-    findActiveItemIds: jest.Mock;
-    create: jest.Mock;
-  };
+  let repository: { create: jest.Mock; findDetailById: jest.Mock };
 
   const validDto: CreateRunDto = {
+    clientRunId: '10000000-0000-4000-8000-000000000001',
     userId: '00000000-0000-4000-8000-000000000001',
     characterId: 'erpin',
     gameVersion: '0.1.0',
@@ -44,27 +44,94 @@ describe('RunsService', () => {
       },
     ],
   };
+  const persistedResult: PersistRunResult = {
+    runId: '20000000-0000-4000-8000-000000000001',
+    experienceGained: 840,
+    progress: {
+      characterId: 'erpin',
+      level: 2,
+      experience: 440,
+      experienceToNextLevel: 500,
+      skillPoints: 1,
+      lowGradeSkillLevel: 1,
+      highGradeSkillLevel: 1,
+    },
+    created: true,
+  };
 
   beforeEach(() => {
     repository = {
-      findUser: jest.fn().mockResolvedValue({ id: validDto.userId }),
-      findActiveCharacter: jest
-        .fn()
-        .mockResolvedValue({ id: validDto.characterId }),
-      findActiveItemIds: jest
-        .fn()
-        .mockResolvedValue([{ id: 'item-01' }, { id: 'item-02' }]),
-      create: jest.fn().mockResolvedValue('run-id'),
+      create: jest.fn().mockResolvedValue(persistedResult),
+      findDetailById: jest.fn().mockResolvedValue({
+        id: 'run-id',
+        user: { id: 'user-id', nickname: 'test-player' },
+        character: { id: 'erpin', name: '에르핀' },
+        gameVersion: '0.1.0',
+        startedAt: new Date('2026-08-17T10:00:00.000Z'),
+        endedAt: new Date('2026-08-17T10:10:00.000Z'),
+        playTime: 600,
+        reachedFloor: 3,
+        isCleared: true,
+        killCount: 100,
+        deathReason: null,
+        runItems: [
+          {
+            itemId: 'item-01',
+            floor: 1,
+            itemOrder: 1,
+            acquiredAt: new Date('2026-08-17T10:02:00.000Z'),
+            item: { name: '우주를 담은 보석', rarity: 'COMMON' },
+          },
+        ],
+      }),
     };
     service = new RunsService(repository as unknown as RunsRepository);
   });
 
-  it('stores a valid run', async () => {
-    await expect(service.create(validDto)).resolves.toBe('run-id');
+  it('stores a valid cleared run through the atomic repository operation', async () => {
+    await expect(service.create(validDto)).resolves.toEqual(persistedResult);
     expect(repository.create).toHaveBeenCalledWith(validDto);
   });
 
-  it('rejects inconsistent clear and death data', async () => {
+  it('returns a web-ready Run detail with acquisition order', async () => {
+    await expect(service.getDetail('run-id')).resolves.toMatchObject({
+      id: 'run-id',
+      user: { nickname: 'test-player' },
+      character: { id: 'erpin', name: '에르핀' },
+      items: [
+        {
+          itemId: 'item-01',
+          name: '우주를 담은 보석',
+          rarity: 'COMMON',
+          floor: 1,
+          order: 1,
+        },
+      ],
+    });
+  });
+
+  it('rejects an unknown Run detail', async () => {
+    repository.findDetailById.mockResolvedValue(null);
+
+    await expectApiError(
+      service.getDetail('missing'),
+      HttpStatus.NOT_FOUND,
+      'RUN_NOT_FOUND',
+    );
+  });
+
+  it('accepts a valid death run', async () => {
+    const deathDto = {
+      ...validDto,
+      isCleared: false,
+      deathReason: DeathReason.BOSS,
+    };
+
+    await expect(service.create(deathDto)).resolves.toEqual(persistedResult);
+    expect(repository.create).toHaveBeenCalledWith(deathDto);
+  });
+
+  it('rejects inconsistent clear and death data before opening a transaction', async () => {
     const dto = {
       ...validDto,
       deathReason: DeathReason.BOSS,
@@ -75,7 +142,7 @@ describe('RunsService', () => {
       HttpStatus.UNPROCESSABLE_ENTITY,
       'INVALID_RUN_DATA',
     );
-    expect(repository.findUser).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
   });
 
   it('rejects non-sequential item order', async () => {
@@ -110,18 +177,19 @@ describe('RunsService', () => {
       HttpStatus.UNPROCESSABLE_ENTITY,
       'INVALID_RUN_DATA',
     );
-    expect(repository.findUser).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it('rejects an unknown item', async () => {
-    repository.findActiveItemIds.mockResolvedValue([{ id: 'item-01' }]);
+  it.each([
+    ['USER_NOT_FOUND', HttpStatus.NOT_FOUND],
+    ['CHARACTER_NOT_FOUND', HttpStatus.NOT_FOUND],
+    ['ITEM_NOT_FOUND', HttpStatus.NOT_FOUND],
+    ['RUN_IDEMPOTENCY_CONFLICT', HttpStatus.CONFLICT],
+    ['RUN_RESULT_UNAVAILABLE', HttpStatus.INTERNAL_SERVER_ERROR],
+  ] as const)('maps repository error %s to HTTP %s', async (code, status) => {
+    repository.create.mockRejectedValue(new RunsRepositoryError(code, code));
 
-    await expectApiError(
-      service.create(validDto),
-      HttpStatus.NOT_FOUND,
-      'ITEM_NOT_FOUND',
-    );
-    expect(repository.create).not.toHaveBeenCalled();
+    await expectApiError(service.create(validDto), status, code);
   });
 });
 

@@ -6,9 +6,9 @@ using UnityEngine.InputSystem;
 namespace TrickalFanGame.Player
 {
     [RequireComponent(typeof(Health), typeof(PlayerCombatEvents), typeof(PlayerActionState))]
+    [RequireComponent(typeof(PlayerStats))]
     public sealed class PlayerAttack : MonoBehaviour
     {
-        [SerializeField, Min(0.01f)] private float damage = 1f;
         [SerializeField, Min(0f)] private float attackRange = 1f;
         [SerializeField, Min(0f)] private float attackRadius = 0.5f;
         [SerializeField, Min(0f)] private float attackCooldown = 0.35f;
@@ -16,6 +16,7 @@ namespace TrickalFanGame.Player
 
         private readonly Collider2D[] hitBuffer = new Collider2D[16];
         private Health health;
+        private PlayerStats stats;
         private PlayerActionState actionState;
         private ContactFilter2D targetFilter;
         private float nextAttackTime;
@@ -26,6 +27,7 @@ namespace TrickalFanGame.Player
         private void Awake()
         {
             health = GetComponent<Health>();
+            stats = GetComponent<PlayerStats>();
             actionState = GetComponent<PlayerActionState>();
             targetFilter = new ContactFilter2D { useLayerMask = true, layerMask = targetLayers };
         }
@@ -38,7 +40,7 @@ namespace TrickalFanGame.Player
             }
 
             AimDirection = direction;
-            nextAttackTime = Time.time + attackCooldown;
+            nextAttackTime = Time.time + attackCooldown / stats.AttackSpeed;
             DealDamage();
         }
 
@@ -56,7 +58,7 @@ namespace TrickalFanGame.Player
                     continue;
                 }
 
-                target.TakeDamage(new DamageContext(gameObject, DamageSourceType.PlayerAttack, damage));
+                target.TakeDamage(stats.CreateDirectDamageContext(gameObject, DamageSourceType.PlayerAttack));
             }
         }
 

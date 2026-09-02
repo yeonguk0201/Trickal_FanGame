@@ -34,6 +34,7 @@ namespace TrickalFanGame.Editor
             GameObject bossEnemy = CreateEnemy(root.transform, "Phase D Boss Enemy", new Vector2(-0.5f, 0f), true,
                 out Health bossHealth, out KnockbackReceiver bossKnockback);
             BossController bossController = bossEnemy.GetComponent<BossController>();
+            DamageCalculator.SetCriticalRollProviderForTesting(() => 1f);
 
             try
             {
@@ -178,6 +179,7 @@ namespace TrickalFanGame.Editor
             }
             finally
             {
+                DamageCalculator.ResetCriticalRollProvider();
                 RemoveSpawnedSkillProjectiles(projectileTemplate);
                 UnityEngine.Object.DestroyImmediate(root);
             }

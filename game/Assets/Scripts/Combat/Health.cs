@@ -6,14 +6,18 @@ namespace TrickalFanGame.Combat
     public sealed class Health : MonoBehaviour, IDamageable
     {
         [SerializeField, Min(0.1f)] private float maxHealth = 10f;
+        [SerializeField, Min(0f)] private float currentShield;
 
         public float CurrentHealth { get; private set; }
         public float MaxHealth => maxHealth;
+        public float CurrentShield => currentShield;
         public bool IsDead { get; private set; }
         public bool IsInvulnerable { get; private set; }
 
         public event Action<float, float> Damaged;
         public event Action<DamageContext, float, float> DamageApplied;
+        public event Action<DamageContext, DamageResult> DamageResolved;
+        public event Action<float> ShieldChanged;
         public event Action Died;
 
         private void Awake()
@@ -28,16 +32,29 @@ namespace TrickalFanGame.Combat
 
         public void TakeDamage(DamageContext context)
         {
-            float amount = DamageCalculator.Calculate(context);
+            DamageResult result = DamageCalculator.Resolve(context);
+            float amount = result.FinalDamage;
             if (IsDead || IsInvulnerable || amount <= 0)
             {
                 return;
             }
 
+            float absorbedDamage = Mathf.Min(currentShield, amount);
+            if (absorbedDamage > 0f)
+            {
+                currentShield -= absorbedDamage;
+                amount -= absorbedDamage;
+                ShieldChanged?.Invoke(currentShield);
+            }
+
             float previousHealth = CurrentHealth;
             CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
+            DamageResolved?.Invoke(context, result);
             DamageApplied?.Invoke(context, previousHealth - CurrentHealth, CurrentHealth);
-            Damaged?.Invoke(CurrentHealth, MaxHealth);
+            if (!Mathf.Approximately(previousHealth, CurrentHealth))
+            {
+                Damaged?.Invoke(CurrentHealth, MaxHealth);
+            }
 
             if (CurrentHealth > 0f)
             {
@@ -55,6 +72,7 @@ namespace TrickalFanGame.Combat
         public void ResetHealth()
         {
             CurrentHealth = maxHealth;
+            SetShield(0f);
             IsDead = false;
             IsInvulnerable = false;
         }
@@ -62,6 +80,24 @@ namespace TrickalFanGame.Combat
         public void SetInvulnerable(bool invulnerable)
         {
             IsInvulnerable = invulnerable && !IsDead;
+        }
+
+        public bool SetShield(float value)
+        {
+            float nextShield = Mathf.Max(0f, value);
+            if (Mathf.Approximately(currentShield, nextShield))
+            {
+                return false;
+            }
+
+            currentShield = nextShield;
+            ShieldChanged?.Invoke(currentShield);
+            return true;
+        }
+
+        public bool AddShield(float amount)
+        {
+            return amount > 0f && SetShield(currentShield + amount);
         }
 
         internal void SetMaxHealth(float value, bool healAddedAmount)

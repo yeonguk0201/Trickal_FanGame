@@ -15,10 +15,22 @@ namespace TrickalFanGame.Editor
         {
             ItemDefinition multiShot = LoadDefinition("item-06");
             ItemDefinition pierce = LoadDefinition("item-11");
-            ItemDefinition healOnKill = LoadDefinition("item-08");
-            ItemDefinition attackDamage = LoadDefinition("item-01");
-            ItemDefinition maxHealth = LoadDefinition("item-02");
-            ItemDefinition moveSpeed = LoadDefinition("item-03");
+            ItemDefinition healOnKill = CreateDefinition(
+                "verification-heal-on-kill",
+                ItemEffectType.HealOnKill,
+                1f);
+            ItemDefinition attackDamage = CreateDefinition(
+                "verification-flat-attack",
+                ItemEffectType.AttackDamage,
+                1f);
+            ItemDefinition maxHealth = CreateDefinition(
+                "verification-flat-max-health",
+                ItemEffectType.MaxHealth,
+                3f);
+            ItemDefinition moveSpeed = CreateDefinition(
+                "verification-flat-move-speed",
+                ItemEffectType.MoveSpeed,
+                0.75f);
 
             GameObject firstPlayer = CreatePlayer("Week6 Verification Player A", out Health firstHealth,
                 out PlayerStats firstStats, out PlayerMovement firstMovement,
@@ -112,6 +124,10 @@ namespace TrickalFanGame.Editor
                 UnityEngine.Object.DestroyImmediate(secondPlayer);
                 UnityEngine.Object.DestroyImmediate(attackPercent);
                 UnityEngine.Object.DestroyImmediate(skillPercent);
+                UnityEngine.Object.DestroyImmediate(moveSpeed);
+                UnityEngine.Object.DestroyImmediate(maxHealth);
+                UnityEngine.Object.DestroyImmediate(attackDamage);
+                UnityEngine.Object.DestroyImmediate(healOnKill);
             }
         }
 

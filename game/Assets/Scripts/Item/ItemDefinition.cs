@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace TrickalFanGame.Item
@@ -7,6 +9,11 @@ namespace TrickalFanGame.Item
     {
         [SerializeField] private string itemId;
         [SerializeField] private string displayName;
+        [SerializeField] private ItemRarity rarity;
+        [SerializeField] private bool isActive = true;
+        [SerializeField] private List<ItemEffectEntry> effects = new();
+
+        // Retained while older verification helpers and assets migrate to the compound contract.
         [SerializeField] private ItemEffectType effectType;
         [SerializeField] private float effectValue = 1f;
         [SerializeField] private ItemStackMode stackMode = ItemStackMode.Additive;
@@ -14,11 +21,46 @@ namespace TrickalFanGame.Item
 
         public string ItemId => itemId;
         public string DisplayName => displayName;
-        public ItemEffectType EffectType => effectType;
-        public float EffectValue => effectValue;
+        public ItemRarity Rarity => rarity;
+        public bool IsActive => isActive;
+        public IReadOnlyList<ItemEffectEntry> Effects => effects ?? (IReadOnlyList<ItemEffectEntry>)System.Array.Empty<ItemEffectEntry>();
+        public ItemEffectType EffectType => effects != null && effects.Count > 0 ? effects[0].EffectType : effectType;
+        public float EffectValue => effects != null && effects.Count > 0 ? effects[0].Magnitude : effectValue;
         public ItemStackMode StackMode => stackMode;
         public int MaxStacks => maxStacks;
 
-        public bool IsValid => !string.IsNullOrWhiteSpace(itemId) && effectValue > 0f;
+        public bool IsValid => !string.IsNullOrWhiteSpace(itemId) &&
+                               !string.IsNullOrWhiteSpace(displayName) &&
+                               maxStacks >= 0 &&
+                               (effects != null && effects.Count > 0
+                                   ? effects.All(effect => effect != null && effect.TryValidate(out _))
+                                   : effectValue > 0f);
+
+#if UNITY_EDITOR
+        public void ConfigureContract(
+            string configuredItemId,
+            string configuredDisplayName,
+            ItemRarity configuredRarity,
+            bool configuredIsActive,
+            int configuredMaxStacks,
+            params ItemEffectEntry[] configuredEffects)
+        {
+            itemId = configuredItemId;
+            displayName = configuredDisplayName;
+            rarity = configuredRarity;
+            isActive = configuredIsActive;
+            maxStacks = configuredMaxStacks;
+            stackMode = ItemStackMode.Additive;
+            effects = configuredEffects?.ToList() ?? new List<ItemEffectEntry>();
+
+            if (effects.Count > 0)
+            {
+                effectType = effects[0].EffectType;
+                effectValue = effects[0].Magnitude > 0f
+                    ? effects[0].Magnitude
+                    : Mathf.Max(1, effects[0].IntegerAmount);
+            }
+        }
+#endif
     }
 }

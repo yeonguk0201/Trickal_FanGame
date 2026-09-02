@@ -14,6 +14,7 @@ namespace TrickalFanGame.Item
         [SerializeField] private RoomController prerequisiteRoom;
 
         private bool isPlayerInside;
+        private PlayerInventory playerInventory;
         private RoomRunState runState;
 
         public bool HasRewarded { get; private set; }
@@ -36,6 +37,9 @@ namespace TrickalFanGame.Item
             runProgress = configuredRunProgress;
             dropSource = configuredDropSource;
             prerequisiteRoom = configuredPrerequisiteRoom;
+            dropSource?.ConfigureRewardContext(
+                configuredRunProgress,
+                $"{FloorGenerator.BuildRoomId(floorNumber, roomNumber)}:treasure");
         }
 
         private void Awake()
@@ -73,6 +77,7 @@ namespace TrickalFanGame.Item
             }
 
             isPlayerInside = true;
+            playerInventory = other.GetComponentInParent<PlayerInventory>();
             TryGrantReward();
         }
 
@@ -81,6 +86,7 @@ namespace TrickalFanGame.Item
             if (other.GetComponentInParent<PlayerMovement>() != null)
             {
                 isPlayerInside = false;
+                playerInventory = null;
             }
         }
 
@@ -101,7 +107,7 @@ namespace TrickalFanGame.Item
             }
 
             runProgress?.RecordRoomEntry(floorNumber, roomNumber);
-            HasRewarded = dropSource != null && dropSource.TryDrop();
+            HasRewarded = dropSource != null && dropSource.TryDrop(playerInventory);
             if (HasRewarded) runState?.MarkArtifactClaimed();
         }
     }

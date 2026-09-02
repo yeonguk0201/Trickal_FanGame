@@ -5,6 +5,7 @@ namespace TrickalFanGame.Network
     [Serializable]
     public class CreateRunRequest
     {
+        public string clientRunId;
         public string userId;
         public string characterId;
         public string gameVersion;
@@ -44,8 +45,59 @@ namespace TrickalFanGame.Network
     }
 
     [Serializable]
+    public class ApiErrorResponse
+    {
+        public bool success;
+        public ApiError error;
+    }
+
+    [Serializable]
     public class RunData
     {
         public string runId;
+        public int experienceGained;
+        public CharacterProgressDto progress;
+    }
+
+    [Serializable]
+    public class CharacterProgressDto
+    {
+        public string characterId;
+        public int level;
+        public int maxLevel;
+        public int experience;
+        public int experienceToNextLevel;
+        public int skillPoints;
+        public int lowGradeSkillLevel;
+        public int highGradeSkillLevel;
+        public int maxSkillLevel;
+    }
+
+    [Serializable]
+    public class UserProfileResponse
+    {
+        public bool success;
+        public UserProfileData data;
+        public ApiError error;
+    }
+
+    [Serializable]
+    public class UserProfileData
+    {
+        public string id;
+        public string nickname;
+        public UserStatsDto stats;
+        public CharacterProgressDto[] characterProgress;
+    }
+
+    [Serializable]
+    public class UserStatsDto
+    {
+        public int totalRuns;
+        public int clears;
+        public float winRate;
+        public float averagePlayTime;
+        public float averageFloor;
+        public int highestFloor;
     }
 }

@@ -12,8 +12,8 @@ namespace TrickalFanGame.Player
     [RequireComponent(typeof(PlayerMovement), typeof(PlayerCombatEvents), typeof(PlayerActionState))]
     public sealed class PlayerSkill : MonoBehaviour
     {
-        private const int ProjectileCount = 4;
-        private static readonly int[] ProjectileSlotOrder = { 0, 2, 1, 3 };
+        private const int BaseProjectileCount = 4;
+        private static readonly float[] BaseProjectileSlotOffsets = { -1.5f, 0.5f, -0.5f, 1.5f };
 
         [SerializeField] private HomingSkillProjectile projectilePrefab;
         [SerializeField, Min(0f)] private float spawnOffset = 0.65f;
@@ -32,11 +32,18 @@ namespace TrickalFanGame.Player
         private DamageContext salvoDamageContext;
         private Vector2 salvoDirection;
         private int nextProjectileIndex;
+        private int salvoProjectileCount;
         private float salvoStartTime;
         private float nextShotTime;
         private bool isFiring;
+        private int progressionLevel = SkillProgressionRules.MinimumLevel;
 
         public bool IsFiring => isFiring;
+        public int ProgressionLevel => progressionLevel;
+        public float ProgressionDamageMultiplier =>
+            SkillProgressionRules.DamageMultiplier(progressionLevel);
+        public int ProgressionProjectileBonus =>
+            SkillProgressionRules.LowerGradeProjectileBonus(progressionLevel);
         public float ShotInterval => shotInterval;
         public float FanSpacingAngle => fanSpacingAngle;
         public event Action<HomingSkillProjectile> ProjectileLaunched;
@@ -87,8 +94,13 @@ namespace TrickalFanGame.Player
                 Awake();
             }
 
-            if (health.IsDead || IsFiring || !actionState.CanUseLowerGradeSkill ||
-                projectilePrefab == null || !playerSP.TrySpend())
+            if (health.IsDead || IsFiring || !actionState.CanUseLowerGradeSkill || projectilePrefab == null)
+            {
+                return false;
+            }
+
+            int projectileBonus = stats.GetLowerGradeSkillProjectileBonus(playerSP.CurrentSP);
+            if (!playerSP.TrySpend())
             {
                 return false;
             }
@@ -98,11 +110,13 @@ namespace TrickalFanGame.Player
             salvoDirection = initialDirection.sqrMagnitude > 0.001f
                 ? initialDirection.normalized
                 : Vector2.down;
-            salvoDamageContext = new DamageContext(
+            salvoProjectileCount = BaseProjectileCount +
+                SkillProgressionRules.LowerGradeProjectileBonus(progressionLevel) +
+                projectileBonus;
+            salvoDamageContext = stats.CreateDirectDamageContext(
                 gameObject,
                 DamageSourceType.PlayerSkillExplosion,
-                stats.AttackDamage,
-                stats.SkillDamageMultiplier);
+                SkillProgressionRules.DamageMultiplier(progressionLevel) * stats.SkillDamageMultiplier);
             nextProjectileIndex = 0;
             salvoStartTime = currentTime;
             nextShotTime = currentTime;
@@ -110,9 +124,14 @@ namespace TrickalFanGame.Player
             FireNextProjectile();
 
             Debug.Log(
-                $"[PlayerSkill] Started {ProjectileCount}-shot homing salvo. SP {playerSP.CurrentSP}/{playerSP.MaxSP}",
+                $"[PlayerSkill] Started {salvoProjectileCount}-shot homing salvo. SP {playerSP.CurrentSP}/{playerSP.MaxSP}",
                 this);
             return true;
+        }
+
+        public void ApplyProgressionLevel(int level)
+        {
+            progressionLevel = SkillProgressionRules.ClampLevel(level);
         }
 
         public void Tick(float currentTime)
@@ -126,11 +145,10 @@ namespace TrickalFanGame.Player
         private void FireNextProjectile()
         {
             int shotIndex = nextProjectileIndex;
-            int fanSlotIndex = ProjectileSlotOrder[shotIndex];
             Health target = salvoTargets.Length == 0
                 ? null
                 : salvoTargets[shotIndex % salvoTargets.Length];
-            float fanAngle = (fanSlotIndex - (ProjectileCount - 1) * 0.5f) * fanSpacingAngle;
+            float fanAngle = GetFanSlotOffset(shotIndex) * fanSpacingAngle;
             Vector2 direction = Rotate(salvoDirection, fanAngle);
             HomingSkillProjectile projectile = Instantiate(
                 projectilePrefab,
@@ -140,16 +158,28 @@ namespace TrickalFanGame.Player
             ProjectileLaunched?.Invoke(projectile);
 
             nextProjectileIndex++;
-            if (nextProjectileIndex >= ProjectileCount)
+            if (nextProjectileIndex >= salvoProjectileCount)
             {
                 isFiring = false;
                 salvoTargets = Array.Empty<Health>();
-                Debug.Log($"[PlayerSkill] Fired fan slots 1-3-2-4 across {ProjectileCount} homing projectiles.", this);
+                Debug.Log($"[PlayerSkill] Fired {salvoProjectileCount} homing projectiles.", this);
             }
             else
             {
                 nextShotTime = salvoStartTime + shotInterval * nextProjectileIndex;
             }
+        }
+
+        private static float GetFanSlotOffset(int shotIndex)
+        {
+            if (shotIndex < BaseProjectileSlotOffsets.Length)
+            {
+                return BaseProjectileSlotOffsets[shotIndex];
+            }
+
+            int outerIndex = shotIndex - BaseProjectileSlotOffsets.Length;
+            float distanceFromCenter = 2.5f + outerIndex / 2;
+            return outerIndex % 2 == 0 ? -distanceFromCenter : distanceFromCenter;
         }
 
         private void FindTargets()

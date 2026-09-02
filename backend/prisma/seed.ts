@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
+import { ITEM_CATALOG } from '../src/contracts/item-catalog';
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -19,19 +20,7 @@ const character = {
   isActive: true,
 };
 
-const items = [
-  ['item-01', '공격력 강화', '공격력이 증가합니다.', 'COMMON'],
-  ['item-02', '최대 체력 강화', '최대 체력이 증가합니다.', 'COMMON'],
-  ['item-03', '이동 속도 강화', '이동 속도가 증가합니다.', 'COMMON'],
-  ['item-04', '공격 속도 강화', '공격 속도가 증가합니다.', 'COMMON'],
-  ['item-05', '투사체 크기 강화', '투사체 크기가 증가합니다.', 'COMMON'],
-  ['item-06', '다중 투사체', '발사되는 투사체 수가 증가합니다.', 'RARE'],
-  ['item-07', '공격 범위 강화', '공격 범위가 증가합니다.', 'COMMON'],
-  ['item-08', '처치 회복', '적 처치 시 체력을 회복합니다.', 'RARE'],
-  ['item-09', '피격 반격', '피격 시 반격 효과가 발생합니다.', 'RARE'],
-  ['item-10', '추가 공격', '특정 조건에서 추가 공격이 발생합니다.', 'EPIC'],
-  ['item-11', '관통 투사체', '투사체가 적을 관통합니다.', 'RARE'],
-] as const;
+const testUserId = '00000000-0000-4000-8000-000000000001';
 
 async function main() {
   await prisma.$transaction([
@@ -39,7 +28,7 @@ async function main() {
       where: { nickname: 'test-player' },
       update: {},
       create: {
-        id: '00000000-0000-4000-8000-000000000001',
+        id: testUserId,
         nickname: 'test-player',
       },
     }),
@@ -48,11 +37,39 @@ async function main() {
       update: character,
       create: character,
     }),
-    ...items.map(([id, name, description, rarity]) =>
+    prisma.userCharacterProgress.upsert({
+      where: {
+        userId_characterId: {
+          userId: testUserId,
+          characterId: character.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: testUserId,
+        characterId: character.id,
+      },
+    }),
+    ...ITEM_CATALOG.map((item) =>
       prisma.item.upsert({
-        where: { id },
-        update: { name, description, rarity, isActive: true },
-        create: { id, name, description, rarity, isActive: true },
+        where: { id: item.id },
+        update: {
+          name: item.name,
+          description: item.description,
+          rarity: item.rarity,
+          isActive: item.isActive,
+          maxStacks: item.maxStacks,
+          effectData: [...item.effects],
+        },
+        create: {
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          rarity: item.rarity,
+          isActive: item.isActive,
+          maxStacks: item.maxStacks,
+          effectData: [...item.effects],
+        },
       }),
     ),
   ]);

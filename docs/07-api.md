@@ -369,6 +369,11 @@ Unity는 생성된 Run ID와 Backend가 계산한 캐릭터 진행 결과를 표
 `RUN_IDEMPOTENCY_CONFLICT`로 전체 요청을 거절한다.
 최초 저장은 `201 Created`를 사용한다.
 
+동일 여부는 `clientRunId`를 제외한 모든 Run 필드와 `order`로 정렬한 아이템의 `itemId`,
+`floor`, `order`, `acquiredAt`으로 계산한 SHA-256 지문으로 판정한다. 재전송에는 이후의 Run이나
+스킬 강화로 바뀐 현재 진행이 아니라 최초 지급 직후 저장한 `experienceGained`와 `progress`
+스냅샷을 반환한다.
+
 ---
 
 # 8.6 Create Run Error
@@ -405,6 +410,18 @@ Unity는 생성된 Run ID와 Backend가 계산한 캐릭터 진행 결과를 표
   "error": {
     "code": "INVALID_RUN_DATA",
     "message": "유효하지 않은 플레이 데이터입니다."
+  }
+}
+```
+
+같은 `clientRunId`에 다른 플레이 데이터가 전송된 경우 (`409 Conflict`):
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RUN_IDEMPOTENCY_CONFLICT",
+    "message": "같은 clientRunId에 다른 플레이 데이터가 전송되었습니다."
   }
 }
 ```
@@ -654,6 +671,7 @@ GET /api/runs/run-uuid
       "id": "erpin",
       "name": "에르핀"
     },
+    "gameVersion": "0.1.0",
     "startedAt": "2026-08-14T20:00:00Z",
     "endedAt": "2026-08-14T20:10:23Z",
     "playTime": 623,
@@ -665,20 +683,26 @@ GET /api/runs/run-uuid
       {
         "itemId": "item-01",
         "name": "Item A",
+        "rarity": "COMMON",
         "floor": 1,
-        "order": 1
+        "order": 1,
+        "acquiredAt": "2026-08-14T20:02:10Z"
       },
       {
         "itemId": "item-02",
         "name": "Item B",
+        "rarity": "UNCOMMON",
         "floor": 2,
-        "order": 2
+        "order": 2,
+        "acquiredAt": "2026-08-14T20:05:30Z"
       },
       {
         "itemId": "item-03",
         "name": "Item C",
+        "rarity": "RARE",
         "floor": 3,
-        "order": 3
+        "order": 3,
+        "acquiredAt": "2026-08-14T20:08:45Z"
       }
     ]
   }
@@ -982,6 +1006,7 @@ MVP에서 사용할 주요 Error Code:
 | `CHARACTER_PROGRESS_NOT_FOUND` | 캐릭터 진행 데이터 없음 |
 | `SKILL_POINT_NOT_ENOUGH` | 사용할 수 있는 스킬 포인트 부족 |
 | `SKILL_LEVEL_MAX` | 대상 스킬이 최대 Lv.10 |
+| `INVALID_SKILL_TYPE` | `LOW_GRADE`, `HIGH_GRADE`가 아닌 스킬 종류 |
 | `INVALID_SKILL_TARGET_LEVEL` | 현재 레벨과 일치하지 않는 강화 목표 |
 | `INVALID_RUN_DATA` | 잘못된 Run 데이터 |
 | `INTERNAL_SERVER_ERROR` | 서버 내부 오류 |
@@ -1089,6 +1114,10 @@ POST /api/runs
 # 24. Unity Network Error 처리
 
 게임 종료 시 서버 통신이 실패할 가능성을 고려한다.
+
+Run 시작 전 캐릭터 진행 조회가 실패하면 마지막으로 성공한 로컬 진행 스냅샷을 사용한다. 저장된
+스냅샷도 없으면 두 스킬을 Lv.1로 적용하고 오프라인 기본값을 사용 중임을 표시한다. 진행 중인
+Run에는 시작 시 스냅샷을 유지하며 Web 등에서 강화된 값은 다음 Run부터 적용한다.
 
 예:
 

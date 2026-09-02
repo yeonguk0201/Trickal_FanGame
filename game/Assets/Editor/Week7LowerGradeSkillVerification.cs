@@ -35,6 +35,7 @@ namespace TrickalFanGame.Editor
             GameObject wall = new("Phase C Solid Wall");
             Collider2D wallCollider = wall.AddComponent<BoxCollider2D>();
             List<HomingSkillProjectile> launched = new();
+            DamageCalculator.SetCriticalRollProviderForTesting(() => 1f);
 
             try
             {
@@ -159,6 +160,7 @@ namespace TrickalFanGame.Editor
             }
             finally
             {
+                DamageCalculator.ResetCriticalRollProvider();
                 skill.ProjectileLaunched -= launched.Add;
                 RemoveSpawnedPickups(pickupTemplate);
                 RemoveSpawnedProjectiles(projectileTemplate);

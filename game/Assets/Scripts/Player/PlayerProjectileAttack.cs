@@ -26,11 +26,12 @@ namespace TrickalFanGame.Player
         public int ProjectileCount => stats.ProjectileCount;
         public int PierceCount => stats.PierceCount;
         public float HealOnKill => stats.HealOnKill;
+        public float CurrentHealOnKillAmount => stats.HealOnKillAmount;
         public bool CanAttack => !health.IsDead && actionState.CanBasicAttack;
 
         public DamageContext CreateDamageContext()
         {
-            return new DamageContext(gameObject, DamageSourceType.PlayerProjectile, stats.AttackDamage);
+            return stats.CreateDirectDamageContext(gameObject, DamageSourceType.PlayerProjectile);
         }
 
         private void Awake()
@@ -99,12 +100,17 @@ namespace TrickalFanGame.Player
 
             Vector2 velocity = direction * baseProjectileSpeed
                 + movement.CurrentVelocity * inheritedVelocityFactor;
-            projectile.Launch(velocity, health, CreateDamageContext(), stats.PierceCount);
+            projectile.Launch(
+                velocity,
+                health,
+                CreateDamageContext(),
+                stats.PierceCount,
+                stats.ProjectileSplitSettings);
         }
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)
         {
-            float healedAmount = health.Heal(stats.HealOnKill);
+            float healedAmount = health.Heal(stats.HealOnKillAmount);
             if (healedAmount > 0f)
             {
                 Debug.Log(

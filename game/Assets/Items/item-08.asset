@@ -13,8 +13,22 @@ MonoBehaviour:
   m_Name: item-08
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.ItemDefinition
   itemId: item-08
-  displayName: Heal On Kill
-  effectType: 5
-  effectValue: 1
+  displayName: "\uCF54\uBBF8\uC758 \uBCA0\uAC1C"
+  rarity: 2
+  isActive: 1
+  effects:
+  - effectType: 14
+    magnitude: 0.05
+    healthThreshold: 0
+    secondaryMagnitude: 0
+    integerAmount: 0
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
+  effectType: 14
+  effectValue: 0.05
   stackMode: 0
-  maxStacks: 3
+  maxStacks: 2

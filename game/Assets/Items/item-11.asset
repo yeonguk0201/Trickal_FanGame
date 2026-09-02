@@ -13,8 +13,33 @@ MonoBehaviour:
   m_Name: item-11
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.ItemDefinition
   itemId: item-11
-  displayName: Piercing Projectile
+  displayName: "\uB2E4\uC57C\uC758 \uB2E4\uC774\uC544\uBAAC\uB4DC \uCEE4\uD130"
+  rarity: 3
+  isActive: 1
+  effects:
+  - effectType: 4
+    magnitude: 0
+    healthThreshold: 0
+    secondaryMagnitude: 0
+    integerAmount: 1
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
+  - effectType: 16
+    magnitude: 0
+    healthThreshold: 0
+    secondaryMagnitude: 0.3
+    integerAmount: 3
+    minimumDistance: 0
+    maximumDistance: 3
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 15
+    scaleMultiplier: 0.6
   effectType: 4
   effectValue: 1
   stackMode: 0
-  maxStacks: 2
+  maxStacks: 1

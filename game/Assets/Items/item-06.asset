@@ -13,7 +13,21 @@ MonoBehaviour:
   m_Name: item-06
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.ItemDefinition
   itemId: item-06
-  displayName: Multi Shot
+  displayName: "\uB2E4\uC911 \uD22C\uC0AC\uCCB4"
+  rarity: 2
+  isActive: 0
+  effects:
+  - effectType: 3
+    magnitude: 0
+    healthThreshold: 0
+    secondaryMagnitude: 0
+    integerAmount: 1
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
   effectType: 3
   effectValue: 1
   stackMode: 0

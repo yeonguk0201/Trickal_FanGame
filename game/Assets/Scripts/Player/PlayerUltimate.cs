@@ -44,8 +44,13 @@ namespace TrickalFanGame.Player
         private float recoveryEndTime;
         private float nextReadyTime;
         private bool hasImpacted;
+        private float configuredBaseCooldown = 30f;
+        private int progressionLevel = SkillProgressionRules.MinimumLevel;
 
         public float Cooldown => cooldown;
+        public int ProgressionLevel => progressionLevel;
+        public float ProgressionDamageMultiplier =>
+            SkillProgressionRules.DamageMultiplier(progressionLevel);
         public float MaximumDuration => maximumDuration;
         public float ImpactRecoveryDuration => impactRecoveryDuration;
         public float CoastRecoveryDuration => coastRecoveryDuration;
@@ -58,6 +63,9 @@ namespace TrickalFanGame.Player
 
         private void Awake()
         {
+            configuredBaseCooldown = Mathf.Max(0.01f, cooldown);
+            cooldown = configuredBaseCooldown *
+                SkillProgressionRules.HighGradeCooldownMultiplier(progressionLevel);
             health = GetComponent<Health>();
             stats = GetComponent<PlayerStats>();
             movement = GetComponent<PlayerMovement>();
@@ -115,7 +123,9 @@ namespace TrickalFanGame.Player
             float configuredBossStunDuration,
             LayerMask configuredTargetLayers)
         {
-            cooldown = Mathf.Max(0.01f, configuredCooldown);
+            configuredBaseCooldown = Mathf.Max(0.01f, configuredCooldown);
+            cooldown = configuredBaseCooldown *
+                SkillProgressionRules.HighGradeCooldownMultiplier(progressionLevel);
             maximumDuration = Mathf.Max(0.01f, configuredMaximumDuration);
             dashSpeedMultiplier = Mathf.Max(1f, configuredDashSpeedMultiplier);
             impactRecoveryDuration = Mathf.Max(0f, configuredImpactRecoveryDuration);
@@ -126,6 +136,13 @@ namespace TrickalFanGame.Player
             enemyStunDuration = Mathf.Max(0f, configuredEnemyStunDuration);
             bossStunDuration = Mathf.Max(0f, configuredBossStunDuration);
             targetLayers = configuredTargetLayers;
+        }
+
+        public void ApplyProgressionLevel(int level)
+        {
+            progressionLevel = SkillProgressionRules.ClampLevel(level);
+            cooldown = configuredBaseCooldown *
+                SkillProgressionRules.HighGradeCooldownMultiplier(progressionLevel);
         }
 
         public bool IsReadyAt(float currentTime)
@@ -208,11 +225,11 @@ namespace TrickalFanGame.Player
                 return;
             }
 
-            DamageContext context = new(
+            DamageContext context = stats.CreateDirectDamageContext(
                 gameObject,
                 DamageSourceType.PlayerUltimateImpact,
-                stats.AttackDamage,
-                damageMultiplier * stats.SkillDamageMultiplier);
+                damageMultiplier * SkillProgressionRules.DamageMultiplier(progressionLevel) *
+                stats.SkillDamageMultiplier);
             target.TakeDamage(context);
 
             KnockbackReceiver receiver = target.GetComponent<KnockbackReceiver>();

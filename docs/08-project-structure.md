@@ -82,10 +82,12 @@ game/
 │   │   ├── Prefabs/        # Phase F-5에서 추가
 │   │   └── Catalogs/       # 카탈로그가 실제로 필요할 때 추가
 │   ├── Scenes/
-│   │   └── SampleScene.unity
+│   │   ├── SampleScene.unity
+│   │   └── ItemTestScene.unity  # 랜덤 Run·Backend 저장과 분리된 아이템 전투 디버그 씬
 │   ├── Scripts/
 │   │   ├── Character/
 │   │   ├── Combat/
+│   │   ├── Debug/               # 개발 전용 테스트 룸 런타임 제어
 │   │   ├── Enemy/
 │   │   ├── Item/
 │   │   ├── Network/
@@ -107,6 +109,7 @@ Unity C# 코드는 현재 존재하는 기능 경계를 따른다.
 |---|---|
 | `Character/` | 캐릭터 정의와 캐릭터별 능력 |
 | `Combat/` | 체력, 피해, 투사체 등 공용 전투 규칙 |
+| `Debug/` | 전용 테스트 씬의 아이템 로드아웃·적 배치·런타임 디버그 패널 |
 | `Enemy/` | 적 이동, 공격, 사망과 스폰 |
 | `Item/` | 아티팩트 정의, 효과, 획득 처리 |
 | `Network/` | Backend API DTO와 통신 |

@@ -204,7 +204,11 @@ namespace TrickalFanGame.Room
                 instance.Controller.BindRunState(state, safeRoom);
                 ApplyEncounter(instance.Controller, generatedNode.Definition);
                 if (generatedNode.Role == GeneratedRoomRole.Boss)
-                    ConfigureBossDrop(instance, generatedNode.FloorNumber >= generatedGraph.Floors.Count);
+                    ConfigureBossDrop(
+                        instance,
+                        generatedNode.FloorNumber >= generatedGraph.Floors.Count,
+                        runProgress,
+                        generatedNode.RoomId);
                 if (instance.RewardRoom != null)
                 {
                     instance.RewardRoom.gameObject.SetActive(generatedNode.Role == GeneratedRoomRole.Treasure);
@@ -292,7 +296,11 @@ namespace TrickalFanGame.Room
             return result;
         }
 
-        private static void ConfigureBossDrop(RoomPrefab instance, bool isFinalBoss)
+        private static void ConfigureBossDrop(
+            RoomPrefab instance,
+            bool isFinalBoss,
+            RunProgress progress,
+            string roomId)
         {
             ItemDropSource template = instance.RewardRoom != null
                 ? instance.RewardRoom.GetComponent<ItemDropSource>() : null;
@@ -305,6 +313,7 @@ namespace TrickalFanGame.Room
                 ItemDefinition[] items = new ItemDefinition[template.ItemPool.Count];
                 for (int i = 0; i < items.Length; i++) items[i] = template.ItemPool[i];
                 source.Configure(template.PickupPrefab, items, enemy.transform, instance.Node.ContentRoot.transform);
+                source.ConfigureRewardContext(progress, $"{roomId}:boss");
                 BossItemDrop drop = enemy.GetComponent<BossItemDrop>();
                 if (drop == null) drop = enemy.AddComponent<BossItemDrop>();
                 drop.Configure(isFinalBoss, source);

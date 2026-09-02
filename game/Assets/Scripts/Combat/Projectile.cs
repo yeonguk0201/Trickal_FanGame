@@ -4,6 +4,31 @@ using UnityEngine;
 
 namespace TrickalFanGame.Combat
 {
+    public readonly struct ProjectileSplitSettings
+    {
+        public ProjectileSplitSettings(
+            int projectileCount,
+            float damageMultiplier,
+            float maximumDistance,
+            float spreadAngleDegrees,
+            float scaleMultiplier)
+        {
+            ProjectileCount = Mathf.Max(0, projectileCount);
+            DamageMultiplier = Mathf.Max(0f, damageMultiplier);
+            MaximumDistance = Mathf.Max(0f, maximumDistance);
+            SpreadAngleDegrees = Mathf.Max(0f, spreadAngleDegrees);
+            ScaleMultiplier = Mathf.Max(0f, scaleMultiplier);
+        }
+
+        public int ProjectileCount { get; }
+        public float DamageMultiplier { get; }
+        public float MaximumDistance { get; }
+        public float SpreadAngleDegrees { get; }
+        public float ScaleMultiplier { get; }
+        public bool IsEnabled => ProjectileCount > 0 && DamageMultiplier > 0f && MaximumDistance > 0f &&
+                                 SpreadAngleDegrees > 0f && ScaleMultiplier > 0f;
+    }
+
     public static class ProjectileSizing
     {
         public const float BaseColliderRadius = 0.5f;
@@ -34,9 +59,17 @@ namespace TrickalFanGame.Combat
         private DamageContext damageContext;
         private readonly HashSet<Health> damagedTargets = new();
         private int remainingPierces;
+        private ProjectileSplitSettings splitSettings;
+        private Vector2 launchPosition;
+        private float maximumTravelDistance;
+        private bool isSplitProjectile;
 
         public DamageContext DamageContext => damageContext;
         public bool IsLaunched => owner != null;
+        public bool IsSplitProjectile => isSplitProjectile;
+        public Vector2 LaunchPosition => launchPosition;
+        public float MaximumTravelDistance => maximumTravelDistance;
+        public Vector2 Velocity => body != null ? body.linearVelocity : Vector2.zero;
 
         private void Awake()
         {
@@ -48,15 +81,37 @@ namespace TrickalFanGame.Combat
             Destroy(gameObject, lifetime);
         }
 
+        private void FixedUpdate()
+        {
+            if (maximumTravelDistance > 0f &&
+                ((Vector2)transform.position - launchPosition).sqrMagnitude >=
+                maximumTravelDistance * maximumTravelDistance)
+            {
+                StopAtBoundary();
+            }
+        }
+
         public void Launch(
             Vector2 velocity,
             Health projectileOwner,
             DamageContext configuredDamageContext,
-            int configuredPierces = 0)
+            int configuredPierces = 0,
+            ProjectileSplitSettings configuredSplitSettings = default,
+            bool configuredAsSplitProjectile = false,
+            float configuredMaximumTravelDistance = 0f)
         {
+            if (body == null)
+            {
+                body = GetComponent<Rigidbody2D>();
+            }
+
             owner = projectileOwner;
             damageContext = configuredDamageContext;
             remainingPierces = Mathf.Max(0, configuredPierces);
+            splitSettings = configuredAsSplitProjectile ? default : configuredSplitSettings;
+            isSplitProjectile = configuredAsSplitProjectile;
+            maximumTravelDistance = Mathf.Max(0f, configuredMaximumTravelDistance);
+            launchPosition = transform.position;
             body.linearVelocity = velocity;
 
             if (owner == null)
@@ -111,9 +166,17 @@ namespace TrickalFanGame.Combat
             if (target != null)
             {
                 damagedTargets.Add(target);
-                target.TakeDamage(damageContext);
+                float impactDistance = Vector2.Distance(launchPosition, transform.position);
+                target.TakeDamage(damageContext.WithImpactDistance(impactDistance));
 
                 IgnoreTargetColliders(target);
+                if (!isSplitProjectile && remainingPierces > 0 && splitSettings.IsEnabled)
+                {
+                    SplitAfterFirstPierce(target);
+                    DestroyProjectile();
+                    return;
+                }
+
                 if (remainingPierces > 0)
                 {
                     remainingPierces--;
@@ -122,6 +185,31 @@ namespace TrickalFanGame.Combat
             }
 
             DestroyProjectile();
+        }
+
+        private void SplitAfterFirstPierce(Health firstTarget)
+        {
+            Vector2 forward = body != null && body.linearVelocity.sqrMagnitude > 0.001f
+                ? body.linearVelocity.normalized
+                : Vector2.right;
+            float centerIndex = (splitSettings.ProjectileCount - 1) * 0.5f;
+            for (int index = 0; index < splitSettings.ProjectileCount; index++)
+            {
+                float angle = (index - centerIndex) * splitSettings.SpreadAngleDegrees;
+                Vector2 direction = Rotate(forward, angle);
+                Projectile splitProjectile = Instantiate(this, transform.position, Quaternion.identity);
+                splitProjectile.transform.localScale = transform.localScale * splitSettings.ScaleMultiplier;
+                splitProjectile.Launch(
+                    direction * body.linearVelocity.magnitude,
+                    owner,
+                    damageContext.ScaleMultiplier(splitSettings.DamageMultiplier),
+                    configuredPierces: 0,
+                    configuredSplitSettings: default,
+                    configuredAsSplitProjectile: true,
+                    configuredMaximumTravelDistance: splitSettings.MaximumDistance);
+                splitProjectile.damagedTargets.Add(firstTarget);
+                splitProjectile.IgnoreTargetColliders(firstTarget);
+            }
         }
 
         public void StopAtBoundary()
@@ -155,6 +243,16 @@ namespace TrickalFanGame.Combat
                     Physics2D.IgnoreCollision(projectileCollider, targetCollider);
                 }
             }
+        }
+
+        private static Vector2 Rotate(Vector2 direction, float degrees)
+        {
+            float radians = degrees * Mathf.Deg2Rad;
+            float sine = Mathf.Sin(radians);
+            float cosine = Mathf.Cos(radians);
+            return new Vector2(
+                direction.x * cosine - direction.y * sine,
+                direction.x * sine + direction.y * cosine);
         }
     }
 }

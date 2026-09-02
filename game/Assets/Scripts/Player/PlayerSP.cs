@@ -45,5 +45,18 @@ namespace TrickalFanGame.Player
             Debug.Log($"[PlayerSP] SP {currentSP}/{maxSP}", this);
             return true;
         }
+
+        public bool AddMaxSP(int amount = 1)
+        {
+            if (amount <= 0)
+            {
+                return false;
+            }
+
+            maxSP += amount;
+            Changed?.Invoke(currentSP, maxSP);
+            Debug.Log($"[PlayerSP] Maximum SP increased to {maxSP}; current SP remains {currentSP}.", this);
+            return true;
+        }
     }
 }

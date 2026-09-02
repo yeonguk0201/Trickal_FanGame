@@ -13,8 +13,22 @@ MonoBehaviour:
   m_Name: item-03
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.ItemDefinition
   itemId: item-03
-  displayName: Move Speed Boost
-  effectType: 2
-  effectValue: 0.75
+  displayName: "\uB3C4\uAE68\uBE44 \uAC10\uD22C"
+  rarity: 2
+  isActive: 1
+  effects:
+  - effectType: 13
+    magnitude: 0.25
+    healthThreshold: 0.3
+    secondaryMagnitude: 0
+    integerAmount: 0
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
+  effectType: 13
+  effectValue: 0.25
   stackMode: 0
-  maxStacks: 5
+  maxStacks: 2

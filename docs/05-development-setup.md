@@ -392,6 +392,10 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 
 현재 구현된 Phase C·D·F Unity 도구:
 
+- `Trickal Fan Game > Debug > Open or Create Item Test Room`: 랜덤 층 생성과 Backend Run 저장에서 분리된 `Assets/Scenes/ItemTestScene.unity`를 생성하거나 연다. Hierarchy의 `Item Test Room`을 선택하고 `Item Loadout`에서 시작 아티팩트 스택을, `Enemy Placements`에서 적 Prefab·활성 여부·로컬 좌표·회전을 설정한 뒤 Play Mode를 시작한다. 활성 아티팩트 10종과 호환성 확인용 비활성 `item-06`이 기본 목록에 포함된다.
+- Play Mode 오른쪽 `Item Test Room` 패널에서 현재 HP·방어막·공격력·공격속도·치명타·이동속도·투사체·관통 수치를 확인한다. 각 아이템의 `+1`로 즉시 한 스택을 획득하고, `Heal / Reset HP`와 `Respawn Enemies`로 같은 설정을 반복 검증한다. 스택 감소와 완전 초기화는 Play Mode를 다시 시작한다.
+- `Trickal Fan Game > Debug > Verify Item Test Room`: 전용 씬 격리, 아이템 목록·중복·최대 스택, 적 Prefab의 `Health`, Backend 저장 세션 부재를 검사한다. `ItemTestScene`을 연 상태에서 Edit Mode와 Play Mode에 각각 실행하며 성공 시 Console에 `Item Test Room verification passed`가 출력되고 오류가 없어야 한다.
+
 - `Trickal Fan Game > Setup Phase C Lower Grade Skill`: Play Mode 밖에서 Player 컴포넌트와 SP 픽업·유도탄 프리팹을 생성 또는 갱신하고 씬을 저장한다.
 - `Trickal Fan Game > Verify Phase C Lower Grade Skill`: SP 경계, 처치 드롭, 입력 방향 중심 36° 부채꼴과 `1→3→2→4` 슬롯 순서, 0.08초 간격 4발 연사, 다수 적 거리순 배분, 현재 공격력 100% 중첩 폭발, 타깃 없음과 SP 부족 경로를 검사한다. 성공 시 Console에 `Phase C verification passed`가 출력되고 불변조건 위반 시 예외로 실패한다.
 - `Trickal Fan Game > Setup Phase D High Grade Skill`: Play Mode 밖에서 Player 행동 상태·고학년 스킬 컴포넌트와 적 넉백 수신기를 생성 또는 갱신하고 씬·적 프리팹을 저장한다. 재실행해도 중복 컴포넌트를 만들지 않는다.
@@ -400,6 +404,8 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 - `Trickal Fan Game > Verify Phase F-1 Random Room Graph`: 고정 seed 재현성, 안정적인 `floor-XX-room-YY` ID, 중복 ID 거부, 시작→일반/보상→보스 연결, 전 층 도달 가능성과 잘못된 정의 실패를 검사한다. 성공 시 Console에 `Phase F-1 random room graph verification passed`가 출력된다.
 - `Trickal Fan Game > Setup Phase F-2 Generated Room Graph Binding`: F-1 Setup을 갱신한 뒤 생성 결과를 Phase E에서 검증된 9개 방의 정의·몬스터 구성·보상방 활성 상태·출입구 순서에 적용하고 `RoomGraphController`를 연결한다. 완료된 Phase E-7 그래프가 선행되어야 하며 재실행해도 assembler나 출입구를 중복 생성하지 않는다.
 - `Trickal Fan Game > Verify Phase F-2 Generated Room Graph Binding`: 생성 노드와 씬 방의 1:1 대응, 몬스터 패턴, 보상방 활성화, 정확한 출입구 순서와 graph 참조, 재적용 멱등성, 방 수 불일치 실패를 검사한다. 성공 시 Console에 `Phase F-2 generated room graph binding verification passed`가 출력된다.
+- `Trickal Fan Game > Setup Phase H-5 Meta Progression`: Play Mode 밖에서 기존 `RunSession`에 `PlayerProgressClient`를 하나만 추가하거나 갱신하고 `test-player`, 저학년 스킬과 고학년 스킬 참조를 연결해 씬을 저장한다. Backend와 seed가 먼저 실행 중이어야 실제 온라인 진행을 조회할 수 있다.
+- `Trickal Fan Game > Verify Phase H-5 Meta Progression`: 온라인·캐시·Lv.1 폴백, Lv.1/Lv.10 실제 스킬 효과, 새 스냅샷 덮어쓰기, 클리어·사망 Run DTO, 중복 종료 방지, 동일 `clientRunId` 재시도, 성공·네트워크 실패·충돌 결과 표시를 검사한다. Edit Mode와 Play Mode에서 각각 실행해 `Phase H-5 verification passed`와 Console 오류 0개를 확인한다.
 
 - 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
 - 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.

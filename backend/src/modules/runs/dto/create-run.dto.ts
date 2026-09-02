@@ -40,6 +40,9 @@ export class CreateRunItemDto {
 
 export class CreateRunDto {
   @IsUUID()
+  clientRunId: string;
+
+  @IsUUID()
   userId: string;
 
   @IsString()

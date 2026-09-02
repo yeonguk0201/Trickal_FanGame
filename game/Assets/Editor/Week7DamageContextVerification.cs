@@ -25,6 +25,7 @@ namespace TrickalFanGame.Editor
                 out Projectile enemyKiller);
             GameObject bossKillProjectile = CreateProjectile("Damage Verification Boss Kill Projectile",
                 out Projectile bossKiller);
+            DamageCalculator.SetCriticalRollProviderForTesting(() => 1f);
 
             try
             {
@@ -113,6 +114,7 @@ namespace TrickalFanGame.Editor
             }
             finally
             {
+                DamageCalculator.ResetCriticalRollProvider();
                 UnityEngine.Object.DestroyImmediate(piercingProjectile);
                 UnityEngine.Object.DestroyImmediate(enemyKillProjectile);
                 UnityEngine.Object.DestroyImmediate(bossKillProjectile);

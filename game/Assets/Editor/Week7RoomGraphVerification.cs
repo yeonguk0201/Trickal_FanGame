@@ -62,6 +62,9 @@ namespace TrickalFanGame.Editor
                 Projectile boundaryBasic = CreateBasicProjectile(playerHealth);
                 InvokePrivate(boundaryBasic, "OnTriggerEnter2D", blockerCollider);
                 Assert(boundaryBasic == null, "A basic projectile must be consumed by a locked door blocker.");
+                Projectile boundarySplit = CreateSplitProjectile(playerHealth);
+                InvokePrivate(boundarySplit, "OnTriggerEnter2D", blockerCollider);
+                Assert(boundarySplit == null, "A split projectile must be consumed by a locked door blocker.");
                 HomingSkillProjectile untargetedHoming = CreateHomingProjectile(playerHealth);
                 InvokePrivate(untargetedHoming, "OnTriggerEnter2D", blockerCollider);
                 Assert(untargetedHoming == null,
@@ -88,6 +91,10 @@ namespace TrickalFanGame.Editor
                 InvokePrivate(openBoundaryBasic, "OnTriggerEnter2D", blockerCollider);
                 Assert(openBoundaryBasic == null,
                     "An open portal barrier must keep basic projectiles inside the active room.");
+                Projectile openBoundarySplit = CreateSplitProjectile(playerHealth);
+                InvokePrivate(openBoundarySplit, "OnTriggerEnter2D", blockerCollider);
+                Assert(openBoundarySplit == null,
+                    "An open portal barrier must keep split projectiles inside the active room.");
                 HomingSkillProjectile openUntargetedHoming = CreateHomingProjectile(playerHealth);
                 InvokePrivate(openUntargetedHoming, "OnTriggerEnter2D", blockerCollider);
                 Assert(openUntargetedHoming == null,
@@ -105,12 +112,13 @@ namespace TrickalFanGame.Editor
                     "Reopening a connection door must preserve its portal barrier without stale state.");
 
                 Projectile leakedBasic = CreateBasicProjectile(playerHealth);
+                Projectile leakedSplit = CreateSplitProjectile(playerHealth);
                 HomingSkillProjectile leakedHoming = CreateHomingProjectile(playerHealth);
                 BossProjectile leakedBoss = CreateBossProjectile(playerHealth);
 
                 Assert(graph.TryTransition(first.Node, second.Node, second.Entry, player),
                     "A registered doorway must transition to its destination.");
-                Assert(leakedBasic == null && leakedHoming == null && leakedBoss == null,
+                Assert(leakedBasic == null && leakedSplit == null && leakedHoming == null && leakedBoss == null,
                     "Room transition must clear every transient projectile before revealing the destination room.");
                 Assert(graph.CurrentNode == second.Node && CountVisible(nodes) == 1 && second.Node.IsVisible,
                     "A transition must activate only the destination room.");
@@ -155,7 +163,7 @@ namespace TrickalFanGame.Editor
                 Debug.Log(
                     "Fixed room graph verification passed: stable IDs, reciprocal graph links, single-room visibility, " +
                     "locked door blockers, open portal barriers, active transition triggers, " +
-                    "target-aware lower-grade projectile passage, projectile transition cleanup, " +
+                    "target-aware lower-grade projectile passage, basic/split projectile boundary and transition cleanup, " +
                     "player/camera transition, backtracking, explicit one-way links, " +
                     "clear state, and reward state are valid.");
             }
@@ -259,6 +267,23 @@ namespace TrickalFanGame.Editor
             projectile.Launch(Vector2.right, owner, target,
                 new DamageContext(owner.gameObject, DamageSourceType.PlayerSkillExplosion, 1),
                 LayerMask.GetMask("Enemy"));
+            return projectile;
+        }
+
+        private static Projectile CreateSplitProjectile(Health owner)
+        {
+            GameObject projectileObject = new("Room Graph Verification Split Projectile");
+            projectileObject.AddComponent<Rigidbody2D>().gravityScale = 0f;
+            CircleCollider2D collider = projectileObject.AddComponent<CircleCollider2D>();
+            collider.isTrigger = true;
+            Projectile projectile = projectileObject.AddComponent<Projectile>();
+            InvokeLifecycle(projectile, "Awake");
+            projectile.Launch(
+                Vector2.right,
+                owner,
+                new DamageContext(owner.gameObject, DamageSourceType.PlayerProjectile, 0.3f),
+                configuredAsSplitProjectile: true,
+                configuredMaximumTravelDistance: 3f);
             return projectile;
         }
 

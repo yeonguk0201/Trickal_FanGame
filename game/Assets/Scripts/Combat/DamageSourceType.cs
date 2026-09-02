@@ -8,6 +8,7 @@ namespace TrickalFanGame.Combat
         PlayerSkillExplosion,
         PlayerUltimateImpact,
         EnemyContact,
-        EnemyProjectile
+        EnemyProjectile,
+        PlayerDamageAura
     }
 }

@@ -42,7 +42,8 @@ namespace TrickalFanGame.Combat
             return sourceType == DamageSourceType.PlayerProjectile ||
                    sourceType == DamageSourceType.PlayerAttack ||
                    sourceType == DamageSourceType.PlayerSkillExplosion ||
-                   sourceType == DamageSourceType.PlayerUltimateImpact;
+                   sourceType == DamageSourceType.PlayerUltimateImpact ||
+                   sourceType == DamageSourceType.PlayerDamageAura;
         }
     }
 }

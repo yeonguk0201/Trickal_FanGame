@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 
 namespace TrickalFanGame.Network
 {
-    public class ApiClient : MonoBehaviour
+    public class ApiClient : MonoBehaviour, IGameApiClient
     {
         [Header("API Settings")]
         [SerializeField] private string baseUrl = "http://localhost:3001/api";
@@ -13,7 +13,7 @@ namespace TrickalFanGame.Network
         [SerializeField] private bool enableLogging = true;
 
         private static ApiClient _instance;
-        public static ApiClient Instance => _instance;
+        public static ApiClient Instance => _instance != null ? _instance : null;
 
         private void Awake()
         {
@@ -29,6 +29,52 @@ namespace TrickalFanGame.Network
         public void PostRun(CreateRunRequest request, Action<CreateRunResponse> onSuccess, Action<string> onError)
         {
             StartCoroutine(PostRunCoroutine(request, onSuccess, onError));
+        }
+
+        public void GetUser(string nickname, Action<UserProfileResponse> onSuccess, Action<string> onError)
+        {
+            StartCoroutine(GetUserCoroutine(nickname, onSuccess, onError));
+        }
+
+        private System.Collections.IEnumerator GetUserCoroutine(
+            string nickname,
+            Action<UserProfileResponse> onSuccess,
+            Action<string> onError)
+        {
+            string url = $"{baseUrl}/users/{UnityWebRequest.EscapeURL(nickname)}";
+            using var webRequest = UnityWebRequest.Get(url);
+            webRequest.timeout = Mathf.Max(1, Mathf.CeilToInt(timeout));
+
+            if (enableLogging)
+            {
+                Debug.Log($"[ApiClient] GET {url}");
+            }
+
+            yield return webRequest.SendWebRequest();
+
+            string responseText = webRequest.downloadHandler?.text ?? "";
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                onError?.Invoke(BuildRequestError(webRequest, responseText));
+                yield break;
+            }
+
+            try
+            {
+                UserProfileResponse response = JsonUtility.FromJson<UserProfileResponse>(responseText);
+                if (response != null && response.success && response.data != null)
+                {
+                    onSuccess?.Invoke(response);
+                }
+                else
+                {
+                    onError?.Invoke(FormatApiError(response?.error, "User progression lookup failed."));
+                }
+            }
+            catch (Exception exception)
+            {
+                onError?.Invoke($"Parse error: {exception.Message}");
+            }
         }
 
         private System.Collections.IEnumerator PostRunCoroutine(
@@ -63,19 +109,7 @@ namespace TrickalFanGame.Network
 
             if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                string error = $"HTTP {webRequest.responseCode}: {webRequest.error}";
-                if (!string.IsNullOrEmpty(responseText))
-                {
-                    try
-                    {
-                        var errorResponse = JsonUtility.FromJson<CreateRunResponse>(responseText);
-                        if (errorResponse.error != null && !string.IsNullOrEmpty(errorResponse.error.message))
-                        {
-                            error = $"{errorResponse.error.code}: {errorResponse.error.message}";
-                        }
-                    }
-                    catch { }
-                }
+                string error = BuildRequestError(webRequest, responseText);
                 Debug.LogError($"[ApiClient] Error: {error}");
                 onError?.Invoke(error);
                 yield break;
@@ -104,6 +138,32 @@ namespace TrickalFanGame.Network
             }
         }
 
+        private static string BuildRequestError(UnityWebRequest webRequest, string responseText)
+        {
+            string fallback = $"HTTP {webRequest.responseCode}: {webRequest.error}";
+            if (string.IsNullOrEmpty(responseText))
+            {
+                return fallback;
+            }
+
+            try
+            {
+                ApiErrorResponse response = JsonUtility.FromJson<ApiErrorResponse>(responseText);
+                return FormatApiError(response?.error, fallback);
+            }
+            catch
+            {
+                return fallback;
+            }
+        }
+
+        private static string FormatApiError(ApiError error, string fallback)
+        {
+            return error != null && !string.IsNullOrEmpty(error.message)
+                ? $"{error.code}: {error.message}"
+                : fallback;
+        }
+
         private static string SerializeRunRequest(CreateRunRequest request)
         {
             if (!request.isCleared || !string.IsNullOrEmpty(request.deathReason))
@@ -113,6 +173,7 @@ namespace TrickalFanGame.Network
 
             var clearRequest = new CreateClearRunRequest
             {
+                clientRunId = request.clientRunId,
                 userId = request.userId,
                 characterId = request.characterId,
                 gameVersion = request.gameVersion,
@@ -131,6 +192,7 @@ namespace TrickalFanGame.Network
         [Serializable]
         private class CreateClearRunRequest
         {
+            public string clientRunId;
             public string userId;
             public string characterId;
             public string gameVersion;

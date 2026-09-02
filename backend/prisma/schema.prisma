@@ -19,7 +19,8 @@ model User {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  runs Run[]
+  runs              Run[]
+  characterProgress UserCharacterProgress[]
 
   @@map("users")
 }
@@ -32,7 +33,8 @@ model Character {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  runs Run[]
+  runs         Run[]
+  userProgress UserCharacterProgress[]
 
   @@map("characters")
 }
@@ -43,6 +45,8 @@ model Item {
   description String?  @db.Text
   rarity      String   @db.VarChar(32)
   isActive    Boolean  @default(true) @map("is_active")
+  maxStacks   Int      @default(1) @map("max_stacks")
+  effectData  Json     @default("[]") @map("effect_data") @db.JsonB
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -52,18 +56,22 @@ model Item {
 }
 
 model Run {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
-  characterId  String   @map("character_id") @db.VarChar(64)
-  gameVersion  String   @map("game_version") @db.VarChar(32)
-  startedAt    DateTime @map("started_at") @db.Timestamptz(3)
-  endedAt      DateTime @map("ended_at") @db.Timestamptz(3)
-  playTime     Int      @map("play_time")
-  reachedFloor Int      @map("reached_floor")
-  isCleared    Boolean  @map("is_cleared")
-  killCount    Int      @default(0) @map("kill_count")
-  deathReason  String?  @map("death_reason") @db.VarChar(32)
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  id                 String   @id @default(uuid()) @db.Uuid
+  clientRunId        String   @unique @map("client_run_id") @db.Uuid
+  requestFingerprint String   @map("request_fingerprint") @db.Char(64)
+  userId             String   @map("user_id") @db.Uuid
+  characterId        String   @map("character_id") @db.VarChar(64)
+  gameVersion        String   @map("game_version") @db.VarChar(32)
+  startedAt          DateTime @map("started_at") @db.Timestamptz(3)
+  endedAt            DateTime @map("ended_at") @db.Timestamptz(3)
+  playTime           Int      @map("play_time")
+  reachedFloor       Int      @map("reached_floor")
+  isCleared          Boolean  @map("is_cleared")
+  killCount          Int      @default(0) @map("kill_count")
+  deathReason        String?  @map("death_reason") @db.VarChar(32)
+  experienceGained   Int      @default(0) @map("experience_gained")
+  progressSnapshot   Json?    @map("progress_snapshot") @db.JsonB
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
   character Character @relation(fields: [characterId], references: [id], onDelete: Restrict)
@@ -75,13 +83,33 @@ model Run {
   @@map("runs")
 }
 
+model UserCharacterProgress {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @map("user_id") @db.Uuid
+  characterId         String   @map("character_id") @db.VarChar(64)
+  level               Int      @default(1)
+  experience          Int      @default(0)
+  skillPoints         Int      @default(0) @map("skill_points")
+  lowGradeSkillLevel  Int      @default(1) @map("low_grade_skill_level")
+  highGradeSkillLevel Int      @default(1) @map("high_grade_skill_level")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, characterId], map: "user_character_progress_user_character_key")
+  @@index([characterId], map: "user_character_progress_character_id_idx")
+  @@map("user_character_progress")
+}
+
 model RunItem {
-  id         String    @id @default(uuid()) @db.Uuid
-  runId      String    @map("run_id") @db.Uuid
-  itemId     String    @map("item_id") @db.VarChar(64)
+  id         String   @id @default(uuid()) @db.Uuid
+  runId      String   @map("run_id") @db.Uuid
+  itemId     String   @map("item_id") @db.VarChar(64)
   floor      Int
-  acquiredAt DateTime  @map("acquired_at") @db.Timestamptz(3)
-  itemOrder  Int       @map("item_order")
+  acquiredAt DateTime @map("acquired_at") @db.Timestamptz(3)
+  itemOrder  Int      @map("item_order")
 
   run  Run  @relation(fields: [runId], references: [id], onDelete: Cascade)
   item Item @relation(fields: [itemId], references: [id], onDelete: Restrict)

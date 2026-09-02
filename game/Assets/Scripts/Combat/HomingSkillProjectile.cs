@@ -23,6 +23,7 @@ namespace TrickalFanGame.Combat
         private float remainingLifetime;
         private bool hasAssignedTarget;
         private bool isFinished;
+        private Vector2 launchPosition;
 
         public Health Target => target;
         public DamageContext DamageContext => damageContext;
@@ -55,6 +56,7 @@ namespace TrickalFanGame.Combat
             target = configuredTarget;
             hasAssignedTarget = configuredTarget != null;
             damageContext = context;
+            launchPosition = transform.position;
             targetLayers = configuredTargetLayers;
             direction = initialDirection.sqrMagnitude > 0.001f ? initialDirection.normalized : Vector2.down;
             remainingLifetime = lifetime;
@@ -141,7 +143,8 @@ namespace TrickalFanGame.Combat
                     continue;
                 }
 
-                health.TakeDamage(damageContext);
+                float impactDistance = Vector2.Distance(launchPosition, transform.position);
+                health.TakeDamage(damageContext.WithImpactDistance(impactDistance));
             }
 
             DestroyProjectile();

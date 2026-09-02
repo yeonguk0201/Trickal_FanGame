@@ -90,7 +90,7 @@ Player의 최대 HP, 공격력, 이동 속도, 공격 속도와 투사체 관련
 
 Unity 메뉴에서 **Trickal Fan Game > Verify PlayerStats and Item Effects**와 **Trickal Fan Game > Verify Damage Context and Projectile**을 차례로 실행한다. 두 번째 검증은 현재 공격력과 출처, 중복 타격 방지, 관통, 일반 적 사망, 보스 피격·사망 이벤트가 유지되는지 확인한다.
 
-플레이어 피해로 `Health`가 사망 상태로 전환되면 Player의 `PlayerCombatEvents.EnemyKilled`가 대상과 마지막 `DamageContext`를 한 번 전달한다. `HealOnKill`은 이 이벤트의 첫 소비자이며, `PlayerProjectileAttack`이 활성화될 때 구독하고 비활성화될 때 해제한다. 이후 SP 드롭과 처치 시 연쇄 폭발은 기존 처치 판정을 복제하지 않고 같은 이벤트에 별도 구독자로 연결한다.
+플레이어 피해로 `Health`가 사망 상태로 전환되면 Player의 `PlayerCombatEvents.EnemyKilled`가 대상과 마지막 `DamageContext`를 한 번 전달한다. 고정 수치와 현재 최대 HP 비례 처치 회복은 `PlayerStats`에서 합산되고, `PlayerProjectileAttack`이 활성화될 때 이 이벤트를 구독해 한 번 회복한 뒤 비활성화 시 구독을 해제한다. 이후 SP 드롭과 처치 시 연쇄 폭발은 기존 처치 판정을 복제하지 않고 같은 이벤트에 별도 구독자로 연결한다.
 
 Unity 메뉴에서 **Trickal Fan Game > Verify Player Combat Events**를 실행하면 플레이어 원인이 아닌 사망 제외, 중복 보고 차단, 연속 처치, 처치 회복과 구독 해제를 확인한다.
 
@@ -179,3 +179,25 @@ Play Mode를 종료한 뒤 Unity 메뉴에서 **Trickal Fan Game > Setup Phase F
 Setup 후 **Trickal Fan Game > Verify Phase F-5 Seeded Grid Floors**를 실행한다. 검증기는 같은 seed 결정성, 여러 seed의 실제 변화, 6~8방 연결성과 필수 방, 안정 ID, 보스 최소 거리, 좌상·우하·좌우·상하 문 조합, 공통 방 크기·벽·문 중심선·전환 트리거·안전 진입점·Encounter·스폰·방 간격·카메라 범위, 미연결 봉인, 반복 Encounter 정책, 상태 복원, 제한 재시도 실패, 8~12방 설정 확장과 Setup 중복 방지를 확인한다.
 
 Play Mode에서는 새 Run을 시작해 각 층의 보스방까지 이동한다. 1~2층 보스를 처치하고 방 중앙 위쪽 출구로 다음 층 시작방에 들어간 뒤 HP·아티팩트·seed가 유지되는지 확인한다. 보물방을 방문한 뒤 인접 방을 왕복해 아티팩트가 다시 지급되지 않는지, 클리어한 전투방의 적이 다시 생성되지 않는지 확인한다. 마지막으로 3층 보스 처치 시 다음 층 출구 없이 기존 Run 클리어가 실행되는지 확인한다.
+
+## Phase G-7 보상 추첨과 전체 Run
+
+`ItemDropSource`는 활성 상태이고 최대 스택에 도달하지 않은 아티팩트만 후보로 만든다. 후보마다 일반 60, 고급 25, 희귀 12, 전설 3의 등급 가중치를 적용하며 `RunProgress.RunSeed`, 안정적인 `floor-XX-room-YY:treasure|boss` 보상 ID, 현재 후보와 스택 상태를 함께 사용해 결정적으로 추첨한다. 따라서 같은 seed와 같은 보상 상태는 같은 결과를 만들고, 아이템 풀의 직렬화 순서가 달라져도 결과가 바뀌지 않는다.
+
+모든 활성 아티팩트가 최대 스택이면 아이템 대신 최대 HP의 25%를 회복한다. 플레이어가 이미 사망했다면 대체 회복을 지급하거나 해당 보상을 소비하지 않는다. `RewardRoom`은 보상을 생성한 즉시 방별 `RoomRunState.HasClaimedArtifact`를 기록하며 재방문과 같은 seed 재조립에서 다시 추첨하지 않는다. 1~2층 보스도 방 ID 기반의 별도 보상 ID를 사용하고 3층 최종 보스는 기존처럼 드롭하지 않는다.
+
+Unity 메뉴에서 **Trickal Fan Game > Verify Phase G-7 Rewards and Full Run**을 Edit Mode와 Play Mode에서 각각 실행한다. 검증기는 활성 10종, 등급 가중치 분포, 최대 스택·비활성 후보 제외, 같은 seed·상태 결정성, 재방문 무재추첨, 방별 수령 상태, 전부 최대 스택일 때의 생존/사망 대체 회복을 확인한다. 이어서 10종을 최대 스택까지 획득한 한 Player가 1→2→3층 좌표를 진행해도 스택, 복합 효과, 방어막, 피해 오라와 최대 SP가 유지되는지 확인한다. 두 모드 모두 Console에 `passed`가 출력되고 오류가 없어야 Phase G를 완료 처리한다.
+
+## Phase H-5 Run 전송과 메타 진행
+
+Backend와 `test-player` seed가 실행 중인 상태에서 Play Mode를 종료하고 Unity 메뉴의 **Trickal Fan Game > Setup Phase H-5 Meta Progression**을 두 번 실행한다. Setup은 기존 `RunSession`에 `PlayerProgressClient`를 하나만 연결하며 저학년·고학년 스킬 참조를 갱신한다. 새 Run은 캐릭터 선택 직후 `GET /api/users/:nickname`으로 진행을 조회한 뒤 시작한다. 조회 실패 시 캐릭터별 마지막 성공 캐시를 사용하고, 캐시도 없으면 Lv.1을 적용하면서 화면에 오프라인 기본값 상태를 표시한다.
+
+Run 시작 시 `clientRunId`를 한 번 생성한다. 사망 또는 3층 클리어 시 실제 캐릭터, 획득 순서의 아티팩트, 도달 층, 처치 수, 플레이 시간과 종료 원인을 하나의 요청으로 고정해 전송한다. 중복 종료 이벤트는 무시하며 실패 후 화면의 **Retry save with the same Run ID** 버튼은 저장된 요청 객체와 ID를 그대로 다시 보낸다. 성공 결과에는 획득 XP, 현재 레벨·경험치/다음 필요 경험치, 미사용 포인트와 저학년/고학년 스킬 레벨이 표시된다.
+
+Unity 메뉴에서 **Trickal Fan Game > Verify Phase H-5 Meta Progression**을 Edit Mode와 Play Mode에서 각각 실행한다. 검증기는 Lv.1/Lv.10 피해·투사체·쿨타임 경계, 새 진행 스냅샷의 이전 값 덮어쓰기, 온라인·캐시·기본값 폴백, 클리어·사망 DTO, 중복 종료, 동일 요청 재시도, 성공·네트워크 실패·멱등성 충돌 표시를 확인한다. 두 모드 모두 Console에 `Phase H-5 verification passed`가 출력되고 오류가 없어야 H-5를 완료 처리한다.
+
+## 아이템 전투 테스트 방
+
+Unity 메뉴에서 **Trickal Fan Game > Debug > Open or Create Item Test Room**을 실행하면 `Assets/Scenes/ItemTestScene.unity`가 생성되거나 열린다. `Item Test Room` 오브젝트의 Inspector에서 아이템별 시작 스택과 적 Prefab·활성 여부·로컬 좌표·회전을 설정하고 Play Mode를 시작한다. 이 씬은 랜덤 층 생성과 Backend Run 저장을 사용하지 않는다.
+
+Play Mode의 오른쪽 패널에서 아이템을 `+1`씩 즉시 획득하고 현재 전투 수치를 확인할 수 있다. `Heal / Reset HP`와 `Respawn Enemies`로 같은 배치를 반복 테스트하며, 스택을 줄이거나 초기화하려면 Play Mode를 다시 시작한다. **Trickal Fan Game > Debug > Verify Item Test Room**을 Edit Mode와 Play Mode에서 각각 실행해 `passed`와 Console 오류 0개를 확인한다.

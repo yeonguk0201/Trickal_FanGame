@@ -1,69 +1,48 @@
-import Image from "next/image";
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
 export default function Home() {
+  const router = useRouter();
+  const [nickname, setNickname] = useState("");
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = nickname.trim();
+    if (value) {
+      router.push(`/users/${encodeURIComponent(value)}`);
+    }
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+    <main className={styles.page}>
+      <section className={styles.hero}>
+        <p className={styles.eyebrow}>TRICKAL RUN ARCHIVE</p>
+        <h1>모험의 끝에서<br />성장을 확인하세요.</h1>
+        <p className={styles.description}>
+          닉네임으로 최근 Run, 아티팩트 획득 순서와 캐릭터 스킬 성장을 확인할 수 있습니다.
+        </p>
+        <form onSubmit={submit} className={styles.search}>
+          <label htmlFor="nickname">사용자 닉네임</label>
+          <div>
+            <input
+              id="nickname"
+              value={nickname}
+              onChange={(event) => setNickname(event.target.value)}
+              placeholder="예: test-player"
+              autoComplete="off"
             />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <button type="submit" disabled={!nickname.trim()}>기록 보기</button>
+          </div>
+        </form>
+      </section>
+      <aside className={styles.note}>
+        <span>01</span><p>Run 종료 경험치와 레벨 진행</p>
+        <span>02</span><p>저학년·고학년 스킬 강화</p>
+        <span>03</span><p>아티팩트 획득 순서 상세</p>
+      </aside>
+    </main>
   );
 }

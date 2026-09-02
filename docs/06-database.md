@@ -110,6 +110,8 @@ MVP 기준의 기본 ERD는 다음과 같다.
 │ description  │
 │ rarity       │
 │ is_active    │
+│ max_stacks   │
+│ effect_data  │
 └──────────────┘
 
 ┌──────────────────┐
@@ -251,12 +253,15 @@ MVP에서는 약 10종의 아이템을 구현한다.
 | description | TEXT | 아이템 설명 |
 | rarity | VARCHAR | 희귀도 |
 | is_active | BOOLEAN | 사용 가능 여부 |
+| max_stacks | INTEGER | Run 내 최대 스택 |
+| effect_data | JSONB | Unity와 동일한 복합 효과 계약과 필수 수치 |
 | created_at | TIMESTAMP | 생성 시간 |
 | updated_at | TIMESTAMP | 수정 시간 |
 
 ### 8.1 Item 데이터와 실제 효과
-아이템의 실제 효과는 Unity에서 게임 로직으로 처리한다.
-Database에는 기본적으로 아이템의 식별 및 표시 정보를 저장한다.
+아이템의 실제 효과 적용은 Unity에서 게임 로직으로 처리한다.
+Database에는 식별·표시 정보와 함께 Unity 계약 드리프트를 검사할 수 있도록 최대 스택과 구조화된
+복합 효과 데이터도 저장한다. Backend는 이 데이터를 직접 전투 계산에 사용하지 않는다.
 예:
 ```text
 items
@@ -264,6 +269,8 @@ items
   name: 공격력 강화
   description: 공격력 증가
   rarity: COMMON
+  max_stacks: 5
+  effect_data: [{ "type": "AttackDamagePercent", "magnitude": 0.05 }]
 ```
 Unity에서는 해당 `item_id`를 기준으로 실제 효과를 적용한다.
 
@@ -289,6 +296,7 @@ Database의 핵심 테이블이다.
 |---|---|---|
 | id | UUID | Run 고유 ID |
 | client_run_id | UUID | Unity가 Run 시작 시 생성하는 멱등성 식별자 |
+| request_fingerprint | CHAR(64) | `client_run_id`를 제외한 정규화 요청의 SHA-256 |
 | user_id | UUID | 플레이한 유저 |
 | character_id | VARCHAR / UUID | 사용 캐릭터 |
 | started_at | TIMESTAMP | 게임 시작 시간 |
@@ -298,11 +306,17 @@ Database의 핵심 테이블이다.
 | is_cleared | BOOLEAN | 클리어 여부 |
 | kill_count | INTEGER | 총 처치 수 |
 | death_reason | VARCHAR | 사망 원인 |
+| experience_gained | INTEGER | 해당 Run에 한 번만 지급된 경험치 |
+| progress_snapshot | JSONB | 최초 지급 직후 API에 반환한 캐릭터 진행 결과 |
 | created_at | TIMESTAMP | 기록 생성 시간 |
 
 `client_run_id`에는 Unique 제약을 둔다. Unity가 네트워크 실패 후 같은 Run을 재전송하면 Backend는
-새 Run과 경험치를 만들지 않고 기존 저장 결과를 반환한다. 같은 ID에 다른 Run 내용이
-전송되면 멱등성 충돌로 거절한다.
+요청 지문을 비교해 새 Run과 경험치를 만들지 않고 `experience_gained`와 `progress_snapshot`에
+보존된 최초 결과를 반환한다. 같은 ID에 다른 Run 내용이 전송되면 멱등성 충돌로 거절한다.
+
+지문은 `client_run_id` 자체를 제외한 Run 필드 전체와 `order`로 정렬한 RunItem의 `item_id`,
+`floor`, `item_order`, `acquired_at`을 정규화한 뒤 계산한다. 배열 전송 순서만 다른 같은 내용은
+동일 요청이지만, 획득 순서나 시각을 포함한 실제 내용이 다르면 충돌이다.
 
 ## 10. Run 상태
 Run은 기본적으로 다음 두 가지 결과를 가진다.
@@ -517,7 +531,8 @@ COMMIT;
 
 ```text
 client_run_id 조회
-  ├─ 이미 존재 → 기존 Run·경험치 지급 결과 반환
+  ├─ 이미 존재하고 요청 지문 일치 → 저장된 Run·경험치·진행 스냅샷 반환
+  ├─ 이미 존재하고 요청 지문 불일치 → RUN_IDEMPOTENCY_CONFLICT
   └─ 없음
       → Run과 RunItem 저장
       → Backend가 획득 경험치 계산
@@ -903,7 +918,107 @@ Database 설계는 다음 조건을 만족하면 MVP 기준 완료로 정의한�
                          │ description  │
                          │ rarity       │
                          │ is_active    │
+                         │ max_stacks   │
+                         │ effect_data  │
                          └──────────────┘
 ```
 
 본 프로젝트의 Database는 하나의 플레이 세션을 Run으로 정의하고, `User` → `Run` → `RunItem` → `Item`의 관계를 중심으로 게임 플레이 데이터를 저장한다. 이를 기반으로 유저 전적, 랭킹, 캐릭터 통계, 아이템 통계 등의 Web 서비스를 제공한다.
+
+---
+
+## 42. ID 관리 정책
+
+이 프로젝트는 세 가지 ID 체계를 사용한다. 출시 후 ID의 의미를 바꾸거나 재사용하지 않는다.
+
+### 42.1 ID 형식별 사용 영역
+
+| 형식 | 사용 영역 | 예시 | 생성 주체 |
+|------|-----------|------|-----------|
+| UUID | User, Run, RunItem, UserCharacterProgress | `550e8400-e29b-41d4-a716-446655440000` | 서버 자동 생성 |
+| UUID | clientRunId (멱등성 키) | `00000000-0000-4000-8000-000000000001` | Unity 클라이언트 |
+| 문자열 (VARCHAR) | Character | `erpin` | 개발자 수동 할당 |
+| 문자열 (VARCHAR) | Item | `item-01`, `item-15` | 개발자 수동 할당 |
+| SHA-256 해시 | requestFingerprint | 64자 해시 | Backend 계산 |
+
+### 42.2 Item ID 규칙
+
+- **형식:** `item-{숫자}` (예: `item-01`, `item-12`)
+- **숫자 범위:** 01부터 시작, 0-패딩 2자리 사용
+- **연속성 불요:** 중간 번호 건너뛰기 허용 (item-05 비활성, item-06 비활성 등)
+- **재사용 금지:** 한 번 할당된 ID는 다른 아이템에 재사용하지 않음
+- **의미 변경 금지:** 기존 ID의 효과나 이름을 완전히 다른 것으로 바꾸지 않음
+
+현재 할당된 Item ID:
+
+| ID | 이름 | 상태 |
+|---|---|---|
+| `item-01` | 급조한 목검 | 활성 |
+| `item-02` | 풍선 갑옷 | 활성 |
+| `item-03` | 도깨비 감투 | 활성 |
+| `item-04` | 낡은 화살 | 활성 |
+| `item-05` | 투사체 크기 강화 | 비활성 (레거시) |
+| `item-06` | 다중 투사체 | 비활성 (레거시, 시너지 계약 보존) |
+| `item-07` | 공격 범위 강화 | 비활성 (레거시) |
+| `item-08` | 코미의 베개 | 활성 |
+| `item-09` | 피격 반격 | 비활성 (레거시) |
+| `item-10` | 추가 공격 | 비활성 (레거시) |
+| `item-11` | 다야의 다이아몬드 커터 | 활성 |
+| `item-12` | 녹슨 송곳 | 활성 |
+| `item-13` | 에르핀의 지팡이 | 활성 |
+| `item-14` | 광기의 가면 | 활성 |
+| `item-15` | 장난감 망원경 | 활성 |
+
+새 아이템 추가 시 `item-16`부터 순차 할당한다.
+
+### 42.3 Character ID 규칙
+
+- **형식:** 영문 소문자 문자열 (예: `erpin`)
+- **최대 길이:** 64자 (VARCHAR(64))
+- **재사용 금지:** 삭제된 캐릭터 ID를 새 캐릭터에 재사용하지 않음
+
+현재 할당된 Character ID:
+
+| ID | 이름 | 상태 |
+|---|---|---|
+| `erpin` | 에르핀 | 활성 |
+
+### 42.4 Rarity 계약
+
+희귀도는 Unity와 Database에서 다른 형식을 사용하지만 의미는 동일하다.
+
+| 게임 표시 | Unity Enum | Database 값 |
+|---|---|---|
+| 일반 | `Common (0)` | `COMMON` |
+| 고급 | `Uncommon (1)` | `UNCOMMON` |
+| 희귀 | `Rare (2)` | `RARE` |
+| 전설 | `Epic (3)` | `EPIC` |
+
+Backend API는 문자열(`COMMON` 등)을 사용하고, Unity는 정수(0~3)를 사용한다.
+변환은 Unity의 `ItemRarity` enum과 Backend의 `ItemRarity` 상수에서 처리한다.
+
+### 42.5 ItemEffectType 계약
+
+효과 타입은 Unity enum의 정수값으로 에셋에 저장되며 Backend는 사용하지 않는다.
+새 효과 추가 시 기존 번호를 재사용하지 않고 끝에 추가한다.
+
+| 번호 | 타입 | 용도 |
+|---|---|---|
+| 0~5 | 레거시 효과 | AttackDamage, MaxHealth, MoveSpeed, MultiShot, Pierce, HealOnKill |
+| 6~18 | Phase G 효과 | AttackDamagePercent, CriticalChance, DistanceDamage, SplitAfterPierce 등 |
+
+### 42.6 Unity ↔ Backend 계약 동기화
+
+- Unity의 `ItemDefinition` 에셋과 Backend의 `ITEM_CATALOG`는 동일한 ID, 이름, 희귀도, 활성 상태를 유지해야 한다.
+- `/contract-drift-check` 명령으로 불일치를 검사할 수 있다.
+- 한쪽만 변경하면 Run 저장 시 `ITEM_NOT_FOUND` 오류가 발생한다.
+
+### 42.7 ID 변경이 필요할 때
+
+ID 자체는 변경하지 않는다. 대신:
+
+1. **효과 조정:** 같은 ID를 유지하고 수치만 변경
+2. **완전히 다른 아이템:** 새 ID 할당 (기존 ID는 비활성 처리)
+3. **아이템 삭제:** `isActive = false`로 비활성화 (ID와 기록 보존)
+
+이 정책은 기존 Run 기록의 무결성을 보장하고, 전적에서 "이 Run에서 획득한 item-01"이 항상 같은 의미를 유지하도록 한다.

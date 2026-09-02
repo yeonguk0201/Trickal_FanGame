@@ -13,8 +13,22 @@ MonoBehaviour:
   m_Name: item-01
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.ItemDefinition
   itemId: item-01
-  displayName: Attack Boost
-  effectType: 0
-  effectValue: 1
+  displayName: "\uAE09\uC870\uD55C \uBAA9\uAC80"
+  rarity: 0
+  isActive: 1
+  effects:
+  - effectType: 6
+    magnitude: 0.05
+    healthThreshold: 0
+    secondaryMagnitude: 0
+    integerAmount: 0
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
+  effectType: 6
+  effectValue: 0.05
   stackMode: 0
-  maxStacks: 0
+  maxStacks: 5

@@ -13,8 +13,33 @@ MonoBehaviour:
   m_Name: item-02
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.ItemDefinition
   itemId: item-02
-  displayName: Max Health Boost
-  effectType: 1
-  effectValue: 3
+  displayName: "\uD48D\uC120 \uAC11\uC637"
+  rarity: 2
+  isActive: 1
+  effects:
+  - effectType: 11
+    magnitude: 2
+    healthThreshold: 0
+    secondaryMagnitude: 0
+    integerAmount: 0
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
+  - effectType: 12
+    magnitude: 0.5
+    healthThreshold: 0
+    secondaryMagnitude: 0
+    integerAmount: 0
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
+  effectType: 11
+  effectValue: 2
   stackMode: 0
-  maxStacks: 0
+  maxStacks: 2

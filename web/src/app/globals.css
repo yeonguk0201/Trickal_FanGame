@@ -1,13 +1,14 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #f4f0e7;
+  --foreground: #26231d;
+  --surface: #fffdf8;
+  --ink: #29261f;
+  --muted: #746f64;
+  --line: #e3ddcf;
+  --line-strong: #cec5b3;
+  --accent: #ffc94d;
+  --accent-dark: #9b5b09;
+  --shadow: 0 18px 50px rgb(69 55 28 / 8%);
 }
 
 html {
@@ -26,7 +27,7 @@ body {
   flex-direction: column;
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -42,8 +43,7 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }

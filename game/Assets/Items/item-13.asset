@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a995624a2bbf4453869f682459c5c723, type: 3}
+  m_Name: item-13
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.ItemDefinition
+  itemId: item-13
+  displayName: "\uC5D0\uB974\uD540\uC758 \uC9C0\uD321\uC774"
+  rarity: 3
+  isActive: 1
+  effects:
+  - effectType: 17
+    magnitude: 0
+    healthThreshold: 0
+    secondaryMagnitude: 0
+    integerAmount: 1
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
+  - effectType: 18
+    magnitude: 0
+    healthThreshold: 1
+    secondaryMagnitude: 0
+    integerAmount: 2
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
+  effectType: 17
+  effectValue: 1
+  stackMode: 0
+  maxStacks: 1

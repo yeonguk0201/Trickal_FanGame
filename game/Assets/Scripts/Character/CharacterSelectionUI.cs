@@ -13,6 +13,7 @@ namespace TrickalFanGame.Character
 
         private float previousTimeScale = 1f;
         private bool isSelecting = true;
+        private bool selectionPending;
 
         public void Configure(
             RunSession configuredRunSession,
@@ -79,10 +80,12 @@ namespace TrickalFanGame.Character
                     continue;
                 }
 
+                GUI.enabled = !selectionPending;
                 if (GUILayout.Button($"{character.DisplayName}\n{character.Description}", GUILayout.Height(62f)))
                 {
                     Select(character);
                 }
+                GUI.enabled = true;
             }
 
             GUILayout.EndArea();
@@ -90,7 +93,25 @@ namespace TrickalFanGame.Character
 
         private void Select(CharacterDefinition character)
         {
-            if (runSession == null || !runSession.BeginRun(character.CharacterId))
+            if (runSession == null || selectionPending)
+            {
+                Debug.LogError("[CharacterSelectionUI] Failed to start the Run with the selected character.", this);
+                return;
+            }
+
+            selectionPending = true;
+            if (!runSession.PrepareAndBeginRun(
+                character.CharacterId,
+                started => CompleteSelection(character, started)))
+            {
+                selectionPending = false;
+            }
+        }
+
+        private void CompleteSelection(CharacterDefinition character, bool started)
+        {
+            selectionPending = false;
+            if (!started)
             {
                 Debug.LogError("[CharacterSelectionUI] Failed to start the Run with the selected character.", this);
                 return;

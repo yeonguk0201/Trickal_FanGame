@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
+using TrickalFanGame.Meta;
 using TrickalFanGame.Network;
 using TrickalFanGame.Player;
 using TrickalFanGame.Room;
@@ -19,6 +20,7 @@ namespace TrickalFanGame.Run
         [SerializeField] private RunProgress runProgress;
         [SerializeField] private BossController boss;
         [SerializeField] private PlayerInventory inventory;
+        [SerializeField] private PlayerProgressClient playerProgressClient;
 
         [Header("Run identity")]
         [SerializeField] private string userId = "00000000-0000-4000-8000-000000000001";
@@ -34,12 +36,23 @@ namespace TrickalFanGame.Run
         private bool hasStarted;
         private bool hasEnded;
         private bool shouldSaveResult = true;
+        private bool isSaveInFlight;
+        private bool canRetrySave;
+        private string clientRunId;
+        private CreateRunRequest pendingRequest;
+        private IGameApiClient apiClient;
         private static int? lastGeneratedRunSeed;
 
         public bool HasStarted => hasStarted;
         public bool HasEnded => hasEnded;
         public bool IsCleared { get; private set; }
         public string CharacterId => characterId;
+        public string ClientRunId => clientRunId;
+        public CreateRunRequest PendingRequest => pendingRequest;
+        public bool IsSaveInFlight => isSaveInFlight;
+        public bool CanRetrySave => canRetrySave;
+        public string StatusMessage => statusMessage;
+        public string LastRunId => lastRunId;
         public RunProgress Progress => runProgress;
         public int RunSeed => runProgress != null && runProgress.HasRunSeed ? runProgress.RunSeed : 0;
 
@@ -59,6 +72,21 @@ namespace TrickalFanGame.Run
         public void SetResultSavingEnabled(bool enabled)
         {
             shouldSaveResult = enabled;
+        }
+
+        public void ConfigureMetaProgression(PlayerProgressClient configuredProgressClient)
+        {
+            playerProgressClient = configuredProgressClient;
+        }
+
+        public void ConfigureInventory(PlayerInventory configuredInventory)
+        {
+            inventory = configuredInventory;
+        }
+
+        public void SetApiClient(IGameApiClient configuredApiClient)
+        {
+            apiClient = configuredApiClient;
         }
 
         private void Awake()
@@ -87,6 +115,13 @@ namespace TrickalFanGame.Run
                 inventory = playerHealth.GetComponent<PlayerInventory>();
             }
 
+            if (playerProgressClient == null)
+            {
+                playerProgressClient = FindFirstObjectByType<PlayerProgressClient>();
+            }
+
+            apiClient = ApiClient.Instance;
+
             EnsureRunSeed();
         }
 
@@ -98,7 +133,37 @@ namespace TrickalFanGame.Run
                 return;
             }
 
-            BeginRun(characterId);
+            PrepareAndBeginRun(characterId, null);
+        }
+
+        public bool PrepareAndBeginRun(string selectedCharacterId, Action<bool> onCompleted)
+        {
+            if (hasStarted || hasEnded || string.IsNullOrWhiteSpace(selectedCharacterId))
+            {
+                onCompleted?.Invoke(false);
+                return false;
+            }
+
+            if (playerProgressClient == null)
+            {
+                bool started = BeginRun(selectedCharacterId);
+                onCompleted?.Invoke(started);
+                return started;
+            }
+
+            statusMessage = $"Loading progression: {selectedCharacterId}.";
+            return playerProgressClient.LoadAndApply(
+                selectedCharacterId,
+                _ =>
+                {
+                    if (!string.IsNullOrWhiteSpace(playerProgressClient.ResolvedUserId))
+                    {
+                        userId = playerProgressClient.ResolvedUserId;
+                    }
+
+                    bool started = BeginRun(selectedCharacterId);
+                    onCompleted?.Invoke(started);
+                });
         }
 
         public bool BeginRun(string selectedCharacterId)
@@ -113,7 +178,15 @@ namespace TrickalFanGame.Run
                 return false;
             }
 
+            if (playerProgressClient != null && !playerProgressClient.IsAppliedFor(selectedCharacterId))
+            {
+                playerProgressClient.ApplyFallback(
+                    selectedCharacterId,
+                    "The Run started without a completed online lookup.");
+            }
+
             characterId = selectedCharacterId;
+            clientRunId = Guid.NewGuid().ToString();
             startedAt = DateTime.UtcNow;
             startedRealtime = Time.realtimeSinceStartup;
             hasStarted = true;
@@ -203,8 +276,9 @@ namespace TrickalFanGame.Run
             IsCleared = isCleared;
             runProgress?.StopProgression();
             var endedAt = DateTime.UtcNow;
-            var request = new CreateRunRequest
+            pendingRequest = new CreateRunRequest
             {
+                clientRunId = clientRunId,
                 userId = userId,
                 characterId = characterId,
                 gameVersion = Application.version,
@@ -226,14 +300,32 @@ namespace TrickalFanGame.Run
             }
 
             statusMessage = isCleared ? "Run cleared. Saving result..." : "Run ended. Saving result...";
-            if (ApiClient.Instance == null)
+            SubmitPendingRun();
+        }
+
+        public bool RetrySave()
+        {
+            if (!hasEnded || pendingRequest == null || isSaveInFlight || !canRetrySave)
             {
-                statusMessage = "Run ended, but ApiClient is unavailable.";
-                Debug.LogError($"[RunSession] {statusMessage}");
+                return false;
+            }
+
+            SubmitPendingRun();
+            return true;
+        }
+
+        private void SubmitPendingRun()
+        {
+            IGameApiClient client = GetValidApiClient();
+            if (client == null)
+            {
+                OnSaveFailure("ApiClient is unavailable.");
                 return;
             }
 
-            ApiClient.Instance.PostRun(request, OnSaveSuccess, OnSaveFailure);
+            isSaveInFlight = true;
+            canRetrySave = false;
+            client.PostRun(pendingRequest, OnSaveSuccess, OnSaveFailure);
         }
 
         private RunItemDto[] BuildRunItems(DateTime endedAt)
@@ -266,23 +358,54 @@ namespace TrickalFanGame.Run
             return result;
         }
 
+        private IGameApiClient GetValidApiClient()
+        {
+            // Unity objects destroyed at runtime report as == null but not ReferenceEquals null
+            if (apiClient != null && (apiClient is not UnityEngine.Object obj || obj != null))
+            {
+                return apiClient;
+            }
+            return ApiClient.Instance;
+        }
+
         private void OnSaveSuccess(CreateRunResponse response)
         {
+            isSaveInFlight = false;
+            canRetrySave = false;
+            if (response?.data == null)
+            {
+                OnSaveFailure("Run response data is unavailable.");
+                return;
+            }
+
             lastRunId = response.data.runId;
-            statusMessage = $"Saved run: {lastRunId}";
+            playerProgressClient?.ShowRunResult(response.data);
+            CharacterProgressDto progress = response.data.progress;
+            statusMessage = progress == null
+                ? $"Saved run: {lastRunId}"
+                : $"Saved {lastRunId}: +{response.data.experienceGained} XP, " +
+                  $"Lv.{progress.level}, XP {progress.experience}/{progress.experienceToNextLevel}, " +
+                  $"points {progress.skillPoints}, skills " +
+                  $"{progress.lowGradeSkillLevel}/{progress.highGradeSkillLevel}.";
             Debug.Log($"[RunSession] {statusMessage}");
         }
 
         private void OnSaveFailure(string error)
         {
+            isSaveInFlight = false;
+            canRetrySave = true;
             statusMessage = $"Run ended; save failed: {error}";
-            Debug.LogError($"[RunSession] {statusMessage}");
+            Debug.LogWarning($"[RunSession] {statusMessage}");
         }
 
         private void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(10, 10, 380, 45));
+            GUILayout.BeginArea(new Rect(10, 10, 520, canRetrySave ? 76 : 45));
             GUILayout.Label(statusMessage, GUI.skin.box);
+            if (canRetrySave && GUILayout.Button("Retry save with the same Run ID"))
+            {
+                RetrySave();
+            }
             GUILayout.EndArea();
         }
     }

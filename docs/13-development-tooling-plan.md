@@ -112,6 +112,7 @@
 - [x] 수동으로만 확인 가능한 항목과 자동 검증 항목이 구분되어 있다. (`Scripts/README.md`의 Setup·검증기·Play Mode 절차)
 - [x] Phase F 방 정의 Setup 재실행과 결정적 그래프의 seed·ID·연결·중복·누락 불변조건을 전용 검증기로 확인한다. (`Verify Phase F-1 Random Room Graph`, 2026-08-28)
 - [x] Phase F 생성 그래프 바인딩 Setup 재실행과 방 정의·몬스터·보상 활성화·출입구·멱등성 불변조건을 전용 검증기로 확인한다. (`Verify Phase F-2 Generated Room Graph Binding`, 2026-08-28)
+- [x] 랜덤 층과 Backend 저장에서 분리된 아이템 테스트 씬에서 시작 스택·적 Prefab·좌표를 설정하고 Play 중 아이템 추가·적 재배치를 반복할 수 있다. (`Open or Create Item Test Room`, `Verify Item Test Room` Edit Mode·Play Mode 통과, 2026-09-01)
 
 ### 중단 기준
 

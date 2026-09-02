@@ -1876,6 +1876,7 @@ GameObject:
   m_Component:
   - component: {fileID: 68205443}
   - component: {fileID: 68205444}
+  - component: {fileID: 68205445}
   m_Layer: 0
   m_Name: Run Session
   m_TagString: Untagged
@@ -1915,11 +1916,28 @@ MonoBehaviour:
   runProgress: {fileID: 1750892776}
   boss: {fileID: 0}
   inventory: {fileID: 0}
+  playerProgressClient: {fileID: 68205445}
   userId: 00000000-0000-4000-8000-000000000001
   characterId: erpin
   waitForCharacterSelection: 1
   statusMessage: Run not started.
   lastRunId: 
+--- !u!114 &68205445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 68205442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2de25f487cb640d9ba7fc84a4164860d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Meta.PlayerProgressClient
+  userNickname: test-player
+  lowerGradeSkill: {fileID: 2018927171}
+  highGradeSkill: {fileID: 2018927174}
+  statusMessage: Progress not loaded.
 --- !u!1 &71204564
 GameObject:
   m_ObjectHideFlags: 0
@@ -2602,6 +2620,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
   dropPoint: {fileID: 62061224}
   dropParent: {fileID: 1845246845}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &85268216
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6556,6 +6576,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 3
+  currentShield: 0
 --- !u!58 &302527985
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -6824,6 +6845,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 1330461713}
   dropParent: {fileID: 0}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &311465636
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -7973,6 +7996,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 1800309174}
   dropParent: {fileID: 0}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &381461748
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -10234,6 +10259,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
   dropPoint: {fileID: 750619908}
   dropParent: {fileID: 525628581}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &504119547
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -14821,6 +14848,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
   dropPoint: {fileID: 1249820504}
   dropParent: {fileID: 1104203981}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &861643318
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -20538,6 +20567,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
   dropPoint: {fileID: 193114584}
   dropParent: {fileID: 824675415}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &1165982204
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -23074,6 +23105,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 587525194}
   dropParent: {fileID: 0}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!1 &1316229937
 GameObject:
   m_ObjectHideFlags: 0
@@ -24734,6 +24767,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 1401535381}
   dropParent: {fileID: 0}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!1 &1402141082
 GameObject:
   m_ObjectHideFlags: 0
@@ -25663,6 +25698,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
   dropPoint: {fileID: 1870838699}
   dropParent: {fileID: 759484618}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &1441868266
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -28676,6 +28713,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
   dropPoint: {fileID: 141138387}
   dropParent: {fileID: 1213509307}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &1551030355
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -30237,6 +30276,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 559356490}
   dropParent: {fileID: 0}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &1632398752
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -31473,6 +31514,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
   dropPoint: {fileID: 1158402242}
   dropParent: {fileID: 1840168144}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &1699078773
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -33948,6 +33991,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
   dropPoint: {fileID: 1818688573}
   dropParent: {fileID: 0}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!1 &1838770895
 GameObject:
   m_ObjectHideFlags: 0
@@ -36006,6 +36051,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
   dropPoint: {fileID: 927815415}
   dropParent: {fileID: 1385583640}
+  runProgress: {fileID: 0}
+  rewardId: 
 --- !u!61 &1940907254
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -38142,7 +38189,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb99820b30c578c4ca49cb31fadb32a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerAttack
-  damage: 1
   attackRange: 1
   attackRadius: 0.5
   attackCooldown: 0.35
@@ -38174,6 +38220,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 5
+  currentShield: 0
 --- !u!58 &2018927163
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -38358,6 +38405,8 @@ MonoBehaviour:
   baseAttackDamage: 1
   baseMoveSpeed: 5
   baseAttackSpeed: 1
+  baseCriticalChance: 0.05
+  baseCriticalDamageMultiplier: 1.5
 --- !u!114 &2018927170
 MonoBehaviour:
   m_ObjectHideFlags: 0
