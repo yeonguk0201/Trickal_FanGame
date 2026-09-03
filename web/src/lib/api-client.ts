@@ -8,10 +8,11 @@ import type {
   SkillType,
   UpgradeSkillRequestDto,
   UserProfileDto,
+  UserSearchResultDto,
 } from "./meta-api-contract";
 
 interface RunHistoryResponse extends ApiSuccess<RunSummaryDto[]> {
-  meta: { page: number; limit: number; total: number };
+  meta: { page: number; limit: number; total: number; totalPages: number };
 }
 
 export class ApiClientError extends Error {
@@ -33,9 +34,21 @@ export async function getUserProfile(nickname: string): Promise<UserProfileDto> 
   return request<UserProfileDto>(`/users/${encodeURIComponent(nickname)}`);
 }
 
-export async function getUserRuns(nickname: string): Promise<RunHistoryDto> {
+export async function searchUsers(
+  nickname: string,
+): Promise<UserSearchResultDto[]> {
+  return request<UserSearchResultDto[]>(
+    `/users/search?q=${encodeURIComponent(nickname)}`,
+  );
+}
+
+export async function getUserRuns(
+  nickname: string,
+  page: number | string = 1,
+  limit = 20,
+): Promise<RunHistoryDto> {
   const response = await requestEnvelope<RunHistoryResponse>(
-    `/users/${encodeURIComponent(nickname)}/runs?page=1&limit=20`,
+    `/users/${encodeURIComponent(nickname)}/runs?page=${encodeURIComponent(page)}&limit=${limit}`,
   );
   return { runs: response.data, ...response.meta };
 }

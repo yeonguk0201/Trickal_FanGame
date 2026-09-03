@@ -11,6 +11,7 @@ import { UsersService } from './users.service';
 describe('UsersService', () => {
   let service: UsersService;
   let repository: {
+    findPublicByNickname: jest.Mock;
     findByNickname: jest.Mock;
     findByNicknameWithProgress: jest.Mock;
     getRunStats: jest.Mock;
@@ -20,6 +21,9 @@ describe('UsersService', () => {
 
   beforeEach(() => {
     repository = {
+      findPublicByNickname: jest
+        .fn()
+        .mockResolvedValue({ nickname: 'test-player' }),
       findByNickname: jest.fn().mockResolvedValue({ id: 'user-id' }),
       findByNicknameWithProgress: jest.fn().mockResolvedValue({
         id: 'user-id',
@@ -68,6 +72,19 @@ describe('UsersService', () => {
       }),
     };
     service = new UsersService(repository as unknown as UsersRepository);
+  });
+
+  it('returns one exact public nickname search result', async () => {
+    await expect(service.searchUsers('test-player')).resolves.toEqual([
+      { nickname: 'test-player' },
+    ]);
+    expect(repository.findPublicByNickname).toHaveBeenCalledWith('test-player');
+  });
+
+  it('returns an empty search result when the exact nickname does not exist', async () => {
+    repository.findPublicByNickname.mockResolvedValue(null);
+
+    await expect(service.searchUsers('missing')).resolves.toEqual([]);
   });
 
   it('returns user stats and character progression contract fields', async () => {
@@ -199,7 +216,7 @@ describe('UsersService', () => {
           endedAt: new Date('2026-08-18T00:00:00.000Z'),
         },
       ],
-      meta: { page: 1, limit: 20, total: 1 },
+      meta: { page: 1, limit: 20, total: 1, totalPages: 1 },
     });
     expect(repository.findRunsByUserId).toHaveBeenCalledWith('user-id', {
       page: 1,
@@ -212,7 +229,32 @@ describe('UsersService', () => {
 
     await expect(service.getRunHistory('test-player', {})).resolves.toEqual({
       data: [],
-      meta: { page: 1, limit: 20, total: 0 },
+      meta: { page: 1, limit: 20, total: 0, totalPages: 1 },
+    });
+  });
+
+  it('rejects a page beyond the last available page', async () => {
+    repository.findRunsByUserId.mockResolvedValue({ runs: [], total: 21 });
+
+    await expect(
+      service.getRunHistory('test-player', { page: 4, limit: 10 }),
+    ).rejects.toMatchObject({
+      status: HttpStatus.UNPROCESSABLE_ENTITY,
+      response: {
+        success: false,
+        error: { code: 'RUN_PAGE_OUT_OF_RANGE' },
+      },
+    } as ApiException);
+  });
+
+  it('accepts page one for a user without runs', async () => {
+    repository.findRunsByUserId.mockResolvedValue({ runs: [], total: 0 });
+
+    await expect(
+      service.getRunHistory('test-player', { page: 1, limit: 10 }),
+    ).resolves.toMatchObject({
+      data: [],
+      meta: { page: 1, limit: 10, total: 0, totalPages: 1 },
     });
   });
 

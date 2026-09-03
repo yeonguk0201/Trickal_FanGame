@@ -82,6 +82,13 @@ describe('RunsService', () => {
             acquiredAt: new Date('2026-08-17T10:02:00.000Z'),
             item: { name: '우주를 담은 보석', rarity: 'COMMON' },
           },
+          {
+            itemId: 'item-01',
+            floor: 2,
+            itemOrder: 2,
+            acquiredAt: new Date('2026-08-17T10:06:00.000Z'),
+            item: { name: '우주를 담은 보석', rarity: 'COMMON' },
+          },
         ],
       }),
     };
@@ -105,6 +112,13 @@ describe('RunsService', () => {
           rarity: 'COMMON',
           floor: 1,
           order: 1,
+        },
+        {
+          itemId: 'item-01',
+          name: '우주를 담은 보석',
+          rarity: 'COMMON',
+          floor: 2,
+          order: 2,
         },
       ],
     });

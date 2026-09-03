@@ -43,6 +43,13 @@ type FindUserRunsOptions = {
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findPublicByNickname(nickname: string) {
+    return this.prisma.user.findUnique({
+      where: { nickname },
+      select: { nickname: true },
+    });
+  }
+
   findByNickname(nickname: string) {
     return this.prisma.user.findUnique({
       where: { nickname },
@@ -193,7 +200,7 @@ export class UsersRepository {
     const [runs, total] = await this.prisma.$transaction([
       this.prisma.run.findMany({
         where,
-        orderBy: { endedAt: 'desc' },
+        orderBy: [{ endedAt: 'desc' }, { id: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
         select: {

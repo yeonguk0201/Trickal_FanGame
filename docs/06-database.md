@@ -550,11 +550,24 @@ Run 저장, 경험치 지급, 스킬 포인트 지급은 하나의 Transaction�
 Web에서 자주 조회하는 데이터에는 Index를 적용한다.
 초기에는 다음 Index를 우선 고려한다.
 
-- `users.nickname`: 유저 검색 (`WHERE nickname = ?`)
+- `users.nickname`: 대소문자를 구분하는 정확 일치 유저 검색 (`WHERE nickname = ?`).
+  `@unique`가 만드는 B-tree 고유 인덱스로 최대 1건을 조회하므로 별도 검색 인덱스나
+  페이지네이션이 필요하지 않다. 향후 부분 일치나 대소문자 무시 검색으로 바꿀 때는 현재
+  인덱스를 그대로 사용할 수 있다고 가정하지 않고 실제 실행 계획을 확인한 뒤 전용 인덱스를 추가한다.
 - `runs.user_id`: 유저의 전적 조회 (`WHERE user_id = ?`)
 - `runs.character_id`: 캐릭터별 통계 (`WHERE character_id = ?`)
 - `runs.is_cleared`: 클리어 기록 조회 (`WHERE is_cleared = true`)
 - `run_items.item_id`: 아이템 선택률 계산 (`GROUP BY item_id`)
+- `runs(reached_floor DESC, play_time ASC, ended_at ASC, id ASC)`: 최고 도달 층 랭킹의
+  주 정렬과 안정적인 보조 정렬
+- `runs(is_cleared, play_time ASC, ended_at ASC, id ASC)`: 클리어 Run 필터와 최단
+  클리어 타임 랭킹
+- `runs(user_id, is_cleared)`: 유저별 클리어 횟수 집계
+
+11주차 통계 구현은 사용자·캐릭터·아이템 카탈로그와 Run의 집계 필드만 한 번의 읽기
+Transaction에서 가져오며, RunItem은 `item_id`만 조회해 같은 Run 내부에서 중복을 제거한다.
+현재 MVP 데이터 규모에서는 일관된 스냅샷과 계산 규칙 검증을 우선한다. 데이터가 메모리 집계에
+부담이 되는 규모가 되면 API 계약은 유지하고 Database `GROUP BY`/CTE 집계와 캐시로 교체한다.
 
 ## 23. Ranking Query를 고려한 Index
 랭킹 기능을 고려하여 다음과 같은 컬럼을 자주 조회한다.

@@ -12,7 +12,7 @@ export default function Home() {
     event.preventDefault();
     const value = nickname.trim();
     if (value) {
-      router.push(`/users/${encodeURIComponent(value)}`);
+      router.push(`/search?q=${encodeURIComponent(value)}`);
     }
   };
 
@@ -34,7 +34,7 @@ export default function Home() {
               placeholder="예: test-player"
               autoComplete="off"
             />
-            <button type="submit" disabled={!nickname.trim()}>기록 보기</button>
+            <button type="submit" disabled={!nickname.trim()}>검색</button>
           </div>
         </form>
       </section>

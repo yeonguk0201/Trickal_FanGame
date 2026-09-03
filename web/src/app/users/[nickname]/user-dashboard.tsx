@@ -19,30 +19,40 @@ import styles from "./user-dashboard.module.css";
 
 export default function UserDashboard({
   nickname,
+  requestedPage,
   initialUser,
   initialHistory,
   initialProfileError,
+  initialProfileErrorCode,
   initialHistoryError,
+  initialHistoryErrorCode,
 }: {
   nickname: string;
+  requestedPage: string;
   initialUser: UserProfileDto | null;
   initialHistory: RunHistoryDto | null;
   initialProfileError: string | null;
+  initialProfileErrorCode: string | null;
   initialHistoryError: string | null;
+  initialHistoryErrorCode: string | null;
 }) {
   const [user, setUser] = useState<UserProfileDto | null>(initialUser);
   const [history, setHistory] = useState<RunHistoryDto | null>(initialHistory);
   const [profileError, setProfileError] = useState<string | null>(initialProfileError);
+  const [profileErrorCode, setProfileErrorCode] = useState<string | null>(initialProfileErrorCode);
   const [historyError, setHistoryError] = useState<string | null>(initialHistoryError);
+  const [historyErrorCode, setHistoryErrorCode] = useState<string | null>(initialHistoryErrorCode);
   const [isLoading, setIsLoading] = useState(false);
 
   const loadData = async () => {
     setIsLoading(true);
     setProfileError(null);
+    setProfileErrorCode(null);
     setHistoryError(null);
+    setHistoryErrorCode(null);
     const [profileResult, historyResult] = await Promise.allSettled([
       getUserProfile(nickname),
-      getUserRuns(nickname),
+      getUserRuns(nickname, requestedPage, 10),
     ]);
 
     if (profileResult.status === "fulfilled") {
@@ -50,12 +60,22 @@ export default function UserDashboard({
     } else {
       setUser(null);
       setProfileError(getErrorMessage(profileResult.reason));
+      setProfileErrorCode(
+        profileResult.reason instanceof ApiClientError
+          ? profileResult.reason.code
+          : null,
+      );
     }
     if (historyResult.status === "fulfilled") {
       setHistory(historyResult.value);
     } else {
       setHistory(null);
       setHistoryError(getErrorMessage(historyResult.reason));
+      setHistoryErrorCode(
+        historyResult.reason instanceof ApiClientError
+          ? historyResult.reason.code
+          : null,
+      );
     }
     setIsLoading(false);
   };
@@ -65,11 +85,14 @@ export default function UserDashboard({
   }
 
   if (!user) {
+    const userMissing = profileErrorCode === "USER_NOT_FOUND";
     return (
       <StatusPage
-        title="사용자 기록을 불러오지 못했습니다"
+        title={userMissing ? "존재하지 않는 사용자입니다" : "사용자 기록을 불러오지 못했습니다"}
         message={profileError ?? undefined}
-        action={<button onClick={() => void loadData()}>다시 시도</button>}
+        action={
+          userMissing ? null : <button onClick={() => void loadData()}>다시 시도</button>
+        }
       />
     );
   }
@@ -87,6 +110,8 @@ export default function UserDashboard({
           <Stat label="클리어" value={`${user.stats.clears}회`} />
           <Stat label="승률" value={`${user.stats.winRate.toFixed(1)}%`} />
           <Stat label="최고 층" value={`${user.stats.highestFloor}층`} />
+          <Stat label="평균 도달 층" value={`${user.stats.averageFloor.toFixed(1)}층`} />
+          <Stat label="평균 플레이 시간" value={formatPlayTime(user.stats.averagePlayTime)} />
         </div>
       </header>
 
@@ -130,20 +155,32 @@ export default function UserDashboard({
       <section className={styles.section} aria-labelledby="runs-title">
         <div className={styles.sectionHeading}>
           <div>
-            <p className={styles.eyebrow}>최근 20개</p>
+            <p className={styles.eyebrow}>페이지당 10개</p>
             <h2 id="runs-title">Run 전적</h2>
           </div>
           {history && <span>전체 {history.total}회</span>}
         </div>
         {historyError ? (
-          <InlineError message={historyError} retry={() => void loadData()} />
+          <InlineError
+            message={historyError}
+            retry={() => void loadData()}
+            firstPageHref={
+              historyErrorCode === "RUN_PAGE_OUT_OF_RANGE" ||
+              historyErrorCode === "VALIDATION_ERROR"
+                ? `/users/${encodeURIComponent(nickname)}?page=1`
+                : undefined
+            }
+          />
         ) : !history || history.runs.length === 0 ? (
           <EmptyState>아직 저장된 Run이 없습니다.</EmptyState>
         ) : (
           <ol className={styles.runList}>
             {history.runs.map((run) => (
               <li key={run.runId}>
-                <Link href={`/runs/${run.runId}`} className={styles.runCard}>
+                <Link
+                  href={`/runs/${run.runId}?fromPage=${history.page}`}
+                  className={styles.runCard}
+                >
                   <span
                     className={
                       run.isCleared ? styles.clearBadge : styles.deathBadge
@@ -163,6 +200,25 @@ export default function UserDashboard({
               </li>
             ))}
           </ol>
+        )}
+        {history && history.totalPages > 1 && (
+          <nav className={styles.pagination} aria-label="Run 전적 페이지">
+            {history.page > 1 ? (
+              <Link href={`/users/${encodeURIComponent(nickname)}?page=${history.page - 1}`}>
+                ← 이전
+              </Link>
+            ) : (
+              <span aria-disabled="true">← 이전</span>
+            )}
+            <strong>{history.page} / {history.totalPages} 페이지</strong>
+            {history.page < history.totalPages ? (
+              <Link href={`/users/${encodeURIComponent(nickname)}?page=${history.page + 1}`}>
+                다음 →
+              </Link>
+            ) : (
+              <span aria-disabled="true">다음 →</span>
+            )}
+          </nav>
         )}
       </section>
     </main>
@@ -300,8 +356,17 @@ function EmptyState({ children }: { children: React.ReactNode }) {
   return <div className={styles.empty}>{children}</div>;
 }
 
-function InlineError({ message, retry }: { message: string; retry: () => void }) {
-  return <div className={styles.inlineError} role="alert"><p>{message}</p><button onClick={retry}>다시 시도</button></div>;
+function InlineError({ message, retry, firstPageHref }: {
+  message: string;
+  retry: () => void;
+  firstPageHref?: string;
+}) {
+  return (
+    <div className={styles.inlineError} role="alert">
+      <p>{message}</p>
+      {firstPageHref ? <Link href={firstPageHref}>첫 페이지로</Link> : <button onClick={retry}>다시 시도</button>}
+    </div>
+  );
 }
 
 function StatusPage({ title, message, action }: {
@@ -315,14 +380,15 @@ function StatusPage({ title, message, action }: {
       <h1>{title}</h1>
       {message && <p>{message}</p>}
       {action}
-      <Link href="/">홈으로</Link>
+      <Link href="/search">유저 검색으로</Link>
     </main>
   );
 }
 
 function formatPlayTime(totalSeconds: number): string {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
+  const roundedSeconds = Math.round(totalSeconds);
+  const minutes = Math.floor(roundedSeconds / 60);
+  const seconds = roundedSeconds % 60;
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 

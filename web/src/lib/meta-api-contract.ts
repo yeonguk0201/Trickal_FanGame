@@ -52,6 +52,10 @@ export interface UserProfileDto {
   characterProgress: CharacterProgressDto[];
 }
 
+export interface UserSearchResultDto {
+  nickname: string;
+}
+
 export interface RunSummaryDto {
   runId: string;
   character: CharacterSummaryDto;
@@ -67,6 +71,7 @@ export interface RunHistoryDto {
   page: number;
   limit: number;
   total: number;
+  totalPages: number;
 }
 
 export interface RunItemDto {

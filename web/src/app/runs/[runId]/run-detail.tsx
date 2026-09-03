@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { getErrorMessage, getRunDetail } from "@/lib/api-client";
+import { ApiClientError, getErrorMessage, getRunDetail } from "@/lib/api-client";
 import type { RunDetailDto } from "@/lib/meta-api-contract";
 import styles from "./run-detail.module.css";
 
@@ -13,23 +13,28 @@ const RARITY_LABEL: Record<string, string> = {
   EPIC: "전설",
 };
 
-export default function RunDetail({ runId, initialRun, initialError = null }: {
+export default function RunDetail({ runId, returnPage, initialRun, initialError = null, initialErrorCode = null }: {
   runId: string;
+  returnPage: string | null;
   initialRun: RunDetailDto | null;
   initialError?: string | null;
+  initialErrorCode?: string | null;
 }) {
   const [run, setRun] = useState<RunDetailDto | null>(initialRun);
   const [error, setError] = useState<string | null>(initialError);
+  const [errorCode, setErrorCode] = useState<string | null>(initialErrorCode);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
     setError(null);
+    setErrorCode(null);
     try {
       setRun(await getRunDetail(runId));
     } catch (reason) {
       setRun(null);
       setError(getErrorMessage(reason));
+      setErrorCode(reason instanceof ApiClientError ? reason.code : null);
     } finally {
       setLoading(false);
     }
@@ -39,20 +44,24 @@ export default function RunDetail({ runId, initialRun, initialError = null }: {
     return <main className={styles.status}>Run 상세를 불러오는 중입니다…</main>;
   }
   if (!run) {
+    const runMissing = errorCode === "RUN_NOT_FOUND";
     return (
       <main className={styles.status}>
-        <h1>Run을 불러오지 못했습니다</h1>
+        <h1>{runMissing ? "존재하지 않는 Run입니다" : "Run을 불러오지 못했습니다"}</h1>
         <p>{error}</p>
-        <button onClick={() => void load()}>다시 시도</button>
-        <Link href="/">홈으로</Link>
+        {!runMissing && <button onClick={() => void load()}>다시 시도</button>}
+        <Link href="/search">유저 검색으로</Link>
       </main>
     );
   }
 
   const orderedItems = [...run.items].sort((a, b) => a.order - b.order);
+  const returnHref = `/users/${encodeURIComponent(run.user.nickname)}${
+    returnPage ? `?page=${returnPage}` : ""
+  }`;
   return (
     <main className={styles.page}>
-      <Link href={`/users/${encodeURIComponent(run.user.nickname)}`} className={styles.back}>
+      <Link href={returnHref} className={styles.back}>
         ← {run.user.nickname}의 전적으로
       </Link>
       <header className={styles.hero}>
@@ -64,10 +73,14 @@ export default function RunDetail({ runId, initialRun, initialError = null }: {
       </header>
 
       <section className={styles.metrics} aria-label="Run 요약">
+        <Metric label="유저" value={run.user.nickname} />
+        <Metric label="캐릭터" value={`${run.character.name} (${run.character.id})`} />
         <Metric label="결과" value={run.isCleared ? "클리어" : `사망 · ${deathLabel(run.deathReason)}`} />
         <Metric label="플레이 시간" value={formatPlayTime(run.playTime)} />
         <Metric label="도달 층" value={`${run.reachedFloor}층`} />
         <Metric label="처치 수" value={`${run.killCount}`} />
+        <Metric label="시작 시각" value={formatDate(run.startedAt)} />
+        <Metric label="종료 시각" value={formatDate(run.endedAt)} />
       </section>
 
       <section className={styles.items}>
@@ -106,9 +119,9 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 function deathLabel(reason: string | null): string {
   const labels: Record<string, string> = {
-    MONSTER: "몬스터",
+    ENEMY: "일반 적",
     BOSS: "보스",
-    ENVIRONMENT: "환경",
+    HAZARD: "환경 위험",
     UNKNOWN: "원인 불명",
   };
   return reason ? labels[reason] ?? reason : "원인 불명";

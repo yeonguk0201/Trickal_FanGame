@@ -1,11 +1,19 @@
 import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { GetUserRunsQueryDto } from './dto/get-user-runs-query.dto';
+import { SearchUsersQueryDto } from './dto/search-users-query.dto';
 import { UpgradeSkillDto } from './dto/upgrade-skill.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('search')
+  async searchUsers(@Query() query: SearchUsersQueryDto) {
+    const data = await this.usersService.searchUsers(query.q);
+
+    return { success: true, data };
+  }
 
   @Get(':nickname')
   async getUser(@Param('nickname') nickname: string) {

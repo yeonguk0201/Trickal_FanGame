@@ -155,6 +155,7 @@ POST /api/runs
 ## User API
 
 ```text
+GET /api/users/search?q={nickname}
 GET /api/users/:nickname
 GET /api/users/:nickname/runs
 PUT /api/users/:nickname/characters/:characterId/skills/:skillType
@@ -430,7 +431,63 @@ Unity는 생성된 Run ID와 Backend가 계산한 캐릭터 진행 결과를 표
 
 # 9. User API
 
-# 9.1 Get User
+# 9.1 Search Users
+
+닉네임으로 전적 페이지에 진입할 유저를 검색한다.
+
+```http
+GET /api/users/search?q=test-player
+```
+
+MVP 검색 정책:
+
+- `q`의 앞뒤 공백은 제거한다.
+- 공백 제거 후 길이는 2~50자여야 한다.
+- 닉네임은 대소문자를 구분해 정확히 일치한다.
+- 정확 일치이므로 결과는 최대 1개이며 페이지네이션을 사용하지 않는다.
+- 결과가 있다면 닉네임 오름차순으로 본 것과 동일한 안정적인 순서다.
+- 응답에는 전적 이동에 필요한 공개 필드 `nickname`만 포함하며 UUID나 진행 데이터는 노출하지 않는다.
+
+성공 응답:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "nickname": "test-player"
+    }
+  ]
+}
+```
+
+일치하는 유저가 없으면 `200 OK`와 빈 배열을 반환한다.
+
+```json
+{
+  "success": true,
+  "data": []
+}
+```
+
+`q`가 없거나, 빈 문자열이거나, 길이 범위를 벗어나면 `422 Unprocessable Entity`를 반환한다.
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "요청 데이터가 유효하지 않습니다."
+  }
+}
+```
+
+Database 예외는 공통 오류 계약에 따라 세부 내용을 노출하지 않고
+`500 INTERNAL_SERVER_ERROR`로 반환한다.
+
+---
+
+# 9.2 Get User
 
 특정 유저의 기본 정보와 주요 전적을 조회한다.
 
@@ -446,7 +503,7 @@ GET /api/users/test-player
 
 ---
 
-# 9.2 User Response
+# 9.3 User Response
 
 ```json
 {
@@ -482,7 +539,7 @@ GET /api/users/test-player
 
 ---
 
-# 9.3 User Stats
+# 9.4 User Stats
 
 유저 페이지에서 다음 통계를 제공한다.
 
@@ -497,9 +554,13 @@ Highest Floor
 
 통계는 `runs` 데이터를 기반으로 Backend에서 계산한다.
 
+Run이 없는 유저는 `totalRuns`, `clears`, `winRate`, `averagePlayTime`, `averageFloor`,
+`highestFloor`를 모두 `0`으로 반환한다. 닉네임에 해당하는 유저가 없으면 `404 Not Found`와
+`USER_NOT_FOUND`를 반환하며 일반 Backend 실패와 구분한다.
+
 ---
 
-# 9.4 Upgrade Character Skill
+# 9.5 Upgrade Character Skill
 
 캐릭터의 미사용 스킬 포인트 1을 소비해 지정한 스킬을 1레벨 강화한다.
 
@@ -585,6 +646,14 @@ Pagination을 기본적으로 지원한다.
 GET /api/users/test-player/runs?page=1&limit=20
 ```
 
+- `page` 기본값은 `1`, 허용 범위는 `1~1,000,000`의 정수다.
+- `limit` 기본값은 `20`, 허용 범위는 `1~100`의 정수다.
+- Web 전적 화면은 한 페이지에 10개를 요청한다.
+- 정렬은 `endedAt DESC`, 같은 종료 시각에서는 `runId DESC`를 사용한다.
+- 전체 Run이 없을 때도 1페이지는 유효하며 빈 배열과 `totalPages: 1`을 반환한다.
+- 마지막 페이지보다 큰 `page`는 `RUN_PAGE_OUT_OF_RANGE`를 반환한다.
+- 숫자가 아니거나 허용 범위를 벗어난 값은 `VALIDATION_ERROR`를 반환한다.
+
 향후 다음과 같은 Filter를 추가할 수 있다.
 
 ```text
@@ -631,7 +700,20 @@ MVP에서는 필요한 기능만 구현한다.
   "meta": {
     "page": 1,
     "limit": 20,
-    "total": 32
+    "total": 32,
+    "totalPages": 2
+  }
+}
+```
+
+범위를 벗어난 페이지 (`422 Unprocessable Entity`):
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RUN_PAGE_OUT_OF_RANGE",
+    "message": "요청한 전적 페이지가 범위를 벗어났습니다."
   }
 }
 ```
@@ -709,247 +791,86 @@ GET /api/runs/run-uuid
 }
 ```
 
+`items`는 `order ASC`로 반환한다. 같은 `itemId`를 여러 번 획득한 경우에도 각 획득의
+`floor`, `order`, `acquiredAt`을 별도 항목으로 유지한다. Run이 없으면 `404 Not Found`와
+`RUN_NOT_FOUND`를 반환하며, Database 또는 네트워크 실패와 구분한다.
+
+`deathReason`은 `ENEMY`, `BOSS`, `HAZARD`, `UNKNOWN` 또는 클리어 Run의 `null`을 사용한다.
+
 ---
 
 # 12. Ranking API
 
-전체 유저의 랭킹을 조회한다.
+전체 기간의 저장 Run을 대상으로 유저당 대표 기록 하나를 반환한다.
 
 ```http
-GET /api/rankings
+GET /api/rankings?type=highest-floor&page=1&limit=20
 ```
 
----
+- `type`: `highest-floor`(기본값), `fastest-clear`, `most-clears`
+- `page`: 1 이상, 기본값 1
+- `limit`: 1~100, 기본값 20
+- 범위를 벗어난 유효 페이지는 성공 응답과 빈 `data`를 반환한다.
+- 잘못된 Query는 `422 VALIDATION_ERROR`를 반환한다.
 
-# 12.1 Ranking Type
+`highest-floor`는 `reachedFloor DESC`, `playTime ASC`, `endedAt ASC`, `nickname ASC`,
+`runId ASC` 순으로 각 유저의 대표 Run과 전체 순서를 정한다. `fastest-clear`는 클리어 Run만
+대상으로 `playTime ASC` 이후 동일한 보조 정렬을 사용한다. `most-clears`는 유저별
+`clears DESC`, `totalRuns DESC`, `nickname ASC`, `userId ASC` 순이다. 순위는 동률이어도
+페이지 전체에서 연속된 위치 순위이며, 같은 저장 데이터에는 항상 같은 순서가 나온다.
 
-MVP에서는 다음 랭킹을 우선 지원한다.
-
-```text
-highest-floor
-fastest-clear
-```
-
-Query Parameter:
-
-```http
-GET /api/rankings?type=highest-floor
-```
-
-또는
-
-```http
-GET /api/rankings?type=fastest-clear
-```
-
----
-
-# 12.2 Highest Floor Ranking
-
-가장 높은 층에 도달한 유저를 기준으로 정렬한다.
-
-```http
-GET /api/rankings?type=highest-floor
-```
-
-정렬:
-
-```text
-reachedFloor DESC
-```
-
-동일 층인 경우 추가적인 정렬 기준을 사용할 수 있다.
-
-예:
-
-```text
-reachedFloor DESC
-playTime ASC
-```
-
----
-
-# 12.3 Fastest Clear Ranking
-
-클리어한 Run 중 플레이 시간이 짧은 순으로 정렬한다.
-
-```http
-GET /api/rankings?type=fastest-clear
-```
-
-조건:
-
-```text
-isCleared = true
-```
-
-정렬:
-
-```text
-playTime ASC
-```
-
----
-
-# 12.4 Ranking Response
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "rank": 1,
-      "nickname": "player-a",
-      "character": {
-        "id": "erpin",
-        "name": "에르핀"
-      },
-      "reachedFloor": 5,
-      "playTime": 812,
-      "runId": "run-001"
-    },
-    {
-      "rank": 2,
-      "nickname": "player-b",
-      "character": {
-        "id": "erpin",
-        "name": "에르핀"
-      },
-      "reachedFloor": 4,
-      "playTime": 921,
-      "runId": "run-002"
-    }
-  ]
-}
-```
+Run 기반 랭킹 항목은 `rank`, `nickname`, `runId`, `character`, `reachedFloor`,
+`playTime`, `endedAt`을 반환한다. `most-clears` 항목은 `rank`, `nickname`,
+`clears`, `totalRuns`를 반환한다. 내부 유저 UUID는 공개하지 않는다. 응답의 `meta`는 `type`, `page`, `limit`, `total`,
+`totalPages`를 포함한다.
 
 ---
 
 # 13. Statistics API
 
-게임 전체의 통계를 조회한다.
+통계 모집단은 별도 기간 필터가 없는 전체 저장 Run이다. 비율은 `0~100` 퍼센트, 분모가
+0인 비율과 평균·최댓값은 0이다. 현재 계약은 테스트/개발 Run을 임의로 제외하지 않는다.
 
 ```http
 GET /api/statistics
+GET /api/statistics/users/:nickname
+GET /api/statistics/characters
+GET /api/statistics/items
+GET /api/statistics/floors
 ```
 
----
-
-# 13.1 Statistics Response
-
-```json
-{
-  "success": true,
-  "data": {
-    "totalUsers": 120,
-    "totalRuns": 1520,
-    "totalClears": 420,
-    "winRate": 27.63,
-    "averagePlayTime": 581,
-    "averageReachedFloor": 2.7
-  }
-}
-```
+전체 통계는 `totalUsers`, `totalRuns`, `totalClears`, `clearRate`, `averagePlayTime`,
+`averageReachedFloor`, `highestReachedFloor`을 반환한다. 유저 통계는 `nickname`과 유저 범위의
+동일 Run 지표를 반환하며 없는 닉네임은 `404 USER_NOT_FOUND`이다.
 
 ---
 
 # 14. Character Statistics API
 
-캐릭터별 통계를 조회한다.
-
-```http
-GET /api/statistics/characters
-```
-
----
-
-# 14.1 Character Statistics Response
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "characterId": "erpin",
-      "characterName": "에르핀",
-      "totalRuns": 1520,
-      "clears": 420,
-      "winRate": 27.63,
-      "averageFloor": 2.7,
-      "averagePlayTime": 581
-    }
-  ]
-}
-```
-
-현재는 캐릭터가 1종이므로 하나의 데이터만 존재한다.
-
-향후 캐릭터가 추가되면 자동으로 여러 캐릭터의 통계를 반환한다.
+`GET /api/statistics/characters`는 캐릭터 카탈로그의 모든 캐릭터를 반환한다. Run이 없는
+캐릭터도 0값으로 포함하며 `totalRuns DESC`, `characterId ASC`로 정렬한다. 각 항목은
+`characterId`, `characterName`, `totalRuns`, `clears`, `clearRate`,
+`averageReachedFloor`, `averagePlayTime`을 포함한다.
 
 ---
 
 # 15. Item Statistics API
 
-아이템별 통계를 조회한다.
-
-```http
-GET /api/statistics/items
-```
-
----
-
-# 15.1 Item Statistics Response
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "itemId": "item-01",
-      "itemName": "Item A",
-      "pickCount": 540,
-      "pickRate": 35.52,
-      "clearCount": 180,
-      "clearRate": 33.33
-    },
-    {
-      "itemId": "item-02",
-      "itemName": "Item B",
-      "pickCount": 420,
-      "pickRate": 27.63,
-      "clearCount": 140,
-      "clearRate": 33.33
-    }
-  ]
-}
-```
+`GET /api/statistics/items`는 아이템 카탈로그의 모든 아이템을 반환한다. 같은 Run에서 같은
+아이템을 여러 번 획득해도 고유 Run 한 건으로 센다. `acquiredRunCount`는 획득한 고유 Run 수,
+`selectionRate`는 `acquiredRunCount / 전체 Run 수 × 100`,
+`clearRateAfterAcquisition`은 `획득 후 클리어 Run 수 / acquiredRunCount × 100`이다.
+획득 Run 수 내림차순, `itemId` 오름차순으로 정렬하며 미획득 아이템도 0값으로 포함한다.
 
 ---
 
-# 16. Item Statistics 계산
+# 16. Floor Statistics API
 
-아이템 선택률은 다음과 같이 계산한다.
-
-```text
-Item Pick Rate
-=
-해당 아이템을 획득한 Run 수
-/
-전체 Run 수
-× 100
-```
-
-예:
-
-```text
-전체 Run = 1,000
-
-Item A 획득 Run = 300
-
-Pick Rate
-= 300 / 1,000 × 100
-= 30%
-```
+`GET /api/statistics/floors`는 1층부터 실제 최고 도달 층까지 오름차순으로 반환한다.
+`reachedRunCount`는 `reachedFloor >= floor`인 Run 수, `reachRate`의 분모는 전체 Run이다.
+`deathCount`는 해당 층에서 끝난 미클리어 Run 수이며 `deathRate`의 분모는 해당 층 도달 Run이다.
+`clearCount`는 해당 층에 도달한 최종 클리어 Run 수이며 `clearRate`도 해당 층 도달 Run을
+분모로 한다. Run이 하나도 없으면 빈 배열을 반환한다.
 
 ---
 
@@ -1244,7 +1165,7 @@ Web은 Backend API를 통해 데이터를 조회한다.
 ```text
 User Search
     ↓
-GET /api/users/:nickname
+GET /api/users/search?q={nickname}
 ```
 
 ```text
@@ -1278,14 +1199,16 @@ GET /api/statistics
 | Web Page | API |
 |---|---|
 | Home | `/api/statistics` |
-| User Search | `/api/users/:nickname` |
+| User Search | `/api/users/search?q={nickname}` |
 | User Profile | `/api/users/:nickname` |
 | User Run History | `/api/users/:nickname/runs` |
 | Run Detail | `/api/runs/:runId` |
 | Ranking | `/api/rankings` |
 | Statistics | `/api/statistics` |
+| User Statistics | `/api/statistics/users/:nickname` |
 | Character Stats | `/api/statistics/characters` |
 | Item Stats | `/api/statistics/items` |
+| Floor Stats | `/api/statistics/floors` |
 
 ---
 
@@ -1301,6 +1224,7 @@ GET /api/statistics
 │   └── GET /:runId
 │
 ├── users
+│   ├── GET /search?q={nickname}
 │   └── GET /:nickname
 │       └── GET /runs
 │
@@ -1309,8 +1233,10 @@ GET /api/statistics
 │
 └── statistics
     ├── GET /
+    ├── GET /users/:nickname
     ├── GET /characters
-    └── GET /items
+    ├── GET /items
+    └── GET /floors
 ```
 
 ---
@@ -1420,6 +1346,8 @@ POST /api/runs
 
 PUT /api/users/:nickname/characters/:characterId/skills/:skillType
 
+GET /api/users/search?q={nickname}
+
 GET /api/users/:nickname
 
 GET /api/users/:nickname/runs
@@ -1430,9 +1358,13 @@ GET /api/rankings
 
 GET /api/statistics
 
+GET /api/statistics/users/:nickname
+
 GET /api/statistics/characters
 
 GET /api/statistics/items
+
+GET /api/statistics/floors
 ```
 
 ---

@@ -17,6 +17,12 @@ import {
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
+  async searchUsers(nickname: string) {
+    const user = await this.usersRepository.findPublicByNickname(nickname);
+
+    return user ? [user] : [];
+  }
+
   async getUser(nickname: string) {
     const user =
       await this.usersRepository.findByNicknameWithProgress(nickname);
@@ -90,6 +96,15 @@ export class UsersService {
       user.id,
       { page, limit },
     );
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
+    if (page > totalPages) {
+      throw new ApiException(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        'RUN_PAGE_OUT_OF_RANGE',
+        '요청한 전적 페이지가 범위를 벗어났습니다.',
+      );
+    }
 
     return {
       data: runs.map((run) => ({
@@ -101,7 +116,7 @@ export class UsersService {
         killCount: run.killCount,
         endedAt: run.endedAt,
       })),
-      meta: { page, limit, total },
+      meta: { page, limit, total, totalPages },
     };
   }
 

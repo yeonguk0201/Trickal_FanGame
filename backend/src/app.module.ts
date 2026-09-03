@@ -7,6 +7,7 @@ import { HealthService } from './health/health.service';
 import { PrismaModule } from './database/prisma.module';
 import { RunsModule } from './modules/runs/runs.module';
 import { UsersModule } from './modules/users/users.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UsersModule } from './modules/users/users.module';
     PrismaModule,
     RunsModule,
     UsersModule,
+    AnalyticsModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService, HealthService],

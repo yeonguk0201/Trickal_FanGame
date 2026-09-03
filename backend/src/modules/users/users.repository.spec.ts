@@ -7,6 +7,66 @@ jest.mock('../../database/prisma.service', () => ({
 import { Prisma } from '../../generated/prisma/client';
 import { UsersRepository, UsersRepositoryError } from './users.repository';
 
+describe('UsersRepository user search', () => {
+  it('uses the unique nickname index and selects only the public nickname', async () => {
+    const findUnique = jest.fn().mockResolvedValue({ nickname: 'test-player' });
+    const repository = new UsersRepository({ user: { findUnique } } as never);
+
+    await expect(
+      repository.findPublicByNickname('test-player'),
+    ).resolves.toEqual({ nickname: 'test-player' });
+    expect(findUnique).toHaveBeenCalledWith({
+      where: { nickname: 'test-player' },
+      select: { nickname: true },
+    });
+  });
+
+  it('propagates database failures for the common exception filter', async () => {
+    const databaseError = new Error('database unavailable');
+    const repository = new UsersRepository({
+      user: { findUnique: jest.fn().mockRejectedValue(databaseError) },
+    } as never);
+
+    await expect(repository.findPublicByNickname('test-player')).rejects.toBe(
+      databaseError,
+    );
+  });
+});
+
+describe('UsersRepository run history pagination', () => {
+  it('uses a stable endedAt and id order with exact page boundaries', async () => {
+    const findMany = jest
+      .fn()
+      .mockResolvedValue([{ id: 'run-04' }, { id: 'run-03' }]);
+    const count = jest.fn().mockResolvedValue(5);
+    const transaction = jest
+      .fn()
+      .mockImplementation((queries: Promise<unknown>[]) =>
+        Promise.all(queries),
+      );
+    const repository = new UsersRepository({
+      run: { findMany, count },
+      $transaction: transaction,
+    } as never);
+
+    await expect(
+      repository.findRunsByUserId('user-id', { page: 2, limit: 2 }),
+    ).resolves.toEqual({
+      runs: [{ id: 'run-04' }, { id: 'run-03' }],
+      total: 5,
+    });
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId: 'user-id' },
+        orderBy: [{ endedAt: 'desc' }, { id: 'desc' }],
+        skip: 2,
+        take: 2,
+      }),
+    );
+    expect(count).toHaveBeenCalledWith({ where: { userId: 'user-id' } });
+  });
+});
+
 describe('UsersRepository H-4 skill upgrade transaction', () => {
   type Progress = ReturnType<typeof createProgress>;
   type Transaction = ReturnType<typeof createTransactionMock>;

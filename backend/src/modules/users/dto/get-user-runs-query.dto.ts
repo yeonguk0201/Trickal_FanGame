@@ -6,6 +6,7 @@ export class GetUserRunsQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(1000000)
   page?: number;
 
   @IsOptional()
