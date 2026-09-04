@@ -9,10 +9,13 @@ pnpm install        # 최초 1회
 pnpm dev            # backend + web 동시 실행
 ```
 
-| 명령어 | 설명 |
-|--------|------|
-| `pnpm dev` | backend + web 동시 실행 |
-| `pnpm db:push` | Prisma 스키마 DB 반영 |
-| `pnpm db:studio` | Prisma Studio (DB GUI) |
+| 명령어           | 설명                    |
+| ---------------- | ----------------------- |
+| `pnpm dev`       | backend + web 동시 실행 |
+| `pnpm db:push`   | Prisma 스키마 DB 반영   |
+| `pnpm db:studio` | Prisma Studio (DB GUI)  |
+| `pnpm test`      | 전체 테스트 실행        |
+| `pnpm lint`      | 전체 lint 실행          |
+| `pnpm build`     | 전체 build 실행         |
 
 자세한 환경 구성은 [개발 환경 설정 가이드](docs/05-development-setup.md)를 참고합니다.
