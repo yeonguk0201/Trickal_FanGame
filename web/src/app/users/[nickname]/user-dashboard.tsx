@@ -103,6 +103,10 @@ export default function UserDashboard({
         <Link href="/" className={styles.backLink}>
           ← 다른 사용자 찾기
         </Link>
+        <nav className={styles.dataNav} aria-label="데이터 탐색">
+          <Link href="/statistics">전체 통계</Link>
+          <Link href="/rankings">랭킹</Link>
+        </nav>
         <p className={styles.eyebrow}>교주의 모험 기록</p>
         <h1>{user.nickname}</h1>
         <div className={styles.stats}>
@@ -151,6 +155,35 @@ export default function UserDashboard({
           </div>
         )}
       </section>
+
+      {history && history.runs.length > 0 && (
+        <section className={styles.section} aria-labelledby="record-chart-title">
+          <div className={styles.sectionHeading}>
+            <div>
+              <p className={styles.eyebrow}>현재 페이지 · 오래된 순</p>
+              <h2 id="record-chart-title">최근 플레이 기록</h2>
+            </div>
+          </div>
+          <div className={styles.runChart} aria-label="최근 Run별 도달 층">
+            {[...history.runs].reverse().map((run, index) => (
+              <Link
+                key={run.runId}
+                href={`/runs/${run.runId}?fromPage=${history.page}`}
+                className={styles.runBar}
+                aria-label={`${index + 1}번째 Run, ${run.reachedFloor}층 도달, ${run.isCleared ? "클리어" : "사망"}`}
+              >
+                <span className={styles.barValue}>{run.reachedFloor}층</span>
+                <i
+                  className={run.isCleared ? styles.clearBar : styles.deathBar}
+                  style={{ height: `${Math.max(12, (run.reachedFloor / Math.max(1, ...history.runs.map((item) => item.reachedFloor))) * 100)}%` }}
+                />
+                <small>{index + 1}</small>
+              </Link>
+            ))}
+          </div>
+          <p className={styles.chartNote}>막대를 선택하면 Run 상세로 이동합니다. 노랑은 클리어, 빨강은 사망 기록입니다.</p>
+        </section>
+      )}
 
       <section className={styles.section} aria-labelledby="runs-title">
         <div className={styles.sectionHeading}>

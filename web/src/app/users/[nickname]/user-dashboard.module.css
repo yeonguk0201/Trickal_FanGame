@@ -2,6 +2,8 @@
 .hero { padding: 34px; border: 1px solid var(--line); border-radius: 28px; background: linear-gradient(135deg, #fff9e7 0%, #fff 62%); box-shadow: var(--shadow); }
 .hero h1 { margin-top: 8px; font-size: clamp(2rem, 6vw, 4rem); letter-spacing: -0.06em; }
 .backLink { display: inline-block; margin-bottom: 28px; color: var(--muted); }
+.dataNav { display: flex; gap: 8px; margin: -16px 0 24px; }
+.dataNav a { padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: white; font-size: .82rem; font-weight: 800; }
 .eyebrow { color: var(--accent-dark); font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 30px; }
 .stats div { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 16px; background: rgb(255 255 255 / 72%); }
@@ -38,11 +40,21 @@
 .clearBadge { background: #e6f6ea; color: #22773d; }
 .deathBadge { background: #fff0ed; color: #ad332c; }
 .arrow { color: var(--accent-dark); font-size: 1.2rem; }
+.runChart { display: flex; height: 230px; align-items: end; gap: clamp(5px, 1.5vw, 14px); padding: 28px 22px 18px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); box-shadow: var(--shadow); }
+.runBar { display: grid; min-width: 0; height: 100%; flex: 1; grid-template-rows: 24px 1fr 20px; align-items: end; justify-items: center; gap: 5px; }
+.runBar i { width: min(36px, 80%); min-height: 12px; border-radius: 7px 7px 3px 3px; transition: filter 150ms ease, transform 150ms ease; }
+.runBar:hover i, .runBar:focus-visible i { filter: brightness(.9); transform: scaleX(1.08); }
+.clearBar { background: linear-gradient(#ffd86f, #edae2c); }
+.deathBar { background: linear-gradient(#ef8c7f, #c94e43); }
+.barValue, .runBar small { font-size: .75rem; font-style: normal; font-weight: 800; }
+.runBar small { color: var(--muted); }
+.chartNote { margin-top: 10px; color: var(--muted); font-size: .82rem; line-height: 1.5; }
 .empty, .inlineError { padding: 34px; border: 1px dashed var(--line-strong); border-radius: 18px; color: var(--muted); text-align: center; }
 .inlineError button { margin-top: 14px; }
 .inlineError a { display: inline-block; margin-top: 14px; }
 .pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; margin-top: 22px; }
-.pagination a, .pagination span { padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-weight: 800; text-align: center; }
+.pagination a, .pagination span { width: min(100%, 132px); padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-weight: 800; text-align: center; }
+.pagination a:first-child, .pagination span:first-child { justify-self: start; }
 .pagination a:last-child, .pagination span:last-child { justify-self: end; }
 .pagination span { color: var(--muted); opacity: .55; }
 .pagination strong { font-size: .9rem; text-align: center; }

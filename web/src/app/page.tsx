@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -37,6 +38,10 @@ export default function Home() {
             <button type="submit" disabled={!nickname.trim()}>검색</button>
           </div>
         </form>
+        <nav className={styles.explore} aria-label="데이터 탐색">
+          <Link href="/statistics">전체 통계 보기</Link>
+          <Link href="/rankings">랭킹 보기</Link>
+        </nav>
       </section>
       <aside className={styles.note}>
         <span>01</span><p>Run 종료 경험치와 레벨 진행</p>
