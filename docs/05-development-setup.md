@@ -335,6 +335,9 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 - [ ] `pnpm dev`로 Web이 실행된다.
 - [ ] Web에서 `NEXT_PUBLIC_API_URL`의 Backend health check를 호출할 수 있다.
 - [ ] CORS 설정으로 브라우저 요청이 차단되지 않는다.
+- `web/`에서 `pnpm test`를 실행하면 실제 Database를 변경하지 않고 통계·랭킹의 빈 데이터,
+  전체·부분 오류, 로딩과 다시 시도 복구, 일부 데이터와 긴 이름을 검증한다.
+- Web 변경 후 `pnpm test`, `pnpm lint`, `pnpm build`를 순서대로 실행한다.
 
 ### 13.4 Unity 연동
 

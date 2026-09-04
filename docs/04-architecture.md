@@ -95,6 +95,8 @@ Unity는 실제 게임 플레이와 관련된 모든 기능을 담당한다.
 #### 주요 책임
 
 - 게임 실행
+- 타이틀·홈·설정 Frontend
+- 로컬 플레이어 프로필 생성과 복원
 - 캐릭터 선택
 - 플레이어 조작
 - 전투
@@ -114,6 +116,12 @@ Unity는 실제 게임 플레이와 관련된 모든 기능을 담당한다.
 Unity 내부는 기능별 책임을 분리한다.
 초기 구조는 다음을 기준으로 한다.
 Unity
+│
+├── Frontend
+│ ├── Local Profile
+│ ├── Home
+│ ├── Character Select
+│ └── Settings
 │
 ├── Core
 │
@@ -187,7 +195,7 @@ Game
 #### 책임
 
 - 이동
-- 플레이어 탐지
+- 플레이어 탐지와 전투 중 지속 경계
 - 공격
 - 피격
 - HP
@@ -198,8 +206,10 @@ Game
   ├── EnemyBase
   ├── EnemyStats
   ├── EnemyHealth
+  ├── EnemyAwareness
   └── AI
-  개별 몬스터는 공통 기능을 재사용하면서 자신만의 행동 패턴을 구현한다.
+  개별 몬스터는 공통 기능을 재사용하면서 자신만의 행동 패턴을 구현한다. 방 전투 시작 또는
+  피격으로 경계한 적은 같은 전투에서 감지 거리 밖으로 나갔다는 이유만으로 플레이어를 잊지 않는다.
 
 ### 6.3 Combat
 
@@ -238,6 +248,7 @@ Game
 - 아이템 효과 적용
 - 아이템 중첩
 - 아이템 시너지
+- 아티팩트 후보 생성과 3개 중 1개 선택
   구조 예시:
   Item
   ├── ItemData
@@ -257,7 +268,9 @@ View 역할을 맡는다. ScriptableObject나 Prefab 자산에 방문·클리어
 - `GeneratedRoomNode`: 안정적인 room ID, 격자 좌표, 방 종류, 정의 ID와 방향별 연결
 - `RoomRunState`: 방문, 클리어, 아티팩트 획득 등 같은 Run에서 변하는 상태
 - `RoomDefinition`: RoomType과 Layout/Encounter 후보를 제공하는 정적 제작 데이터
-- `RoomPrefab`: 방 영역, 카메라 기준점, spawn point, 보상 지점과 4방향 문 슬롯
+- `RoomProfile`: 내부 크기, 카메라 크기, 벽·출입구·안전 영역과 Encounter 가능 영역
+- `RoomPrefab`: Room Profile을 만족하는 방 영역, spawn point, 보상 지점과 4방향 문 슬롯
+- `EncounterDefinition`: 적 구성, spawn group, 웨이브, 층·Room Profile 조건과 안전거리
 - `RoomController`: 방 입장, 전투 시작, 적 전멸 확인, 클리어와 문 잠금/해제
 - `RoomGraphController`: 현재 방 활성화, 플레이어 배치, 카메라 전환과 방 사이 이동
 
@@ -274,6 +287,11 @@ CLEARED
 시작방과 보물방처럼 전투가 없는 방은 RoomType 규칙에 따라 전투 상태를 생략한다. 방을 비활성화하거나
 Scene 인스턴스를 제거하더라도 `RoomRunState`가 남아 있어 재방문 시 적과 아티팩트를 다시 생성하지
 않아야 한다.
+
+기존 `16 × 9`, Orthographic Size `5.25` 방은 회귀 기준으로 보존한다. 대형 방은 Room Profile이
+내부 크기와 카메라 크기를 함께 제공하며, 현재 격자 배치 간격보다 커질 경우 인접 Room 인스턴스의
+겹침과 전환 좌표를 검증한다. 플레이어·적 크기와 속도는 Room Profile에서 암묵적으로 배율 적용하지
+않고 플레이테스트 결과에 따라 별도 설정으로 조정한다.
 
 ## 9. Floor
 
@@ -336,12 +354,14 @@ RoomDefinition / RoomPrefab Catalog
   → RoomGraphAssembler
 
 Encounter Definition
-  → 검증된 spawn point와 몬스터 구성
+  → 검증된 spawn point·몬스터 구성·웨이브·Room Profile 조건
   → RoomController
 ```
 
 `FloorGenerator`는 적 Prefab을 생성하지 않고, `RoomController`는 층의 연결 구조를 결정하지 않는다.
 장애물과 spawn point를 임의 좌표에 배치하지 않으며 검증된 Layout과 Encounter만 선택한다.
+Room과 Encounter 선택은 Run seed에서 안정적으로 파생하고, 재방문 시 `RoomRunState`를 통해
+이미 완료한 웨이브나 선택 보상을 다시 생성하지 않는다.
 
 ### 9.3 생성 실패 처리
 
@@ -372,6 +392,11 @@ Boss
 ├── BossStats
 ├── BossHealth
 └── BossPattern
+
+각 층은 서로 다른 보스 정의를 사용하고 보스 패턴은 데이터와 런타임 실행을 분리한다. 패턴 정의는
+예고, 실제 공격, 대응 가능한 안전 영역, 공격 후 빈틈과 다음 패턴 조건을 제공한다. 3층 최종 보스의
+페이즈 전환은 HP 같은 명시적인 조건으로 상태를 바꾸며 중복 전환되지 않아야 한다. 구체적인 보스와
+패턴은 사용자의 트릭컬 보스 선정 전까지 미정으로 유지한다.
 
 ## 11. Run System
 
@@ -446,16 +471,26 @@ MonoBehaviour의 임의 `Awake()` 순서에 생성 성공 여부를 맡기지 �
 
 ## 12. Unity UI
 
-UI는 게임 플레이 시스템과 분리한다.
+UI는 게임 플레이 시스템과 분리한다. 기준 해상도는 `1920 × 1080`, 화면 비율은 16:9로 하며
+해상도가 달라져도 같은 기준 배치와 안전 영역에서 비례 조정한다.
+
+Frontend Scene은 전투 오브젝트를 생성하지 않고 타이틀·로컬 프로필·홈·캐릭터 선택·스킬 강화와
+설정을 담당한다. Game Scene은 Room·전투·HUD·일시정지와 Run 결과를 담당한다.
+
 주요 화면:
 UI
-├── Main Menu
-├── Character Select
-├── HUD
-├── Item Selection
-├── Pause
-├── Game Over
-└── Game Clear
+├── Frontend
+│   ├── Title
+│   ├── Local Profile Registration
+│   ├── Home
+│   ├── Character Select
+│   ├── Skill Upgrade
+│   └── Settings
+└── Game
+    ├── HUD
+    ├── Artifact Selection
+    ├── Pause
+    └── Run Result
 UI는 게임의 실제 상태를 직접 조작하기보다는 Game System의 상태를 표시하고 사용자 입력을 전달하는 역할을 한다.
 예:
 Player
@@ -463,6 +498,11 @@ Player
 PlayerStats
 ↓
 HUD
+
+로컬 프로필 저장은 UI 컴포넌트가 직접 처리하지 않는다. 프로필 서비스가 등록 요청 전에
+`clientProfileId`를 만들고 `clientProfileId`, `userId`와 닉네임을 저장·복원한다. UI는 등록·로딩·오류
+상태만 표시한다. 스킬 강화도 기존 Backend 진행 계약을 통해 수행하며 UI가 포인트나 레벨을 직접
+변경하지 않는다.
 
 ## 13. Unity Data
 
@@ -472,9 +512,10 @@ HUD
 
 | 구분 | 예 | 형태와 소유권 |
 |---|---|---|
-| 정적 제작 데이터 | CharacterDefinition, ItemDefinition, RoomDefinition, EncounterDefinition | ScriptableObject 또는 Catalog, 에셋 값만 저장 |
-| Run 생성 데이터 | GeneratedFloorGraph, GeneratedRoomNode, GridPosition, 방향 연결 | 일반 C# 데이터, seed로 재현 가능 |
-| 가변 Run 상태 | RoomRunState, 현재 층·방, 획득 아티팩트 | RunProgress가 소유, Run 종료까지 유지 |
+| 정적 제작 데이터 | CharacterDefinition, ItemDefinition, RoomDefinition, RoomProfile, EncounterDefinition | ScriptableObject 또는 Catalog, 에셋 값만 저장 |
+| 로컬 프로필 | clientProfileId, 서버가 발급한 userId와 대소문자를 보존한 닉네임 | Unity 로컬 저장, 계정 인증 정보가 아님 |
+| Run 생성 데이터 | GeneratedFloorGraph, GeneratedRoomNode, GridPosition, 방향 연결, 선택된 Room·Encounter ID | 일반 C# 데이터, seed로 재현 가능 |
+| 가변 Run 상태 | RoomRunState, 현재 층·방, 완료 웨이브, 선택 보상, 획득 아티팩트 | RunProgress가 소유, Run 종료까지 유지 |
 | Scene 실행 객체 | RoomController, Door Slot, 적·보상 인스턴스, 카메라 기준점 | Prefab/MonoBehaviour, 논리 데이터를 표시하고 실행 |
 
 ScriptableObject에는 `IsVisited`, `IsCleared`, `HasRewarded` 같은 Run 상태를 저장하지 않는다. 같은
@@ -493,26 +534,42 @@ Backend API와 통신하는 영역이다.
 
 - HTTP 요청
 - JSON Serialization / Deserialization
+- 로컬 플레이어 등록과 프로필 조회
+- 캐릭터 진행 조회와 스킬 강화
 - Run Result 전송
 - 서버 응답 처리
 - 통신 실패 처리
 - 구조:
-  Run System
+  Frontend / Run System
   ↓
-  RunResult
+  User Registration / Progress / RunResult
   ↓
-  Network
-  ↓
-  POST /api/runs
+  API Client
+  ├── POST /api/users
+  ├── GET /api/users/:nickname
+  ├── PUT /api/users/:nickname/characters/:characterId/skills/:skillType
+  └── POST /api/runs
   ↓
   Backend
   게임 플레이 로직이 HTTP 통신 코드에 직접 의존하지 않도록 분리한다.
 
 ## 15. Unity 전체 흐름
 
+EXE 실행
+↓
+Frontend Scene: Title
+↓
+로컬 프로필 확인 또는 POST /api/users
+↓
+Home / Skill Upgrade / Settings
+↓
 Character Select
 ↓
+GameLaunchRequest (`userId`, nickname, characterId)
+↓
 Run Start
+↓
+Game Scene 전환
 ↓
 Run Seed와 3개 층 논리 그래프 생성
 ↓
@@ -522,7 +579,7 @@ Run Seed와 3개 층 논리 그래프 생성
 ↓
 격자 탐색과 일반방 전투
 ↓
-보물방 아티팩트 획득
+보물방 아티팩트 후보 3개 중 1개 선택
 ↓
 먼 끝방의 Boss
 ↓
@@ -537,6 +594,10 @@ Clear / Death
 RunResult
 ↓
 Network
+↓
+Run Result UI
+↓
+Frontend Scene의 Home 또는 Character Select
 
 ## 16. Backend Architecture
 
@@ -581,7 +642,8 @@ Backend
 
 #### 예
 
-- 유저 생성
+- 닉네임 기반 로컬 플레이어 등록
+- User와 초기 캐릭터 진행 데이터의 원자적 생성
 - 유저 조회
 - 닉네임 검색
 - 유저 전적 조회
@@ -952,6 +1014,7 @@ Run 저장 X O O X
 ### Unity가 관리하는 데이터
 
 게임 실행 중 실시간으로 변하는 데이터.
+Local Profile Reference (`userId`, nickname)
 Run Seed
 Generated Floor Graphs
 Room Run States
@@ -965,6 +1028,7 @@ Combat State
 ### Backend가 관리하는 데이터
 
 서버에서 검증하고 처리해야 하는 데이터.
+Nickname Validation / Duplicate Check
 Run Result
 User Record
 Statistics
@@ -1008,7 +1072,17 @@ Run 결과
 ## 31. 게임과 서버의 연결 시점
 
 게임 플레이 중 모든 데이터를 서버에 실시간으로 전송하지 않는다.
-MVP에서는 Run 종료 시점에 결과 데이터를 한 번 전송하는 방식을 기본으로 한다.
+MVP에서는 최초 로컬 플레이어 등록, Frontend의 진행 조회·스킬 강화와 Run 종료 시점에만 필요한
+요청을 보낸다. 실시간 위치·전투 상태는 서버로 전송하지 않는다.
+
+최초 실행
+↓
+clientProfileId 생성·로컬 저장
+↓
+닉네임 등록과 초기 진행 생성 또는 같은 요청 결과 복원
+↓
+`userId`·nickname 로컬 저장
+↓
 게임 시작
 ↓
 로컬에서 Run 진행

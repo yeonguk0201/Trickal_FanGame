@@ -79,21 +79,26 @@ game/
 │   ├── Prefabs/
 │   ├── Rooms/
 │   │   ├── Definitions/
+│   │   ├── Profiles/       # 방 크기·카메라·안전 영역 규격
+│   │   ├── Encounters/     # 적 조합·spawn group·웨이브
 │   │   ├── Prefabs/        # Phase F-5에서 추가
 │   │   └── Catalogs/       # 카탈로그가 실제로 필요할 때 추가
 │   ├── Scenes/
-│   │   ├── SampleScene.unity
+│   │   ├── FrontendScene.unity
+│   │   ├── GameScene.unity
 │   │   └── ItemTestScene.unity  # 랜덤 Run·Backend 저장과 분리된 아이템 전투 디버그 씬
 │   ├── Scripts/
 │   │   ├── Character/
 │   │   ├── Combat/
 │   │   ├── Debug/               # 개발 전용 테스트 룸 런타임 제어
 │   │   ├── Enemy/
+│   │   ├── Frontend/            # 화면 흐름·로컬 프로필·설정 조정
 │   │   ├── Item/
 │   │   ├── Network/
 │   │   ├── Player/
 │   │   ├── Room/
-│   │   └── Run/
+│   │   ├── Run/
+│   │   └── UI/
 │   └── Settings/
 ├── Packages/
 └── ProjectSettings/
@@ -111,11 +116,13 @@ Unity C# 코드는 현재 존재하는 기능 경계를 따른다.
 | `Combat/` | 체력, 피해, 투사체 등 공용 전투 규칙 |
 | `Debug/` | 전용 테스트 씬의 아이템 로드아웃·적 배치·런타임 디버그 패널 |
 | `Enemy/` | 적 이동, 공격, 사망과 스폰 |
+| `Frontend/` | 타이틀·홈 화면 흐름, 로컬 플레이어 프로필과 설정 조정 |
 | `Item/` | 아티팩트 정의, 효과, 획득 처리 |
 | `Network/` | Backend API DTO와 통신 |
 | `Player/` | 플레이어 입력, 이동, 공격과 상태 |
 | `Room/` | 방 정의, 층 그래프 생성, 배치, 이동과 방 상태 |
 | `Run/` | Run 시작·종료와 Run 수명주기 |
+| `UI/` | Frontend·HUD·보상 선택·결과 화면의 표시와 입력 전달 |
 
 범용 `Data/`, `Stage/`, `GameFlow/` 폴더를 별도로 만들지 않는다. 생성 결과는 `Room`, Run 수명주기는 `Run`, API 계약은 `Network`처럼 소유 기능 가까이에 둔다. 파일 수가 적을 때는 평면 구조를 유지하고, 책임이 실제로 나뉠 때만 하위 폴더를 추가한다.
 ## 5. 공용 코드
@@ -126,9 +133,27 @@ Unity C# 코드는 현재 존재하는 기능 경계를 따른다.
 
 `Player/`는 입력, 이동, 공격, SP와 플레이 중 상태를 담당한다. `Character/`는 에르핀을 포함한 캐릭터 정의 데이터와 선택 UI를 담당한다. 캐릭터가 늘어나더라도 공통 전투·이동 코드를 캐릭터별 폴더에 복제하지 않는다.
 
+`Frontend/`는 전투 규칙을 소유하지 않고 다음과 같은 화면 흐름과 짧은 수명의 데이터를 관리한다.
+
+```text
+Frontend/
+├── FrontendFlowController.cs
+├── LocalPlayerProfile.cs
+├── LocalPlayerProfileStore.cs
+├── GameLaunchRequest.cs
+└── GameSettingsStore.cs
+```
+
+`LocalPlayerProfileStore`는 최초 요청 전에 만든 `clientProfileId`와 등록 응답의 `userId`, 닉네임을
+UTF-8을 보존할 수 있는 Unity 로컬 저장 방식으로 관리한다. 저장 형식이 JSON이면 읽기·쓰기에
+UTF-8을 명시한다. 비밀번호나 로그인 토큰을 저장하는 계정 저장소로 확장하지 않는다.
+
 ## 7. Enemy
 
 `Enemy/`는 일반 적과 보스의 런타임 행동을 함께 관리한다. 현재 `BossController`도 이 폴더에 있으며, 보스 구현 규모가 커져 독립된 제작·검증 흐름이 생길 때만 `Enemy/Boss/` 하위 폴더를 만든다.
+공통 경계 상태와 취소 규칙은 일반 적이 공유하고, 추적형·원거리형·돌진형의 이동과 공격 패턴은
+각 행동 컴포넌트로 분리한다. 보스 3종의 패턴 수가 늘어나면 `Enemy/Boss/Definitions/`와
+`Enemy/Boss/Runtime/`처럼 정적 패턴 데이터와 실행 코드를 분리한다.
 
 ## 8. Combat
 
@@ -139,7 +164,8 @@ Unity C# 코드는 현재 존재하는 기능 경계를 따른다.
 코드의 기존 영문 안정 키와 타입명은 호환성을 위해 `Item`을 유지할 수 있지만, 게임 디자인 용어는 아티팩트를 사용한다. `Item/`은 아티팩트 정의, 획득, 인벤토리, 효과와 보상 드롭을 담당하고 정적 에셋은 `Assets/Items/`에 둔다. 보물방은 방 종류 이름이며, 보물방의 MVP 보상은 아티팩트다. 엘리프 재화와 상점은 도입 시 별도 소유 책임을 정한다.
 ## 10. Room
 
-`Scripts/Room/`은 방의 정적 정의, seed 기반 층 그래프 생성, 런타임 배치와 이동을 담당한다. Phase F-5에서 책임이 커지면 다음 구조를 목표로 하되, 기존 파일은 기능 변경과 함께 안전하게 이동할 이유가 생길 때만 정리한다.
+`Scripts/Room/`은 방의 정적 정의, seed 기반 층 그래프 생성, 런타임 배치와 이동을 담당한다. 책임이
+커지면 다음 구조를 목표로 하되, 기존 파일은 기능 변경과 함께 안전하게 이동할 이유가 생길 때만 정리한다.
 
 ```text
 Room/
@@ -163,8 +189,9 @@ Room/
 │   └── RoomCameraController.cs
 └── Authoring/
     ├── RoomDefinition.cs
+    ├── RoomProfile.cs
     ├── RoomPrefabCatalog.cs
-    └── EncounterDefinition.cs   # 별도 조우 데이터가 필요할 때 추가
+    └── EncounterDefinition.cs
 ```
 
 구조별 책임은 다음과 같다.
@@ -175,19 +202,26 @@ Room/
 
 현재 평면 구조의 `FloorGenerator`, `RoomGraphAssembler`, `RoomGraphController`, `RoomDefinition` 등은 위 책임을 이미 나누어 가진다. Phase F-5 구현만을 위해 전부 이동할 필요는 없으며, 새 파일부터 적절한 하위 폴더에 두어도 된다. 폴더와 namespace를 반드시 일치시키지 않아도 되며 기존 `TrickalFanGame.Room` namespace를 유지할 수 있다.
 
-`RoomDefinition`은 검증된 방 레이아웃과 콘텐츠 후보를 참조하고, `GeneratedRoomNode`는 `roomId`, 그리드 좌표, 방 종류, 연결 방향과 선택된 콘텐츠를 담는다. `RoomRunState`는 방문·클리어·아티팩트 수령 상태만 보유한다. 안정 키인 `floor-XX-room-YY`와 배치 좌표를 분리하여 좌표나 seed가 바뀌어도 ID 형식을 유지한다.
+`RoomDefinition`은 검증된 Room Profile과 콘텐츠 후보를 참조하고, `RoomProfile`은 방 크기, 카메라,
+출입구·안전 영역과 spawn 기준을 제공한다. `EncounterDefinition`은 적 구성, spawn group, 웨이브와
+적용 가능한 층·Room Profile을 정의한다. `GeneratedRoomNode`는 `roomId`, 그리드 좌표, 방 종류,
+연결 방향과 선택된 콘텐츠 ID를 담는다. `RoomRunState`는 방문·클리어·완료 웨이브·아티팩트 수령
+상태를 보유한다. 안정 키인 `floor-XX-room-YY`와 배치 좌표를 분리하여 좌표나 seed가 바뀌어도
+ID 형식을 유지한다.
 
 `Assets/Rooms/`의 목표 구조는 다음과 같다.
 
 ```text
 Rooms/
 ├── Definitions/     # 현재 RoomDefinition 에셋
+├── Profiles/        # 방 크기·카메라·출입구·안전 영역 규격
 ├── Prefabs/         # 4방향 문 슬롯을 갖는 검증된 방 Prefab
 ├── Catalogs/        # Prefab·방 종류 선택 카탈로그가 도입될 때
-└── Encounters/      # 몬스터 조우를 별도 에셋으로 분리할 때
+└── Encounters/      # 적 구성·spawn group·웨이브 정의
 ```
 
-`Prefabs/`만 Phase F-5의 필수 추가 대상이다. `Catalogs/`와 `Encounters/`는 실제 데이터 타입을 도입하기 전에는 만들지 않는다.
+빈 폴더를 미리 만들지 않는다. `Profiles/`와 `Encounters/`는 넷째 달에 해당 데이터 타입을 실제로
+도입할 때 생성하며 기존 방 Prefab과 Definition을 일괄 이동하지 않는다.
 
 ## 11. Floor와 Run 소유권
 
@@ -220,12 +254,18 @@ IDamageable
     ├── Enemy
     └── Boss
 13. UI
-게임 내 UI를 관리한다.
+Frontend와 게임 내 UI를 관리한다. 표시와 입력 전달만 담당하며 로컬 프로필, 스킬 포인트,
+Run 상태와 보상 지급을 UI 컴포넌트가 직접 소유하지 않는다.
 UI/
 ├── Common/
 ├── Title/
+├── Home/
+├── LocalProfile/
 ├── CharacterSelect/
+├── SkillUpgrade/
+├── Settings/
 ├── InGame/
+├── ArtifactSelection/
 ├── Result/
 └── Components/
 예:
@@ -236,8 +276,14 @@ UI/
 ├── InGame/
 │   ├── HUD.cs
 │   ├── HealthBar.cs
+│   ├── SPBar.cs
+│   ├── SkillStatusDisplay.cs
 │   ├── ItemDisplay.cs
-│   └── Minimap.cs
+│   ├── FloorRoomDisplay.cs
+│   └── BossHealthBar.cs
+│
+├── ArtifactSelection/
+│   └── ArtifactSelectionUI.cs
 │
 └── Result/
     └── ResultUI.cs
@@ -248,10 +294,13 @@ UI/
 | 데이터 | 위치 |
 |---|---|
 | 방 제작 데이터 | `Assets/Rooms/Definitions/` 및 `Scripts/Room/Authoring/` |
+| 방 크기·카메라·안전 영역 | `Assets/Rooms/Profiles/` 및 `Scripts/Room/Authoring/` |
+| 적 조합·spawn group·웨이브 | `Assets/Rooms/Encounters/` 및 `Scripts/Room/Authoring/` |
 | seed에서 파생된 층 그래프 | `Scripts/Room/Generation/` |
 | 방문·클리어·아티팩트 수령 상태 | `Scripts/Room/Runtime/` 또는 소유권 정리 후 `Scripts/Run/` |
 | 아티팩트·캐릭터 정적 데이터 | `Assets/Items/`, `Assets/Characters/` |
 | Backend 요청·응답 DTO | `Scripts/Network/` |
+| 로컬 `clientProfileId`·`userId`·닉네임과 설정 | `Scripts/Frontend/`이 소유하고 Unity 로컬 저장소 사용 |
 
 로컬 생성용 `runSeed`, 그리드 좌표와 문 연결 정보는 게임 내부 데이터다. 현재 Run 저장 API에 필요하지 않으므로 Backend DTO나 Web 타입에 추가하지 않는다. 서버에 저장할 요구가 확정될 때 `docs/06-database.md`와 `docs/07-api.md`의 계약부터 함께 변경한다.
 15. Network
@@ -277,7 +326,22 @@ ApiClient
 Backend
 ## 16. Game Flow
 
-현재 별도 `GameFlow/` 폴더나 `GameSession`, `RunManager`를 추가하지 않는다. `RunSession`이 새 Run 시작·종료를, `RunProgress`가 seed·현재 층·방별 런타임 상태를 소유하고 각 기능 컨트롤러를 명시적으로 초기화한다.
+Frontend와 Game Scene이 분리되므로 화면 전환 책임은 `Frontend/`에서 명시적으로 관리한다.
+별도 거대 `GameManager`를 추가하지 않고, `RunSession`이 새 Run 시작·종료를, `RunProgress`가
+seed·현재 층·방별 런타임 상태를 계속 소유한다.
+
+```text
+FrontendScene
+  → Title
+  → Local Profile Registration 또는 Home
+  → Character Select
+  → GameLaunchRequest (`userId`, nickname, characterId)
+  → GameScene 로드
+  → RunSession 초기화
+```
+
+`GameLaunchRequest`는 Scene 사이에서 선택 결과를 전달하는 짧은 수명의 데이터다. 전투 상태나
+Room 인스턴스를 보관하지 않으며 GameScene의 `RunSession`이 소비한 뒤 새 Run 상태를 구성한다.
 
 ```text
 RunSession
@@ -288,7 +352,8 @@ RunSession
   → RoomController / Combat / Reward
 ```
 
-화면 전환을 포함한 독립 상태 머신이 실제로 필요해질 때만 `GameFlow/`를 도입한다. 그 전에는 기존 Run·Room 시스템과 같은 책임의 전역 관리자를 만들지 않는다.
+Frontend 화면 수가 늘어 독립 상태 머신이 실제로 필요해졌으므로 화면 상태와 Scene 전환은
+`Frontend/`에서 관리한다. 이는 Run·Room 상태 머신과 분리하며 같은 책임의 전역 관리자를 만들지 않는다.
 
 ### 16.1 Editor Setup과 Verification
 
@@ -370,8 +435,11 @@ users/
 ├── users.service.ts
 ├── users.repository.ts
 ├── dto/
+│   ├── create-user.dto.ts
+│   └── search-users-query.dto.ts
 └── entities/
 역할:
+POST /api/users
 GET /api/users/:nickname
 GET /api/users/:nickname/runs
 21. Statistics Module
@@ -861,23 +929,32 @@ Web
 통계 대시보드
 ## 46. MVP 기준 실제 구조
 
-현재 Unity Script 구조는 `Character`, `Combat`, `Enemy`, `Item`, `Network`, `Player`, `Room`, `Run`으로 구성되어 있다. Phase F-5는 이 경계를 유지하면서 `Room` 내부에 생성·런타임·제작 책임을 추가한다.
+현재 Unity Script 구조는 `Character`, `Combat`, `Enemy`, `Item`, `Network`, `Player`, `Room`, `Run`으로
+구성되어 있다. 넷째 달에는 실제 기능을 구현할 때 `Frontend`와 `UI` 경계를 추가하고, `Room` 내부에
+Room Profile과 Encounter 제작 책임을 확장한다.
 
 ```text
 game/Assets/
 ├── Editor/                       # Week 단위 Setup과 Verification
 ├── Rooms/
 │   ├── Definitions/             # 현재 존재
-│   └── Prefabs/                 # Phase F-5 필수 추가
+│   ├── Profiles/                # 구현 시 추가
+│   ├── Encounters/              # 구현 시 추가
+│   └── Prefabs/
+├── Scenes/
+│   ├── FrontendScene.unity      # 구현 시 추가
+│   └── GameScene.unity          # 기존 플레이 Scene 역할을 명확히 변경
 └── Scripts/
     ├── Character/
     ├── Combat/
     ├── Enemy/
+    ├── Frontend/                # 구현 시 추가
     ├── Item/
     ├── Network/
     ├── Player/
     ├── Room/                    # 필요 시 Generation/Runtime/Authoring 확장
-    └── Run/
+    ├── Run/
+    └── UI/                      # 구현 시 추가
 ```
 
 층별 방 수가 6–8개에서 향후 8–12개로 늘어나더라도 폴더를 방 수만큼 만들지 않는다. 방의 차이는 `RoomDefinition`, Prefab, 생성 데이터로 표현하고 공통 런타임 코드를 공유한다.

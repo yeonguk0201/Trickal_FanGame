@@ -162,13 +162,15 @@ MVP에서는 다음 테이블을 우선 사용한다.
 
 ## 6. users
 유저 정보를 저장한다.
-현재 프로젝트의 핵심은 로그인 시스템이 아니라 전적 검색이므로 MVP에서는 최소한의 유저 정보만 관리한다.
+현재 프로젝트의 핵심은 로그인 시스템이 아니라 로컬 플레이어의 진행과 전적 검색이므로 MVP에서는
+최소한의 유저 정보만 관리한다. 비밀번호, 로그인 토큰과 기기 식별자는 저장하지 않는다.
 
 ### Schema: users
 
 | Column | Type | 설명 |
 |---|---|---|
 | id | UUID | 유저 고유 ID |
+| client_profile_id | UUID | Unity 로컬 프로필 등록 멱등성 키 |
 | nickname | VARCHAR | 유저 닉네임 |
 | created_at | TIMESTAMP | 생성 시간 |
 | updated_at | TIMESTAMP | 수정 시간 |
@@ -176,12 +178,45 @@ MVP에서는 다음 테이블을 우선 사용한다.
 ### 6.1 User ID
 User의 식별자는 UUID를 우선 사용한다.
 예: `550e8400-e29b-41d4-a716-446655440000`
-닉네임을 Primary Key로 사용하지 않는다. 닉네임은 변경될 수 있기 때문이다.
+닉네임을 Primary Key로 사용하지 않는다. MVP에서는 변경 기능을 제공하지 않지만 향후 정책이
+바뀌더라도 User와 기존 Run의 관계는 UUID로 유지되어야 한다.
 
 ### 6.2 Nickname
-닉네임은 Web에서 유저 검색의 기준으로 사용한다.
-예: `GET /api/users?nickname=테스트유저`
-닉네임은 필요에 따라 Unique 제약을 적용한다.
+닉네임은 Unity의 최초 로컬 플레이어 등록과 Web 유저 검색의 기준으로 사용한다.
+
+- 넷째 달 이후 새로 등록하는 닉네임은 앞뒤 공백을 제거한 뒤 한글·영문·숫자 2~12자여야 한다.
+- 영문 대소문자를 구분하며 입력한 표기를 그대로 보존한다.
+- `Erpin`과 `erpin`은 서로 다른 값으로 허용한다.
+- `nickname`에 Unique 제약을 적용해 최종 등록 시점의 동시 요청도 중복 생성되지 않게 한다.
+- MVP에서는 생성 후 닉네임 변경과 사용자 전환을 제공하지 않는다.
+
+기존 개발·검증 데이터에는 `test-player`처럼 새 등록 규칙에 포함되지 않는 닉네임이 있을 수 있다.
+조회 호환성을 위해 기존 행을 강제로 변경하지 않으며 2~12자 문자 규칙은 Backend의 신규 등록
+DTO에 적용한다. Database는 대소문자를 구분하는 Unique 제약을 전체 User에 유지한다.
+
+Unity는 등록 요청 전에 `clientProfileId`를 생성해 `userId`, 닉네임과 함께 로컬에 보관한다.
+`client_profile_id`는 응답 유실 후 같은 등록을 안전하게 재시도하기 위한 멱등성 키이며 로그인 토큰이나
+소유권 증명이 아니다. 검색·전적 응답에는 이를 노출하지 않는다.
+
+### 6.3 로컬 플레이어 등록 Transaction
+
+최초 등록은 User와 현재 활성 캐릭터의 초기 `UserCharacterProgress`를 하나의 Transaction으로 만든다.
+현재 활성 캐릭터는 에르핀 1종이며 레벨 1, 경험치 0, 스킬 포인트 0, 두 스킬 레벨 1로 시작한다.
+
+```text
+client_profile_id 조회
+  ├─ 기존 User와 nickname 일치 → 기존 User·진행 결과 반환
+  ├─ 기존 User와 nickname 불일치 → PROFILE_IDEMPOTENCY_CONFLICT
+  └─ 없음
+      → nickname 형식 검증
+      → 대소문자를 구분하는 nickname 중복 확인
+      → User 생성
+      → 활성 캐릭터별 UserCharacterProgress 생성
+      → Commit
+```
+
+닉네임 중복이나 진행 데이터 생성 실패가 발생하면 전체를 Rollback한다. User만 존재하거나 초기
+진행 데이터만 누락된 부분 생성 상태를 허용하지 않는다.
 
 ## 7. characters
 플레이 가능한 캐릭터 정보를 저장한다.
@@ -546,6 +581,12 @@ client_run_id 조회
 Run 저장, 경험치 지급, 스킬 포인트 지급은 하나의 Transaction에서 처리한다. 같은
 `client_run_id`가 동시에 요청되어도 Unique 제약과 Transaction으로 한 번만 지급되도록 한다.
 
+### 21.2 아티팩트 선택 보상 저장
+
+보물방이나 보스 보상에서 후보 3개를 표시하더라도 Database에는 실제로 선택해 적용한 아티팩트만
+`run_items`에 저장한다. 선택하지 않은 후보와 화면 선택 상태는 기본 Run 전적에 필요하지 않으므로
+저장하지 않는다. 따라서 선택 보상 도입 자체는 새 테이블이나 Run 스키마 변경을 요구하지 않는다.
+
 ## 22. Index 설계
 Web에서 자주 조회하는 데이터에는 Index를 적용한다.
 초기에는 다음 Index를 우선 고려한다.
@@ -554,6 +595,7 @@ Web에서 자주 조회하는 데이터에는 Index를 적용한다.
   `@unique`가 만드는 B-tree 고유 인덱스로 최대 1건을 조회하므로 별도 검색 인덱스나
   페이지네이션이 필요하지 않다. 향후 부분 일치나 대소문자 무시 검색으로 바꿀 때는 현재
   인덱스를 그대로 사용할 수 있다고 가정하지 않고 실제 실행 계획을 확인한 뒤 전용 인덱스를 추가한다.
+- `users.client_profile_id`: 같은 로컬 프로필 등록 재전송을 한 User 결과로 연결하는 Unique 인덱스.
 - `runs.user_id`: 유저의 전적 조회 (`WHERE user_id = ?`)
 - `runs.character_id`: 캐릭터별 통계 (`WHERE character_id = ?`)
 - `runs.is_cleared`: 클리어 기록 조회 (`WHERE is_cleared = true`)
@@ -706,6 +748,9 @@ enemies
 - 실시간 HP 변화
 - 실시간 전투 상태
 - 방 내부의 임시 상태
+- Unity 로컬 설정과 Frontend 화면 상태
+- 아티팩트 선택 화면에 제시됐지만 선택하지 않은 후보
+- Room Profile, Encounter 웨이브와 실시간 적 경계 상태
 
 이러한 데이터는 서버에 저장할 필요가 없다.
 
@@ -790,6 +835,9 @@ Run
 
 ## 36. 데이터 무결성
 Backend는 다음 조건을 보장해야 한다.
+- 닉네임 형식과 대소문자를 구분하는 Unique 제약을 적용한다.
+- `client_profile_id`에 Unique 제약을 적용하고 같은 ID의 다른 닉네임 요청을 충돌로 거절한다.
+- User와 초기 캐릭터 진행 데이터를 부분 생성하지 않는다.
 - 존재하지 않는 User ID를 저장하지 않는다.
 - 존재하지 않는 Character ID를 저장하지 않는다.
 - 존재하지 않는 Item ID를 저장하지 않는다.
@@ -870,6 +918,9 @@ Unity와 Web은 Database에 직접 접근하지 않는다.
 ## 40. Definition of Done
 Database 설계는 다음 조건을 만족하면 MVP 기준 완료로 정의한다.
 - [ ] users 테이블 정의
+- [ ] 닉네임 형식·대소문자·Unique 계약 정의
+- [ ] client_profile_id 등록 멱등성 제약 정의
+- [ ] User와 초기 캐릭터 진행 생성 Transaction 정의
 - [ ] characters 테이블 정의
 - [ ] items 테이블 정의
 - [ ] runs 테이블 정의
@@ -892,6 +943,7 @@ Database 설계는 다음 조건을 만족하면 MVP 기준 완료로 정의한�
                          │    users     │
                          │              │
                          │ id           │
+                         │ client_profile_id │
                          │ nickname     │
                          └──────┬───────┘
                                 │
@@ -949,6 +1001,7 @@ Database 설계는 다음 조건을 만족하면 MVP 기준 완료로 정의한�
 | 형식 | 사용 영역 | 예시 | 생성 주체 |
 |------|-----------|------|-----------|
 | UUID | User, Run, RunItem, UserCharacterProgress | `550e8400-e29b-41d4-a716-446655440000` | 서버 자동 생성 |
+| UUID | clientProfileId (프로필 등록 멱등성 키) | `10000000-0000-4000-8000-000000000001` | Unity 클라이언트 |
 | UUID | clientRunId (멱등성 키) | `00000000-0000-4000-8000-000000000001` | Unity 클라이언트 |
 | 문자열 (VARCHAR) | Character | `erpin` | 개발자 수동 할당 |
 | 문자열 (VARCHAR) | Item | `item-01`, `item-15` | 개발자 수동 할당 |

@@ -155,13 +155,14 @@ POST /api/runs
 ## User API
 
 ```text
+POST /api/users
 GET /api/users/search?q={nickname}
 GET /api/users/:nickname
 GET /api/users/:nickname/runs
 PUT /api/users/:nickname/characters/:characterId/skills/:skillType
 ```
 
-유저 정보 및 전적 조회, 캐릭터 스킬 강화.
+로컬 플레이어 등록, 유저 정보 및 전적 조회, 캐릭터 스킬 강화.
 
 ---
 
@@ -431,7 +432,77 @@ Unity는 생성된 Run ID와 Backend가 계산한 캐릭터 진행 결과를 표
 
 # 9. User API
 
-# 9.1 Search Users
+# 9.1 Create Local Player
+
+Unity에서 처음 게임을 시작한 로컬 플레이어를 등록한다. 이는 비밀번호나 로그인 세션을 만드는
+계정 API가 아니며 한 PC에 저장할 User 참조를 발급하는 최소 등록 계약이다.
+
+```http
+POST /api/users
+```
+
+요청:
+
+```json
+{
+  "clientProfileId": "client-generated-profile-uuid",
+  "nickname": "Erpin123"
+}
+```
+
+등록 규칙:
+
+- 앞뒤 공백을 제거한다.
+- 공백 제거 후 한글·영문·숫자만 허용한다.
+- 길이는 2~12자다.
+- 영문 대소문자를 구분하므로 `Erpin`과 `erpin`은 서로 다른 닉네임이다.
+- 닉네임 중복 확인 UI가 있어도 최종 `POST`에서 다시 Unique 제약을 확인한다.
+- `clientProfileId`는 Unity가 최초 요청 전에 한 번 생성한 UUID이며 응답 유실 후 재시도에도 유지한다.
+- User와 현재 활성 캐릭터의 초기 `UserCharacterProgress`를 하나의 Transaction으로 생성한다.
+- 현재 MVP의 에르핀 진행은 Lv.1, 경험치 0, 스킬 포인트 0, 두 스킬 Lv.1로 시작한다.
+
+최초 생성 성공 응답은 `201 Created`다. 같은 `clientProfileId`와 닉네임을 재전송해 기존 User를
+반환할 때는 `200 OK`와 같은 응답 형태를 사용한다.
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "user-uuid",
+    "clientProfileId": "client-generated-profile-uuid",
+    "nickname": "Erpin123",
+    "characterProgress": [
+      {
+        "characterId": "erpin",
+        "level": 1,
+        "experience": 0,
+        "experienceToNextLevel": 400,
+        "skillPoints": 0,
+        "lowGradeSkillLevel": 1,
+        "highGradeSkillLevel": 1
+      }
+    ]
+  }
+}
+```
+
+오류:
+
+| HTTP | Code | 조건 |
+|---:|---|---|
+| 409 | `NICKNAME_ALREADY_EXISTS` | 대소문자까지 같은 닉네임이 이미 존재 |
+| 409 | `PROFILE_IDEMPOTENCY_CONFLICT` | 같은 clientProfileId로 다른 닉네임을 요청 |
+| 422 | `VALIDATION_ERROR` | 길이·문자·공백 제거 후 형식이 잘못됨 |
+| 500 | `INTERNAL_SERVER_ERROR` | User와 초기 진행 생성 Transaction 실패 |
+
+같은 `clientProfileId`와 같은 닉네임을 재전송하면 기존 User와 현재 캐릭터 진행 결과를 반환하며
+데이터를 추가로 생성하지 않는다. 새로운 `clientProfileId`로 이미 사용 중인 닉네임을
+요청하면 `NICKNAME_ALREADY_EXISTS`를 반환한다. 닉네임만으로 기존 사용자의 소유권을 증명할 수
+없기 때문에 기존 User 연결 API처럼 동작시키지 않는다.
+
+---
+
+# 9.2 Search Users
 
 닉네임으로 전적 페이지에 진입할 유저를 검색한다.
 
@@ -485,9 +556,12 @@ MVP 검색 정책:
 Database 예외는 공통 오류 계약에 따라 세부 내용을 노출하지 않고
 `500 INTERNAL_SERVER_ERROR`로 반환한다.
 
+Unity의 닉네임 등록 화면은 이 정확 일치 검색을 사전 중복 확인에 재사용할 수 있다. 검색 결과가
+비어 있어도 동시에 다른 등록이 완료될 수 있으므로 최종 판정은 항상 `POST /api/users` 응답을 따른다.
+
 ---
 
-# 9.2 Get User
+# 9.3 Get User
 
 특정 유저의 기본 정보와 주요 전적을 조회한다.
 
@@ -503,7 +577,7 @@ GET /api/users/test-player
 
 ---
 
-# 9.3 User Response
+# 9.4 User Response
 
 ```json
 {
@@ -539,7 +613,7 @@ GET /api/users/test-player
 
 ---
 
-# 9.4 User Stats
+# 9.5 User Stats
 
 유저 페이지에서 다음 통계를 제공한다.
 
@@ -560,7 +634,7 @@ Run이 없는 유저는 `totalRuns`, `clears`, `winRate`, `averagePlayTime`, `av
 
 ---
 
-# 9.5 Upgrade Character Skill
+# 9.6 Upgrade Character Skill
 
 캐릭터의 미사용 스킬 포인트 1을 소비해 지정한 스킬을 1레벨 강화한다.
 
@@ -961,6 +1035,9 @@ Backend에서는 API Request / Response를 명확하게 정의한다.
 예:
 
 ```text
+CreateUserRequest
+CreateUserResponse
+
 CreateRunRequest
 CreateRunResponse
 
@@ -1011,14 +1088,29 @@ Backend에서 필요한 데이터를 조합하여 Web에 적합한 형태로 반
 Unity는 다음 API를 사용한다.
 
 ```text
+POST /api/users
+GET /api/users/:nickname
+PUT /api/users/:nickname/characters/:characterId/skills/:skillType
 POST /api/runs
 ```
 
-MVP에서는 게임 플레이 중 지속적으로 API를 호출하지 않는다.
+`POST /api/users`는 최초 로컬 플레이어 등록에만 사용하고 요청 전 생성한 `clientProfileId`와 성공
+응답의 `id`, `nickname`을 Unity 로컬 프로필에 저장한다. 이후 Frontend에서 진행을 조회하고 스킬을
+강화하며, 게임 플레이 중에는 지속적으로 API를 호출하지 않는다.
 
 기본적인 통신 시점:
 
 ```text
+최초 GAME START
+    ↓
+clientProfileId 생성·저장
+    ↓
+POST /api/users
+    ↓
+userId·nickname 로컬 저장
+    ↓
+Frontend 진행 조회·스킬 강화
+    ↓
 Game Start
     ↓
 Local Game Play
@@ -1142,7 +1234,10 @@ MVP에서는 최소한의 보안을 적용한다.
 
 초기 MVP에서는 복잡한 로그인 시스템을 구현하지 않는다.
 
-게임에서 전적 저장에 필요한 최소한의 식별 방식만 사용한다.
+게임에서 전적 저장에 필요한 최소한의 식별 방식만 사용한다. 최초 등록의 `clientProfileId`, 응답의
+`userId`와 닉네임을 한 PC의 로컬 프로필에 저장하지만 이는 인증 토큰이 아니며 사용자 소유권을
+증명하지 않는다.
+닉네임 변경, 사용자 전환과 기존 사용자의 새 기기 복구는 MVP 범위에서 제공하지 않는다.
 
 향후 필요할 경우 다음과 같은 인증 시스템을 추가한다.
 
@@ -1224,6 +1319,7 @@ GET /api/statistics
 │   └── GET /:runId
 │
 ├── users
+│   ├── POST /
 │   ├── GET /search?q={nickname}
 │   └── GET /:nickname
 │       └── GET /runs
@@ -1261,6 +1357,24 @@ runs
 run_items
  ↓
 PostgreSQL
+```
+
+## 32.1.1 로컬 플레이어 등록
+
+```text
+Unity 최초 실행
+ ↓
+clientProfileId 생성·로컬 저장
+ ↓
+POST /api/users
+ ↓
+Nickname Validation / Unique Check
+ ↓
+User + UserCharacterProgress Transaction
+ ↓
+clientProfileId + userId + nickname 응답
+ ↓
+Unity 로컬 프로필 저장
 ```
 
 ---
@@ -1342,6 +1456,8 @@ MVP에서는 다음 API만 구현한다.
 ### 필수
 
 ```text
+POST /api/users
+
 POST /api/runs
 
 PUT /api/users/:nickname/characters/:characterId/skills/:skillType
@@ -1468,6 +1584,10 @@ Database
 
 API 설계는 다음 조건을 만족하면 MVP 기준 완료로 정의한다.
 
+- [ ] 로컬 플레이어 등록 API 정의
+- [ ] 닉네임 형식·대소문자·중복 오류 정의
+- [ ] clientProfileId 재전송과 충돌 계약 정의
+- [ ] User와 초기 캐릭터 진행의 원자적 생성 응답 정의
 - [ ] Run 저장 API 정의
 - [ ] User 조회 API 정의
 - [ ] User Run History API 정의
