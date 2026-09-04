@@ -1,0 +1,10 @@
+.list { display: grid; gap: 10px; }
+.rankCard { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 17px 20px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); box-shadow: var(--shadow); }
+.rank { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; background: var(--ink); color: var(--accent); font-weight: 900; }
+.rankCard > div { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
+.rankCard > div > a { width: fit-content; overflow-wrap: anywhere; font-size: 1.05rem; font-weight: 900; }
+.rankCard > div > a:hover { color: var(--accent-dark); text-decoration: underline; }
+.rankCard > div span { color: var(--muted); font-size: .84rem; }
+.rankCard > strong { font-size: 1.25rem; }
+.detailLink { color: var(--accent-dark); text-decoration: underline; }
+@media (max-width: 480px) { .rankCard { grid-template-columns: 42px minmax(0, 1fr); gap: 12px; padding: 15px; } .rankCard > strong { grid-column: 2; font-size: 1rem; } .rank { width: 36px; height: 36px; } }

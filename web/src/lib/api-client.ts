@@ -1,11 +1,19 @@
 import type {
   ApiFailure,
   ApiSuccess,
+  CharacterStatisticsDto,
+  ClearRankingDto,
   CharacterProgressDto,
+  FloorStatisticsDto,
+  ItemStatisticsDto,
+  RankingMetaDto,
+  RankingType,
   RunDetailDto,
   RunHistoryDto,
+  RunRankingDto,
   RunSummaryDto,
   SkillType,
+  StatisticsOverviewDto,
   UpgradeSkillRequestDto,
   UserProfileDto,
   UserSearchResultDto,
@@ -13,6 +21,10 @@ import type {
 
 interface RunHistoryResponse extends ApiSuccess<RunSummaryDto[]> {
   meta: { page: number; limit: number; total: number; totalPages: number };
+}
+
+interface RankingResponse<T> extends ApiSuccess<T[]> {
+  meta: RankingMetaDto;
 }
 
 export class ApiClientError extends Error {
@@ -72,6 +84,37 @@ export async function upgradeCharacterSkill(
 
 export async function getRunDetail(runId: string): Promise<RunDetailDto> {
   return request<RunDetailDto>(`/runs/${encodeURIComponent(runId)}`);
+}
+
+export async function getStatisticsOverview(): Promise<StatisticsOverviewDto> {
+  return request<StatisticsOverviewDto>("/statistics");
+}
+
+export async function getCharacterStatistics(): Promise<CharacterStatisticsDto[]> {
+  return request<CharacterStatisticsDto[]>("/statistics/characters");
+}
+
+export async function getItemStatistics(): Promise<ItemStatisticsDto[]> {
+  return request<ItemStatisticsDto[]>("/statistics/items");
+}
+
+export async function getFloorStatistics(): Promise<FloorStatisticsDto[]> {
+  return request<FloorStatisticsDto[]>("/statistics/floors");
+}
+
+export async function getRankings(
+  type: "most-clears",
+  limit?: number,
+): Promise<{ data: ClearRankingDto[]; meta: RankingMetaDto }>;
+export async function getRankings(
+  type: Exclude<RankingType, "most-clears">,
+  limit?: number,
+): Promise<{ data: RunRankingDto[]; meta: RankingMetaDto }>;
+export async function getRankings(type: RankingType, limit = 10) {
+  const response = await requestEnvelope<
+    RankingResponse<RunRankingDto | ClearRankingDto>
+  >(`/rankings?type=${encodeURIComponent(type)}&page=1&limit=${limit}`);
+  return { data: response.data, meta: response.meta };
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

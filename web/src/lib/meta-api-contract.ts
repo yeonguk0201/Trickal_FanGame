@@ -97,3 +97,69 @@ export interface RunDetailDto {
   deathReason: string | null;
   items: RunItemDto[];
 }
+
+export interface StatisticsOverviewDto {
+  totalUsers: number;
+  totalRuns: number;
+  totalClears: number;
+  clearRate: number;
+  averagePlayTime: number;
+  averageReachedFloor: number;
+  highestReachedFloor: number;
+}
+
+export interface CharacterStatisticsDto {
+  characterId: string;
+  characterName: string;
+  totalRuns: number;
+  clears: number;
+  clearRate: number;
+  averageReachedFloor: number;
+  averagePlayTime: number;
+}
+
+export interface ItemStatisticsDto {
+  itemId: string;
+  itemName: string;
+  acquiredRunCount: number;
+  selectionRate: number;
+  clearCountAfterAcquisition: number;
+  clearRateAfterAcquisition: number;
+}
+
+export interface FloorStatisticsDto {
+  floor: number;
+  reachedRunCount: number;
+  reachRate: number;
+  deathCount: number;
+  deathRate: number;
+  clearCount: number;
+  clearRate: number;
+}
+
+export type RankingType = "highest-floor" | "fastest-clear" | "most-clears";
+
+export interface RunRankingDto {
+  rank: number;
+  nickname: string;
+  runId: string;
+  character: CharacterSummaryDto;
+  reachedFloor: number;
+  playTime: number;
+  endedAt: string;
+}
+
+export interface ClearRankingDto {
+  rank: number;
+  nickname: string;
+  clears: number;
+  totalRuns: number;
+}
+
+export interface RankingMetaDto {
+  type: RankingType;
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
