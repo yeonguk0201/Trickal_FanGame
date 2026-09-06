@@ -6,16 +6,41 @@ import {
   type CharacterProgressSnapshot,
 } from '../../contracts/meta-progression';
 import { ApiException } from '../../common/exceptions/api.exception';
+import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserRunsQueryDto } from './dto/get-user-runs-query.dto';
 import {
   UsersRepository,
   UsersRepositoryError,
   type SkillType,
+  type CreateUserResult,
 } from './users.repository';
+
+export type CreateUserServiceResult = CreateUserResult & {
+  experienceToNextLevel: number;
+};
 
 @Injectable()
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
+
+  async createUser(dto: CreateUserDto): Promise<CreateUserServiceResult> {
+    try {
+      const result = await this.usersRepository.createUser({
+        clientProfileId: dto.clientProfileId,
+        nickname: dto.nickname,
+      });
+
+      return {
+        ...result,
+        experienceToNextLevel: EXPERIENCE_TO_NEXT_LEVEL[0],
+      };
+    } catch (error: unknown) {
+      if (error instanceof UsersRepositoryError) {
+        throw this.toApiException(error);
+      }
+      throw error;
+    }
+  }
 
   async searchUsers(nickname: string) {
     const user = await this.usersRepository.findPublicByNickname(nickname);
@@ -155,6 +180,9 @@ export class UsersService {
           error.code,
           error.message,
         );
+      case 'NICKNAME_ALREADY_EXISTS':
+      case 'PROFILE_IDEMPOTENCY_CONFLICT':
+        return new ApiException(HttpStatus.CONFLICT, error.code, error.message);
     }
   }
 

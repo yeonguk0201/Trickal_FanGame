@@ -1,4 +1,17 @@
-import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+} from '@nestjs/common';
+import type { Response } from 'express';
+import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserRunsQueryDto } from './dto/get-user-runs-query.dto';
 import { SearchUsersQueryDto } from './dto/search-users-query.dto';
 import { UpgradeSkillDto } from './dto/upgrade-skill.dto';
@@ -7,6 +20,37 @@ import { UsersService } from './users.service';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async createUser(
+    @Body() dto: CreateUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.usersService.createUser(dto);
+
+    if (!result.isNew) {
+      res.status(HttpStatus.OK);
+    }
+
+    return {
+      success: true,
+      data: {
+        id: result.id,
+        clientProfileId: result.clientProfileId,
+        nickname: result.nickname,
+        characterProgress: result.characterProgress.map((cp) => ({
+          characterId: cp.characterId,
+          level: cp.level,
+          experience: cp.experience,
+          experienceToNextLevel: result.experienceToNextLevel,
+          skillPoints: cp.skillPoints,
+          lowGradeSkillLevel: cp.lowGradeSkillLevel,
+          highGradeSkillLevel: cp.highGradeSkillLevel,
+        })),
+      },
+    };
+  }
 
   @Get('search')
   async searchUsers(@Query() query: SearchUsersQueryDto) {

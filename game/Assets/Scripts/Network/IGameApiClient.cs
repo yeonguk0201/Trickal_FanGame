@@ -6,5 +6,6 @@ namespace TrickalFanGame.Network
     {
         void GetUser(string nickname, Action<UserProfileResponse> onSuccess, Action<string> onError);
         void PostRun(CreateRunRequest request, Action<CreateRunResponse> onSuccess, Action<string> onError);
+        void PostUser(CreateUserRequest request, Action<CreateUserResponse> onSuccess, Action<string> onError);
     }
 }

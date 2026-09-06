@@ -26,13 +26,37 @@ export class UsersRepositoryError extends Error {
       | 'CHARACTER_PROGRESS_NOT_FOUND'
       | 'SKILL_POINT_NOT_ENOUGH'
       | 'SKILL_LEVEL_MAX'
-      | 'INVALID_SKILL_TARGET_LEVEL',
+      | 'INVALID_SKILL_TARGET_LEVEL'
+      | 'NICKNAME_ALREADY_EXISTS'
+      | 'PROFILE_IDEMPOTENCY_CONFLICT',
     message: string,
   ) {
     super(message);
     this.name = 'UsersRepositoryError';
   }
 }
+
+const DEFAULT_CHARACTER_ID = 'erpin';
+
+type CreateUserInput = {
+  clientProfileId: string;
+  nickname: string;
+};
+
+export type CreateUserResult = {
+  id: string;
+  clientProfileId: string;
+  nickname: string;
+  characterProgress: {
+    characterId: string;
+    level: number;
+    experience: number;
+    skillPoints: number;
+    lowGradeSkillLevel: number;
+    highGradeSkillLevel: number;
+  }[];
+  isNew: boolean;
+};
 
 type FindUserRunsOptions = {
   page: number;
@@ -42,6 +66,85 @@ type FindUserRunsOptions = {
 @Injectable()
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async createUser(input: CreateUserInput): Promise<CreateUserResult> {
+    // Check for existing user with same clientProfileId (idempotency)
+    const existingByProfileId = await this.prisma.user.findUnique({
+      where: { clientProfileId: input.clientProfileId },
+      select: {
+        id: true,
+        clientProfileId: true,
+        nickname: true,
+        characterProgress: {
+          orderBy: { characterId: 'asc' },
+          select: {
+            characterId: true,
+            level: true,
+            experience: true,
+            skillPoints: true,
+            lowGradeSkillLevel: true,
+            highGradeSkillLevel: true,
+          },
+        },
+      },
+    });
+
+    if (existingByProfileId) {
+      if (existingByProfileId.nickname !== input.nickname) {
+        throw new UsersRepositoryError(
+          'PROFILE_IDEMPOTENCY_CONFLICT',
+          '이미 등록된 프로필 ID입니다. 다른 닉네임으로 등록되어 있습니다.',
+        );
+      }
+      return { ...existingByProfileId, isNew: false };
+    }
+
+    // Check for nickname conflict
+    const existingByNickname = await this.prisma.user.findUnique({
+      where: { nickname: input.nickname },
+      select: { id: true },
+    });
+
+    if (existingByNickname) {
+      throw new UsersRepositoryError(
+        'NICKNAME_ALREADY_EXISTS',
+        '이미 사용 중인 닉네임입니다.',
+      );
+    }
+
+    // Create user and initial character progress in transaction
+    const user = await this.prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: {
+          clientProfileId: input.clientProfileId,
+          nickname: input.nickname,
+        },
+        select: { id: true, clientProfileId: true, nickname: true },
+      });
+
+      const progress = await tx.userCharacterProgress.create({
+        data: {
+          userId: newUser.id,
+          characterId: DEFAULT_CHARACTER_ID,
+        },
+        select: {
+          characterId: true,
+          level: true,
+          experience: true,
+          skillPoints: true,
+          lowGradeSkillLevel: true,
+          highGradeSkillLevel: true,
+        },
+      });
+
+      return {
+        ...newUser,
+        characterProgress: [progress],
+      };
+    });
+
+    return { ...user, isNew: true };
+  }
 
   findPublicByNickname(nickname: string) {
     return this.prisma.user.findUnique({

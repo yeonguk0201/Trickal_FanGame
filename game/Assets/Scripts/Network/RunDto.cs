@@ -100,4 +100,40 @@ namespace TrickalFanGame.Network
         public float averageFloor;
         public int highestFloor;
     }
+
+    [Serializable]
+    public class CreateUserRequest
+    {
+        public string clientProfileId;
+        public string nickname;
+    }
+
+    [Serializable]
+    public class CreateUserResponse
+    {
+        public bool success;
+        public CreateUserData data;
+        public ApiError error;
+    }
+
+    [Serializable]
+    public class CreateUserData
+    {
+        public string id;
+        public string clientProfileId;
+        public string nickname;
+        public CreateUserCharacterProgressDto[] characterProgress;
+    }
+
+    [Serializable]
+    public class CreateUserCharacterProgressDto
+    {
+        public string characterId;
+        public int level;
+        public int experience;
+        public int experienceToNextLevel;
+        public int skillPoints;
+        public int lowGradeSkillLevel;
+        public int highGradeSkillLevel;
+    }
 }

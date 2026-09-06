@@ -357,6 +357,15 @@ namespace TrickalFanGame.Editor
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
+            public void PostUser(
+                CreateUserRequest request,
+                Action<CreateUserResponse> onSuccess,
+                Action<string> onError)
+            {
+                // Not used in Phase H verification
+                onError?.Invoke("PostUser not implemented in FakeApiClient");
+            }
         }
 
         private sealed class RuntimeHarness

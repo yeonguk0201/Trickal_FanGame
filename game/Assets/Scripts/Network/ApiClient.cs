@@ -36,6 +36,11 @@ namespace TrickalFanGame.Network
             StartCoroutine(GetUserCoroutine(nickname, onSuccess, onError));
         }
 
+        public void PostUser(CreateUserRequest request, Action<CreateUserResponse> onSuccess, Action<string> onError)
+        {
+            StartCoroutine(PostUserCoroutine(request, onSuccess, onError));
+        }
+
         private System.Collections.IEnumerator GetUserCoroutine(
             string nickname,
             Action<UserProfileResponse> onSuccess,
@@ -74,6 +79,67 @@ namespace TrickalFanGame.Network
             catch (Exception exception)
             {
                 onError?.Invoke($"Parse error: {exception.Message}");
+            }
+        }
+
+        private System.Collections.IEnumerator PostUserCoroutine(
+            CreateUserRequest request,
+            Action<CreateUserResponse> onSuccess,
+            Action<string> onError)
+        {
+            string url = $"{baseUrl}/users";
+            string json = JsonUtility.ToJson(request);
+
+            if (enableLogging)
+            {
+                Debug.Log($"[ApiClient] POST {url}");
+                Debug.Log($"[ApiClient] Request Body: {json}");
+            }
+
+            using var webRequest = new UnityWebRequest(url, "POST");
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+            webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            webRequest.downloadHandler = new DownloadHandlerBuffer();
+            webRequest.SetRequestHeader("Content-Type", "application/json");
+            webRequest.timeout = (int)timeout;
+
+            yield return webRequest.SendWebRequest();
+
+            string responseText = webRequest.downloadHandler?.text ?? "";
+
+            if (enableLogging)
+            {
+                Debug.Log($"[ApiClient] Response ({webRequest.responseCode}): {responseText}");
+            }
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                string error = BuildRequestError(webRequest, responseText);
+                Debug.LogError($"[ApiClient] Error: {error}");
+                onError?.Invoke(error);
+                yield break;
+            }
+
+            try
+            {
+                var response = JsonUtility.FromJson<CreateUserResponse>(responseText);
+                if (response.success)
+                {
+                    Debug.Log($"[ApiClient] User created/retrieved: {response.data.nickname}");
+                    onSuccess?.Invoke(response);
+                }
+                else
+                {
+                    string error = response.error != null
+                        ? $"{response.error.code}: {response.error.message}"
+                        : "User creation failed.";
+                    onError?.Invoke(error);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[ApiClient] Parse error: {e.Message}");
+                onError?.Invoke($"Parse error: {e.Message}");
             }
         }
 
