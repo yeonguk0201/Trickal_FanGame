@@ -387,6 +387,17 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 
 ## 17. 개발 보조 도구
 
+### 13주차 Frontend 타이틀
+
+- `Trickal Fan Game > Week 13 > Setup Frontend Title`: Edit Mode에서 실행한다. 수정 중인 Scene의 저장 여부를 확인한 뒤 `Assets/Scenes/FrontendScene.unity`를 생성하거나 갱신하고 단독으로 연다. 기존 이름의 UI 오브젝트와 Scene GUID를 재사용한다. Frontend를 첫 번째 활성 Build Scene으로 등록하며 기존 `SampleScene`은 전투용 Game Scene으로 보존한다. 다른 Build Scene 항목도 보존한다.
+- `Trickal Fan Game > Week 13 > Verify Frontend Title`: Frontend를 연 상태에서 실행한다. 시작 Scene 순서, 전투·Run·Backend 컴포넌트 부재, Canvas·입력 시스템 중복, TMP·버튼 참조, 1920×1080 Scaler와 좌우 64·상하 54 안전 여백을 검사한다. Edit Mode에서는 720p·1080p·1440p와 비16:9 크기의 실제 RectTransform/TMP 경계도 별도 미리보기 Scene에서 검사한다. 실패 시 예외가 발생하며 성공 로그는 `Week 13 Frontend verification passed`다.
+- `Trickal Fan Game > Week 13 > Export Title Previews (720p and 1080p)`: `game/Logs/Week13FrontendPreviews/title-1280x720.png`, `title-1920x1080.png`를 만든다. 별도 미리보기 Scene에서 같은 UI를 렌더링하므로 현재 Scene은 바뀌지 않는다. 이 이미지는 배치 확인용이며 실제 Overlay Canvas의 Game View 확인을 대체하지 않는다.
+- 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13FrontendVerification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 두 번 실행, GUID·Game Scene 보존, 잘못된 참조·중복 버튼·전투 오브젝트·시작 순서의 거부까지 검사한다. 렌더링 미리보기가 포함되어 `-nographics`를 사용하지 않는다. 검증 실패는 비정상 종료 코드로 반환된다.
+- Play Mode 자동 검증: 구성 후 별도 Unity 프로세스에서 `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13FrontendPlayVerification.RunBatch -logFile <로그 경로>`를 사용한다. `-quit`는 넣지 않는다. 첫 포커스, 클릭·Submit, 반복 요청 후 타이틀 유지와 전투 격리를 검사한 뒤 성공 0/실패 1로 종료한다.
+- 같은 프로젝트를 연 Unity가 있으면 배치 실행이 잠길 수 있다. 기존 Editor를 강제 종료하지 않고 수동 메뉴를 실행하거나 독립된 복사본에서 검증한다.
+
+수동 확인: `FrontendScene`을 열고 Game View에 Fixed Resolution `1280 × 720`, `1920 × 1080`을 각각 추가하여 Play한다. 로고·한글 부제·버튼이 잘리지 않고 중앙에 유지되는지, 첫 포커스에 흰 외곽선이 보이는지 확인한다. 마우스 호버, Tab, Enter/Space 입력을 확인하고, 반복 클릭해도 준비 중 안내만 표시되며 Hierarchy에 Room·Player·Enemy·RunSession이 생성되지 않아야 한다. 빌드 실행에서도 같은 타이틀이 먼저 표시되어야 한다. 이번 단계는 닉네임 등록·Backend 프로필·홈·Game 진입을 연결하지 않는다.
+
 저장소 공통 불변 규칙은 루트 `AGENTS.md`에 둔다. 기능 하나를 계획부터 검증과 체크리스트 갱신까지 진행할 때는
 `.agents/skills/trickal-feature-cycle/SKILL.md`의 저장소 전용 스킬을 사용한다.
 

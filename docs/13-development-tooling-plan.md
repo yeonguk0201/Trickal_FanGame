@@ -98,6 +98,8 @@
 
 ### 후보 산출물
 
+13주차 추가 도구(2026-09-07): `Week13FrontendSetup`, `Week13FrontendVerification`과 Play Mode 배치 검증기를 구현했다. Frontend 단독 구성, Setup 재실행·GUID 유지, 전투 Scene 보존, 잘못된 참조·중복·전투 오브젝트 거부, 해상도별 TMP 경계와 미리보기 출력을 담당한다. 실행 방법과 수동 확인 항목은 [개발 환경 설정 §17](./05-development-setup.md)에 기록한다. 실제 검증 결과는 [13주차 기록](./15-fourth-month-plan.md)의 Frontend 기반 구현 항목에 남긴다.
+
 - 공통 Editor 구성 유틸리티
 - 방·몬스터 콘텐츠 Setup
 - 콘텐츠 참조 및 상태 불변조건 검증기
