@@ -11,6 +11,7 @@ import { UsersService } from './users.service';
 describe('UsersService', () => {
   let service: UsersService;
   let repository: {
+    createUser: jest.Mock;
     findPublicByNickname: jest.Mock;
     findByNickname: jest.Mock;
     findByNicknameWithProgress: jest.Mock;
@@ -21,6 +22,22 @@ describe('UsersService', () => {
 
   beforeEach(() => {
     repository = {
+      createUser: jest.fn().mockResolvedValue({
+        id: 'user-id',
+        clientProfileId: '10000000-0000-4000-8000-000000000001',
+        nickname: 'test-player',
+        characterProgress: [
+          {
+            characterId: 'erpin',
+            level: 1,
+            experience: 0,
+            skillPoints: 0,
+            lowGradeSkillLevel: 1,
+            highGradeSkillLevel: 1,
+          },
+        ],
+        isNew: true,
+      }),
       findPublicByNickname: jest
         .fn()
         .mockResolvedValue({ nickname: 'test-player' }),
@@ -73,6 +90,39 @@ describe('UsersService', () => {
     };
     service = new UsersService(repository as unknown as UsersRepository);
   });
+
+  it('returns the initial progression contract for local profile registration', async () => {
+    await expect(
+      service.createUser({
+        clientProfileId: '10000000-0000-4000-8000-000000000001',
+        nickname: 'test-player',
+      }),
+    ).resolves.toMatchObject({
+      nickname: 'test-player',
+      isNew: true,
+      experienceToNextLevel: 400,
+      characterProgress: [{ characterId: 'erpin', level: 1 }],
+    });
+  });
+
+  it.each(['NICKNAME_ALREADY_EXISTS', 'PROFILE_IDEMPOTENCY_CONFLICT'] as const)(
+    'maps registration conflict %s to HTTP 409',
+    async (code) => {
+      repository.createUser.mockRejectedValue(
+        new UsersRepositoryError(code, 'registration conflict'),
+      );
+
+      await expect(
+        service.createUser({
+          clientProfileId: '10000000-0000-4000-8000-000000000001',
+          nickname: 'test-player',
+        }),
+      ).rejects.toMatchObject({
+        status: HttpStatus.CONFLICT,
+        response: { success: false, error: { code } },
+      } as ApiException);
+    },
+  );
 
   it('returns one exact public nickname search result', async () => {
     await expect(service.searchUsers('test-player')).resolves.toEqual([

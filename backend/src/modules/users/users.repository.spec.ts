@@ -33,6 +33,173 @@ describe('UsersRepository user search', () => {
   });
 });
 
+describe('UsersRepository local profile registration', () => {
+  const clientProfileId = '10000000-0000-4000-8000-000000000001';
+  const progress = {
+    characterId: 'erpin',
+    level: 1,
+    experience: 0,
+    skillPoints: 0,
+    lowGradeSkillLevel: 1,
+    highGradeSkillLevel: 1,
+  };
+
+  it('creates the user and initial Erpin progress in one transaction', async () => {
+    const findUnique = jest
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+    const createUser = jest.fn().mockResolvedValue({
+      id: 'user-id',
+      clientProfileId,
+      nickname: 'Yeonguk',
+    });
+    const createProgress = jest.fn().mockResolvedValue(progress);
+    const transaction = jest.fn().mockImplementation(async (callback) =>
+      callback({
+        user: { create: createUser },
+        userCharacterProgress: { create: createProgress },
+      }),
+    );
+    const repository = new UsersRepository({
+      user: { findUnique },
+      $transaction: transaction,
+    } as never);
+
+    await expect(
+      repository.createUser({ clientProfileId, nickname: 'Yeonguk' }),
+    ).resolves.toEqual({
+      id: 'user-id',
+      clientProfileId,
+      nickname: 'Yeonguk',
+      characterProgress: [progress],
+      isNew: true,
+    });
+    expect(findUnique).toHaveBeenNthCalledWith(2, {
+      where: { nickname: 'Yeonguk' },
+      select: { id: true },
+    });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(createUser).toHaveBeenCalledWith({
+      data: { clientProfileId, nickname: 'Yeonguk' },
+      select: { id: true, clientProfileId: true, nickname: true },
+    });
+    expect(createProgress).toHaveBeenCalledWith({
+      data: { userId: 'user-id', characterId: 'erpin' },
+      select: {
+        characterId: true,
+        level: true,
+        experience: true,
+        skillPoints: true,
+        lowGradeSkillLevel: true,
+        highGradeSkillLevel: true,
+      },
+    });
+  });
+
+  it('returns the existing result for the same profile id and exact nickname', async () => {
+    const existing = {
+      id: 'user-id',
+      clientProfileId,
+      nickname: 'yeonguk',
+      characterProgress: [progress],
+    };
+    const findUnique = jest.fn().mockResolvedValue(existing);
+    const transaction = jest.fn();
+    const repository = new UsersRepository({
+      user: { findUnique },
+      $transaction: transaction,
+    } as never);
+
+    await expect(
+      repository.createUser({ clientProfileId, nickname: 'yeonguk' }),
+    ).resolves.toEqual({ ...existing, isNew: false });
+    expect(findUnique).toHaveBeenCalledTimes(1);
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
+  it('rejects a different nickname for the same profile id', async () => {
+    const repository = new UsersRepository({
+      user: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'user-id',
+          clientProfileId,
+          nickname: 'yeonguk',
+          characterProgress: [progress],
+        }),
+      },
+    } as never);
+
+    await expectRepositoryError(
+      repository.createUser({ clientProfileId, nickname: 'Yeonguk' }),
+      'PROFILE_IDEMPOTENCY_CONFLICT',
+    );
+  });
+
+  it('rejects an exact nickname owned by another profile', async () => {
+    const findUnique = jest
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ id: 'other-user-id' });
+    const repository = new UsersRepository({ user: { findUnique } } as never);
+
+    await expectRepositoryError(
+      repository.createUser({ clientProfileId, nickname: 'yeonguk' }),
+      'NICKNAME_ALREADY_EXISTS',
+    );
+    expect(findUnique).toHaveBeenNthCalledWith(2, {
+      where: { nickname: 'yeonguk' },
+      select: { id: true },
+    });
+  });
+
+  it('returns the concurrent winner for the same idempotent request', async () => {
+    const existing = {
+      id: 'user-id',
+      clientProfileId,
+      nickname: 'yeonguk',
+      characterProgress: [progress],
+    };
+    const findUnique = jest
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(existing);
+    const uniqueConflict = Object.assign(new Error('unique conflict'), {
+      code: 'P2002',
+    });
+    const repository = new UsersRepository({
+      user: { findUnique },
+      $transaction: jest.fn().mockRejectedValue(uniqueConflict),
+    } as never);
+
+    await expect(
+      repository.createUser({ clientProfileId, nickname: 'yeonguk' }),
+    ).resolves.toEqual({ ...existing, isNew: false });
+  });
+
+  it('classifies a concurrent exact nickname conflict from the database constraint', async () => {
+    const findUnique = jest
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ id: 'other-user-id' });
+    const uniqueConflict = Object.assign(new Error('unique conflict'), {
+      code: 'P2002',
+    });
+    const repository = new UsersRepository({
+      user: { findUnique },
+      $transaction: jest.fn().mockRejectedValue(uniqueConflict),
+    } as never);
+
+    await expectRepositoryError(
+      repository.createUser({ clientProfileId, nickname: 'yeonguk' }),
+      'NICKNAME_ALREADY_EXISTS',
+    );
+  });
+});
+
 describe('UsersRepository run history pagination', () => {
   it('uses a stable endedAt and id order with exact page boundaries', async () => {
     const findMany = jest

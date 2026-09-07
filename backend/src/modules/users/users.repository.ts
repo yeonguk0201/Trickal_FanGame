@@ -58,6 +58,23 @@ export type CreateUserResult = {
   isNew: boolean;
 };
 
+const registrationSelect = {
+  id: true,
+  clientProfileId: true,
+  nickname: true,
+  characterProgress: {
+    orderBy: { characterId: 'asc' as const },
+    select: {
+      characterId: true,
+      level: true,
+      experience: true,
+      skillPoints: true,
+      lowGradeSkillLevel: true,
+      highGradeSkillLevel: true,
+    },
+  },
+};
+
 type FindUserRunsOptions = {
   page: number;
   limit: number;
@@ -71,22 +88,7 @@ export class UsersRepository {
     // Check for existing user with same clientProfileId (idempotency)
     const existingByProfileId = await this.prisma.user.findUnique({
       where: { clientProfileId: input.clientProfileId },
-      select: {
-        id: true,
-        clientProfileId: true,
-        nickname: true,
-        characterProgress: {
-          orderBy: { characterId: 'asc' },
-          select: {
-            characterId: true,
-            level: true,
-            experience: true,
-            skillPoints: true,
-            lowGradeSkillLevel: true,
-            highGradeSkillLevel: true,
-          },
-        },
-      },
+      select: registrationSelect,
     });
 
     if (existingByProfileId) {
@@ -113,35 +115,68 @@ export class UsersRepository {
     }
 
     // Create user and initial character progress in transaction
-    const user = await this.prisma.$transaction(async (tx) => {
-      const newUser = await tx.user.create({
-        data: {
-          clientProfileId: input.clientProfileId,
-          nickname: input.nickname,
-        },
-        select: { id: true, clientProfileId: true, nickname: true },
-      });
+    let user: Omit<CreateUserResult, 'isNew'>;
+    try {
+      user = await this.prisma.$transaction(async (tx) => {
+        const newUser = await tx.user.create({
+          data: {
+            clientProfileId: input.clientProfileId,
+            nickname: input.nickname,
+          },
+          select: { id: true, clientProfileId: true, nickname: true },
+        });
 
-      const progress = await tx.userCharacterProgress.create({
-        data: {
-          userId: newUser.id,
-          characterId: DEFAULT_CHARACTER_ID,
-        },
-        select: {
-          characterId: true,
-          level: true,
-          experience: true,
-          skillPoints: true,
-          lowGradeSkillLevel: true,
-          highGradeSkillLevel: true,
-        },
-      });
+        const progress = await tx.userCharacterProgress.create({
+          data: {
+            userId: newUser.id,
+            characterId: DEFAULT_CHARACTER_ID,
+          },
+          select: {
+            characterId: true,
+            level: true,
+            experience: true,
+            skillPoints: true,
+            lowGradeSkillLevel: true,
+            highGradeSkillLevel: true,
+          },
+        });
 
-      return {
-        ...newUser,
-        characterProgress: [progress],
-      };
-    });
+        return {
+          ...newUser,
+          characterProgress: [progress],
+        };
+      });
+    } catch (error: unknown) {
+      if (!isUniqueConstraintError(error)) throw error;
+
+      // A concurrent request may win after both pre-checks. Re-read the stable
+      // keys so the API still returns the documented idempotency result/code.
+      const concurrentByProfileId = await this.prisma.user.findUnique({
+        where: { clientProfileId: input.clientProfileId },
+        select: registrationSelect,
+      });
+      if (concurrentByProfileId) {
+        if (concurrentByProfileId.nickname !== input.nickname) {
+          throw new UsersRepositoryError(
+            'PROFILE_IDEMPOTENCY_CONFLICT',
+            '이미 등록된 프로필 ID입니다. 다른 닉네임으로 등록되어 있습니다.',
+          );
+        }
+        return { ...concurrentByProfileId, isNew: false };
+      }
+
+      const concurrentByNickname = await this.prisma.user.findUnique({
+        where: { nickname: input.nickname },
+        select: { id: true },
+      });
+      if (concurrentByNickname) {
+        throw new UsersRepositoryError(
+          'NICKNAME_ALREADY_EXISTS',
+          '이미 사용 중인 닉네임입니다.',
+        );
+      }
+      throw error;
+    }
 
     return { ...user, isNew: true };
   }
@@ -364,4 +399,13 @@ function isRetryableTransactionError(error: unknown): boolean {
   }
 
   return (error as { code?: unknown }).code === 'P2034';
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return Boolean(
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    (error as { code?: unknown }).code === 'P2002',
+  );
 }
