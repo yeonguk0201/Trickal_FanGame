@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 
 namespace TrickalFanGame.Network
 {
-    public class ApiClient : MonoBehaviour, IGameApiClient
+    public class ApiClient : MonoBehaviour, IGameApiClient, IUserRegistrationClient
     {
         [Header("API Settings")]
         [SerializeField] private string baseUrl = "http://localhost:3001/api";
@@ -39,6 +39,14 @@ namespace TrickalFanGame.Network
         public void PostUser(CreateUserRequest request, Action<CreateUserResponse> onSuccess, Action<string> onError)
         {
             StartCoroutine(PostUserCoroutine(request, onSuccess, onError));
+        }
+
+        public void PostUserWithErrorInfo(
+            CreateUserRequest request,
+            Action<CreateUserResponse> onSuccess,
+            Action<RegistrationError> onError)
+        {
+            StartCoroutine(PostUserWithErrorInfoCoroutine(request, onSuccess, onError));
         }
 
         private System.Collections.IEnumerator GetUserCoroutine(
@@ -140,6 +148,95 @@ namespace TrickalFanGame.Network
             {
                 Debug.LogError($"[ApiClient] Parse error: {e.Message}");
                 onError?.Invoke($"Parse error: {e.Message}");
+            }
+        }
+
+        private System.Collections.IEnumerator PostUserWithErrorInfoCoroutine(
+            CreateUserRequest request,
+            Action<CreateUserResponse> onSuccess,
+            Action<RegistrationError> onError)
+        {
+            string url = $"{baseUrl}/users";
+            string json = JsonUtility.ToJson(request);
+
+            if (enableLogging)
+            {
+                Debug.Log($"[ApiClient] POST {url}");
+                Debug.Log($"[ApiClient] Request Body: {json}");
+            }
+
+            using var webRequest = new UnityWebRequest(url, "POST");
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+            webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            webRequest.downloadHandler = new DownloadHandlerBuffer();
+            webRequest.SetRequestHeader("Content-Type", "application/json");
+            webRequest.timeout = (int)timeout;
+
+            yield return webRequest.SendWebRequest();
+
+            string responseText = webRequest.downloadHandler?.text ?? "";
+            long httpStatus = webRequest.responseCode;
+
+            if (enableLogging)
+            {
+                Debug.Log($"[ApiClient] Response ({httpStatus}): {responseText}");
+            }
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                var registrationError = BuildRegistrationError(webRequest, responseText);
+                Debug.LogError($"[ApiClient] Registration error: {registrationError.Type} - {registrationError.Message}");
+                onError?.Invoke(registrationError);
+                yield break;
+            }
+
+            try
+            {
+                var response = JsonUtility.FromJson<CreateUserResponse>(responseText);
+                if (response.success)
+                {
+                    Debug.Log($"[ApiClient] User created/retrieved: {response.data.nickname}");
+                    onSuccess?.Invoke(response);
+                }
+                else
+                {
+                    string code = response.error?.code ?? "UNKNOWN";
+                    string message = response.error?.message ?? "User creation failed.";
+                    var registrationError = RegistrationError.FromApiError(httpStatus, code, message);
+                    onError?.Invoke(registrationError);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[ApiClient] Parse error: {e.Message}");
+                onError?.Invoke(RegistrationError.ParseFailure(e.Message));
+            }
+        }
+
+        private static RegistrationError BuildRegistrationError(UnityWebRequest webRequest, string responseText)
+        {
+            long httpStatus = webRequest.responseCode;
+
+            if (webRequest.result == UnityWebRequest.Result.ConnectionError)
+            {
+                return RegistrationError.NetworkFailure(webRequest.error);
+            }
+
+            if (string.IsNullOrEmpty(responseText))
+            {
+                return RegistrationError.FromApiError(httpStatus, "HTTP_ERROR", webRequest.error);
+            }
+
+            try
+            {
+                ApiErrorResponse response = JsonUtility.FromJson<ApiErrorResponse>(responseText);
+                string code = response?.error?.code ?? "UNKNOWN";
+                string message = response?.error?.message ?? webRequest.error ?? "Unknown error";
+                return RegistrationError.FromApiError(httpStatus, code, message);
+            }
+            catch
+            {
+                return RegistrationError.FromApiError(httpStatus, "HTTP_ERROR", webRequest.error);
             }
         }
 

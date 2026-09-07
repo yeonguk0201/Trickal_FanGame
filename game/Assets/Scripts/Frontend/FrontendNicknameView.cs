@@ -18,6 +18,7 @@ namespace TrickalFanGame.Frontend
 
         private bool _isSubmitting;
         private IGameApiClient _apiClient;
+        private IUserRegistrationClient _registrationClient;
 
         public event Action<CreateUserData> OnRegistrationComplete;
 
@@ -37,6 +38,7 @@ namespace TrickalFanGame.Frontend
         public void SetApiClient(IGameApiClient apiClient)
         {
             _apiClient = apiClient;
+            _registrationClient = apiClient as IUserRegistrationClient;
         }
 
         private void OnEnable()
@@ -149,6 +151,15 @@ namespace TrickalFanGame.Frontend
                 nickname = nickname
             };
 
+            IUserRegistrationClient registrationClient = _registrationClient
+                ?? ApiClient.Instance as IUserRegistrationClient;
+
+            if (registrationClient != null)
+            {
+                registrationClient.PostUserWithErrorInfo(request, OnRegistrationSuccess, OnRegistrationErrorWithInfo);
+                return;
+            }
+
             IGameApiClient apiClient = _apiClient ?? ApiClient.Instance;
             if (apiClient == null)
             {
@@ -181,6 +192,34 @@ namespace TrickalFanGame.Frontend
             _isSubmitting = false;
             ShowError(error);
             SetSubmitInteractable(true);
+        }
+
+        private void OnRegistrationErrorWithInfo(RegistrationError error)
+        {
+            _isSubmitting = false;
+            string message = GetUserFriendlyMessage(error);
+            ShowError(message);
+            SetSubmitInteractable(true);
+        }
+
+        private static string GetUserFriendlyMessage(RegistrationError error)
+        {
+            return error.Type switch
+            {
+                RegistrationErrorType.NicknameExists =>
+                    "이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.",
+                RegistrationErrorType.ProfileConflict =>
+                    "프로필 등록 충돌이 발생했습니다. 다시 시도해주세요.",
+                RegistrationErrorType.ValidationError =>
+                    "닉네임 형식이 올바르지 않습니다. 한글, 영문, 숫자만 2~12자로 입력해주세요.",
+                RegistrationErrorType.NetworkError =>
+                    "네트워크 연결을 확인해주세요. 잠시 후 다시 시도해주세요.",
+                RegistrationErrorType.ServerError =>
+                    "서버에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+                RegistrationErrorType.ParseError or RegistrationErrorType.Unknown =>
+                    "알 수 없는 오류가 발생했습니다. 다시 시도해주세요.",
+                _ => "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
+            };
         }
 
         private void ShowError(string message)
