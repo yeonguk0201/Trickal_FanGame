@@ -108,6 +108,7 @@ namespace TrickalFanGame.Editor
             view.ConfigureTitlePanel(titlePanel.gameObject);
 
             FrontendHomeView homeView = SetupHome(frame);
+            SetupSettings(homeView, frame);
             view.ConfigureHomeView(homeView);
             homeView.gameObject.SetActive(false);
 
@@ -151,7 +152,8 @@ namespace TrickalFanGame.Editor
             fontSettings.FindProperty("m_ClearDynamicDataOnBuild").boolValue = false;
             fontSettings.ApplyModifiedPropertiesWithoutUndo();
             string titleCharacters = "TRICKAL FAN GAME트릭컬 팬게임닉네임님환영합니다게임시작스킬강화설정나가기캐릭터선택뒤로" +
-                FrontendTitleView.ReadyMessage + FrontendHomeView.PreparationMessage + FrontendHomeView.QuitMessage;
+                FrontendTitleView.ReadyMessage + FrontendHomeView.PreparationMessage + FrontendHomeView.QuitMessage +
+                "음량전체배경효과화면해상도x0123456789% ";
             if (!font.HasCharacters(titleCharacters) && !font.TryAddCharacters(titleCharacters, out string missing))
                 throw new InvalidOperationException("Missing title glyphs: " + missing);
             EditorUtility.SetDirty(font);
@@ -244,6 +246,236 @@ namespace TrickalFanGame.Editor
             view.Configure(homePanel.gameObject, welcome, gameStart, skill, settings, quit,
                 destination.gameObject, destinationTitle, destinationMessage, back);
             return view;
+        }
+
+        private static void SetupSettings(FrontendHomeView homeView, RectTransform frame)
+        {
+            RectTransform root = Rect(frame, "SettingsPanel", Vector2.zero, new Vector2(720, 560));
+            Image background = Component<Image>(root.gameObject);
+            background.color = new Color(0.06f, 0.1f, 0.14f);
+            background.raycastTarget = true;
+
+            Text(root, "SettingsTitle", "설정", new Vector2(0, 230), new Vector2(680, 60), 40);
+
+            // Volume Section
+            Text(root, "VolumeSection", "음량 설정", new Vector2(-200, 155), new Vector2(280, 40), 28);
+
+            TMP_Text masterLabel = Text(root, "MasterVolumeLabel", "전체 음량", new Vector2(-200, 105), new Vector2(160, 32), 20);
+            masterLabel.alignment = TextAlignmentOptions.Left;
+            Slider masterSlider = Slider(root, "MasterVolumeSlider", new Vector2(60, 105), new Vector2(320, 32));
+            TMP_Text masterValue = Text(root, "MasterVolumeValue", "100%", new Vector2(280, 105), new Vector2(80, 32), 20);
+
+            TMP_Text bgmLabel = Text(root, "BgmVolumeLabel", "배경음", new Vector2(-200, 55), new Vector2(160, 32), 20);
+            bgmLabel.alignment = TextAlignmentOptions.Left;
+            Slider bgmSlider = Slider(root, "BgmVolumeSlider", new Vector2(60, 55), new Vector2(320, 32));
+            TMP_Text bgmValue = Text(root, "BgmVolumeValue", "100%", new Vector2(280, 55), new Vector2(80, 32), 20);
+
+            TMP_Text sfxLabel = Text(root, "SfxVolumeLabel", "효과음", new Vector2(-200, 5), new Vector2(160, 32), 20);
+            sfxLabel.alignment = TextAlignmentOptions.Left;
+            Slider sfxSlider = Slider(root, "SfxVolumeSlider", new Vector2(60, 5), new Vector2(320, 32));
+            TMP_Text sfxValue = Text(root, "SfxVolumeValue", "100%", new Vector2(280, 5), new Vector2(80, 32), 20);
+
+            // Display Section
+            Text(root, "DisplaySection", "화면 설정", new Vector2(-200, -60), new Vector2(280, 40), 28);
+
+            TMP_Text resolutionLabel = Text(root, "ResolutionLabel", "해상도", new Vector2(-200, -110), new Vector2(160, 32), 20);
+            resolutionLabel.alignment = TextAlignmentOptions.Left;
+            TMP_Dropdown resolutionDropdown = Dropdown(root, "ResolutionDropdown", new Vector2(100, -110), new Vector2(220, 40));
+
+            TMP_Text fullscreenLabel = Text(root, "FullscreenLabel", "전체 화면", new Vector2(-200, -165), new Vector2(160, 32), 20);
+            fullscreenLabel.alignment = TextAlignmentOptions.Left;
+            Toggle fullscreenToggle = Toggle(root, "FullscreenToggle", new Vector2(20, -165), new Vector2(40, 40));
+
+            // Back button
+            FrontendStartButton backButton = MenuButton(root, "SettingsBackButton", "뒤로", -230);
+            backButton.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 56);
+
+            // Configure view
+            FrontendSettingsView settingsView = Component<FrontendSettingsView>(root.gameObject);
+            settingsView.Configure(
+                masterSlider, masterValue,
+                bgmSlider, bgmValue,
+                sfxSlider, sfxValue,
+                resolutionDropdown,
+                fullscreenToggle,
+                backButton);
+            homeView.ConfigureSettings(root.gameObject, settingsView);
+            root.gameObject.SetActive(false);
+        }
+
+        private static Slider Slider(Transform parent, string name, Vector2 position, Vector2 size)
+        {
+            RectTransform rect = Rect(parent, name, position, size);
+            Slider slider = Component<Slider>(rect.gameObject);
+
+            // Background
+            RectTransform bgRect = Rect(rect, "Background", Vector2.zero, Vector2.zero);
+            Stretch(bgRect);
+            Image bgImage = Component<Image>(bgRect.gameObject);
+            bgImage.color = new Color(0.15f, 0.2f, 0.25f);
+
+            // Fill Area
+            RectTransform fillArea = Rect(rect, "Fill Area", Vector2.zero, Vector2.zero);
+            Stretch(fillArea);
+            fillArea.offsetMin = new Vector2(5, 0);
+            fillArea.offsetMax = new Vector2(-5, 0);
+
+            RectTransform fill = Rect(fillArea, "Fill", Vector2.zero, Vector2.zero);
+            fill.anchorMin = Vector2.zero;
+            fill.anchorMax = new Vector2(0, 1);
+            fill.offsetMin = Vector2.zero;
+            fill.offsetMax = Vector2.zero;
+            Image fillImage = Component<Image>(fill.gameObject);
+            fillImage.color = new Color(0.18f, 0.68f, 0.64f);
+
+            // Handle Area
+            RectTransform handleArea = Rect(rect, "Handle Slide Area", Vector2.zero, Vector2.zero);
+            Stretch(handleArea);
+            handleArea.offsetMin = new Vector2(10, 0);
+            handleArea.offsetMax = new Vector2(-10, 0);
+
+            RectTransform handle = Rect(handleArea, "Handle", Vector2.zero, new Vector2(20, 0));
+            handle.anchorMin = new Vector2(0, 0);
+            handle.anchorMax = new Vector2(0, 1);
+            Image handleImage = Component<Image>(handle.gameObject);
+            handleImage.color = new Color(0.92f, 0.96f, 1);
+
+            slider.fillRect = fill;
+            slider.handleRect = handle;
+            slider.targetGraphic = handleImage;
+            slider.minValue = 0;
+            slider.maxValue = 1;
+            slider.value = 1;
+
+            ColorBlock colors = ColorBlock.defaultColorBlock;
+            colors.highlightedColor = new Color(1.1f, 1.1f, 1.1f);
+            colors.selectedColor = Color.white;
+            slider.colors = colors;
+
+            return slider;
+        }
+
+        private static TMP_Dropdown Dropdown(Transform parent, string name, Vector2 position, Vector2 size)
+        {
+            RectTransform rect = Rect(parent, name, position, size);
+            Image bgImage = Component<Image>(rect.gameObject);
+            bgImage.color = new Color(0.15f, 0.2f, 0.25f);
+
+            TMP_Dropdown dropdown = Component<TMP_Dropdown>(rect.gameObject);
+
+            // Label
+            TMP_Text label = Text(rect, "Label", "", Vector2.zero, Vector2.zero, 18);
+            label.rectTransform.anchorMin = Vector2.zero;
+            label.rectTransform.anchorMax = Vector2.one;
+            label.rectTransform.offsetMin = new Vector2(10, 6);
+            label.rectTransform.offsetMax = new Vector2(-35, -7);
+            label.alignment = TextAlignmentOptions.Left;
+            label.raycastTarget = false;
+
+            // Arrow
+            RectTransform arrowRect = Rect(rect, "Arrow", new Vector2(-15, 0), new Vector2(20, 20));
+            arrowRect.anchorMin = arrowRect.anchorMax = new Vector2(1, 0.5f);
+            Image arrowImage = Component<Image>(arrowRect.gameObject);
+            arrowImage.color = new Color(0.92f, 0.96f, 1);
+            arrowImage.raycastTarget = false;
+
+            // Template
+            RectTransform template = Rect(rect, "Template", new Vector2(0, -size.y / 2), new Vector2(size.x, 150));
+            template.pivot = new Vector2(0.5f, 1);
+            Image templateBg = Component<Image>(template.gameObject);
+            templateBg.color = new Color(0.1f, 0.14f, 0.18f);
+            ScrollRect scrollRect = Component<ScrollRect>(template.gameObject);
+
+            // Viewport
+            RectTransform viewport = Rect(template, "Viewport", Vector2.zero, Vector2.zero);
+            Stretch(viewport);
+            Mask mask = Component<Mask>(viewport.gameObject);
+            mask.showMaskGraphic = false;
+            Component<Image>(viewport.gameObject).color = Color.white;
+
+            // Content
+            RectTransform content = Rect(viewport, "Content", Vector2.zero, new Vector2(size.x, 28));
+            content.anchorMin = new Vector2(0, 1);
+            content.anchorMax = Vector2.one;
+            content.pivot = new Vector2(0.5f, 1);
+
+            // Item
+            RectTransform item = Rect(content, "Item", Vector2.zero, new Vector2(size.x, 28));
+            item.anchorMin = new Vector2(0, 0.5f);
+            item.anchorMax = new Vector2(1, 0.5f);
+            item.pivot = new Vector2(0.5f, 0.5f);
+            Toggle itemToggle = Component<Toggle>(item.gameObject);
+
+            // Item Background
+            RectTransform itemBgRect = Rect(item, "Item Background", Vector2.zero, Vector2.zero);
+            Stretch(itemBgRect);
+            Image itemBgImage = Component<Image>(itemBgRect.gameObject);
+            itemBgImage.color = new Color(0.18f, 0.22f, 0.28f);
+
+            // Item Checkmark
+            RectTransform checkRect = Rect(item, "Item Checkmark", new Vector2(10, 0), new Vector2(20, 20));
+            checkRect.anchorMin = checkRect.anchorMax = new Vector2(0, 0.5f);
+            Image checkImage = Component<Image>(checkRect.gameObject);
+            checkImage.color = new Color(0.18f, 0.68f, 0.64f);
+
+            // Item Label
+            TMP_Text itemLabel = Text(item, "Item Label", "", Vector2.zero, Vector2.zero, 16);
+            itemLabel.rectTransform.anchorMin = Vector2.zero;
+            itemLabel.rectTransform.anchorMax = Vector2.one;
+            itemLabel.rectTransform.offsetMin = new Vector2(35, 2);
+            itemLabel.rectTransform.offsetMax = new Vector2(-10, -2);
+            itemLabel.alignment = TextAlignmentOptions.Left;
+
+            itemToggle.targetGraphic = itemBgImage;
+            itemToggle.graphic = checkImage;
+            itemToggle.isOn = true;
+
+            scrollRect.content = content;
+            scrollRect.viewport = viewport;
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+
+            dropdown.captionText = label;
+            dropdown.itemText = itemLabel;
+            dropdown.template = template;
+            dropdown.targetGraphic = bgImage;
+
+            ColorBlock colors = ColorBlock.defaultColorBlock;
+            colors.highlightedColor = new Color(1.1f, 1.1f, 1.1f);
+            colors.selectedColor = Color.white;
+            dropdown.colors = colors;
+
+            template.gameObject.SetActive(false);
+
+            return dropdown;
+        }
+
+        private static Toggle Toggle(Transform parent, string name, Vector2 position, Vector2 size)
+        {
+            RectTransform rect = Rect(parent, name, position, size);
+            Toggle toggle = Component<Toggle>(rect.gameObject);
+
+            // Background
+            RectTransform bgRect = Rect(rect, "Background", Vector2.zero, size);
+            Image bgImage = Component<Image>(bgRect.gameObject);
+            bgImage.color = new Color(0.15f, 0.2f, 0.25f);
+
+            // Checkmark
+            RectTransform checkRect = Rect(rect, "Checkmark", Vector2.zero, size * 0.6f);
+            Image checkImage = Component<Image>(checkRect.gameObject);
+            checkImage.color = new Color(0.18f, 0.68f, 0.64f);
+
+            toggle.targetGraphic = bgImage;
+            toggle.graphic = checkImage;
+            toggle.isOn = true;
+
+            ColorBlock colors = ColorBlock.defaultColorBlock;
+            colors.highlightedColor = new Color(1.1f, 1.1f, 1.1f);
+            colors.selectedColor = Color.white;
+            toggle.colors = colors;
+
+            return toggle;
         }
 
         private static FrontendStartButton MenuButton(Transform parent, string name, string label, float y)

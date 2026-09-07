@@ -32,6 +32,10 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Text destinationMessage;
         [SerializeField] private Button backButton;
 
+        [Header("Settings")]
+        [SerializeField] private GameObject settingsPanel;
+        [SerializeField] private FrontendSettingsView settingsView;
+
         public GameObject HomePanel => homePanel;
         public TMP_Text WelcomeText => welcomeText;
         public Button GameStartButton => gameStartButton;
@@ -41,6 +45,8 @@ namespace TrickalFanGame.Frontend
         public GameObject DestinationPanel => destinationPanel;
         public TMP_Text DestinationTitle => destinationTitle;
         public Button BackButton => backButton;
+        public GameObject SettingsPanel => settingsPanel;
+        public FrontendSettingsView SettingsView => settingsView;
         public FrontendDestination? CurrentDestination { get; private set; }
 
         public event Action<FrontendDestination> OnDestinationRequested;
@@ -70,6 +76,12 @@ namespace TrickalFanGame.Frontend
             backButton = back;
         }
 
+        public void ConfigureSettings(GameObject settings, FrontendSettingsView view)
+        {
+            settingsPanel = settings;
+            settingsView = view;
+        }
+
         private void OnEnable()
         {
             if (gameStartButton != null) gameStartButton.onClick.AddListener(RequestCharacterSelection);
@@ -77,6 +89,7 @@ namespace TrickalFanGame.Frontend
             if (settingsButton != null) settingsButton.onClick.AddListener(RequestSettings);
             if (quitButton != null) quitButton.onClick.AddListener(RequestQuit);
             if (backButton != null) backButton.onClick.AddListener(ReturnHome);
+            if (settingsView != null) settingsView.OnBackRequested += ReturnHomeFromSettings;
         }
 
         private void OnDisable()
@@ -86,6 +99,7 @@ namespace TrickalFanGame.Frontend
             if (settingsButton != null) settingsButton.onClick.RemoveListener(RequestSettings);
             if (quitButton != null) quitButton.onClick.RemoveListener(RequestQuit);
             if (backButton != null) backButton.onClick.RemoveListener(ReturnHome);
+            if (settingsView != null) settingsView.OnBackRequested -= ReturnHomeFromSettings;
         }
 
         public void Show(string nickname)
@@ -94,6 +108,7 @@ namespace TrickalFanGame.Frontend
             CurrentDestination = null;
             if (homePanel != null) homePanel.SetActive(true);
             if (destinationPanel != null) destinationPanel.SetActive(false);
+            if (settingsPanel != null) settingsPanel.SetActive(false);
             if (welcomeText != null) welcomeText.text = $"{nickname} 님, 환영합니다";
             Focus(gameStartButton);
         }
@@ -106,14 +121,36 @@ namespace TrickalFanGame.Frontend
 
         public void RequestCharacterSelection() => ShowDestination(FrontendDestination.CharacterSelection);
         public void RequestSkillUpgrade() => ShowDestination(FrontendDestination.SkillUpgrade);
-        public void RequestSettings() => ShowDestination(FrontendDestination.Settings);
+
+        public void RequestSettings()
+        {
+            if (settingsPanel != null && settingsView != null)
+            {
+                CurrentDestination = FrontendDestination.Settings;
+                if (homePanel != null) homePanel.SetActive(false);
+                if (destinationPanel != null) destinationPanel.SetActive(false);
+                settingsPanel.SetActive(true);
+                settingsView.FocusMasterSlider();
+                OnDestinationRequested?.Invoke(FrontendDestination.Settings);
+            }
+            else
+            {
+                ShowDestination(FrontendDestination.Settings);
+            }
+        }
 
         public void ReturnHome()
         {
             CurrentDestination = null;
             if (homePanel != null) homePanel.SetActive(true);
             if (destinationPanel != null) destinationPanel.SetActive(false);
+            if (settingsPanel != null) settingsPanel.SetActive(false);
             Focus(gameStartButton);
+        }
+
+        private void ReturnHomeFromSettings()
+        {
+            ReturnHome();
         }
 
         public void RequestQuit()

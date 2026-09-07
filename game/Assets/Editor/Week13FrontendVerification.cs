@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TMPro;
@@ -26,7 +27,7 @@ namespace TrickalFanGame.Editor
             Assert(scene.path == Week13FrontendSetup.ScenePath, "Open FrontendScene before verification.");
             ValidateScene(scene);
             if (!EditorApplication.isPlaying) VerifyLayouts(scene);
-            Debug.Log("Week 13 Frontend verification passed: scene isolation, build entry, references, scaler, safe area and screen layouts.");
+            Debug.Log("Week 13 Frontend verification passed: scene isolation, build entry, references, scaler, safe area, settings (Setting-1A/1B) and screen layouts.");
         }
 
         public static void ValidateScene(Scene scene)
@@ -67,8 +68,8 @@ namespace TrickalFanGame.Editor
             RectTransform safe = canvas.transform.Find("ReferenceFrame/SafeArea") as RectTransform;
             Assert(safe != null && safe.anchorMin == Vector2.zero && safe.anchorMax == Vector2.one &&
                 safe.offsetMin == new Vector2(64, 54) && safe.offsetMax == new Vector2(-64, -54), "Safe area differs from UI spec.");
-            Assert(components.OfType<FrontendTitleView>().Count() == 1 && components.OfType<Button>().Count() == 7,
-                "The title, nickname, home and destination screens require exactly seven buttons.");
+            Assert(components.OfType<FrontendTitleView>().Count() == 1 && components.OfType<Button>().Count() == 8,
+                "The title, nickname, home, destination and settings screens require exactly eight buttons.");
             FrontendTitleView view = components.OfType<FrontendTitleView>().Single();
             Assert(view.TitlePanel != null && view.StartButton != null && view.StatusText != null &&
                 view.StartButton is FrontendStartButton && view.HomeView != null,
@@ -86,14 +87,17 @@ namespace TrickalFanGame.Editor
             Assert(serializedButton.FindProperty("hoverBorder").objectReferenceValue != null &&
                 serializedButton.FindProperty("focusBorder").objectReferenceValue != null, "Missing button border references.");
             ValidateHome(view.HomeView, scene);
+            ValidateSettings(view.HomeView, scene);
             foreach (TMP_Text text in components.OfType<TMP_Text>())
             {
                 Assert(text.font != null, "Missing TMP font: " + text.name);
                 // The registered nickname is user data. The dynamic font resolves its allowed Korean/Latin/digit
                 // glyphs during rendering, so only fixed UI copy can be preflighted here.
+                // Empty strings are runtime-populated (dropdown templates, volume percentages).
                 bool runtimeText = text == view.HomeView.WelcomeText ||
                     text == view.NicknameView.ValidationText ||
-                    text == view.NicknameView.ErrorText;
+                    text == view.NicknameView.ErrorText ||
+                    string.IsNullOrEmpty(text.text);
                 if (!runtimeText)
                     Assert(text.font.HasCharacters(text.text), "Missing TMP glyph: " + text.name);
             }
@@ -119,6 +123,87 @@ namespace TrickalFanGame.Editor
                 "Home keyboard navigation must form an explicit loop.");
             Assert(menuButtons.Append(home.BackButton).All(button => button.onClick.GetPersistentEventCount() == 0),
                 "Frontend actions must be wired once at runtime, not as persistent Scene calls.");
+            Assert(home.SettingsPanel != null && home.SettingsView != null, "Home requires settings panel and view.");
+        }
+
+        private static void ValidateSettings(FrontendHomeView home, Scene scene)
+        {
+            FrontendSettingsView settings = home.SettingsView;
+            Assert(settings != null, "Settings view is required.");
+            Assert(settings.gameObject.scene == scene && settings.name == "SettingsPanel", "Settings panel must stay in FrontendScene.");
+
+            Assert(settings.MasterVolumeSlider != null, "Missing master volume slider.");
+            Assert(settings.BgmVolumeSlider != null, "Missing BGM volume slider.");
+            Assert(settings.SfxVolumeSlider != null, "Missing SFX volume slider.");
+            Assert(settings.MasterVolumeLabel != null, "Missing master volume label.");
+            Assert(settings.BgmVolumeLabel != null, "Missing BGM volume label.");
+            Assert(settings.SfxVolumeLabel != null, "Missing SFX volume label.");
+            Assert(settings.ResolutionDropdown != null, "Missing resolution dropdown.");
+            Assert(settings.FullscreenToggle != null, "Missing fullscreen toggle.");
+            Assert(settings.BackButton != null && settings.BackButton is FrontendStartButton, "Missing styled settings back button.");
+
+            Slider[] sliders = { settings.MasterVolumeSlider, settings.BgmVolumeSlider, settings.SfxVolumeSlider };
+            Assert(sliders.Distinct().Count() == 3, "Settings requires three distinct volume sliders.");
+            Assert(sliders.All(s => s.minValue == 0 && s.maxValue == 1), "Volume sliders must be normalized 0-1.");
+
+            ValidateLocalSettings();
+        }
+
+        private static void ValidateLocalSettings()
+        {
+            Assert(LocalSettings.SupportedResolutions.Length == 3, "Exactly 3 resolutions must be supported.");
+            var expected = new (int w, int h)[] { (1280, 720), (1920, 1080), (2560, 1440) };
+            for (int i = 0; i < expected.Length; i++)
+            {
+                Assert(LocalSettings.SupportedResolutions[i].width == expected[i].w &&
+                    LocalSettings.SupportedResolutions[i].height == expected[i].h,
+                    $"Resolution {i} must be {expected[i].w}x{expected[i].h}.");
+                float ratio = (float)expected[i].w / expected[i].h;
+                Assert(Mathf.Abs(ratio - 16f / 9f) < 0.001f, "All resolutions must be 16:9.");
+            }
+
+            float originalMaster = LocalSettings.MasterVolume;
+            float originalBgm = LocalSettings.BgmVolume;
+            float originalSfx = LocalSettings.SfxVolume;
+            bool originalFullscreen = LocalSettings.Fullscreen;
+            int originalWidth = LocalSettings.ResolutionWidth;
+            int originalHeight = LocalSettings.ResolutionHeight;
+
+            try
+            {
+                LocalSettings.MasterVolume = 0.5f;
+                LocalSettings.BgmVolume = 0.75f;
+                LocalSettings.SfxVolume = 0.25f;
+                LocalSettings.Fullscreen = false;
+                LocalSettings.SetResolution(1280, 720);
+
+                Assert(Mathf.Approximately(LocalSettings.MasterVolume, 0.5f), "Master volume save failed.");
+                Assert(Mathf.Approximately(LocalSettings.BgmVolume, 0.75f), "BGM volume save failed.");
+                Assert(Mathf.Approximately(LocalSettings.SfxVolume, 0.25f), "SFX volume save failed.");
+                Assert(!LocalSettings.Fullscreen, "Fullscreen save failed.");
+                Assert(LocalSettings.ResolutionWidth == 1280 && LocalSettings.ResolutionHeight == 720, "Resolution save failed.");
+                Assert(LocalSettings.GetResolutionIndex() == 0, "Resolution index calculation failed.");
+
+                LocalSettings.Load();
+                Assert(Mathf.Approximately(LocalSettings.MasterVolume, 0.5f), "Master volume load failed.");
+                Assert(Mathf.Approximately(LocalSettings.BgmVolume, 0.75f), "BGM volume load failed.");
+                Assert(Mathf.Approximately(LocalSettings.SfxVolume, 0.25f), "SFX volume load failed.");
+                Assert(!LocalSettings.Fullscreen, "Fullscreen load failed.");
+                Assert(LocalSettings.ResolutionWidth == 1280 && LocalSettings.ResolutionHeight == 720, "Resolution load failed.");
+
+                Assert(LocalSettings.IsValidResolution(1920, 1080), "Valid resolution rejected.");
+                Assert(!LocalSettings.IsValidResolution(1600, 900), "Invalid resolution accepted.");
+
+                Debug.Log("LocalSettings save/restore verification passed.");
+            }
+            finally
+            {
+                LocalSettings.MasterVolume = originalMaster;
+                LocalSettings.BgmVolume = originalBgm;
+                LocalSettings.SfxVolume = originalSfx;
+                LocalSettings.Fullscreen = originalFullscreen;
+                LocalSettings.SetResolution(originalWidth, originalHeight);
+            }
         }
 
         // Exercise actual RectTransforms/TMP preferred sizes without changing the open scene.
@@ -386,8 +471,7 @@ namespace TrickalFanGame.Editor
                     FrontendHomeView.CharacterSelectionTitle);
                 VerifyDestination(home, home.SkillUpgradeButton, FrontendDestination.SkillUpgrade,
                     FrontendHomeView.SkillUpgradeTitle);
-                VerifyDestination(home, home.SettingsButton, FrontendDestination.Settings,
-                    FrontendHomeView.SettingsTitle);
+                VerifySettingsScreen(home);
                 bool quitRequested = false;
                 home.OnQuitRequested += () => quitRequested = true;
                 home.RequestQuit();
@@ -416,6 +500,59 @@ namespace TrickalFanGame.Editor
                 home.DestinationPanel.activeInHierarchy ||
                 EventSystem.current.currentSelectedGameObject != home.GameStartButton.gameObject)
                 throw new InvalidOperationException("Back did not return to Home from " + expected + ".");
+        }
+
+        private static void VerifySettingsScreen(FrontendHomeView home)
+        {
+            FrontendSettingsView settings = home.SettingsView;
+            if (settings == null)
+                throw new InvalidOperationException("Settings view is missing.");
+
+            home.SettingsButton.onClick.Invoke();
+            if (home.CurrentDestination != FrontendDestination.Settings ||
+                !home.SettingsPanel.activeInHierarchy ||
+                home.HomePanel.activeInHierarchy ||
+                EventSystem.current.currentSelectedGameObject != settings.MasterVolumeSlider.gameObject)
+                throw new InvalidOperationException("Settings button did not reach settings screen.");
+
+            float originalMaster = LocalSettings.MasterVolume;
+            float originalBgm = LocalSettings.BgmVolume;
+            float originalSfx = LocalSettings.SfxVolume;
+            bool originalFullscreen = LocalSettings.Fullscreen;
+
+            try
+            {
+                settings.MasterVolumeSlider.value = 0.5f;
+                if (!Mathf.Approximately(LocalSettings.MasterVolume, 0.5f))
+                    throw new InvalidOperationException("Master volume slider did not save to LocalSettings.");
+                if (settings.MasterVolumeLabel.text != "50%")
+                    throw new InvalidOperationException("Master volume label did not update.");
+
+                settings.BgmVolumeSlider.value = 0.75f;
+                if (!Mathf.Approximately(LocalSettings.BgmVolume, 0.75f))
+                    throw new InvalidOperationException("BGM volume slider did not save to LocalSettings.");
+
+                settings.SfxVolumeSlider.value = 0.25f;
+                if (!Mathf.Approximately(LocalSettings.SfxVolume, 0.25f))
+                    throw new InvalidOperationException("SFX volume slider did not save to LocalSettings.");
+
+                settings.FullscreenToggle.isOn = !originalFullscreen;
+                if (LocalSettings.Fullscreen == originalFullscreen)
+                    throw new InvalidOperationException("Fullscreen toggle did not save to LocalSettings.");
+            }
+            finally
+            {
+                LocalSettings.MasterVolume = originalMaster;
+                LocalSettings.BgmVolume = originalBgm;
+                LocalSettings.SfxVolume = originalSfx;
+                LocalSettings.Fullscreen = originalFullscreen;
+            }
+
+            settings.BackButton.onClick.Invoke();
+            if (home.CurrentDestination != null || !home.HomePanel.activeInHierarchy ||
+                home.SettingsPanel.activeInHierarchy ||
+                EventSystem.current.currentSelectedGameObject != home.GameStartButton.gameObject)
+                throw new InvalidOperationException("Settings back button did not return to Home.");
         }
 
         private static void Finish(int code, string message)
