@@ -20,7 +20,7 @@ namespace TrickalFanGame.Editor
         public const string GameScenePath = "Assets/Scenes/SampleScene.unity";
         public const string FontPath = "Assets/Fonts/Frontend Noto Sans KR.asset";
 
-        [MenuItem("Trickal Fan Game/Week 13/Setup Frontend Title")]
+        [MenuItem("Trickal Fan Game/Week 13/Setup Frontend Flow")]
         public static void Setup()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -43,7 +43,7 @@ namespace TrickalFanGame.Editor
             SceneManager.SetActiveScene(scene);
             Undo.IncrementCurrentGroup();
             int group = Undo.GetCurrentGroup();
-            Undo.SetCurrentGroupName("Setup Frontend Title");
+            Undo.SetCurrentGroupName("Setup Frontend Flow");
 
             GameObject cameraObject = Root(scene, "FrontendCamera");
             Camera titleCamera = Component<Camera>(cameraObject);
@@ -74,14 +74,21 @@ namespace TrickalFanGame.Editor
             safe.offsetMin = FrontendLayout.SafeMargin;
             safe.offsetMax = -FrontendLayout.SafeMargin;
 
-            RectTransform logo = Rect(safe, "GameLogo", new Vector2(0, 150), new Vector2(960, 160));
+            RectTransform titlePanel = Rect(safe, "TitlePanel", Vector2.zero, Vector2.zero);
+            Stretch(titlePanel);
+            MoveDirectChild(safe, titlePanel, "GameLogo");
+            MoveDirectChild(safe, titlePanel, "Subtitle");
+            MoveDirectChild(safe, titlePanel, "GameStartButton");
+            MoveDirectChild(safe, titlePanel, "Status");
+
+            RectTransform logo = Rect(titlePanel, "GameLogo", new Vector2(0, 150), new Vector2(960, 160));
             Image logoShape = Component<Image>(logo.gameObject);
             logoShape.color = new Color(0.1f, 0.17f, 0.26f);
             logoShape.raycastTarget = false;
             Text(logo, "LogoText", "TRICKAL FAN GAME", Vector2.zero, new Vector2(920, 112), 72);
-            Text(safe, "Subtitle", "트릭컬 팬게임", new Vector2(0, 28), new Vector2(560, 48), 28);
+            Text(titlePanel, "Subtitle", "트릭컬 팬게임", new Vector2(0, 28), new Vector2(560, 48), 28);
 
-            RectTransform buttonRect = Rect(safe, "GameStartButton", new Vector2(0, -120), new Vector2(280, 64));
+            RectTransform buttonRect = Rect(titlePanel, "GameStartButton", new Vector2(0, -120), new Vector2(280, 64));
             Image buttonImage = Component<Image>(buttonRect.gameObject);
             buttonImage.color = new Color(0.18f, 0.68f, 0.64f);
             FrontendStartButton button = Component<FrontendStartButton>(buttonRect.gameObject);
@@ -95,9 +102,14 @@ namespace TrickalFanGame.Editor
             GameObject hover = Border(buttonRect, "HoverBorder", 2, 0);
             GameObject focus = Border(buttonRect, "FocusBorder", 3, 2);
             button.ConfigureBorders(hover, focus);
-            TMP_Text status = Text(safe, "Status", "", new Vector2(0, -220), new Vector2(800, 80), 24);
+            TMP_Text status = Text(titlePanel, "Status", "", new Vector2(0, -220), new Vector2(800, 80), 24);
             FrontendTitleView view = Component<FrontendTitleView>(canvasObject);
             view.Configure(button, status);
+            view.ConfigureTitlePanel(titlePanel.gameObject);
+
+            FrontendHomeView homeView = SetupHome(frame);
+            view.ConfigureHomeView(homeView);
+            homeView.gameObject.SetActive(false);
 
             GameObject events = Root(scene, "FrontendEventSystem");
             EventSystem eventSystem = Component<EventSystem>(events);
@@ -114,7 +126,7 @@ namespace TrickalFanGame.Editor
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) }.Concat(remainingScenes).ToArray();
             AssetDatabase.SaveAssets();
             Undo.CollapseUndoOperations(group);
-            Debug.Log("Week 13 Frontend setup complete. Frontend is build index 0; SampleScene remains the Game Scene.");
+            Debug.Log("Week 13 Frontend setup complete. Title, profile and home flow are isolated from the Game Scene.");
         }
 
         private static void EnsureFont()
@@ -138,7 +150,8 @@ namespace TrickalFanGame.Editor
             var fontSettings = new SerializedObject(font);
             fontSettings.FindProperty("m_ClearDynamicDataOnBuild").boolValue = false;
             fontSettings.ApplyModifiedPropertiesWithoutUndo();
-            string titleCharacters = "TRICKAL FAN GAME트릭컬 팬게임" + FrontendTitleView.ReadyMessage;
+            string titleCharacters = "TRICKAL FAN GAME트릭컬 팬게임닉네임님환영합니다게임시작스킬강화설정나가기캐릭터선택뒤로" +
+                FrontendTitleView.ReadyMessage + FrontendHomeView.PreparationMessage + FrontendHomeView.QuitMessage;
             if (!font.HasCharacters(titleCharacters) && !font.TryAddCharacters(titleCharacters, out string missing))
                 throw new InvalidOperationException("Missing title glyphs: " + missing);
             EditorUtility.SetDirty(font);
@@ -187,6 +200,87 @@ namespace TrickalFanGame.Editor
 
         private static void Stretch(RectTransform rect)
         { rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one; rect.offsetMin = rect.offsetMax = Vector2.zero; }
+
+        private static FrontendHomeView SetupHome(RectTransform frame)
+        {
+            RectTransform root = Rect(frame, "HomeScreen", Vector2.zero, Vector2.zero);
+            Stretch(root);
+            Image background = Component<Image>(root.gameObject);
+            background.color = new Color(0.075f, 0.12f, 0.16f);
+            background.raycastTarget = false;
+
+            RectTransform homePanel = Rect(root, "HomePanel", Vector2.zero, Vector2.zero);
+            Stretch(homePanel);
+            RectTransform homeSafe = Rect(homePanel, "SafeArea", Vector2.zero, Vector2.zero);
+            Stretch(homeSafe);
+            homeSafe.offsetMin = FrontendLayout.SafeMargin;
+            homeSafe.offsetMax = -FrontendLayout.SafeMargin;
+
+            Image leftDecoration = Component<Image>(Rect(homePanel, "LeftDecoration", new Vector2(-760, 0), new Vector2(260, 1080)).gameObject);
+            leftDecoration.color = new Color(0.1f, 0.25f, 0.28f, 0.75f);
+            leftDecoration.raycastTarget = false;
+            Image rightDecoration = Component<Image>(Rect(homePanel, "RightDecoration", new Vector2(760, 0), new Vector2(260, 1080)).gameObject);
+            rightDecoration.color = new Color(0.16f, 0.17f, 0.3f, 0.75f);
+            rightDecoration.raycastTarget = false;
+
+            Text(homeSafe, "HomeTitle", "TRICKAL FAN GAME", new Vector2(0, 330), new Vector2(900, 100), 56);
+            TMP_Text welcome = Text(homeSafe, "Welcome", "닉네임 님, 환영합니다", new Vector2(0, 235), new Vector2(900, 56), 28);
+            FrontendStartButton gameStart = MenuButton(homeSafe, "HomeGameStartButton", "게임 시작", 100);
+            FrontendStartButton skill = MenuButton(homeSafe, "HomeSkillUpgradeButton", "스킬 강화", 15);
+            FrontendStartButton settings = MenuButton(homeSafe, "HomeSettingsButton", "설정", -70);
+            FrontendStartButton quit = MenuButton(homeSafe, "HomeQuitButton", "나가기", -155);
+            SetVerticalNavigation(gameStart, skill, settings, quit);
+
+            RectTransform destination = Rect(root, "DestinationPanel", Vector2.zero, Vector2.zero);
+            Stretch(destination);
+            TMP_Text destinationTitle = Text(destination, "DestinationTitle", FrontendHomeView.CharacterSelectionTitle,
+                new Vector2(0, 140), new Vector2(900, 90), 48);
+            TMP_Text destinationMessage = Text(destination, "DestinationMessage", FrontendHomeView.PreparationMessage,
+                new Vector2(0, 30), new Vector2(900, 80), 26);
+            FrontendStartButton back = MenuButton(destination, "BackButton", "뒤로", -130);
+            destination.gameObject.SetActive(false);
+
+            FrontendHomeView view = Component<FrontendHomeView>(root.gameObject);
+            view.Configure(homePanel.gameObject, welcome, gameStart, skill, settings, quit,
+                destination.gameObject, destinationTitle, destinationMessage, back);
+            return view;
+        }
+
+        private static FrontendStartButton MenuButton(Transform parent, string name, string label, float y)
+        {
+            RectTransform rect = Rect(parent, name, new Vector2(0, y), new Vector2(360, 64));
+            Image image = Component<Image>(rect.gameObject);
+            image.color = new Color(0.18f, 0.68f, 0.64f);
+            FrontendStartButton button = Component<FrontendStartButton>(rect.gameObject);
+            button.targetGraphic = image;
+            ColorBlock colors = ColorBlock.defaultColorBlock;
+            colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
+            colors.selectedColor = Color.white;
+            button.colors = colors;
+            Text(rect, "Label", label, Vector2.zero, new Vector2(344, 52), 24).color = new Color(0.025f, 0.06f, 0.08f);
+            button.ConfigureBorders(Border(rect, "HoverBorder", 2, 0), Border(rect, "FocusBorder", 3, 2));
+            return button;
+        }
+
+        private static void SetVerticalNavigation(params FrontendStartButton[] buttons)
+        {
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                buttons[i].navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnUp = buttons[(i + buttons.Length - 1) % buttons.Length],
+                    selectOnDown = buttons[(i + 1) % buttons.Length]
+                };
+            }
+        }
+
+        private static void MoveDirectChild(Transform source, Transform destination, string name)
+        {
+            Transform child = source.Find(name);
+            if (child == null || child.parent != source) return;
+            Undo.SetTransformParent(child, destination, "Group " + name);
+        }
 
         private static TMP_Text Text(Transform parent, string name, string value, Vector2 position, Vector2 size, float fontSize)
         {

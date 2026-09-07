@@ -17,6 +17,7 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private Button submitButton;
 
         private bool _isSubmitting;
+        private IGameApiClient _apiClient;
 
         public event Action<CreateUserData> OnRegistrationComplete;
 
@@ -31,6 +32,11 @@ namespace TrickalFanGame.Frontend
             validationText = validation;
             errorText = error;
             submitButton = submit;
+        }
+
+        public void SetApiClient(IGameApiClient apiClient)
+        {
+            _apiClient = apiClient;
         }
 
         private void OnEnable()
@@ -143,7 +149,7 @@ namespace TrickalFanGame.Frontend
                 nickname = nickname
             };
 
-            var apiClient = ApiClient.Instance;
+            IGameApiClient apiClient = _apiClient ?? ApiClient.Instance;
             if (apiClient == null)
             {
                 ShowError("API 클라이언트를 찾을 수 없습니다.");

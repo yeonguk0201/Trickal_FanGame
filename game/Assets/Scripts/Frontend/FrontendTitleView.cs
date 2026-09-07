@@ -14,6 +14,7 @@ namespace TrickalFanGame.Frontend
         public const string ReadyMessage = "닉네임 등록과 홈 화면은 준비 중입니다.";
 
         [Header("Title Screen")]
+        [SerializeField] private GameObject titlePanel;
         [SerializeField] private Button startButton;
         [SerializeField] private TMP_Text statusText;
 
@@ -21,9 +22,14 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private GameObject nicknamePanel;
         [SerializeField] private FrontendNicknameView nicknameView;
 
+        [Header("Home Screen")]
+        [SerializeField] private FrontendHomeView homeView;
+
         public Button StartButton => startButton;
         public TMP_Text StatusText => statusText;
         public FrontendNicknameView NicknameView => nicknameView;
+        public GameObject TitlePanel => titlePanel;
+        public FrontendHomeView HomeView => homeView;
 
         public event Action OnHomeRequested;
 
@@ -33,10 +39,20 @@ namespace TrickalFanGame.Frontend
             statusText = status;
         }
 
+        public void ConfigureTitlePanel(GameObject panel)
+        {
+            titlePanel = panel;
+        }
+
         public void ConfigureNicknamePanel(GameObject panel, FrontendNicknameView view)
         {
             nicknamePanel = panel;
             nicknameView = view;
+        }
+
+        public void ConfigureHomeView(FrontendHomeView view)
+        {
+            homeView = view;
         }
 
         private void OnEnable()
@@ -63,28 +79,34 @@ namespace TrickalFanGame.Frontend
 
         private void InitializeView()
         {
-            if (LocalProfile.IsRegistered)
-            {
-                ShowTitleScreen();
-            }
-            else
-            {
-                ShowNicknameRegistration();
-            }
+            ShowTitleScreen();
         }
 
         public void ShowTitleScreen()
         {
+            if (titlePanel != null) titlePanel.SetActive(true);
             if (nicknamePanel != null) nicknamePanel.SetActive(false);
+            if (homeView != null) homeView.Hide();
             if (startButton != null) startButton.gameObject.SetActive(true);
             FocusStart();
         }
 
         public void ShowNicknameRegistration()
         {
+            if (titlePanel != null) titlePanel.SetActive(false);
             if (startButton != null) startButton.gameObject.SetActive(false);
+            if (homeView != null) homeView.Hide();
             if (nicknamePanel != null) nicknamePanel.SetActive(true);
             if (nicknameView != null) nicknameView.FocusInput();
+        }
+
+        public void ShowHomeScreen()
+        {
+            if (!LocalProfile.IsRegistered) return;
+
+            if (titlePanel != null) titlePanel.SetActive(false);
+            if (nicknamePanel != null) nicknamePanel.SetActive(false);
+            if (homeView != null) homeView.Show(LocalProfile.Nickname);
         }
 
         public void FocusStart()
@@ -101,13 +123,13 @@ namespace TrickalFanGame.Frontend
                 return;
             }
 
+            ShowHomeScreen();
             OnHomeRequested?.Invoke();
-            if (statusText != null) statusText.text = ReadyMessage;
         }
 
         private void OnNicknameRegistered(CreateUserData userData)
         {
-            ShowTitleScreen();
+            ShowHomeScreen();
             OnHomeRequested?.Invoke();
         }
     }

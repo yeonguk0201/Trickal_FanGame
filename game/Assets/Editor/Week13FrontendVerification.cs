@@ -2,7 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using TMPro;
+using TrickalFanGame.Data;
 using TrickalFanGame.Frontend;
+using TrickalFanGame.Network;
+using TrickalFanGame.Utils;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -16,18 +19,20 @@ namespace TrickalFanGame.Editor
 {
     public static class Week13FrontendVerification
     {
-        [MenuItem("Trickal Fan Game/Week 13/Verify Frontend Title")]
+        [MenuItem("Trickal Fan Game/Week 13/Verify Frontend Flow")]
         public static void Verify()
         {
             Scene scene = SceneManager.GetActiveScene();
             Assert(scene.path == Week13FrontendSetup.ScenePath, "Open FrontendScene before verification.");
             ValidateScene(scene);
             if (!EditorApplication.isPlaying) VerifyLayouts(scene);
-            Debug.Log("Week 13 Frontend verification passed: scene isolation, build entry, references, scaler, safe area and title layout.");
+            Debug.Log("Week 13 Frontend verification passed: scene isolation, build entry, references, scaler, safe area and screen layouts.");
         }
 
         public static void ValidateScene(Scene scene)
         {
+            Assert(NicknameValidator.Validate("Erpin").IsValid && NicknameValidator.Validate("erpin").IsValid,
+                "Unity nickname validation must accept and preserve both uppercase and lowercase Latin input.");
             var enabled = EditorBuildSettings.scenes.Where(s => s.enabled).ToArray();
             Assert(enabled.Length >= 2 && enabled[0].path == Week13FrontendSetup.ScenePath,
                 "Frontend must be the first enabled build scene.");
@@ -38,17 +43,19 @@ namespace TrickalFanGame.Editor
             {
                 Assert(component != null, "Missing script in Frontend.");
                 string ns = component.GetType().Namespace ?? "";
-                Assert(!ns.StartsWith("TrickalFanGame.") || ns == "TrickalFanGame.Frontend",
+                Assert(!ns.StartsWith("TrickalFanGame.") || ns == "TrickalFanGame.Frontend" || component is ApiClient,
                     "Combat, Run or Backend component leaked into Frontend: " + component.GetType().Name);
                 Assert(component is not Renderer && component is not Collider2D && component is not Rigidbody2D,
                     "World combat object leaked into Frontend.");
             }
-            Assert(components.OfType<Canvas>().Count() == 1, "Exactly one Canvas is required.");
+            Canvas[] rootCanvases = scene.GetRootGameObjects().Select(root => root.GetComponent<Canvas>())
+                .Where(rootCanvas => rootCanvas != null).ToArray();
+            Assert(rootCanvases.Length == 1, "Exactly one root Canvas is required.");
             Assert(components.OfType<Camera>().Count() == 1 && components.OfType<Camera>().Single().cullingMask == 0,
                 "Frontend camera must only clear the background, without rendering world objects.");
             Assert(components.OfType<EventSystem>().Count() == 1 && components.OfType<InputSystemUIInputModule>().Count() == 1,
                 "Exactly one EventSystem and Input System UI module are required.");
-            Canvas canvas = components.OfType<Canvas>().Single();
+            Canvas canvas = rootCanvases.Single();
             Assert(canvas.renderMode == RenderMode.ScreenSpaceOverlay && canvas.GetComponent<GraphicRaycaster>() != null,
                 "Frontend requires Overlay Canvas and GraphicRaycaster.");
             CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
@@ -60,10 +67,11 @@ namespace TrickalFanGame.Editor
             RectTransform safe = canvas.transform.Find("ReferenceFrame/SafeArea") as RectTransform;
             Assert(safe != null && safe.anchorMin == Vector2.zero && safe.anchorMax == Vector2.one &&
                 safe.offsetMin == new Vector2(64, 54) && safe.offsetMax == new Vector2(-64, -54), "Safe area differs from UI spec.");
-            Assert(components.OfType<FrontendTitleView>().Count() == 1 && components.OfType<Button>().Count() == 1,
-                "Exactly one title view and start button are required.");
+            Assert(components.OfType<FrontendTitleView>().Count() == 1 && components.OfType<Button>().Count() == 7,
+                "The title, nickname, home and destination screens require exactly seven buttons.");
             FrontendTitleView view = components.OfType<FrontendTitleView>().Single();
-            Assert(view.StartButton != null && view.StatusText != null && view.StartButton is FrontendStartButton,
+            Assert(view.TitlePanel != null && view.StartButton != null && view.StatusText != null &&
+                view.StartButton is FrontendStartButton && view.HomeView != null,
                 "Missing title references.");
             Assert(view.StartButton.gameObject.scene == scene && view.StatusText.gameObject.scene == scene,
                 "Title references must stay inside Frontend.");
@@ -77,9 +85,40 @@ namespace TrickalFanGame.Editor
             var serializedButton = new SerializedObject(view.StartButton);
             Assert(serializedButton.FindProperty("hoverBorder").objectReferenceValue != null &&
                 serializedButton.FindProperty("focusBorder").objectReferenceValue != null, "Missing button border references.");
+            ValidateHome(view.HomeView, scene);
             foreach (TMP_Text text in components.OfType<TMP_Text>())
-                Assert(text.font != null && text.font.HasCharacters(text.text), "Missing TMP font or glyph: " + text.name);
+            {
+                Assert(text.font != null, "Missing TMP font: " + text.name);
+                // The registered nickname is user data. The dynamic font resolves its allowed Korean/Latin/digit
+                // glyphs during rendering, so only fixed UI copy can be preflighted here.
+                bool runtimeText = text == view.HomeView.WelcomeText ||
+                    text == view.NicknameView.ValidationText ||
+                    text == view.NicknameView.ErrorText;
+                if (!runtimeText)
+                    Assert(text.font.HasCharacters(text.text), "Missing TMP glyph: " + text.name);
+            }
             Assert(view.StatusText.font.HasCharacters(FrontendTitleView.ReadyMessage), "Missing Korean status glyphs.");
+        }
+
+        private static void ValidateHome(FrontendHomeView home, Scene scene)
+        {
+            Assert(home.gameObject.scene == scene && home.name == "HomeScreen", "Home must stay in FrontendScene.");
+            Assert(home.GetComponent<Image>() != null && home.GetComponent<Image>().raycastTarget == false,
+                "Home requires a dedicated non-interactive temporary background.");
+            Assert(home.HomePanel != null && home.WelcomeText != null && home.GameStartButton != null &&
+                home.SkillUpgradeButton != null && home.SettingsButton != null && home.QuitButton != null &&
+                home.DestinationPanel != null && home.DestinationTitle != null && home.BackButton != null,
+                "Missing Home references.");
+            Button[] menuButtons = { home.GameStartButton, home.SkillUpgradeButton, home.SettingsButton, home.QuitButton };
+            Assert(menuButtons.Distinct().Count() == 4 && menuButtons.All(button => button is FrontendStartButton),
+                "Home requires four distinct styled buttons.");
+            Assert(menuButtons.All(button => button.GetComponent<RectTransform>().sizeDelta == new Vector2(360, 64)),
+                "Home buttons must be 360 x 64.");
+            Assert(menuButtons.All(button => button.navigation.mode == Navigation.Mode.Explicit &&
+                button.navigation.selectOnUp != null && button.navigation.selectOnDown != null),
+                "Home keyboard navigation must form an explicit loop.");
+            Assert(menuButtons.Append(home.BackButton).All(button => button.onClick.GetPersistentEventCount() == 0),
+                "Frontend actions must be wired once at runtime, not as persistent Scene calls.");
         }
 
         // Exercise actual RectTransforms/TMP preferred sizes without changing the open scene.
@@ -98,7 +137,8 @@ namespace TrickalFanGame.Editor
                 RectTransform canvasRect = (RectTransform)clone.transform;
                 RectTransform safe = (RectTransform)layout.transform.Find("SafeArea");
                 FrontendTitleView view = clone.GetComponent<FrontendTitleView>();
-                view.RequestStart();
+                FrontendHomeView home = view.HomeView;
+                RectTransform homeSafe = (RectTransform)home.HomePanel.transform.Find("SafeArea");
                 foreach (Vector2 resolution in new[] { new Vector2(1280, 720), new Vector2(1920, 1080), new Vector2(2560, 1440), new Vector2(1600, 1200), new Vector2(2560, 1080) })
                 {
                     canvasRect.sizeDelta = resolution;
@@ -110,10 +150,14 @@ namespace TrickalFanGame.Editor
                         Vector2 preferred = text.GetPreferredValues(text.text, text.rectTransform.rect.width, Mathf.Infinity);
                         Assert(preferred.y <= text.rectTransform.rect.height + 1, $"{resolution}: text height overflow: {text.name}");
                         Assert(text.preferredWidth <= text.rectTransform.rect.width + 1, $"{resolution}: text width overflow: {text.name}");
-                        AssertInside(text.rectTransform, safe, resolution + " safe area: " + text.name);
+                        AssertInside(text.rectTransform, (RectTransform)layout.transform, resolution + " content frame: " + text.name);
                     }
                     AssertInside(safe, canvasRect, resolution + " safe area outside viewport");
                     AssertInside(view.StartButton.GetComponent<RectTransform>(), safe, resolution + " button");
+                    AssertInside(homeSafe, (RectTransform)layout.transform, resolution + " home safe area");
+                    foreach (Button homeButton in new[] { home.GameStartButton, home.SkillUpgradeButton, home.SettingsButton, home.QuitButton })
+                        AssertInside(homeButton.GetComponent<RectTransform>(), homeSafe, resolution + " home button: " + homeButton.name);
+                    AssertInside(home.BackButton.GetComponent<RectTransform>(), (RectTransform)layout.transform, resolution + " back button");
                     Assert(Mathf.Abs(((RectTransform)layout.transform).rect.width / ((RectTransform)layout.transform).rect.height - 16f / 9f) < 0.001f,
                         "Content aspect ratio changed.");
                     Debug.Log($"Week 13 layout passed: {resolution.x} x {resolution.y}; TMP bounds and safe area.");
@@ -126,7 +170,7 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        [MenuItem("Trickal Fan Game/Week 13/Export Title Previews (720p and 1080p)")]
+        [MenuItem("Trickal Fan Game/Week 13/Export Home Previews (720p and 1080p)")]
         public static void ExportPreviews()
         {
             Scene source = SceneManager.GetActiveScene();
@@ -140,6 +184,9 @@ namespace TrickalFanGame.Editor
                 GameObject clone = Object.Instantiate(source.GetRootGameObjects().Single(r => r.GetComponent<Canvas>() != null));
                 SceneManager.MoveGameObjectToScene(clone, preview);
                 Canvas canvas = clone.GetComponent<Canvas>();
+                FrontendTitleView frontend = clone.GetComponent<FrontendTitleView>();
+                frontend.TitlePanel.SetActive(false);
+                frontend.HomeView.Show("FlowTester");
                 clone.GetComponent<CanvasScaler>().enabled = false;
                 canvas.renderMode = RenderMode.WorldSpace;
                 clone.transform.position = Vector3.zero;
@@ -175,9 +222,9 @@ namespace TrickalFanGame.Editor
                         image = new Texture2D(resolution.x, resolution.y, TextureFormat.RGB24, false);
                         image.ReadPixels(new Rect(0, 0, resolution.x, resolution.y), 0, 0);
                         image.Apply();
-                        string path = Path.Combine(directory, $"title-{resolution.x}x{resolution.y}.png");
+                        string path = Path.Combine(directory, $"home-{resolution.x}x{resolution.y}.png");
                         File.WriteAllBytes(path, image.EncodeToPNG());
-                        Debug.Log("Title preview exported: " + Path.GetFullPath(path));
+                        Debug.Log("Home preview exported: " + Path.GetFullPath(path));
                     }
                     finally
                     {
@@ -225,7 +272,7 @@ namespace TrickalFanGame.Editor
         private static void VerifyRejections()
         {
             Scene scene = SceneManager.GetActiveScene();
-            FrontendTitleView view = Object.FindFirstObjectByType<FrontendTitleView>();
+            FrontendTitleView view = Object.FindFirstObjectByType<FrontendTitleView>(FindObjectsInactive.Include);
             Button button = view.StartButton;
             TMP_Text status = view.StatusText;
             try
@@ -266,6 +313,9 @@ namespace TrickalFanGame.Editor
     {
         private const string PendingKey = "Week13FrontendPlayVerification.Pending";
         private static double started;
+        private static bool hadProfile;
+        private static string previousUserId;
+        private static string previousNickname;
 
         static Week13FrontendPlayVerification()
         {
@@ -276,6 +326,10 @@ namespace TrickalFanGame.Editor
         // Run separately without -quit: the Editor exits only after Play Mode assertions finish.
         public static void RunBatch()
         {
+            hadProfile = LocalProfile.IsRegistered;
+            previousUserId = LocalProfile.UserId;
+            previousNickname = LocalProfile.Nickname;
+            LocalProfile.ClearProfile();
             EditorSceneManager.OpenScene(Week13FrontendSetup.ScenePath, OpenSceneMode.Single);
             SessionState.SetBool(PendingKey, true);
             started = EditorApplication.timeSinceStartup;
@@ -299,24 +353,120 @@ namespace TrickalFanGame.Editor
                     throw new InvalidOperationException("Initial keyboard focus is missing.");
                 int before = Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length;
                 view.StartButton.onClick.Invoke();
-                ExecuteEvents.Execute(view.StartButton.gameObject, new BaseEventData(EventSystem.current), ExecuteEvents.submitHandler);
+                if (view.NicknameView == null || !view.NicknameView.gameObject.activeInHierarchy)
+                    throw new InvalidOperationException("A new local player did not reach nickname registration.");
+
+                var retryApi = new RetryRegistrationApiClient();
+                view.NicknameView.SetApiClient(retryApi);
+                string clientProfileId = LocalProfile.ClientProfileId;
+                view.NicknameView.NicknameInput.text = "FlowTester";
+                view.NicknameView.SubmitButton.onClick.Invoke();
+                if (retryApi.Requests.Count != 1 || retryApi.Requests[0].clientProfileId != clientProfileId ||
+                    LocalProfile.IsRegistered || !view.NicknameView.ErrorText.gameObject.activeInHierarchy ||
+                    !view.NicknameView.SubmitButton.interactable)
+                    throw new InvalidOperationException("Failed registration did not preserve a retryable local profile request.");
+
+                view.NicknameView.SubmitButton.onClick.Invoke();
+                if (retryApi.Requests.Count != 2 || retryApi.Requests.Any(request => request.clientProfileId != clientProfileId) ||
+                    !LocalProfile.IsRegistered || LocalProfile.UserId != "week13-profile-user" ||
+                    LocalProfile.Nickname != "FlowTester")
+                    throw new InvalidOperationException("Registration retry changed identity or failed to save the successful profile.");
+
+                FrontendHomeView home = view.HomeView;
+                if (!home.gameObject.activeInHierarchy || home.WelcomeText.text != "FlowTester 님, 환영합니다")
+                    throw new InvalidOperationException("Successful registration retry did not reach Home.");
+
+                view.ShowTitleScreen();
                 view.StartButton.onClick.Invoke();
-                if (view.StatusText.text != FrontendTitleView.ReadyMessage)
-                    throw new InvalidOperationException("Click/submit did not reach the title status.");
+                if (!home.gameObject.activeInHierarchy || view.TitlePanel.activeInHierarchy ||
+                    home.WelcomeText.text != "FlowTester 님, 환영합니다" || retryApi.Requests.Count != 2)
+                    throw new InvalidOperationException("A saved local profile did not reach Home.");
+
+                VerifyDestination(home, home.GameStartButton, FrontendDestination.CharacterSelection,
+                    FrontendHomeView.CharacterSelectionTitle);
+                VerifyDestination(home, home.SkillUpgradeButton, FrontendDestination.SkillUpgrade,
+                    FrontendHomeView.SkillUpgradeTitle);
+                VerifyDestination(home, home.SettingsButton, FrontendDestination.Settings,
+                    FrontendHomeView.SettingsTitle);
+                bool quitRequested = false;
+                home.OnQuitRequested += () => quitRequested = true;
+                home.RequestQuit();
+                if (!quitRequested) throw new InvalidOperationException("Quit action was not requested.");
                 if (SceneManager.sceneCount != 1 || before != Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length)
-                    throw new InvalidOperationException("Repeated start requests created objects or changed scenes.");
+                    throw new InvalidOperationException("Frontend navigation created objects or changed scenes.");
                 Week13FrontendVerification.ValidateScene(SceneManager.GetActiveScene());
-                Finish(0, "Week 13 Play Mode verification passed: initial focus, click/submit, repeated start, combat isolation.");
+                Finish(0, "Week 13 profile retry verification passed: stable clientProfileId, retry after failure, saved user identity, registration-to-Home, restart path and combat isolation.");
             }
             catch (Exception exception) { Finish(1, exception.ToString()); }
+        }
+
+        private static void VerifyDestination(
+            FrontendHomeView home,
+            Button button,
+            FrontendDestination expected,
+            string expectedTitle)
+        {
+            button.onClick.Invoke();
+            if (home.CurrentDestination != expected || !home.DestinationPanel.activeInHierarchy ||
+                home.HomePanel.activeInHierarchy || home.DestinationTitle.text != expectedTitle ||
+                EventSystem.current.currentSelectedGameObject != home.BackButton.gameObject)
+                throw new InvalidOperationException("Home action did not reach " + expected + ".");
+            home.BackButton.onClick.Invoke();
+            if (home.CurrentDestination != null || !home.HomePanel.activeInHierarchy ||
+                home.DestinationPanel.activeInHierarchy ||
+                EventSystem.current.currentSelectedGameObject != home.GameStartButton.gameObject)
+                throw new InvalidOperationException("Back did not return to Home from " + expected + ".");
         }
 
         private static void Finish(int code, string message)
         {
             SessionState.SetBool(PendingKey, false);
+            if (hadProfile) LocalProfile.SaveProfile(previousUserId, previousNickname);
+            else LocalProfile.ClearProfile();
             if (code == 0) Debug.Log(message); else Debug.LogError(message);
             EditorApplication.isPlaying = false;
             EditorApplication.Exit(code);
+        }
+
+        private sealed class RetryRegistrationApiClient : IGameApiClient
+        {
+            public readonly System.Collections.Generic.List<CreateUserRequest> Requests = new();
+
+            public void PostUser(CreateUserRequest request, Action<CreateUserResponse> onSuccess, Action<string> onError)
+            {
+                Requests.Add(new CreateUserRequest
+                {
+                    clientProfileId = request.clientProfileId,
+                    nickname = request.nickname
+                });
+                if (Requests.Count == 1)
+                {
+                    onError?.Invoke("NETWORK_ERROR: retry verification");
+                    return;
+                }
+
+                onSuccess?.Invoke(new CreateUserResponse
+                {
+                    success = true,
+                    data = new CreateUserData
+                    {
+                        id = "week13-profile-user",
+                        clientProfileId = request.clientProfileId,
+                        nickname = request.nickname,
+                        characterProgress = Array.Empty<CreateUserCharacterProgressDto>()
+                    }
+                });
+            }
+
+            public void GetUser(string nickname, Action<UserProfileResponse> onSuccess, Action<string> onError)
+            {
+                throw new InvalidOperationException("Profile retry verification must not query progression.");
+            }
+
+            public void PostRun(CreateRunRequest request, Action<CreateRunResponse> onSuccess, Action<string> onError)
+            {
+                throw new InvalidOperationException("Profile retry verification must not create a Run.");
+            }
         }
     }
 }
