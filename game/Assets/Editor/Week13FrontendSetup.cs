@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using System.Linq;
 using TMPro;
+using TrickalFanGame.Character;
 using TrickalFanGame.Frontend;
+using TrickalFanGame.Run;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -19,6 +21,7 @@ namespace TrickalFanGame.Editor
         public const string ScenePath = "Assets/Scenes/FrontendScene.unity";
         public const string GameScenePath = "Assets/Scenes/SampleScene.unity";
         public const string FontPath = "Assets/Fonts/Frontend Noto Sans KR.asset";
+        public const string CharacterFolder = "Assets/Characters";
 
         [MenuItem("Trickal Fan Game/Week 13/Setup Frontend Flow")]
         public static void Setup()
@@ -108,7 +111,9 @@ namespace TrickalFanGame.Editor
             view.ConfigureTitlePanel(titlePanel.gameObject);
 
             FrontendHomeView homeView = SetupHome(frame);
+            SetupCharacterSelection(homeView, frame);
             SetupSettings(homeView, frame);
+            Component<FrontendRunLauncher>(canvasObject).Configure(homeView, GameScenePath);
             view.ConfigureHomeView(homeView);
             homeView.gameObject.SetActive(false);
 
@@ -127,7 +132,7 @@ namespace TrickalFanGame.Editor
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) }.Concat(remainingScenes).ToArray();
             AssetDatabase.SaveAssets();
             Undo.CollapseUndoOperations(group);
-            Debug.Log("Week 13 Frontend setup complete. Title, profile and home flow are isolated from the Game Scene.");
+            Debug.Log("Week 13 Frontend setup complete. Title, profile, home and data-driven character selection are isolated from the Game Scene.");
         }
 
         private static void EnsureFont()
@@ -151,7 +156,7 @@ namespace TrickalFanGame.Editor
             var fontSettings = new SerializedObject(font);
             fontSettings.FindProperty("m_ClearDynamicDataOnBuild").boolValue = false;
             fontSettings.ApplyModifiedPropertiesWithoutUndo();
-            string titleCharacters = "TRICKAL FAN GAME트릭컬 팬게임닉네임님환영합니다게임시작스킬강화설정나가기캐릭터선택뒤로" +
+            string titleCharacters = "TRICKAL FAN GAME트릭컬 팬게임닉네임님환영합니다게임시작스킬강화설정나가기캐릭터선택뒤로확인선택됨할수있는없습니다해주세요완료" +
                 FrontendTitleView.ReadyMessage + FrontendHomeView.PreparationMessage + FrontendHomeView.QuitMessage +
                 "음량전체배경효과화면해상도x0123456789% ";
             if (!font.HasCharacters(titleCharacters) && !font.TryAddCharacters(titleCharacters, out string missing))
@@ -246,6 +251,70 @@ namespace TrickalFanGame.Editor
             view.Configure(homePanel.gameObject, welcome, gameStart, skill, settings, quit,
                 destination.gameObject, destinationTitle, destinationMessage, back);
             return view;
+        }
+
+        private static void SetupCharacterSelection(FrontendHomeView homeView, RectTransform frame)
+        {
+            CharacterDefinition[] characters = AssetDatabase.FindAssets("t:CharacterDefinition", new[] { CharacterFolder })
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Select(AssetDatabase.LoadAssetAtPath<CharacterDefinition>)
+                .Where(character => character != null && character.IsValid)
+                .OrderBy(character => character.CharacterId, StringComparer.Ordinal)
+                .ToArray();
+            if (characters.Length == 0)
+                throw new InvalidOperationException("At least one valid CharacterDefinition is required for Flow-3.");
+
+            RectTransform root = Rect(frame, "CharacterSelectionPanel", Vector2.zero, Vector2.zero);
+            Stretch(root);
+            Image background = Component<Image>(root.gameObject);
+            background.color = new Color(0.055f, 0.09f, 0.14f);
+            background.raycastTarget = false;
+
+            Text(root, "CharacterSelectionTitle", "캐릭터 선택", new Vector2(0, 440), new Vector2(900, 64), 40);
+            RectTransform cardContainer = Rect(root, "CharacterCardContainer", new Vector2(0, 70), new Vector2(1120, 420));
+            HorizontalLayoutGroup layout = Component<HorizontalLayoutGroup>(cardContainer.gameObject);
+            layout.spacing = 24;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlWidth = false;
+            layout.childControlHeight = false;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = false;
+
+            RectTransform cardRect = Rect(cardContainer, "CharacterCardTemplate", Vector2.zero, new Vector2(300, 420));
+            Image cardImage = Component<Image>(cardRect.gameObject);
+            cardImage.color = new Color(0.12f, 0.18f, 0.24f);
+            FrontendStartButton cardButton = Component<FrontendStartButton>(cardRect.gameObject);
+            cardButton.targetGraphic = cardImage;
+            ColorBlock colors = ColorBlock.defaultColorBlock;
+            colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
+            colors.selectedColor = Color.white;
+            cardButton.colors = colors;
+            cardButton.ConfigureBorders(Border(cardRect, "HoverBorder", 2, 0), Border(cardRect, "FocusBorder", 3, 2));
+
+            GameObject border = Border(cardRect, "SelectionBorder", 3, 0);
+            Image icon = Component<Image>(Rect(cardRect, "CharacterIcon", new Vector2(0, 105), new Vector2(96, 96)).gameObject);
+            icon.color = new Color(0.3f, 0.72f, 0.68f);
+            icon.raycastTarget = false;
+            TMP_Text name = Text(cardRect, "CharacterName", "캐릭터", new Vector2(0, 25), new Vector2(260, 48), 28);
+            TMP_Text description = Text(cardRect, "CharacterDescription", "설명", new Vector2(0, -55), new Vector2(260, 100), 20);
+            TMP_Text selection = Text(cardRect, "SelectionState", "", new Vector2(0, -155), new Vector2(260, 36), 20);
+            FrontendCharacterCardView cardTemplate = Component<FrontendCharacterCardView>(cardRect.gameObject);
+            cardTemplate.ConfigureTemplate(cardButton, name, description, selection, border);
+            cardRect.gameObject.SetActive(false);
+
+            TMP_Text status = Text(root, "CharacterSelectionStatus", FrontendCharacterSelectionView.SelectMessage,
+                new Vector2(0, -215), new Vector2(900, 48), 20);
+            FrontendStartButton confirm = MenuButton(root, "CharacterConfirmButton", "확인", -315);
+            confirm.GetComponent<RectTransform>().anchoredPosition = new Vector2(155, -315);
+            confirm.GetComponent<RectTransform>().sizeDelta = new Vector2(280, 64);
+            FrontendStartButton back = MenuButton(root, "CharacterBackButton", "뒤로", -315);
+            back.GetComponent<RectTransform>().anchoredPosition = new Vector2(-155, -315);
+            back.GetComponent<RectTransform>().sizeDelta = new Vector2(220, 52);
+
+            FrontendCharacterSelectionView view = Component<FrontendCharacterSelectionView>(root.gameObject);
+            view.Configure(characters, cardContainer, cardTemplate, status, confirm, back);
+            homeView.ConfigureCharacterSelection(root.gameObject, view);
+            root.gameObject.SetActive(false);
         }
 
         private static void SetupSettings(FrontendHomeView homeView, RectTransform frame)

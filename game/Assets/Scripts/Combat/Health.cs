@@ -15,6 +15,7 @@ namespace TrickalFanGame.Combat
         public bool IsInvulnerable { get; private set; }
 
         public event Action<float, float> Damaged;
+        public event Action<float, float> Changed;
         public event Action<DamageContext, float, float> DamageApplied;
         public event Action<DamageContext, DamageResult> DamageResolved;
         public event Action<float> ShieldChanged;
@@ -54,6 +55,7 @@ namespace TrickalFanGame.Combat
             if (!Mathf.Approximately(previousHealth, CurrentHealth))
             {
                 Damaged?.Invoke(CurrentHealth, MaxHealth);
+                Changed?.Invoke(CurrentHealth, MaxHealth);
             }
 
             if (CurrentHealth > 0f)
@@ -75,6 +77,7 @@ namespace TrickalFanGame.Combat
             SetShield(0f);
             IsDead = false;
             IsInvulnerable = false;
+            Changed?.Invoke(CurrentHealth, MaxHealth);
         }
 
         public void SetInvulnerable(bool invulnerable)
@@ -118,6 +121,8 @@ namespace TrickalFanGame.Combat
             {
                 CurrentHealth = Mathf.Min(CurrentHealth, maxHealth);
             }
+
+            Changed?.Invoke(CurrentHealth, MaxHealth);
         }
 
         public float Heal(float amount)
@@ -129,7 +134,13 @@ namespace TrickalFanGame.Combat
 
             float previousHealth = CurrentHealth;
             CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
-            return CurrentHealth - previousHealth;
+            float healedAmount = CurrentHealth - previousHealth;
+            if (healedAmount > 0f)
+            {
+                Changed?.Invoke(CurrentHealth, MaxHealth);
+            }
+
+            return healedAmount;
         }
     }
 }

@@ -31,7 +31,7 @@ namespace TrickalFanGame.Meta
         private void Awake()
         {
             ResolveSkillReferences();
-            apiClient = ApiClient.Instance;
+            apiClient ??= ApiClient.Instance;
         }
 
         public void Configure(

@@ -46,6 +46,9 @@ namespace TrickalFanGame.Player
             SkillProgressionRules.LowerGradeProjectileBonus(progressionLevel);
         public float ShotInterval => shotInterval;
         public float FanSpacingAngle => fanSpacingAngle;
+        public bool CanCast => health != null && !health.IsDead && !IsFiring &&
+            actionState != null && actionState.CanUseLowerGradeSkill && projectilePrefab != null &&
+            playerSP != null && playerSP.CurrentSP > 0;
         public event Action<HomingSkillProjectile> ProjectileLaunched;
 
         private void Awake()

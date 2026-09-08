@@ -390,7 +390,9 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 ### 13주차 Frontend Flow
 
 - `Trickal Fan Game > Week 13 > Setup Frontend Flow`: Edit Mode에서 실행한다. 수정 중인 Scene의 저장 여부를 확인한 뒤 `Assets/Scenes/FrontendScene.unity`를 생성하거나 갱신하고 단독으로 연다. 기존 이름의 UI 오브젝트와 Scene GUID를 재사용한다. Frontend를 첫 번째 활성 Build Scene으로 등록하며 기존 `SampleScene`은 전투용 Game Scene으로 보존한다. 다른 Build Scene 항목도 보존한다.
-- `Trickal Fan Game > Week 13 > Verify Frontend Flow`: Frontend를 연 상태에서 실행한다. 시작 Scene 순서, 전투·Run 컴포넌트 부재, Canvas·입력 시스템 중복, 화면·버튼 참조, 1920×1080 Scaler와 좌우 64·상하 54 안전 여백을 검사한다. Edit Mode에서는 720p·1080p·1440p와 비16:9 크기의 실제 RectTransform/TMP 경계도 별도 미리보기 Scene에서 검사한다. 실패 시 예외가 발생하며 성공 로그는 `Week 13 Frontend verification passed`다.
+- `Trickal Fan Game > Week 13 > Setup Flow-4 Run Launch`: Game Scene의 기존 `RunSession` 옆에 조기 Bootstrap을 중복 없이 구성하고, 이전 전투 Scene 캐릭터 선택 UI와 진행 조회 참조를 연결한 뒤 Frontend 구성도 갱신한다. 완료 후 Frontend Scene을 연다.
+- `Trickal Fan Game > Week 13 > Verify Flow-4 Run Launch`: Frontend의 단일 Scene 전환기와 Game Scene의 단일 Bootstrap, `RunSession`·진행 조회·이전 선택 UI·방 그래프·인벤토리 참조 및 Build Settings를 검사한다.
+- `Trickal Fan Game > Week 13 > Verify Frontend Flow`: Frontend를 연 상태에서 실행한다. 시작 Scene 순서, 전투·Run 컴포넌트 부재, Canvas·입력 시스템 중복, 화면·버튼 참조, 캐릭터 정의의 유효성·고유 ID, 1920×1080 Scaler와 좌우 64·상하 54 안전 여백을 검사한다. Edit Mode에서는 720p·1080p·1440p와 비16:9 크기의 실제 RectTransform/TMP 경계도 별도 미리보기 Scene에서 검사한다. 실패 시 예외가 발생하며 성공 로그는 `Week 13 Frontend verification passed`다.
 - `Trickal Fan Game > Week 13 > Export Home Previews (720p and 1080p)`: `game/Logs/Week13FrontendPreviews/home-1280x720.png`, `home-1920x1080.png`를 만든다. 별도 미리보기 Scene에서 홈 UI를 렌더링하므로 현재 Scene은 바뀌지 않는다. 이 이미지는 배치 확인용이며 실제 Overlay Canvas의 Game View 확인을 대체하지 않는다.
 - `Trickal Fan Game > Development > Clear Local Profile (Editor)`: Editor Play Mode에서 사용하는
   `userId`와 닉네임을 삭제한다. 확인 창에서 승인한 경우에만 실행하며 `clientProfileId`와 음량 등
@@ -403,10 +405,14 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
   `clientProfileId`가 필요하다.
   이 버튼은 정식 빌드에는 나타나지 않는다.
 - 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13FrontendVerification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 두 번 실행, GUID·Game Scene 보존, 잘못된 참조·중복 버튼·전투 오브젝트·시작 순서의 거부까지 검사한다. 렌더링 미리보기가 포함되어 `-nographics`를 사용하지 않는다. 검증 실패는 비정상 종료 코드로 반환된다.
-- Play Mode 자동 검증: 구성 후 별도 Unity 프로세스에서 `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13FrontendPlayVerification.RunBatch -logFile <로그 경로>`를 사용한다. `-quit`는 넣지 않는다. 타이틀 선행, 첫 등록 실패 후 같은 `clientProfileId` 재시도와 프로필 저장, 저장 프로필 홈 진입, 네 홈 동작과 뒤로가기 포커스, 전투 격리를 검사한 뒤 성공 0/실패 1로 종료한다.
+- Play Mode 자동 검증: 구성 후 별도 Unity 프로세스에서 `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13FrontendPlayVerification.RunBatch -logFile <로그 경로>`를 사용한다. `-quit`는 넣지 않는다. 타이틀 선행, 프로필 재시도·저장, 홈 진입, 데이터 기반 에르핀 카드, 선택 전 확인 차단, 단일 확정 이벤트, 뒤로가기·재진입 상태 초기화와 Flow-4 전 Run 미생성을 검사한 뒤 성공 0/실패 1로 종료한다.
+- Flow-4 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Flow4Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Flow-4 Setup 두 번, 두 Scene GUID와 Bootstrap 단일성, Game 참조 및 전체 Frontend 레이아웃 회귀를 검사한다.
+- Flow-4 Play Mode: Unity `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Flow4PlayVerification.RunBatch -logFile <로그 경로>`. `-quit`는 넣지 않는다. Frontend 확정부터 Game Scene까지 이동하여 로컬 사용자·캐릭터 전달, 단일 Run과 UUID `clientRunId`, 새 seed·첫 방·빈 인벤토리, 이전 선택 UI 비활성화와 종료 전 `POST /runs` 미호출을 검사한다.
+- HUD-1 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-1 HP and SP`. Game Scene에 HP 바, 반복 SP 슬롯과 저학년 스킬 사용 가능 표시를 구성하고 실제 플레이어 상태에 연결한다.
+- HUD-1 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud1Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 두 번, Game Scene GUID·계층 단일성, HP 피해·회복, SP 획득·소비·최대치 증가, 저학년 스킬 사용 가능 조건과 Flow-4 회귀를 검사한다.
 - 같은 프로젝트를 연 Unity가 있으면 배치 실행이 잠길 수 있다. 기존 Editor를 강제 종료하지 않고 수동 메뉴를 실행하거나 독립된 복사본에서 검증한다.
 
-수동 확인: `FrontendScene`을 열고 Game View에 Fixed Resolution `1280 × 720`, `1920 × 1080`을 각각 추가하여 Play한다. 타이틀에서 저장 프로필의 홈 진입과 새 사용자의 닉네임 등록 진입을 각각 확인한다. 홈에서는 네 버튼의 마우스 호버, 위·아래 키 순환, Enter/Space, 세 목적지 제목과 뒤로가기를 확인한다. 모든 화면에서 Hierarchy에 Room·Player·Enemy·RunSession이 생성되지 않아야 하며, Development Build의 나가기는 프로세스를 종료해야 한다.
+수동 확인: `FrontendScene`을 열고 Game View에 Fixed Resolution `1280 × 720`, `1920 × 1080`을 각각 추가하여 Play한다. 타이틀에서 저장 프로필의 홈 진입과 새 사용자의 닉네임 등록 진입을 각각 확인한다. 홈에서는 네 버튼의 마우스 호버, 위·아래 키 순환과 Enter/Space를 확인한다. 게임 시작에서는 에르핀 카드 선택 표시, 확인 활성화, 뒤로가기와 재진입 시 선택 초기화를 확인한다. 확인을 누르면 Game Scene으로 한 번 이동해 1층 첫 방에서 전투를 시작해야 하며 이전 캐릭터 선택 창이 다시 나타나지 않아야 한다. Run 종료 전에는 Backend 전적이 생성되지 않아야 한다.
 
 저장소 공통 불변 규칙은 루트 `AGENTS.md`에 둔다. 기능 하나를 계획부터 검증과 체크리스트 갱신까지 진행할 때는
 `.agents/skills/trickal-feature-cycle/SKILL.md`의 저장소 전용 스킬을 사용한다.

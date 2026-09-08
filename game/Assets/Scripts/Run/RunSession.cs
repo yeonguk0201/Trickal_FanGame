@@ -46,6 +46,7 @@ namespace TrickalFanGame.Run
         public bool HasStarted => hasStarted;
         public bool HasEnded => hasEnded;
         public bool IsCleared { get; private set; }
+        public string UserId => userId;
         public string CharacterId => characterId;
         public string ClientRunId => clientRunId;
         public CreateRunRequest PendingRequest => pendingRequest;
@@ -89,6 +90,22 @@ namespace TrickalFanGame.Run
             apiClient = configuredApiClient;
         }
 
+        public bool ConfigureLaunchIdentity(string configuredUserId, string configuredNickname,
+            string configuredCharacterId)
+        {
+            if (hasStarted || hasEnded || string.IsNullOrWhiteSpace(configuredUserId) ||
+                string.IsNullOrWhiteSpace(configuredNickname) || string.IsNullOrWhiteSpace(configuredCharacterId))
+            {
+                return false;
+            }
+
+            userId = configuredUserId;
+            characterId = configuredCharacterId;
+            waitForCharacterSelection = false;
+            playerProgressClient?.Configure(configuredNickname, null, null);
+            return true;
+        }
+
         private void Awake()
         {
             if (playerHealth == null)
@@ -120,7 +137,7 @@ namespace TrickalFanGame.Run
                 playerProgressClient = FindFirstObjectByType<PlayerProgressClient>();
             }
 
-            apiClient = ApiClient.Instance;
+            apiClient ??= ApiClient.Instance;
 
             EnsureRunSeed();
         }

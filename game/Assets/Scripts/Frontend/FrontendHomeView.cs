@@ -36,6 +36,10 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private GameObject settingsPanel;
         [SerializeField] private FrontendSettingsView settingsView;
 
+        [Header("Character Selection")]
+        [SerializeField] private GameObject characterSelectionPanel;
+        [SerializeField] private FrontendCharacterSelectionView characterSelectionView;
+
         public GameObject HomePanel => homePanel;
         public TMP_Text WelcomeText => welcomeText;
         public Button GameStartButton => gameStartButton;
@@ -47,10 +51,13 @@ namespace TrickalFanGame.Frontend
         public Button BackButton => backButton;
         public GameObject SettingsPanel => settingsPanel;
         public FrontendSettingsView SettingsView => settingsView;
+        public GameObject CharacterSelectionPanel => characterSelectionPanel;
+        public FrontendCharacterSelectionView CharacterSelectionView => characterSelectionView;
         public FrontendDestination? CurrentDestination { get; private set; }
 
         public event Action<FrontendDestination> OnDestinationRequested;
         public event Action OnQuitRequested;
+        public event Action<string> OnCharacterConfirmed;
 
         public void Configure(
             GameObject home,
@@ -82,6 +89,12 @@ namespace TrickalFanGame.Frontend
             settingsView = view;
         }
 
+        public void ConfigureCharacterSelection(GameObject panel, FrontendCharacterSelectionView view)
+        {
+            characterSelectionPanel = panel;
+            characterSelectionView = view;
+        }
+
         private void OnEnable()
         {
             if (gameStartButton != null) gameStartButton.onClick.AddListener(RequestCharacterSelection);
@@ -90,6 +103,11 @@ namespace TrickalFanGame.Frontend
             if (quitButton != null) quitButton.onClick.AddListener(RequestQuit);
             if (backButton != null) backButton.onClick.AddListener(ReturnHome);
             if (settingsView != null) settingsView.OnBackRequested += ReturnHomeFromSettings;
+            if (characterSelectionView != null)
+            {
+                characterSelectionView.OnBackRequested += ReturnHomeFromCharacterSelection;
+                characterSelectionView.OnCharacterConfirmed += ForwardCharacterConfirmation;
+            }
         }
 
         private void OnDisable()
@@ -100,6 +118,11 @@ namespace TrickalFanGame.Frontend
             if (quitButton != null) quitButton.onClick.RemoveListener(RequestQuit);
             if (backButton != null) backButton.onClick.RemoveListener(ReturnHome);
             if (settingsView != null) settingsView.OnBackRequested -= ReturnHomeFromSettings;
+            if (characterSelectionView != null)
+            {
+                characterSelectionView.OnBackRequested -= ReturnHomeFromCharacterSelection;
+                characterSelectionView.OnCharacterConfirmed -= ForwardCharacterConfirmation;
+            }
         }
 
         public void Show(string nickname)
@@ -109,6 +132,7 @@ namespace TrickalFanGame.Frontend
             if (homePanel != null) homePanel.SetActive(true);
             if (destinationPanel != null) destinationPanel.SetActive(false);
             if (settingsPanel != null) settingsPanel.SetActive(false);
+            if (characterSelectionPanel != null) characterSelectionPanel.SetActive(false);
             if (welcomeText != null) welcomeText.text = $"{nickname} 님, 환영합니다";
             Focus(gameStartButton);
         }
@@ -119,7 +143,15 @@ namespace TrickalFanGame.Frontend
             gameObject.SetActive(false);
         }
 
-        public void RequestCharacterSelection() => ShowDestination(FrontendDestination.CharacterSelection);
+        public void RequestCharacterSelection()
+        {
+            CurrentDestination = FrontendDestination.CharacterSelection;
+            if (homePanel != null) homePanel.SetActive(false);
+            if (destinationPanel != null) destinationPanel.SetActive(false);
+            if (settingsPanel != null) settingsPanel.SetActive(false);
+            if (characterSelectionView != null) characterSelectionView.Show();
+            OnDestinationRequested?.Invoke(FrontendDestination.CharacterSelection);
+        }
         public void RequestSkillUpgrade() => ShowDestination(FrontendDestination.SkillUpgrade);
 
         public void RequestSettings()
@@ -145,6 +177,7 @@ namespace TrickalFanGame.Frontend
             if (homePanel != null) homePanel.SetActive(true);
             if (destinationPanel != null) destinationPanel.SetActive(false);
             if (settingsPanel != null) settingsPanel.SetActive(false);
+            if (characterSelectionView != null) characterSelectionView.Hide();
             Focus(gameStartButton);
         }
 
@@ -152,6 +185,9 @@ namespace TrickalFanGame.Frontend
         {
             ReturnHome();
         }
+
+        private void ReturnHomeFromCharacterSelection() => ReturnHome();
+        private void ForwardCharacterConfirmation(string characterId) => OnCharacterConfirmed?.Invoke(characterId);
 
         public void RequestQuit()
         {
@@ -165,6 +201,7 @@ namespace TrickalFanGame.Frontend
             CurrentDestination = destination;
             if (homePanel != null) homePanel.SetActive(false);
             if (destinationPanel != null) destinationPanel.SetActive(true);
+            if (characterSelectionPanel != null) characterSelectionPanel.SetActive(false);
             if (destinationTitle != null) destinationTitle.text = GetTitle(destination);
             if (destinationMessage != null) destinationMessage.text = PreparationMessage;
             Focus(backButton);
