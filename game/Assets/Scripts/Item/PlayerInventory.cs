@@ -13,6 +13,7 @@ namespace TrickalFanGame.Item
         [SerializeField] private RunProgress runProgress;
 
         private readonly List<AcquiredItem> acquiredItems = new();
+        private readonly List<ItemDefinition> acquiredDefinitions = new();
         private readonly Dictionary<string, int> stackCounts = new();
         private PlayerStats stats;
         private Health health;
@@ -22,6 +23,7 @@ namespace TrickalFanGame.Item
         public const string PierceItemId = "item-11";
 
         public IReadOnlyList<AcquiredItem> AcquiredItems => acquiredItems;
+        public IReadOnlyList<ItemDefinition> AcquiredDefinitions => acquiredDefinitions;
         public bool IsMultiShotPierceSynergyActive { get; private set; }
         public event Action<ItemDefinition, int> ItemAcquired;
         public event Action<string> SynergyActivated;
@@ -54,6 +56,10 @@ namespace TrickalFanGame.Item
 
             int newStackCount = currentStacks + 1;
             stackCounts[definition.ItemId] = newStackCount;
+            if (currentStacks == 0)
+            {
+                acquiredDefinitions.Add(definition);
+            }
             ApplyEffect(definition);
             EvaluateSynergies();
 

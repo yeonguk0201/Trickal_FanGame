@@ -29,6 +29,12 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Text spValueText;
         [SerializeField] private Image lowerGradeSkillState;
         [SerializeField] private TMP_Text lowerGradeSkillText;
+        [SerializeField] private PlayerUltimate highGradeSkill;
+        [SerializeField] private Image lowerGradeCooldownFill;
+        [SerializeField] private Image highGradeSkillState;
+        [SerializeField] private Image highGradeCooldownFill;
+        [SerializeField] private TMP_Text highGradeCooldownText;
+        [SerializeField] private TMP_Text highGradeSkillText;
         [SerializeField, Min(0.05f)] private float feedbackDuration = 0.28f;
 
         private readonly List<Image> spSlots = new();
@@ -49,9 +55,17 @@ namespace TrickalFanGame.Frontend
         public TMP_Text SpValueText => spValueText;
         public Image LowerGradeSkillState => lowerGradeSkillState;
         public TMP_Text LowerGradeSkillText => lowerGradeSkillText;
+        public PlayerUltimate HighGradeSkill => highGradeSkill;
+        public Image LowerGradeCooldownFill => lowerGradeCooldownFill;
+        public Image HighGradeSkillState => highGradeSkillState;
+        public Image HighGradeCooldownFill => highGradeCooldownFill;
+        public TMP_Text HighGradeCooldownText => highGradeCooldownText;
+        public TMP_Text HighGradeSkillText => highGradeSkillText;
         public int SlotCount => spSlots.Count;
         public int ActiveSlotCount { get; private set; }
         public bool IsLowerGradeSkillAvailable { get; private set; }
+        public bool IsHighGradeSkillAvailable { get; private set; }
+        public float HighGradeCooldownRemaining { get; private set; }
         public float LastHealthDelta { get; private set; }
         public int LastSPDelta { get; private set; }
 
@@ -79,6 +93,19 @@ namespace TrickalFanGame.Frontend
             }
         }
 
+        public void ConfigureSkills(PlayerUltimate ultimate, Image configuredLowerCooldownFill,
+            Image configuredHighState, Image configuredHighCooldownFill, TMP_Text configuredHighCooldownText,
+            TMP_Text configuredHighSkillText)
+        {
+            highGradeSkill = ultimate;
+            lowerGradeCooldownFill = configuredLowerCooldownFill;
+            highGradeSkillState = configuredHighState;
+            highGradeCooldownFill = configuredHighCooldownFill;
+            highGradeCooldownText = configuredHighCooldownText;
+            highGradeSkillText = configuredHighSkillText;
+            if (isActiveAndEnabled && Application.isPlaying) RefreshSkillStateAt(Time.time);
+        }
+
         private void OnEnable()
         {
             Subscribe();
@@ -92,7 +119,7 @@ namespace TrickalFanGame.Frontend
 
         private void Update()
         {
-            RefreshSkillState();
+            RefreshSkillStateAt(Time.time);
             float now = Time.unscaledTime;
             if (healthFeedback != null && healthFeedback.gameObject.activeSelf && now >= healthFeedbackUntil)
             {
@@ -119,7 +146,7 @@ namespace TrickalFanGame.Frontend
                 RefreshSP(playerSP.CurrentSP, playerSP.MaxSP, false);
             }
 
-            RefreshSkillState();
+            RefreshSkillStateAt(Time.time);
         }
 
         private void Subscribe()
@@ -165,7 +192,7 @@ namespace TrickalFanGame.Frontend
             LastSPDelta = current - previousSP;
             previousSP = current;
             RefreshSP(current, maximum, true);
-            RefreshSkillState();
+            RefreshSkillStateAt(Time.time);
         }
 
         private void RefreshSP(int current, int maximum, bool showFeedback)
@@ -205,13 +232,40 @@ namespace TrickalFanGame.Frontend
             }
         }
 
-        private void RefreshSkillState()
+        public void RefreshSkillStateAt(float currentTime)
         {
             IsLowerGradeSkillAvailable = lowerGradeSkill != null && lowerGradeSkill.CanCast;
             if (lowerGradeSkillState != null)
                 lowerGradeSkillState.color = IsLowerGradeSkillAvailable ? SkillReadyColor : SkillUnavailableColor;
             if (lowerGradeSkillText != null)
-                lowerGradeSkillText.text = IsLowerGradeSkillAvailable ? "SPACE · 사용 가능" : "SPACE · 사용 불가";
+                lowerGradeSkillText.text = lowerGradeSkill != null && lowerGradeSkill.IsFiring
+                    ? "발사 중"
+                    : IsLowerGradeSkillAvailable ? "사용 가능" : "사용 불가";
+            if (lowerGradeCooldownFill != null) lowerGradeCooldownFill.fillAmount = 0f;
+
+            HighGradeCooldownRemaining = highGradeSkill != null
+                ? highGradeSkill.GetCooldownRemaining(currentTime)
+                : 0f;
+            IsHighGradeSkillAvailable = highGradeSkill != null && highGradeSkill.IsReadyAt(currentTime);
+            if (highGradeSkillState != null)
+                highGradeSkillState.color = IsHighGradeSkillAvailable ? SkillReadyColor : SkillUnavailableColor;
+            if (highGradeCooldownFill != null)
+            {
+                float duration = highGradeSkill != null ? Mathf.Max(0.01f, highGradeSkill.Cooldown) : 1f;
+                highGradeCooldownFill.fillAmount = Mathf.Clamp01(HighGradeCooldownRemaining / duration);
+            }
+            if (highGradeCooldownText != null)
+                highGradeCooldownText.text = HighGradeCooldownRemaining > 0.001f
+                    ? Mathf.CeilToInt(HighGradeCooldownRemaining).ToString()
+                    : string.Empty;
+            if (highGradeSkillText != null)
+            {
+                highGradeSkillText.text = highGradeSkill != null && highGradeSkill.IsDashing
+                    ? "사용 중"
+                    : HighGradeCooldownRemaining > 0.001f
+                        ? "쿨타임"
+                        : IsHighGradeSkillAvailable ? "사용 가능" : "사용 불가";
+            }
         }
 
         private void SetSlotScale(Vector3 scale)

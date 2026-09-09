@@ -57,6 +57,7 @@ namespace TrickalFanGame.Player
         public float NextReadyTime => nextReadyTime;
         public bool IsDashing => actionState != null && actionState.IsDashing;
         public bool IsReady => IsReadyAt(Time.time);
+        public float CooldownRemaining => GetCooldownRemaining(Time.time);
         public UltimateEndReason LastEndReason { get; private set; }
 
         public event Action<UltimateEndReason> DashEnded;
@@ -91,6 +92,7 @@ namespace TrickalFanGame.Player
 
         private void Update()
         {
+            if (Time.timeScale <= 0f) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.qKey.wasPressedThisFrame)
             {
@@ -149,6 +151,11 @@ namespace TrickalFanGame.Player
         {
             return health != null && !health.IsDead && actionState != null &&
                    actionState.CanStartUltimate && currentTime >= nextReadyTime;
+        }
+
+        public float GetCooldownRemaining(float currentTime)
+        {
+            return Mathf.Max(0f, nextReadyTime - currentTime);
         }
 
         public bool TryActivate(float currentTime)

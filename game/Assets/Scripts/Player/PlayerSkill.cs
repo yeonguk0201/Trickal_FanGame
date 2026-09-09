@@ -62,6 +62,7 @@ namespace TrickalFanGame.Player
 
         private void Update()
         {
+            if (Time.timeScale <= 0f) return;
             Tick(Time.time);
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.spaceKey.wasPressedThisFrame)

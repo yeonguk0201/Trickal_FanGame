@@ -28,6 +28,7 @@ namespace TrickalFanGame.Player
 
         private void Update()
         {
+            if (Time.timeScale <= 0f) return;
             if (health.IsDead)
             {
                 movement = Vector2.zero;

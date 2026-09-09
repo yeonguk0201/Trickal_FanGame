@@ -34,6 +34,7 @@ namespace TrickalFanGame.Player
 
         private void Update()
         {
+            if (Time.timeScale <= 0f) return;
             if (!CanAttack || Time.time < nextAttackTime || !TryReadAttackDirection(out Vector2 direction))
             {
                 return;

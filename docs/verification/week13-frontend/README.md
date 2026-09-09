@@ -47,6 +47,25 @@ Unity 6000.3.22f1에서 기존 Editor를 유지하고 시스템 임시 폴더의
 | HUD-1 구성 | 전용 Overlay Canvas, 1920×1080 Scaler, 좌상단 500×128 영역, 비활성 40×40 SP 템플릿과 입력 비가로채기 통과 |
 | HUD-1 상태 경계 | 피해·회복 HP 갱신, SP 획득·소비, 최대 SP 3→4 슬롯 재구성, 저학년 스킬 SP 0/1 사용 가능 상태 통과 |
 | HUD-1 회귀 | Setup 두 번 실행 후 계층 수·Game Scene GUID 유지와 Flow-4 구성 회귀 통과 |
+| HUD-2 구성 | 우하단 300×128 영역, 72×72 스킬 아이콘 두 개, SPACE·Q 키와 입력 비가로채기 통과 |
+| HUD-2 상태 경계 | 실제 저학년·고학년 사용 조건, 사용 중, 쿨타임 중간값·종료 경계와 방사형 표시 통과 |
+| HUD-2 일시정지·회귀 | scaled game time 정지 중 쿨타임 유지, Setup 두 번, Scene GUID·계층 유지와 HUD-1·Flow-4 회귀 통과 |
+| HUD-3A 구성 | 좌하단 288×112 영역, 48×48 슬롯, 8px 간격의 5열×2행과 입력 비가로채기 통과 |
+| HUD-3A 상태 경계 | 빈 상태, 중복 획득 스택 2, 11종의 최초 획득 순서 10개와 `+1`, 재구성 상태 유지 통과 |
+| HUD-3A 회귀 | Setup 두 번 실행 후 Scene GUID·계층 유지와 HUD-2·Flow-4 회귀 통과 |
+| HUD-3B 구성 | 중앙 720×120 영역, 단일 TMP 메시의 28px 이름·20px 설명, 동적 설명 글리프와 입력 비가로채기 통과 |
+| HUD-3B 상태 경계 | 실제 획득 즉시 표시, 1.49초 유지·1.5초 종료, 연속 획득 큐와 최대 스택 거부 무알림 통과 |
+| HUD-3B 시간·회귀 | unscaled 표시 진행·기존 전투 시간 불변, Setup 두 번과 HUD-3A·HUD-2·Flow-4 회귀 통과 |
+| HUD-3C 구성 | 중앙 1120×760 패널, 1024×600 세로 스크롤 목록과 전체 화면 입력 차단 통과 |
+| HUD-3C 상태 경계 | 빈 상태, 12종 전체 획득 순서, 11번째 항목 2스택과 모든 이름·효과 설명 통과 |
+| HUD-7A 일시정지·회귀 | timeScale·전투 입력 루프 정지와 상태 보존, 중첩 거부, Setup 두 번과 HUD-3B·HUD-3A·HUD-2·Flow-4 회귀 통과 |
+| HUD-4A 구성 | 우상단 220×180 영역, 비색상 `P` 현재 표식, 생성 격자 기반 방·연결선과 입력 비가로채기 통과 |
+| HUD-4A 생성 그래프 | 고정 seed의 실제 격자 좌표와 상·하·좌·우 상대 위치, 현재 방의 모든 직접 연결 수 일치 통과 |
+| HUD-4A 전환·회귀 | 인접방 진입 후 현재 표식 이동, Setup 두 번, Scene GUID·계층 유지와 HUD-3C·HUD-7A·Flow-4 회귀 통과 |
+| HUD-4B 누적 탐색 | 방문방과 그 인접방만 공개, 이동 후 이전 공개방 유지와 실제 격자 상대 위치 통과 |
+| HUD-4B 상태 경계 | `?` 일반 미확인, `P` 현재, `V` 실제 진입 후 클리어, 탐색 범위의 `S/T/B` 특수 문 공개 통과 |
+| HUD-4B 맞춤·회귀 | 공개 범위 증가 시 220×180 패널 자동 맞춤, Setup 두 번과 HUD-4A·HUD-3C·HUD-7A·Flow-4 회귀 통과 |
+| HUD-4B 사용자 확인 | 보물방 진입 전 `T`만 표시되고 실제 진입 뒤부터 `V`가 표시되는 경계 통과 |
 
 최종 구성 배치 로그:
 
@@ -148,6 +167,123 @@ HUD 구성만 원본에 반영했다. Backend·Database·API DTO·Web 계약 변
 
 정식 아이콘·애니메이션 교체는 후속 UI 에셋 범위다.
 
+## HUD-2 자동 확인 (2026-09-09 완료)
+
+- [x] 우하단 300×128 안전 영역에 저학년·고학년 72×72 임시 아이콘과 `SPACE`·`Q` 키를 표시한다.
+- [x] 저학년은 `PlayerSkill.CanCast`, 고학년은 `PlayerUltimate.IsReadyAt`과 같은 조건으로 준비 상태를 표시한다.
+- [x] 고학년 돌진 종료부터 시작한 실제 쿨타임을 남은 초와 반시계 방사형 오버레이로 표시한다.
+- [x] 쿨타임 중간값과 종료 경계에서 숫자·채움·사용 가능 상태가 실제 스킬 값과 일치한다.
+- [x] `Time.timeScale = 0`인 동안 `Time.time`과 HUD의 남은 쿨타임 표시가 함께 정지한다.
+- [x] 모든 그래픽이 전투 입력을 가로채지 않고 Setup 재실행 후 중복 오브젝트를 만들지 않는다.
+- [x] Game Scene GUID를 유지하고 HUD-1 구성과 Flow-4 참조 회귀 검증을 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Hud2Verification.SetupAndVerifyBatch`를 실행했으며 컴파일 오류 없이
+`Week 13 HUD-2 verification passed`와 `Week 13 HUD-2 batch verification passed`가 출력됐다.
+Backend·Database·API DTO·Web 계약 변경은 없다. 정식 아이콘과 전체 화면의 시각 확인은 후속
+UI 에셋 및 통합 Build 검증 범위다.
+
+사용자가 Development Build에서 두 스킬의 사용 가능 상태와 고학년 쿨타임 표시가 정상 동작함을
+확인했다. 별도 문제는 발견되지 않았다. (사용자 확인, 2026-09-09)
+
+## HUD-3A 자동·Build 확인 (2026-09-09 완료)
+
+- [x] 실제 플레이어 `PlayerInventory`를 좌하단 `GameArtifactHudView`에 연결한다.
+- [x] 최초 획득 순서의 고유 아티팩트를 48×48 임시 아이콘으로 5개 × 2줄 표시한다.
+- [x] 같은 아티팩트의 반복 획득은 새 슬롯 없이 기존 우하단 배지의 스택 수를 갱신한다.
+- [x] 고유 아티팩트 11종에서 앞의 10종과 `+1`을 표시한다.
+- [x] 재구성 후에도 순서·스택·초과 수가 유지되며 전체 획득 기록은 기존 중복 순서를 보존한다.
+- [x] 모든 그래픽이 전투 입력을 가로채지 않고 Setup 재실행 후 중복 오브젝트를 만들지 않는다.
+- [x] Game Scene GUID를 유지하고 HUD-2 구성과 Flow-4 참조 회귀 검증을 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Hud3AVerification.SetupAndVerifyBatch`를 실행했으며 컴파일 오류 없이
+종료 코드 0과 `Week 13 HUD-3A verification passed`, `Week 13 HUD-3A batch verification passed`를
+확인했다. Backend·Database·API DTO·Web 계약과 기존 안정 `itemId`의 의미는 변경하지 않았다.
+정식 아이콘, 획득 알림과 일시정지 전체 목록은 각각 후속 UI 에셋·HUD-3B·HUD-3C 범위다.
+
+사용자가 Development Build에서 좌하단 아티팩트 아이콘 표시와 같은 아티팩트 반복 획득 시 스택
+배지 갱신이 정상 동작함을 확인했다. 별도 문제는 발견되지 않았다. (사용자 확인, 2026-09-09)
+
+## HUD-3B 자동·Build 확인 (2026-09-10 완료)
+
+- [x] 실제 `PlayerInventory.ItemAcquired` 이벤트가 이름과 효과 계약 기반 한 줄 설명을 즉시 표시한다.
+- [x] 모든 유효 아티팩트 효과 설명의 TMP 글리프가 Build용 폰트 아틀라스에 포함된다.
+- [x] 첫 알림은 1.49초까지 유지되고 1.5초 경계에서 숨겨진다.
+- [x] 빠르게 연속 획득하면 현재 알림을 덮어쓰지 않고 다음 알림을 큐에서 1.5초 동안 표시한다.
+- [x] 최대 스택으로 거부된 획득은 알림을 만들지 않는다.
+- [x] unscaled 시간으로 표시가 진행되며 기존 timeScale과 EventSystem은 바뀌지 않는다.
+- [x] 단일 TMP 메시가 이름과 설명을 정확히 2줄로 생성하고 선호 높이가 중앙 720×120 패널 안에 들어간다.
+- [x] 중앙 패널의 모든 Graphic과 CanvasGroup이 전투 입력을 가로채지 않는다.
+- [x] Setup 두 번 뒤 Scene GUID·계층 수를 유지하고 HUD-3A·HUD-2·Flow-4 회귀를 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Hud3BVerification.SetupAndVerifyBatch`를 실행했으며 컴파일 오류 없이
+종료 코드 0과 `Week 13 HUD-3B verification passed`, `Week 13 HUD-3B batch verification passed`를
+확인했다. 설명은 새 데이터 계약 없이 기존 `ItemEffectEntry`를 짧은 한국어 문구로 변환하므로
+Backend·Database·API DTO·Web과 안정 `itemId`에는 영향이 없다. 정식 프레임·전환 애니메이션은
+후속 UI 에셋 범위이며 전체 목록·스택·설명은 HUD-3C에서 구현한다.
+
+두 차례 Development Build에서 이름 문구의 잘림은 없었지만 별도 TMP 오브젝트로 만든 효과 설명은
+표시되지 않았다. 두 번째 확인으로 글리프 추가만으로 해결되지 않음을 확인했으며, 별도 설명
+렌더러를 제거하고 빌드에서 렌더링되는 이름 TMP 하나에 28px 이름과 보조색 20px 설명을 2줄로
+함께 생성하도록 변경했다. 보정 후 실제 TMP 메시의 두 줄·글자 수·선호 높이를 포함한 배치 검증이
+종료 코드 0으로 통과했다. 수정된 Development Build에서 아티팩트 이름 아래 보조색 효과 설명이
+정상 표시되고 문구가 잘리지 않음을 사용자가 확인했다. (사용자 확인, 2026-09-10)
+
+## HUD-3C·HUD-7A 자동·Build 확인 (2026-09-10 완료)
+
+- [x] `Esc` 일시정지 기반이 scaled game time과 플레이어 이동·공격·스킬 입력 루프를 함께 멈춘다.
+- [x] 전투 컴포넌트를 끄지 않아 진행 중 행동 상태를 보존하고 복귀 시 이전 timeScale을 복원한다.
+- [x] 다른 팝업이 이미 timeScale을 0으로 만든 상태에서는 중첩해 열리지 않는다.
+- [x] 중앙 1120×760 패널의 세로 스크롤 목록에 전체 획득 순서를 표시한다.
+- [x] 빈 상태와 12종 전체 목록, 11번째 항목의 2스택, 각 이름·효과 설명을 검사한다.
+- [x] Setup 두 번 뒤 Scene GUID·계층 수를 유지하고 HUD-3B·HUD-3A·HUD-2·Flow-4 회귀를 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Hud3CVerification.SetupAndVerifyBatch`를 실행했으며 컴파일 오류 없이
+종료 코드 0과 `Week 13 HUD-3C verification passed`, `Week 13 HUD-3C batch verification passed`를
+확인했다. 상세 스탯·포커스 제한과 홈 나가기 확인은 HUD-7B·7C에 남겼다. Backend·Database·API
+DTO·Web 계약과 안정 `itemId`에는 영향이 없다.
+
+사용자가 Development Build에서 일시정지·복귀, 전투 시간 정지, 플레이어 입력 루프 정지·복원,
+아티팩트 이름을 포함한 전체 상세 목록 표시가 모두 정상임을 확인했다. 별도 표시 누락이나 진행
+이상은 발견되지 않았다. (사용자 확인, 2026-09-10)
+
+## HUD-4A 자동 확인 (2026-09-10 완료)
+
+- [x] 우상단 220×180 안전 영역에서 실제 생성 격자 위의 현재 방을 `P` 표식과 밝은 외곽선으로 강조한다.
+- [x] 현재 방의 모든 직접 연결을 실제 생성 그래프의 상·하·좌·우 방향대로 인접 방과 연결선으로 표시한다.
+- [x] 고정 seed로 생성한 층의 실제 `GridPosition`과 표시 상대 좌표가 일치한다.
+- [x] 인접 방 진입 이벤트 후 실제 격자 위치의 현재 방 표식과 연결 관계를 즉시 다시 구성한다.
+- [x] HUD-4A 단계에서는 방문·클리어·특수방 정체와 층 이름을 섞지 않고 후속 범위로 분리했다.
+- [x] 모든 그래픽이 전투 입력을 가로채지 않고 Setup 재실행 후 중복 오브젝트를 만들지 않는다.
+- [x] Game Scene GUID를 유지하고 HUD-3C·HUD-7A 구성과 Flow-4 참조 회귀 검증을 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Hud4AVerification.SetupAndVerifyBatch`를 실행했으며 컴파일 오류 없이
+종료 코드 0과 `Week 13 HUD-4A verification passed`, `Week 13 HUD-4A batch verification passed`를
+확인했다. 미니맵은 기존 `RunProgress.GeneratedGraph`와 `RoomChanged`를 소비하므로 Backend·Database·
+API DTO·Web 계약과 안정 ID에는 영향이 없다. 방문·클리어·발견한 특수방 표식은 HUD-4B에서 추가했고,
+층 이름과 진입 알림은 HUD-4C에 남겼다.
+
+## HUD-4B 자동·수동 확인 (2026-09-10 완료)
+
+- [x] 방문한 모든 방과 각 방문방에 직접 연결된 미방문 방을 현재 층 지도에 누적한다.
+- [x] 현재 방이 이동해도 이전에 밝혀진 방과 연결선이 사라지지 않는다.
+- [x] 일반 미방문 방은 `?`, 현재 방은 `P`, 실제 진입한 클리어 방은 별도 `V` 배지로 색 외의 상태를 제공한다.
+- [x] 인접한 미방문 보물방·보스방은 특수 문과 일치하는 `T`·`B`로 표시한다.
+- [x] 전투 없는 보물방의 선클리어 상태는 실제 방문과 분리하며, 진입 전에는 `T`만 표시하고 `V`를 숨긴다.
+- [x] 방문한 시작방·보물방·보스방은 현재 방을 떠난 뒤 각각 `S`·`T`·`B` 임시 아이콘으로 유지한다.
+- [x] 클리어·방문 상태 변경 알림으로 현재 미니맵을 즉시 갱신하고 중복 상태 기록은 추가 갱신을 만들지 않는다.
+- [x] 공개 그래프의 격자 상대 위치를 보존하면서 220×180 미니맵 영역을 넘으면 자동 축소한다.
+- [x] Setup 두 번 뒤 Scene GUID·계층 수를 유지하고 HUD-4A·HUD-3C·HUD-7A·Flow-4 회귀를 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Hud4BVerification.SetupAndVerifyBatch`를 실행했으며 컴파일 오류 없이
+종료 코드 0과 `Week 13 HUD-4B verification passed`, `Week 13 HUD-4B batch verification passed`를
+확인했다. 기존 `RoomRunState`에 멱등 변경 알림과 방문을 수반하지 않는 선클리어 상태를 추가하고
+생성 그래프·안정 ID 계약은 유지했으므로 Backend·Database·API DTO·Web에는 영향이 없다. 수동 확인에서
+발견된 보물방 진입 전 `T V` 표시는 `T`만 남도록 회귀 검증을 보강했다. 층 이름과 진입 알림은
+HUD-4C에 남겼다.
+
+사용자가 Unity 실행 화면에서 보물방 진입 전에는 `T`만 표시되고 실제 진입 후에만 `V`가 추가되는
+것을 확인했다. 누적 지도와 특수 문 표식에도 별도 이상이 없었다. (사용자 확인, 2026-09-10)
+
 ## Profile-1~3 검증 (2026-09-08 완료)
 
 - Backend 사용자 Repository·Service·DTO 관련 테스트 45개와 전체 테스트 125개가 통과했다.
@@ -166,8 +302,8 @@ Setup·검증·PNG 출력 메뉴와 배치 명령은 [개발 환경 설정 §17]
 
 ## 영향 범위
 
-- Runtime: `FrontendLayout`, `FrontendTitleView`, `FrontendHomeView`, `FrontendCharacterSelectionView`, `FrontendCharacterCardView`, `FrontendRunLauncher`, `RunLaunchContext`, `GameRunBootstrap`, `RunSession`, `PlayerProgressClient`, `FrontendStartButton`, `GameHudView`, `Health`, `PlayerSkill`.
-- Editor: `Week13FrontendSetup`, `Week13FrontendVerification`, `Week13Flow4Setup`, `Week13Flow4Verification`, `Week13Hud1Setup`, `Week13Hud1Verification` 및 Play Mode 배치 진입점.
+- Runtime: `FrontendLayout`, `FrontendTitleView`, `FrontendHomeView`, `FrontendCharacterSelectionView`, `FrontendCharacterCardView`, `FrontendRunLauncher`, `RunLaunchContext`, `GameRunBootstrap`, `RunSession`, `PlayerProgressClient`, `FrontendStartButton`, `GameHudView`, `GameArtifactHudView`, `ArtifactHudSlotView`, `GameArtifactAcquisitionToastView`, `ArtifactPauseListEntryView`, `GamePauseArtifactView`, `ArtifactEffectDescription`, `GameMinimapView`, `MinimapRoomMarkerView`, `RoomRunState`, `Health`, `PlayerSkill`, `PlayerUltimate`, `PlayerInventory`.
+- Editor: `Week13FrontendSetup`, `Week13FrontendVerification`, `Week13Flow4Setup`, `Week13Flow4Verification`, `Week13Hud1Setup`, `Week13Hud1Verification`, `Week13Hud2Setup`, `Week13Hud2Verification`, `Week13Hud3ASetup`, `Week13Hud3AVerification`, `Week13Hud3BSetup`, `Week13Hud3BVerification`, `Week13Hud3CSetup`, `Week13Hud3CVerification`, `Week13Hud4ASetup`, `Week13Hud4AVerification`, `Week13Hud4BSetup`, `Week13Hud4BVerification` 및 Play Mode 배치 진입점.
 - Assets: Frontend Scene, Game Scene Bootstrap, Noto Sans KR OTF·OFL·TMP 에셋, TMP Essential Resources, Build Scene 순서.
 - Backend 사용자 등록의 동시 Unique 충돌 복구와 관련 테스트를 보강했다. Prisma 스키마, Web,
   Unity DTO, seed와 기존 영문 ID는 변경하지 않았다. Game Scene 이동·Run 초기화, 스킬 강화의 실제

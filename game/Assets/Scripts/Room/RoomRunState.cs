@@ -1,3 +1,5 @@
+using System;
+
 namespace TrickalFanGame.Room
 {
     public sealed class RoomRunState
@@ -7,8 +9,36 @@ namespace TrickalFanGame.Room
         public bool HasVisited { get; private set; }
         public bool IsCleared { get; private set; }
         public bool HasClaimedArtifact { get; private set; }
-        public void MarkVisited() => HasVisited = true;
-        public void MarkCleared() { HasVisited = true; IsCleared = true; }
-        public void MarkArtifactClaimed() { HasVisited = true; HasClaimedArtifact = true; }
+        public event Action Changed;
+
+        public void MarkVisited()
+        {
+            if (HasVisited) return;
+            HasVisited = true;
+            Changed?.Invoke();
+        }
+
+        public void MarkCleared()
+        {
+            if (HasVisited && IsCleared) return;
+            HasVisited = true;
+            IsCleared = true;
+            Changed?.Invoke();
+        }
+
+        public void MarkPreCleared()
+        {
+            if (IsCleared) return;
+            IsCleared = true;
+            Changed?.Invoke();
+        }
+
+        public void MarkArtifactClaimed()
+        {
+            if (HasVisited && HasClaimedArtifact) return;
+            HasVisited = true;
+            HasClaimedArtifact = true;
+            Changed?.Invoke();
+        }
     }
 }

@@ -43,7 +43,7 @@ namespace TrickalFanGame.Room
             runState = configuredState;
             if (runState != null && (runState.IsCleared || startsCleared))
             {
-                if (startsCleared && !runState.IsCleared) runState.MarkCleared();
+                if (startsCleared && !runState.IsCleared) runState.MarkPreCleared();
                 HasStarted = true;
                 State = RoomState.Cleared;
                 SetDoorsLocked(false);
