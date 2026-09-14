@@ -27,14 +27,22 @@ namespace TrickalFanGame.Run
 
         public static bool TryPrepare(string userId, string nickname, string characterId)
         {
+            IGameApiClient apiClient = verificationApiClient;
+            if (!TryPrepare(userId, nickname, characterId, apiClient)) return false;
+            verificationApiClient = null;
+            return true;
+        }
+
+        public static bool TryPrepare(string userId, string nickname, string characterId,
+            IGameApiClient apiClient)
+        {
             if (pending != null || string.IsNullOrWhiteSpace(userId) ||
                 string.IsNullOrWhiteSpace(nickname) || string.IsNullOrWhiteSpace(characterId))
             {
                 return false;
             }
 
-            pending = new RunLaunchRequest(userId, nickname, characterId, verificationApiClient);
-            verificationApiClient = null;
+            pending = new RunLaunchRequest(userId, nickname, characterId, apiClient);
             return true;
         }
 

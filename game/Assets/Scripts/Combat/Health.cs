@@ -20,6 +20,7 @@ namespace TrickalFanGame.Combat
         public event Action<DamageContext, DamageResult> DamageResolved;
         public event Action<float> ShieldChanged;
         public event Action Died;
+        public static event Action<Health, DamageContext, DamageResult> AnyDamageResolved;
 
         private void Awake()
         {
@@ -51,6 +52,7 @@ namespace TrickalFanGame.Combat
             float previousHealth = CurrentHealth;
             CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
             DamageResolved?.Invoke(context, result);
+            AnyDamageResolved?.Invoke(this, context, result);
             DamageApplied?.Invoke(context, previousHealth - CurrentHealth, CurrentHealth);
             if (!Mathf.Approximately(previousHealth, CurrentHealth))
             {

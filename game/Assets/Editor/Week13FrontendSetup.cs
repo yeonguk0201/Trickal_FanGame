@@ -54,6 +54,7 @@ namespace TrickalFanGame.Editor
             titleCamera.backgroundColor = new Color(0.045f, 0.065f, 0.12f);
             titleCamera.cullingMask = 0;
             titleCamera.orthographic = true;
+            Component<AudioListener>(cameraObject);
             EditorUtility.SetDirty(titleCamera);
 
             GameObject canvasObject = Root(scene, "FrontendCanvas", typeof(RectTransform));
@@ -112,9 +113,11 @@ namespace TrickalFanGame.Editor
 
             FrontendHomeView homeView = SetupHome(frame);
             SetupCharacterSelection(homeView, frame);
+            SetupSkillUpgrade(homeView, frame);
             SetupSettings(homeView, frame);
             Component<FrontendRunLauncher>(canvasObject).Configure(homeView, GameScenePath);
             view.ConfigureHomeView(homeView);
+            SetupRunResult(view, frame);
             homeView.gameObject.SetActive(false);
 
             GameObject events = Root(scene, "FrontendEventSystem");
@@ -158,7 +161,10 @@ namespace TrickalFanGame.Editor
             fontSettings.ApplyModifiedPropertiesWithoutUndo();
             string titleCharacters = "TRICKAL FAN GAME트릭컬 팬게임닉네임님환영합니다게임시작스킬강화설정나가기캐릭터선택뒤로확인선택됨할수있는없습니다해주세요완료" +
                 FrontendTitleView.ReadyMessage + FrontendHomeView.PreparationMessage + FrontendHomeView.QuitMessage +
-                "음량전체배경효과화면해상도x0123456789% ";
+                "음량전체배경효과화면해상도x0123456789% " +
+                "결과저장중완료실패서버확인후공개됩니다다시시도홈으로도달층처치플레이시간사망원인" +
+                "경험치레벨업포인트획득아티팩트없음해냈어역시내가최고야으앙다음에는꼭이길거야" +
+                "HUD상세스탯표시";
             if (!font.HasCharacters(titleCharacters) && !font.TryAddCharacters(titleCharacters, out string missing))
                 throw new InvalidOperationException("Missing title glyphs: " + missing);
             EditorUtility.SetDirty(font);
@@ -270,8 +276,8 @@ namespace TrickalFanGame.Editor
             background.color = new Color(0.055f, 0.09f, 0.14f);
             background.raycastTarget = false;
 
-            Text(root, "CharacterSelectionTitle", "캐릭터 선택", new Vector2(0, 440), new Vector2(900, 64), 40);
-            RectTransform cardContainer = Rect(root, "CharacterCardContainer", new Vector2(0, 70), new Vector2(1120, 420));
+            Text(root, "CharacterSelectionTitle", "캐릭터 선택", new Vector2(0, 450), new Vector2(900, 64), 40);
+            RectTransform cardContainer = Rect(root, "CharacterCardContainer", new Vector2(0, 70), new Vector2(1240, 520));
             HorizontalLayoutGroup layout = Component<HorizontalLayoutGroup>(cardContainer.gameObject);
             layout.spacing = 24;
             layout.childAlignment = TextAnchor.MiddleCenter;
@@ -280,7 +286,7 @@ namespace TrickalFanGame.Editor
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
 
-            RectTransform cardRect = Rect(cardContainer, "CharacterCardTemplate", Vector2.zero, new Vector2(300, 420));
+            RectTransform cardRect = Rect(cardContainer, "CharacterCardTemplate", Vector2.zero, new Vector2(320, 520));
             Image cardImage = Component<Image>(cardRect.gameObject);
             cardImage.color = new Color(0.12f, 0.18f, 0.24f);
             FrontendStartButton cardButton = Component<FrontendStartButton>(cardRect.gameObject);
@@ -292,23 +298,23 @@ namespace TrickalFanGame.Editor
             cardButton.ConfigureBorders(Border(cardRect, "HoverBorder", 2, 0), Border(cardRect, "FocusBorder", 3, 2));
 
             GameObject border = Border(cardRect, "SelectionBorder", 3, 0);
-            Image icon = Component<Image>(Rect(cardRect, "CharacterIcon", new Vector2(0, 105), new Vector2(96, 96)).gameObject);
+            Image icon = Component<Image>(Rect(cardRect, "CharacterIcon", new Vector2(0, 155), new Vector2(128, 128)).gameObject);
             icon.color = new Color(0.3f, 0.72f, 0.68f);
             icon.raycastTarget = false;
-            TMP_Text name = Text(cardRect, "CharacterName", "캐릭터", new Vector2(0, 25), new Vector2(260, 48), 28);
-            TMP_Text description = Text(cardRect, "CharacterDescription", "설명", new Vector2(0, -55), new Vector2(260, 100), 20);
-            TMP_Text selection = Text(cardRect, "SelectionState", "", new Vector2(0, -155), new Vector2(260, 36), 20);
+            TMP_Text name = Text(cardRect, "CharacterName", "캐릭터", new Vector2(0, 55), new Vector2(280, 48), 28);
+            TMP_Text description = Text(cardRect, "CharacterDescription", "설명", new Vector2(0, -55), new Vector2(280, 130), 20);
+            TMP_Text selection = Text(cardRect, "SelectionState", "", new Vector2(0, -205), new Vector2(280, 36), 20);
             FrontendCharacterCardView cardTemplate = Component<FrontendCharacterCardView>(cardRect.gameObject);
             cardTemplate.ConfigureTemplate(cardButton, name, description, selection, border);
             cardRect.gameObject.SetActive(false);
 
             TMP_Text status = Text(root, "CharacterSelectionStatus", FrontendCharacterSelectionView.SelectMessage,
-                new Vector2(0, -215), new Vector2(900, 48), 20);
-            FrontendStartButton confirm = MenuButton(root, "CharacterConfirmButton", "확인", -315);
-            confirm.GetComponent<RectTransform>().anchoredPosition = new Vector2(155, -315);
+                new Vector2(0, -235), new Vector2(900, 48), 20);
+            FrontendStartButton confirm = MenuButton(root, "CharacterConfirmButton", "게임 시작", -335);
+            confirm.GetComponent<RectTransform>().anchoredPosition = new Vector2(155, -335);
             confirm.GetComponent<RectTransform>().sizeDelta = new Vector2(280, 64);
-            FrontendStartButton back = MenuButton(root, "CharacterBackButton", "뒤로", -315);
-            back.GetComponent<RectTransform>().anchoredPosition = new Vector2(-155, -315);
+            FrontendStartButton back = MenuButton(root, "CharacterBackButton", "뒤로", -335);
+            back.GetComponent<RectTransform>().anchoredPosition = new Vector2(-155, -335);
             back.GetComponent<RectTransform>().sizeDelta = new Vector2(220, 52);
 
             FrontendCharacterSelectionView view = Component<FrontendCharacterSelectionView>(root.gameObject);
@@ -317,46 +323,188 @@ namespace TrickalFanGame.Editor
             root.gameObject.SetActive(false);
         }
 
+        private static void SetupSkillUpgrade(FrontendHomeView homeView, RectTransform frame)
+        {
+            RectTransform root = Rect(frame, "SkillUpgradePanel", Vector2.zero, Vector2.zero);
+            Stretch(root);
+            Image background = Component<Image>(root.gameObject);
+            background.color = new Color(0.045f, 0.075f, 0.12f);
+            background.raycastTarget = false;
+
+            TMP_Text title = Text(root, "SkillUpgradeTitle", "에르핀 강화", new Vector2(0, 445), new Vector2(900, 64), 40);
+            RectTransform summary = Rect(root, "ProgressSummary", new Vector2(0, 325), new Vector2(1120, 130));
+            Image summaryImage = Component<Image>(summary.gameObject);
+            summaryImage.color = new Color(0.08f, 0.14f, 0.2f);
+            summaryImage.raycastTarget = false;
+            TMP_Text characterLevel = Text(summary, "CharacterLevel", "캐릭터 레벨  -", new Vector2(-335, 28), new Vector2(400, 40), 24);
+            TMP_Text experience = Text(summary, "Experience", "경험치  -", new Vector2(-335, -28), new Vector2(400, 40), 20);
+            TMP_Text points = Text(summary, "SkillPoints", "남은 스킬 포인트  -", new Vector2(300, 0), new Vector2(450, 54), 28);
+
+            RectTransform lowPanel = SkillPanel(root, "LowGradeSkillPanel", new Vector2(-300, 35),
+                "저학년 스킬", "SP 유도탄 연사");
+            TMP_Text lowLevel = Text(lowPanel, "SkillLevel", "Lv. -", new Vector2(0, 52), new Vector2(420, 42), 28);
+            TMP_Text lowEffect = Text(lowPanel, "SkillEffect", "서버 진행 정보가 필요합니다.", new Vector2(0, -5), new Vector2(430, 58), 20);
+            FrontendStartButton lowButton = MenuButton(lowPanel, "UpgradeButton", "1 포인트로 강화", -105);
+            lowButton.GetComponent<RectTransform>().sizeDelta = new Vector2(280, 64);
+
+            RectTransform highPanel = SkillPanel(root, "HighGradeSkillPanel", new Vector2(300, 35),
+                "고학년 스킬", "무적 돌진과 광역 피해");
+            TMP_Text highLevel = Text(highPanel, "SkillLevel", "Lv. -", new Vector2(0, 52), new Vector2(420, 42), 28);
+            TMP_Text highEffect = Text(highPanel, "SkillEffect", "서버 진행 정보가 필요합니다.", new Vector2(0, -5), new Vector2(430, 58), 20);
+            FrontendStartButton highButton = MenuButton(highPanel, "UpgradeButton", "1 포인트로 강화", -105);
+            highButton.GetComponent<RectTransform>().sizeDelta = new Vector2(280, 64);
+
+            TMP_Text status = Text(root, "SkillUpgradeStatus", FrontendSkillUpgradeView.LoadingMessage,
+                new Vector2(0, -245), new Vector2(1120, 70), 20);
+            FrontendStartButton retry = MenuButton(root, "SkillProgressRetryButton", "다시 불러오기", -330);
+            retry.GetComponent<RectTransform>().anchoredPosition = new Vector2(150, -330);
+            retry.GetComponent<RectTransform>().sizeDelta = new Vector2(280, 64);
+            FrontendStartButton back = MenuButton(root, "SkillUpgradeBackButton", "캐릭터 선택", -330);
+            back.GetComponent<RectTransform>().anchoredPosition = new Vector2(-150, -330);
+            back.GetComponent<RectTransform>().sizeDelta = new Vector2(220, 52);
+
+            lowButton.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnRight = highButton, selectOnDown = back };
+            highButton.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnLeft = lowButton, selectOnDown = retry };
+            back.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnUp = lowButton, selectOnRight = retry };
+            retry.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnUp = highButton, selectOnLeft = back };
+
+            FrontendSkillUpgradeView view = Component<FrontendSkillUpgradeView>(root.gameObject);
+            view.Configure(title, characterLevel, experience, points, lowLevel, lowEffect, lowButton,
+                highLevel, highEffect, highButton, status, retry, back);
+            homeView.ConfigureSkillUpgrade(root.gameObject, view);
+            retry.gameObject.SetActive(false);
+            root.gameObject.SetActive(false);
+        }
+
+        private static RectTransform SkillPanel(Transform parent, string name, Vector2 position, string heading, string summary)
+        {
+            RectTransform panel = Rect(parent, name, position, new Vector2(520, 390));
+            Image image = Component<Image>(panel.gameObject);
+            image.color = new Color(0.1f, 0.16f, 0.24f);
+            image.raycastTarget = false;
+            Text(panel, "Heading", heading, new Vector2(0, 145), new Vector2(440, 48), 28);
+            Text(panel, "Summary", summary, new Vector2(0, 103), new Vector2(440, 36), 18);
+            return panel;
+        }
+
+        private static void SetupRunResult(FrontendTitleView titleView, RectTransform frame)
+        {
+            RectTransform root = Rect(frame, "RunResultScreen", Vector2.zero, Vector2.zero);
+            Stretch(root);
+            Image background = Component<Image>(root.gameObject);
+            background.color = new Color(0.025f, 0.04f, 0.075f, 1f);
+            background.raycastTarget = true;
+
+            RectTransform safe = Rect(root, "SafeArea", Vector2.zero, Vector2.zero);
+            Stretch(safe);
+            safe.offsetMin = FrontendLayout.SafeMargin;
+            safe.offsetMax = -FrontendLayout.SafeMargin;
+
+            TMP_Text heading = Text(safe, "ResultTitle", "RUN CLEAR", new Vector2(0, 390), new Vector2(900, 80), 48);
+
+            RectTransform characterPanel = Rect(safe, "CharacterReaction", new Vector2(-490, -20), new Vector2(620, 700));
+            Image characterBackground = Component<Image>(characterPanel.gameObject);
+            characterBackground.color = new Color(0.08f, 0.16f, 0.22f, 1f);
+            TMP_Text characterName = Text(characterPanel, "CharacterName", "에르핀", new Vector2(0, 245), new Vector2(540, 60), 32);
+            TMP_Text reaction = Text(characterPanel, "Reaction", "^_^", new Vector2(0, 30), new Vector2(420, 300), 84);
+            RectTransform speechPanel = Rect(characterPanel, "SpeechBubble", new Vector2(0, -230), new Vector2(520, 120));
+            Image speechBackground = Component<Image>(speechPanel.gameObject);
+            speechBackground.color = new Color(0.92f, 0.96f, 1f, 1f);
+            TMP_Text speech = Text(speechPanel, "Speech", "해냈어!", Vector2.zero, new Vector2(480, 92), 24);
+            speech.color = new Color(0.04f, 0.07f, 0.1f);
+
+            RectTransform stagePanel = Rect(safe, "SequenceStage", new Vector2(400, -20), new Vector2(860, 700));
+            Image stageBackground = Component<Image>(stagePanel.gameObject);
+            stageBackground.color = new Color(0.09f, 0.105f, 0.18f, 1f);
+            TMP_Text stageTitle = Text(stagePanel, "StageTitle", "결과 저장 중...", new Vector2(0, 205), new Vector2(760, 90), 40);
+            TMP_Text stageBody = Text(stagePanel, "StageBody", "성장 결과는 서버 확인 후 공개됩니다.",
+                new Vector2(0, 35), new Vector2(740, 230), 25);
+            TMP_Text saveStatus = Text(stagePanel, "SaveStatus", "", new Vector2(0, 292), new Vector2(720, 40), 18);
+            saveStatus.alignment = TextAlignmentOptions.Right;
+
+            RectTransform gauge = Rect(stagePanel, "ExperienceGauge", new Vector2(0, -105), new Vector2(620, 34));
+            Image gaugeBackground = Component<Image>(gauge.gameObject);
+            gaugeBackground.color = new Color(0.04f, 0.055f, 0.09f);
+            Slider experienceBar = Component<Slider>(gauge.gameObject);
+            RectTransform fillArea = Rect(gauge, "FillArea", Vector2.zero, new Vector2(600, 20));
+            RectTransform fill = Rect(fillArea, "Fill", Vector2.zero, new Vector2(600, 20));
+            Image fillImage = Component<Image>(fill.gameObject);
+            fillImage.color = new Color(0.25f, 0.82f, 0.72f);
+            experienceBar.fillRect = fill;
+            experienceBar.targetGraphic = fillImage;
+            experienceBar.direction = UnityEngine.UI.Slider.Direction.LeftToRight;
+            experienceBar.minValue = 0f;
+            experienceBar.maxValue = 1f;
+            experienceBar.interactable = false;
+            TMP_Text experienceText = Text(stagePanel, "ExperienceText", "Lv. 1    0 / 400",
+                new Vector2(0, -155), new Vector2(620, 42), 20);
+
+            FrontendStartButton saveRetry = MenuButton(stagePanel, "RetrySaveButton", "같은 Run ID로 다시 시도", -245);
+
+            RectTransform actions = Rect(stagePanel, "ResultActions", new Vector2(0, -245), new Vector2(780, 70));
+            FrontendStartButton retryRun = MenuButton(actions, "RetryRunButton", "다시 도전", 0);
+            retryRun.GetComponent<RectTransform>().anchoredPosition = new Vector2(-195, 0);
+            FrontendStartButton home = MenuButton(actions, "ResultHomeButton", "홈으로", 0);
+            home.GetComponent<RectTransform>().anchoredPosition = new Vector2(195, 0);
+            retryRun.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnRight = home, selectOnLeft = home };
+            home.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnRight = retryRun, selectOnLeft = retryRun };
+
+            AudioSource audioSource = Component<AudioSource>(root.gameObject);
+            audioSource.playOnAwake = false;
+            audioSource.loop = false;
+            FrontendRunResultView resultView = Component<FrontendRunResultView>(titleView.gameObject);
+            resultView.Configure(titleView, root.gameObject, heading, characterName, reaction, speech, stageTitle,
+                stageBody, experienceBar, experienceText, saveStatus, saveRetry, actions.gameObject, retryRun, home,
+                audioSource);
+            root.gameObject.SetActive(false);
+        }
+
         private static void SetupSettings(FrontendHomeView homeView, RectTransform frame)
         {
-            RectTransform root = Rect(frame, "SettingsPanel", Vector2.zero, new Vector2(720, 560));
+            RectTransform root = Rect(frame, "SettingsPanel", Vector2.zero, new Vector2(720, 720));
             Image background = Component<Image>(root.gameObject);
             background.color = new Color(0.06f, 0.1f, 0.14f);
             background.raycastTarget = true;
 
-            Text(root, "SettingsTitle", "설정", new Vector2(0, 230), new Vector2(680, 60), 40);
+            Text(root, "SettingsTitle", "설정", new Vector2(0, 310), new Vector2(680, 60), 40);
 
             // Volume Section
-            Text(root, "VolumeSection", "음량 설정", new Vector2(-200, 155), new Vector2(280, 40), 28);
+            Text(root, "VolumeSection", "음량 설정", new Vector2(-200, 245), new Vector2(280, 40), 28);
 
-            TMP_Text masterLabel = Text(root, "MasterVolumeLabel", "전체 음량", new Vector2(-200, 105), new Vector2(160, 32), 20);
+            TMP_Text masterLabel = Text(root, "MasterVolumeLabel", "전체 음량", new Vector2(-200, 195), new Vector2(160, 32), 20);
             masterLabel.alignment = TextAlignmentOptions.Left;
-            Slider masterSlider = Slider(root, "MasterVolumeSlider", new Vector2(60, 105), new Vector2(320, 32));
-            TMP_Text masterValue = Text(root, "MasterVolumeValue", "100%", new Vector2(280, 105), new Vector2(80, 32), 20);
+            Slider masterSlider = Slider(root, "MasterVolumeSlider", new Vector2(60, 195), new Vector2(320, 32));
+            TMP_Text masterValue = Text(root, "MasterVolumeValue", "100%", new Vector2(280, 195), new Vector2(80, 32), 20);
 
-            TMP_Text bgmLabel = Text(root, "BgmVolumeLabel", "배경음", new Vector2(-200, 55), new Vector2(160, 32), 20);
+            TMP_Text bgmLabel = Text(root, "BgmVolumeLabel", "배경음", new Vector2(-200, 145), new Vector2(160, 32), 20);
             bgmLabel.alignment = TextAlignmentOptions.Left;
-            Slider bgmSlider = Slider(root, "BgmVolumeSlider", new Vector2(60, 55), new Vector2(320, 32));
-            TMP_Text bgmValue = Text(root, "BgmVolumeValue", "100%", new Vector2(280, 55), new Vector2(80, 32), 20);
+            Slider bgmSlider = Slider(root, "BgmVolumeSlider", new Vector2(60, 145), new Vector2(320, 32));
+            TMP_Text bgmValue = Text(root, "BgmVolumeValue", "100%", new Vector2(280, 145), new Vector2(80, 32), 20);
 
-            TMP_Text sfxLabel = Text(root, "SfxVolumeLabel", "효과음", new Vector2(-200, 5), new Vector2(160, 32), 20);
+            TMP_Text sfxLabel = Text(root, "SfxVolumeLabel", "효과음", new Vector2(-200, 95), new Vector2(160, 32), 20);
             sfxLabel.alignment = TextAlignmentOptions.Left;
-            Slider sfxSlider = Slider(root, "SfxVolumeSlider", new Vector2(60, 5), new Vector2(320, 32));
-            TMP_Text sfxValue = Text(root, "SfxVolumeValue", "100%", new Vector2(280, 5), new Vector2(80, 32), 20);
+            Slider sfxSlider = Slider(root, "SfxVolumeSlider", new Vector2(60, 95), new Vector2(320, 32));
+            TMP_Text sfxValue = Text(root, "SfxVolumeValue", "100%", new Vector2(280, 95), new Vector2(80, 32), 20);
 
             // Display Section
-            Text(root, "DisplaySection", "화면 설정", new Vector2(-200, -60), new Vector2(280, 40), 28);
+            Text(root, "DisplaySection", "화면 설정", new Vector2(-200, 30), new Vector2(280, 40), 28);
 
-            TMP_Text resolutionLabel = Text(root, "ResolutionLabel", "해상도", new Vector2(-200, -110), new Vector2(160, 32), 20);
+            TMP_Text resolutionLabel = Text(root, "ResolutionLabel", "해상도", new Vector2(-200, -20), new Vector2(160, 32), 20);
             resolutionLabel.alignment = TextAlignmentOptions.Left;
-            TMP_Dropdown resolutionDropdown = Dropdown(root, "ResolutionDropdown", new Vector2(100, -110), new Vector2(220, 40));
+            TMP_Dropdown resolutionDropdown = Dropdown(root, "ResolutionDropdown", new Vector2(100, -20), new Vector2(220, 40));
 
-            TMP_Text fullscreenLabel = Text(root, "FullscreenLabel", "전체 화면", new Vector2(-200, -165), new Vector2(160, 32), 20);
+            TMP_Text fullscreenLabel = Text(root, "FullscreenLabel", "전체 화면", new Vector2(-200, -75), new Vector2(160, 32), 20);
             fullscreenLabel.alignment = TextAlignmentOptions.Left;
-            Toggle fullscreenToggle = Toggle(root, "FullscreenToggle", new Vector2(20, -165), new Vector2(40, 40));
+            Toggle fullscreenToggle = Toggle(root, "FullscreenToggle", new Vector2(20, -75), new Vector2(40, 40));
+
+            Text(root, "HudSection", "HUD 설정", new Vector2(-200, -140), new Vector2(280, 40), 28);
+            TMP_Text detailedStatsLabel = Text(root, "DetailedStatsHudLabel", "상세 스탯 표시", new Vector2(-200, -190), new Vector2(200, 32), 20);
+            detailedStatsLabel.alignment = TextAlignmentOptions.Left;
+            Toggle detailedStatsToggle = Toggle(root, "DetailedStatsHudToggle", new Vector2(20, -190), new Vector2(40, 40));
+            detailedStatsToggle.isOn = false;
 
             // Back button
-            FrontendStartButton backButton = MenuButton(root, "SettingsBackButton", "뒤로", -230);
+            FrontendStartButton backButton = MenuButton(root, "SettingsBackButton", "뒤로", -290);
             backButton.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 56);
 
             // Configure view
@@ -367,7 +515,8 @@ namespace TrickalFanGame.Editor
                 sfxSlider, sfxValue,
                 resolutionDropdown,
                 fullscreenToggle,
-                backButton);
+                backButton,
+                detailedStatsToggle);
             homeView.ConfigureSettings(root.gameObject, settingsView);
             root.gameObject.SetActive(false);
         }
@@ -449,10 +598,11 @@ namespace TrickalFanGame.Editor
             arrowImage.raycastTarget = false;
 
             // Template
-            RectTransform template = Rect(rect, "Template", new Vector2(0, -size.y / 2), new Vector2(size.x, 150));
+            RectTransform template = Rect(rect, "Template", new Vector2(0, -size.y / 2), new Vector2(size.x, 126));
             template.pivot = new Vector2(0.5f, 1);
             Image templateBg = Component<Image>(template.gameObject);
             templateBg.color = new Color(0.1f, 0.14f, 0.18f);
+            Component<CanvasGroup>(template.gameObject);
             ScrollRect scrollRect = Component<ScrollRect>(template.gameObject);
 
             // Viewport
@@ -463,13 +613,13 @@ namespace TrickalFanGame.Editor
             Component<Image>(viewport.gameObject).color = Color.white;
 
             // Content
-            RectTransform content = Rect(viewport, "Content", Vector2.zero, new Vector2(size.x, 28));
+            RectTransform content = Rect(viewport, "Content", Vector2.zero, new Vector2(0, 40));
             content.anchorMin = new Vector2(0, 1);
             content.anchorMax = Vector2.one;
             content.pivot = new Vector2(0.5f, 1);
 
             // Item
-            RectTransform item = Rect(content, "Item", Vector2.zero, new Vector2(size.x, 28));
+            RectTransform item = Rect(content, "Item", Vector2.zero, new Vector2(0, 40));
             item.anchorMin = new Vector2(0, 0.5f);
             item.anchorMax = new Vector2(1, 0.5f);
             item.pivot = new Vector2(0.5f, 0.5f);
@@ -488,7 +638,7 @@ namespace TrickalFanGame.Editor
             checkImage.color = new Color(0.18f, 0.68f, 0.64f);
 
             // Item Label
-            TMP_Text itemLabel = Text(item, "Item Label", "", Vector2.zero, Vector2.zero, 16);
+            TMP_Text itemLabel = Text(item, "Item Label", "", Vector2.zero, Vector2.zero, 20);
             itemLabel.rectTransform.anchorMin = Vector2.zero;
             itemLabel.rectTransform.anchorMax = Vector2.one;
             itemLabel.rectTransform.offsetMin = new Vector2(35, 2);

@@ -40,10 +40,12 @@ Unity 6000.3.22f1에서 기존 Editor를 유지하고 시스템 임시 폴더의
 | Flow-0 Play Mode | 초기 포커스, 클릭·Submit 이벤트, 반복 요청 후 Scene·오브젝트 수 유지 통과 |
 | Flow-2 구성 | 홈 전용 배경, 네 버튼, 세 목적지·뒤로가기 참조와 명시적 키보드 순환 통과 |
 | Flow-2 Play Mode | 타이틀 선행, 새 사용자 닉네임 경로, 저장 프로필 홈 진입, 세 목적지·뒤로가기, 나가기 요청과 전투 격리 통과 |
-| Flow-3 데이터·구성 | 유효 캐릭터 정의, 고유 안정 ID, 300×420 카드 템플릿, 동적 목록과 다섯 화면 크기 경계 통과 |
+| Flow-3 데이터·구성 | 유효 캐릭터 정의, 고유 안정 ID, 세로형 320×520 카드 템플릿, 동적 목록과 다섯 화면 크기 경계 통과 |
 | Flow-3 Play Mode | 에르핀 1명 목록, 미선택 확인 차단, 선택 표시·포커스, 단일 확정 ID, 뒤로가기·재진입 초기화와 Run 미생성 통과 |
 | Flow-4 구성 | Frontend 전환기와 Game Bootstrap 단일성, 두 Scene GUID, 기존 Game 참조와 전체 Frontend 회귀 통과 |
 | Flow-4 Play Mode | 로컬 사용자·에르핀 전달, Game Scene 단일 이동, UUID `clientRunId`, 새 seed·첫 방·빈 인벤토리와 종료 전 Run API 미호출 통과 |
+| Skill-1 조회·표시 | 스킬 강화용 캐릭터 선택, 로딩·빈 상태·조회 실패, 레벨·경험치·포인트·두 스킬 레벨 표시 통과 |
+| Skill-2 강화·오류 | 목표 레벨 요청, 요청 중 중복 차단, 성공 스냅샷 즉시 갱신, 포인트 부족·최대·충돌·네트워크 오류 분류 통과 |
 | HUD-1 구성 | 전용 Overlay Canvas, 1920×1080 Scaler, 좌상단 500×128 영역, 비활성 40×40 SP 템플릿과 입력 비가로채기 통과 |
 | HUD-1 상태 경계 | 피해·회복 HP 갱신, SP 획득·소비, 최대 SP 3→4 슬롯 재구성, 저학년 스킬 SP 0/1 사용 가능 상태 통과 |
 | HUD-1 회귀 | Setup 두 번 실행 후 계층 수·Game Scene GUID 유지와 Flow-4 구성 회귀 통과 |
@@ -165,6 +167,9 @@ HUD 구성만 원본에 반영했다. Backend·Database·API DTO·Web 계약 변
 사용자가 직접 빌드하여 현재·최대 HP와 SP 표시, 피해·회복, 최대 HP 변경 및 관련 상태 갱신이
 정상임을 확인했다. 별도 문제는 발견되지 않았다. (사용자 확인, 2026-09-09)
 
+채움 Sprite 보정 후 플레이어가 피해를 받을 때 HP 게이지가 실제 현재 HP 비율에 맞춰 줄어드는 것을
+Unity 실행 화면에서 다시 확인했다. (사용자 재확인, 2026-09-11)
+
 정식 아이콘·애니메이션 교체는 후속 UI 에셋 범위다.
 
 ## HUD-2 자동 확인 (2026-09-09 완료)
@@ -284,6 +289,173 @@ HUD-4C에 남겼다.
 사용자가 Unity 실행 화면에서 보물방 진입 전에는 `T`만 표시되고 실제 진입 후에만 `V`가 추가되는
 것을 확인했다. 누적 지도와 특수 문 표식에도 별도 이상이 없었다. (사용자 확인, 2026-09-10)
 
+## HUD-4C 스크립트·Build 확인 (2026-09-10 완료)
+
+- [x] 미니맵의 작은 머리글에 현재 층을 `요정의 숲 · N층` 형식으로 상시 표시한다.
+- [x] 첫 층과 다른 층에 진입할 때 같은 층 이름을 화면 중앙보다 180px 위에 표시한다.
+- [x] 층 진입 알림은 unscaled 시간 기준 약 1.5초 뒤 숨겨지고 전투 입력을 가로채지 않는다.
+- [x] 같은 층의 다른 방으로 이동할 때 알림을 다시 시작하거나 방 이름·번호를 표시하지 않는다.
+- [x] 현재 숫자 층 이름을 유지하면서 추후 필요한 층만 고유 이름으로 대체할 수 있다.
+- [x] Game Scene에 `Floor Entry Announcement`와 단일 `GameFloorNameView`가 저장되고 실제 `RunProgress`를 참조한다.
+
+런타임과 Editor 검증 스크립트를 포함한 `Assembly-CSharp`·`Assembly-CSharp-Editor` 컴파일이 오류 없이
+통과했다. 최초 검증 메뉴의 `Sequence contains more than one element`는 테스트 복제본을 만든 뒤
+Scene 단일 검색을 반복한 검증기 문제였으며, 원본 참조를 복제 전에 보관하도록 수정했다. 자세한
+원인과 재발 방지 기준은 [트러블슈팅 §3](../../17-troubleshooting.md#3-hud-4c-검증-예외와-build-층-진입-알림-미표시)에 기록했다.
+
+사용자가 HUD-4C Setup 이후 새로 만든 Development Build에서 미니맵 층 이름과 층 진입 알림이
+정상 표시되며 위치와 지속 시간이 의도에 맞는 것을 확인했다. 별도 방 이름·번호는 표시되지 않았다.
+(사용자 확인, 2026-09-10)
+
+## HUD-5 자동·수동 확인 (2026-09-10 완료)
+
+- [x] 하단 중앙 720×64 안전 영역에 현재 방의 활성 보스 이름, 현재·최대 HP와 페이즈를 표시한다.
+- [x] 실제 `Health` 피해 이벤트가 HP 수치와 가로 게이지를 즉시 갱신한다.
+- [x] `BossController`의 실제 현재·전체 페이즈가 바뀌면 표시도 즉시 갱신한다.
+- [x] 보스가 활성화되기 전, 처치된 뒤와 일반 방으로 복귀한 뒤에는 HUD를 숨기고 이전 보스를 구독 해제한다.
+- [x] 모든 그래픽이 전투 입력을 가로채지 않으며 Setup 두 번 뒤 계층 수와 Game Scene GUID를 유지한다.
+- [x] HUD-4C와 Flow-4 구성·참조 회귀 검증을 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Hud5Verification.SetupAndVerifyBatch`를 실행해 종료 코드 0과
+`Week 13 HUD-5 verification passed`, `Week 13 HUD-5 batch verification passed`를 확인했다. 현재
+보스 전투에는 패턴 페이즈 전환이 없으므로 임의 규칙을 추가하지 않고 실제 상태인 `페이즈 1 / 1`을
+표시한다. 이후 선정된 보스 구현이 `BossController`의 표시 이름과 페이즈 상태를 갱신하면 같은 HUD가
+이를 소비한다. Unity 런타임 상태만 확장했으며 Backend·Database·API DTO·Web 계약과 안정 ID에는
+영향이 없다.
+
+이후 실제 플레이 재확인에서 현재·최대 HP 수치는 바뀌지만 게이지가 줄지 않는 시각 회귀가 발견됐다.
+원인은 `Filled Image`에 Sprite가 없어 Unity가 `fillAmount`를 렌더링에 적용하지 않은 것이었다. HUD-1,
+HUD-5, HUD-6B Setup이 공통 Unity 내장 임시 Sprite를 지정하도록 보정했고, 검증기는 Sprite가 없는
+채움 이미지를 실패 처리한다. 보정 후 보스가 피해를 받을 때 하단 HP 게이지가 실제 현재 HP 비율에
+맞춰 줄어드는 것을 Unity 실행 화면에서 확인했다. (사용자 재확인, 2026-09-11)
+
+## HUD-6·HUD-6B 자동·수동 확인 (2026-09-11 완료)
+
+- [x] 런타임에 생성된 일반 적과 보스의 실제 피해 결과만 월드 TMP 숫자로 표시한다.
+- [x] 플레이어 피해·회복은 월드 숫자를 만들지 않고 기존 고정 HP 바의 변화 피드백만 사용한다.
+- [x] 숫자는 영향받은 대상보다 위에서 시작해 0.8초 동안 0.65 월드 단위 상승하며 사라진다.
+- [x] 동시에 발생한 숫자는 좌우 시작 위치를 번갈아 분산해 겹침을 줄인다.
+- [x] 수명이 끝난 텍스트는 비활성 풀로 반환되고 다음 피해 때 새 인스턴스 없이 재사용된다.
+- [x] 일반 적의 첫 피격은 실제 현재·최대 HP에 연결된 월드 체력바를 하나만 생성한다.
+- [x] 일반 적 체력바는 풀 체력과 사망 시 숨고 재피격 시 기존 인스턴스를 다시 표시한다.
+- [x] 보스에는 머리 위 체력바를 만들지 않고 기존 하단 전용 HUD만 유지한다.
+- [x] Setup 두 번 뒤 계층 수와 Game Scene GUID를 유지하고 HUD-5·HUD-4C·Flow-4 회귀를 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Hud6Verification.SetupAndVerifyBatch`를 실행해 종료 코드 0과
+`Week 13 HUD-6 verification passed`, `Week 13 HUD-6 batch verification passed`를 확인했다. 첫
+실행에서 발견한 TMP 공통 타입의 정렬 순서 API 오류는 실제 월드 렌더러에 정렬 순서를 지정하도록
+수정한 뒤 재검증했다. 사용자 확인에 따라 플레이어 월드 숫자를 제거하고 일반 적 체력바 경계를
+추가한 검증도 통과했다. Unity 런타임 이벤트와 Game Scene 구성만 확장했으며 Backend·Database·API
+DTO·Web 계약과 안정 ID에는 영향이 없다. 정식 서체 크기와 색상에 대한 실제 플레이 화면 확인은
+후속 통합 Build 검증에서 조정할 수 있다.
+
+사용자가 Unity 실행 화면에서 플레이어에게는 월드 숫자가 표시되지 않고 적에게만 피해 숫자가
+표시되며, 일반 적 머리 위 체력바가 나타나는 것을 확인했다. 이후 실제 플레이 재확인에서 플레이어,
+보스, 일반 적 모두 수치는 갱신되지만 Sprite가 없는 `Filled Image`는 채움 감소를 그리지 않는 문제를
+발견했다. 세 Setup에 같은 Unity 내장 임시 Sprite를 지정하고 검증기에 Sprite 필수 조건을 추가했다.
+따라서 정식 에셋 교체 시 상태 연결 코드는 유지한 채 이 Sprite와 프레임·색상·가독성만 교체하면 된다.
+보정 후 플레이어, 일반 적, 보스가 피해를 받을 때 각 HP 게이지가 실제 현재 HP 비율에 맞춰 정상적으로
+줄어드는 것을 Unity 실행 화면에서 확인했다. (사용자 재확인, 2026-09-11)
+
+## HUD-7B 자동 확인 (2026-09-11 완료)
+
+- [x] 일시정지 메뉴가 실제 `PlayerStats`의 공격력·공격속도·이동속도·치명타율·치명타 피해·투사체·관통을 표시한다.
+- [x] 평상시 HUD `GraphicRaycaster`는 꺼져 있고 일시정지 중에만 켜진다.
+- [x] 메뉴가 열리면 `게임으로 돌아가기`에 첫 포커스를 두고, 포커스가 패널 밖으로 나가면 다시 내부로 제한한다.
+- [x] 메뉴를 닫으면 열기 전 선택, 이전 timeScale과 평상시 입력 상태를 복원한다.
+- [x] 다른 취소 불가 화면이 이미 timeScale을 0으로 만든 상태에서는 일시정지를 중첩하지 않는다.
+- [x] 1120×760 중앙 팝업 안에 300×560 상세 스탯과 700×520 아티팩트 목록을 분리해 배치한다.
+- [x] Setup 두 번 뒤 계층 수와 Game Scene GUID를 유지하고 HUD-3C·Flow-4 회귀를 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Hud7BVerification.SetupAndVerifyBatch`를 실행해 종료 코드 0과
+`Week 13 HUD-7B verification passed`, `Week 13 HUD-7B batch verification passed`를 확인했다.
+최초 제한 실행은 Unity Package Manager와 Licensing Client가 작업 폴더 밖의 상태에 접근하지 못해
+중단됐으며, 허용된 배치 실행에서 전체 Library 재생성과 스크립트 컴파일 후 정상 통과했다. 이 조각은
+Unity Scene과 런타임 UI만 변경하므로 Backend·Database·API DTO·Web과 안정 ID에는 영향이 없다.
+Setting-1C의 상세 스탯 상시 HUD 토글과 HUD-7C의 홈 나가기 확인은 후속 범위로 유지한다.
+
+## Flow-5 Run 결과·순차 연출 자동 확인 (2026-09-11 완료)
+
+- [x] 사망과 클리어가 같은 Run 종료 경로에서 요청을 한 번 고정하고 Frontend 전체 화면 결과로 이동한다.
+- [x] 불투명한 1920×1080 결과 배경이 이전 전투, HUD와 일시정지 팝업을 완전히 가린다.
+- [x] 왼쪽 캐릭터 반응·말풍선은 유지하고 오른쪽 단일 영역에서 Run 기록, 경험치, 레벨 변화,
+  스킬 포인트, 아티팩트와 최종 요약을 순서대로 교체한다.
+- [x] 경험치는 Backend가 확정한 시작·최종 진행과 Lv.1~19 경계를 사용하고, 첫 구간 뒤 속도를 높이며
+  경계마다 게이지 펄스와 짧은 효과음을 낸다.
+- [x] 여러 레벨 상승도 `LEVEL UP!`과 시작·최종 레벨을 한 번만 표시하고 레벨 상승이 없으면 생략한다.
+- [x] 저장 실패 중에는 성장 결과를 확정 표시하지 않고, 재시도 시 같은 요청 객체와 `clientRunId`를 사용한다.
+- [x] 첫 확인은 진행 중 경험치 구간을 즉시 끝내고 다음 확인은 남은 연출을 건너뛰되 최종 데이터는 유지한다.
+- [x] 다시 도전은 캐릭터 선택으로, 홈으로는 홈으로 복귀하고 시간·포커스·입력 상태를 복원한다.
+- [x] 복귀 후 Frontend에는 `RunSession`, `RunProgress`, `PlayerInventory`가 없어 이전 Run 상태가 남지 않는다.
+- [x] Setup 두 번 뒤 Scene GUID·계층 단일성을 유지하고 Flow-4 회귀가 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Flow5Verification.SetupAndVerifyBatch`와
+`Week13Flow5PlayVerification.RunBatch`가 각각 종료 코드 0으로 통과했다. Play Mode 검증은 실제
+플레이어 사망으로 Run을 끝내고 첫 저장을 의도적으로 실패시킨 뒤 동일 요청 재시도, Lv.1→Lv.3
+확정 결과, 연출 단축, 캐릭터 선택과 홈 복귀를 차례로 확인했다. Unity Scene과 런타임 표시 계층만
+확장했고 Backend·Database·API DTO·Web 계약과 안정 ID는 변경하지 않았다. 캐릭터 반응 영역은
+정식 일러스트·애니메이션 교체 전 텍스트 자리표시자다.
+
+사용자가 실제 실행 화면에서 Flow-5 결과 저장과 순차 연출, 결과 화면의 조작과 복귀가 정상
+동작하며 레벨 경계 효과음도 재생되는 것을 확인했다. 별도 기능 이상은 발견되지 않았다.
+(사용자 수동 확인, 2026-09-11)
+
+## Setting-1A 음량·Scene 오디오 자동 확인 (2026-09-13 완료)
+
+- [x] 홈·전투 BGM과 UI 클릭음이 두 Scene의 공용 오디오 컨트롤러에 연결된다.
+- [x] BGM은 Streaming, 짧은 클릭음은 PCM·Decompress On Load 임포트 설정을 사용한다.
+- [x] 전체 음량과 BGM·SFX 채널 음량의 곱이 슬라이더 변경 즉시 실제 Source에 적용된다.
+- [x] 활성 타이틀 버튼이 공용 클릭음에 연결되고 한 번 클릭할 때 한 번 호출된다.
+- [x] `Frontend → Game → Frontend` 전환에서 컨트롤러 인스턴스를 유지하며 홈·전투 BGM을 교체한다.
+- [x] `LocalSettings.Load()` 뒤에도 저장한 세 음량과 실제 출력 음량을 유지한다.
+- [x] Setup을 두 번 실행해도 Scene별 컨트롤러 1개·AudioSource 2개와 기존 Scene GUID를 유지한다.
+
+Unity 6000.3.22f1에서 `Week13Setting1AVerification.SetupAndVerifyBatch`와
+`Week13Setting1APlayVerification.RunBatch`가 모두 종료 코드 0으로 통과했다. 적용 음원의 출처와
+교체용 안정 경로는 `docs/audio-sources.md`에 기록했다. Unity 런타임·Scene·오디오 에셋만 변경했으며
+Backend·Database·API DTO·Web 계약과 안정 ID에는 영향이 없다.
+
+사용자가 실제 실행 화면에서 홈·전투 BGM 전환과 UI 클릭 효과음을 청감 확인하고, 세 음량
+슬라이더의 즉시 적용과 재실행 후 저장값 유지가 정상 동작함을 확인했다. 별도 이상은 발견되지
+않았다. (사용자 수동 확인, 2026-09-13)
+
+## Setting-1B 화면 모드·해상도 자동 확인 (2026-09-14 완료)
+
+- [x] 설정 UI는 1280×720·1920×1080·2560×1440만 제공하고 목록 밖 크기를 저장 단계에서 거부한다.
+- [x] 1280×720 창 모드 선택이 즉시 로컬 상태에 반영되고 `LocalSettings.Load()` 뒤에도 유지된다.
+- [x] 지원하는 세 16:9 크기는 전체 뷰포트를 사용하며, 4:3과 울트라와이드 입력은 중앙 16:9 영역과 상하·좌우 여백으로 계산된다.
+- [x] Frontend·Game 카메라와 두 UI 기준 프레임이 Scene 전환 뒤에도 같은 중앙 16:9 규칙을 사용한다.
+- [x] 빌드는 1920×1080 테두리 없는 전체 화면을 기본값으로 하며 창 크기 조절을 허용하지 않는다.
+- [x] Setup을 두 번 실행해도 Scene별 비율 제어기와 UI 프레임 제어기가 하나이고 Scene GUID를 유지한다.
+- [x] 펼친 드롭다운의 세 옵션이 40px 행과 20px 라벨로 마스크 안에 표시된다.
+
+Unity 6000.3.22f1에서 `Week13Setting1BVerification.SetupAndVerifyBatch`와
+`Week13Setting1BPlayVerification.RunBatch`가 모두 종료 코드 0으로 통과했다. 첫 검증은 지원 목록,
+저장·재로드, 비율 계산, Scene 단일성과 GUID를 검사했고, Play Mode 검증은 실제 설정 UI로
+1280×720 창 모드를 고른 뒤 Game Scene까지 전환해 저장값과 중앙 HUD 구성을 확인했다. Unity
+런타임·Scene·Player Settings만 변경했으며 Backend·Database·API DTO·Web 계약과 안정 ID에는
+영향이 없다.
+
+사용자가 실제 실행 화면에서 전체 화면·창 모드·세 해상도 적용이 정상임을 확인했다. 최초에는
+드롭다운의 스트레치 폭이 중복 적용되어 옵션 라벨이 마스크 밖에 놓였고 빈 목록처럼 보였지만,
+가로 추가 폭 제거와 TMP 목록 `CanvasGroup` 보정 후 Play Mode에서 세 옵션 라벨의 실제 생성을
+검증했다. 이 보정으로 Setting-1B 수동 검증도 완료했다. (사용자 수동 확인, 2026-09-14)
+
+## Setting-1C 상세 스탯 HUD 자동 확인 (2026-09-14 완료)
+
+- [x] 설정 화면에 기본 꺼짐인 `상세 스탯 표시` 토글이 있고 선택을 로컬에 저장한다.
+- [x] 저장한 선택은 `LocalSettings.Load()` 뒤에도 유지되며 현재 HUD 표시에도 즉시 반영된다.
+- [x] 공격력·공격속도·이동속도·치명타율이 실제 `PlayerStats` 값과 일치한다.
+- [x] 240×216 HUD가 좌측 안전 영역에 놓이고 중앙 전투 영역을 침범하지 않는다.
+- [x] 배경 8%·텍스트 68%·임시 표식 55% 불투명도를 사용하며 Raycast를 차단하지 않는다.
+- [x] Setup을 두 번 실행해도 Scene GUID와 구성 단일성을 유지하고 HUD-1 회귀가 통과한다.
+
+Unity 6000.3.22f1에서 `Week13Setting1CVerification.SetupAndVerifyBatch`가 종료 코드 0으로
+통과했다. 정식 아이콘 전에는 `A`·`AS`·`M`·`C` 색상 표식을 사용한다. Unity Scene과 런타임
+설정·표시 계층만 변경했으며 Backend·Database·API DTO·Web 계약과 안정 ID에는 영향이 없다.
+실제 전투 화면에서는 `설정 → HUD 설정 → 상세 스탯 표시`를 켜고 왼쪽 수치의 가독성·방해도를
+확인한다.
+
 ## Profile-1~3 검증 (2026-09-08 완료)
 
 - Backend 사용자 Repository·Service·DTO 관련 테스트 45개와 전체 테스트 125개가 통과했다.
@@ -298,12 +470,22 @@ HUD-4C에 남겼다.
 개발용 `RESET LOCAL PROFILE`은 `clientProfileId`를 유지한다. 기존 닉네임을 지운 뒤 다른 대소문자의
 닉네임을 등록하면 대소문자 중복이 아니라 프로필 멱등성 충돌이 발생하는 것이 정상이다.
 
+## Skill-1~2 검증 (2026-09-14 완료)
+
+- Unity 6000.3.22f1에서 `Week13SkillUpgradeVerification.SetupAndVerifyBatch` 종료 코드 0.
+- Frontend Setup 2회 실행 뒤 Scene GUID 유지와 전체 Frontend 레이아웃·격리 회귀 통과.
+- `320 × 520` 세로 카드의 데이터 기반 에르핀 선택과 강화 화면 진입 통과.
+- 서버 진행 로딩·빈 상태·실패, 성공 표시와 재시도 상태 통과.
+- 강화 요청 중 재입력 1회 차단, 목표 레벨과 성공 응답의 포인트·레벨 즉시 반영 통과.
+- 포인트 부족·최대 레벨·진행 충돌·네트워크 실패의 전용 안내 통과.
+- Backend 사용자 Controller·Service·Repository Jest 3 suites, 41 tests 통과.
+
 Setup·검증·PNG 출력 메뉴와 배치 명령은 [개발 환경 설정 §17](../../05-development-setup.md)에 기록했다. 원본 Editor의 현재 Scene과 저장하지 않은 변경은 자동으로 전환하거나 덮어쓰지 않았다.
 
 ## 영향 범위
 
-- Runtime: `FrontendLayout`, `FrontendTitleView`, `FrontendHomeView`, `FrontendCharacterSelectionView`, `FrontendCharacterCardView`, `FrontendRunLauncher`, `RunLaunchContext`, `GameRunBootstrap`, `RunSession`, `PlayerProgressClient`, `FrontendStartButton`, `GameHudView`, `GameArtifactHudView`, `ArtifactHudSlotView`, `GameArtifactAcquisitionToastView`, `ArtifactPauseListEntryView`, `GamePauseArtifactView`, `ArtifactEffectDescription`, `GameMinimapView`, `MinimapRoomMarkerView`, `RoomRunState`, `Health`, `PlayerSkill`, `PlayerUltimate`, `PlayerInventory`.
-- Editor: `Week13FrontendSetup`, `Week13FrontendVerification`, `Week13Flow4Setup`, `Week13Flow4Verification`, `Week13Hud1Setup`, `Week13Hud1Verification`, `Week13Hud2Setup`, `Week13Hud2Verification`, `Week13Hud3ASetup`, `Week13Hud3AVerification`, `Week13Hud3BSetup`, `Week13Hud3BVerification`, `Week13Hud3CSetup`, `Week13Hud3CVerification`, `Week13Hud4ASetup`, `Week13Hud4AVerification`, `Week13Hud4BSetup`, `Week13Hud4BVerification` 및 Play Mode 배치 진입점.
+- Runtime: `DisplayAspectController`, `FrontendLayout`, `FrontendTitleView`, `FrontendHomeView`, `FrontendCharacterSelectionView`, `FrontendCharacterCardView`, `FrontendSkillUpgradeView`, `FrontendRunLauncher`, `FrontendRunResultView`, `ApiClient`, `ISkillProgressApiClient`, `SkillUpgradeDto`, `RunLaunchContext`, `RunResultContext`, `GameRunBootstrap`, `GameRunResultTransition`, `RunSession`, `PlayerProgressClient`, `FrontendStartButton`, `GameAudioController`, `LocalSettings`, `GameHudView`, `GameDetailedStatsHudView`, `GameArtifactHudView`, `ArtifactHudSlotView`, `GameArtifactAcquisitionToastView`, `ArtifactPauseListEntryView`, `GamePauseArtifactView`, `ArtifactEffectDescription`, `GameMinimapView`, `MinimapRoomMarkerView`, `GameFloorNameView`, `GameBossHudView`, `WorldCombatNumberPool`, `EnemyWorldHealthBarView`, `RoomRunState`, `Health`, `PlayerStats`, `PlayerSkill`, `PlayerUltimate`, `PlayerInventory`.
+- Editor: `Week13FrontendSetup`, `Week13FrontendVerification`, `Week13SkillUpgradeVerification`, `Week13Flow4Setup`, `Week13Flow4Verification`, `Week13Flow5Setup`, `Week13Flow5Verification`, `Week13Setting1ASetup`, `Week13Setting1AVerification`, `Week13Setting1BSetup`, `Week13Setting1BVerification`, `Week13Setting1CSetup`, `Week13Setting1CVerification`, `Week13Hud1Setup`, `Week13Hud1Verification`, `Week13Hud2Setup`, `Week13Hud2Verification`, `Week13Hud3ASetup`, `Week13Hud3AVerification`, `Week13Hud3BSetup`, `Week13Hud3BVerification`, `Week13Hud3CSetup`, `Week13Hud3CVerification`, `Week13Hud4ASetup`, `Week13Hud4AVerification`, `Week13Hud4BSetup`, `Week13Hud4BVerification`, `Week13Hud4CSetup`, `Week13Hud4CVerification`, `Week13Hud5Setup`, `Week13Hud5Verification`, `Week13Hud6Setup`, `Week13Hud6Verification`, `Week13Hud7BSetup`, `Week13Hud7BVerification` 및 Play Mode 배치 진입점.
 - Assets: Frontend Scene, Game Scene Bootstrap, Noto Sans KR OTF·OFL·TMP 에셋, TMP Essential Resources, Build Scene 순서.
 - Backend 사용자 등록의 동시 Unique 충돌 복구와 관련 테스트를 보강했다. Prisma 스키마, Web,
   Unity DTO, seed와 기존 영문 ID는 변경하지 않았다. Game Scene 이동·Run 초기화, 스킬 강화의 실제

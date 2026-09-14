@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace TrickalFanGame.Data
@@ -10,11 +11,13 @@ namespace TrickalFanGame.Data
         private const string KeyFullscreen = "Settings_Fullscreen";
         private const string KeyResolutionWidth = "Settings_ResolutionWidth";
         private const string KeyResolutionHeight = "Settings_ResolutionHeight";
+        private const string KeyDetailedStatsHud = "Settings_DetailedStatsHud";
 
         public const float DefaultVolume = 1f;
         public const int DefaultWidth = 1920;
         public const int DefaultHeight = 1080;
         public const bool DefaultFullscreen = true;
+        public const bool DefaultDetailedStatsHud = false;
 
         public static readonly (int width, int height)[] SupportedResolutions =
         {
@@ -29,6 +32,10 @@ namespace TrickalFanGame.Data
         private static bool fullscreen = DefaultFullscreen;
         private static int resolutionWidth = DefaultWidth;
         private static int resolutionHeight = DefaultHeight;
+        private static bool detailedStatsHud = DefaultDetailedStatsHud;
+
+        public static event Action AudioVolumeChanged;
+        public static event Action DetailedStatsHudChanged;
 
         public static float MasterVolume
         {
@@ -38,6 +45,7 @@ namespace TrickalFanGame.Data
                 masterVolume = Mathf.Clamp01(value);
                 PlayerPrefs.SetFloat(KeyMasterVolume, masterVolume);
                 PlayerPrefs.Save();
+                AudioVolumeChanged?.Invoke();
             }
         }
 
@@ -49,6 +57,7 @@ namespace TrickalFanGame.Data
                 bgmVolume = Mathf.Clamp01(value);
                 PlayerPrefs.SetFloat(KeyBgmVolume, bgmVolume);
                 PlayerPrefs.Save();
+                AudioVolumeChanged?.Invoke();
             }
         }
 
@@ -60,6 +69,7 @@ namespace TrickalFanGame.Data
                 sfxVolume = Mathf.Clamp01(value);
                 PlayerPrefs.SetFloat(KeySfxVolume, sfxVolume);
                 PlayerPrefs.Save();
+                AudioVolumeChanged?.Invoke();
             }
         }
 
@@ -68,6 +78,7 @@ namespace TrickalFanGame.Data
             get => fullscreen;
             set
             {
+                if (fullscreen == value) return;
                 fullscreen = value;
                 PlayerPrefs.SetInt(KeyFullscreen, fullscreen ? 1 : 0);
                 PlayerPrefs.Save();
@@ -86,8 +97,24 @@ namespace TrickalFanGame.Data
             private set => resolutionHeight = value;
         }
 
+        public static bool DetailedStatsHud
+        {
+            get => detailedStatsHud;
+            set
+            {
+                if (detailedStatsHud == value) return;
+                detailedStatsHud = value;
+                PlayerPrefs.SetInt(KeyDetailedStatsHud, detailedStatsHud ? 1 : 0);
+                PlayerPrefs.Save();
+                DetailedStatsHudChanged?.Invoke();
+            }
+        }
+
         public static void SetResolution(int width, int height)
         {
+            if (!IsValidResolution(width, height))
+                throw new ArgumentOutOfRangeException(nameof(width), $"Unsupported display resolution: {width}x{height}");
+            if (resolutionWidth == width && resolutionHeight == height) return;
             resolutionWidth = width;
             resolutionHeight = height;
             PlayerPrefs.SetInt(KeyResolutionWidth, width);
@@ -104,6 +131,7 @@ namespace TrickalFanGame.Data
             fullscreen = PlayerPrefs.GetInt(KeyFullscreen, DefaultFullscreen ? 1 : 0) == 1;
             resolutionWidth = PlayerPrefs.GetInt(KeyResolutionWidth, DefaultWidth);
             resolutionHeight = PlayerPrefs.GetInt(KeyResolutionHeight, DefaultHeight);
+            detailedStatsHud = PlayerPrefs.GetInt(KeyDetailedStatsHud, DefaultDetailedStatsHud ? 1 : 0) == 1;
 
             if (!IsValidResolution(resolutionWidth, resolutionHeight))
             {
@@ -112,6 +140,8 @@ namespace TrickalFanGame.Data
             }
 
             ApplyDisplay();
+            AudioVolumeChanged?.Invoke();
+            DetailedStatsHudChanged?.Invoke();
         }
 
         public static void ApplyDisplay()
@@ -149,6 +179,7 @@ namespace TrickalFanGame.Data
             SfxVolume = DefaultVolume;
             Fullscreen = DefaultFullscreen;
             SetResolution(DefaultWidth, DefaultHeight);
+            DetailedStatsHud = DefaultDetailedStatsHud;
         }
     }
 }

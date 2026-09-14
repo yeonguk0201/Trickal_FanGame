@@ -57,8 +57,9 @@ namespace TrickalFanGame.Editor
                 "GameHudView visual references are missing.");
             Assert(!view.SpSlotTemplate.gameObject.activeSelf && view.SpSlotTemplate.rectTransform.sizeDelta == new Vector2(40, 40),
                 "HUD-1 must use one inactive 40x40 SP slot template.");
-            Assert(view.HpFill.type == Image.Type.Filled && view.HpFill.fillMethod == Image.FillMethod.Horizontal,
-                "HP fill must be a horizontal filled Image.");
+            Assert(view.HpFill.sprite != null && view.HpFill.type == Image.Type.Filled &&
+                view.HpFill.fillMethod == Image.FillMethod.Horizontal,
+                "HP fill must have a Sprite so Unity renders its horizontal fill amount.");
             Assert(!view.GetComponentsInChildren<Graphic>(true).Any(graphic => graphic.raycastTarget &&
                 graphic.GetComponentInParent<GamePauseArtifactView>() == null),
                 "HUD-1 graphics must not intercept combat input.");

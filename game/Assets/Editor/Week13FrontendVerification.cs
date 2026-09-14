@@ -44,7 +44,8 @@ namespace TrickalFanGame.Editor
             {
                 Assert(component != null, "Missing script in Frontend.");
                 string ns = component.GetType().Namespace ?? "";
-                Assert(!ns.StartsWith("TrickalFanGame.") || ns == "TrickalFanGame.Frontend" || component is ApiClient,
+                Assert(!ns.StartsWith("TrickalFanGame.") || ns == "TrickalFanGame.Frontend" ||
+                    ns == "TrickalFanGame.Audio" || component is ApiClient,
                     "Combat, Run or Backend component leaked into Frontend: " + component.GetType().Name);
                 Assert(component is not Renderer && component is not Collider2D && component is not Rigidbody2D,
                     "World combat object leaked into Frontend.");
@@ -70,8 +71,8 @@ namespace TrickalFanGame.Editor
                 safe.offsetMin == new Vector2(64, 54) && safe.offsetMax == new Vector2(-64, -54), "Safe area differs from UI spec.");
             int configuredButtonCount = components.OfType<Button>()
                 .Count(button => !button.name.StartsWith("CharacterCard-", StringComparison.Ordinal));
-            Assert(components.OfType<FrontendTitleView>().Count() == 1 && configuredButtonCount == 11,
-                "The configured Frontend screens require exactly eleven buttons including the character card template.");
+            Assert(components.OfType<FrontendTitleView>().Count() == 1 && configuredButtonCount >= 15,
+                "The configured Frontend screens require at least fifteen buttons including Skill-1/2 controls.");
             FrontendTitleView view = components.OfType<FrontendTitleView>().Single();
             FrontendRunLauncher launcher = components.OfType<FrontendRunLauncher>().SingleOrDefault();
             Assert(view.TitlePanel != null && view.StartButton != null && view.StatusText != null &&
@@ -94,6 +95,7 @@ namespace TrickalFanGame.Editor
                 serializedButton.FindProperty("focusBorder").objectReferenceValue != null, "Missing button border references.");
             ValidateHome(view.HomeView, scene);
             ValidateCharacterSelection(view.HomeView, scene);
+            ValidateSkillUpgrade(view.HomeView, scene);
             ValidateSettings(view.HomeView, scene);
             foreach (TMP_Text text in components.OfType<TMP_Text>())
             {
@@ -105,6 +107,7 @@ namespace TrickalFanGame.Editor
                     text == view.NicknameView.ValidationText ||
                     text == view.NicknameView.ErrorText ||
                     text == view.HomeView.CharacterSelectionView.StatusText ||
+                    text.GetComponentInParent<FrontendSkillUpgradeView>(true) != null ||
                     text.GetComponentInParent<FrontendCharacterCardView>(true) != null ||
                     string.IsNullOrEmpty(text.text);
                 if (!runtimeText)
@@ -135,6 +138,8 @@ namespace TrickalFanGame.Editor
             Assert(home.SettingsPanel != null && home.SettingsView != null, "Home requires settings panel and view.");
             Assert(home.CharacterSelectionPanel != null && home.CharacterSelectionView != null,
                 "Home requires the Flow-3 character selection panel and view.");
+            Assert(home.SkillUpgradePanel != null && home.SkillUpgradeView != null,
+                "Home requires the Skill-1/2 progress and upgrade screen.");
         }
 
         private static void ValidateCharacterSelection(FrontendHomeView home, Scene scene)
@@ -145,8 +150,9 @@ namespace TrickalFanGame.Editor
             Assert(selection.CardContainer != null && selection.CardTemplate != null &&
                 selection.StatusText != null && selection.ConfirmButton != null && selection.BackButton != null,
                 "Missing character selection references.");
-            Assert(selection.CardTemplate.GetComponent<RectTransform>().sizeDelta == new Vector2(300, 420),
-                "Character cards must be at least 300 x 420.");
+            Vector2 cardSize = selection.CardTemplate.GetComponent<RectTransform>().sizeDelta;
+            Assert(cardSize == new Vector2(320, 520) && cardSize.y > cardSize.x,
+                "Character cards must use the requested tall 320 x 520 layout.");
             Assert(selection.ConfirmButton.GetComponent<RectTransform>().sizeDelta == new Vector2(280, 64),
                 "Character confirmation must use the primary button size.");
             Assert(selection.BackButton.GetComponent<RectTransform>().sizeDelta == new Vector2(220, 52),
@@ -164,6 +170,22 @@ namespace TrickalFanGame.Editor
             Assert(ids.Contains("erpin"), "Flow-3 requires the existing erpin character definition.");
             Assert(selection.GetComponentsInChildren<TrickalFanGame.Run.RunSession>(true).Length == 0,
                 "Character selection must not own or create a RunSession.");
+        }
+
+        private static void ValidateSkillUpgrade(FrontendHomeView home, Scene scene)
+        {
+            FrontendSkillUpgradeView skill = home.SkillUpgradeView;
+            Assert(skill != null && skill.gameObject.scene == scene && skill.name == "SkillUpgradePanel",
+                "Skill upgrade must stay in FrontendScene.");
+            Assert(skill.CharacterLevelText != null && skill.ExperienceText != null && skill.SkillPointsText != null &&
+                skill.LowGradeLevelText != null && skill.HighGradeLevelText != null && skill.StatusText != null,
+                "Skill-1 requires character level, experience, remaining points, two skill levels and status.");
+            Assert(skill.LowGradeUpgradeButton is FrontendStartButton &&
+                skill.HighGradeUpgradeButton is FrontendStartButton && skill.RetryButton is FrontendStartButton &&
+                skill.BackButton is FrontendStartButton,
+                "Skill-2 controls must use the shared button interaction states.");
+            Assert(skill.transform.Find("LowGradeSkillPanel") != null && skill.transform.Find("HighGradeSkillPanel") != null,
+                "Both skill cards are required.");
         }
 
         private static void ValidateSettings(FrontendHomeView home, Scene scene)
@@ -513,8 +535,7 @@ namespace TrickalFanGame.Editor
                     throw new InvalidOperationException("A saved local profile did not reach Home.");
 
                 VerifyCharacterSelection(home);
-                VerifyDestination(home, home.SkillUpgradeButton, FrontendDestination.SkillUpgrade,
-                    FrontendHomeView.SkillUpgradeTitle);
+                VerifySkillEntry(home);
                 VerifySettingsScreen(home);
                 bool quitRequested = false;
                 home.OnQuitRequested += () => quitRequested = true;
@@ -544,6 +565,20 @@ namespace TrickalFanGame.Editor
                 home.DestinationPanel.activeInHierarchy ||
                 EventSystem.current.currentSelectedGameObject != home.GameStartButton.gameObject)
                 throw new InvalidOperationException("Back did not return to Home from " + expected + ".");
+        }
+
+        private static void VerifySkillEntry(FrontendHomeView home)
+        {
+            home.SkillUpgradeButton.onClick.Invoke();
+            FrontendCharacterSelectionView selection = home.CharacterSelectionView;
+            if (home.CurrentDestination != FrontendDestination.SkillUpgrade ||
+                selection.Purpose != FrontendCharacterSelectionPurpose.UpgradeSkills ||
+                !selection.gameObject.activeInHierarchy || selection.Cards.Count != 1 ||
+                selection.Cards[0].Character.CharacterId != "erpin")
+                throw new InvalidOperationException("Skill Upgrade did not open the data-driven character picker.");
+            selection.BackButton.onClick.Invoke();
+            if (home.CurrentDestination != null || !home.HomePanel.activeInHierarchy)
+                throw new InvalidOperationException("Skill character picker did not return Home.");
         }
 
         private static void VerifyCharacterSelection(FrontendHomeView home)

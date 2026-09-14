@@ -128,6 +128,16 @@ namespace TrickalFanGame.Meta
                 $"{LastResultProgress.lowGradeSkillLevel}/{LastResultProgress.highGradeSkillLevel}.";
         }
 
+        public static void StoreConfirmedProgress(string nickname, CharacterProgressDto progress)
+        {
+            if (string.IsNullOrWhiteSpace(nickname) || progress == null ||
+                string.IsNullOrWhiteSpace(progress.characterId))
+                return;
+
+            PlayerPrefs.SetString($"{CachePrefix}{nickname}.{progress.characterId}", JsonUtility.ToJson(progress));
+            PlayerPrefs.Save();
+        }
+
         public bool IsAppliedFor(string characterId)
         {
             return AppliedProgress != null && AppliedCharacterId == characterId;

@@ -40,6 +40,10 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private GameObject characterSelectionPanel;
         [SerializeField] private FrontendCharacterSelectionView characterSelectionView;
 
+        [Header("Skill Upgrade")]
+        [SerializeField] private GameObject skillUpgradePanel;
+        [SerializeField] private FrontendSkillUpgradeView skillUpgradeView;
+
         public GameObject HomePanel => homePanel;
         public TMP_Text WelcomeText => welcomeText;
         public Button GameStartButton => gameStartButton;
@@ -53,6 +57,8 @@ namespace TrickalFanGame.Frontend
         public FrontendSettingsView SettingsView => settingsView;
         public GameObject CharacterSelectionPanel => characterSelectionPanel;
         public FrontendCharacterSelectionView CharacterSelectionView => characterSelectionView;
+        public GameObject SkillUpgradePanel => skillUpgradePanel;
+        public FrontendSkillUpgradeView SkillUpgradeView => skillUpgradeView;
         public FrontendDestination? CurrentDestination { get; private set; }
 
         public event Action<FrontendDestination> OnDestinationRequested;
@@ -95,6 +101,12 @@ namespace TrickalFanGame.Frontend
             characterSelectionView = view;
         }
 
+        public void ConfigureSkillUpgrade(GameObject panel, FrontendSkillUpgradeView view)
+        {
+            skillUpgradePanel = panel;
+            skillUpgradeView = view;
+        }
+
         private void OnEnable()
         {
             if (gameStartButton != null) gameStartButton.onClick.AddListener(RequestCharacterSelection);
@@ -107,7 +119,9 @@ namespace TrickalFanGame.Frontend
             {
                 characterSelectionView.OnBackRequested += ReturnHomeFromCharacterSelection;
                 characterSelectionView.OnCharacterConfirmed += ForwardCharacterConfirmation;
+                characterSelectionView.OnUpgradeCharacterConfirmed += ShowSkillUpgrade;
             }
+            if (skillUpgradeView != null) skillUpgradeView.OnBackRequested += ReturnToSkillCharacterSelection;
         }
 
         private void OnDisable()
@@ -122,7 +136,9 @@ namespace TrickalFanGame.Frontend
             {
                 characterSelectionView.OnBackRequested -= ReturnHomeFromCharacterSelection;
                 characterSelectionView.OnCharacterConfirmed -= ForwardCharacterConfirmation;
+                characterSelectionView.OnUpgradeCharacterConfirmed -= ShowSkillUpgrade;
             }
+            if (skillUpgradeView != null) skillUpgradeView.OnBackRequested -= ReturnToSkillCharacterSelection;
         }
 
         public void Show(string nickname)
@@ -133,6 +149,7 @@ namespace TrickalFanGame.Frontend
             if (destinationPanel != null) destinationPanel.SetActive(false);
             if (settingsPanel != null) settingsPanel.SetActive(false);
             if (characterSelectionPanel != null) characterSelectionPanel.SetActive(false);
+            if (skillUpgradePanel != null) skillUpgradePanel.SetActive(false);
             if (welcomeText != null) welcomeText.text = $"{nickname} 님, 환영합니다";
             Focus(gameStartButton);
         }
@@ -140,6 +157,8 @@ namespace TrickalFanGame.Frontend
         public void Hide()
         {
             CurrentDestination = null;
+            if (characterSelectionView != null) characterSelectionView.Hide();
+            if (skillUpgradeView != null) skillUpgradeView.Hide();
             gameObject.SetActive(false);
         }
 
@@ -149,10 +168,21 @@ namespace TrickalFanGame.Frontend
             if (homePanel != null) homePanel.SetActive(false);
             if (destinationPanel != null) destinationPanel.SetActive(false);
             if (settingsPanel != null) settingsPanel.SetActive(false);
-            if (characterSelectionView != null) characterSelectionView.Show();
+            if (skillUpgradeView != null) skillUpgradeView.Hide();
+            if (characterSelectionView != null) characterSelectionView.Show(FrontendCharacterSelectionPurpose.StartRun);
             OnDestinationRequested?.Invoke(FrontendDestination.CharacterSelection);
         }
-        public void RequestSkillUpgrade() => ShowDestination(FrontendDestination.SkillUpgrade);
+        public void RequestSkillUpgrade()
+        {
+            CurrentDestination = FrontendDestination.SkillUpgrade;
+            if (homePanel != null) homePanel.SetActive(false);
+            if (destinationPanel != null) destinationPanel.SetActive(false);
+            if (settingsPanel != null) settingsPanel.SetActive(false);
+            if (skillUpgradeView != null) skillUpgradeView.Hide();
+            if (characterSelectionView != null)
+                characterSelectionView.Show(FrontendCharacterSelectionPurpose.UpgradeSkills);
+            OnDestinationRequested?.Invoke(FrontendDestination.SkillUpgrade);
+        }
 
         public void RequestSettings()
         {
@@ -178,6 +208,7 @@ namespace TrickalFanGame.Frontend
             if (destinationPanel != null) destinationPanel.SetActive(false);
             if (settingsPanel != null) settingsPanel.SetActive(false);
             if (characterSelectionView != null) characterSelectionView.Hide();
+            if (skillUpgradeView != null) skillUpgradeView.Hide();
             Focus(gameStartButton);
         }
 
@@ -188,6 +219,18 @@ namespace TrickalFanGame.Frontend
 
         private void ReturnHomeFromCharacterSelection() => ReturnHome();
         private void ForwardCharacterConfirmation(string characterId) => OnCharacterConfirmed?.Invoke(characterId);
+
+        private void ShowSkillUpgrade(TrickalFanGame.Character.CharacterDefinition character)
+        {
+            characterSelectionView.Hide();
+            skillUpgradeView.Show(character);
+        }
+
+        private void ReturnToSkillCharacterSelection()
+        {
+            skillUpgradeView.Hide();
+            characterSelectionView.Show(FrontendCharacterSelectionPurpose.UpgradeSkills);
+        }
 
         public void RequestQuit()
         {
@@ -202,6 +245,7 @@ namespace TrickalFanGame.Frontend
             if (homePanel != null) homePanel.SetActive(false);
             if (destinationPanel != null) destinationPanel.SetActive(true);
             if (characterSelectionPanel != null) characterSelectionPanel.SetActive(false);
+            if (skillUpgradePanel != null) skillUpgradePanel.SetActive(false);
             if (destinationTitle != null) destinationTitle.text = GetTitle(destination);
             if (destinationMessage != null) destinationMessage.text = PreparationMessage;
             Focus(backButton);

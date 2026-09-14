@@ -21,6 +21,7 @@ namespace TrickalFanGame.Run
         [SerializeField] private BossController boss;
         [SerializeField] private PlayerInventory inventory;
         [SerializeField] private PlayerProgressClient playerProgressClient;
+        [SerializeField] private GameRunResultTransition resultTransition;
 
         [Header("Run identity")]
         [SerializeField] private string userId = "00000000-0000-4000-8000-000000000001";
@@ -55,6 +56,7 @@ namespace TrickalFanGame.Run
         public string StatusMessage => statusMessage;
         public string LastRunId => lastRunId;
         public RunProgress Progress => runProgress;
+        public GameRunResultTransition ResultTransition => resultTransition;
         public int RunSeed => runProgress != null && runProgress.HasRunSeed ? runProgress.RunSeed : 0;
 
         public void Configure(Health configuredPlayer, RunProgress configuredProgress, BossController configuredBoss)
@@ -83,6 +85,11 @@ namespace TrickalFanGame.Run
         public void ConfigureInventory(PlayerInventory configuredInventory)
         {
             inventory = configuredInventory;
+        }
+
+        public void ConfigureResultTransition(GameRunResultTransition configuredTransition)
+        {
+            resultTransition = configuredTransition;
         }
 
         public void SetApiClient(IGameApiClient configuredApiClient)
@@ -269,9 +276,7 @@ namespace TrickalFanGame.Run
 
         private void OnDestroy()
         {
-            if (playerHealth != null) playerHealth.Died -= OnPlayerDied;
-            if (boss != null) boss.Died -= OnBossDied;
-            if (runProgress != null) runProgress.FinalBossCleared -= OnFinalBossCleared;
+            UnbindRunEvents();
         }
 
         private void OnPlayerDied() => EndRun(false, playerDeathReason != null ? playerDeathReason.CurrentReason : "UNKNOWN");
@@ -317,6 +322,12 @@ namespace TrickalFanGame.Run
             }
 
             statusMessage = isCleared ? "Run cleared. Saving result..." : "Run ended. Saving result...";
+            if (resultTransition != null && resultTransition.TryTransition(
+                    pendingRequest, playerProgressClient != null ? playerProgressClient.AppliedProgress : null,
+                    GetValidApiClient()))
+            {
+                return;
+            }
             SubmitPendingRun();
         }
 
@@ -329,6 +340,43 @@ namespace TrickalFanGame.Run
 
             SubmitPendingRun();
             return true;
+        }
+
+        public bool TryAbandonToHome()
+        {
+            if (!hasStarted || hasEnded || isSaveInFlight || resultTransition == null ||
+                !resultTransition.CanLoadFrontend())
+            {
+                return false;
+            }
+
+            hasEnded = true;
+            shouldSaveResult = false;
+            canRetrySave = false;
+            pendingRequest = null;
+            statusMessage = "Run abandoned. Returning home.";
+            runProgress?.StopProgression();
+            UnbindRunEvents();
+            return resultTransition.TryReturnHomeWithoutResult();
+        }
+
+        public bool TryRestartRun()
+        {
+            string nickname = playerProgressClient != null ? playerProgressClient.UserNickname : null;
+            if (!hasStarted || hasEnded || isSaveInFlight || resultTransition == null ||
+                !resultTransition.CanReloadGame() || string.IsNullOrWhiteSpace(nickname))
+            {
+                return false;
+            }
+
+            hasEnded = true;
+            shouldSaveResult = false;
+            canRetrySave = false;
+            pendingRequest = null;
+            statusMessage = $"Restarting Run with {characterId}.";
+            runProgress?.StopProgression();
+            UnbindRunEvents();
+            return resultTransition.TryRestartRun(userId, nickname, characterId, GetValidApiClient());
         }
 
         private void SubmitPendingRun()
@@ -413,6 +461,13 @@ namespace TrickalFanGame.Run
             canRetrySave = true;
             statusMessage = $"Run ended; save failed: {error}";
             Debug.LogWarning($"[RunSession] {statusMessage}");
+        }
+
+        private void UnbindRunEvents()
+        {
+            if (playerHealth != null) playerHealth.Died -= OnPlayerDied;
+            if (boss != null) boss.Died -= OnBossDied;
+            if (runProgress != null) runProgress.FinalBossCleared -= OnFinalBossCleared;
         }
 
         private void OnGUI()

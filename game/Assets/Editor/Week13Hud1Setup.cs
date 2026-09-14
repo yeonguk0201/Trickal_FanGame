@@ -33,6 +33,7 @@ namespace TrickalFanGame.Editor
             TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Week13FrontendSetup.FontPath);
             if (font == null)
                 throw new InvalidOperationException("Frontend TMP font is missing. Run Setup Frontend Flow first.");
+            Sprite fillSprite = Week13FrontendUiAssets.LoadPlaceholderFillSprite();
 
             Undo.IncrementCurrentGroup();
             int group = Undo.GetCurrentGroup();
@@ -50,6 +51,7 @@ namespace TrickalFanGame.Editor
             Component<GraphicRaycaster>(canvasObject).enabled = false;
 
             RectTransform frame = Rect(canvasObject.transform, "ReferenceFrame", Vector2.zero, new Vector2(1920, 1080));
+            Component<FrontendLayout>(frame.gameObject).ApplyLayout();
             Image frameImage = Component<Image>(frame.gameObject);
             frameImage.color = Color.clear;
             frameImage.raycastTarget = false;
@@ -65,6 +67,7 @@ namespace TrickalFanGame.Editor
             hpBackground.color = new Color(0.11f, 0.14f, 0.18f, 0.95f);
             hpBackground.raycastTarget = false;
             Image hpFill = Component<Image>(Rect(hpFrame, "Fill", Vector2.zero, new Vector2(308, 20)).gameObject);
+            hpFill.sprite = fillSprite;
             hpFill.type = Image.Type.Filled;
             hpFill.fillMethod = Image.FillMethod.Horizontal;
             hpFill.fillOrigin = 0;

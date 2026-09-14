@@ -9,6 +9,8 @@ using UnityEngine.UI;
 
 namespace TrickalFanGame.Frontend
 {
+    public enum FrontendCharacterSelectionPurpose { StartRun, UpgradeSkills }
+
     public sealed class FrontendCharacterSelectionView : MonoBehaviour
     {
         public const string EmptyMessage = "선택할 수 있는 캐릭터가 없습니다.";
@@ -34,8 +36,10 @@ namespace TrickalFanGame.Frontend
         public Button BackButton => backButton;
         public RectTransform CardContainer => cardContainer;
         public FrontendCharacterCardView CardTemplate => cardTemplate;
+        public FrontendCharacterSelectionPurpose Purpose { get; private set; }
 
         public event Action<string> OnCharacterConfirmed;
+        public event Action<CharacterDefinition> OnUpgradeCharacterConfirmed;
         public event Action OnBackRequested;
 
         public void Configure(CharacterDefinition[] definitions, RectTransform container,
@@ -61,15 +65,23 @@ namespace TrickalFanGame.Frontend
             if (backButton != null) backButton.onClick.RemoveListener(RequestBack);
         }
 
-        public void Show()
+        public void Show(FrontendCharacterSelectionPurpose purpose = FrontendCharacterSelectionPurpose.StartRun)
         {
+            Purpose = purpose;
             gameObject.SetActive(true);
             BuildCards();
             selectedCharacter = null;
             confirmed = false;
             foreach (FrontendCharacterCardView card in cards) card.SetSelected(false);
             confirmButton.interactable = false;
-            statusText.text = cards.Count > 0 ? SelectMessage : EmptyMessage;
+            statusText.text = cards.Count > 0
+                ? purpose == FrontendCharacterSelectionPurpose.UpgradeSkills
+                    ? "강화할 캐릭터를 선택해 주세요."
+                    : SelectMessage
+                : EmptyMessage;
+            TMP_Text confirmLabel = confirmButton != null ? confirmButton.GetComponentInChildren<TMP_Text>() : null;
+            if (confirmLabel != null) confirmLabel.text = purpose == FrontendCharacterSelectionPurpose.UpgradeSkills
+                ? "강화 화면으로" : "게임 시작";
             Focus(cards.Count > 0 ? cards[0].Button : backButton);
         }
 
@@ -96,7 +108,10 @@ namespace TrickalFanGame.Frontend
             confirmed = true;
             confirmButton.interactable = false;
             statusText.text = string.Format(ConfirmedMessageFormat, selectedCharacter.DisplayName);
-            OnCharacterConfirmed?.Invoke(selectedCharacter.CharacterId);
+            if (Purpose == FrontendCharacterSelectionPurpose.UpgradeSkills)
+                OnUpgradeCharacterConfirmed?.Invoke(selectedCharacter);
+            else
+                OnCharacterConfirmed?.Invoke(selectedCharacter.CharacterId);
         }
 
         public void RequestBack()

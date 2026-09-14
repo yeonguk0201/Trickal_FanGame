@@ -714,7 +714,8 @@ Backend·Database에 저장되고 유저 전적, Run 상세, 통계 4종, 랭킹
 - [ ] Frontend Scene과 Game Scene 분리
 - [ ] 한 PC의 로컬 플레이어 프로필 생성·복원
 - [ ] HP·SP·스킬·아티팩트·층·방·보스 상태 HUD
-- [ ] 기존 방을 보존한 대형 Room Profile과 크기별 카메라
+- [ ] 기존 방을 보존한 Small·Basic·Wide·Tall·Large Room Template과 seed 기반 선택
+- [ ] 현재 방 하나만 활성·노출하고 기준 화면보다 큰 축에서만 움직이는 방 경계 제한 카메라
 - [ ] 방 크기·층에 맞는 Encounter와 웨이브
 - [ ] 전투 시작 또는 피격 후 적의 지속 경계 상태
 - [ ] 추적형·원거리형·돌진형의 구분되는 이동·공격·빈틈
@@ -987,7 +988,7 @@ COULD 추가
 - [ ] 1종 캐릭터 플레이 가능
 - [ ] 3개 층 플레이 가능
 - [ ] HP·SP·스킬·아티팩트·진행 상태 HUD
-- [ ] 서로 다른 크기의 Room Profile과 Encounter·웨이브
+- [ ] 서로 다른 크기의 Room Template, 축별 제한 카메라와 Encounter·웨이브
 - [ ] 일반 몬스터 3종의 구분되는 완성 패턴
 - [ ] 서로 다른 층별 보스 3종
 - [ ] 아이템 약 10종

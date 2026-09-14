@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using TrickalFanGame.Data;
 using TrickalFanGame.Network;
+using TrickalFanGame.Run;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -79,6 +80,12 @@ namespace TrickalFanGame.Frontend
 
         private void InitializeView()
         {
+            if (FrontendEntryContext.TryConsumeHome())
+            {
+                ShowHomeScreen();
+                OnHomeRequested?.Invoke();
+                return;
+            }
             ShowTitleScreen();
         }
 

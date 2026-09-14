@@ -136,3 +136,49 @@ Database, API DTO, Web과 안정 `itemId`에는 영향이 없다.
 - Scene 구성: `game/Assets/Editor/Week13Hud3BSetup.cs`
 - 자동 검증: `game/Assets/Editor/Week13Hud3BVerification.cs`
 - 상세 검증 기록: `docs/verification/week13-frontend/README.md`
+
+---
+
+## 3. HUD-4C 검증 예외와 Build 층 진입 알림 미표시
+
+### 3.1 발생 범위
+
+- 기능: HUD-4C 층 이름과 층 진입 알림
+- 환경: Unity 6000.3.22f1 Editor 및 Development Build
+- 발생일: 2026-09-10
+
+Editor에서 HUD-4C Setup을 실행한 뒤 층 이름은 보였지만, 검증 메뉴에서
+`InvalidOperationException: Sequence contains more than one element`가 발생했다. 앞서 실행한 Build에서는
+층 진입 알림이 보이지 않았다.
+
+### 3.2 조사와 원인
+
+검증 예외의 Editor 로그는 `Week13Hud4CVerification.VerifyRuntimeState`의 테스트 복제본 생성 직후를
+가리켰다. 검증기가 Scene의 단일 `GameFloorNameView`를 복제한 뒤 다시 `Single()`로 검색하여 원본과
+복제본 두 개를 동시에 찾은 것이 원인이었다. 이는 HUD 런타임 로직이나 Scene 중복 생성 오류가 아니다.
+
+Build 파일과 실행 로그의 시각도 비교했다. 확인한 Player 실행 로그는 HUD-4C Setup으로
+`SampleScene.unity`가 저장되기 전에 생성되어, 해당 Build에는 `Floor Entry Announcement`가 포함되지
+않았다. 현재 Scene에는 단일 HUD-4C 컴포넌트와 텍스트·CanvasGroup 참조가 정상 직렬화되어 있다.
+
+HUD-3B의 과거 문제와 달리 HUD-4C는 하나의 충분한 높이를 가진 한 줄 TMP 렌더러를 사용한다. 따라서
+이번 증상은 별도 TMP 줄 컬링과 관련이 없다.
+
+### 3.3 적용한 해결
+
+- 검증 시작 시 원본 `GameFloorNameView`를 한 번만 보관하고, 테스트 복제 후 다시 `Single()`을 호출하지 않는다.
+- 알림 TMP는 `ForceMeshUpdate` 후 파싱 문자열, 글자 수, 한 줄 여부와 선호 높이를 검사한다.
+- 초기화 순서가 달라도 `Start`에서 현재 층을 재확인하여 첫 층 알림을 한 번 보장한다.
+- HUD-4C Setup으로 Scene을 저장한 뒤 새 Development Build를 만들어 확인한다.
+
+### 3.4 재발 방지 기준
+
+- Scene 단일성 검사는 테스트 복제본을 만들기 전에 수행하고 원본 참조를 보관한다.
+- Editor에서 새 Setup을 적용한 뒤에는 Scene 저장 시각보다 나중에 생성된 Build로 확인한다.
+- 동적 TMP 알림은 문자열 대입뿐 아니라 실제 메시 생성과 영역 내 높이를 자동 검증한다.
+
+### 3.5 검증 결과
+
+검증기 수정 후 스크립트 컴파일이 오류 없이 통과했다. 사용자가 HUD-4C Setup이 저장된 새
+Development Build에서 미니맵 층 이름과 화면 중앙보다 위에 표시되는 층 진입 알림을 확인했으며,
+기존 Build의 미표시 문제가 재현되지 않았다. (사용자 확인, 2026-09-10)

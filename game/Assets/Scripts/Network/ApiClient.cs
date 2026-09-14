@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 
 namespace TrickalFanGame.Network
 {
-    public class ApiClient : MonoBehaviour, IGameApiClient, IUserRegistrationClient
+    public class ApiClient : MonoBehaviour, IGameApiClient, IUserRegistrationClient, ISkillProgressApiClient
     {
         [Header("API Settings")]
         [SerializeField] private string baseUrl = "http://localhost:3001/api";
@@ -39,6 +39,61 @@ namespace TrickalFanGame.Network
         public void PostUser(CreateUserRequest request, Action<CreateUserResponse> onSuccess, Action<string> onError)
         {
             StartCoroutine(PostUserCoroutine(request, onSuccess, onError));
+        }
+
+        public void UpgradeSkill(
+            string nickname,
+            string characterId,
+            SkillType skillType,
+            int targetLevel,
+            Action<CharacterProgressDto> onSuccess,
+            Action<SkillUpgradeError> onError)
+        {
+            StartCoroutine(UpgradeSkillCoroutine(
+                nickname, characterId, skillType, targetLevel, onSuccess, onError));
+        }
+
+        private System.Collections.IEnumerator UpgradeSkillCoroutine(
+            string nickname,
+            string characterId,
+            SkillType skillType,
+            int targetLevel,
+            Action<CharacterProgressDto> onSuccess,
+            Action<SkillUpgradeError> onError)
+        {
+            string skillPath = skillType == SkillType.LowGrade ? "LOW_GRADE" : "HIGH_GRADE";
+            string url = $"{baseUrl}/users/{UnityWebRequest.EscapeURL(nickname)}/characters/" +
+                $"{UnityWebRequest.EscapeURL(characterId)}/skills/{skillPath}";
+            string json = JsonUtility.ToJson(new UpgradeSkillRequest { targetLevel = targetLevel });
+            using var webRequest = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT);
+            webRequest.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
+            webRequest.downloadHandler = new DownloadHandlerBuffer();
+            webRequest.SetRequestHeader("Content-Type", "application/json");
+            webRequest.timeout = Mathf.Max(1, Mathf.CeilToInt(timeout));
+
+            yield return webRequest.SendWebRequest();
+
+            string responseText = webRequest.downloadHandler?.text ?? string.Empty;
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                onError?.Invoke(SkillUpgradeError.FromResponse(
+                    webRequest.responseCode, webRequest.result, webRequest.error, responseText));
+                yield break;
+            }
+
+            try
+            {
+                CharacterProgressResponse response = JsonUtility.FromJson<CharacterProgressResponse>(responseText);
+                if (response != null && response.success && response.data != null)
+                    onSuccess?.Invoke(response.data);
+                else
+                    onError?.Invoke(SkillUpgradeError.FromApiError(
+                        webRequest.responseCode, response?.error?.code, response?.error?.message));
+            }
+            catch (Exception exception)
+            {
+                onError?.Invoke(SkillUpgradeError.ParseFailure(exception.Message));
+            }
         }
 
         public void PostUserWithErrorInfo(

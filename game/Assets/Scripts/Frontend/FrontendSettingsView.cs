@@ -21,6 +21,9 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Dropdown resolutionDropdown;
         [SerializeField] private Toggle fullscreenToggle;
 
+        [Header("HUD Controls")]
+        [SerializeField] private Toggle detailedStatsHudToggle;
+
         [Header("Navigation")]
         [SerializeField] private Button backButton;
 
@@ -32,6 +35,7 @@ namespace TrickalFanGame.Frontend
         public TMP_Text SfxVolumeLabel => sfxVolumeLabel;
         public TMP_Dropdown ResolutionDropdown => resolutionDropdown;
         public Toggle FullscreenToggle => fullscreenToggle;
+        public Toggle DetailedStatsHudToggle => detailedStatsHudToggle;
         public Button BackButton => backButton;
 
         public event Action OnBackRequested;
@@ -42,7 +46,8 @@ namespace TrickalFanGame.Frontend
             Slider sfxSlider, TMP_Text sfxLabel,
             TMP_Dropdown resolution,
             Toggle fullscreen,
-            Button back)
+            Button back,
+            Toggle detailedStatsHud = null)
         {
             masterVolumeSlider = masterSlider;
             masterVolumeLabel = masterLabel;
@@ -53,6 +58,7 @@ namespace TrickalFanGame.Frontend
             resolutionDropdown = resolution;
             fullscreenToggle = fullscreen;
             backButton = back;
+            detailedStatsHudToggle = detailedStatsHud;
         }
 
         private void OnEnable()
@@ -95,6 +101,8 @@ namespace TrickalFanGame.Frontend
             }
             if (fullscreenToggle != null)
                 fullscreenToggle.isOn = LocalSettings.Fullscreen;
+            if (detailedStatsHudToggle != null)
+                detailedStatsHudToggle.isOn = LocalSettings.DetailedStatsHud;
         }
 
         private void BindEvents()
@@ -104,6 +112,7 @@ namespace TrickalFanGame.Frontend
             if (sfxVolumeSlider != null) sfxVolumeSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
             if (resolutionDropdown != null) resolutionDropdown.onValueChanged.AddListener(OnResolutionChanged);
             if (fullscreenToggle != null) fullscreenToggle.onValueChanged.AddListener(OnFullscreenChanged);
+            if (detailedStatsHudToggle != null) detailedStatsHudToggle.onValueChanged.AddListener(OnDetailedStatsHudChanged);
             if (backButton != null) backButton.onClick.AddListener(RequestBack);
         }
 
@@ -114,6 +123,7 @@ namespace TrickalFanGame.Frontend
             if (sfxVolumeSlider != null) sfxVolumeSlider.onValueChanged.RemoveListener(OnSfxVolumeChanged);
             if (resolutionDropdown != null) resolutionDropdown.onValueChanged.RemoveListener(OnResolutionChanged);
             if (fullscreenToggle != null) fullscreenToggle.onValueChanged.RemoveListener(OnFullscreenChanged);
+            if (detailedStatsHudToggle != null) detailedStatsHudToggle.onValueChanged.RemoveListener(OnDetailedStatsHudChanged);
             if (backButton != null) backButton.onClick.RemoveListener(RequestBack);
         }
 
@@ -147,6 +157,11 @@ namespace TrickalFanGame.Frontend
         {
             LocalSettings.Fullscreen = isFullscreen;
             LocalSettings.ApplyDisplay();
+        }
+
+        private static void OnDetailedStatsHudChanged(bool visible)
+        {
+            LocalSettings.DetailedStatsHud = visible;
         }
 
         private void RequestBack()
