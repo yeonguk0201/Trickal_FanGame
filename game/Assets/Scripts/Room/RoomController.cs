@@ -22,8 +22,10 @@ namespace TrickalFanGame.Room
         [SerializeField] private DoorController[] doors = Array.Empty<DoorController>();
 
         private readonly Dictionary<Health, Action> enemyDeathHandlers = new();
+        private EncounterRuntimeWave[] encounterWaves = Array.Empty<EncounterRuntimeWave>();
         private Health playerHealth;
         private RoomRunState runState;
+        private RoomClearRewardSpawner clearRewardSpawner;
 
         public RoomState State { get; private set; } = RoomState.Waiting;
         public int AliveEnemyCount => enemyDeathHandlers.Count;
@@ -31,12 +33,17 @@ namespace TrickalFanGame.Room
         public bool IsProgressionStopped { get; private set; }
         public int FloorNumber => floorNumber;
         public int RoomNumber => roomNumber;
+        public int CurrentWaveNumber { get; private set; }
+        public int WaveCount => encounterWaves.Length;
+        public IReadOnlyList<EncounterRuntimeWave> EncounterWaves => encounterWaves;
         public IReadOnlyList<GameObject> EnemyPrefabs => enemyPrefabs;
         public IReadOnlyList<Transform> SpawnPoints => spawnPoints;
         public IReadOnlyList<Health> PreplacedEnemies => preplacedEnemies;
 
         public event Action<RoomState> StateChanged;
         public event Action<GameObject> EnemySpawned;
+        public event Action<int> WaveStarted;
+        public event Action<int> WaveCompleted;
 
         public void BindRunState(RoomRunState configuredState, bool startsCleared)
         {
@@ -77,10 +84,67 @@ namespace TrickalFanGame.Room
         {
             enemyPrefab = null;
             enemyPrefabs = configuredEnemyPrefabs ?? Array.Empty<GameObject>();
+            encounterWaves = Array.Empty<EncounterRuntimeWave>();
+        }
+
+        public void ConfigureEnemyPrefabs(GameObject[] configuredEnemyPrefabs,
+            Transform[] configuredSpawnPoints)
+        {
+            ConfigureEnemyPrefabs(configuredEnemyPrefabs);
+            spawnPoints = configuredSpawnPoints ?? Array.Empty<Transform>();
+            encounterWaves = enemyPrefabs.Length > 0
+                ? new[] { new EncounterRuntimeWave(enemyPrefabs, spawnPoints) }
+                : Array.Empty<EncounterRuntimeWave>();
+        }
+
+        public void ConfigureEncounterWaves(EncounterRuntimeWave[] configuredWaves)
+        {
+            enemyPrefab = null;
+            encounterWaves = configuredWaves ?? Array.Empty<EncounterRuntimeWave>();
+            if (encounterWaves.Length > 0 && encounterWaves[0] != null)
+            {
+                enemyPrefabs = new GameObject[encounterWaves[0].EnemyPrefabs.Count];
+                spawnPoints = new Transform[encounterWaves[0].SpawnPoints.Count];
+                for (int index = 0; index < enemyPrefabs.Length; index++)
+                {
+                    enemyPrefabs[index] = encounterWaves[0].EnemyPrefabs[index];
+                    spawnPoints[index] = encounterWaves[0].SpawnPoints[index];
+                }
+            }
+            else
+            {
+                enemyPrefabs = Array.Empty<GameObject>();
+                spawnPoints = Array.Empty<Transform>();
+            }
+        }
+
+        public void ConfigureClearReward(RoomClearRewardSpawner configuredSpawner)
+        {
+            clearRewardSpawner = configuredSpawner;
         }
 
         public bool TryValidateEncounterConfiguration(out string error)
         {
+            if (encounterWaves.Length > 0)
+            {
+                for (int index = 0; index < encounterWaves.Length; index++)
+                {
+                    if (encounterWaves[index] == null)
+                    {
+                        error = $"Encounter wave {index + 1} is missing.";
+                        return false;
+                    }
+                    if (!encounterWaves[index].TryValidate(out error))
+                    {
+                        error = $"Encounter wave {index + 1} is invalid. {error}";
+                        return false;
+                    }
+                }
+
+                error = null;
+                return true;
+            }
+
             if (enemyPrefab != null && enemyPrefabs.Length > 0)
             {
                 error = "A room cannot use both one repeated prefab and a per-spawn prefab list.";
@@ -188,7 +252,15 @@ namespace TrickalFanGame.Room
             ChangeState(RoomState.Combat);
             SetDoorsLocked(true);
             ActivatePreplacedEnemies();
-            SpawnConfiguredEnemies();
+            if (encounterWaves.Length > 0)
+            {
+                int nextWaveIndex = runState != null ? runState.CompletedWaveCount : 0;
+                if (nextWaveIndex < encounterWaves.Length) StartWave(nextWaveIndex);
+            }
+            else
+            {
+                SpawnConfiguredEnemies();
+            }
 
             if (AliveEnemyCount == 0)
             {
@@ -247,6 +319,17 @@ namespace TrickalFanGame.Room
             }
         }
 
+        private void StartWave(int waveIndex)
+        {
+            if (waveIndex < 0 || waveIndex >= encounterWaves.Length || AliveEnemyCount > 0) return;
+
+            EncounterRuntimeWave wave = encounterWaves[waveIndex];
+            CurrentWaveNumber = waveIndex + 1;
+            WaveStarted?.Invoke(CurrentWaveNumber);
+            for (int index = 0; index < wave.EnemyPrefabs.Count; index++)
+                SpawnEnemy(wave.EnemyPrefabs[index], wave.SpawnPoints[index]);
+        }
+
         private void SpawnEnemy(GameObject configuredPrefab, Transform spawnPoint)
         {
             if (configuredPrefab == null || spawnPoint == null)
@@ -280,15 +363,40 @@ namespace TrickalFanGame.Room
 
             if (State == RoomState.Combat && !IsProgressionStopped && AliveEnemyCount == 0)
             {
-                ClearRoom();
+                CompleteCurrentWaveOrRoom();
             }
+        }
+
+        private void CompleteCurrentWaveOrRoom()
+        {
+            if (encounterWaves.Length == 0)
+            {
+                ClearRoom();
+                return;
+            }
+
+            int completedWave = CurrentWaveNumber;
+            if (completedWave < 1) return;
+            bool newlyCompleted = runState == null || runState.TryMarkWaveCompleted(completedWave);
+            if (!newlyCompleted) return;
+
+            WaveCompleted?.Invoke(completedWave);
+            if (completedWave < encounterWaves.Length)
+            {
+                StartWave(completedWave);
+                return;
+            }
+
+            ClearRoom();
         }
 
         private void ClearRoom()
         {
+            if (State == RoomState.Cleared) return;
             runState?.MarkCleared();
             ChangeState(RoomState.Cleared);
             SetDoorsLocked(false);
+            clearRewardSpawner?.TrySpawn();
             UnsubscribeFromPlayer();
         }
 

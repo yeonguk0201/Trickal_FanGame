@@ -70,14 +70,23 @@ namespace TrickalFanGame.Room
                 return false;
             }
 
+            Vector2 previousPlayerPosition = transitioningPlayer.transform.position;
             ClearTransientProjectiles();
             destination.SetVisible(true);
             MovePlayer(transitioningPlayer, entryPoint.position);
             source.SetVisible(false);
 
+            if (!TryShowRoom(destination, transitioningPlayer.transform, out string cameraError))
+            {
+                source.SetVisible(true);
+                destination.SetVisible(false);
+                MovePlayer(transitioningPlayer, previousPlayerPosition);
+                Debug.LogError($"{name}: Cannot frame destination room {destination.RoomId}. {cameraError}", destination);
+                return false;
+            }
+
             CurrentNode = destination;
             CurrentNode.MarkVisited();
-            roomCamera?.ShowRoom(CurrentNode.CameraAnchor);
             runProgress?.RecordRoomEntry(CurrentNode.FloorNumber, CurrentNode.RoomNumber);
             nextTransitionTime = Time.unscaledTime + transitionCooldown;
             return true;
@@ -109,7 +118,10 @@ namespace TrickalFanGame.Room
                 ClearTransientProjectiles();
                 MovePlayer(targetPlayer, startingNode.DefaultEntryPoint.position);
             }
-            roomCamera?.ShowRoom(startingNode.CameraAnchor);
+            if (!TryShowRoom(startingNode, targetPlayer != null ? targetPlayer.transform : null, out error))
+            {
+                return false;
+            }
             if (runProgress != null &&
                 (enteredDifferentRoom || runProgress.CurrentFloor != startingNode.FloorNumber ||
                  runProgress.CurrentRoom != startingNode.RoomNumber))
@@ -118,6 +130,24 @@ namespace TrickalFanGame.Room
             }
             error = null;
             return true;
+        }
+
+        private bool TryShowRoom(RoomNode node, Transform followTarget, out string error)
+        {
+            if (roomCamera == null)
+            {
+                error = null;
+                return true;
+            }
+
+            if (node.Profile == null)
+            {
+                roomCamera.ShowRoom(node.CameraAnchor);
+                error = null;
+                return true;
+            }
+
+            return roomCamera.ShowRoom(node.CameraAnchor, node.Profile, followTarget, out error);
         }
 
         public bool TryValidateConfiguration(out string error)
@@ -206,8 +236,17 @@ namespace TrickalFanGame.Room
             Rigidbody2D body = movingPlayer.GetComponent<Rigidbody2D>();
             if (body != null)
             {
+                // Teleport both physics and presentation. Otherwise interpolation can render the old
+                // position for the first destination frame, inside the new camera's edge.
+                RigidbodyInterpolation2D interpolation = body.interpolation;
+                body.interpolation = RigidbodyInterpolation2D.None;
                 body.linearVelocity = Vector2.zero;
                 body.position = destination;
+                Vector3 position = movingPlayer.transform.position;
+                position.x = destination.x;
+                position.y = destination.y;
+                movingPlayer.transform.position = position;
+                body.interpolation = interpolation;
             }
             else
             {

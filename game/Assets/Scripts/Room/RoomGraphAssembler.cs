@@ -15,6 +15,8 @@ namespace TrickalFanGame.Room
         [SerializeField] private RoomGraphController graph;
         [SerializeField] private RunProgress runProgress;
         [SerializeField] private RoomPrefab roomPrefab;
+        [SerializeField] private EncounterEnemyRoster encounterEnemyRoster;
+        [SerializeField] private SPPickup encounterClearRewardPrefab;
 
         private GeneratedFloorGraph generatedGraph;
         private GameObject currentFloorRoot;
@@ -28,7 +30,10 @@ namespace TrickalFanGame.Room
         public bool HasAppliedRuntimeGraph => hasAppliedRuntimeGraph;
         public int AppliedRunSeed => appliedRunSeed;
         public RoomPrefab ConfiguredRoomPrefab => roomPrefab;
+        public EncounterEnemyRoster EnemyRoster => encounterEnemyRoster;
+        public SPPickup EncounterClearRewardPrefab => encounterClearRewardPrefab;
         public GeneratedFloorGraph GeneratedGraph => generatedGraph;
+        public GameObject CurrentFloorRoot => currentFloorRoot;
 
         public void Configure(
             FloorGenerator configuredGenerator,
@@ -45,6 +50,16 @@ namespace TrickalFanGame.Room
         {
             Configure(configuredGenerator, configuredGraph, configuredProgress);
             roomPrefab = configuredRoomPrefab;
+        }
+
+        public void ConfigureEncounterRoster(EncounterEnemyRoster configuredRoster)
+        {
+            encounterEnemyRoster = configuredRoster;
+        }
+
+        public void ConfigureEncounterClearReward(SPPickup configuredPrefab)
+        {
+            encounterClearRewardPrefab = configuredPrefab;
         }
 
         private void Awake()
@@ -181,7 +196,9 @@ namespace TrickalFanGame.Room
             List<RoomNode> nodes = new(floor.Nodes.Count);
             foreach (GeneratedRoomNode generatedNode in floor.Nodes)
             {
-                RoomPrefab instance = Instantiate(roomPrefab, nextRoot.transform);
+                RoomPrefab sourcePrefab = ResolveRoomPrefab(generatedNode, out error);
+                if (sourcePrefab == null) { DestroyFloor(nextRoot); return false; }
+                RoomPrefab instance = Instantiate(sourcePrefab, nextRoot.transform);
                 instance.name = generatedNode.RoomId;
                 instance.transform.localPosition = new Vector3(
                     generatedNode.GridPosition.X * RoomLayout.RoomSpacingX,
@@ -193,6 +210,7 @@ namespace TrickalFanGame.Room
                 node.Configure(generatedNode.RoomId, generatedNode.FloorNumber, generatedNode.RoomNumber,
                     node.ContentRoot, node.CameraAnchor, node.DefaultEntryPoint, Array.Empty<RoomDoorway>());
                 node.ApplyGeneratedDefinition(generatedNode.Definition);
+                node.ApplyRoomProfile(generatedNode.Template != null ? generatedNode.Template.Profile : null);
                 RoomRunState state = runProgress?.GetRoomState(generatedNode.RoomId);
                 DoorController[] blockers = new DoorController[instance.DoorSlots.Length];
                 for (int i = 0; i < blockers.Length; i++) blockers[i] = instance.DoorSlots[i].Blocker;
@@ -202,7 +220,11 @@ namespace TrickalFanGame.Room
                     null, spawnPoints, blockers);
                 bool safeRoom = generatedNode.Role == GeneratedRoomRole.Start || generatedNode.Role == GeneratedRoomRole.Treasure;
                 instance.Controller.BindRunState(state, safeRoom);
-                ApplyEncounter(instance.Controller, generatedNode.Definition);
+                if (!ApplyEncounter(instance, generatedNode, state, out error))
+                {
+                    DestroyFloor(nextRoot);
+                    return false;
+                }
                 if (generatedNode.Role == GeneratedRoomRole.Boss)
                     ConfigureBossDrop(
                         instance,
@@ -260,6 +282,26 @@ namespace TrickalFanGame.Room
             currentFloorRoot = nextRoot;
             if (previousRoot != null) DestroyFloor(previousRoot);
             return true;
+        }
+
+        private RoomPrefab ResolveRoomPrefab(GeneratedRoomNode generatedNode, out string error)
+        {
+            GameObject templateAsset = generatedNode?.Template?.RoomPrefabAsset;
+            RoomPrefab resolved = templateAsset != null ? templateAsset.GetComponent<RoomPrefab>() : roomPrefab;
+            if (resolved == null)
+            {
+                error = $"Room {generatedNode?.RoomId ?? "<missing>"} has no usable Room Prefab.";
+                return null;
+            }
+
+            if (generatedNode?.Template != null && generatedNode.Template.Profile == null)
+            {
+                error = $"Room {generatedNode.RoomId} template '{generatedNode.TemplateId}' has no Room Profile.";
+                return null;
+            }
+
+            error = null;
+            return resolved;
         }
 
         private void ConfigureFloorCompletion(GeneratedFloor floor, RoomPrefab bossRoom, GameObject floorRoot)
@@ -320,13 +362,61 @@ namespace TrickalFanGame.Room
             };
         }
 
-        private static void ApplyEncounter(RoomController controller, RoomDefinition definition)
+        private bool ApplyEncounter(RoomPrefab instance, GeneratedRoomNode node,
+            RoomRunState state, out string error)
         {
+            RoomController controller = instance.Controller;
+            if (node.Encounter != null)
+            {
+                if (encounterEnemyRoster == null)
+                { error = $"Room {node.RoomId} requires an Encounter enemy roster."; return false; }
+                if (!encounterEnemyRoster.TryValidate(out error))
+                { error = $"Room {node.RoomId} requires a valid Encounter enemy roster. {error}"; return false; }
+                EncounterRuntimeWave[] waves = new EncounterRuntimeWave[node.Encounter.Waves.Count];
+                for (int waveIndex = 0; waveIndex < waves.Length; waveIndex++)
+                {
+                    if (!node.Encounter.TryResolveWave(node.Template, node.FloorNumber,
+                            node.DirectionalConnections, waveIndex, out ResolvedEncounterSpawn[] resolved, out error))
+                    { error = $"Room {node.RoomId} could not resolve Encounter '{node.EncounterId}' wave {waveIndex + 1}. {error}"; return false; }
+
+                    GameObject[] encounterPrefabs = new GameObject[resolved.Length];
+                    Transform[] encounterSpawnPoints = new Transform[resolved.Length];
+                    for (int index = 0; index < resolved.Length; index++)
+                    {
+                        ResolvedEncounterSpawn spawn = resolved[index];
+                        if (!encounterEnemyRoster.TryResolve(spawn.Role, out encounterPrefabs[index], out error))
+                        { error = $"Room {node.RoomId} could not resolve role '{spawn.Role}'. {error}"; return false; }
+                        if (spawn.SpawnPointIndex < 0 || spawn.SpawnPointIndex >= controller.SpawnPoints.Count)
+                        { error = $"Room {node.RoomId} resolved an invalid SpawnPoint index {spawn.SpawnPointIndex}."; return false; }
+                        encounterSpawnPoints[index] = controller.SpawnPoints[spawn.SpawnPointIndex];
+                    }
+
+                    waves[waveIndex] = new EncounterRuntimeWave(encounterPrefabs, encounterSpawnPoints);
+                }
+
+                controller.ConfigurePreplacedEnemies(Array.Empty<Health>());
+                controller.ConfigureEncounterWaves(waves);
+                if (encounterClearRewardPrefab != null)
+                {
+                    RoomClearRewardSpawner rewardSpawner = controller.GetComponent<RoomClearRewardSpawner>();
+                    if (rewardSpawner == null)
+                        rewardSpawner = controller.gameObject.AddComponent<RoomClearRewardSpawner>();
+                    rewardSpawner.Configure(encounterClearRewardPrefab, controller.transform,
+                        instance.Node.ContentRoot.transform, state);
+                    controller.ConfigureClearReward(rewardSpawner);
+                }
+                error = null;
+                return true;
+            }
+
+            RoomDefinition definition = node.Definition;
             GameObject[] prefabs = new GameObject[controller.SpawnPoints.Count];
             for (int i = 0; i < prefabs.Length; i++)
                 prefabs[i] = definition.EncounterPrefabs[i % definition.EncounterPrefabs.Count];
             controller.ConfigurePreplacedEnemies(Array.Empty<Health>());
             controller.ConfigureEnemyPrefabs(prefabs);
+            error = null;
+            return true;
         }
 
         private static void DestroyFloor(GameObject floorRoot)

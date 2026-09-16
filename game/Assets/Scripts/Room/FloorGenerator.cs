@@ -52,6 +52,10 @@ namespace TrickalFanGame.Room
         public GeneratedRoomRole Role { get; }
         public int ContentSeed { get; }
         public RoomDefinition Definition { get; }
+        public RoomTemplateDefinition Template { get; private set; }
+        public string TemplateId => Template != null ? Template.TemplateId : null;
+        public EncounterDefinition Encounter { get; private set; }
+        public string EncounterId => Encounter != null ? Encounter.EncounterId : null;
         public RoomType RoomType => Definition != null ? Definition.RoomType : RoomType.Normal;
         public IReadOnlyList<GeneratedRoomConnection> DirectionalConnections => connections;
         public IReadOnlyList<string> ConnectedRoomIds
@@ -74,6 +78,16 @@ namespace TrickalFanGame.Room
             if (TryGetConnection(direction, out _))
                 throw new InvalidOperationException($"Room {RoomId} already has a {direction} connection.");
             connections.Add(new GeneratedRoomConnection(direction, destinationRoomId));
+        }
+
+        internal void AssignTemplate(RoomTemplateDefinition template)
+        {
+            Template = template;
+        }
+
+        internal void AssignEncounter(EncounterDefinition encounter)
+        {
+            Encounter = encounter;
         }
     }
 
@@ -161,6 +175,15 @@ namespace TrickalFanGame.Room
                 };
                 if (!validRoleType)
                 { error = $"Room {node.RoomId} role {node.Role} does not match definition type {node.RoomType}."; return false; }
+                if (node.Template != null &&
+                    (!node.Template.SupportsRoomType(node.RoomType) ||
+                     !node.Template.SupportsConnections(node.DirectionalConnections)))
+                { error = $"Room {node.RoomId} has an incompatible template '{node.TemplateId}'."; return false; }
+                if (node.Encounter != null &&
+                    (node.Role != GeneratedRoomRole.Intermediate || node.Template == null ||
+                     !node.Encounter.TryValidateFor(node.Template, node.FloorNumber,
+                         node.DirectionalConnections, out error)))
+                { error = $"Room {node.RoomId} has an incompatible Encounter '{node.EncounterId}'. {error}"; return false; }
             }
             if (starts != 1 || bosses != 1 || treasures < 1 ||
                 !byId.ContainsKey(floor.StartingRoomId) || !byId.ContainsKey(floor.BossRoomId))
@@ -215,6 +238,10 @@ namespace TrickalFanGame.Room
         [SerializeField, Min(1)] private int minimumBossDistance = 3;
         [SerializeField, Min(1)] private int generationRetryLimit = 32;
         [SerializeField] private RoomDefinition[] roomDefinitions = Array.Empty<RoomDefinition>();
+        [SerializeField, Min(1)] private int roomContentVersion = 1;
+        [SerializeField] private RoomTemplateDefinition[] roomTemplates = Array.Empty<RoomTemplateDefinition>();
+        [SerializeField] private EncounterDefinition[] encounterDefinitions = Array.Empty<EncounterDefinition>();
+        [SerializeField, Min(1)] private int encounterContentVersion = 1;
         private int runSeed; private bool hasRunSeed;
         public int RunSeed => runSeed;
         public bool HasRunSeed => hasRunSeed;
@@ -225,12 +252,28 @@ namespace TrickalFanGame.Room
         public int MinimumBossDistance => minimumBossDistance;
         public int GenerationRetryLimit => generationRetryLimit;
         public IReadOnlyList<RoomDefinition> RoomDefinitions => roomDefinitions;
+        public int RoomContentVersion => roomContentVersion;
+        public IReadOnlyList<RoomTemplateDefinition> RoomTemplates => roomTemplates;
+        public IReadOnlyList<EncounterDefinition> EncounterDefinitions => encounterDefinitions;
+        public int EncounterContentVersion => encounterContentVersion;
 
         public void Configure(int floors, int rooms, RoomDefinition[] definitions) => Configure(floors, rooms, rooms, 2, 32, definitions);
         public void Configure(int floors, int minRooms, int maxRooms, int bossDistance, int retries, RoomDefinition[] definitions)
         { floorCount = floors; minimumRoomsPerFloor = minRooms; maximumRoomsPerFloor = maxRooms;
           minimumBossDistance = bossDistance; generationRetryLimit = retries; roomDefinitions = definitions ?? Array.Empty<RoomDefinition>();
           if (!Application.isPlaying) { runSeed = 0; hasRunSeed = false; } }
+
+        public void ConfigureTemplates(int contentVersion, RoomTemplateDefinition[] templates)
+        {
+            roomContentVersion = Mathf.Max(1, contentVersion);
+            roomTemplates = templates ?? Array.Empty<RoomTemplateDefinition>();
+        }
+
+        public void ConfigureEncounters(int contentVersion, EncounterDefinition[] definitions)
+        {
+            encounterContentVersion = Mathf.Max(1, contentVersion);
+            encounterDefinitions = definitions ?? Array.Empty<EncounterDefinition>();
+        }
 
         public bool TryInitializeRunSeed(int seed, out string error)
         {
@@ -257,6 +300,28 @@ namespace TrickalFanGame.Room
                 { error = $"Floor generation failed after {generationRetryLimit} attempts for run seed {seed}, floor seed {floorSeed}, floor {i + 1}. {failure}"; return false; }
             }
             graph = new GeneratedFloorGraph(floors, minimumBossDistance);
+            if (!graph.TryValidate(out error)) { error = $"Generated graph validation failed for run seed {seed}. {error}"; graph = null; return false; }
+            if (roomTemplates.Length > 0 && !RoomTemplateSelector.TryAssign(
+                    graph,
+                    roomTemplates,
+                    roomContentVersion,
+                    new Vector2(RoomLayout.RoomSpacingX, RoomLayout.RoomSpacingY),
+                    out error))
+            {
+                error = $"Room template selection failed for run seed {seed}. {error}";
+                graph = null;
+                return false;
+            }
+            if (encounterDefinitions.Length > 0 && !EncounterSelector.TryAssign(
+                    graph,
+                    encounterDefinitions,
+                    encounterContentVersion,
+                    out error))
+            {
+                error = $"Encounter selection failed for run seed {seed}. {error}";
+                graph = null;
+                return false;
+            }
             if (!graph.TryValidate(out error)) { error = $"Generated graph validation failed for run seed {seed}. {error}"; graph = null; return false; }
             return true;
         }

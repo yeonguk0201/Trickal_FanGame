@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9b7443fb6f37ef4584b47f3ca3ca88a, type: 3}
+  m_Name: boss-floor-3-large
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomTemplateDefinition
+  templateId: boss-floor-3-large
+  profile: {fileID: 11400000, guid: 160e2c0500980704faff83d081f4aae1, type: 2}
+  roomPrefab: {fileID: 8070110405722340216, guid: 89db766c63a53464dba82ea09fa4412b, type: 3}
+  allowedRoomTypes: 02000000
+  minimumFloor: 3
+  maximumFloor: 3
+  doorSlots:
+  - direction: 0
+    slotPosition: {x: -11.55, y: 0}
+    safeEntryPosition: {x: -9.85, y: 0}
+  - direction: 1
+    slotPosition: {x: 11.55, y: 0}
+    safeEntryPosition: {x: 9.85, y: 0}
+  - direction: 2
+    slotPosition: {x: 0, y: 6.3}
+    safeEntryPosition: {x: 0, y: 4.6000004}
+  - direction: 3
+    slotPosition: {x: 0, y: -6.3}
+    safeEntryPosition: {x: 0, y: -4.6000004}
+  spawnPoints:
+  - {x: -6, y: 3.5}
+  - {x: 0, y: 0}
+  - {x: 6, y: -3.5}
