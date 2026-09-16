@@ -266,13 +266,20 @@ View 역할을 맡는다. ScriptableObject나 Prefab 자산에 방문·클리어
 ### 책임
 
 - `GeneratedRoomNode`: 안정적인 room ID, 격자 좌표, 방 종류, 정의 ID와 방향별 연결
-- `RoomRunState`: 방문, 클리어, 아티팩트 획득 등 같은 Run에서 변하는 상태
+- `RoomRunState`: 방문, 완료 웨이브 수, 클리어, 클리어 보상과 아티팩트 획득 등 같은 Run에서 변하는 상태
 - `RoomDefinition`: RoomType과 Layout/Encounter 후보를 제공하는 정적 제작 데이터
-- `RoomProfile`: 내부 크기, 카메라 크기, 벽·출입구·안전 영역과 Encounter 가능 영역
+- `RoomProfile`: 안정 `profileId`, 내부 크기, 이동·Encounter·카메라 경계, Orthographic Size와 미니맵 실루엣
+- `RoomTemplateDefinition`: 안정 `templateId`, Room Profile·Prefab·허용 RoomType과 방향별 문·안전 진입점·SpawnPoint
 - `RoomPrefab`: Room Profile을 만족하는 방 영역, spawn point, 보상 지점과 4방향 문 슬롯
+- `RoomStaticObstacle`: 안정 장애물 ID, solid Environment 충돌체와 비파괴·무드롭 정적 계약
 - `EncounterDefinition`: 적 구성, spawn group, 웨이브, 층·Room Profile 조건과 안전거리
 - `RoomController`: 방 입장, 전투 시작, 적 전멸 확인, 클리어와 문 잠금/해제
 - `RoomGraphController`: 현재 방 활성화, 플레이어 배치, 카메라 전환과 방 사이 이동
+- `RoomCameraFraming`: 방 크기·Orthographic Size·종횡비에서 축별 카메라 중심 경계와 추적 모드를 계산하는 순수 규칙
+- `RoomCameraController`: 현재 Profile의 계산 결과로 방 진입 카메라를 즉시 유효화하고 플레이어를 경계 안에서 보간 추적
+- `RoomTemplateSelector`: RoomType·연결 방향·grid AABB 호환 후보를 seed와 콘텐츠 버전으로 결정적으로 배정
+- `EncounterSelector`: Room Profile·층·SpawnPoint·안전거리 호환 후보를 seed와 Encounter 콘텐츠 버전으로 결정적으로 배정
+- `EncounterEnemyRoster`: Encounter의 적 역할을 기존 검증 Prefab에 매핑하며 Encounter 데이터와 Prefab 소유권을 분리
 
 상태 예시:
 
@@ -292,6 +299,62 @@ Scene 인스턴스를 제거하더라도 `RoomRunState`가 남아 있어 재방�
 내부 크기와 카메라 크기를 함께 제공하며, 현재 격자 배치 간격보다 커질 경우 인접 Room 인스턴스의
 겹침과 전환 좌표를 검증한다. 플레이어·적 크기와 속도는 Room Profile에서 암묵적으로 배율 적용하지
 않고 플레이테스트 결과에 따라 별도 설정으로 조정한다.
+
+Room 계약 카탈로그는 profile/template ID를 대소문자 변환 없이 안정 키로 취급하고 빈 ID·중복 ID,
+등록되지 않은 Profile, 누락된 Prefab과 중복 방향 슬롯을 명시적으로 거부한다. Template 검증은
+제작 데이터의 문·안전 진입점·SpawnPoint·Encounter·카메라 좌표가 참조 Prefab과 일치하는지도
+확인한다. 이 검증은 `RoomRunState`를 읽거나 교체하지 않으며 정적 자산에 Run 상태 필드를 두지 않는다.
+
+카메라 중심의 축별 이동 가능 길이는 `max(0, roomSize - viewportSize)`이며, 0인 축의 최소·최대
+중심은 모두 방 중앙이다. 양수인 축은 그 길이의 절반을 중앙 양쪽 경계로 사용한다. 이 계산은
+Small·Basic·Wide·Tall·Large에 공통 적용하며 Profile의 16:9 제작 경계도 같은 결과와 일치해야 한다.
+`RoomCameraController`는 Profile 전환 순간 새 경계 안으로 스냅한 위치에서 보간을 시작하므로 전환
+중에도 이전 방 위치나 새 방의 유효 경계 밖을 거치지 않는다.
+
+수작업 일반방 Template은 `small-standard(12 × 6.75)`, `basic-standard(16 × 9)`,
+`wide-standard(24 × 9)`, `tall-standard(16 × 13.5)`, `large-standard(24 × 13.5)`다. 층별 보스
+후보는 `boss-floor-1-wide`, `boss-floor-2-tall`, `boss-floor-3-large`이며 Template의 최소·최대 층
+계약으로 다른 층에서 제외한다. Basic Prefab은 회귀 기준으로 유지하고 확장 Layout은 별도 Prefab과
+GUID를 가진다. `RoomTemplateGeometry`는 방향별 문 슬롯과 안전 진입점에서 필수 통로를 파생하며,
+`RoomTemplateDefinition`은 해당 통로 안의 SpawnPoint를 거부한다. Encounter trigger 자체는 입장
+감지를 위해 통로와 겹칠 수 있으므로 적·장애물 안전 규칙과 구분한다.
+
+`FloorGenerator`의 좌표·역할·RoomDefinition 생성이 끝난 뒤 `RoomTemplateSelector`가 Template을
+배정한다. 후보는 안정 ID로 정렬하고 방의 `contentSeed`와 콘텐츠 버전에서 시작 인덱스를 파생하므로
+ScriptableObject 배열 순서가 결과를 바꾸지 않는다. 배정은 방 번호 순서로 진행하며 이미 배정된 모든
+방과 Profile 내부 크기 AABB가 겹치는 후보를 건너뛴다. 현재 `20 × 13` 간격에서는 Wide·Tall·Large의
+일부 동일 축 인접 조합이 충돌하므로 간격을 확대하지 않고 호환 가능한 Small·Basic 후보로 폴백한다.
+층별 확장 보스 후보도 충돌하면 기존 Basic 보스방을 사용한다. 선택된 Template 참조와
+`templateId`는 `GeneratedRoomNode`가 소유하고, 실제 Prefab 인스턴스화는 `RoomGraphAssembler`가 맡는다.
+
+Template 배정 뒤 `EncounterSelector`가 일반 전투방의 Encounter 후보를 안정 `encounterId` 순으로
+정렬하고, 방의 content seed와 별도 Encounter 콘텐츠 버전으로 하나를 선택한다. Encounter는 적 역할과
+수, 웨이브 조건, 허용 Profile·층, 안전거리와 Template의 안정 SpawnPoint ID 또는 SpawnGroup ID만
+소유한다. 실제 적 Prefab과 월드 좌표는 소유하지 않는다. 현재 Template은 배열 순서에서
+`spawn-01` 형식의 안정 지점 ID를 파생하고 전체 지점 그룹 `all`을 제공한다.
+
+선택 전 검증은 Profile·층 호환, 참조 지점 존재와 개수, 같은 웨이브의 지점 중복, 모든 플레이어
+안전 진입점·문 슬롯과의 최소거리를 확인한다. 런타임 선택에서는 현재 방에 실제로 연결된 방향의
+문만 활성 출입구로 취급하고, SpawnGroup 후보 중 안전하며 아직 사용하지 않은 지점을 역할별 우선순위로
+고른다. 추적형은 중심에 가까운 지점, 원거리형·돌진형은 바깥 지점을 먼저 사용한다. 호환 후보가
+없으면 임의 폴백하지 않고 생성 자체를
+실패시킨다. 선택된 참조와 `encounterId`는 `GeneratedRoomNode`가 소유하며, 적 인스턴스화·웨이브 진행·
+클리어 및 재방문 상태 반영은 Room 런타임 계층이 맡는다.
+
+`RoomGraphAssembler`는 `EncounterEnemyRoster`에서 역할 Prefab을 해석하고 모든 웨이브의 선택된
+SpawnPoint Transform과 함께 `RoomController`에 전달한다. `RoomController`는 현재 웨이브의 필수 적을
+등록하고 전멸 이벤트가 확인된 뒤에만 다음 웨이브를 한 번 생성한다. 완료 웨이브 수는
+`RoomRunState`에 순서대로 기록하며, 방 인스턴스를 다시 구성하면 첫 미완료 웨이브부터 복원한다.
+전체 웨이브가 끝나면 방을 클리어하고 `RoomClearRewardSpawner`가 SP 픽업을 한 번 생성한다. 보상
+생성 여부도 `RoomRunState`에 기록하므로 같은 컨트롤러 재진입과 인스턴스 재구성에서 중복 생성하지
+않는다.
+
+첫 장애물 Template `large-central-pillar`는 Large Profile과 같은 문·카메라 계약을 재사용하되
+중앙의 `RoomStaticObstacle(central-pillar)`을 Prefab Layout에 고정한다. 검증기는 장애물이 solid
+`Environment` Collider이고 `Health`, `ItemDropSource`, 이동 Rigidbody가 없음을 확인한다. 플레이어와
+추적형은 Rigidbody 충돌로 통과하지 못하고, 양쪽 투사체는 사선이 차단되며, 돌진형은 기존
+Environment 충돌 처리로 즉시 회복 상태에 들어간다. 자동 우회나 경로 탐색은 이 정적 Room 계약의
+책임이 아니며 15주차 적 이동 정책에서 별도로 확장한다.
 
 ## 9. Floor
 
@@ -359,9 +422,11 @@ Encounter Definition
 ```
 
 `FloorGenerator`는 적 Prefab을 생성하지 않고, `RoomController`는 층의 연결 구조를 결정하지 않는다.
-장애물과 spawn point를 임의 좌표에 배치하지 않으며 검증된 Layout과 Encounter만 선택한다.
-Room과 Encounter 선택은 Run seed에서 안정적으로 파생하고, 재방문 시 `RoomRunState`를 통해
-이미 완료한 웨이브나 선택 보상을 다시 생성하지 않는다.
+핵심 벽·기둥·장애물과 안전 진입 영역은 수작업 Layout에 고정하고, 장애물과 spawn point를 임의
+좌표에 배치하지 않는다. 후속 장식·파괴물·SpawnPoint 랜덤화도 Layout이 제공하는 안전한 후보
+슬롯 안에서만 수행한다. Room Layout, 후보 슬롯과 Encounter 선택은 Run seed에서 안정적으로
+파생하고, 재방문 시 `RoomRunState`를 통해 파괴 상태, 완료한 웨이브와 선택 보상을 복원하여
+재추첨·재생성·중복 지급하지 않는다.
 
 ### 9.3 생성 실패 처리
 
