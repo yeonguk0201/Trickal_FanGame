@@ -1752,6 +1752,24 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d2d9250bc6cdce743be7738550951259, type: 2}
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
+  roomContentVersion: 3
+  roomTemplates:
+  - {fileID: 11400000, guid: 684a6d37e34e4a640b4de439e8dd6680, type: 2}
+  - {fileID: 11400000, guid: 7e42edc154314df4aa56be0401028675, type: 2}
+  - {fileID: 11400000, guid: 96c440fa91f28a342ae804f9000e9e6a, type: 2}
+  - {fileID: 11400000, guid: 9c4ef623dfcfad048ae2af84d0410cef, type: 2}
+  - {fileID: 11400000, guid: 025c80049bfec5843b1f45e2c3f9a5d7, type: 2}
+  - {fileID: 11400000, guid: 386c2e1a00ff0b948a82c708cd6bb049, type: 2}
+  - {fileID: 11400000, guid: 4ac878bf9faf92e498255aa1ba52cbe7, type: 2}
+  - {fileID: 11400000, guid: 807655f00c0bc124ba7aed2e8f024528, type: 2}
+  - {fileID: 11400000, guid: d582d98ad188b3c41bbd94118fa04e97, type: 2}
+  encounterDefinitions:
+  - {fileID: 11400000, guid: b65f49263c258d240b91a29c70b1a148, type: 2}
+  - {fileID: 11400000, guid: dbc8d179114db3d4585c4606f6e248c6, type: 2}
+  - {fileID: 11400000, guid: 0784e86b531646f41be6d7a2426d5758, type: 2}
+  - {fileID: 11400000, guid: d2cea361938940b40919b3b90fc10f62, type: 2}
+  - {fileID: 11400000, guid: b9f33209bf3f7ff4186d482ab125cb28, type: 2}
+  encounterContentVersion: 4
 --- !u!4 &43863915
 Transform:
   m_ObjectHideFlags: 0
@@ -1784,6 +1802,8 @@ MonoBehaviour:
   graph: {fileID: 1265728904}
   runProgress: {fileID: 1750892776}
   roomPrefab: {fileID: 3035332181880803975, guid: 4c3637cd1a19e3f4883f17715d95367f, type: 3}
+  encounterEnemyRoster: {fileID: 11400000, guid: dbd3fb86e3fb0264686c348e9060667b, type: 2}
+  encounterClearRewardPrefab: {fileID: 6812840948383656007, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
 --- !u!1 &49446195
 GameObject:
   m_ObjectHideFlags: 0
@@ -13409,7 +13429,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -13493,6 +13513,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomCameraController
   followCamera: {fileID: 519420033}
   roomCamera: {fileID: 519420031}
+  target: {fileID: 0}
+  followSpeed: 8
 --- !u!114 &519420035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48346,7 +48368,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4

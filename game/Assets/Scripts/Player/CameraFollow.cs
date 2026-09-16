@@ -9,6 +9,8 @@ namespace TrickalFanGame.Player
 
         private Vector3 offset;
 
+        public Transform Target => target;
+
         private void Awake()
         {
             if (target != null)

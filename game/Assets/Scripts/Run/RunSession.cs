@@ -1,6 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Data;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
 using TrickalFanGame.Meta;
@@ -437,12 +438,14 @@ namespace TrickalFanGame.Run
         {
             isSaveInFlight = false;
             canRetrySave = false;
+
             if (response?.data == null)
             {
                 OnSaveFailure("Run response data is unavailable.");
                 return;
             }
 
+            LocalPendingRunStorage.Remove(pendingRequest.clientRunId);
             lastRunId = response.data.runId;
             playerProgressClient?.ShowRunResult(response.data);
             CharacterProgressDto progress = response.data.progress;
@@ -459,6 +462,7 @@ namespace TrickalFanGame.Run
         {
             isSaveInFlight = false;
             canRetrySave = true;
+            LocalPendingRunStorage.Save(pendingRequest);
             statusMessage = $"Run ended; save failed: {error}";
             Debug.LogWarning($"[RunSession] {statusMessage}");
         }
