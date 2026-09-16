@@ -33,7 +33,6 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private Slider experienceBar;
         [SerializeField] private TMP_Text experienceText;
         [SerializeField] private TMP_Text saveStatus;
-        [SerializeField] private Button retrySaveButton;
         [SerializeField] private GameObject actionRoot;
         [SerializeField] private Button retryRunButton;
         [SerializeField] private Button homeButton;
@@ -54,7 +53,6 @@ namespace TrickalFanGame.Frontend
         public TMP_Text StageBody => stageBody;
         public TMP_Text SaveStatus => saveStatus;
         public Slider ExperienceBar => experienceBar;
-        public Button RetrySaveButton => retrySaveButton;
         public Button RetryRunButton => retryRunButton;
         public Button HomeButton => homeButton;
         public bool IsShowing => resultPanel != null && resultPanel.activeInHierarchy;
@@ -63,7 +61,7 @@ namespace TrickalFanGame.Frontend
 
         public void Configure(FrontendTitleView configuredTitleView, GameObject panel, TMP_Text heading,
             TMP_Text configuredCharacterName, TMP_Text reaction, TMP_Text speech, TMP_Text configuredStageTitle,
-            TMP_Text body, Slider xpBar, TMP_Text xpText, TMP_Text configuredSaveStatus, Button saveRetry,
+            TMP_Text body, Slider xpBar, TMP_Text xpText, TMP_Text configuredSaveStatus,
             GameObject configuredActionRoot, Button runRetry, Button home, AudioSource configuredAudioSource)
         {
             titleView = configuredTitleView;
@@ -77,7 +75,6 @@ namespace TrickalFanGame.Frontend
             experienceBar = xpBar;
             experienceText = xpText;
             saveStatus = configuredSaveStatus;
-            retrySaveButton = saveRetry;
             actionRoot = configuredActionRoot;
             retryRunButton = runRetry;
             homeButton = home;
@@ -86,7 +83,6 @@ namespace TrickalFanGame.Frontend
 
         private void OnEnable()
         {
-            retrySaveButton?.onClick.AddListener(SubmitResult);
             retryRunButton?.onClick.AddListener(ReturnToCharacterSelection);
             homeButton?.onClick.AddListener(ReturnHome);
         }
@@ -122,7 +118,6 @@ namespace TrickalFanGame.Frontend
 
         private void OnDisable()
         {
-            retrySaveButton?.onClick.RemoveListener(SubmitResult);
             retryRunButton?.onClick.RemoveListener(ReturnToCharacterSelection);
             homeButton?.onClick.RemoveListener(ReturnHome);
         }
@@ -150,10 +145,9 @@ namespace TrickalFanGame.Frontend
             }
 
             submissionInFlight = true;
-            retrySaveButton.gameObject.SetActive(false);
-            saveStatus.text = "결과 저장 중...";
-            stageTitle.text = "결과를 저장하고 있어요";
-            stageBody.text = "성장 결과는 서버 확인 후 공개됩니다.";
+            saveStatus.text = "";
+            stageTitle.text = "결과를 정리하고 있어요";
+            stageBody.text = "잠시만 기다려 주세요...";
             client.PostRun(payload.Request, OnSaveSuccess, ShowSaveFailure);
         }
 
@@ -167,6 +161,7 @@ namespace TrickalFanGame.Frontend
             }
 
             savedResponse = response;
+            LocalPendingRunStorage.Remove(payload.Request.clientRunId);
             PlayerProgressClient.StoreConfirmedProgress(LocalProfile.Nickname, response.data.progress);
             saveStatus.text = "저장 완료";
             if (sequence != null) StopCoroutine(sequence);
@@ -176,13 +171,11 @@ namespace TrickalFanGame.Frontend
         private void ShowSaveFailure(string error)
         {
             submissionInFlight = false;
-            saveStatus.text = "저장 실패";
-            stageTitle.text = "결과를 저장하지 못했어요";
-            stageBody.text = string.IsNullOrWhiteSpace(error)
-                ? "잠시 후 같은 Run ID로 다시 시도해 주세요."
-                : error + "\n같은 Run ID로 안전하게 다시 시도할 수 있습니다.";
-            retrySaveButton.gameObject.SetActive(true);
-            Focus(retrySaveButton);
+            Debug.Log($"[FrontendRunResultView] Save failed (offline mode): {error}");
+            LocalPendingRunStorage.Save(payload.Request);
+            saveStatus.text = "";
+            if (sequence != null) StopCoroutine(sequence);
+            sequence = StartCoroutine(PlayOfflineSequence());
         }
 
         private void ShowPendingResult()
@@ -192,7 +185,6 @@ namespace TrickalFanGame.Frontend
             titleView.TitlePanel.SetActive(false);
             titleView.HomeView.Hide();
             resultPanel.SetActive(true);
-            retrySaveButton.gameObject.SetActive(false);
             actionRoot.SetActive(false);
             experienceBar.gameObject.SetActive(false);
             experienceText.gameObject.SetActive(false);
@@ -228,6 +220,30 @@ namespace TrickalFanGame.Frontend
 
             yield return ShowTextStage("획득 아티팩트", BuildArtifactReview(), 1.1f);
             ShowSummary();
+        }
+
+        private IEnumerator PlayOfflineSequence()
+        {
+            skipToSummary = false;
+            finishCurrentStage = false;
+            hasUsedFastForward = false;
+            yield return ShowTextStage("RUN 기록", BuildRunRecord(), 1.25f);
+            if (skipToSummary) { ShowOfflineSummary(); yield break; }
+
+            yield return ShowTextStage("획득 아티팩트", BuildArtifactReview(), 1.1f);
+            ShowOfflineSummary();
+        }
+
+        private void ShowOfflineSummary()
+        {
+            sequence = null;
+            stageAnimating = false;
+            stageTitle.text = "RUN 결과";
+            stageBody.text = $"{BuildRunRecord()}\n{BuildArtifactReview()}";
+            experienceBar.gameObject.SetActive(false);
+            experienceText.gameObject.SetActive(false);
+            actionRoot.SetActive(true);
+            Focus(retryRunButton);
         }
 
         private IEnumerator ShowTextStage(string title, string body, float duration)

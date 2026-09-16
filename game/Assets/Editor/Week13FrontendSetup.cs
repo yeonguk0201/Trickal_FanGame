@@ -439,7 +439,8 @@ namespace TrickalFanGame.Editor
             TMP_Text experienceText = Text(stagePanel, "ExperienceText", "Lv. 1    0 / 400",
                 new Vector2(0, -155), new Vector2(620, 42), 20);
 
-            FrontendStartButton saveRetry = MenuButton(stagePanel, "RetrySaveButton", "같은 Run ID로 다시 시도", -245);
+            Transform obsoleteRetry = stagePanel.Find("RetrySaveButton");
+            if (obsoleteRetry != null) Undo.DestroyObjectImmediate(obsoleteRetry.gameObject);
 
             RectTransform actions = Rect(stagePanel, "ResultActions", new Vector2(0, -245), new Vector2(780, 70));
             FrontendStartButton retryRun = MenuButton(actions, "RetryRunButton", "다시 도전", 0);
@@ -454,7 +455,7 @@ namespace TrickalFanGame.Editor
             audioSource.loop = false;
             FrontendRunResultView resultView = Component<FrontendRunResultView>(titleView.gameObject);
             resultView.Configure(titleView, root.gameObject, heading, characterName, reaction, speech, stageTitle,
-                stageBody, experienceBar, experienceText, saveStatus, saveRetry, actions.gameObject, retryRun, home,
+                stageBody, experienceBar, experienceText, saveStatus, actions.gameObject, retryRun, home,
                 audioSource);
             root.gameObject.SetActive(false);
         }

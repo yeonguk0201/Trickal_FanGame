@@ -26,9 +26,11 @@ namespace TrickalFanGame.Editor
             Assert(resultViews.Length == 1, "Frontend Scene requires exactly one Run result view.");
             FrontendRunResultView result = resultViews[0];
             Assert(result.ResultPanel != null && result.StageTitle != null && result.StageBody != null &&
-                   result.SaveStatus != null && result.ExperienceBar != null && result.RetrySaveButton != null &&
+                   result.SaveStatus != null && result.ExperienceBar != null &&
                    result.RetryRunButton != null && result.HomeButton != null,
                 "Run result view has missing references.");
+            Assert(result.ResultPanel.transform.Find("SafeArea/SequenceStage/RetrySaveButton") == null,
+                "Offline result UI must not retain the obsolete manual save retry button.");
             ImageAssertOpaque(result.ResultPanel);
             Assert(FindAll<RunSession>(frontend).Length == 0 && FindAll<RunProgress>(frontend).Length == 0 &&
                    FindAll<PlayerInventory>(frontend).Length == 0,
@@ -55,9 +57,58 @@ namespace TrickalFanGame.Editor
                 "Flow-5 setup changed the Frontend Scene GUID.");
             Assert(gameGuid == AssetDatabase.AssetPathToGUID(Week13FrontendSetup.GameScenePath),
                 "Flow-5 setup changed the Game Scene GUID.");
+            VerifyPendingRunStorage();
             Verify();
             Week13Flow4Verification.Verify();
             Debug.Log("Week 13 Flow-5 batch verification passed: setup twice, stable Scene GUIDs and Flow-4 regression.");
+        }
+
+        private static void VerifyPendingRunStorage()
+        {
+            string firstId = $"flow5-storage-{Guid.NewGuid()}";
+            string secondId = $"flow5-storage-{Guid.NewGuid()}";
+            int initialCount = LocalPendingRunStorage.Count;
+            CreateRunRequest first = CreateStorageRequest(firstId, 1);
+            CreateRunRequest second = CreateStorageRequest(secondId, 2);
+
+            try
+            {
+                Assert(LocalPendingRunStorage.Save(first) && LocalPendingRunStorage.Save(second),
+                    "Pending Run queue rejected valid requests.");
+                Assert(LocalPendingRunStorage.Count == initialCount + 2 &&
+                       LocalPendingRunStorage.Contains(firstId) && LocalPendingRunStorage.Contains(secondId),
+                    "Pending Run queue did not preserve multiple requests.");
+                Assert(LocalPendingRunStorage.Save(first) && LocalPendingRunStorage.Count == initialCount + 2,
+                    "Pending Run queue duplicated an existing clientRunId.");
+
+                CreateRunRequest conflict = CreateStorageRequest(firstId, 99);
+                Assert(!LocalPendingRunStorage.Save(conflict) && LocalPendingRunStorage.Count == initialCount + 2,
+                    "Pending Run queue replaced a stable clientRunId with conflicting data.");
+                Assert(LocalPendingRunStorage.Remove(firstId) && !LocalPendingRunStorage.Contains(firstId) &&
+                       LocalPendingRunStorage.Contains(secondId) && LocalPendingRunStorage.Count == initialCount + 1,
+                    "Removing one confirmed Run deleted another queued request.");
+            }
+            finally
+            {
+                LocalPendingRunStorage.Remove(firstId);
+                LocalPendingRunStorage.Remove(secondId);
+            }
+        }
+
+        private static CreateRunRequest CreateStorageRequest(string clientRunId, int killCount)
+        {
+            return new CreateRunRequest
+            {
+                clientRunId = clientRunId,
+                userId = "flow5-storage-user",
+                characterId = "erpin",
+                gameVersion = Application.version,
+                startedAt = DateTime.UtcNow.AddMinutes(-1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+                endedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+                reachedFloor = 1,
+                killCount = killCount,
+                items = Array.Empty<RunItemDto>()
+            };
         }
 
         private static void ImageAssertOpaque(GameObject panel)
@@ -132,12 +183,13 @@ namespace TrickalFanGame.Editor
                 {
                     case 0: LaunchRun(); break;
                     case 1: EndRun(); break;
-                    case 2: VerifyFailureAndRetry(); break;
-                    case 3: FastForwardExperience(); break;
-                    case 4: SkipToSummary(); break;
-                    case 5: ReturnToSelection(); break;
-                    case 6: PrepareHomeResult(); break;
-                    case 7: ReturnHome(); break;
+                    case 2: VerifyOfflineResultAndRecovery(); break;
+                    case 3: PrepareConfirmedResult(); break;
+                    case 4: FastForwardExperience(); break;
+                    case 5: SkipToSummary(); break;
+                    case 6: ReturnToSelection(); break;
+                    case 7: PrepareHomeResult(); break;
+                    case 8: ReturnHome(); break;
                 }
             }
             catch (Exception exception)
@@ -172,22 +224,39 @@ namespace TrickalFanGame.Editor
             NextPhase();
         }
 
-        private static void VerifyFailureAndRetry()
+        private static void VerifyOfflineResultAndRecovery()
         {
             if (SceneManager.GetActiveScene().path != Week13FrontendSetup.ScenePath) return;
             FrontendRunResultView view = Object.FindFirstObjectByType<FrontendRunResultView>();
-            if (view == null || !view.IsShowing || view.RetrySaveButton == null) return;
-            if (!view.RetrySaveButton.gameObject.activeInHierarchy) return;
+            if (view == null || !view.IsShowing || !view.IsSummaryVisible) return;
             Week13Flow5Verification.Assert(apiClient.PostRunCount == 1 &&
                 apiClient.Requests[0].clientRunId == endedClientRunId,
                 "Initial result save did not preserve the ended Run clientRunId.");
-            Week13Flow5Verification.Assert(view.SaveStatus.text == "저장 실패" &&
-                view.StageBody.text.Contains("같은 Run ID"),
-                "Save failure did not prioritize same-ID retry guidance.");
-            view.RetrySaveButton.onClick.Invoke();
+            Week13Flow5Verification.Assert(LocalPendingRunStorage.Contains(endedClientRunId) &&
+                string.IsNullOrEmpty(view.SaveStatus.text) && view.StageTitle.text == "RUN 결과" &&
+                view.StageBody.text.Contains("획득한 아티팩트"),
+                "Offline result did not immediately show local Run data and queue the request.");
+
+            view.RetryRunButton.onClick.Invoke();
+            FrontendTitleView frontend = Object.FindFirstObjectByType<FrontendTitleView>();
+            frontend.RecoverPendingRuns(apiClient);
             Week13Flow5Verification.Assert(apiClient.PostRunCount == 2 &&
-                ReferenceEquals(apiClient.Requests[0], apiClient.Requests[1]),
-                "Result retry did not reuse the exact pending request.");
+                apiClient.Requests[1].clientRunId == endedClientRunId &&
+                !LocalPendingRunStorage.Contains(endedClientRunId),
+                "Pending Run recovery did not confirm and remove the exact clientRunId.");
+            string cachedProgress = PlayerPrefs.GetString("TrickalFanGame.CharacterProgress.Flow5Tester.erpin", string.Empty);
+            Week13Flow5Verification.Assert(cachedProgress.Contains("\"level\":3"),
+                "Recovered Run progress was not stored in the local cache.");
+            NextPhase();
+        }
+
+        private static void PrepareConfirmedResult()
+        {
+            CreateRunRequest request = CreateRequest(Guid.NewGuid().ToString());
+            Week13Flow5Verification.Assert(RunResultContext.TryPrepare(request, StartingProgress(), apiClient),
+                "Could not prepare the confirmed result sequence verification.");
+            apiClient.FailNextRun = false;
+            SceneManager.LoadScene(SceneUtility.GetBuildIndexByScenePath(Week13FrontendSetup.ScenePath));
             NextPhase();
         }
 
@@ -212,7 +281,7 @@ namespace TrickalFanGame.Editor
             FrontendRunResultView view = Object.FindFirstObjectByType<FrontendRunResultView>();
             if (view == null || !view.IsSummaryVisible) return;
             Week13Flow5Verification.Assert(view.StageBody.text.Contains("Lv. 3") &&
-                view.StageBody.text.Contains("획득한 아티팩트 없음") && view.SaveStatus.text == "저장 완료",
+                view.StageBody.text.Contains("item-01") && view.SaveStatus.text == "저장 완료",
                 "Final summary lost confirmed progression, artifacts or save state.");
             view.RetryRunButton.onClick.Invoke();
             FrontendTitleView frontend = Object.FindFirstObjectByType<FrontendTitleView>();
@@ -251,7 +320,7 @@ namespace TrickalFanGame.Editor
                 frontend.HomeView.HomePanel.activeInHierarchy && frontend.HomeView.CurrentDestination == null &&
                 EventSystem.current.currentSelectedGameObject == frontend.HomeView.GameStartButton.gameObject,
                 "Home return did not restore clean Frontend state and first focus.");
-            Finish(0, "Week 13 Flow-5 Play Mode verification passed: death transition, same-ID retry, confirmed sequence, skip controls and clean retry/home returns.");
+            Finish(0, "Week 13 Flow-5 Play Mode verification passed: offline queue, exact-ID recovery, confirmed progress cache, result sequence and clean returns.");
         }
 
         private static CreateRunRequest CreateRequest(string clientRunId)
@@ -297,6 +366,7 @@ namespace TrickalFanGame.Editor
             SessionState.SetBool(PendingKey, false);
             RunLaunchContext.Clear();
             RunResultContext.Clear();
+            if (!string.IsNullOrWhiteSpace(endedClientRunId)) LocalPendingRunStorage.Remove(endedClientRunId);
             Time.timeScale = 1f;
             PlayerPrefs.DeleteKey("TrickalFanGame.CharacterProgress.Flow5Tester.erpin");
             PlayerPrefs.Save();

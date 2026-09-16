@@ -95,7 +95,7 @@ namespace TrickalFanGame.Frontend
 
             if (string.IsNullOrEmpty(nickname))
             {
-                validationText.text = $"닉네임 ({NicknameValidator.MinLength}~{NicknameValidator.MaxLength}자)";
+                validationText.text = $"닉네임 ({NicknameValidator.MinLength}~{NicknameValidator.MaxLength}자)\n영문 대소문자를 구분합니다";
                 validationText.color = Color.gray;
                 SetSubmitInteractable(false);
                 return;

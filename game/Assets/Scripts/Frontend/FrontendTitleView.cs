@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using TrickalFanGame.Data;
+using TrickalFanGame.Meta;
 using TrickalFanGame.Network;
 using TrickalFanGame.Run;
 using UnityEngine;
@@ -80,6 +81,8 @@ namespace TrickalFanGame.Frontend
 
         private void InitializeView()
         {
+            RecoverPendingRuns();
+
             if (FrontendEntryContext.TryConsumeHome())
             {
                 ShowHomeScreen();
@@ -87,6 +90,51 @@ namespace TrickalFanGame.Frontend
                 return;
             }
             ShowTitleScreen();
+        }
+
+        private bool pendingRunRecoveryInFlight;
+
+        public void RecoverPendingRuns(IGameApiClient overrideClient = null)
+        {
+            if (pendingRunRecoveryInFlight || RunResultContext.HasPending || !LocalProfile.IsRegistered) return;
+
+            CreateRunRequest pendingRequest = LocalPendingRunStorage.Load(LocalProfile.UserId);
+            if (pendingRequest == null) return;
+
+            Debug.Log($"[FrontendTitleView] Recovering pending Run request: {pendingRequest.clientRunId}");
+            IGameApiClient apiClient = overrideClient ?? ApiClient.Instance;
+            if (apiClient == null)
+            {
+                Debug.LogWarning("[FrontendTitleView] ApiClient not available for recovery.");
+                return;
+            }
+
+            pendingRunRecoveryInFlight = true;
+            apiClient.PostRun(pendingRequest,
+                response => OnPendingRunRecovered(pendingRequest, response, apiClient),
+                OnPendingRunRecoveryFailed);
+        }
+
+        private void OnPendingRunRecovered(CreateRunRequest request, CreateRunResponse response, IGameApiClient apiClient)
+        {
+            if (response?.data == null)
+            {
+                pendingRunRecoveryInFlight = false;
+                Debug.LogWarning("[FrontendTitleView] Pending Run recovery returned null data.");
+                return;
+            }
+
+            LocalPendingRunStorage.Remove(request.clientRunId);
+            PlayerProgressClient.StoreConfirmedProgress(LocalProfile.Nickname, response.data.progress);
+            pendingRunRecoveryInFlight = false;
+            Debug.Log($"[FrontendTitleView] Pending Run recovered successfully: {response.data.runId}");
+            RecoverPendingRuns(apiClient);
+        }
+
+        private void OnPendingRunRecoveryFailed(string error)
+        {
+            pendingRunRecoveryInFlight = false;
+            Debug.LogWarning($"[FrontendTitleView] Pending Run recovery failed: {error}. Will retry on next launch.");
         }
 
         public void ShowTitleScreen()
