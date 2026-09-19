@@ -20,26 +20,28 @@ namespace TrickalFanGame.Editor
             EnemyProfile ranged = ReadRanged();
             EnemyProfile charging = ReadCharging();
 
-            Assert(chaser.Health == 5 && chaser.Damage == 1 && Mathf.Approximately(chaser.Speed, 2.5f),
-                "Chaser must use HP 5, contact damage 1, and move speed 2.5.");
+            Assert(chaser.Health == 6 && chaser.Damage == 2 && Mathf.Approximately(chaser.Speed, 2.25f),
+                "Enemy-2 chaser must use HP 6, contact damage 2, and move speed 2.25.");
+            Assert(Mathf.Approximately(
+                    Require<MeleeEnemyAttack>(LoadPrefab(ChaserPrefabPath), ChaserPrefabPath).AttackDamage,
+                    3f),
+                "Enemy-2 chaser must use melee damage 3.");
             Assert(ranged.Health == 3 && ranged.Damage == 2 && Mathf.Approximately(ranged.Speed, 1.5f),
                 "Ranged must use HP 3, projectile damage 2, and move speed 1.5.");
             Assert(charging.Health == 7 && charging.Damage == 3 && Mathf.Approximately(charging.Speed, 8f),
                 "Charging must use HP 7, charge damage 3, and dash speed 8.");
 
-            HashSet<float> healthValues = new() { chaser.Health, ranged.Health, charging.Health };
-            HashSet<float> damageValues = new() { chaser.Damage, ranged.Damage, charging.Damage };
             HashSet<float> speedValues = new() { chaser.Speed, ranged.Speed, charging.Speed };
-            Assert(healthValues.Count == 3 && damageValues.Count == 3 && speedValues.Count == 3,
-                "All three normal monsters must have distinct HP, damage, and movement-speed values.");
+            Assert(speedValues.Count == 3,
+                "All three normal monster roles must retain distinct movement speeds.");
             Assert(ranged.Health < chaser.Health && chaser.Health < charging.Health &&
                    ranged.Speed < chaser.Speed && chaser.Speed < charging.Speed &&
-                   chaser.Damage < ranged.Damage && ranged.Damage < charging.Damage,
-                "Enemy profiles must preserve fragile ranged, balanced chaser, and durable charging roles.");
+                   ranged.Damage <= chaser.Damage && chaser.Damage < charging.Damage,
+                "Enemy profiles must preserve fragile ranged, strong chaser contact, and durable charging roles.");
 
             Debug.Log(
-                "Phase E-4 enemy balance verification passed: all three enemy prefabs have distinct HP, " +
-                "damage, and movement-speed profiles with the intended combat roles.");
+                "Phase E-4 enemy balance verification passed: all three enemy prefabs preserve their " +
+                "intended HP, damage, and movement-speed roles.");
         }
 
         private static EnemyProfile ReadChaser()

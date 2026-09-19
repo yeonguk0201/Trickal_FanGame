@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: erpin
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Character.CharacterDefinition
   characterId: erpin
-  displayName: 에르핀
+  displayName: "\uC5D0\uB974\uD540"
   description: "MVP \uAE30\uBCF8 \uD50C\uB808\uC774 \uCE90\uB9AD\uD130"
+  portrait: {fileID: 21300000, guid: 99284f00c85795949b72821e2d755fc8, type: 3}

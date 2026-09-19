@@ -305,7 +305,7 @@ namespace TrickalFanGame.Editor
             TMP_Text description = Text(cardRect, "CharacterDescription", "설명", new Vector2(0, -55), new Vector2(280, 130), 20);
             TMP_Text selection = Text(cardRect, "SelectionState", "", new Vector2(0, -205), new Vector2(280, 36), 20);
             FrontendCharacterCardView cardTemplate = Component<FrontendCharacterCardView>(cardRect.gameObject);
-            cardTemplate.ConfigureTemplate(cardButton, name, description, selection, border);
+            cardTemplate.ConfigureTemplate(cardButton, name, description, selection, border, icon);
             cardRect.gameObject.SetActive(false);
 
             TMP_Text status = Text(root, "CharacterSelectionStatus", FrontendCharacterSelectionView.SelectMessage,

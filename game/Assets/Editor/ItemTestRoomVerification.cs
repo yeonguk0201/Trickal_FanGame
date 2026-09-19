@@ -55,8 +55,16 @@ namespace TrickalFanGame.Editor
                 int activeCount = controller.ItemLoadout.Count(entry => entry.Item.IsActive);
                 Assert(controller.ItemLoadout.Count == 11 && ids.Count == 11 && activeCount == 10 && ids.Contains("item-06"),
                     "The loadout editor must expose all 10 active artifacts and the inactive item-06 compatibility item.");
-                Assert(controller.EnemyPlacements.Count == 3,
-                    "The default test room must expose three independently editable enemy placements.");
+                Assert(controller.EnemyPlacements.Count == 5,
+                    "The default test room must expose five independently editable enemy placements.");
+                GameObject sansamo = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/SansamoEnemy.prefab");
+                GameObject highBloodSugar = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/HighBloodSugarFairy.prefab");
+                Assert(sansamo != null && highBloodSugar != null,
+                    "The Sansamo and High Blood Sugar Fairy debug prefabs must exist.");
+                Assert(controller.EnemyPlacements.Any(placement => placement?.EnemyPrefab == sansamo),
+                    "The default test room must include a Sansamo color sample.");
+                Assert(controller.EnemyPlacements.Any(placement => placement?.EnemyPrefab == highBloodSugar),
+                    "The default test room must include a High Blood Sugar Fairy color sample.");
                 Assert(controller.EnemyPlacements.All(placement =>
                         placement.EnemyPrefab != null && placement.EnemyPrefab.GetComponent<Health>() != null),
                     "Every default enemy placement must reference a prefab with Health.");
@@ -82,7 +90,7 @@ namespace TrickalFanGame.Editor
                 string mode = EditorApplication.isPlaying ? "Play Mode" : "Edit Mode";
                 Debug.Log(
                     $"Item Test Room verification passed in {mode}: isolated scene, 10 active + 1 legacy item " +
-                    "loadout entries, editable stacks, three editable enemy placements, and runtime debug controls are valid.",
+                    "loadout entries, editable stacks, five editable enemy placements, and runtime debug controls are valid.",
                     controller);
             }
             finally
@@ -92,6 +100,12 @@ namespace TrickalFanGame.Editor
                     EditorSceneManager.CloseScene(scene, true);
                 }
             }
+        }
+
+        public static void SetupAndVerifyBatch()
+        {
+            ItemTestRoomSetup.AddWeek15EnemyColorSamples();
+            Verify();
         }
 
         private static T[] FindInScene<T>(Scene scene) where T : Component

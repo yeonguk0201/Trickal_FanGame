@@ -7693,7 +7693,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Slider
   m_Navigation:
     m_Mode: 3
@@ -8610,6 +8610,7 @@ MonoBehaviour:
   descriptionText: {fileID: 607231182}
   selectionText: {fileID: 2036429732}
   selectionBorder: {fileID: 1363272644}
+  portraitImage: {fileID: 238334014}
 --- !u!114 &766247453
 MonoBehaviour:
   m_ObjectHideFlags: 0

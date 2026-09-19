@@ -1752,7 +1752,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d2d9250bc6cdce743be7738550951259, type: 2}
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
-  roomContentVersion: 3
+  roomContentVersion: 2
   roomTemplates:
   - {fileID: 11400000, guid: 684a6d37e34e4a640b4de439e8dd6680, type: 2}
   - {fileID: 11400000, guid: 7e42edc154314df4aa56be0401028675, type: 2}
@@ -1762,14 +1762,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 386c2e1a00ff0b948a82c708cd6bb049, type: 2}
   - {fileID: 11400000, guid: 4ac878bf9faf92e498255aa1ba52cbe7, type: 2}
   - {fileID: 11400000, guid: 807655f00c0bc124ba7aed2e8f024528, type: 2}
-  - {fileID: 11400000, guid: d582d98ad188b3c41bbd94118fa04e97, type: 2}
   encounterDefinitions:
   - {fileID: 11400000, guid: b65f49263c258d240b91a29c70b1a148, type: 2}
+  - {fileID: 11400000, guid: 44567edd1d3df2649a0d93df54348ce1, type: 2}
+  - {fileID: 11400000, guid: 2ac9c27c2ace10f48bcb34deb0f1ade0, type: 2}
+  - {fileID: 11400000, guid: b735f65dec1087848819a83764baa89e, type: 2}
   - {fileID: 11400000, guid: dbc8d179114db3d4585c4606f6e248c6, type: 2}
-  - {fileID: 11400000, guid: 0784e86b531646f41be6d7a2426d5758, type: 2}
   - {fileID: 11400000, guid: d2cea361938940b40919b3b90fc10f62, type: 2}
   - {fileID: 11400000, guid: b9f33209bf3f7ff4186d482ab125cb28, type: 2}
-  encounterContentVersion: 4
+  encounterContentVersion: 5
 --- !u!4 &43863915
 Transform:
   m_ObjectHideFlags: 0
@@ -1804,6 +1805,10 @@ MonoBehaviour:
   roomPrefab: {fileID: 3035332181880803975, guid: 4c3637cd1a19e3f4883f17715d95367f, type: 3}
   encounterEnemyRoster: {fileID: 11400000, guid: dbd3fb86e3fb0264686c348e9060667b, type: 2}
   encounterClearRewardPrefab: {fileID: 6812840948383656007, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
+  floorBossPrefabs:
+  - {fileID: 421685952657128216, guid: f991af9e6d8bc4e4f869e052eded37e0, type: 3}
+  - {fileID: 2406316834951311537, guid: 6bef911f342ead54b94de8fab8306eb9, type: 3}
+  - {fileID: 421685952657128216, guid: f991af9e6d8bc4e4f869e052eded37e0, type: 3}
 --- !u!1 &49446195
 GameObject:
   m_ObjectHideFlags: 0
@@ -8717,6 +8722,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b65f8e205289b64b91a50cb0721cb5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.TestEnemy
+  allowsSPDrop: 1
+  destroyOnBossCollision: 0
 --- !u!114 &302527992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25643,7 +25650,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -12}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -24, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1137766539
@@ -48258,6 +48265,8 @@ GameObject:
   - component: {fileID: 2018927171}
   - component: {fileID: 2018927175}
   - component: {fileID: 2018927174}
+  - component: {fileID: 2018927176}
+  - component: {fileID: 2018927177}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -48421,7 +48430,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 99284f00c85795949b72821e2d755fc8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -48592,6 +48601,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1f4124a434d46629401b3b217b9d10e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerActionState
+--- !u!114 &2018927176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018927159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cd40aeb89be4c2786376575d9b92ab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.DamageInvulnerability
+  hitDuration: 0.35
+--- !u!114 &2018927177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018927159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
+  defaultDuration: 0.2
+  defaultStunDuration: 0.4
 --- !u!1 &2024060499
 GameObject:
   m_ObjectHideFlags: 0

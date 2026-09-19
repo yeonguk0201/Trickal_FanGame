@@ -87,7 +87,7 @@ namespace TrickalFanGame.Editor
             if (!EditorSceneManager.SaveScene(SceneManager.GetActiveScene()))
                 throw new InvalidOperationException("Game Scene save failed during Room-6 setup.");
             AssetDatabase.SaveAssets();
-            Debug.Log("Week 14 Room-6 ready: Tall and Large normal rooms plus floor-specific wide, tall, " +
+            Debug.Log("Week 14 Room-6 ready: Tall and Large normal rooms plus floor-specific basic, tall, " +
                       "and large boss room profile candidates use the shared camera, door, spawn, and spacing contracts.");
         }
 
@@ -106,8 +106,13 @@ namespace TrickalFanGame.Editor
             RoomType[] bossOnly = { RoomType.Boss };
             Week14Room3Setup.ConfigureLayout(BossFloor1ProfileId, BossFloor1TemplateId,
                 BossFloor1ProfilePath, BossFloor1TemplatePath, BossFloor1PrefabPath,
-                "Room Boss Floor 1 Wide", Week14Room3Setup.WideSize,
-                new[] { new Vector2(-5f, 2f), Vector2.zero, new Vector2(5f, -2f) },
+                "Room Boss Floor 1 Basic Size", RoomLayout.RoomSize,
+                new[]
+                {
+                    RoomLayout.SpawnPosition(0, 3),
+                    RoomLayout.SpawnPosition(1, 3),
+                    RoomLayout.SpawnPosition(2, 3),
+                },
                 basicPrefab, bossOnly, 1, 1);
             Week14Room3Setup.ConfigureLayout(BossFloor2ProfileId, BossFloor2TemplateId,
                 BossFloor2ProfilePath, BossFloor2TemplatePath, BossFloor2PrefabPath,

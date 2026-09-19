@@ -147,7 +147,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 8, y: 0, z: 0}
-  m_LocalScale: {x: 0.4, y: 9, z: 1}
+  m_LocalScale: {x: 0.4, y: 12, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 590584129}
@@ -268,7 +268,7 @@ GameObject:
   - component: {fileID: 249022118}
   - component: {fileID: 249022117}
   m_Layer: 0
-  m_Name: Item Test Room
+  m_Name: Boss-2 Test Room
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -289,51 +289,13 @@ MonoBehaviour:
   playerInventory: {fileID: 2018927168}
   playerHealth: {fileID: 2018927162}
   playerStats: {fileID: 2018927169}
-  itemLoadout:
-  - item: {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
-    startingStacks: 1
-  - item: {fileID: 11400000, guid: 22636d545b564004ab7f9a2ea443ba45, type: 2}
-    startingStacks: 0
-  - item: {fileID: 11400000, guid: 7a7b1d69278e448aa7edd8b0e10ac1c0, type: 2}
-    startingStacks: 0
-  - item: {fileID: 11400000, guid: 2e3b460311314c30be140bb33f554042, type: 2}
-    startingStacks: 0
-  - item: {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
-    startingStacks: 0
-  - item: {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
-    startingStacks: 0
-  - item: {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
-    startingStacks: 0
-  - item: {fileID: 11400000, guid: eb5f979e22d646bd852848ba85098dc7, type: 2}
-    startingStacks: 0
-  - item: {fileID: 11400000, guid: d74271f8aaa7ee2428d026411a4e9e03, type: 2}
-    startingStacks: 0
-  - item: {fileID: 11400000, guid: 625e0be83fd749cb861e619dfb23d4e3, type: 2}
-    startingStacks: 0
-  - item: {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
-    startingStacks: 0
+  itemLoadout: []
   enemyPlacements:
   - enabled: 1
-    enemyPrefab: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
-    localPosition: {x: 3, y: 1.5}
+    enemyPrefab: {fileID: 2406316834951311537, guid: 6bef911f342ead54b94de8fab8306eb9, type: 3}
+    localPosition: {x: 0, y: 0}
     rotationDegrees: 0
-  - enabled: 1
-    enemyPrefab: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
-    localPosition: {x: -3, y: 1.5}
-    rotationDegrees: 0
-  - enabled: 1
-    enemyPrefab: {fileID: 940017362510908874, guid: e65ef9de4be55d4458e0b57203c22239, type: 3}
-    localPosition: {x: 3, y: -1.5}
-    rotationDegrees: 0
-  - enabled: 1
-    enemyPrefab: {fileID: 4653349662447937955, guid: 7b80094402b1ca948bdb4950142b1fc2, type: 3}
-    localPosition: {x: -3, y: -1.5}
-    rotationDegrees: 0
-  - enabled: 1
-    enemyPrefab: {fileID: 7096289180192387305, guid: 2ef440c86adf96d4b8485c722ca3e937, type: 3}
-    localPosition: {x: 0, y: 3}
-    rotationDegrees: 0
-  roomSize: {x: 16, y: 9}
+  roomSize: {x: 16, y: 12}
   applyLoadoutOnStart: 1
   spawnEnemiesOnStart: 1
   showDebugPanel: 1
@@ -462,7 +424,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5.25
+  orthographic size: 7
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -714,7 +676,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -8, y: 0, z: 0}
-  m_LocalScale: {x: 0.4, y: 9, z: 1}
+  m_LocalScale: {x: 0.4, y: 12, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 590584129}
@@ -851,7 +813,7 @@ Transform:
   m_GameObject: {fileID: 1430606031}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.5, z: 0}
+  m_LocalPosition: {x: 0, y: 6, z: 0}
   m_LocalScale: {x: 16, y: 0.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -989,7 +951,7 @@ Transform:
   m_GameObject: {fileID: 1704413247}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -4.5, z: 0}
+  m_LocalPosition: {x: 0, y: -6, z: 0}
   m_LocalScale: {x: 16, y: 0.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1125,6 +1087,7 @@ GameObject:
   - component: {fileID: 2018927175}
   - component: {fileID: 2018927174}
   - component: {fileID: 2018927176}
+  - component: {fileID: 2018927177}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -1307,7 +1270,7 @@ Transform:
   m_GameObject: {fileID: 2018927159}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -3, y: -2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1469,9 +1432,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4cd40aeb89be4c2786376575d9b92ab1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.DamageInvulnerability
   hitDuration: 0.35
+--- !u!114 &2018927177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018927159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
+  defaultDuration: 0.2
+  defaultStunDuration: 0.4
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -96,13 +96,13 @@ namespace TrickalFanGame.Editor
                 player.transform.position = Vector2.left * 5f;
                 charging.TickBehavior(0.64f);
                 Assert(charging.State == ChargingEnemyState.Windup &&
-                       Vector2.Dot(charging.LockedDirection, Vector2.right) > 0.999f,
-                    "Moving during windup must not redirect the committed charge.");
+                       Vector2.Dot(charging.LockedDirection, Vector2.left) > 0.999f,
+                    "Moving during windup must update the telegraphed charge direction.");
                 charging.TickBehavior(0.65f);
                 Assert(charging.State == ChargingEnemyState.Dashing &&
-                       Vector2.Dot(enemyBody.linearVelocity.normalized, Vector2.right) > 0.999f &&
+                       Vector2.Dot(enemyBody.linearVelocity.normalized, Vector2.left) > 0.999f &&
                        Mathf.Approximately(enemyBody.linearVelocity.magnitude, 9f),
-                    "The charging enemy must dash in its locked direction when windup ends.");
+                    "The charging enemy must lock the latest tracked direction when windup ends.");
 
                 float healthBeforeHit = playerHealth.CurrentHealth;
                 Assert(charging.TryResolveCollision(playerCollider, 0.7f) &&

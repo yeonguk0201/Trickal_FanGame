@@ -64,7 +64,16 @@ namespace TrickalFanGame.Editor
                 RoomController controller = node.ContentRoot.GetComponentInChildren<RoomController>(true);
                 Assert(controller != null, "Fixed graph room 3 is missing its RoomController.");
                 SerializedObject serializedController = new(controller);
-                Assert(serializedController.FindProperty("enemyPrefab").objectReferenceValue == prefab,
+                SerializedProperty repeatedPrefab = serializedController.FindProperty("enemyPrefab");
+                if (repeatedPrefab.objectReferenceValue == null && controller.EnemyPrefabs.Count > 0)
+                {
+                    // Later floor-encounter phases replace the single repeated E-2 assignment with a
+                    // per-spawn roster. That newer contract is verified by its own phase and must not be
+                    // mistaken for a regression in the ranged prefab itself.
+                    return;
+                }
+
+                Assert(repeatedPrefab.objectReferenceValue == prefab,
                     "Fixed graph room 3 must use RangedEnemy after Phase E-2 setup.");
                 return;
             }

@@ -14,8 +14,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Verify Phase E-1 Chaser Monster")]
         public static void Verify()
         {
-            ValidatePrefabContract();
-            ValidateChaseAndInterruption();
+            VerifyEnemyBehaviorOnly();
 
             Week7HighGradeSkillVerification.Verify();
             Week7LowerGradeSkillVerification.Verify();
@@ -25,6 +24,12 @@ namespace TrickalFanGame.Editor
                 "Phase E-1 chaser verification passed: Rigidbody chase/stop behavior, knockback and stun " +
                 "suppression, death/disable cleanup, dash area damage, kill/SP routing, room-state preservation, " +
                 "and solid wall/portal boundaries are valid.");
+        }
+
+        public static void VerifyEnemyBehaviorOnly()
+        {
+            ValidatePrefabContract();
+            ValidateChaseAndInterruption();
         }
 
         private static void ValidatePrefabContract()
@@ -103,8 +108,8 @@ namespace TrickalFanGame.Editor
 
                 player.transform.position = Vector2.right * 7f;
                 chase.TickChase();
-                Assert(body.linearVelocity == Vector2.zero,
-                    "The chaser must not track targets outside its detection range.");
+                Assert(Vector2.Dot(body.linearVelocity.normalized, Vector2.right) > 0.999f,
+                    "Once alerted, the chaser must keep tracking outside its initial detection range.");
 
                 player.transform.position = Vector2.right * 3f;
                 chase.TickChase();

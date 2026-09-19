@@ -8,10 +8,12 @@ namespace TrickalFanGame.Character
         [SerializeField] private string characterId;
         [SerializeField] private string displayName;
         [SerializeField, TextArea] private string description;
+        [SerializeField] private Sprite portrait;
 
         public string CharacterId => characterId;
         public string DisplayName => displayName;
         public string Description => description;
+        public Sprite Portrait => portrait;
         public bool IsValid => !string.IsNullOrWhiteSpace(characterId) && !string.IsNullOrWhiteSpace(displayName);
     }
 }

@@ -44,7 +44,7 @@ namespace TrickalFanGame.Editor
             ValidateEncounterCompatibility(generator);
             Week14Encounter3Verification.Verify();
             Debug.Log("Week 14 Room-6 verification passed: Tall tracks vertically, Large tracks both axes, " +
-                      "floor 1/2/3 boss candidates use wide/tall/large profiles only on their floors, expanded " +
+                      "floor 1/2/3 boss candidates use basic/tall/large profiles only on their floors, expanded " +
                       "layouts remain deterministic and non-overlapping, and Encounter-3 plus Room-0~5 regressions pass.");
         }
 
@@ -76,8 +76,8 @@ namespace TrickalFanGame.Editor
                 Week14Room6Setup.LargeProfileId, Week14Room6Setup.LargeSize,
                 RoomCameraTrackingMode.Both, RoomType.Normal, 1, 99);
             ValidateTemplate(templates, Week14Room6Setup.BossFloor1TemplateId,
-                Week14Room6Setup.BossFloor1ProfileId, Week14Room3Setup.WideSize,
-                RoomCameraTrackingMode.Horizontal, RoomType.Boss, 1, 1);
+                Week14Room6Setup.BossFloor1ProfileId, RoomLayout.RoomSize,
+                RoomCameraTrackingMode.Fixed, RoomType.Boss, 1, 1);
             ValidateTemplate(templates, Week14Room6Setup.BossFloor2TemplateId,
                 Week14Room6Setup.BossFloor2ProfileId, Week14Room6Setup.TallSize,
                 RoomCameraTrackingMode.Vertical, RoomType.Boss, 2, 2);

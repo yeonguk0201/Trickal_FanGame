@@ -1,4 +1,5 @@
 using TrickalFanGame.Combat;
+using TrickalFanGame.Enemy;
 using UnityEngine;
 
 namespace TrickalFanGame.Player
@@ -59,8 +60,15 @@ namespace TrickalFanGame.Player
             return Instantiate(pickupPrefab, position, Quaternion.identity, parent);
         }
 
+        public bool CanDropFrom(Health target)
+        {
+            TestEnemy enemy = target != null ? target.GetComponent<TestEnemy>() : null;
+            return target != null && (enemy == null || enemy.AllowsSPDrop);
+        }
+
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)
         {
+            if (!CanDropFrom(killEvent.Target)) return;
             Transform dropParent = killEvent.Target.transform.parent;
             TrySpawnPickup(killEvent.Target.transform.position, dropParent, Random.value);
         }

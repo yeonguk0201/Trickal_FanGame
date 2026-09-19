@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TrickalFanGame.Combat;
@@ -123,6 +124,60 @@ namespace TrickalFanGame.Editor
                 rootObject);
         }
 
+        [MenuItem("Trickal Fan Game/Debug/Add Week 15 Enemy Color Samples", priority = 2)]
+        public static void AddWeek15EnemyColorSamples()
+        {
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogError("Exit Play Mode before changing the Item Test Room.");
+                return;
+            }
+
+            OpenOrCreate();
+            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            ItemTestRoomController controller = FindInScene<ItemTestRoomController>(scene);
+            if (controller == null)
+            {
+                Debug.LogError("Item Test Room controller is missing. Run verification for details.");
+                return;
+            }
+
+            List<ItemTestRoomController.EnemyPlacement> placements = controller.EnemyPlacements
+                .Where(IsValidPlacement)
+                .ToList();
+            bool changed = placements.Count != controller.EnemyPlacements.Count;
+            changed |= AddPlacementIfMissing(
+                placements,
+                "Assets/Prefabs/SansamoEnemy.prefab",
+                new Vector2(-3f, -1.5f));
+            changed |= AddPlacementIfMissing(
+                placements,
+                "Assets/Prefabs/HighBloodSugarFairy.prefab",
+                new Vector2(0f, 3f));
+
+            if (!changed)
+            {
+                Debug.Log("Week 15 enemy color samples are already in the Item Test Room.", controller);
+                return;
+            }
+
+            PlayerInventory inventory = FindInScene<PlayerInventory>(scene);
+            PlayerMovement player = FindInScene<PlayerMovement>(scene);
+            controller.Configure(
+                inventory,
+                player != null ? player.GetComponent<Health>() : null,
+                player != null ? player.GetComponent<PlayerStats>() : null,
+                controller.ItemLoadout.ToArray(),
+                placements.ToArray(),
+                controller.RoomSize);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene, ScenePath);
+            Selection.activeGameObject = controller.gameObject;
+            Debug.Log(
+                "Repaired the Item Test Room enemy placements and ensured the Sansamo and High Blood Sugar Fairy color samples exist.",
+                controller);
+        }
+
         private static bool RemoveRunSessions(Scene scene)
         {
             bool changed = false;
@@ -155,7 +210,37 @@ namespace TrickalFanGame.Editor
                 Placement("Assets/Prefabs/TestEnemy.prefab", new Vector2(3f, 1.5f)),
                 Placement("Assets/Prefabs/RangedEnemy.prefab", new Vector2(-3f, 1.5f)),
                 Placement("Assets/Prefabs/ChargingEnemy.prefab", new Vector2(3f, -1.5f)),
+                Placement("Assets/Prefabs/SansamoEnemy.prefab", new Vector2(-3f, -1.5f)),
+                Placement("Assets/Prefabs/HighBloodSugarFairy.prefab", new Vector2(0f, 3f)),
             };
+        }
+
+        private static bool AddPlacementIfMissing(
+            List<ItemTestRoomController.EnemyPlacement> placements,
+            string prefabPath,
+            Vector2 position)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab == null)
+            {
+                Debug.LogError($"Could not load debug enemy prefab at {prefabPath}.");
+                return false;
+            }
+
+            if (placements.Any(placement => placement?.EnemyPrefab == prefab))
+            {
+                return false;
+            }
+
+            placements.Add(new ItemTestRoomController.EnemyPlacement(prefab, position));
+            return true;
+        }
+
+        private static bool IsValidPlacement(ItemTestRoomController.EnemyPlacement placement)
+        {
+            return placement != null &&
+                   (!placement.Enabled ||
+                    (placement.EnemyPrefab != null && placement.EnemyPrefab.GetComponent<Health>() != null));
         }
 
         private static ItemTestRoomController.EnemyPlacement Placement(string prefabPath, Vector2 position)

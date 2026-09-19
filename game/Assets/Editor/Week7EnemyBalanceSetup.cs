@@ -25,7 +25,7 @@ namespace TrickalFanGame.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log(
-                "Phase E-4 enemy balance ready: Chaser HP 5 / damage 1 / speed 2.5, " +
+                "Phase E-4 enemy balance ready: Chaser HP 6 / contact 2 / melee 3 / speed 2.25, " +
                 "Ranged HP 3 / damage 2 / speed 1.5, Charging HP 7 / damage 3 / dash speed 8.");
         }
 
@@ -55,9 +55,10 @@ namespace TrickalFanGame.Editor
             GameObject contents = PrefabUtility.LoadPrefabContents(ChaserPrefabPath);
             try
             {
-                SetMaxHealth(contents.GetComponent<Health>(), 5);
-                contents.GetComponent<EnemyChase>().Configure(2.5f, 6f, 0.8f);
-                contents.GetComponent<ContactDamage>().Configure(1, 1f);
+                SetMaxHealth(contents.GetComponent<Health>(), 6);
+                contents.GetComponent<EnemyChase>().Configure(2.25f, 6f, 0.8f);
+                contents.GetComponent<ContactDamage>().Configure(2, 1f);
+                contents.GetComponent<MeleeEnemyAttack>()?.Configure(1.15f, 0.4f, 0.12f, 0.65f, 0.2f, 3f);
                 Save(contents, ChaserPrefabPath);
             }
             finally

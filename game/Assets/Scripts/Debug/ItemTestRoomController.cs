@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
 using UnityEngine;
@@ -78,6 +79,10 @@ namespace TrickalFanGame.Debugging
         public Vector2 RoomSize => roomSize;
         public bool HasAppliedLoadout { get; private set; }
         public int SpawnedEnemyCount => spawnedEnemies.Count(enemy => enemy != null);
+        public BossController ActiveBoss => spawnedEnemies
+            .Where(enemy => enemy != null)
+            .Select(enemy => enemy.GetComponent<BossController>())
+            .FirstOrDefault(boss => boss != null && boss.Health != null && !boss.Health.IsDead);
 
         public void Configure(
             PlayerInventory configuredInventory,
@@ -107,7 +112,6 @@ namespace TrickalFanGame.Debugging
             if (!TryValidateConfiguration(out string error))
             {
                 Debug.LogError($"[ItemTestRoom] Invalid configuration: {error}", this);
-                enabled = false;
                 return;
             }
 
@@ -255,8 +259,13 @@ namespace TrickalFanGame.Debugging
             const float width = 330f;
             Rect area = new(Screen.width - width - 10f, 10f, width, Mathf.Min(Screen.height - 20f, 650f));
             GUILayout.BeginArea(area, "Item Test Room", GUI.skin.window);
+            BossController activeBoss = ActiveBoss;
+            string bossVitals = activeBoss == null
+                ? "BOSS HP --"
+                : $"BOSS {activeBoss.DisplayName}  HP {activeBoss.Health.CurrentHealth:0.#}/{activeBoss.Health.MaxHealth:0.#}";
             GUILayout.Label(
-                $"HP {playerHealth.CurrentHealth:0.#}/{playerHealth.MaxHealth:0.#}  Shield {playerHealth.CurrentShield:0.#}\n" +
+                $"PLAYER HP {playerHealth.CurrentHealth:0.#}/{playerHealth.MaxHealth:0.#}  Shield {playerHealth.CurrentShield:0.#}\n" +
+                bossVitals + "\n" +
                 $"ATK {playerStats.AttackDamage:0.##}  ASPD {playerStats.AttackSpeed:0.##}  " +
                 $"CRIT {playerStats.CriticalChance:P0}\n" +
                 $"MOVE {playerStats.MoveSpeed:0.##}  SHOT {playerStats.ProjectileCount}  PIERCE {playerStats.PierceCount}",

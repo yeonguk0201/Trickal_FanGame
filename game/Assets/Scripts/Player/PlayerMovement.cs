@@ -5,13 +5,15 @@ using UnityEngine.InputSystem;
 namespace TrickalFanGame.Player
 {
     [RequireComponent(typeof(Rigidbody2D), typeof(Health), typeof(PlayerStats))]
-    [RequireComponent(typeof(PlayerActionState))]
+    [RequireComponent(typeof(PlayerActionState), typeof(DamageInvulnerability), typeof(KnockbackReceiver))]
     public sealed class PlayerMovement : MonoBehaviour
     {
         private Rigidbody2D body;
         private Health health;
         private PlayerStats stats;
         private PlayerActionState actionState;
+        private KnockbackReceiver knockback;
+        private SpriteRenderer spriteRenderer;
         private Vector2 movement;
 
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
@@ -24,6 +26,12 @@ namespace TrickalFanGame.Player
             health = GetComponent<Health>();
             stats = GetComponent<PlayerStats>();
             actionState = GetComponent<PlayerActionState>();
+            knockback = GetComponent<KnockbackReceiver>();
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            if (GetComponent<DamageInvulnerability>() == null)
+            {
+                gameObject.AddComponent<DamageInvulnerability>();
+            }
         }
 
         private void Update()
@@ -41,7 +49,7 @@ namespace TrickalFanGame.Player
                 if (dashInput.sqrMagnitude > 0.001f)
                 {
                     actionState.TryUpdateDashDirection(dashInput);
-                    FacingDirection = dashInput;
+                    SetFacingDirection(dashInput);
                 }
 
                 movement = actionState.DashDirection;
@@ -63,12 +71,22 @@ namespace TrickalFanGame.Player
             movement = ReadMovement();
             if (movement.sqrMagnitude > 0.001f)
             {
-                FacingDirection = movement.normalized;
+                SetFacingDirection(movement);
             }
+        }
+
+        public void SetFacingDirection(Vector2 direction)
+        {
+            if (direction.sqrMagnitude <= 0.001f) return;
+            FacingDirection = direction.normalized;
+            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null && Mathf.Abs(direction.x) > 0.001f)
+                spriteRenderer.flipX = direction.x > 0f;
         }
 
         private void FixedUpdate()
         {
+            if (knockback != null && knockback.IsActive) return;
             float speedMultiplier = actionState.IsDashing || actionState.IsCoastRecovering
                 ? actionState.DashSpeedMultiplier
                 : 1f;
