@@ -13,6 +13,7 @@ namespace TrickalFanGame.Enemy
         Windup,
         Dashing,
         Recovering,
+        Pursuing,
     }
 
     [DisallowMultipleComponent]
@@ -23,6 +24,8 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0f)] private float detectionRange = 7f;
 
         [Header("Charge")]
+        [SerializeField, Min(0f)] private float pursuitSpeed = 2.5f;
+        [SerializeField, Min(0f)] private float pursuitDuration = 1.1f;
         [SerializeField, Min(0.01f)] private float windupDuration = 0.65f;
         [SerializeField, Min(0.01f)] private float dashSpeed = 9f;
         [SerializeField, Min(0.01f)] private float dashDuration = 0.8f;
@@ -33,21 +36,26 @@ namespace TrickalFanGame.Enemy
 
         private Rigidbody2D body;
         private Health health;
-        private Health targetHealth;
         private KnockbackReceiver knockback;
+        private EnemyBehaviorContext behavior;
+        private EnemyAttackPresentation attackPresentation;
         private SpriteRenderer spriteRenderer;
+        private LineRenderer chargePath;
         private Color idleColor = Color.white;
         private float stateEndsAt;
         private float nextChargeTime;
         private Vector2 lockedDirection;
+        private bool pursuitTimerStarted;
 
         public ChargingEnemyState State { get; private set; }
         public Vector2 LockedDirection => lockedDirection;
         public float NextChargeTime => nextChargeTime;
         public float DashSpeed => dashSpeed;
+        public float DashDuration => dashDuration;
+        public float PursuitSpeed => pursuitSpeed;
+        public float PursuitDuration => pursuitDuration;
         public float ChargeDamage => chargeDamage;
-        public bool IsActionSuppressed => health == null || health.IsDead ||
-                                          (knockback != null && knockback.IsActive);
+        public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;
 
         public event Action<ChargingEnemyState> StateChanged;
 
@@ -85,6 +93,7 @@ namespace TrickalFanGame.Enemy
             }
 
             lockedDirection = Vector2.zero;
+            pursuitTimerStarted = false;
             SetState(ChargingEnemyState.Idle);
         }
 
@@ -104,6 +113,32 @@ namespace TrickalFanGame.Enemy
             recoveryDuration = Mathf.Max(0f, configuredRecoveryDuration);
             chargeCooldown = Mathf.Max(0f, configuredChargeCooldown);
             chargeDamage = Mathf.Max(0.01f, configuredChargeDamage);
+            pursuitDuration = 0f;
+            pursuitTimerStarted = false;
+            SetState(ChargingEnemyState.Idle);
+        }
+
+        public void ConfigurePursuitCharge(
+            float configuredDetectionRange,
+            float configuredPursuitSpeed,
+            float configuredPursuitDuration,
+            float configuredWindupDuration,
+            float configuredDashSpeed,
+            float configuredDashDuration,
+            float configuredRecoveryDuration,
+            float configuredChargeDamage)
+        {
+            detectionRange = Mathf.Max(0f, configuredDetectionRange);
+            pursuitSpeed = Mathf.Max(0f, configuredPursuitSpeed);
+            pursuitDuration = Mathf.Max(0f, configuredPursuitDuration);
+            windupDuration = Mathf.Max(0.01f, configuredWindupDuration);
+            dashSpeed = Mathf.Max(0.01f, configuredDashSpeed);
+            dashDuration = Mathf.Max(0.01f, configuredDashDuration);
+            recoveryDuration = Mathf.Max(0f, configuredRecoveryDuration);
+            chargeCooldown = 0f;
+            chargeDamage = Mathf.Max(0.01f, configuredChargeDamage);
+            pursuitTimerStarted = false;
+            SetState(ChargingEnemyState.Idle);
         }
 
         public void SetChargeDamage(float configuredChargeDamage)
@@ -114,7 +149,7 @@ namespace TrickalFanGame.Enemy
         public void SetTarget(Transform configuredTarget)
         {
             target = configuredTarget;
-            targetHealth = target != null ? target.GetComponent<Health>() : null;
+            behavior?.SetTarget(configuredTarget);
         }
 
         public void TickBehavior(float currentTime)
@@ -124,26 +159,41 @@ namespace TrickalFanGame.Enemy
                 CacheComponents();
             }
 
-            if (knockback.IsActive)
+            if (!behavior.TryAcquireOrAlert(detectionRange))
             {
-                InterruptPattern(currentTime, !knockback.IsKnockedBack);
+                InterruptPattern(currentTime, true);
                 return;
             }
 
-            if (health.IsDead || !FindTargetIfNeeded() || targetHealth.IsDead)
+            target = behavior.Target;
+            if (behavior.IsActionSuppressed)
             {
-                InterruptPattern(currentTime, true);
+                InterruptPattern(currentTime, !knockback.IsKnockedBack);
                 return;
             }
 
             switch (State)
             {
                 case ChargingEnemyState.Idle:
-                    body.linearVelocity = Vector2.zero;
-                    TryBeginWindup(currentTime);
+                    if (pursuitDuration > 0f)
+                    {
+                        EnterPursuit(currentTime);
+                        TickPursuit(currentTime);
+                    }
+                    else
+                    {
+                        behavior.SetControllerMovementSuppressed(false);
+                        body.linearVelocity = Vector2.zero;
+                        TryBeginWindup(currentTime);
+                    }
+                    break;
+                case ChargingEnemyState.Pursuing:
+                    TickPursuit(currentTime);
                     break;
                 case ChargingEnemyState.Windup:
+                    behavior.SetControllerMovementSuppressed(true);
                     body.linearVelocity = Vector2.zero;
+                    TrackTargetDuringWindup();
                     if (currentTime >= stateEndsAt)
                     {
                         stateEndsAt = currentTime + dashDuration;
@@ -153,6 +203,7 @@ namespace TrickalFanGame.Enemy
 
                     break;
                 case ChargingEnemyState.Dashing:
+                    behavior.SetControllerMovementSuppressed(false);
                     if (currentTime >= stateEndsAt)
                     {
                         EnterRecovery(currentTime);
@@ -164,11 +215,20 @@ namespace TrickalFanGame.Enemy
 
                     break;
                 case ChargingEnemyState.Recovering:
+                    behavior.SetControllerMovementSuppressed(true);
                     body.linearVelocity = Vector2.zero;
                     if (currentTime >= stateEndsAt)
                     {
                         lockedDirection = Vector2.zero;
-                        SetState(ChargingEnemyState.Idle);
+                        if (pursuitDuration > 0f)
+                        {
+                            EnterPursuit(currentTime);
+                            TickPursuit(currentTime);
+                        }
+                        else
+                        {
+                            SetState(ChargingEnemyState.Idle);
+                        }
                     }
 
                     break;
@@ -212,7 +272,7 @@ namespace TrickalFanGame.Enemy
             }
 
             Vector2 offset = target.position - transform.position;
-            if (offset.sqrMagnitude <= 0.001f || offset.sqrMagnitude > detectionRange * detectionRange)
+            if (offset.sqrMagnitude <= 0.001f)
             {
                 return;
             }
@@ -222,9 +282,61 @@ namespace TrickalFanGame.Enemy
             SetState(ChargingEnemyState.Windup);
         }
 
+        private void TrackTargetDuringWindup()
+        {
+            if (target == null) return;
+            Vector2 offset = target.position - transform.position;
+            if (offset.sqrMagnitude <= 0.001f) return;
+            lockedDirection = offset.normalized;
+            UpdateChargePath();
+        }
+
+        private void UpdateChargePath()
+        {
+            if (chargePath == null || State != ChargingEnemyState.Windup ||
+                lockedDirection.sqrMagnitude <= 0.001f) return;
+            chargePath.SetPosition(0, transform.position);
+            chargePath.SetPosition(1, (Vector2)transform.position + lockedDirection * dashSpeed * dashDuration);
+        }
+
+        private void EnterPursuit(float currentTime)
+        {
+            lockedDirection = Vector2.zero;
+            pursuitTimerStarted = true;
+            stateEndsAt = currentTime + pursuitDuration;
+            SetState(ChargingEnemyState.Pursuing);
+        }
+
+        private void TickPursuit(float currentTime)
+        {
+            behavior.SetControllerMovementSuppressed(false);
+            if (!pursuitTimerStarted)
+            {
+                stateEndsAt = currentTime + pursuitDuration;
+                pursuitTimerStarted = true;
+            }
+
+            Vector2 offset = target.position - transform.position;
+            if (offset.sqrMagnitude > 0.001f)
+            {
+                body.linearVelocity = offset.normalized * pursuitSpeed;
+            }
+            else
+            {
+                body.linearVelocity = Vector2.zero;
+            }
+
+            if (currentTime >= stateEndsAt)
+            {
+                body.linearVelocity = Vector2.zero;
+                TryBeginWindup(currentTime);
+            }
+        }
+
         private void EnterRecovery(float currentTime)
         {
             body.linearVelocity = Vector2.zero;
+            pursuitTimerStarted = false;
             stateEndsAt = currentTime + recoveryDuration;
             nextChargeTime = currentTime + chargeCooldown;
             SetState(ChargingEnemyState.Recovering);
@@ -243,6 +355,7 @@ namespace TrickalFanGame.Enemy
             }
 
             lockedDirection = Vector2.zero;
+            pursuitTimerStarted = false;
             nextChargeTime = Mathf.Max(nextChargeTime, currentTime + chargeCooldown);
             SetState(ChargingEnemyState.Idle);
         }
@@ -262,9 +375,30 @@ namespace TrickalFanGame.Enemy
 
         private void ApplyStateVisual()
         {
+            if (attackPresentation != null)
+            {
+                attackPresentation.SetPhase(State switch
+                {
+                    ChargingEnemyState.Windup => EnemyAttackPhase.Telegraph,
+                    ChargingEnemyState.Dashing => EnemyAttackPhase.Active,
+                    ChargingEnemyState.Recovering => EnemyAttackPhase.Recovery,
+                    _ => EnemyAttackPhase.Idle,
+                });
+            }
+
             if (spriteRenderer == null)
             {
                 return;
+            }
+
+            if (chargePath != null)
+            {
+                bool showPath = State == ChargingEnemyState.Windup && lockedDirection.sqrMagnitude > 0.001f;
+                chargePath.enabled = showPath;
+                if (showPath)
+                {
+                    UpdateChargePath();
+                }
             }
 
             spriteRenderer.color = State switch
@@ -281,24 +415,44 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
+            behavior = GetComponent<EnemyBehaviorContext>();
+            if (behavior == null)
+            {
+                behavior = gameObject.AddComponent<EnemyBehaviorContext>();
+            }
+            behavior.Initialize();
+            if (target != null)
+            {
+                behavior.SetTarget(target);
+            }
             spriteRenderer = GetComponent<SpriteRenderer>();
+            chargePath = GetComponent<LineRenderer>();
+            if (chargePath == null)
+            {
+                chargePath = gameObject.AddComponent<LineRenderer>();
+            }
+            chargePath.useWorldSpace = true;
+            chargePath.positionCount = 2;
+            chargePath.startWidth = 0.1f;
+            chargePath.endWidth = 0.04f;
+            chargePath.startColor = new Color(1f, 0.85f, 0.2f, 0.9f);
+            chargePath.endColor = new Color(1f, 0.25f, 0.1f, 0.35f);
+            chargePath.sortingOrder = spriteRenderer != null ? spriteRenderer.sortingOrder - 1 : 0;
+            if (spriteRenderer != null && spriteRenderer.sharedMaterial != null)
+            {
+                chargePath.sharedMaterial = spriteRenderer.sharedMaterial;
+            }
+            chargePath.enabled = false;
+            attackPresentation = GetComponent<EnemyAttackPresentation>();
+            if (attackPresentation == null)
+            {
+                attackPresentation = gameObject.AddComponent<EnemyAttackPresentation>();
+            }
         }
 
         private bool FindTargetIfNeeded()
         {
-            if (target != null && targetHealth != null)
-            {
-                return true;
-            }
-
-            PlayerMovement player = FindFirstObjectByType<PlayerMovement>();
-            if (player == null)
-            {
-                return false;
-            }
-
-            SetTarget(player.transform);
-            return targetHealth != null;
+            return behavior != null && behavior.TryAcquireOrAlert(detectionRange);
         }
 
         private void OnDrawGizmosSelected()

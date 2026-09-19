@@ -12,9 +12,41 @@ PrefabInstance:
       propertyPath: maxHealth
       value: 25
       objectReference: {fileID: 0}
+    - target: {fileID: 4184832910138919893, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_Radius
+      value: 0.36
+      objectReference: {fileID: 0}
+    - target: {fileID: 4592771066635862529, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: dfebb1a2e1016be4b81c1ed8a27e0b63, type: 3}
+    - target: {fileID: 4592771066635862529, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4592771066635862529, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4592771066635862529, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_Name
       value: TestBoss
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149828810831364249, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_Mass
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 6157331486542440955, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6157331486542440955, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 6157331486542440955, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_LocalPosition.x
@@ -59,12 +91,23 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 8647675937649764220, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
     - {fileID: 2726524135096534971, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+    - {fileID: 4511758983444437158, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+    - {fileID: 3873071872432734107, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1671378323394020317}
+    - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1341662532215233610}
+    - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 700000000000000001}
+    - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6263568933103265327}
   m_SourcePrefab: {fileID: 100100000, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
 --- !u!1 &421685952657128216 stripped
 GameObject:
@@ -83,6 +126,108 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d3d4cc20b2e4f57b6928ac9170c73bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.BossController
+  displayName: "\uBD80\uC2A4\uB7EC\uAE30"
+  phaseCount: 2
+  patterns:
+  - patternId: buseureogi-approach-volley
+    execution: 2
+    telegraphDuration: 0.6
+    activeDuration: 1.7
+    recoveryDuration: 0.75
+    reuseCooldown: 0.8
+  - patternId: buseureogi-summon-crumbs
+    execution: 3
+    telegraphDuration: 0.9
+    activeDuration: 0.15
+    recoveryDuration: 0.85
+    reuseCooldown: 4.2
+  - patternId: buseureogi-throw-obstacle
+    execution: 4
+    telegraphDuration: 0.85
+    activeDuration: 0.15
+    recoveryDuration: 0.7
+    reuseCooldown: 2.6
+  encounterSeed: 1
   attackInterval: 1.2
   projectileSpeed: 4
-  projectileDamage: 2
+  projectileDamage: 1.5
+  phaseTransitionDuration: 1.25
+  phaseTwoTempoMultiplier: 0.72
+--- !u!114 &1341662532215233610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 421685952657128216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f3acf591a71fc44c93ad648f34fcd9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.BuseureogiBossPatternRuntime
+  minionPrefab: {fileID: 4637529536798824959, guid: 52a22289b4c3e874c8c7f8c09f000c9f, type: 3}
+  obstaclePrefabs:
+  - {fileID: 4695559734981807543, guid: f012c89007050674292afb3ce1e396a6, type: 3}
+  - {fileID: 4595007371475726162, guid: b5b96256c5279144cb7357b6b1becf62, type: 3}
+  minionOffsets:
+  - {x: 1.8, y: 0}
+  - {x: 1.5588, y: 0.9}
+  - {x: 0.9, y: 1.5588}
+  - {x: 0, y: 1.8}
+  - {x: -0.9, y: 1.5588}
+  - {x: -1.5588, y: 0.9}
+  - {x: -1.8, y: 0}
+  - {x: -1.5588, y: -0.9}
+  - {x: -0.9, y: -1.5588}
+  - {x: 0, y: -1.8}
+  - {x: 0.9, y: -1.5588}
+  - {x: 1.5588, y: -0.9}
+  obstacleOffsets:
+  - {x: -3.7, y: -2.15}
+  - {x: 3.7, y: -2.15}
+  - {x: -3.7, y: 2.15}
+  - {x: 3.7, y: 2.15}
+  maximumMinions: 4
+  obstaclesPerThrowLimit: 3
+  obstacleImpactRadius: 1.1
+  obstacleSpacing: 2.25
+  openCrossHalfWidth: 1.45
+  arenaPadding: 0.75
+  minionSpacing: 0.65
+  obstacleImpactDamage: 1
+  obstacleKnockbackSpeed: 7
+  obstacleKnockbackDuration: 0.2
+  approachSpeed: 2.25
+  phaseTwoSpeedMultiplier: 1.35
+  shotInterval: 0.42
+  projectileSpeed: 5
+  movementHalfExtents: {x: 6.2, y: 3.2}
+--- !u!114 &700000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 421685952657128216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
+  damage: 2
+  cooldown: 0.8
+--- !u!114 &6263568933103265327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 421685952657128216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2448a35b34fa40a9bfe4363b9fe5c889, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackPresentation
+  telegraphScale: {x: 1.25, y: 0.75}
+  activeScale: {x: 0.8, y: 1.3}
+  recoveryScale: {x: 1.15, y: 0.85}

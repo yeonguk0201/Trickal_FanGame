@@ -1,6 +1,5 @@
 using System;
 using TrickalFanGame.Combat;
-using TrickalFanGame.Player;
 using UnityEngine;
 
 namespace TrickalFanGame.Enemy
@@ -24,12 +23,11 @@ namespace TrickalFanGame.Enemy
 
         private Rigidbody2D body;
         private Health health;
-        private Health targetHealth;
         private KnockbackReceiver knockback;
+        private EnemyBehaviorContext behavior;
         private float nextAttackTime;
 
-        public bool IsActionSuppressed => health == null || health.IsDead ||
-                                          (knockback != null && knockback.IsActive);
+        public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;
         public float NextAttackTime => nextAttackTime;
         public float MoveSpeed => moveSpeed;
         public float MinimumAttackDistance => minimumAttackDistance;
@@ -92,7 +90,7 @@ namespace TrickalFanGame.Enemy
         public void SetTarget(Transform configuredTarget)
         {
             target = configuredTarget;
-            targetHealth = target != null ? target.GetComponent<Health>() : null;
+            behavior?.SetTarget(configuredTarget);
         }
 
         public void TickBehavior(float currentTime)
@@ -102,25 +100,22 @@ namespace TrickalFanGame.Enemy
                 CacheComponents();
             }
 
-            if (knockback.IsActive)
+            if (!behavior.TryAcquireOrAlert(detectionRange))
             {
-                if (!knockback.IsKnockedBack)
-                {
-                    body.linearVelocity = Vector2.zero;
-                }
-
+                behavior.StopForSuppression();
                 return;
             }
 
-            if (health.IsDead || !FindTargetIfNeeded() || targetHealth.IsDead)
+            target = behavior.Target;
+            if (behavior.IsMovementSuppressed)
             {
-                body.linearVelocity = Vector2.zero;
+                behavior.StopForSuppression();
                 return;
             }
 
             Vector2 offset = target.position - transform.position;
             float distance = offset.magnitude;
-            if (distance > detectionRange || distance <= 0.001f)
+            if (distance <= 0.001f)
             {
                 body.linearVelocity = Vector2.zero;
                 return;
@@ -145,7 +140,7 @@ namespace TrickalFanGame.Enemy
 
         public EnemyProjectile TryFire(Vector2 direction, float currentTime)
         {
-            if (IsActionSuppressed || targetHealth == null || targetHealth.IsDead ||
+            if (IsActionSuppressed ||
                 currentTime < nextAttackTime || direction.sqrMagnitude <= 0.001f)
             {
                 return null;
@@ -171,23 +166,21 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
+            behavior = GetComponent<EnemyBehaviorContext>();
+            if (behavior == null)
+            {
+                behavior = gameObject.AddComponent<EnemyBehaviorContext>();
+            }
+            behavior.Initialize();
+            if (target != null)
+            {
+                behavior.SetTarget(target);
+            }
         }
 
         private bool FindTargetIfNeeded()
         {
-            if (target != null && targetHealth != null)
-            {
-                return true;
-            }
-
-            PlayerMovement player = FindFirstObjectByType<PlayerMovement>();
-            if (player == null)
-            {
-                return false;
-            }
-
-            SetTarget(player.transform);
-            return targetHealth != null;
+            return behavior != null && behavior.TryAcquireOrAlert(detectionRange);
         }
 
         private void OnDrawGizmosSelected()

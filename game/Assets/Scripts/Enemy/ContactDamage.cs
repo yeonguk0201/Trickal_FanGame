@@ -14,6 +14,7 @@ namespace TrickalFanGame.Enemy
 
         public float Damage => damage;
         public float Cooldown => cooldown;
+        public float NextDamageTime => nextDamageTime;
 
         public void Configure(float configuredDamage, float configuredCooldown)
         {
@@ -23,20 +24,22 @@ namespace TrickalFanGame.Enemy
 
         private void OnCollisionStay2D(Collision2D collision)
         {
-            if (Time.time < nextDamageTime)
-            {
-                return;
-            }
-
             Health target = collision.collider.GetComponentInParent<Health>();
-            if (target == null || target.IsDead || target.GetComponent<PlayerMovement>() == null)
+            TryApplyDamage(target, Time.time);
+        }
+
+        public bool TryApplyDamage(Health target, float currentTime)
+        {
+            if (currentTime < nextDamageTime || target == null || target.IsDead ||
+                target.GetComponent<PlayerMovement>() == null)
             {
-                return;
+                return false;
             }
 
             target.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
             target.TakeDamage(new DamageContext(gameObject, DamageSourceType.EnemyContact, damage));
-            nextDamageTime = Time.time + cooldown;
+            nextDamageTime = currentTime + cooldown;
+            return true;
         }
     }
 }

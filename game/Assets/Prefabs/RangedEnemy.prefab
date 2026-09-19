@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1601065682659508264}
   - component: {fileID: 8575249931884036228}
   - component: {fileID: 8452432046994071784}
+  - component: {fileID: 6274296918522010085}
   m_Layer: 6
   m_Name: RangedEnemy
   m_TagString: Untagged
@@ -220,3 +221,15 @@ MonoBehaviour:
   projectileDamage: 2
   projectileLifetime: 4
   target: {fileID: 0}
+--- !u!114 &6274296918522010085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6192307500632814172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aa527e4c75f4de29f4975b643b25cab, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyBehaviorContext

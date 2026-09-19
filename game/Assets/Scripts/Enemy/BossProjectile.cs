@@ -42,6 +42,7 @@ namespace TrickalFanGame.Enemy
                 attackDamage);
             controller.expiresAt = Time.time + 4f;
             controller.isLaunched = true;
+            source?.GetComponent<BossController>()?.RegisterOwnedObject(projectile);
             return controller;
         }
 
