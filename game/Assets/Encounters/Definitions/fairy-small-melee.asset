@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a73bdf2426d4a0ebd2e2432b8f10f75, type: 3}
+  m_Name: fairy-small-melee
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.EncounterDefinition
+  encounterId: fairy-small-melee
+  allowedProfiles:
+  - {fileID: 11400000, guid: 1ff92c9396d895b4a88f5ddfd322caef, type: 2}
+  minimumFloor: 1
+  maximumFloor: 3
+  minimumPlayerDistance: 1.5
+  minimumDoorDistance: 2
+  waves:
+  - waveNumber: 1
+    startCondition: 0
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 0
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+    - enemyRole: 4
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+  - waveNumber: 2
+    startCondition: 1
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 2
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+  clearCondition: 0

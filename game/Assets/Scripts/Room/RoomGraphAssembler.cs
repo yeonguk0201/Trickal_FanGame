@@ -17,6 +17,7 @@ namespace TrickalFanGame.Room
         [SerializeField] private RoomPrefab roomPrefab;
         [SerializeField] private EncounterEnemyRoster encounterEnemyRoster;
         [SerializeField] private SPPickup encounterClearRewardPrefab;
+        [SerializeField] private GameObject[] floorBossPrefabs = Array.Empty<GameObject>();
 
         private GeneratedFloorGraph generatedGraph;
         private GameObject currentFloorRoot;
@@ -32,6 +33,7 @@ namespace TrickalFanGame.Room
         public RoomPrefab ConfiguredRoomPrefab => roomPrefab;
         public EncounterEnemyRoster EnemyRoster => encounterEnemyRoster;
         public SPPickup EncounterClearRewardPrefab => encounterClearRewardPrefab;
+        public IReadOnlyList<GameObject> FloorBossPrefabs => floorBossPrefabs;
         public GeneratedFloorGraph GeneratedGraph => generatedGraph;
         public GameObject CurrentFloorRoot => currentFloorRoot;
 
@@ -60,6 +62,22 @@ namespace TrickalFanGame.Room
         public void ConfigureEncounterClearReward(SPPickup configuredPrefab)
         {
             encounterClearRewardPrefab = configuredPrefab;
+        }
+
+        public void ConfigureFloorBossPrefabs(GameObject[] configuredPrefabs)
+        {
+            floorBossPrefabs = configuredPrefabs ?? Array.Empty<GameObject>();
+        }
+
+        public GameObject ResolveBossPrefab(int floorNumber)
+        {
+            int index = floorNumber - 1;
+            if (index < 0 || index >= floorBossPrefabs.Length) return null;
+            GameObject prefab = floorBossPrefabs[index];
+            return prefab != null && prefab.GetComponent<BossController>() != null &&
+                   prefab.GetComponent<Health>() != null
+                ? prefab
+                : null;
         }
 
         private void Awake()
@@ -230,7 +248,8 @@ namespace TrickalFanGame.Room
                         instance,
                         generatedNode.FloorNumber >= generatedGraph.Floors.Count,
                         runProgress,
-                        generatedNode.RoomId);
+                        generatedNode.RoomId,
+                        generatedNode.ContentSeed);
                 if (instance.RewardRoom != null)
                 {
                     instance.RewardRoom.gameObject.SetActive(generatedNode.Role == GeneratedRoomRole.Treasure);
@@ -342,14 +361,17 @@ namespace TrickalFanGame.Room
             RoomPrefab instance,
             bool isFinalBoss,
             RunProgress progress,
-            string roomId)
+            string roomId,
+            int contentSeed)
         {
             ItemDropSource template = instance.RewardRoom != null
                 ? instance.RewardRoom.GetComponent<ItemDropSource>() : null;
             instance.Controller.EnemySpawned += enemy =>
             {
                 BossController boss = enemy != null ? enemy.GetComponent<BossController>() : null;
-                if (boss == null || template == null) return;
+                if (boss == null) return;
+                boss.ConfigureEncounterSeed(contentSeed);
+                if (template == null) return;
                 ItemDropSource source = enemy.GetComponent<ItemDropSource>();
                 if (source == null) source = enemy.AddComponent<ItemDropSource>();
                 ItemDefinition[] items = new ItemDefinition[template.ItemPool.Count];
@@ -411,8 +433,13 @@ namespace TrickalFanGame.Room
 
             RoomDefinition definition = node.Definition;
             GameObject[] prefabs = new GameObject[controller.SpawnPoints.Count];
+            GameObject floorBossPrefab = node.Role == GeneratedRoomRole.Boss
+                ? ResolveBossPrefab(node.FloorNumber)
+                : null;
             for (int i = 0; i < prefabs.Length; i++)
-                prefabs[i] = definition.EncounterPrefabs[i % definition.EncounterPrefabs.Count];
+                prefabs[i] = floorBossPrefab != null
+                    ? floorBossPrefab
+                    : definition.EncounterPrefabs[i % definition.EncounterPrefabs.Count];
             controller.ConfigurePreplacedEnemies(Array.Empty<Health>());
             controller.ConfigureEnemyPrefabs(prefabs);
             error = null;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Enemy;
 using TrickalFanGame.Player;
 using UnityEngine;
 
@@ -292,6 +293,7 @@ namespace TrickalFanGame.Room
                 enemy.gameObject.SetActive(true);
                 FloorDifficultyScaler.ApplyScaling(enemy.gameObject, floorNumber);
                 enemy.ResetHealth();
+                AlertEnemy(enemy);
                 RegisterEnemy(enemy);
             }
         }
@@ -348,7 +350,16 @@ namespace TrickalFanGame.Room
 
             FloorDifficultyScaler.ApplyScaling(enemy, floorNumber);
             EnemySpawned?.Invoke(enemy);
+            AlertEnemy(enemyHealth);
             RegisterEnemy(enemyHealth);
+        }
+
+        private void AlertEnemy(Health enemyHealth)
+        {
+            EnemyBehaviorContext behavior = enemyHealth != null
+                ? enemyHealth.GetComponent<EnemyBehaviorContext>()
+                : null;
+            behavior?.BeginCombat(playerHealth != null ? playerHealth.transform : null);
         }
 
         private void OnEnemyDied(Health enemyHealth)

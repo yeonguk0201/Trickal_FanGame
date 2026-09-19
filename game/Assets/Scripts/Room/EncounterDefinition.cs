@@ -5,7 +5,16 @@ using UnityEngine;
 
 namespace TrickalFanGame.Room
 {
-    public enum EncounterEnemyRole { Chaser, Ranged, Charging, Boss }
+    // Existing numeric values are serialized in Encounter assets. Append variants only.
+    public enum EncounterEnemyRole
+    {
+        Chaser,
+        Ranged,
+        Charging,
+        Boss,
+        FastChaser,
+        Sniper,
+    }
     public enum EncounterWaveStartCondition { RoomEntered, PreviousWaveCleared }
     public enum EncounterWaveCompletionCondition { AllRequiredEnemiesDefeated }
     public enum EncounterClearCondition { AllWavesCleared }
@@ -208,7 +217,9 @@ namespace TrickalFanGame.Room
 
                 IEnumerable<int> available = candidates.Where(index => !occupied.Contains(index) &&
                     IsSafe(template.SpawnPoints[index], activeDoors));
-                available = rule.EnemyRole == EncounterEnemyRole.Chaser
+                bool prefersCloseSpawn = rule.EnemyRole == EncounterEnemyRole.Chaser ||
+                                         rule.EnemyRole == EncounterEnemyRole.FastChaser;
+                available = prefersCloseSpawn
                     ? available.OrderBy(index => template.SpawnPoints[index].sqrMagnitude).ThenBy(index => index)
                     : available.OrderByDescending(index => template.SpawnPoints[index].sqrMagnitude).ThenBy(index => index);
                 int[] selected = available.Take(rule.Count).ToArray();

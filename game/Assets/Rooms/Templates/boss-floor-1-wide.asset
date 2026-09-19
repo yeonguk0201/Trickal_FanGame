@@ -20,11 +20,11 @@ MonoBehaviour:
   maximumFloor: 1
   doorSlots:
   - direction: 0
-    slotPosition: {x: -11.55, y: 0}
-    safeEntryPosition: {x: -9.85, y: 0}
+    slotPosition: {x: -7.55, y: 0}
+    safeEntryPosition: {x: -5.8500004, y: 0}
   - direction: 1
-    slotPosition: {x: 11.55, y: 0}
-    safeEntryPosition: {x: 9.85, y: 0}
+    slotPosition: {x: 7.55, y: 0}
+    safeEntryPosition: {x: 5.8500004, y: 0}
   - direction: 2
     slotPosition: {x: 0, y: 4.05}
     safeEntryPosition: {x: 0, y: 2.3500001}
@@ -32,6 +32,6 @@ MonoBehaviour:
     slotPosition: {x: 0, y: -4.05}
     safeEntryPosition: {x: 0, y: -2.3500001}
   spawnPoints:
-  - {x: -5, y: 2}
-  - {x: 0, y: 0}
-  - {x: 5, y: -2}
+  - {x: -3, y: 2}
+  - {x: 0, y: -2}
+  - {x: 3, y: 2}

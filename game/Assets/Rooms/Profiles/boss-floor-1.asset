@@ -13,28 +13,28 @@ MonoBehaviour:
   m_Name: boss-floor-1
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomProfile
   profileId: boss-floor-1
-  interiorSize: {x: 24, y: 9}
+  interiorSize: {x: 16, y: 9}
   movementBounds:
     serializedVersion: 2
-    x: -11.5
+    x: -7.5
     y: -4
-    width: 23
+    width: 15
     height: 8
   encounterBounds:
     serializedVersion: 2
-    x: -11.25
+    x: -7.25
     y: -3.75
-    width: 22.5
+    width: 14.5
     height: 7.5
   cameraOrthographicSize: 5.25
   cameraBounds:
     serializedVersion: 2
-    x: -2.666667
+    x: -0
     y: -0
-    width: 5.333334
+    width: 0
     height: 0
   minimapSilhouette:
-  - {x: -12, y: -4.5}
-  - {x: 12, y: -4.5}
-  - {x: 12, y: 4.5}
-  - {x: -12, y: 4.5}
+  - {x: -8, y: -4.5}
+  - {x: 8, y: -4.5}
+  - {x: 8, y: 4.5}
+  - {x: -8, y: 4.5}
