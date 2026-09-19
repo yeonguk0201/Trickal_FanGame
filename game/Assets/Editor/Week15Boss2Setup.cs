@@ -34,7 +34,8 @@ namespace TrickalFanGame.Editor
                 SpriteRenderer renderer = EnsureVisualChild(contents);
                 renderer.sprite = Load<Sprite>(BossSpritePath);
                 renderer.color = Color.white;
-                contents.transform.localScale = Vector3.one * Week15Boss0Setup.BossVisualScale;
+                contents.transform.localScale = new Vector3(
+                    Week15Boss1Setup.BossScale, Week15Boss1Setup.BossScale, 1f);
                 EnemyAttackPresentation commonPresentation = contents.GetComponent<EnemyAttackPresentation>();
                 if (commonPresentation != null) UnityEngine.Object.DestroyImmediate(commonPresentation);
 
@@ -50,7 +51,7 @@ namespace TrickalFanGame.Editor
                 SetFloat(contents.GetComponent<Health>(), "maxHealth", 80f);
                 BossController boss = contents.GetComponent<BossController>();
                 boss.ConfigureHud("새마음금고", 2);
-                boss.ConfigurePhaseTwo(1.1f, 0.75f);
+                boss.ConfigurePhaseTwo(1.1f, 0.88f);
                 boss.SetProjectileDamage(1.5f);
                 boss.ConfigurePatterns(new[]
                 {
@@ -67,7 +68,7 @@ namespace TrickalFanGame.Editor
                 if (runtime == null) runtime = contents.AddComponent<SaemaeumVaultBossPatternRuntime>();
                 runtime.ConfigureMovement(1.8f, 1.35f, 0.55f, 5.5f);
                 runtime.ConfigureVolley(5, 5, 48f);
-                runtime.ConfigureJumps(3, 5, 4, 6, 4.8f, 1.15f, 2f, 7f, 0.2f);
+                runtime.ConfigureJumps(3, 5, 4, 6, 4.8f, 2.875f, 2f, 7f, 0.2f, 0.69f, 0.62f);
                 runtime.ConfigureHealing(15f, 4);
 
                 if (PrefabUtility.SaveAsPrefabAsset(contents, BossPrefabPath) == null)

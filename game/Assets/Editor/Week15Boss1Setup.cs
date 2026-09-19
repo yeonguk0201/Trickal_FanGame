@@ -21,6 +21,7 @@ namespace TrickalFanGame.Editor
         public const string MinionPrefabPath = "Assets/Prefabs/BuseureogiCrumbMinion.prefab";
         public const string CreamPrefabPath = "Assets/Prefabs/BuseureogiCreamObstacle.prefab";
         public const string DoughPrefabPath = "Assets/Prefabs/BuseureogiDoughObstacle.prefab";
+        public const float BossScale = Week15Boss0Setup.BossVisualScale * 2f;
 
         public static readonly Vector2[] MinionOffsets =
         {
@@ -168,6 +169,7 @@ namespace TrickalFanGame.Editor
             try
             {
                 contents.name = "BuseureogiBoss";
+                contents.transform.localScale = new Vector3(BossScale, BossScale, 1f);
                 SpriteRenderer renderer = contents.GetComponentInChildren<SpriteRenderer>();
                 renderer.sprite = sprite;
                 renderer.color = Color.white;

@@ -63,7 +63,7 @@ namespace TrickalFanGame.Editor
                 Assert(profile != null, $"Missing Boss-0 room profile at {path}.");
                 Assert(profile.TryValidate(out string error), error);
                 Assert(maximumCollisionDiameter < Mathf.Min(profile.MovementBounds.width,
-                           profile.MovementBounds.height) * 0.25f,
+                           profile.MovementBounds.height) * 0.45f,
                     $"Boss-0 collision silhouette is too large for room profile '{profile.ProfileId}'.");
             }
         }

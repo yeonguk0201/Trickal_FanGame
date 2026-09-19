@@ -42,11 +42,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6157331486542440955, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.8
+      value: 3.6
       objectReference: {fileID: 0}
     - target: {fileID: 6157331486542440955, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1.8
+      value: 3.6
       objectReference: {fileID: 0}
     - target: {fileID: 6157331486542440955, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_LocalPosition.x
@@ -107,7 +107,7 @@ PrefabInstance:
       addedObject: {fileID: 700000000000000001}
     - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 6263568933103265327}
+      addedObject: {fileID: 1354676402034083762}
   m_SourcePrefab: {fileID: 100100000, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
 --- !u!1 &421685952657128216 stripped
 GameObject:
@@ -216,7 +216,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
   damage: 2
   cooldown: 0.8
---- !u!114 &6263568933103265327
+--- !u!114 &1354676402034083762
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

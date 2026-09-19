@@ -170,6 +170,9 @@ namespace TrickalFanGame.Editor
                 "Every obstacle candidate must remain outside the open horizontal/vertical door cross.");
             Rigidbody2D body = prefab.GetComponent<Rigidbody2D>();
             ContactDamage contactDamage = prefab.GetComponent<ContactDamage>();
+            Assert(Mathf.Approximately(prefab.transform.localScale.x, Week15Boss1Setup.BossScale) &&
+                   Mathf.Approximately(prefab.transform.localScale.y, Week15Boss1Setup.BossScale),
+                "Buseureogi must use the doubled boss body scale.");
             Assert(body != null && body.bodyType == RigidbodyType2D.Dynamic && body.mass >= 25f &&
                    (body.constraints & RigidbodyConstraints2D.FreezeRotation) != 0,
                 "Buseureogi must retain dynamic chase motion while resisting player collision pushes.");

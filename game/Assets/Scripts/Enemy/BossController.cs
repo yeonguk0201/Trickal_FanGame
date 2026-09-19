@@ -174,6 +174,11 @@ namespace TrickalFanGame.Enemy
             if (ownedObject != null && !ownedObjects.Contains(ownedObject)) ownedObjects.Add(ownedObject);
         }
 
+        public void SynchronizeActiveEndTime(float endsAt)
+        {
+            if (State == BossActionState.Active) stateEndsAt = endsAt;
+        }
+
         public void CleanupOwnedObjects()
         {
             for (int index = ownedObjects.Count - 1; index >= 0; index--)

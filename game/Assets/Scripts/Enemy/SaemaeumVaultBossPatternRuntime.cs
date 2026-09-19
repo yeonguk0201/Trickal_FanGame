@@ -24,9 +24,11 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(1)] private int phaseOneMaximumJumps = 5;
         [SerializeField, Min(1)] private int phaseTwoMinimumJumps = 4;
         [SerializeField, Min(1)] private int phaseTwoMaximumJumps = 6;
+        [SerializeField, Min(0.1f)] private float phaseOneJumpDuration = 0.69f;
+        [SerializeField, Min(0.1f)] private float phaseTwoJumpDuration = 0.62f;
         [SerializeField, Min(0.1f)] private float jumpDistance = 4.8f;
         [SerializeField, Min(0.1f)] private float jumpHeight = 2f;
-        [SerializeField, Min(0.1f)] private float landingRadius = 1.15f;
+        [SerializeField, Min(0.1f)] private float landingRadius = 2.875f;
         [SerializeField, Min(0.01f)] private float landingDamage = 2f;
         [SerializeField, Min(0f)] private float landingKnockbackSpeed = 7f;
         [SerializeField, Min(0.01f)] private float landingKnockbackDuration = 0.2f;
@@ -62,6 +64,7 @@ namespace TrickalFanGame.Enemy
         private int jumpCount;
         private int currentJump;
         private int resolvedJumpCount;
+        private float jumpSequenceStartTime;
         private Vector2 jumpStart;
         private Vector2 jumpDestination;
         private int healUses;
@@ -117,12 +120,15 @@ namespace TrickalFanGame.Enemy
         }
 
         public void ConfigureJumps(int firstMin, int firstMax, int secondMin, int secondMax,
-            float distance, float radius, float damage, float knockbackSpeed, float knockbackDuration)
+            float distance, float radius, float damage, float knockbackSpeed, float knockbackDuration,
+            float firstJumpDuration = 0.69f, float secondJumpDuration = 0.62f)
         {
             phaseOneMinimumJumps = Mathf.Max(1, firstMin);
             phaseOneMaximumJumps = Mathf.Max(phaseOneMinimumJumps, firstMax);
             phaseTwoMinimumJumps = Mathf.Max(1, secondMin);
             phaseTwoMaximumJumps = Mathf.Max(phaseTwoMinimumJumps, secondMax);
+            phaseOneJumpDuration = Mathf.Max(0.1f, firstJumpDuration);
+            phaseTwoJumpDuration = Mathf.Max(0.1f, secondJumpDuration);
             jumpDistance = Mathf.Max(0.1f, distance);
             landingRadius = Mathf.Max(0.1f, radius);
             landingDamage = Mathf.Max(0.01f, damage);
@@ -267,6 +273,12 @@ namespace TrickalFanGame.Enemy
             jumpCount = minimum + NextRandom(maximum - minimum + 1);
             currentJump = 0;
             resolvedJumpCount = 0;
+            jumpSequenceStartTime = lastTickTime;
+            float jumpDuration = boss != null && boss.CurrentPhase >= 2
+                ? phaseTwoJumpDuration
+                : phaseOneJumpDuration;
+            activeEndsAt = jumpSequenceStartTime + jumpCount * jumpDuration;
+            boss?.SynchronizeActiveEndTime(activeEndsAt);
             jumpStart = transform.position;
             LockNextJumpDestination();
         }
@@ -274,8 +286,9 @@ namespace TrickalFanGame.Enemy
         private void TickJumpSequence(float now)
         {
             if (!jumping || jumpCount <= 0) return;
-            float activeDuration = Mathf.Max(0.01f, activeEndsAt - GetActiveStartedAt());
-            float elapsed = Mathf.Max(0f, now - GetActiveStartedAt());
+            float jumpDuration = boss != null && boss.CurrentPhase >= 2 ? phaseTwoJumpDuration : phaseOneJumpDuration;
+            float activeDuration = Mathf.Max(0.01f, jumpCount * jumpDuration);
+            float elapsed = Mathf.Max(0f, now - jumpSequenceStartTime);
             float sequenceProgress = Mathf.Clamp01(elapsed / activeDuration);
             float scaled = sequenceProgress * jumpCount;
             int jumpIndex = Mathf.Min(jumpCount - 1, Mathf.FloorToInt(scaled));
@@ -306,14 +319,10 @@ namespace TrickalFanGame.Enemy
             }
         }
 
-        private float GetActiveStartedAt()
-        {
-            return activeEndsAt - 3.8f * (boss != null ? boss.CurrentTempoMultiplier : 1f);
-        }
-
         private void LockNextJumpDestination()
         {
-            Vector2 offset = target != null ? (Vector2)target.position - jumpStart : Vector2.down * jumpDistance;
+            Vector2 targetPosition = target != null ? (Vector2)target.position : jumpStart + Vector2.down * jumpDistance;
+            Vector2 offset = targetPosition - jumpStart;
             jumpDestination = ClampToArena(jumpStart + Vector2.ClampMagnitude(offset, jumpDistance));
             CreateLandingTelegraph();
         }

@@ -301,7 +301,7 @@ HUD-4C에 남겼다.
 런타임과 Editor 검증 스크립트를 포함한 `Assembly-CSharp`·`Assembly-CSharp-Editor` 컴파일이 오류 없이
 통과했다. 최초 검증 메뉴의 `Sequence contains more than one element`는 테스트 복제본을 만든 뒤
 Scene 단일 검색을 반복한 검증기 문제였으며, 원본 참조를 복제 전에 보관하도록 수정했다. 자세한
-원인과 재발 방지 기준은 [트러블슈팅 §3](../../17-troubleshooting.md#3-hud-4c-검증-예외와-build-층-진입-알림-미표시)에 기록했다.
+원인과 재발 방지 기준은 [트러블슈팅 §3](../../troubleshooting/17-troubleshooting.md#3-hud-4c-검증-예외와-build-층-진입-알림-미표시)에 기록했다.
 
 사용자가 HUD-4C Setup 이후 새로 만든 Development Build에서 미니맵 층 이름과 층 진입 알림이
 정상 표시되며 위치와 지속 시간이 의도에 맞는 것을 확인했다. 별도 방 이름·번호는 표시되지 않았다.

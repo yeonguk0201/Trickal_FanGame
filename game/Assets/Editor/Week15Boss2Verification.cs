@@ -22,12 +22,13 @@ namespace TrickalFanGame.Editor
             ValidateLandingDamageAndKnockback();
             ValidateGroundedContact();
             ValidateJumpArcAndCollisionRestoration();
+            ValidateFinalJumpCompletesBeforeRecovery();
             ValidateWallAndCornerLandings();
             ValidateLandingTelegraphCleanup();
             ValidateFloorTwoRuntimeBinding();
             Week15Boss1Verification.Verify();
             Debug.Log("Week 15 Boss-2 verification passed: Saemaeum Vault keeps its own sprite/prefab, " +
-                      "fires five five-projectile fan volleys, repeats seeded 3-5 / 4-6 longer jumps, damages " +
+                      "fires five five-projectile fan volleys, repeats seeded 3-5 / 4-6 jumps, damages " +
                       "and knocks back at the locked landing point, heals 15 without a phase-one use cap, " +
                       "excludes healing in phase two, accelerates, and cleans landing telegraphs.");
         }
@@ -63,6 +64,9 @@ namespace TrickalFanGame.Editor
             Assert(prefab.GetComponent<SpriteRenderer>() == null &&
                    prefab.GetComponentInChildren<SpriteRenderer>()?.transform != prefab.transform,
                 "Boss-2 elastic animation must live on a visual child so its collider never stretches.");
+            Assert(Mathf.Approximately(prefab.transform.localScale.x, Week15Boss1Setup.BossScale) &&
+                   Mathf.Approximately(prefab.transform.localScale.y, Week15Boss1Setup.BossScale),
+                "Saemaeum Vault must use the doubled boss body scale.");
             Assert(boss.DisplayName == "새마음금고" && boss.PhaseCount == 2 && boss.Patterns.Count == 3,
                 "Boss-2 HUD identity or its three-pattern/two-phase contract is missing.");
             Assert(boss.Patterns.Select(pattern => pattern.Execution).SequenceEqual(new[]
@@ -75,9 +79,9 @@ namespace TrickalFanGame.Editor
                    Mathf.Approximately(runtime.FanSpreadDegrees, 48f),
                 "Boss-2 approach throw must use five 5-projectile fan volleys.");
             Assert(Mathf.Approximately(runtime.JumpDistance, 4.8f) &&
-                   runtime.PhaseTwoMinimumJumps == 4 && Mathf.Approximately(runtime.HealPerUse, 15f),
+                   runtime.PhaseTwoMinimumJumps == 4 && Mathf.Approximately(runtime.HealPerUse, 15f) &&
+                   Mathf.Approximately(GetPrivateField<float>(runtime, "landingRadius"), 2.875f),
                 "Boss-2 jump distance or phase-one healing amount was not rebalanced.");
-
             TextureImporter importer = AssetImporter.GetAtPath(Week15Boss2Setup.BossSpritePath) as TextureImporter;
             Assert(importer != null && importer.alphaIsTransparency && importer.mipmapEnabled == false,
                 "Boss-2 sprite must preserve transparency and disable mipmaps.");
@@ -89,8 +93,8 @@ namespace TrickalFanGame.Editor
                 "Boss-2 requires the stable floor-two Tall room profile.");
             Assert(profile.MovementBounds.height > profile.MovementBounds.width * 0.6f,
                 "Boss-2 Tall room does not provide enough vertical jump space.");
-            float diameter = collider.radius * 2f * Week15Boss0Setup.BossVisualScale;
-            Assert(diameter < Mathf.Min(profile.MovementBounds.width, profile.MovementBounds.height) * 0.25f,
+            float diameter = collider.radius * 2f * Week15Boss1Setup.BossScale;
+            Assert(diameter < Mathf.Min(profile.MovementBounds.width, profile.MovementBounds.height) * 0.4f,
                 "Boss-2 collision silhouette is too large for the floor-two room.");
         }
 
@@ -120,7 +124,7 @@ namespace TrickalFanGame.Editor
                 runtime.OnPatternStateChanged(BossActionState.Active,
                     BossPatternExecution.SaemaeumJumpSequence, 4.75f);
                 runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence);
-                float flightSampleTime = 0.95f + 3.8f * (0.5f / runtime.PlannedJumpCount);
+                float flightSampleTime = GetPrivateField<float>(runtime, "phaseOneJumpDuration") * 0.5f;
                 runtime.TickPattern(BossActionState.Active,
                     BossPatternExecution.SaemaeumJumpSequence, flightSampleTime);
                 Assert(runtime.CurrentVisualScale.y > runtime.CurrentVisualScale.x * 1.5f,
@@ -235,11 +239,12 @@ namespace TrickalFanGame.Editor
                 runtime.OnPatternStateChanged(BossActionState.Active,
                     BossPatternExecution.SaemaeumJumpSequence, 3.8f);
                 runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence);
-                float firstLandingTime = 3.8f / runtime.PlannedJumpCount + 0.001f;
+                target.transform.position += Vector3.right * 2.8f;
+                float firstLandingTime = GetPrivateField<float>(runtime, "phaseOneJumpDuration") + 0.001f;
                 runtime.TickPattern(BossActionState.Active,
                     BossPatternExecution.SaemaeumJumpSequence, firstLandingTime);
                 Assert(Mathf.Approximately(targetHealth.CurrentHealth, before - runtime.LandingDamage),
-                    "Boss-2 landing did not damage the player at the locked landing point.");
+                    "Boss-2 landing did not damage the player inside the enlarged impact radius.");
                 Assert(receiver.IsKnockedBack &&
                        Mathf.Approximately(receiver.CurrentVelocity.magnitude, runtime.LandingKnockbackSpeed),
                     "Boss-2 landing did not apply Buseureogi-style knockback.");
@@ -281,8 +286,9 @@ namespace TrickalFanGame.Editor
                         try
                         {
                             root.transform.SetParent(arena.transform, false);
-                            root.transform.localScale = Vector3.one * 1.8f;
-                            root.AddComponent<CircleCollider2D>().radius = 0.38f;
+                            root.transform.localScale = Vector3.one * Week15Boss1Setup.BossScale;
+                            CircleCollider2D bodyCollider = root.AddComponent<CircleCollider2D>();
+                            bodyCollider.radius = 0.38f;
                             Vector2 interiorHalf = half - Vector2.one * 0.2f;
                             target.transform.position = (Vector2)arena.transform.position +
                                 Vector2.Scale(edge, interiorHalf - Vector2.one * 0.5f);
@@ -294,12 +300,13 @@ namespace TrickalFanGame.Editor
                             runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence);
                             Vector2 destination = GetPrivateField<Vector2>(runtime, "jumpDestination");
                             Vector2 local = destination - (Vector2)arena.transform.position;
-                            Assert(Mathf.Abs(local.x) + 0.684f <= interiorHalf.x + 0.001f &&
-                                   Mathf.Abs(local.y) + 0.684f <= interiorHalf.y + 0.001f,
+                            float bodyRadius = bodyCollider.radius * root.transform.lossyScale.x;
+                            Assert(Mathf.Abs(local.x) + bodyRadius <= interiorHalf.x + 0.001f &&
+                                   Mathf.Abs(local.y) + bodyRadius <= interiorHalf.y + 0.001f,
                                 "Landing body overlaps a wall.");
                             float before = target.GetComponent<Health>().CurrentHealth;
                             runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence,
-                                3.8f / runtime.PlannedJumpCount + 0.001f);
+                                GetPrivateField<float>(runtime, "phaseOneJumpDuration") + 0.001f);
                             Assert(Mathf.Approximately(target.GetComponent<Health>().CurrentHealth,
                                     before - runtime.LandingDamage),
                                 $"Wall/corner landing missed: testRoom={testRoom}, edge={edge}.");
@@ -362,6 +369,52 @@ namespace TrickalFanGame.Editor
             }
         }
 
+        private static void ValidateFinalJumpCompletesBeforeRecovery()
+        {
+            GameObject root = CreateRuntimeBoss(out BossController boss,
+                out SaemaeumVaultBossPatternRuntime runtime, out _, out GameObject target);
+            try
+            {
+                CircleCollider2D collider = root.AddComponent<CircleCollider2D>();
+                boss.ConfigurePhaseTwo(0f, 0.88f);
+                boss.ConfigurePatterns(new[]
+                {
+                    new BossPatternDefinition("final-jump-continuity",
+                        BossPatternExecution.SaemaeumJumpSequence, 0f, 3.8f, 1.15f, 0f),
+                });
+                runtime.ConfigureJumps(6, 6, 6, 6, 4.8f, 2.875f, 2f, 7f, 0.2f, 0.69f, 0.62f);
+                boss.SetPhase(2);
+                boss.BeginCombat(target.transform, 99, 0f);
+                float activeStart = boss.StateEndsAt;
+                boss.TickBehavior(activeStart);
+
+                float expectedEnd = activeStart + 6f * 0.62f;
+                Assert(boss.State == BossActionState.Active &&
+                       Mathf.Approximately(boss.StateEndsAt, expectedEnd),
+                    $"The active state must end at the actual final landing instead of the old fixed duration. " +
+                    $"state={boss.State}, phase={boss.CurrentPhase}, jumps={runtime.PlannedJumpCount}, " +
+                    $"actualEnd={boss.StateEndsAt}, expectedEnd={expectedEnd}.");
+
+                boss.TickBehavior(expectedEnd - 0.001f);
+                Assert(boss.State == BossActionState.Active && GetPrivateField<bool>(runtime, "jumping"),
+                    "The boss left its active state before the final jump completed.");
+
+                boss.TickBehavior(expectedEnd + 0.001f);
+                Transform visual = root.transform.Find("Visual");
+                Assert(boss.State == BossActionState.Recovery &&
+                       !GetPrivateField<bool>(runtime, "jumping") &&
+                       GetPrivateField<int>(runtime, "resolvedJumpCount") == 6 &&
+                       !collider.isTrigger && visual.localPosition == Vector3.zero,
+                    "The final jump must land and restore collision before recovery begins.");
+            }
+            finally
+            {
+                boss.CancelCombat();
+                UnityEngine.Object.DestroyImmediate(target);
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
         private static void ValidateJumpArcAndCollisionRestoration()
         {
             GameObject root = CreateRuntimeBoss(out BossController boss,
@@ -376,7 +429,7 @@ namespace TrickalFanGame.Editor
                 runtime.OnPatternStateChanged(BossActionState.Active,
                     BossPatternExecution.SaemaeumJumpSequence, 3.8f);
                 runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence);
-                float duration = 3.8f / runtime.PlannedJumpCount;
+                float duration = GetPrivateField<float>(runtime, "phaseOneJumpDuration");
                 runtime.TickPattern(BossActionState.Active,
                     BossPatternExecution.SaemaeumJumpSequence, duration * 0.5f);
                 Assert(collider.isTrigger, "Airborne boss must not physically push the player before landing.");
@@ -397,11 +450,13 @@ namespace TrickalFanGame.Editor
                     BossPatternExecution.SaemaeumJumpSequence, 3.8f);
                 runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence);
                 target.transform.position = new Vector2(-5f, -4f);
+                float sequenceDuration = runtime.PlannedJumpCount *
+                    GetPrivateField<float>(runtime, "phaseOneJumpDuration");
                 runtime.TickPattern(BossActionState.Active,
-                    BossPatternExecution.SaemaeumJumpSequence, 3.8f);
+                    BossPatternExecution.SaemaeumJumpSequence, sequenceDuration);
                 float after = target.GetComponent<Health>().CurrentHealth;
                 runtime.TickPattern(BossActionState.Active,
-                    BossPatternExecution.SaemaeumJumpSequence, 3.8f);
+                    BossPatternExecution.SaemaeumJumpSequence, sequenceDuration);
                 Assert(!collider.isTrigger && visual.localPosition == Vector3.zero &&
                        Mathf.Approximately(target.GetComponent<Health>().CurrentHealth, after),
                     "Final landing must restore collision/height and never repeat its damage.");
@@ -502,7 +557,7 @@ namespace TrickalFanGame.Editor
             Invoke(runtime, "Awake");
             Invoke(boss, "Awake");
             boss.ConfigureHud("새마음금고", 2);
-            boss.ConfigurePhaseTwo(0f, 0.75f);
+            boss.ConfigurePhaseTwo(0f, 0.88f);
             target = new GameObject("Moving Player Target");
             target.transform.position = new Vector2(4.8f, 0f);
             target.AddComponent<Health>();

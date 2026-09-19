@@ -420,7 +420,7 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 - HUD-3A 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud3AVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 빈 상태, 중복 획득 스택, 11종 획득 순서·10개 제한·`+1`, 재구성 상태 유지, Setup 두 번과 HUD-2·Flow-4 회귀를 검사한다.
 - HUD-3B 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-3B Artifact Acquisition Toast`. Game Scene 중앙의 단일 TMP 메시로 28px 이름과 그 아래 보조색 20px 효과 설명을 구성하고 동적 설명에 필요한 TMP 글리프를 Build용 폰트 아틀라스에 추가한다.
 - HUD-3B 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud3BVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 이름·설명의 실제 2줄 TMP 메시와 선호 높이, 폰트 글리프, 1.5초 unscaled 시간 경계, 연속 획득 큐, 최대 스택 거부, 입력·시간 불변, Setup 두 번과 HUD-3A·HUD-2·Flow-4 회귀를 검사한다.
-- HUD-3B Build에서 이름만 보이고 효과 설명이 사라지는 문제의 조사·해결 과정은 [트러블슈팅 §2](./17-troubleshooting.md#2-unity-build에서-tmp-두-번째-줄이-표시되지-않는-문제)에 기록한다.
+- HUD-3B Build에서 이름만 보이고 효과 설명이 사라지는 문제의 조사·해결 과정은 [트러블슈팅 §2](./troubleshooting/17-troubleshooting.md#2-unity-build에서-tmp-두-번째-줄이-표시되지-않는-문제)에 기록한다.
 - HUD-3C 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-3C Pause Artifact List`. Game Scene에 `Esc` 일시정지·복귀와 10종 초과분을 포함한 전체 아티팩트 이름·스택·설명 스크롤 목록을 구성한다.
 - HUD-3C 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud3CVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 빈 목록, 12종 전체 획득 순서, 초과 항목 스택·설명, timeScale·전투 입력 루프 정지와 상태 보존, 중첩 거부, Setup 두 번과 HUD-3B·HUD-3A·HUD-2·Flow-4 회귀를 검사한다.
 - HUD-4A 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-4A Minimap Foundation`. Game Scene 우상단 220×180 영역에 실제 생성 그래프의 격자 방향대로 방과 연결선을 구성하고 현재 방을 `P`와 외곽선으로 강조한다.
