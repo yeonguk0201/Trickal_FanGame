@@ -9,6 +9,7 @@ namespace TrickalFanGame.Combat
         PlayerUltimateImpact,
         EnemyContact,
         EnemyProjectile,
-        PlayerDamageAura
+        PlayerDamageAura,
+        EnemyMelee
     }
 }

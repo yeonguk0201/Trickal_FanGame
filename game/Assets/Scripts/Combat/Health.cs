@@ -8,11 +8,15 @@ namespace TrickalFanGame.Combat
         [SerializeField, Min(0.1f)] private float maxHealth = 10f;
         [SerializeField, Min(0f)] private float currentShield;
 
+        private bool explicitInvulnerability;
+        private DamageInvulnerability damageInvulnerability;
+
         public float CurrentHealth { get; private set; }
         public float MaxHealth => maxHealth;
         public float CurrentShield => currentShield;
         public bool IsDead { get; private set; }
-        public bool IsInvulnerable { get; private set; }
+        public bool IsInvulnerable => explicitInvulnerability ||
+                                      ResolveDamageInvulnerability()?.IsHitInvulnerableAt(Time.time) == true;
 
         public event Action<float, float> Damaged;
         public event Action<float, float> Changed;
@@ -51,6 +55,10 @@ namespace TrickalFanGame.Combat
 
             float previousHealth = CurrentHealth;
             CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
+            if (CurrentHealth > 0f)
+            {
+                ResolveDamageInvulnerability()?.BeginHitWindow(Time.time);
+            }
             DamageResolved?.Invoke(context, result);
             AnyDamageResolved?.Invoke(this, context, result);
             DamageApplied?.Invoke(context, previousHealth - CurrentHealth, CurrentHealth);
@@ -78,13 +86,24 @@ namespace TrickalFanGame.Combat
             CurrentHealth = maxHealth;
             SetShield(0f);
             IsDead = false;
-            IsInvulnerable = false;
+            explicitInvulnerability = false;
+            ResolveDamageInvulnerability()?.ResetHitWindow();
             Changed?.Invoke(CurrentHealth, MaxHealth);
         }
 
         public void SetInvulnerable(bool invulnerable)
         {
-            IsInvulnerable = invulnerable && !IsDead;
+            explicitInvulnerability = invulnerable && !IsDead;
+        }
+
+        private DamageInvulnerability ResolveDamageInvulnerability()
+        {
+            if (damageInvulnerability == null)
+            {
+                damageInvulnerability = GetComponent<DamageInvulnerability>();
+            }
+
+            return damageInvulnerability;
         }
 
         public bool SetShield(float value)
