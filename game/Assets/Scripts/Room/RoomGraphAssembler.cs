@@ -365,19 +365,32 @@ namespace TrickalFanGame.Room
             int contentSeed)
         {
             ItemDropSource template = instance.RewardRoom != null
-                ? instance.RewardRoom.GetComponent<ItemDropSource>() : null;
+                ? instance.RewardRoom.GetComponent<ItemDropSource>()
+                : instance.GetComponentInChildren<ItemDropSource>(true);
+            if (template == null)
+            {
+                Debug.LogError($"{roomId}: boss reward source is missing from the instantiated boss room.", instance);
+                return;
+            }
             instance.Controller.EnemySpawned += enemy =>
             {
                 BossController boss = enemy != null ? enemy.GetComponent<BossController>() : null;
                 if (boss == null) return;
                 boss.ConfigureEncounterSeed(contentSeed);
-                if (template == null) return;
                 ItemDropSource source = enemy.GetComponent<ItemDropSource>();
                 if (source == null) source = enemy.AddComponent<ItemDropSource>();
                 ItemDefinition[] items = new ItemDefinition[template.ItemPool.Count];
                 for (int i = 0; i < items.Length; i++) items[i] = template.ItemPool[i];
                 source.Configure(template.PickupPrefab, items, enemy.transform, instance.Node.ContentRoot.transform);
                 source.ConfigureRewardContext(progress, $"{roomId}:boss");
+                Health health = enemy.GetComponent<Health>();
+                bool rewardHandled = false;
+                health.Died += () =>
+                {
+                    if (isFinalBoss || rewardHandled) return;
+                    rewardHandled = true;
+                    source.TryDrop();
+                };
                 BossItemDrop drop = enemy.GetComponent<BossItemDrop>();
                 if (drop == null) drop = enemy.AddComponent<BossItemDrop>();
                 drop.Configure(isFinalBoss, source);

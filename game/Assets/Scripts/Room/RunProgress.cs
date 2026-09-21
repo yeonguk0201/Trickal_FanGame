@@ -14,6 +14,7 @@ namespace TrickalFanGame.Room
         public int CurrentRoom { get; private set; }
         public int KillCount { get; private set; }
         public bool IsProgressionStopped { get; private set; }
+        public bool HasClearedFinalBoss { get; private set; }
         public GeneratedFloorGraph GeneratedGraph { get; private set; }
         public IReadOnlyDictionary<string, RoomRunState> RoomStates => roomStates;
         public event Action FinalBossCleared;
@@ -56,7 +57,9 @@ namespace TrickalFanGame.Room
 
         public void RecordFinalBossCleared()
         {
-            if (!IsProgressionStopped) FinalBossCleared?.Invoke();
+            if (IsProgressionStopped || HasClearedFinalBoss) return;
+            HasClearedFinalBoss = true;
+            FinalBossCleared?.Invoke();
         }
 
         public bool TryInitializeRunSeed(int configuredRunSeed, out string error)
@@ -113,6 +116,7 @@ namespace TrickalFanGame.Room
             CurrentRoom = 0;
             KillCount = 0;
             IsProgressionStopped = false;
+            HasClearedFinalBoss = false;
             GeneratedGraph = null;
             roomStates.Clear();
         }

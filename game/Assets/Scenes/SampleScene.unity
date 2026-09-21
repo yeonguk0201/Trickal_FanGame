@@ -1808,7 +1808,7 @@ MonoBehaviour:
   floorBossPrefabs:
   - {fileID: 421685952657128216, guid: f991af9e6d8bc4e4f869e052eded37e0, type: 3}
   - {fileID: 2406316834951311537, guid: 6bef911f342ead54b94de8fab8306eb9, type: 3}
-  - {fileID: 421685952657128216, guid: f991af9e6d8bc4e4f869e052eded37e0, type: 3}
+  - {fileID: 7891563656944652053, guid: 22741d1cf20f4c64fb3b98652d0e4d57, type: 3}
 --- !u!1 &49446195
 GameObject:
   m_ObjectHideFlags: 0
