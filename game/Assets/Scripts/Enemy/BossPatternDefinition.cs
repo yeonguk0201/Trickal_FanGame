@@ -13,6 +13,10 @@ namespace TrickalFanGame.Enemy
         SaemaeumApproachThrow,
         SaemaeumJumpSequence,
         SaemaeumTreasureHeal,
+        CrayonHeroMapSlash,
+        CrayonHeroSummonMinions,
+        CrayonHeroApproachSwing,
+        CrayonHeroDashChain,
     }
 
     [Serializable]

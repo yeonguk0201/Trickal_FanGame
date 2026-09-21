@@ -302,8 +302,36 @@ namespace TrickalFanGame.Enemy
                 return;
             }
 
-            currentPatternIndex = candidates[NextRandom(candidates.Count)];
+            currentPatternIndex = SelectWeightedPattern(candidates);
             SetState(BossActionState.Telegraph, now + ScaleDuration(CurrentPattern.TelegraphDuration));
+        }
+
+        private int SelectWeightedPattern(IReadOnlyList<int> candidates)
+        {
+            int totalWeight = 0;
+            int[] weights = new int[candidates.Count];
+            for (int candidate = 0; candidate < candidates.Count; candidate++)
+            {
+                BossPatternExecution execution = patterns[candidates[candidate]].Execution;
+                int weight = 1;
+                foreach (IBossPatternRuntime runtime in patternRuntimes)
+                {
+                    if (runtime is not IBossPatternSelectionPolicy policy) continue;
+                    weight = Mathf.Max(0, policy.GetSelectionWeight(execution));
+                    break;
+                }
+                weights[candidate] = weight;
+                totalWeight += weight;
+            }
+
+            if (totalWeight <= 0) return candidates[NextRandom(candidates.Count)];
+            int roll = NextRandom(totalWeight);
+            for (int candidate = 0; candidate < candidates.Count; candidate++)
+            {
+                roll -= weights[candidate];
+                if (roll < 0) return candidates[candidate];
+            }
+            return candidates[candidates.Count - 1];
         }
 
         private void ExecuteCurrentPattern()

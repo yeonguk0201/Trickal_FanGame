@@ -8,4 +8,9 @@ namespace TrickalFanGame.Enemy
         bool TryExecute(BossPatternExecution execution);
         void TickPattern(BossActionState state, BossPatternExecution execution, float now);
     }
+
+    public interface IBossPatternSelectionPolicy
+    {
+        int GetSelectionWeight(BossPatternExecution execution);
+    }
 }
