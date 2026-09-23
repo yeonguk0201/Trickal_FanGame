@@ -22,5 +22,12 @@ namespace TrickalFanGame.Item
         SplitAfterPierce = 16,
         MaxSP = 17,
         SkillProjectileBonusAtSP = 18,
+        MoveSpeedPercent = 19,
+        MoveSpeedPenaltyPercent = 20,
+        NextCombatRoomAttackDamagePercent = 21,
+        BossRoomAttackSpeedPercent = 22,
+        BossRoomMoveSpeedPercent = 23,
+        HealOverTimeBelowHealthOnce = 24,
+        BasicAttackHitLightning = 25,
     }
 }

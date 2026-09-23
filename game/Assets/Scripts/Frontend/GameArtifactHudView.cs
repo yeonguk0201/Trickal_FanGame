@@ -99,7 +99,7 @@ namespace TrickalFanGame.Frontend
         {
             if (slotsRoot == null || slotTemplate == null || definition == null) return;
             ArtifactHudSlotView slot = Instantiate(slotTemplate, slotsRoot);
-            slot.name = "Artifact " + definition.ItemId;
+            slot.name = "Item " + definition.ItemId;
             slot.gameObject.SetActive(true);
             slot.Bind(definition, stackCount);
             visibleSlots.Add(slot);

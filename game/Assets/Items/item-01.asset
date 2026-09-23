@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.ItemDefinition
   itemId: item-01
   displayName: "\uAE09\uC870\uD55C \uBAA9\uAC80"
+  kind: 0
   rarity: 0
   isActive: 1
   effects:
@@ -28,6 +29,7 @@ MonoBehaviour:
     intervalSeconds: 0
     spreadAngleDegrees: 0
     scaleMultiplier: 0
+    durationSeconds: 0
   effectType: 6
   effectValue: 0.05
   stackMode: 0

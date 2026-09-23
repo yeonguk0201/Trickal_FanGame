@@ -136,6 +136,7 @@ namespace TrickalFanGame.Editor
                 definition.ConfigureContract(
                     spec.ItemId,
                     spec.DisplayName,
+                    ItemKind.Artifact,
                     spec.Rarity,
                     spec.IsActive,
                     spec.MaxStacks,

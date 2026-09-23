@@ -7,7 +7,7 @@ namespace TrickalFanGame.Item
 {
     public sealed class ItemDropSource : MonoBehaviour
     {
-        public const float FallbackHealMaxHealthRatio = 0.25f;
+        public const float FallbackHealMaxHealthRatio = ArtifactRewardSelector.FallbackHealMaxHealthRatio;
 
         [SerializeField] private ItemPickup pickupPrefab;
         [SerializeField] private ItemDefinition[] itemPool = System.Array.Empty<ItemDefinition>();

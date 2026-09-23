@@ -17,6 +17,7 @@ namespace TrickalFanGame.Item
         [SerializeField, Min(0f)] private float intervalSeconds;
         [SerializeField, Min(0f)] private float spreadAngleDegrees;
         [SerializeField, Min(0f)] private float scaleMultiplier;
+        [SerializeField, Min(0f)] private float durationSeconds;
 
         public ItemEffectType EffectType => effectType;
         public float Magnitude => magnitude;
@@ -29,6 +30,7 @@ namespace TrickalFanGame.Item
         public float IntervalSeconds => intervalSeconds;
         public float SpreadAngleDegrees => spreadAngleDegrees;
         public float ScaleMultiplier => scaleMultiplier;
+        public float DurationSeconds => durationSeconds;
 
         public ItemEffectEntry(
             ItemEffectType configuredEffectType,
@@ -41,7 +43,8 @@ namespace TrickalFanGame.Item
             float configuredRadius = 0f,
             float configuredIntervalSeconds = 0f,
             float configuredSpreadAngleDegrees = 0f,
-            float configuredScaleMultiplier = 0f)
+            float configuredScaleMultiplier = 0f,
+            float configuredDurationSeconds = 0f)
         {
             effectType = configuredEffectType;
             magnitude = configuredMagnitude;
@@ -54,6 +57,7 @@ namespace TrickalFanGame.Item
             intervalSeconds = configuredIntervalSeconds;
             spreadAngleDegrees = configuredSpreadAngleDegrees;
             scaleMultiplier = configuredScaleMultiplier;
+            durationSeconds = configuredDurationSeconds;
         }
 
         public bool TryValidate(out string error)
@@ -103,6 +107,22 @@ namespace TrickalFanGame.Item
                     if (healthThreshold <= 0f || integerAmount <= 0)
                     {
                         error = "SkillProjectileBonusAtSP requires a positive SP threshold and projectile count.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.HealOverTimeBelowHealthOnce:
+                    if (healthThreshold <= 0f || healthThreshold > 1f || durationSeconds <= 0f)
+                    {
+                        error = "HealOverTimeBelowHealthOnce requires a health threshold in (0, 1] and a positive duration.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.BasicAttackHitLightning:
+                    if (integerAmount <= 0)
+                    {
+                        error = "BasicAttackHitLightning requires a positive hit count.";
                         return false;
                     }
 

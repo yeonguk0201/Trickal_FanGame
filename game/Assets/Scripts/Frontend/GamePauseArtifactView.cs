@@ -218,7 +218,7 @@ namespace TrickalFanGame.Frontend
                 foreach (ItemDefinition definition in inventory.AcquiredDefinitions)
                 {
                     ArtifactPauseListEntryView entry = Instantiate(entryTemplate, entriesRoot);
-                    entry.name = "Artifact Detail " + definition.ItemId;
+                    entry.name = "Item Detail " + definition.ItemId;
                     entry.gameObject.SetActive(true);
                     entry.Bind(definition, inventory.GetStackCount(definition.ItemId));
                     entries.Add(entry);
@@ -308,8 +308,8 @@ namespace TrickalFanGame.Frontend
                     : "현재 Run을 끝낼까요?";
             if (confirmationWarning != null)
                 confirmationWarning.text = action == PendingRunAction.Restart
-                    ? "현재 Run의 진행과 획득 아티팩트는 저장되지 않습니다.\n같은 캐릭터로 새 Run을 시작합니다."
-                    : "지금까지의 진행과 획득 아티팩트는 저장되지 않습니다.\n홈으로 돌아가도 결과 보상은 지급되지 않습니다.";
+                    ? "현재 Run의 진행과 획득 아이템은 저장되지 않습니다.\n같은 캐릭터로 새 Run을 시작합니다."
+                    : "지금까지의 진행과 획득 아이템은 저장되지 않습니다.\n홈으로 돌아가도 결과 보상은 지급되지 않습니다.";
             if (confirmationActionLabel != null)
                 confirmationActionLabel.text = action == PendingRunAction.Restart ? "다시 시작" : "Run 끝내기";
             ApplyLeaveConfirmationVisibility(true);

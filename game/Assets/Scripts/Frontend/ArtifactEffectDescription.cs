@@ -64,6 +64,18 @@ namespace TrickalFanGame.Frontend
                 ItemEffectType.SplitAfterPierce => $"첫 관통 시 분열탄 {effect.IntegerAmount}개",
                 ItemEffectType.MaxSP => $"최대 SP +{effect.IntegerAmount}",
                 ItemEffectType.SkillProjectileBonusAtSP => $"저학년 투사체 +{effect.IntegerAmount}",
+                ItemEffectType.MoveSpeedPercent => $"이동속도 +{Percent(effect.Magnitude)}",
+                ItemEffectType.MoveSpeedPenaltyPercent => $"이동속도 -{Percent(effect.Magnitude)}",
+                ItemEffectType.NextCombatRoomAttackDamagePercent =>
+                    $"다음 전투방 기본 공격 피해 +{Percent(effect.Magnitude)}",
+                ItemEffectType.BossRoomAttackSpeedPercent =>
+                    $"보스방 공격속도 +{Percent(effect.Magnitude)}",
+                ItemEffectType.BossRoomMoveSpeedPercent =>
+                    $"보스방 이동속도 +{Percent(effect.Magnitude)}",
+                ItemEffectType.HealOverTimeBelowHealthOnce =>
+                    $"HP {Percent(effect.HealthThreshold)} 이하 시 {Number(effect.DurationSeconds)}초간 최대 HP의 {Percent(effect.Magnitude)} 회복 (Run당 1회)",
+                ItemEffectType.BasicAttackHitLightning =>
+                    $"기본 공격 {effect.IntegerAmount}회 적중마다 공격력의 {Percent(effect.Magnitude)} 번개 피해",
                 _ => effect.EffectType.ToString(),
             };
         }

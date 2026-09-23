@@ -23,6 +23,7 @@ namespace TrickalFanGame.Editor
                 Assert(actual.IsValid, $"Invalid artifact contract: {expected.ItemId}");
                 Assert(actual.ItemId == expected.ItemId, $"Item ID mismatch for {expected.ItemId}.");
                 Assert(actual.DisplayName == expected.DisplayName, $"Display name mismatch for {expected.ItemId}.");
+                Assert(actual.Kind == ItemKind.Artifact, $"Legacy item must remain an artifact: {expected.ItemId}.");
                 Assert(actual.Rarity == expected.Rarity, $"Rarity mismatch for {expected.ItemId}.");
                 Assert(actual.IsActive == expected.IsActive, $"Active state mismatch for {expected.ItemId}.");
                 Assert(actual.MaxStacks == expected.MaxStacks, $"Maximum stack mismatch for {expected.ItemId}.");
