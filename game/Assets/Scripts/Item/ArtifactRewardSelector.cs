@@ -5,6 +5,8 @@ namespace TrickalFanGame.Item
 {
     public static class ArtifactRewardSelector
     {
+        public const int MaximumCandidateCount = 3;
+        public const float FallbackHealMaxHealthRatio = 0.25f;
         public const int CommonWeight = 60;
         public const int UncommonWeight = 25;
         public const int RareWeight = 12;
@@ -18,51 +20,78 @@ namespace TrickalFanGame.Item
             out ItemDefinition definition)
         {
             definition = null;
-            if (itemPool == null || itemPool.Count == 0)
+            IReadOnlyList<ItemRewardCandidate> rewardCandidates = BuildCandidates(
+                itemPool, inventory, runSeed, rewardId);
+            for (int index = 0; index < rewardCandidates.Count; index++)
             {
-                return false;
+                if (rewardCandidates[index].IsItem)
+                {
+                    definition = rewardCandidates[index].Definition;
+                    return true;
+                }
             }
 
-            List<ItemDefinition> candidates = new(itemPool.Count);
+            return false;
+        }
+
+        public static IReadOnlyList<ItemRewardCandidate> BuildCandidates(
+            IReadOnlyList<ItemDefinition> itemPool,
+            PlayerInventory inventory,
+            int runSeed,
+            string rewardId)
+        {
+            if (itemPool == null || itemPool.Count == 0)
+            {
+                return Array.Empty<ItemRewardCandidate>();
+            }
+
+            Dictionary<string, ItemDefinition> activeById = new(StringComparer.Ordinal);
             for (int index = 0; index < itemPool.Count; index++)
             {
                 ItemDefinition candidate = itemPool[index];
-                if (!IsEligible(candidate, inventory))
+                if (candidate == null || !candidate.IsValid || !candidate.IsActive ||
+                    activeById.ContainsKey(candidate.ItemId))
                 {
                     continue;
                 }
 
-                candidates.Add(candidate);
+                activeById.Add(candidate.ItemId, candidate);
             }
 
-            if (candidates.Count == 0)
+            if (activeById.Count == 0)
             {
-                return false;
+                return Array.Empty<ItemRewardCandidate>();
             }
 
+            List<ItemDefinition> candidates = new(activeById.Values);
             candidates.Sort((left, right) => string.CompareOrdinal(left.ItemId, right.ItemId));
-            int totalWeight = 0;
+            candidates.RemoveAll(candidate => !IsEligible(candidate, inventory));
+
             uint stateHash = Mix(unchecked((uint)runSeed), rewardId ?? string.Empty);
             foreach (ItemDefinition candidate in candidates)
             {
                 int currentStacks = inventory != null ? inventory.GetStackCount(candidate.ItemId) : 0;
                 stateHash = Mix(stateHash, candidate.ItemId);
                 stateHash = Avalanche(stateHash ^ unchecked((uint)currentStacks));
-                totalWeight += GetWeight(candidate.Rarity);
             }
 
-            int roll = (int)(stateHash % unchecked((uint)totalWeight));
-            foreach (ItemDefinition candidate in candidates)
+            List<ItemRewardCandidate> result = new(MaximumCandidateCount);
+            while (result.Count < MaximumCandidateCount && candidates.Count > 0)
             {
-                roll -= GetWeight(candidate.Rarity);
-                if (roll < 0)
-                {
-                    definition = candidate;
-                    return true;
-                }
+                ItemDefinition selected = ChooseWeighted(candidates, stateHash);
+                int currentStacks = inventory != null ? inventory.GetStackCount(selected.ItemId) : 0;
+                result.Add(ItemRewardCandidate.ForItem(selected, currentStacks));
+                candidates.Remove(selected);
+                stateHash = Mix(stateHash, selected.ItemId);
+                stateHash = Avalanche(stateHash ^ unchecked((uint)result.Count));
             }
 
-            throw new InvalidOperationException("A positive artifact reward weight must select a candidate.");
+            if (result.Count < MaximumCandidateCount)
+            {
+                result.Add(ItemRewardCandidate.ForHealing(FallbackHealMaxHealthRatio));
+            }
+
+            return result.ToArray();
         }
 
         public static int GetWeight(ItemRarity rarity)
@@ -115,6 +144,28 @@ namespace TrickalFanGame.Item
             }
 
             return foundActive;
+        }
+
+        private static ItemDefinition ChooseWeighted(IReadOnlyList<ItemDefinition> candidates, uint stateHash)
+        {
+            int totalWeight = 0;
+            for (int index = 0; index < candidates.Count; index++)
+            {
+                totalWeight += GetWeight(candidates[index].Rarity);
+            }
+
+            int roll = (int)(stateHash % unchecked((uint)totalWeight));
+            for (int index = 0; index < candidates.Count; index++)
+            {
+                ItemDefinition candidate = candidates[index];
+                roll -= GetWeight(candidate.Rarity);
+                if (roll < 0)
+                {
+                    return candidate;
+                }
+            }
+
+            throw new InvalidOperationException("A positive item reward weight must select a candidate.");
         }
 
         private static uint Mix(uint hash, string value)
