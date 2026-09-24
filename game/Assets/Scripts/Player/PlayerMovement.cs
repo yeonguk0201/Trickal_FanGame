@@ -28,6 +28,10 @@ namespace TrickalFanGame.Player
             actionState = GetComponent<PlayerActionState>();
             knockback = GetComponent<KnockbackReceiver>();
             spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null && GetComponent<PlayerWalkAnimator>() == null)
+            {
+                gameObject.AddComponent<PlayerWalkAnimator>();
+            }
             if (GetComponent<DamageInvulnerability>() == null)
             {
                 gameObject.AddComponent<DamageInvulnerability>();
@@ -103,6 +107,8 @@ namespace TrickalFanGame.Player
                 body.linearVelocity = Vector2.zero;
             }
         }
+
+        public bool IsMoving => movement.sqrMagnitude > 0.001f && health != null && !health.IsDead;
 
         private static Vector2 ReadMovement()
         {
