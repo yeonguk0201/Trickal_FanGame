@@ -43,7 +43,7 @@ TextureImporter:
   cubemapConvolution: 0
   seamlessCubemap: 0
   textureFormat: 1
-  maxTextureSize: 2048
+  maxTextureSize: 4096
   textureSettings:
     serializedVersion: 2
     filterMode: 1
@@ -60,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 430
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -81,7 +81,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -94,7 +94,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Standalone
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -112,12 +112,12 @@ TextureImporter:
       name: Erpin_lowGrade_skill_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 91
-        width: 589
-        height: 546
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 605
+        height: 724
+      alignment: 9
+      pivot: {x: 0.5, y: 0.362}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -134,12 +134,12 @@ TextureImporter:
       name: Erpin_lowGrade_skill_1
       rect:
         serializedVersion: 2
-        x: 619
-        y: 83
-        width: 586
-        height: 531
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 605
+        y: 0
+        width: 605
+        height: 724
+      alignment: 9
+      pivot: {x: 0.5, y: 0.362}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -156,12 +156,12 @@ TextureImporter:
       name: Erpin_lowGrade_skill_2
       rect:
         serializedVersion: 2
-        x: 1245
-        y: 82
-        width: 567
-        height: 534
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1210
+        y: 0
+        width: 605
+        height: 724
+      alignment: 9
+      pivot: {x: 0.5, y: 0.362}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -178,12 +178,12 @@ TextureImporter:
       name: Erpin_lowGrade_skill_3
       rect:
         serializedVersion: 2
-        x: 1854
-        y: 47
-        width: 547
-        height: 546
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1815
+        y: 0
+        width: 605
+        height: 724
+      alignment: 9
+      pivot: {x: 0.5, y: 0.362}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

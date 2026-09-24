@@ -50,6 +50,7 @@ namespace TrickalFanGame.Player
             actionState != null && actionState.CanUseLowerGradeSkill && projectilePrefab != null &&
             playerSP != null && playerSP.CurrentSP > 0;
         public event Action<HomingSkillProjectile> ProjectileLaunched;
+        public event Action SalvoStarted;
 
         private void Awake()
         {
@@ -125,6 +126,7 @@ namespace TrickalFanGame.Player
             salvoStartTime = currentTime;
             nextShotTime = currentTime;
             isFiring = true;
+            SalvoStarted?.Invoke();
             FireNextProjectile();
 
             Debug.Log(
