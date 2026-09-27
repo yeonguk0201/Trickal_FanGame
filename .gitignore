@@ -40,3 +40,8 @@ game/*.slnx
 .DS_Store
 Thumbs.db
 *.stackdump
+
+# Local agent and verification artifacts
+/.claude/settings.local.json
+/output/
+/nul
