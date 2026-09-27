@@ -22,6 +22,7 @@ namespace TrickalFanGame.Item
         public ItemPickup PickupPrefab => pickupPrefab;
         public IReadOnlyList<ItemDefinition> ItemPool => itemPool;
         public Transform DropParent => dropParent;
+        public string RewardId => rewardId;
 
         public void Configure(
             ItemPickup configuredPickupPrefab,
@@ -92,6 +93,16 @@ namespace TrickalFanGame.Item
             LastFallbackHealAmount = 0f;
 
             Debug.Log($"[ItemDropSource] Dropped {definition.DisplayName} from {name}.", this);
+            return true;
+        }
+
+        public bool MarkSelectionResolved(ItemRewardCandidate selectedCandidate)
+        {
+            if (HasDropped || selectedCandidate == null) return false;
+            HasDropped = true;
+            LastDroppedDefinition = selectedCandidate.IsItem ? selectedCandidate.Definition : null;
+            LastFallbackHealAmount = 0f;
+            Debug.Log($"[ItemDropSource] Resolved selection reward {selectedCandidate.StableId} from {name}.", this);
             return true;
         }
 

@@ -55,6 +55,7 @@ namespace TrickalFanGame.Room
         {
             if (!enabled || source == null || destination == null || transitioningPlayer == null ||
                 source != CurrentNode || !source.HasConnectionTo(destination) ||
+                runProgress?.IsRewardSelectionPending == true ||
                 transitioningPlayer.GetComponent<PlayerActionState>()?.CanTransition == false ||
                 Time.unscaledTime < nextTransitionTime)
             {
@@ -95,6 +96,12 @@ namespace TrickalFanGame.Room
         public bool TryReplaceFloor(RoomNode[] configuredNodes, RoomNode configuredStart,
             PlayerMovement transitioningPlayer, out string error)
         {
+            if (runProgress?.IsRewardSelectionPending == true)
+            {
+                error = "A pending reward selection blocks floor replacement.";
+                return false;
+            }
+
             nodes = configuredNodes ?? Array.Empty<RoomNode>();
             startingNode = configuredStart;
             return TryInitializeStartingRoom(transitioningPlayer, out error);

@@ -18,6 +18,8 @@ namespace TrickalFanGame.Room
         [SerializeField] private EncounterEnemyRoster encounterEnemyRoster;
         [SerializeField] private SPPickup encounterClearRewardPrefab;
         [SerializeField] private GameObject[] floorBossPrefabs = Array.Empty<GameObject>();
+        [SerializeField] private ItemRewardSelectionSession rewardSelectionSession;
+        [SerializeField] private ItemDefinition[] selectionRewardPool = Array.Empty<ItemDefinition>();
 
         private GeneratedFloorGraph generatedGraph;
         private GameObject currentFloorRoot;
@@ -36,6 +38,8 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<GameObject> FloorBossPrefabs => floorBossPrefabs;
         public GeneratedFloorGraph GeneratedGraph => generatedGraph;
         public GameObject CurrentFloorRoot => currentFloorRoot;
+        public ItemRewardSelectionSession RewardSelectionSession => rewardSelectionSession;
+        public IReadOnlyList<ItemDefinition> SelectionRewardPool => selectionRewardPool;
 
         public void Configure(
             FloorGenerator configuredGenerator,
@@ -67,6 +71,13 @@ namespace TrickalFanGame.Room
         public void ConfigureFloorBossPrefabs(GameObject[] configuredPrefabs)
         {
             floorBossPrefabs = configuredPrefabs ?? Array.Empty<GameObject>();
+        }
+
+        public void ConfigureSelectionRewards(ItemRewardSelectionSession configuredSession,
+            ItemDefinition[] configuredPool)
+        {
+            rewardSelectionSession = configuredSession;
+            selectionRewardPool = configuredPool ?? Array.Empty<ItemDefinition>();
         }
 
         public GameObject ResolveBossPrefab(int floorNumber)
@@ -188,6 +199,12 @@ namespace TrickalFanGame.Room
 
         public bool TryLoadFloor(int floorNumber, PlayerMovement transitioningPlayer, out string error)
         {
+            if (runProgress?.IsRewardSelectionPending == true)
+            {
+                error = "The pending reward selection must be completed before loading another floor.";
+                return false;
+            }
+
             if (generatedGraph == null)
             {
                 error = "No generated graph is available for floor loading.";
@@ -249,12 +266,14 @@ namespace TrickalFanGame.Room
                         generatedNode.FloorNumber >= generatedGraph.Floors.Count,
                         runProgress,
                         generatedNode.RoomId,
-                        generatedNode.ContentSeed);
+                        generatedNode.ContentSeed,
+                        selectionRewardPool);
                 if (instance.RewardRoom != null)
                 {
                     instance.RewardRoom.gameObject.SetActive(generatedNode.Role == GeneratedRoomRole.Treasure);
                     instance.RewardRoom.Configure(generatedNode.FloorNumber, generatedNode.RoomNumber,
-                        runProgress, instance.RewardRoom.GetComponent<ItemDropSource>(), instance.Controller);
+                        runProgress, instance.RewardRoom.GetComponent<ItemDropSource>(), instance.Controller,
+                        rewardSelectionSession, selectionRewardPool);
                     instance.RewardRoom.BindRunState(state);
                 }
                 instances.Add(generatedNode.RoomId, instance);
@@ -347,7 +366,8 @@ namespace TrickalFanGame.Room
             BoxCollider2D collider = portalObject.AddComponent<BoxCollider2D>();
             collider.size = Vector2.one;
             FloorAdvancePortal portal = portalObject.AddComponent<FloorAdvancePortal>();
-            portal.Configure(this, bossRoom.Controller, floor.FloorNumber + 1, indicator);
+            portal.Configure(this, bossRoom.Controller, floor.FloorNumber + 1, indicator,
+                runProgress, null);
         }
 
         private static Transform[] CopySpawnPoints(IReadOnlyList<Transform> source, int maximumCount)
@@ -362,7 +382,8 @@ namespace TrickalFanGame.Room
             bool isFinalBoss,
             RunProgress progress,
             string roomId,
-            int contentSeed)
+            int contentSeed,
+            ItemDefinition[] configuredSelectionPool)
         {
             ItemDropSource template = instance.RewardRoom != null
                 ? instance.RewardRoom.GetComponent<ItemDropSource>()
@@ -379,21 +400,19 @@ namespace TrickalFanGame.Room
                 boss.ConfigureEncounterSeed(contentSeed);
                 ItemDropSource source = enemy.GetComponent<ItemDropSource>();
                 if (source == null) source = enemy.AddComponent<ItemDropSource>();
-                ItemDefinition[] items = new ItemDefinition[template.ItemPool.Count];
-                for (int i = 0; i < items.Length; i++) items[i] = template.ItemPool[i];
+                IReadOnlyList<ItemDefinition> sourcePool = configuredSelectionPool != null &&
+                                                           configuredSelectionPool.Length > 0
+                    ? configuredSelectionPool
+                    : template.ItemPool;
+                ItemDefinition[] items = new ItemDefinition[sourcePool.Count];
+                for (int i = 0; i < items.Length; i++) items[i] = sourcePool[i];
                 source.Configure(template.PickupPrefab, items, enemy.transform, instance.Node.ContentRoot.transform);
                 source.ConfigureRewardContext(progress, $"{roomId}:boss");
-                Health health = enemy.GetComponent<Health>();
-                bool rewardHandled = false;
-                health.Died += () =>
-                {
-                    if (isFinalBoss || rewardHandled) return;
-                    rewardHandled = true;
-                    source.TryDrop();
-                };
                 BossItemDrop drop = enemy.GetComponent<BossItemDrop>();
                 if (drop == null) drop = enemy.AddComponent<BossItemDrop>();
                 drop.Configure(isFinalBoss, source);
+                Health health = enemy.GetComponent<Health>();
+                health.Died += () => drop.TryHandleBossDefeated();
             };
         }
 
@@ -462,6 +481,12 @@ namespace TrickalFanGame.Room
         private static void DestroyFloor(GameObject floorRoot)
         {
             if (floorRoot == null) return;
+            foreach (FloorAdvancePortal portal in floorRoot.GetComponentsInChildren<FloorAdvancePortal>(true))
+                portal.ReleaseRuntimeBindings();
+            foreach (RewardRoom rewardRoom in floorRoot.GetComponentsInChildren<RewardRoom>(true))
+                rewardRoom.ReleaseRuntimeBindings();
+            foreach (BossItemDrop bossDrop in floorRoot.GetComponentsInChildren<BossItemDrop>(true))
+                bossDrop.ReleaseRuntimeBindings();
             floorRoot.SetActive(false);
             if (Application.isPlaying) Destroy(floorRoot); else DestroyImmediate(floorRoot);
         }

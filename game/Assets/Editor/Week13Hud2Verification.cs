@@ -61,7 +61,8 @@ namespace TrickalFanGame.Editor
                 !view.HighGradeCooldownFill.fillClockwise,
                 "Skill cooldown overlays must be counter-clockwise radial filled Images.");
             Assert(!view.GetComponentsInChildren<Graphic>(true).Any(graphic => graphic.raycastTarget &&
-                graphic.GetComponentInParent<GamePauseArtifactView>() == null),
+                graphic.GetComponentInParent<GamePauseArtifactView>() == null &&
+                graphic.GetComponentInParent<ItemRewardSelectionView>() == null),
                 "HUD-2 graphics must not intercept combat input.");
 
             RectTransform panel = view.transform.Find("ReferenceFrame/" + Week13Hud2Setup.SkillPanelName) as RectTransform;

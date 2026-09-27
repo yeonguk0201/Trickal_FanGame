@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TrickalFanGame.Item;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -7,6 +8,8 @@ namespace TrickalFanGame.Room
     public sealed class RunProgress : MonoBehaviour
     {
         private readonly Dictionary<string, RoomRunState> roomStates = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, ItemRewardSelectionState> rewardSelections = new(StringComparer.Ordinal);
+        private string activeRewardSelectionId;
 
         public int RunSeed { get; private set; }
         public bool HasRunSeed { get; private set; }
@@ -17,7 +20,18 @@ namespace TrickalFanGame.Room
         public bool HasClearedFinalBoss { get; private set; }
         public GeneratedFloorGraph GeneratedGraph { get; private set; }
         public IReadOnlyDictionary<string, RoomRunState> RoomStates => roomStates;
+        public IReadOnlyDictionary<string, ItemRewardSelectionState> RewardSelections => rewardSelections;
+        public ItemRewardSelectionState PendingRewardSelection
+        {
+            get
+            {
+                ItemRewardSelectionState selection = GetRewardSelection(activeRewardSelectionId);
+                return selection != null && !selection.IsCompleted ? selection : null;
+            }
+        }
+        public bool IsRewardSelectionPending => PendingRewardSelection != null;
         public event Action FinalBossCleared;
+        public event Action RewardSelectionStateChanged;
 
         public event Action<int, int> RoomChanged;
 
@@ -53,6 +67,75 @@ namespace TrickalFanGame.Room
         {
             return !string.IsNullOrWhiteSpace(roomId) && roomStates.TryGetValue(roomId, out RoomRunState state)
                 ? state : null;
+        }
+
+        public ItemRewardSelectionState GetRewardSelection(string rewardId)
+        {
+            return !string.IsNullOrWhiteSpace(rewardId) &&
+                   rewardSelections.TryGetValue(rewardId, out ItemRewardSelectionState selection)
+                ? selection
+                : null;
+        }
+
+        public ItemRewardSelectionState CreateRewardSelection(string rewardId,
+            IReadOnlyList<ItemRewardCandidate> candidates)
+        {
+            if (string.IsNullOrWhiteSpace(rewardId))
+            {
+                throw new ArgumentException("A reward selection requires a stable reward ID.", nameof(rewardId));
+            }
+
+            if (rewardSelections.TryGetValue(rewardId, out ItemRewardSelectionState existing))
+            {
+                return existing;
+            }
+
+            ItemRewardSelectionState selection = new(rewardId, candidates);
+            rewardSelections.Add(rewardId, selection);
+            RewardSelectionStateChanged?.Invoke();
+            return selection;
+        }
+
+        public void NotifyRewardSelectionCompleted(ItemRewardSelectionState selection)
+        {
+            if (selection != null && selection.IsCompleted &&
+                ReferenceEquals(GetRewardSelection(selection.RewardId), selection))
+            {
+                if (string.Equals(activeRewardSelectionId, selection.RewardId, StringComparison.Ordinal))
+                    activeRewardSelectionId = null;
+                RewardSelectionStateChanged?.Invoke();
+            }
+        }
+
+        public bool TryActivateRewardSelection(ItemRewardSelectionState selection, out string error)
+        {
+            if (selection == null || selection.IsCompleted ||
+                !ReferenceEquals(GetRewardSelection(selection.RewardId), selection))
+            {
+                error = "Only an owned incomplete reward selection can be activated.";
+                return false;
+            }
+
+            ItemRewardSelectionState active = PendingRewardSelection;
+            if (active != null && !ReferenceEquals(active, selection))
+            {
+                error = $"Reward selection '{active.RewardId}' must be closed before '{selection.RewardId}'.";
+                return false;
+            }
+
+            activeRewardSelectionId = selection.RewardId;
+            RewardSelectionStateChanged?.Invoke();
+            error = null;
+            return true;
+        }
+
+        public bool DeactivateRewardSelection(ItemRewardSelectionState selection)
+        {
+            if (selection == null || !string.Equals(activeRewardSelectionId, selection.RewardId,
+                    StringComparison.Ordinal)) return false;
+            activeRewardSelectionId = null;
+            RewardSelectionStateChanged?.Invoke();
+            return true;
         }
 
         public void RecordFinalBossCleared()
@@ -118,7 +201,10 @@ namespace TrickalFanGame.Room
             IsProgressionStopped = false;
             HasClearedFinalBoss = false;
             GeneratedGraph = null;
+            activeRewardSelectionId = null;
             roomStates.Clear();
+            rewardSelections.Clear();
+            RewardSelectionStateChanged?.Invoke();
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
@@ -76,6 +77,17 @@ namespace TrickalFanGame.Editor
             PlayerMovement player = assembler.Graph.Player;
             Assert(player != null && player.GetComponent<Health>() != null,
                 "Boss-4 integration verification requires a configured player.");
+            if (assembler.RewardSelectionSession != null)
+            {
+                Health health = player.GetComponent<Health>();
+                PlayerInventory inventory = player.GetComponent<PlayerInventory>();
+                InvokeLifecycle(health, "Awake");
+                InvokeLifecycle(player.GetComponent<PlayerSP>(), "Awake");
+                InvokeLifecycle(player.GetComponent<PlayerStats>(), "Awake");
+                InvokeLifecycle(inventory, "Awake");
+                assembler.RewardSelectionSession.Configure(progress, inventory, health,
+                    player.GetComponent<PlayerActionState>());
+            }
             int finalClearEvents = 0;
             Action onFinalBossCleared = () => finalClearEvents++;
             progress.FinalBossCleared += onFinalBossCleared;
@@ -103,11 +115,19 @@ namespace TrickalFanGame.Editor
 
                     if (floor < 3)
                     {
+                        FloorAdvancePortal portal = bossRoom.GetComponentInChildren<FloorAdvancePortal>(true);
+                        if (bossDrop != null && bossDrop.UsesSelectionReward)
+                        {
+                            ItemRewardSelectionSession session = assembler.RewardSelectionSession;
+                            Assert(session != null && session.IsOpen && portal != null && !portal.IsUnlocked,
+                                $"Floor {floor} selection reward must keep the portal locked before confirmation.");
+                            Assert(session.TrySelect(0),
+                                $"Floor {floor} selection reward could not be confirmed.");
+                        }
                         Assert(drop != null && drop.HasDropped,
-                            $"Floor {floor} boss did not grant its one growth reward. " +
+                            $"Floor {floor} boss did not resolve its one growth reward. " +
                             $"source={(drop == null ? "missing" : $"present/hasDropped={drop.HasDropped}")}, " +
                             $"bossDrop={(bossDrop == null ? "missing" : $"present/final={bossDrop.IsFinalBoss}")}.");
-                        FloorAdvancePortal portal = bossRoom.GetComponentInChildren<FloorAdvancePortal>(true);
                         Assert(portal != null && portal.IsUnlocked && portal.TryEnter(player),
                             $"Floor {floor} boss clear did not unlock the next-floor portal.");
                         Assert(progress.CurrentFloor == floor + 1,
@@ -169,6 +189,13 @@ namespace TrickalFanGame.Editor
         private static RoomPrefab FindBossRoom(RoomGraphAssembler assembler) =>
             assembler.CurrentFloorRoot.GetComponentsInChildren<RoomPrefab>(true)
                 .Single(room => room.Node.Definition.RoomType == RoomType.Boss);
+
+        private static void InvokeLifecycle(object target, string methodName)
+        {
+            MethodInfo method = target?.GetType().GetMethod(methodName,
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            method?.Invoke(target, null);
+        }
 
         private static void Assert(bool condition, string message)
         {

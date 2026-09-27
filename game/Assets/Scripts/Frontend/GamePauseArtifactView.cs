@@ -168,7 +168,8 @@ namespace TrickalFanGame.Frontend
 
         public bool TryPause()
         {
-            if (IsPaused || Time.timeScale <= 0f) return false;
+            if (IsPaused || Time.timeScale <= 0f ||
+                FindFirstObjectByType<ItemRewardSelectionSession>()?.IsOpen == true) return false;
             previousTimeScale = Time.timeScale;
             previousSelectedObject = EventSystem.current != null
                 ? EventSystem.current.currentSelectedGameObject

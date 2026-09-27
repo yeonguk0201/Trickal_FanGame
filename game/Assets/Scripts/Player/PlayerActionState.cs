@@ -17,18 +17,30 @@ namespace TrickalFanGame.Player
         public PlayerActionPhase Phase { get; private set; } = PlayerActionPhase.Normal;
         public Vector2 DashDirection { get; private set; } = Vector2.down;
         public float DashSpeedMultiplier { get; private set; } = 1f;
+        public bool IsRewardSelectionBlocked { get; private set; }
 
         public bool IsDashing => Phase == PlayerActionPhase.UltimateDashing;
         public bool IsImpactRecovering => Phase == PlayerActionPhase.UltimateImpactRecovery;
         public bool IsCoastRecovering => Phase == PlayerActionPhase.UltimateCoastRecovery;
         public bool IsRecovering => IsImpactRecovering || IsCoastRecovering;
-        public bool CanMove => Phase == PlayerActionPhase.Normal || IsDashing || IsCoastRecovering;
-        public bool CanBasicAttack => Phase == PlayerActionPhase.Normal;
-        public bool CanUseLowerGradeSkill => Phase == PlayerActionPhase.Normal;
-        public bool CanStartUltimate => Phase == PlayerActionPhase.Normal;
-        public bool CanTransition => Phase == PlayerActionPhase.Normal;
+        public bool CanMove => !IsRewardSelectionBlocked &&
+                               (Phase == PlayerActionPhase.Normal || IsDashing || IsCoastRecovering);
+        public bool CanBasicAttack => !IsRewardSelectionBlocked && Phase == PlayerActionPhase.Normal;
+        public bool CanUseLowerGradeSkill => !IsRewardSelectionBlocked && Phase == PlayerActionPhase.Normal;
+        public bool CanStartUltimate => !IsRewardSelectionBlocked && Phase == PlayerActionPhase.Normal;
+        public bool CanTransition => !IsRewardSelectionBlocked && Phase == PlayerActionPhase.Normal;
 
         public event Action<PlayerActionPhase> Changed;
+
+        public void SetRewardSelectionBlocked(bool blocked)
+        {
+            if (blocked && !IsRewardSelectionBlocked && Phase != PlayerActionPhase.Normal)
+            {
+                ForceNormal();
+            }
+
+            IsRewardSelectionBlocked = blocked;
+        }
 
         public bool TryBeginUltimate(Vector2 initialDirection, float speedMultiplier)
         {

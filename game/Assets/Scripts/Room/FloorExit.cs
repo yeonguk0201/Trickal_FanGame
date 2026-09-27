@@ -73,6 +73,7 @@ namespace TrickalFanGame.Room
         public bool TryEnter(PlayerMovement player)
         {
             if (!IsUnlocked || destination == null || player == null ||
+                runProgress?.IsRewardSelectionPending == true ||
                 player.GetComponent<PlayerActionState>()?.CanTransition == false)
             {
                 return false;

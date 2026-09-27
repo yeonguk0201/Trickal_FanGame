@@ -61,7 +61,8 @@ namespace TrickalFanGame.Editor
                 view.HpFill.fillMethod == Image.FillMethod.Horizontal,
                 "HP fill must have a Sprite so Unity renders its horizontal fill amount.");
             Assert(!view.GetComponentsInChildren<Graphic>(true).Any(graphic => graphic.raycastTarget &&
-                graphic.GetComponentInParent<GamePauseArtifactView>() == null),
+                graphic.GetComponentInParent<GamePauseArtifactView>() == null &&
+                graphic.GetComponentInParent<ItemRewardSelectionView>() == null),
                 "HUD-1 graphics must not intercept combat input.");
 
             Canvas canvas = view.GetComponent<Canvas>();
