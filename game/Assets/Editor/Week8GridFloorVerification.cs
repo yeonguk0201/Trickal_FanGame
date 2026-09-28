@@ -195,10 +195,10 @@ namespace TrickalFanGame.Editor
             Assert(activeRooms == 1, "Exactly one current room must be active after floor entry.");
             Vector2 actualPlayerPosition = assembler.Graph.Player != null
                 ? PlayerPosition(assembler.Graph.Player) : Vector2.zero;
-            Vector2 expectedPlayerPosition = assembler.Graph.CurrentNode.DefaultEntryPoint.position;
+            Vector2 expectedPlayerPosition = assembler.Graph.CurrentNode.InitialSpawnPosition;
             Assert(assembler.Graph.Player == null ||
                    (actualPlayerPosition - expectedPlayerPosition).sqrMagnitude < 0.0001f,
-                $"Initial floor assembly must place the Player at the starting room entry point so Player projectiles are visible in the active room. Expected {expectedPlayerPosition}, got {actualPlayerPosition}.");
+                $"Initial floor assembly must place the Player at the starting room spawn point so Player projectiles are visible in the active room. Expected {expectedPlayerPosition}, got {actualPlayerPosition}.");
 
             Assert(treasureNode != null, "Floor 1 needs a treasure room for state restoration verification.");
             RoomRunState state = assembler.Progress.GetRoomState(treasureNode.RoomId);

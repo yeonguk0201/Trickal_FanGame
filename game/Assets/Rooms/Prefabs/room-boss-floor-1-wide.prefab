@@ -1182,6 +1182,7 @@ MonoBehaviour:
   roomNumber: 1
   contentRoot: {fileID: 2566084209633095164}
   cameraAnchor: {fileID: 8250532295061464338}
+  initialSpawnPoint: {fileID: 0}
   defaultEntryPoint: {fileID: 6004383677200005650}
   doorways: []
   definition: {fileID: 0}

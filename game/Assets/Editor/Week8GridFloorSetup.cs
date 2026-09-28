@@ -84,6 +84,7 @@ namespace TrickalFanGame.Editor
                 RoomNode node = root.AddComponent<RoomNode>();
                 GameObject content = Child(root.transform, "Content");
                 Transform cameraAnchor = Child(root.transform, "Camera Anchor").transform;
+                Transform initialSpawnPoint = Child(content.transform, "Start Point").transform;
 
                 GameObject encounterObject = Child(content.transform, "Encounter");
                 BoxCollider2D encounterTrigger = encounterObject.AddComponent<BoxCollider2D>();
@@ -114,6 +115,7 @@ namespace TrickalFanGame.Editor
 
                 node.Configure("floor-01-room-01", 1, 1, content, cameraAnchor,
                     slots[(int)RoomDoorDirection.Left].EntryPoint, Array.Empty<RoomDoorway>());
+                node.ConfigureInitialSpawnPoint(initialSpawnPoint);
                 roomPrefab.Configure(node, controller, reward, slots);
                 GameObject saved = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
                 if (saved == null) { Debug.LogError($"Could not save {PrefabPath}."); return null; }

@@ -27,6 +27,7 @@ namespace TrickalFanGame.Editor
 
             ValidateDeterminism(generator);
             ValidateCatalogOrderIndependence(generator);
+            ValidateStartingRoomTemplate(generator);
             ValidateCompatibilityAndCoverage(generator);
             ValidateSpacingRules(generator);
             ValidateContentVersion(generator);
@@ -36,7 +37,8 @@ namespace TrickalFanGame.Editor
             Debug.Log(
                 "Week 14 Room-4 verification passed: connection directions, RoomType and AABB size " +
                 "compatibility filter candidates; the same seed/content version is deterministic and catalog-order " +
-                "independent; Small/Basic/Wide are selected; Wide-Wide horizontal overlap is prevented; " +
+                "independent; every floor starts in Small while normal rooms retain varied templates; " +
+                "Wide-Wide horizontal overlap is prevented; " +
                 "missing compatible types fail explicitly; and Room-0~3 regressions remain valid.");
         }
 
@@ -135,6 +137,51 @@ namespace TrickalFanGame.Editor
                     Week14Room3Setup.WideTemplateId,
                 }.All(selectedNormalTemplates.Contains),
                 "Seeded normal rooms must retain coverage of Small, Basic, and Wide templates.");
+        }
+
+        private static void ValidateStartingRoomTemplate(FloorGenerator generator)
+        {
+            for (int seed = 1; seed <= 128; seed++)
+            {
+                Assert(generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out string error), error);
+                foreach (GeneratedFloor floor in graph.Floors)
+                {
+                    GeneratedRoomNode startingRoom = floor.Nodes
+                        .Single(node => node.RoomId == floor.StartingRoomId);
+                    Assert(startingRoom.Role == GeneratedRoomRole.Start &&
+                           startingRoom.TemplateId == RoomTemplateSelector.StartingRoomTemplateId,
+                        $"Floor {floor.FloorNumber} must start with the " +
+                        $"{RoomTemplateSelector.StartingRoomTemplateId} template.");
+                }
+            }
+
+            GameObject holder = new("Room-4 Missing Start Template Verification");
+            try
+            {
+                FloorGenerator invalid = holder.AddComponent<FloorGenerator>();
+                invalid.Configure(
+                    generator.FloorCount,
+                    generator.MinimumRoomsPerFloor,
+                    generator.MaximumRoomsPerFloor,
+                    generator.MinimumBossDistance,
+                    generator.GenerationRetryLimit,
+                    CopyDefinitions(generator));
+                invalid.ConfigureTemplates(
+                    generator.RoomContentVersion,
+                    generator.RoomTemplates
+                        .Where(template => template.TemplateId != RoomTemplateSelector.StartingRoomTemplateId)
+                        .ToArray());
+                Assert(!invalid.TryGenerateForSeed(
+                           Week8RandomRoomSetup.FixedVerificationSeed,
+                           out _,
+                           out string error) &&
+                       error.Contains("requires compatible template", StringComparison.Ordinal),
+                    "A template catalog without the fixed Small starting room must fail explicitly.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(holder);
+            }
         }
 
         private static void ValidateSpacingRules(FloorGenerator generator)

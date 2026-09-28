@@ -123,7 +123,7 @@ namespace TrickalFanGame.Room
             if (targetPlayer != null)
             {
                 ClearTransientProjectiles();
-                MovePlayer(targetPlayer, startingNode.DefaultEntryPoint.position);
+                MovePlayer(targetPlayer, startingNode.InitialSpawnPosition);
             }
             if (!TryShowRoom(startingNode, targetPlayer != null ? targetPlayer.transform : null, out error))
             {

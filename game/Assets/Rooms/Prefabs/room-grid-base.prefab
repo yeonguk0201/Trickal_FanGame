@@ -934,6 +934,7 @@ MonoBehaviour:
   roomNumber: 1
   contentRoot: {fileID: 2726247650352724188}
   cameraAnchor: {fileID: 7580018729418761449}
+  initialSpawnPoint: {fileID: 8842747945315112277}
   defaultEntryPoint: {fileID: 1799164528656849088}
   doorways: []
   definition: {fileID: 0}
@@ -1630,6 +1631,7 @@ Transform:
   - {fileID: 8795039610618050239}
   - {fileID: 3733274854833023996}
   - {fileID: 5498980731088340074}
+  - {fileID: 8842747945315112277}
   m_Father: {fileID: 5511797924929483636}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3312734590471509964
@@ -3884,3 +3886,34 @@ MonoBehaviour:
   entryPoint: {fileID: 725868831005468593}
   blocker: {fileID: 6268946055686895766}
   seal: {fileID: 2266727921377804063}
+--- !u!1 &8658279105123420618
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8842747945315112277}
+  m_Layer: 0
+  m_Name: Start Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8842747945315112277
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8658279105123420618}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4585391709033529478}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

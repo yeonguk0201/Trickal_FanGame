@@ -172,8 +172,10 @@ namespace TrickalFanGame.Editor
             }
 
             Assert(Approximately(prefab.Node.CameraAnchor.localPosition, Vector2.zero) &&
+                   prefab.Node.InitialSpawnPoint != null &&
+                   Approximately(prefab.Node.InitialSpawnPosition, prefab.transform.position) &&
                    prefab.Node.DefaultEntryPoint == prefab.FindSlot(RoomDoorDirection.Left).EntryPoint,
-                "The Basic room camera anchor or default floor entry changed.");
+                "The Basic room camera anchor, initial spawn, or default door entry changed.");
         }
 
         private static void AssertWall(
