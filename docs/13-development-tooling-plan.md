@@ -286,6 +286,29 @@ ItemTestScene에서 독립된 Boss2TestScene을 생성하며, Play 시작 시 �
 빌드 Scene 목록은 변경하지 않는다. 구성·생성 검증 메뉴를 제공하며 현재 열린 Unity의 프로젝트 잠금으로
 배치 검증은 미실행 상태다. 실행 방법은 `docs/05-development-setup.md`의 Boss-2 즉시 전투 항목을 따른다.
 
+### Unity 검증기 정리 후보 — 2026-09-29
+
+`game/Assets/Editor`에 `*Verification.cs`가 96개 쌓였다. 개수 자체는 빌드·런타임 비용이 없어 문제가 아니지만,
+원래 실패하는 검증이 섞이면 새 회귀를 놓치고, 예전 Setup을 다시 실행하면 최신 카탈로그를 되돌린다.
+아래는 전체 배치를 돌리지 않은 **정적 1차 분류**이며, 실제 정리 전에 전체 실행으로 확인한다.
+
+| 분류 | 대상 | 근거 | 후속 조치 후보 |
+| ---- | ---- | ---- | -------------- |
+| 실패 확인 | Week14 Room-7 | 카탈로그에 `pillar-crossfire` Encounter가 없어 조회 실패 (2026-09-29 실행) | Encounter 포함 여부 결정 후 검증 갱신 |
+| 실패 확인 | Week15 Enemy-0·2·3·5 | 프리팹·추적 기본값 변경으로 실패 (Obstacle-0 작업 중 확인) | 현재 값 기준으로 기대값 갱신 또는 폐기 |
+| 오래된 가정 | Week14 Room-8, Encounter-1·2 | Encounter 수를 `== 5`·`== 3`으로 고정 (현재 7종) | "필수 ID 포함"으로 완화. Room-8은 Floor-1·Play-1 전 필수 |
+| 오래된 가정 | Week14 Encounter-3 | 웨이브·스폰 수 고정 기대값 | 실행해 확인 |
+| 최신 계약 | Week16~18 (Artifact·Content·Item·Reward·Spell·Test, Resource-0·1·3, Obstacle-0·1·2), Hp1~5 | 이번 달 작업에서 통과 | 유지 |
+| 확인 필요 | Week6~8, Phase G·H, Week13 Frontend·HUD·Setting·Flow, Week14 Room-0~6·Artwork, Week15 Boss·Enemy-1·4·RoleColor, ItemTestRoom, ErpinWalkAnimation | 최근 실행 기록 없음. Week7·8 초기 방·층 검증은 이후 Room·Encounter 계약이 대체했을 가능성이 높음 | 전체 실행 후 유지·갱신·폐기 결정 |
+
+카탈로그를 통째로 다시 쓰는 Setup(`ConfigureTemplates`·`ConfigureEncounters`·Roster 호출):
+Week14 Encounter-1·2·3, Room-4·6·7, Week15 Enemy-5, Week18 Obstacle-2. 이 중 Room-6·7과 Obstacle-2는 기존 등록을
+보존하고 버전을 낮추지 않게 수정됐다(2026-09-29). 나머지는 재실행하면 이후 콘텐츠가 빠질 수 있으므로
+기존 등록 보존으로 고치거나 `[MenuItem]`을 제거해 실수 실행을 막는다.
+
+정리 시점 후보: Obstacle-3 전후 또는 20주차 Floor-1·Play-1 전. 유효한 검증만 한 번에 돌리고 통과/실패 목록을
+출력하는 회귀 실행기 배치 메서드를 함께 검토한다.
+
 - T2: 첫 7주차 방 또는 몬스터 콘텐츠 구현 직후
 - T3: 아이템 등급이나 `clientRunId` 계약 구현 직전
 - T4: 8주차 반복 플레이 테스트 시작 전
