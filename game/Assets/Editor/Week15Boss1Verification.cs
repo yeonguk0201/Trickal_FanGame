@@ -196,7 +196,6 @@ namespace TrickalFanGame.Editor
                 playerObject.AddComponent<PlayerActionState>();
                 playerObject.AddComponent<DamageInvulnerability>();
                 PlayerMovement movement = playerObject.AddComponent<PlayerMovement>();
-                PlayerSPDropper spDropper = playerObject.AddComponent<PlayerSPDropper>();
                 Invoke(health, "Awake");
                 Invoke(movement, "Awake");
 
@@ -214,11 +213,6 @@ namespace TrickalFanGame.Editor
                 Assert(!renderer.flipX, "Vertical movement must preserve Erpin's last horizontal facing.");
                 movement.SetFacingDirection(Vector2.right);
                 Assert(renderer.flipX, "Erpin's supplied art must flip when moving right.");
-                Assert(!spDropper.CanDropFrom(Load<GameObject>(Week15Boss1Setup.CreamPrefabPath)
-                           .GetComponent<Health>()) &&
-                       !spDropper.CanDropFrom(Load<GameObject>(Week15Boss1Setup.DoughPrefabPath)
-                           .GetComponent<Health>()),
-                    "Boss-created obstacles must never be eligible for an SP drop.");
             }
             finally
             {

@@ -5,6 +5,7 @@ using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
+using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
 using UnityEngine;
 
@@ -73,6 +74,12 @@ namespace TrickalFanGame.Debugging
         [SerializeField] private bool spawnEnemiesOnStart = true;
         [SerializeField] private bool showDebugPanel = true;
 
+        [Header("Resources")]
+        [Tooltip("디버그 패널의 Spawn Heart로 플레이어 옆에 생성할 체력 회복 픽업입니다.")]
+        [SerializeField] private HealthPickup healthPickupPrefab;
+        [Tooltip("디버그 패널의 Spawn 버튼으로 생성할 엘리프·열쇠·폭탄 픽업입니다. 자원 종류별로 하나씩 둡니다.")]
+        [SerializeField] private RunResourcePickup[] resourcePickupPrefabs = Array.Empty<RunResourcePickup>();
+
         private readonly List<GameObject> spawnedEnemies = new();
         private Vector2 panelScroll;
 
@@ -81,6 +88,8 @@ namespace TrickalFanGame.Debugging
         public Vector2 RoomSize => roomSize;
         public bool HasAppliedLoadout { get; private set; }
         public int SpawnedEnemyCount => spawnedEnemies.Count(enemy => enemy != null);
+        public HealthPickup HealthPickupPrefab => healthPickupPrefab;
+        public IReadOnlyList<RunResourcePickup> ResourcePickupPrefabs => resourcePickupPrefabs;
         public int CurrentFloor => runProgress != null ? Mathf.Max(1, runProgress.CurrentFloor) : 1;
         public BossController ActiveBoss => spawnedEnemies
             .Where(enemy => enemy != null)
@@ -254,6 +263,51 @@ namespace TrickalFanGame.Debugging
             }
         }
 
+        public void SetHealthPickupPrefab(HealthPickup prefab)
+        {
+            healthPickupPrefab = prefab;
+        }
+
+        public void SetResourcePickupPrefabs(RunResourcePickup[] prefabs)
+        {
+            resourcePickupPrefabs = prefabs ?? Array.Empty<RunResourcePickup>();
+        }
+
+        public RunResourcePickup SpawnResourcePickup(RunResourceType type)
+        {
+            RunResourcePickup prefab = resourcePickupPrefabs.FirstOrDefault(
+                candidate => candidate != null && candidate.ResourceType == type);
+            ResolveRunProgress();
+            if (prefab == null || playerHealth == null || runProgress == null)
+            {
+                return null;
+            }
+
+            Vector3 position = playerHealth.transform.position + Vector3.right * 1.5f;
+            RunResourcePickup pickup = Instantiate(prefab, position, Quaternion.identity, transform);
+            pickup.BindRunProgress(runProgress);
+            return pickup;
+        }
+
+        public void DamagePlayerOneAndHalfHearts()
+        {
+            if (playerHealth != null && !playerHealth.IsDead)
+            {
+                playerHealth.TakeDamage(3f);
+            }
+        }
+
+        public HealthPickup SpawnHealthPickup()
+        {
+            if (healthPickupPrefab == null || playerHealth == null)
+            {
+                return null;
+            }
+
+            Vector3 position = playerHealth.transform.position + Vector3.right * 1.5f;
+            return Instantiate(healthPickupPrefab, position, Quaternion.identity, transform);
+        }
+
         public void AdvanceTestFloor()
         {
             ResolveRunProgress();
@@ -291,6 +345,38 @@ namespace TrickalFanGame.Debugging
             {
                 runProgress.RecordRoomEntry(1, 1);
             }
+        }
+
+        private void DrawRunResourceControls()
+        {
+            ResolveRunProgress();
+            if (runProgress == null)
+            {
+                return;
+            }
+
+            GUILayout.Label(
+                $"ELIF {runProgress.GetResourceCount(RunResourceType.Elif)}  " +
+                $"KEY {runProgress.GetResourceCount(RunResourceType.Key)}  " +
+                $"BOMB {runProgress.GetResourceCount(RunResourceType.Bomb)}  (max {RunResourceWallet.MaxCount})",
+                GUI.skin.box);
+            GUILayout.BeginHorizontal();
+            foreach (RunResourceType type in new[] { RunResourceType.Elif, RunResourceType.Key, RunResourceType.Bomb })
+            {
+                GUI.enabled = resourcePickupPrefabs.Any(prefab => prefab != null && prefab.ResourceType == type);
+                if (GUILayout.Button($"Spawn {type}"))
+                {
+                    SpawnResourcePickup(type);
+                }
+            }
+            GUI.enabled = true;
+            if (GUILayout.Button("+98 All"))
+            {
+                runProgress.TryAddResource(RunResourceType.Elif, 98);
+                runProgress.TryAddResource(RunResourceType.Key, 98);
+                runProgress.TryAddResource(RunResourceType.Bomb, 98);
+            }
+            GUILayout.EndHorizontal();
         }
 
         private void OnGUI()
@@ -336,6 +422,21 @@ namespace TrickalFanGame.Debugging
                 AdvanceTestFloor();
             }
             GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("HP -1.5 Hearts"))
+            {
+                DamagePlayerOneAndHalfHearts();
+            }
+            GUI.enabled = healthPickupPrefab != null;
+            if (GUILayout.Button("Spawn Heart"))
+            {
+                SpawnHealthPickup();
+            }
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+
+            DrawRunResourceControls();
 
             GUILayout.Label("Items / Spells — +1은 현재 Play에서 즉시 획득", GUI.skin.box);
             panelScroll = GUILayout.BeginScrollView(panelScroll);

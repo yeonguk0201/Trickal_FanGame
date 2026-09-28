@@ -1119,7 +1119,6 @@ GameObject:
   - component: {fileID: 2018927169}
   - component: {fileID: 2018927170}
   - component: {fileID: 2018927173}
-  - component: {fileID: 2018927172}
   - component: {fileID: 2018927171}
   - component: {fileID: 2018927175}
   - component: {fileID: 2018927174}
@@ -1394,20 +1393,6 @@ MonoBehaviour:
   targetLayers:
     serializedVersion: 2
     m_Bits: 64
---- !u!114 &2018927172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2018927159}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10dc6910a9f04acc89854ebd53cdf2a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerSPDropper
-  pickupPrefab: {fileID: 6812840948383656007, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
-  dropChance: 0.25
 --- !u!114 &2018927173
 MonoBehaviour:
   m_ObjectHideFlags: 0

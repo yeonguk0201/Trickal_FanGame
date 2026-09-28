@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TrickalFanGame.Item;
+using TrickalFanGame.Resource;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -9,6 +10,7 @@ namespace TrickalFanGame.Room
     {
         private readonly Dictionary<string, RoomRunState> roomStates = new(StringComparer.Ordinal);
         private readonly Dictionary<string, ItemRewardSelectionState> rewardSelections = new(StringComparer.Ordinal);
+        private readonly RunResourceWallet resources = new();
         private string activeRewardSelectionId;
 
         public int RunSeed { get; private set; }
@@ -34,6 +36,21 @@ namespace TrickalFanGame.Room
         public event Action RewardSelectionStateChanged;
 
         public event Action<int, int> RoomChanged;
+        public event Action<RunResourceType, int> ResourceChanged
+        {
+            add => resources.Changed += value;
+            remove => resources.Changed -= value;
+        }
+
+        public int GetResourceCount(RunResourceType type) => resources.GetCount(type);
+
+        // Resources are Run-only: nothing is granted after the Run ends, and ResetProgress returns them to zero.
+        public bool CanAcceptResource(RunResourceType type) => !IsProgressionStopped && resources.CanAccept(type);
+
+        public int TryAddResource(RunResourceType type, int amount)
+        {
+            return IsProgressionStopped ? 0 : resources.Add(type, amount);
+        }
 
         public bool TrySetGeneratedGraph(GeneratedFloorGraph graph, out string error)
         {
@@ -204,6 +221,7 @@ namespace TrickalFanGame.Room
             activeRewardSelectionId = null;
             roomStates.Clear();
             rewardSelections.Clear();
+            resources.Clear();
             RewardSelectionStateChanged?.Invoke();
         }
     }

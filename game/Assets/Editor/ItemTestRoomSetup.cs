@@ -5,6 +5,7 @@ using TrickalFanGame.Combat;
 using TrickalFanGame.Debugging;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
+using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -112,6 +113,8 @@ namespace TrickalFanGame.Editor
                 BuildDefaultLoadout(),
                 BuildDefaultEnemyPlacements(),
                 TestRoomSize);
+            AssignHealthPickupPrefab(controller);
+            AssignResourcePickupPrefabs(controller);
             BuildArena(rootObject.transform, player.GetComponent<SpriteRenderer>()?.sprite);
 
             EditorSceneManager.MarkSceneDirty(scene);
@@ -224,7 +227,39 @@ namespace TrickalFanGame.Editor
                 loadout,
                 placements.ToArray(),
                 controller.RoomSize);
+            changed |= AssignHealthPickupPrefab(controller);
+            changed |= AssignResourcePickupPrefabs(controller);
             return changed;
+        }
+
+        private static bool AssignHealthPickupPrefab(ItemTestRoomController controller)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Week17Resource0Setup.PrefabPath);
+            HealthPickup pickup = prefab != null ? prefab.GetComponent<HealthPickup>() : null;
+            if (pickup == null || controller.HealthPickupPrefab == pickup)
+            {
+                return false;
+            }
+
+            controller.SetHealthPickupPrefab(pickup);
+            EditorUtility.SetDirty(controller);
+            return true;
+        }
+
+        private static bool AssignResourcePickupPrefabs(ItemTestRoomController controller)
+        {
+            RunResourcePickup[] prefabs = Week17Resource1Setup.Specs
+                .Select(spec => Week17Resource1Setup.LoadPrefab(spec.Type))
+                .Where(prefab => prefab != null)
+                .ToArray();
+            if (prefabs.Length == 0 || prefabs.SequenceEqual(controller.ResourcePickupPrefabs))
+            {
+                return false;
+            }
+
+            controller.SetResourcePickupPrefabs(prefabs);
+            EditorUtility.SetDirty(controller);
+            return true;
         }
 
         private static bool RemoveRunSessions(Scene scene)

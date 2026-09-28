@@ -22,7 +22,7 @@ namespace TrickalFanGame.Editor
             RoomGraphAssembler assembler = UnityEngine.Object.FindFirstObjectByType<RoomGraphAssembler>();
             Assert(assembler != null && assembler.Generator != null && assembler.Graph != null &&
                    assembler.Progress != null && assembler.EnemyRoster != null &&
-                   assembler.EncounterClearRewardPrefab != null,
+                   assembler.EncounterClearDropTable != null,
                 "Run Room-7 Setup before Room-8 verification.");
             ValidateThreeFloorSeeds(assembler.Generator);
             ValidateRendererVisibilityBoundary(assembler.Generator);
@@ -178,8 +178,10 @@ namespace TrickalFanGame.Editor
             foreach (GameObject enemy in spawned.ToArray()) Kill(enemy);
             Assert(state.CompletedWaveCount == 2 && state.IsCleared && state.HasGrantedClearReward,
                 "The final required-enemy wipe did not persist clear and reward state.");
-            Assert(room.Controller.GetComponent<RoomClearRewardSpawner>()?.LastSpawnedReward != null,
-                "The completed Encounter did not create its one clear reward.");
+            RoomClearRewardSpawner clearDrop = room.Controller.GetComponent<RoomClearRewardSpawner>();
+            Assert(clearDrop != null && clearDrop.HasRolled &&
+                   (clearDrop.LastSpawnedReward != null) == clearDrop.DropTable.TryRoll(clearDrop.DropSeed, out _),
+                "The completed Encounter did not roll its one seeded clear drop.");
 
             int otherFloor = generated.FloorNumber == 1 ? 2 : 1;
             Assert(assembler.TryLoadFloor(otherFloor, assembler.Graph.Player, out error), error);

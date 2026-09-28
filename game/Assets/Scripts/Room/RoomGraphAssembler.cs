@@ -4,6 +4,7 @@ using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
+using TrickalFanGame.Resource;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -16,7 +17,7 @@ namespace TrickalFanGame.Room
         [SerializeField] private RunProgress runProgress;
         [SerializeField] private RoomPrefab roomPrefab;
         [SerializeField] private EncounterEnemyRoster encounterEnemyRoster;
-        [SerializeField] private SPPickup encounterClearRewardPrefab;
+        [SerializeField] private ResourceDropTable encounterClearDropTable;
         [SerializeField] private GameObject[] floorBossPrefabs = Array.Empty<GameObject>();
         [SerializeField] private ItemRewardSelectionSession rewardSelectionSession;
         [SerializeField] private ItemDefinition[] selectionRewardPool = Array.Empty<ItemDefinition>();
@@ -34,7 +35,7 @@ namespace TrickalFanGame.Room
         public int AppliedRunSeed => appliedRunSeed;
         public RoomPrefab ConfiguredRoomPrefab => roomPrefab;
         public EncounterEnemyRoster EnemyRoster => encounterEnemyRoster;
-        public SPPickup EncounterClearRewardPrefab => encounterClearRewardPrefab;
+        public ResourceDropTable EncounterClearDropTable => encounterClearDropTable;
         public IReadOnlyList<GameObject> FloorBossPrefabs => floorBossPrefabs;
         public GeneratedFloorGraph GeneratedGraph => generatedGraph;
         public GameObject CurrentFloorRoot => currentFloorRoot;
@@ -63,9 +64,9 @@ namespace TrickalFanGame.Room
             encounterEnemyRoster = configuredRoster;
         }
 
-        public void ConfigureEncounterClearReward(SPPickup configuredPrefab)
+        public void ConfigureEncounterClearDrop(ResourceDropTable configuredTable)
         {
-            encounterClearRewardPrefab = configuredPrefab;
+            encounterClearDropTable = configuredTable;
         }
 
         public void ConfigureFloorBossPrefabs(GameObject[] configuredPrefabs)
@@ -450,13 +451,14 @@ namespace TrickalFanGame.Room
 
                 controller.ConfigurePreplacedEnemies(Array.Empty<Health>());
                 controller.ConfigureEncounterWaves(waves);
-                if (encounterClearRewardPrefab != null)
+                if (encounterClearDropTable != null)
                 {
                     RoomClearRewardSpawner rewardSpawner = controller.GetComponent<RoomClearRewardSpawner>();
                     if (rewardSpawner == null)
                         rewardSpawner = controller.gameObject.AddComponent<RoomClearRewardSpawner>();
-                    rewardSpawner.Configure(encounterClearRewardPrefab, controller.transform,
-                        instance.Node.ContentRoot.transform, state);
+                    rewardSpawner.Configure(encounterClearDropTable, controller.transform,
+                        instance.Node.ContentRoot.transform, state,
+                        RoomClearRewardSpawner.DeriveDropSeed(node.ContentSeed), runProgress);
                     controller.ConfigureClearReward(rewardSpawner);
                 }
                 error = null;

@@ -37,13 +37,10 @@ namespace TrickalFanGame.Editor
             Undo.SetCurrentGroupName("Setup Phase C Lower Grade Skill");
 
             PlayerSP playerSP = GetOrAdd<PlayerSP>(player.gameObject);
-            PlayerSPDropper dropper = GetOrAdd<PlayerSPDropper>(player.gameObject);
             PlayerSkill skill = GetOrAdd<PlayerSkill>(player.gameObject);
-            dropper.Configure(pickupPrefab, 0.25f);
             skill.Configure(projectilePrefab, LayerMask.GetMask("Enemy"), 0.08f, 12f);
 
             EditorUtility.SetDirty(playerSP);
-            EditorUtility.SetDirty(dropper);
             EditorUtility.SetDirty(skill);
             Undo.CollapseUndoOperations(undoGroup);
 
@@ -53,7 +50,7 @@ namespace TrickalFanGame.Editor
             AssetDatabase.SaveAssets();
             Selection.activeGameObject = player.gameObject;
             Debug.Log(
-                "Phase C lower-grade skill ready: enemy kills have a 25% SP pickup chance; " +
+                "Phase C lower-grade skill ready: SP pickups come from room-clear drops (Resource-3); " +
                 "collect SP and press Space to fire a 36-degree homing fan in slot order 1-3-2-4 at 0.08-second intervals.",
                 player);
         }
