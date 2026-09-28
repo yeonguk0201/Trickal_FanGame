@@ -26,6 +26,8 @@ namespace TrickalFanGame.Enemy
         private KnockbackReceiver knockback;
         private EnemyBehaviorContext behavior;
         private float nextAttackTime;
+        private readonly EnemyObstacleNavigator navigator = new();
+        private float bodyRadius;
 
         public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;
         public float NextAttackTime => nextAttackTime;
@@ -122,9 +124,12 @@ namespace TrickalFanGame.Enemy
             }
 
             Vector2 direction = offset / distance;
-            if (distance > maximumAttackDistance)
+            // Obstacle-0: with the line of fire blocked the enemy holds fire and walks around toward the target.
+            if (distance > maximumAttackDistance ||
+                !EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
             {
-                body.linearVelocity = direction * moveSpeed;
+                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
+                    currentTime) * moveSpeed;
                 return;
             }
 
@@ -166,6 +171,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
+            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {

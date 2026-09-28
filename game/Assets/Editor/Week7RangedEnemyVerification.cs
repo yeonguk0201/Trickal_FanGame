@@ -136,6 +136,9 @@ namespace TrickalFanGame.Editor
                     Vector2.zero, Vector2.right, enemy, EnemyDamageTier.Light, 5f, 4f, null);
                 Assert(wallShot.TryHit(wallCollider) && wallShot == null,
                     "Enemy projectiles must be consumed by solid environment boundaries.");
+                // The wall sits on the enemy for this hit check only; left in place it would block the line of fire.
+                UnityEngine.Object.DestroyImmediate(wall);
+                Physics2D.SyncTransforms();
 
                 GameObject doorObject = new("Phase E-2 Portal Door");
                 doorObject.transform.SetParent(root.transform);

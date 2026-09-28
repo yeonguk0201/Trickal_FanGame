@@ -144,6 +144,9 @@ namespace TrickalFanGame.Editor
                        charging.State == ChargingEnemyState.Recovering &&
                        enemyBody.linearVelocity == Vector2.zero,
                     "Solid room boundaries must stop a charge and start recovery.");
+                // The wall sits on the enemy for this collision check only; left in place it would block the charge line.
+                UnityEngine.Object.DestroyImmediate(wall);
+                Physics2D.SyncTransforms();
 
                 charging.TickBehavior(3.5f);
                 charging.TickBehavior(4.4f);

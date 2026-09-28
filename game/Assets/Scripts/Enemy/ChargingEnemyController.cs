@@ -46,6 +46,8 @@ namespace TrickalFanGame.Enemy
         private float nextChargeTime;
         private Vector2 lockedDirection;
         private bool pursuitTimerStarted;
+        private readonly EnemyObstacleNavigator navigator = new();
+        private float bodyRadius;
 
         public ChargingEnemyState State { get; private set; }
         public Vector2 LockedDirection => lockedDirection;
@@ -184,7 +186,10 @@ namespace TrickalFanGame.Enemy
                     {
                         behavior.SetControllerMovementSuppressed(false);
                         body.linearVelocity = Vector2.zero;
-                        TryBeginWindup(currentTime);
+                        if (!TryBeginWindup(currentTime) && !HasClearChargePath())
+                        {
+                            MoveAroundObstacles(currentTime);
+                        }
                     }
                     break;
                 case ChargingEnemyState.Pursuing:
@@ -194,7 +199,12 @@ namespace TrickalFanGame.Enemy
                     behavior.SetControllerMovementSuppressed(true);
                     body.linearVelocity = Vector2.zero;
                     TrackTargetDuringWindup();
-                    if (currentTime >= stateEndsAt)
+                    if (currentTime >= stateEndsAt && !HasClearChargePath())
+                    {
+                        // The telegraphed line became blocked: skip the dash as if it had hit the obstacle.
+                        EnterRecovery(currentTime);
+                    }
+                    else if (currentTime >= stateEndsAt)
                     {
                         stateEndsAt = currentTime + dashDuration;
                         body.linearVelocity = lockedDirection * dashSpeed;
@@ -265,22 +275,37 @@ namespace TrickalFanGame.Enemy
             return false;
         }
 
-        private void TryBeginWindup(float currentTime)
+        private bool TryBeginWindup(float currentTime)
         {
-            if (currentTime < nextChargeTime)
+            if (currentTime < nextChargeTime || !HasClearChargePath())
             {
-                return;
+                return false;
             }
 
             Vector2 offset = target.position - transform.position;
             if (offset.sqrMagnitude <= 0.001f)
             {
-                return;
+                return false;
             }
 
             lockedDirection = offset.normalized;
             stateEndsAt = currentTime + windupDuration;
             SetState(ChargingEnemyState.Windup);
+            return true;
+        }
+
+        private bool HasClearChargePath()
+        {
+            return target != null &&
+                   EnemyObstacleNavigator.HasClearPath(transform.position, target.position, bodyRadius);
+        }
+
+        private void MoveAroundObstacles(float currentTime)
+        {
+            body.linearVelocity = target != null
+                ? navigator.GetMoveDirection(transform.position, target.position, bodyRadius, currentTime) *
+                  pursuitSpeed
+                : Vector2.zero;
         }
 
         private void TrackTargetDuringWindup()
@@ -317,17 +342,11 @@ namespace TrickalFanGame.Enemy
                 pursuitTimerStarted = true;
             }
 
-            Vector2 offset = target.position - transform.position;
-            if (offset.sqrMagnitude > 0.001f)
-            {
-                body.linearVelocity = offset.normalized * pursuitSpeed;
-            }
-            else
-            {
-                body.linearVelocity = Vector2.zero;
-            }
+            MoveAroundObstacles(currentTime);
 
-            if (currentTime >= stateEndsAt)
+            // Obstacle-0: the charge only starts once the straight line to the target is clear; until then the
+            // pursuit continues around obstacles and re-checks every tick.
+            if (currentTime >= stateEndsAt && HasClearChargePath())
             {
                 body.linearVelocity = Vector2.zero;
                 TryBeginWindup(currentTime);
@@ -416,6 +435,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
+            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {

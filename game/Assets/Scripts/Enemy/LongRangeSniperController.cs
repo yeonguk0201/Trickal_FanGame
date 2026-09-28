@@ -48,6 +48,8 @@ namespace TrickalFanGame.Enemy
         private int strafeDirection = 1;
         private int relocationSequence;
         private bool strafeThisCycle;
+        private readonly EnemyObstacleNavigator navigator = new();
+        private float bodyRadius;
 
         public LongRangeSniperState State { get; private set; }
         public Vector2 LockedDirection => lockedDirection;
@@ -172,7 +174,13 @@ namespace TrickalFanGame.Enemy
                     behavior.SetControllerMovementSuppressed(true);
                     body.linearVelocity = Vector2.zero;
                     TrackTargetDuringAim();
-                    if (currentTime >= stateEndsAt)
+                    if (currentTime >= stateEndsAt &&
+                        !EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
+                    {
+                        // Obstacle-0: never fire into an obstacle; go back to finding a clear line.
+                        EnterRelocating(currentTime);
+                    }
+                    else if (currentTime >= stateEndsAt)
                     {
                         Fire(currentTime);
                     }
@@ -226,6 +234,14 @@ namespace TrickalFanGame.Enemy
         private void TickRelocating(float currentTime)
         {
             behavior.SetControllerMovementSuppressed(false);
+            if (!EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
+            {
+                // Obstacle-0: hold the aim and walk around the obstacle until the line of fire opens.
+                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
+                    currentTime) * moveSpeed;
+                return;
+            }
+
             Vector2 offset = target.position - transform.position;
             float distance = offset.magnitude;
             Vector2 direction = distance > 0.001f ? offset / distance : Vector2.right;
@@ -355,6 +371,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
+            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {
