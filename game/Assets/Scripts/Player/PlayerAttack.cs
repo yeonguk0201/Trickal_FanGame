@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Room;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -61,6 +62,8 @@ namespace TrickalFanGame.Player
 
                 target.TakeDamage(stats.CreateDirectDamageContext(gameObject, DamageSourceType.PlayerAttack));
             }
+
+            DestructibleObstacle.HitInCircle(center, attackRadius);
         }
 
         private static bool TryReadAttackDirection(out Vector2 direction)

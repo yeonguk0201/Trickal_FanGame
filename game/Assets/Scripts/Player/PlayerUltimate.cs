@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
+using TrickalFanGame.Room;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -37,6 +38,7 @@ namespace TrickalFanGame.Player
         [SerializeField] private LayerMask targetLayers = 1 << 6;
 
         private readonly HashSet<Health> impactedTargets = new();
+        private readonly HashSet<DestructibleObstacle> impactedObstacles = new();
         private Health health;
         private PlayerStats stats;
         private PlayerMovement movement;
@@ -108,6 +110,11 @@ namespace TrickalFanGame.Player
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
+            if (IsDashing)
+            {
+                DestructibleObstacle.TryHitCollider(collision.collider, impactedObstacles);
+            }
+
             TryImpact(collision.collider.GetComponentInParent<Health>(), Time.time);
         }
 
@@ -171,6 +178,7 @@ namespace TrickalFanGame.Player
             }
 
             hasImpacted = false;
+            impactedObstacles.Clear();
             LastEndReason = UltimateEndReason.None;
             dashEndTime = currentTime + maximumDuration;
             health.SetInvulnerable(true);
@@ -238,6 +246,8 @@ namespace TrickalFanGame.Player
             {
                 ApplyToTarget(hit.GetComponentInParent<Health>());
             }
+
+            DestructibleObstacle.HitInCircle(transform.position, impactRadius, impactedObstacles);
         }
 
         private void ApplyToTarget(Health target)

@@ -15,6 +15,7 @@ namespace TrickalFanGame.Combat
         [SerializeField] private LayerMask targetLayers = 1 << 6;
 
         private readonly HashSet<Health> damagedTargets = new();
+        private readonly HashSet<DestructibleObstacle> hitObstacles = new();
         private Rigidbody2D body;
         private Health owner;
         private Health target;
@@ -112,6 +113,7 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
+            DestructibleObstacle.TryHitCollider(other, hitObstacles);
             bool isPortalDoor = other.GetComponentInParent<DoorController>() != null;
             bool isSolidBoundary = !other.isTrigger;
             if (!hasAssignedTarget && (isPortalDoor || isSolidBoundary))
@@ -147,6 +149,7 @@ namespace TrickalFanGame.Combat
                 health.TakeDamage(damageContext.WithImpactDistance(impactDistance));
             }
 
+            DestructibleObstacle.HitInCircle(transform.position, explosionRadius, hitObstacles);
             DestroyProjectile();
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace TrickalFanGame.Room
 {
@@ -11,6 +12,8 @@ namespace TrickalFanGame.Room
         public bool HasClaimedArtifact { get; private set; }
         public int CompletedWaveCount { get; private set; }
         public bool HasGrantedClearReward { get; private set; }
+        public IReadOnlyCollection<string> DestroyedObstacleIds => destroyedObstacleIds;
+        private readonly HashSet<string> destroyedObstacleIds = new(StringComparer.Ordinal);
         public event Action Changed;
 
         public void MarkVisited()
@@ -52,6 +55,17 @@ namespace TrickalFanGame.Room
 
             HasVisited = true;
             CompletedWaveCount = waveNumber;
+            Changed?.Invoke();
+            return true;
+        }
+
+        public bool IsObstacleDestroyed(string obstacleId) =>
+            !string.IsNullOrWhiteSpace(obstacleId) && destroyedObstacleIds.Contains(obstacleId);
+
+        public bool TryMarkObstacleDestroyed(string obstacleId)
+        {
+            if (string.IsNullOrWhiteSpace(obstacleId) || !destroyedObstacleIds.Add(obstacleId)) return false;
+            HasVisited = true;
             Changed?.Invoke();
             return true;
         }

@@ -151,6 +151,13 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
+            if (collider.GetComponentInParent<DestructibleObstacle>() != null)
+            {
+                DestructibleObstacle.TryHitCollider(collider);
+                DestroyProjectile();
+                return;
+            }
+
             Health target = collider.GetComponentInParent<Health>();
             if (target == owner || (target != null && damagedTargets.Contains(target)))
             {

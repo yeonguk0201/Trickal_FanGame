@@ -256,6 +256,11 @@ namespace TrickalFanGame.Room
                     null, spawnPoints, blockers);
                 bool safeRoom = generatedNode.Role == GeneratedRoomRole.Start || generatedNode.Role == GeneratedRoomRole.Treasure;
                 instance.Controller.BindRunState(state, safeRoom);
+                if (!BindDestructibleObstacles(instance, generatedNode, state, out error))
+                {
+                    DestroyFloor(nextRoot);
+                    return false;
+                }
                 if (!ApplyEncounter(instance, generatedNode, state, out error))
                 {
                     DestroyFloor(nextRoot);
@@ -415,6 +420,26 @@ namespace TrickalFanGame.Room
                 Health health = enemy.GetComponent<Health>();
                 health.Died += () => drop.TryHandleBossDefeated();
             };
+        }
+
+        private bool BindDestructibleObstacles(RoomPrefab instance, GeneratedRoomNode node, RoomRunState state,
+            out string error)
+        {
+            HashSet<string> ids = new(StringComparer.Ordinal);
+            foreach (DestructibleObstacle obstacle in instance.GetComponentsInChildren<DestructibleObstacle>(true))
+            {
+                if (!obstacle.TryValidate(out error) || !ids.Add(obstacle.ObstacleId))
+                {
+                    error = $"Room {node.RoomId} has an invalid or duplicate destructible obstacle " +
+                            $"'{obstacle.ObstacleId}'. {error}";
+                    return false;
+                }
+
+                obstacle.Bind(state, node.ContentSeed, instance.Node.ContentRoot.transform, runProgress);
+            }
+
+            error = null;
+            return true;
         }
 
         private bool ApplyEncounter(RoomPrefab instance, GeneratedRoomNode node,
