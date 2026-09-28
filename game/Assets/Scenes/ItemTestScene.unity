@@ -312,6 +312,18 @@ MonoBehaviour:
     startingStacks: 0
   - item: {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
     startingStacks: 0
+  - item: {fileID: 11400000, guid: 4c6d17c2077a6fb43bbeda89f37d557c, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 582b1a831ceded4438116781274efe64, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: d05d894249916b44fbfc8d46a8888f5e, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: c1c95cd095900d54394906e00d5e2d18, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 1ffb80362a4d97a4d8a68aaffdd8675b, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: fc8088d88f829f34a854a5a37f3e5ba3, type: 2}
+    startingStacks: 0
   enemyPlacements:
   - enabled: 1
     enemyPrefab: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
@@ -1356,8 +1368,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52f62f5ee934d13b7239afb52b78bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerStats
-  baseMaxHealth: 5
-  baseAttackDamage: 1
+  baseMaxHealth: 10
+  baseAttackDamage: 10
   baseMoveSpeed: 5
   baseAttackSpeed: 1
   baseCriticalChance: 0.05

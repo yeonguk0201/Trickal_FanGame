@@ -53,8 +53,10 @@ namespace TrickalFanGame.Editor
                     .Select(entry => entry.Item.ItemId)
                     .ToHashSet(StringComparer.Ordinal);
                 int activeCount = controller.ItemLoadout.Count(entry => entry.Item.IsActive);
-                Assert(controller.ItemLoadout.Count == 11 && ids.Count == 11 && activeCount == 10 && ids.Contains("item-06"),
-                    "The loadout editor must expose all 10 active artifacts and the inactive item-06 compatibility item.");
+                Assert(controller.ItemLoadout.Count == 17 && ids.Count == 17 && activeCount == 16 &&
+                       ids.Contains("item-06") && ids.Contains("artifact-life-gem") &&
+                       ids.Contains("spell-catch-that-one"),
+                    "The loadout editor must expose all 16 active items/spells and the inactive item-06 compatibility item.");
                 Assert(controller.EnemyPlacements.Count == 5,
                     "The default test room must expose five independently editable enemy placements.");
                 GameObject sansamo = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/SansamoEnemy.prefab");
@@ -89,7 +91,7 @@ namespace TrickalFanGame.Editor
 
                 string mode = EditorApplication.isPlaying ? "Play Mode" : "Edit Mode";
                 Debug.Log(
-                    $"Item Test Room verification passed in {mode}: isolated scene, 10 active + 1 legacy item " +
+                    $"Item Test Room verification passed in {mode}: isolated scene, 16 active + 1 legacy item " +
                     "loadout entries, editable stacks, five editable enemy placements, and runtime debug controls are valid.",
                     controller);
             }

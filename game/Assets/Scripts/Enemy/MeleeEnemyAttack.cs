@@ -23,7 +23,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float activeDuration = 0.12f;
         [SerializeField, Min(0f)] private float recoveryDuration = 0.65f;
         [SerializeField, Min(0f)] private float attackCooldown = 0.2f;
-        [SerializeField, Min(0.01f)] private float attackDamage = 2f;
+        [SerializeField] private EnemyDamageTier damageTier = EnemyDamageTier.Medium;
 
         private EnemyChase chase;
         private EnemyBehaviorContext behavior;
@@ -34,7 +34,7 @@ namespace TrickalFanGame.Enemy
 
         public MeleeEnemyAttackState State { get; private set; }
         public float AttackRange => attackRange;
-        public float AttackDamage => attackDamage;
+        public EnemyDamageTier DamageTier => damageTier;
         public float TelegraphDuration => telegraphDuration;
         public float ActiveDuration => activeDuration;
         public float RecoveryDuration => recoveryDuration;
@@ -63,14 +63,14 @@ namespace TrickalFanGame.Enemy
             float configuredActiveDuration,
             float configuredRecoveryDuration,
             float configuredCooldown,
-            float configuredDamage)
+            EnemyDamageTier configuredDamageTier)
         {
             attackRange = Mathf.Max(0.01f, configuredRange);
             telegraphDuration = Mathf.Max(0.01f, configuredTelegraphDuration);
             activeDuration = Mathf.Max(0.01f, configuredActiveDuration);
             recoveryDuration = Mathf.Max(0f, configuredRecoveryDuration);
             attackCooldown = Mathf.Max(0f, configuredCooldown);
-            attackDamage = Mathf.Max(0.01f, configuredDamage);
+            damageTier = configuredDamageTier;
         }
 
         public void TickAttack(float currentTime)
@@ -150,10 +150,10 @@ namespace TrickalFanGame.Enemy
 
             hitApplied = true;
             targetHealth.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
-            targetHealth.TakeDamage(new DamageContext(
+            targetHealth.TakeDamage(HealthUnits.CreateEnemyDamageContext(
                 gameObject,
                 DamageSourceType.EnemyMelee,
-                attackDamage));
+                damageTier));
             return true;
         }
 

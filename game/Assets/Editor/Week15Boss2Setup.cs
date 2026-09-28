@@ -29,7 +29,7 @@ namespace TrickalFanGame.Editor
                 if (oldRuntime != null) UnityEngine.Object.DestroyImmediate(oldRuntime);
                 ContactDamage contact = contents.GetComponent<ContactDamage>();
                 if (contact == null) contact = contents.AddComponent<ContactDamage>();
-                contact.Configure(2f, 0.8f);
+                contact.Configure(EnemyDamageTier.Heavy, 0.8f);
 
                 SpriteRenderer renderer = EnsureVisualChild(contents);
                 renderer.sprite = Load<Sprite>(BossSpritePath);
@@ -48,11 +48,11 @@ namespace TrickalFanGame.Editor
                 body.gravityScale = 0f;
                 body.constraints = RigidbodyConstraints2D.FreezeRotation;
 
-                SetFloat(contents.GetComponent<Health>(), "maxHealth", 80f);
+                SetFloat(contents.GetComponent<Health>(), "maxHealth", 800f);
                 BossController boss = contents.GetComponent<BossController>();
                 boss.ConfigureHud("새마음금고", 2);
                 boss.ConfigurePhaseTwo(1.1f, 0.88f);
-                boss.SetProjectileDamage(1.5f);
+                boss.SetProjectileDamageTier(EnemyDamageTier.Medium);
                 boss.ConfigurePatterns(new[]
                 {
                     new BossPatternDefinition("saemaeum-approach-treasure-throw",
@@ -68,8 +68,8 @@ namespace TrickalFanGame.Editor
                 if (runtime == null) runtime = contents.AddComponent<SaemaeumVaultBossPatternRuntime>();
                 runtime.ConfigureMovement(1.8f, 1.35f, 0.55f, 5.5f);
                 runtime.ConfigureVolley(5, 5, 48f);
-                runtime.ConfigureJumps(3, 5, 4, 6, 4.8f, 2.875f, 2f, 7f, 0.2f, 0.69f, 0.62f);
-                runtime.ConfigureHealing(15f, 4);
+                runtime.ConfigureJumps(3, 5, 4, 6, 4.8f, 2.875f, EnemyDamageTier.Medium, 7f, 0.2f, 0.69f, 0.62f);
+                runtime.ConfigureHealing(150f, 4);
 
                 if (PrefabUtility.SaveAsPrefabAsset(contents, BossPrefabPath) == null)
                     throw new InvalidOperationException("Could not save the Saemaeum Vault boss prefab.");
@@ -83,7 +83,7 @@ namespace TrickalFanGame.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("Week 15 Boss-2 setup complete: Saemaeum Vault fires five fan volleys, uses longer " +
-                      "3-5 / 4-6 jump sequences with landing knockback, heals 15 without a phase-one use cap, " +
+                      "3-5 / 4-6 jump sequences with landing knockback, heals 150 without a phase-one use cap, " +
                       "and enters an aggressive phase two.");
         }
 

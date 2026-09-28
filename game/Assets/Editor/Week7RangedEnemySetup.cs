@@ -73,8 +73,8 @@ namespace TrickalFanGame.Editor
                     ranged = contents.AddComponent<RangedEnemyController>();
                 }
 
-                SetMaxHealth(contents.GetComponent<Health>(), 3);
-                ranged.Configure(1.5f, 8f, 3f, 6f, 1.5f, 5f, 2, 4f);
+                SetMaxHealth(contents.GetComponent<Health>(), 30);
+                ranged.Configure(1.5f, 8f, 3f, 6f, 1.5f, 5f, EnemyDamageTier.Heavy, 4f);
                 SpriteRenderer renderer = contents.GetComponent<SpriteRenderer>();
                 if (renderer != null)
                 {

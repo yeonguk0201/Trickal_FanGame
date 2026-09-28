@@ -111,7 +111,7 @@ namespace TrickalFanGame.Player
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)
         {
-            float healedAmount = health.Heal(stats.HealOnKillAmount);
+            float healedAmount = health.Heal(stats.RegisterKillAndGetHealAmount());
             if (healedAmount > 0f)
             {
                 Debug.Log(

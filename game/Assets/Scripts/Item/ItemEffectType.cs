@@ -29,5 +29,7 @@ namespace TrickalFanGame.Item
         BossRoomMoveSpeedPercent = 23,
         HealOverTimeBelowHealthOnce = 24,
         BasicAttackHitLightning = 25,
+        HealOnKillEveryN = 26,
+        AttackDamageAura = 27,
     }
 }

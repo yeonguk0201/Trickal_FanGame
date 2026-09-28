@@ -27,10 +27,10 @@ namespace TrickalFanGame.Editor
                 "Phase C Projectile Template",
                 out HomingSkillProjectile projectileTemplate);
             GameObject dropParent = new("Phase C Drop Parent");
-            GameObject enemy = CreateEnemy("Phase C Explosion Enemy", new Vector2(3f, 0f), 30, out Health enemyHealth);
-            GameObject secondEnemy = CreateEnemy("Phase C Second Enemy", new Vector2(0f, 5f), 30,
+            GameObject enemy = CreateEnemy("Phase C Explosion Enemy", new Vector2(3f, 0f), 300, out Health enemyHealth);
+            GameObject secondEnemy = CreateEnemy("Phase C Second Enemy", new Vector2(0f, 5f), 300,
                 out Health secondEnemyHealth);
-            GameObject thirdEnemy = CreateEnemy("Phase C Third Enemy", new Vector2(-7f, 0f), 30,
+            GameObject thirdEnemy = CreateEnemy("Phase C Third Enemy", new Vector2(-7f, 0f), 300,
                 out Health thirdEnemyHealth);
             GameObject wall = new("Phase C Solid Wall");
             Collider2D wallCollider = wall.AddComponent<BoxCollider2D>();
@@ -59,7 +59,7 @@ namespace TrickalFanGame.Editor
                 UnityEngine.Object.DestroyImmediate(dropEnemy);
                 RemoveSpawnedPickups(pickupTemplate);
 
-                stats.AddAttackDamage(4);
+                stats.AddAttackDamage(40);
                 const float firstCastTime = 100f;
                 const float shotInterval = 0.08f;
                 const float fanSpacingAngle = 12f;
@@ -119,7 +119,7 @@ namespace TrickalFanGame.Editor
                 {
                     projectile.ExplodeNow();
                 }
-                Assert(enemyHealth.CurrentHealth == 10,
+                Assert(enemyHealth.CurrentHealth == 100,
                     "Four overlapping explosions must stack to current attack damage x400% on one enemy.");
 
                 UnityEngine.Object.DestroyImmediate(enemy);

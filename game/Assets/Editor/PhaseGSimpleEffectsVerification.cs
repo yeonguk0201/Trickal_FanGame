@@ -23,8 +23,12 @@ namespace TrickalFanGame.Editor
                 out PlayerCombatEvents combatEvents,
                 out PlayerProjectileAttack attack,
                 out PlayerInventory inventory);
-            GameObject firstEnemy = CreateEnemy("Phase G-3 Enemy 1", out Health firstEnemyHealth);
-            GameObject secondEnemy = CreateEnemy("Phase G-3 Enemy 2", out Health secondEnemyHealth);
+            GameObject[] enemies = new GameObject[4];
+            Health[] enemyHealths = new Health[enemies.Length];
+            for (int index = 0; index < enemies.Length; index++)
+            {
+                enemies[index] = CreateEnemy($"Phase G-3 Enemy {index + 1}", out enemyHealths[index]);
+            }
             DamageCalculator.SetCriticalRollProviderForTesting(() => 1f);
 
             try
@@ -36,22 +40,22 @@ namespace TrickalFanGame.Editor
                     playerHealth,
                     stats,
                     combatEvents,
-                    attack,
                     inventory,
                     pillow,
-                    firstEnemyHealth,
-                    secondEnemyHealth);
+                    enemyHealths);
 
                 Debug.Log(
                     "Phase G-3 simple effects verification passed: sword attack +5%, awl critical chance +3%p, " +
-                    "arrow attack speed +10%, stack caps, and Pillow max-HP-based kill healing are valid.");
+                    "arrow attack speed +10%, stack caps, and Pillow half-heart healing every N kills are valid.");
             }
             finally
             {
                 InvokeLifecycle(attack, "OnDisable");
                 DamageCalculator.ResetCriticalRollProvider();
-                UnityEngine.Object.DestroyImmediate(secondEnemy);
-                UnityEngine.Object.DestroyImmediate(firstEnemy);
+                foreach (GameObject enemy in enemies)
+                {
+                    UnityEngine.Object.DestroyImmediate(enemy);
+                }
                 UnityEngine.Object.DestroyImmediate(player);
             }
         }
@@ -64,7 +68,7 @@ namespace TrickalFanGame.Editor
             ItemDefinition arrow)
         {
             AcquireStacks(inventory, sword, 5);
-            Assert(Approximately(stats.AttackDamage, 1.25f),
+            Assert(Approximately(stats.AttackDamage, 12.5f),
                 "Five sword stacks must add 25% attack damage before multiplying the base stat.");
             Assert(!inventory.TryAcquire(sword) && inventory.GetStackCount(sword.ItemId) == 5,
                 "Sword must reject acquisitions beyond its five-stack cap without changing stats.");
@@ -87,34 +91,43 @@ namespace TrickalFanGame.Editor
             Health playerHealth,
             PlayerStats stats,
             PlayerCombatEvents combatEvents,
-            PlayerProjectileAttack attack,
             PlayerInventory inventory,
             ItemDefinition pillow,
-            Health firstEnemy,
-            Health secondEnemy)
+            Health[] enemies)
         {
-            AcquireStacks(inventory, pillow, 2);
-            Assert(Approximately(stats.HealOnKillMaxHealthPercent, 0.10f) &&
-                   Approximately(attack.CurrentHealOnKillAmount, 1f),
-                "Two Pillow stacks must heal 10% of the current maximum HP per player kill.");
+            AcquireStacks(inventory, pillow, 1);
+            Assert(stats.PeriodicKillHealInterval == 2 &&
+                   Approximately(stats.PeriodicKillHealAmount, 1f) &&
+                   Approximately(stats.HealOnKillMaxHealthPercent, 0f),
+                "One Pillow stack must heal one half-heart unit every two kills without max-HP scaling.");
+
+            playerHealth.TakeDamage(9f);
+            Assert(Approximately(playerHealth.CurrentHealth, 1f),
+                "Pillow verification setup must leave the player at one half-heart unit.");
+            enemies[0].TakeDamage(CreatePlayerKill(player));
+            Assert(Approximately(playerHealth.CurrentHealth, 1f) && stats.PeriodicKillHealProgress == 1,
+                "The first kill with one Pillow stack must only advance the kill counter.");
+            Assert(!TryReportAgain(combatEvents, enemies[0], CreatePlayerKill(player)) &&
+                   stats.PeriodicKillHealProgress == 1,
+                "A duplicate report for the same defeated enemy must not advance the kill counter.");
+            enemies[1].TakeDamage(CreatePlayerKill(player));
+            Assert(Approximately(playerHealth.CurrentHealth, 2f) && stats.PeriodicKillHealProgress == 0,
+                "The second kill with one Pillow stack must heal exactly one half-heart unit and reset the counter.");
+
+            AcquireStacks(inventory, pillow, 1);
+            Assert(stats.PeriodicKillHealInterval == 1 && Approximately(stats.PeriodicKillHealAmount, 1f),
+                "The second Pillow stack must lower the kill requirement by one without raising the heal amount.");
             Assert(!inventory.TryAcquire(pillow) && inventory.GetStackCount(pillow.ItemId) == 2,
                 "Pillow must reject acquisitions beyond its two-stack cap.");
 
-            playerHealth.TakeDamage(9f);
-            firstEnemy.TakeDamage(CreatePlayerKill(player));
-            Assert(Approximately(playerHealth.CurrentHealth, 2f),
-                "A player kill at 10 maximum HP must heal exactly 1 HP with two Pillow stacks.");
-            Assert(!TryReportAgain(combatEvents, firstEnemy, CreatePlayerKill(player)) &&
-                   Approximately(playerHealth.CurrentHealth, 2f),
-                "A duplicate report for the same defeated enemy must not heal again.");
-
-            stats.AddMaxHealth(10f, false);
-            Assert(Approximately(playerHealth.MaxHealth, 20f) &&
-                   Approximately(attack.CurrentHealOnKillAmount, 2f),
-                "Pillow healing must be recalculated from current maximum HP rather than acquisition-time HP.");
-            secondEnemy.TakeDamage(CreatePlayerKill(player));
+            enemies[2].TakeDamage(CreatePlayerKill(player));
+            enemies[3].TakeDamage(CreatePlayerKill(player));
             Assert(Approximately(playerHealth.CurrentHealth, 4f),
-                "A later player kill at 20 maximum HP must heal exactly 2 HP.");
+                "With two Pillow stacks every kill must heal one half-heart unit.");
+
+            stats.AddPeriodicKillHeal(1f, 2);
+            Assert(stats.PeriodicKillHealInterval == 1,
+                "Extra periodic heal stacks must keep the kill requirement at its one-kill minimum.");
         }
 
         private static void AcquireStacks(PlayerInventory inventory, ItemDefinition definition, int count)

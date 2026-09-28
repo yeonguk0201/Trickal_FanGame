@@ -207,7 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
-  maxHealth: 110
+  maxHealth: 1100
   currentShield: 0
 --- !u!114 &734462270550356005
 MonoBehaviour:
@@ -291,7 +291,7 @@ MonoBehaviour:
   encounterSeed: 1
   attackInterval: 1.2
   projectileSpeed: 4
-  projectileDamage: 1.5
+  projectileDamageTier: 1
   phaseTransitionDuration: 1.25
   phaseTwoTempoMultiplier: 0.78
 --- !u!114 &4516198890744965387
@@ -306,7 +306,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damage: 2
+  damageTier: 2
   cooldown: 0.8
 --- !u!114 &1230439742369051024
 MonoBehaviour:
@@ -324,7 +324,7 @@ MonoBehaviour:
   slashWidth: 1.15
   goldenSlashWidth: 0.57
   slashLockedDelay: 0.2
-  slashDamage: 3
+  slashDamageTier: 3
   goldenSlashSpreadDegrees: 15
   minionPrefabs:
   - {fileID: 1716652274724679613, guid: bd408416178ec69499ef7f6bf1fbc967, type: 3}
@@ -342,13 +342,13 @@ MonoBehaviour:
   swingWindup: 0.3
   swingInterval: 0.7
   swingDirectionLockDuration: 0.12
-  swingDamage: 2
+  swingDamageTier: 2
   swingRecognitionMultiplier: 1.625
   dashSpeed: 15
   dashDuration: 0.17
   dashRetargetDuration: 0.1
   dashWidth: 1.8
-  dashDamage: 2
+  dashDamageTier: 2
   pressureActionsBeforeSlash: 3
   slashCooldownPhaseOne: 9
   slashCooldownGolden: 7.5

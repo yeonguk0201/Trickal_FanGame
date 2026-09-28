@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2079928141612301653, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: maxHealth
-      value: 25
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 4184832910138919893, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_Radius
@@ -150,7 +150,7 @@ MonoBehaviour:
   encounterSeed: 1
   attackInterval: 1.2
   projectileSpeed: 4
-  projectileDamage: 1.5
+  projectileDamageTier: 1
   phaseTransitionDuration: 1.25
   phaseTwoTempoMultiplier: 0.72
 --- !u!114 &1341662532215233610
@@ -194,7 +194,7 @@ MonoBehaviour:
   openCrossHalfWidth: 1.45
   arenaPadding: 0.75
   minionSpacing: 0.65
-  obstacleImpactDamage: 1
+  obstacleImpactDamageTier: 0
   obstacleKnockbackSpeed: 7
   obstacleKnockbackDuration: 0.2
   approachSpeed: 2.25
@@ -214,7 +214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damage: 2
+  damageTier: 2
   cooldown: 0.8
 --- !u!114 &6457682146462493304
 MonoBehaviour:

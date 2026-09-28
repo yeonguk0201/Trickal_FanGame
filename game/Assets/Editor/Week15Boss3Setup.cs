@@ -76,9 +76,9 @@ namespace TrickalFanGame.Editor
                 body.constraints = RigidbodyConstraints2D.FreezeRotation;
                 ContactDamage contact = contents.GetComponent<ContactDamage>();
                 if (contact == null) contact = contents.AddComponent<ContactDamage>();
-                contact.Configure(2f, 0.8f);
+                contact.Configure(EnemyDamageTier.Heavy, 0.8f);
 
-                SetFloat(contents.GetComponent<Health>(), "maxHealth", 110f);
+                SetFloat(contents.GetComponent<Health>(), "maxHealth", 1100f);
                 BossController boss = contents.GetComponent<BossController>();
                 boss.ConfigureHud("크레용사용", 2);
                 boss.ConfigurePhaseTwo(1.25f, 0.78f);
@@ -96,7 +96,7 @@ namespace TrickalFanGame.Editor
 
                 CrayonHeroBossPatternRuntime runtime = contents.GetComponent<CrayonHeroBossPatternRuntime>();
                 if (runtime == null) runtime = contents.AddComponent<CrayonHeroBossPatternRuntime>();
-                runtime.ConfigureSlash(18f, 1.15f, 0.2f, 3f);
+                runtime.ConfigureSlash(18f, 1.15f, 0.2f, EnemyDamageTier.Critical);
                 runtime.ConfigureSummons(new[]
                 {
                     Load<GameObject>(ArcherPrefabPath),
@@ -104,8 +104,8 @@ namespace TrickalFanGame.Editor
                     Load<GameObject>(AxePrefabPath),
                     Load<GameObject>(ShieldPrefabPath),
                 }, 4, 2.5f, 0.15f);
-                runtime.ConfigureSwing(2.5f, 1.35f, 2.4f, 3.2f, 0.15f, 0.3f, 0.7f, 0.12f, 2f);
-                runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, 2f);
+                runtime.ConfigureSwing(2.5f, 1.35f, 2.4f, 3.2f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Heavy);
+                runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, EnemyDamageTier.Heavy);
                 runtime.ConfigureSelection(3, 9f, 7.5f, 45, 30, 10, 15);
 
                 if (PrefabUtility.SaveAsPrefabAsset(contents, BossPrefabPath) == null)

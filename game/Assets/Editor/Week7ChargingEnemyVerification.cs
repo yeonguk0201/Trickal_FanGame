@@ -46,10 +46,11 @@ namespace TrickalFanGame.Editor
                    prefab.GetComponent<KnockbackReceiver>() != null &&
                    prefab.GetComponent<ChargingEnemyController>() != null,
                 "The charging prefab is missing health, death, knockback, or charging behavior.");
+            ContactDamage contact = prefab.GetComponent<ContactDamage>();
             Assert(prefab.GetComponent<EnemyChase>() == null &&
-                   prefab.GetComponent<RangedEnemyController>() == null &&
-                   prefab.GetComponent<ContactDamage>() == null,
-                "The charging prefab must not retain chaser, ranged, or unrestricted contact-damage behavior.");
+                   prefab.GetComponent<RangedEnemyController>() == null && contact != null &&
+                   contact.DamageTier == EnemyDamageTier.Light && Mathf.Approximately(contact.Cooldown, 1f),
+                "The charging prefab must remove chaser/ranged behavior and use light contact damage once per second.");
             return prefab;
         }
 
@@ -83,7 +84,15 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                charging.Configure(7f, 0.65f, 9f, 0.8f, 0.6f, 1.5f, 2);
+                charging.Configure(7f, 0.65f, 9f, 0.8f, 0.6f, 1.5f, EnemyDamageTier.Heavy);
+                int expectedChargeDamage = HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Heavy, 1);
+                ContactDamage contact = enemy.GetComponent<ContactDamage>();
+                float healthBeforeContact = playerHealth.CurrentHealth;
+                Assert(contact.TryApplyDamage(playerHealth, 0f) &&
+                       playerHealth.CurrentHealth == healthBeforeContact -
+                       HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 1),
+                    "Touching an idle charging enemy must apply light contact damage.");
+                playerHealth.ResetHealth();
                 charging.SetTarget(player.transform);
 
                 player.transform.position = Vector2.right * 5f;
@@ -106,13 +115,13 @@ namespace TrickalFanGame.Editor
 
                 float healthBeforeHit = playerHealth.CurrentHealth;
                 Assert(charging.TryResolveCollision(playerCollider, 0.7f) &&
-                       playerHealth.CurrentHealth == healthBeforeHit - 2 &&
+                       playerHealth.CurrentHealth == healthBeforeHit - expectedChargeDamage &&
                        deathReason.CurrentReason == "ENEMY" &&
                        charging.State == ChargingEnemyState.Recovering &&
                        enemyBody.linearVelocity == Vector2.zero,
                     "A dash collision must damage the player once, set ENEMY as death reason, and enter recovery.");
                 Assert(!charging.TryResolveCollision(playerCollider, 0.71f) &&
-                       playerHealth.CurrentHealth == healthBeforeHit - 2,
+                       playerHealth.CurrentHealth == healthBeforeHit - expectedChargeDamage,
                     "The same charge must not damage the player more than once.");
 
                 charging.TickBehavior(1.3f);
@@ -236,6 +245,8 @@ namespace TrickalFanGame.Editor
             enemy.AddComponent<CircleCollider2D>();
             health = enemy.AddComponent<Health>();
             knockback = enemy.AddComponent<KnockbackReceiver>();
+            ContactDamage contact = enemy.AddComponent<ContactDamage>();
+            contact.Configure(EnemyDamageTier.Light, 1f);
             charging = enemy.AddComponent<ChargingEnemyController>();
             InvokeLifecycle(health, "Awake");
             InvokeLifecycle(knockback, "Awake");

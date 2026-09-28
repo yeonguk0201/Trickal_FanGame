@@ -69,7 +69,7 @@ namespace TrickalFanGame.Editor
             Debug.Log("Week 13 HUD-3B setup complete. Artifact acquisition notifications are connected without blocking input or game time.");
         }
 
-        private static void EnsureDescriptionGlyphs(TMP_FontAsset font)
+        internal static void EnsureDescriptionGlyphs(TMP_FontAsset font)
         {
             string descriptions = string.Concat(AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" })
                 .Select(AssetDatabase.GUIDToAssetPath)

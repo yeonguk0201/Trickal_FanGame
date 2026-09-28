@@ -116,7 +116,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
-  maxHealth: 80
+  maxHealth: 800
   currentShield: 0
 --- !u!114 &646219967290382098
 MonoBehaviour:
@@ -194,7 +194,7 @@ MonoBehaviour:
   encounterSeed: 1
   attackInterval: 1.2
   projectileSpeed: 4
-  projectileDamage: 1.5
+  projectileDamageTier: 1
   phaseTransitionDuration: 1.1
   phaseTwoTempoMultiplier: 0.88
 --- !u!114 &1920493134593096256
@@ -225,10 +225,10 @@ MonoBehaviour:
   jumpDistance: 4.8
   jumpHeight: 2
   landingRadius: 2.875
-  landingDamage: 2
+  landingDamageTier: 1
   landingKnockbackSpeed: 7
   landingKnockbackDuration: 0.2
-  healPerUse: 15
+  healPerUse: 150
   healPulses: 4
   arenaPadding: 0.8
   fallbackHalfExtents: {x: 6.2, y: 5}
@@ -249,7 +249,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damage: 2
+  damageTier: 2
   cooldown: 0.8
 --- !u!1 &4782152418808698028
 GameObject:

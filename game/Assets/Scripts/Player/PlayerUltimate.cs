@@ -12,6 +12,7 @@ namespace TrickalFanGame.Player
         None,
         Impact,
         Timeout,
+        Cancelled,
     }
 
     [DisallowMultipleComponent]
@@ -96,7 +97,10 @@ namespace TrickalFanGame.Player
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.qKey.wasPressedThisFrame)
             {
-                TryActivate(Time.time);
+                if (!TryCancel(Time.time))
+                {
+                    TryActivate(Time.time);
+                }
             }
 
             Tick(Time.time);
@@ -215,6 +219,17 @@ namespace TrickalFanGame.Player
             return true;
         }
 
+        public bool TryCancel(float currentTime)
+        {
+            if (!IsDashing)
+            {
+                return false;
+            }
+
+            EndDash(currentTime, UltimateEndReason.Cancelled);
+            return LastEndReason == UltimateEndReason.Cancelled;
+        }
+
         private void ApplyImpact(Health contactedTarget)
         {
             impactedTargets.Clear();
@@ -281,7 +296,8 @@ namespace TrickalFanGame.Player
                 ? impactRecoveryDuration
                 : coastRecoveryDuration;
             recoveryEndTime = currentTime + duration;
-            nextReadyTime = currentTime + cooldown;
+            float cooldownMultiplier = reason == UltimateEndReason.Cancelled ? 0.8f : 1f;
+            nextReadyTime = currentTime + cooldown * cooldownMultiplier;
             if (reason == UltimateEndReason.Impact)
             {
                 movement.StopImmediately();

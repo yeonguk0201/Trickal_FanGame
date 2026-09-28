@@ -5,6 +5,7 @@ using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
+using TrickalFanGame.Room;
 using UnityEngine;
 
 namespace TrickalFanGame.Debugging
@@ -15,6 +16,12 @@ namespace TrickalFanGame.Debugging
         [SerializeField] private PlayerInventory playerInventory;
         [SerializeField] private Health playerHealth;
         [SerializeField] private PlayerStats playerStats;
+        [SerializeField] private RunProgress runProgress;
+
+        [Header("Item catalog")]
+        [Tooltip("Play Mode에서 보스전과 함께 개별 획득해 볼 수 있는 아이템·스펠 목록입니다.")]
+        [SerializeField] private ItemTestRoomController.ItemLoadoutEntry[] itemCatalog =
+            Array.Empty<ItemTestRoomController.ItemLoadoutEntry>();
 
         [Header("Boss Prefabs")]
         [Tooltip("소환 가능한 보스 프리팹 목록입니다.")]
@@ -33,6 +40,8 @@ namespace TrickalFanGame.Debugging
         private Vector2 panelScroll;
 
         public int BossPrefabCount => bossPrefabs.Length;
+        public IReadOnlyList<ItemTestRoomController.ItemLoadoutEntry> ItemCatalog => itemCatalog;
+        public int CurrentFloor => runProgress != null ? Mathf.Max(1, runProgress.CurrentFloor) : 1;
         public BossController ActiveBoss => spawnedBoss != null
             ? spawnedBoss.GetComponent<BossController>()
             : null;
@@ -42,6 +51,7 @@ namespace TrickalFanGame.Debugging
             PlayerInventory configuredInventory,
             Health configuredHealth,
             PlayerStats configuredStats,
+            ItemTestRoomController.ItemLoadoutEntry[] configuredItemCatalog,
             GameObject[] configuredBossPrefabs,
             string[] configuredBossNames,
             Vector2 configuredRoomSize)
@@ -49,6 +59,7 @@ namespace TrickalFanGame.Debugging
             playerInventory = configuredInventory;
             playerHealth = configuredHealth;
             playerStats = configuredStats;
+            itemCatalog = configuredItemCatalog ?? Array.Empty<ItemTestRoomController.ItemLoadoutEntry>();
             bossPrefabs = configuredBossPrefabs ?? Array.Empty<GameObject>();
             bossNames = configuredBossNames ?? Array.Empty<string>();
             roomSize = new Vector2(
@@ -73,6 +84,8 @@ namespace TrickalFanGame.Debugging
             {
                 SpawnBoss(0);
             }
+
+            EnsureTestFloorInitialized();
         }
 
         public bool TryValidateConfiguration(out string error)
@@ -99,6 +112,22 @@ namespace TrickalFanGame.Debugging
                 if (prefab.GetComponent<BossController>() == null)
                 {
                     error = $"Boss prefab {prefab.name} is missing BossController component.";
+                    return false;
+                }
+            }
+
+            HashSet<string> itemIds = new(StringComparer.Ordinal);
+            foreach (ItemTestRoomController.ItemLoadoutEntry entry in itemCatalog)
+            {
+                if (entry?.Item == null || !entry.Item.IsValid)
+                {
+                    error = "Every item catalog entry must reference a valid ItemDefinition.";
+                    return false;
+                }
+
+                if (!itemIds.Add(entry.Item.ItemId))
+                {
+                    error = $"Duplicate item catalog entry: {entry.Item.ItemId}.";
                     return false;
                 }
             }
@@ -146,6 +175,27 @@ namespace TrickalFanGame.Debugging
             playerHealth?.ResetHealth();
         }
 
+        public void DamagePlayerToLowHealth()
+        {
+            if (playerHealth == null || playerHealth.IsDead)
+            {
+                return;
+            }
+
+            float targetHealth = Mathf.Max(1f, Mathf.Floor(playerHealth.MaxHealth * 0.25f));
+            float damage = playerHealth.CurrentHealth - targetHealth;
+            if (damage > 0f)
+            {
+                playerHealth.TakeDamage(damage);
+            }
+        }
+
+        public void AdvanceTestFloor()
+        {
+            ResolveRunProgress();
+            runProgress?.RecordRoomEntry(CurrentFloor + 1, 1);
+        }
+
         public void SetCrayonRecognitionRadiusVisible(bool visible)
         {
             showCrayonRecognitionRadius = visible;
@@ -184,6 +234,24 @@ namespace TrickalFanGame.Debugging
 
             playerHealth ??= playerInventory.GetComponent<Health>();
             playerStats ??= playerInventory.GetComponent<PlayerStats>();
+            ResolveRunProgress();
+        }
+
+        private void ResolveRunProgress()
+        {
+            if (runProgress == null)
+            {
+                runProgress = FindFirstObjectByType<RunProgress>();
+            }
+        }
+
+        private void EnsureTestFloorInitialized()
+        {
+            ResolveRunProgress();
+            if (runProgress != null && runProgress.CurrentFloor < 1)
+            {
+                runProgress.RecordRoomEntry(1, 1);
+            }
         }
 
         private void OnGUI()
@@ -193,8 +261,8 @@ namespace TrickalFanGame.Debugging
                 return;
             }
 
-            const float width = 350f;
-            Rect area = new(Screen.width - width - 10f, 10f, width, Mathf.Min(Screen.height - 20f, 500f));
+            const float width = 380f;
+            Rect area = new(Screen.width - width - 10f, 10f, width, Mathf.Min(Screen.height - 20f, 720f));
             GUILayout.BeginArea(area, "Boss Test Room", GUI.skin.window);
 
             // Player and Boss vitals
@@ -203,7 +271,7 @@ namespace TrickalFanGame.Debugging
                 ? "BOSS HP --"
                 : $"BOSS {activeBoss.DisplayName}  HP {activeBoss.Health.CurrentHealth:0.#}/{activeBoss.Health.MaxHealth:0.#}";
             GUILayout.Label(
-                $"PLAYER HP {playerHealth.CurrentHealth:0.#}/{playerHealth.MaxHealth:0.#}  Shield {playerHealth.CurrentShield:0.#}\n" +
+                $"FLOOR {CurrentFloor}  PLAYER HP {playerHealth.CurrentHealth:0.#}/{playerHealth.MaxHealth:0.#}  Shield {playerHealth.CurrentShield:0.#}\n" +
                 bossVitals + "\n" +
                 $"ATK {playerStats.AttackDamage:0.##}  ASPD {playerStats.AttackSpeed:0.##}  " +
                 $"CRIT {playerStats.CriticalChance:P0}\n" +
@@ -222,6 +290,17 @@ namespace TrickalFanGame.Debugging
             }
             GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("HP 25% (Life Gem)"))
+            {
+                DamagePlayerToLowHealth();
+            }
+            if (GUILayout.Button("Next Floor"))
+            {
+                AdvanceTestFloor();
+            }
+            GUILayout.EndHorizontal();
+
             CrayonHeroBossPatternRuntime crayonRuntime = spawnedBoss != null
                 ? spawnedBoss.GetComponent<CrayonHeroBossPatternRuntime>()
                 : null;
@@ -235,7 +314,7 @@ namespace TrickalFanGame.Debugging
 
             // Boss selection
             GUILayout.Label("Boss Selection", GUI.skin.box);
-            panelScroll = GUILayout.BeginScrollView(panelScroll, GUILayout.Height(200f));
+            panelScroll = GUILayout.BeginScrollView(panelScroll);
 
             for (int i = 0; i < bossPrefabs.Length; i++)
             {
@@ -253,8 +332,36 @@ namespace TrickalFanGame.Debugging
                 GUILayout.EndHorizontal();
             }
 
-            GUILayout.EndScrollView();
             GUILayout.Label("보스를 클릭하면 해당 보스가 소환됩니다.");
+
+            GUILayout.Label("Items / Spells — 보스전 중 개별 +1", GUI.skin.box);
+            foreach (ItemTestRoomController.ItemLoadoutEntry entry in itemCatalog)
+            {
+                if (entry?.Item == null)
+                {
+                    continue;
+                }
+
+                GUILayout.BeginHorizontal();
+                int current = playerInventory.GetStackCount(entry.Item.ItemId);
+                string kind = entry.Item.Kind == ItemKind.Spell ? "SPELL" : "ART";
+                GUILayout.Label($"[{kind}] {entry.Item.DisplayName}  {current}/{entry.Item.MaxStacks}");
+                GUI.enabled = entry.Item.MaxStacks <= 0 || current < entry.Item.MaxStacks;
+                if (GUILayout.Button("+1", GUILayout.Width(42f)))
+                {
+                    playerInventory.TryAcquire(entry.Item);
+                }
+                GUI.enabled = true;
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndScrollView();
+
+            PlayerDamageAura aura = playerInventory.GetComponent<PlayerDamageAura>();
+            if (aura != null && aura.StackCount > 0)
+            {
+                GUILayout.Label($"광기의 가면 범위: {aura.Radius:0.##}m (Scene 뷰 Gizmo 표시 중)");
+            }
+            GUILayout.Label("아이템은 보스를 바꿔도 유지됩니다. 초기화는 Play Mode를 다시 시작하세요.");
             GUILayout.EndArea();
         }
 

@@ -80,12 +80,13 @@ namespace TrickalFanGame.Editor
                 "Goblin Hat must remain inactive above 30% HP.");
 
             health.SetShield(0f);
-            health.TakeDamage(9.8f);
-            Assert(Approximately(health.CurrentHealth, 4.2f) && stats.IsBelowMoveSpeedHealthThreshold &&
+            // 14 units: the 30% threshold is 4.2 units, so 4 units is the highest whole-unit HP below it.
+            health.TakeDamage(10f);
+            Assert(Approximately(health.CurrentHealth, 4f) && stats.IsBelowMoveSpeedHealthThreshold &&
                    Approximately(stats.MoveSpeed, 7.5f),
-                "At exactly 30% HP, two Goblin Hat stacks must add 50% movement speed.");
+                "At or below 30% HP, two Goblin Hat stacks must add 50% movement speed.");
 
-            health.Heal(0.1f);
+            health.Heal(1f);
             Assert(!stats.IsBelowMoveSpeedHealthThreshold && Approximately(stats.MoveSpeed, 5f),
                 "Goblin Hat movement speed must be removed immediately after HP rises above 30%.");
             Assert(!inventory.TryAcquire(hat),

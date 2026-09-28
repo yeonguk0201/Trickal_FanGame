@@ -35,6 +35,10 @@ namespace TrickalFanGame.Item
             playerSP = GetComponent<PlayerSP>();
             if (runProgress == null)
             {
+                runProgress = GetComponent<RunProgress>();
+            }
+            if (runProgress == null)
+            {
                 runProgress = FindFirstObjectByType<RunProgress>();
             }
         }
@@ -104,6 +108,21 @@ namespace TrickalFanGame.Item
                     case ItemEffectType.AttackSpeedPercent:
                         stats.AddAttackSpeedPercent(effect.Magnitude);
                         break;
+                    case ItemEffectType.MoveSpeedPercent:
+                        stats.AddMoveSpeedPercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.MoveSpeedPenaltyPercent:
+                        stats.AddMoveSpeedPenaltyPercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.NextCombatRoomAttackDamagePercent:
+                        GetOrCreateSpellEffects().AddNextCombatRoomAttackDamagePercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.BossRoomAttackSpeedPercent:
+                        GetOrCreateSpellEffects().AddBossRoomAttackSpeedPercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.BossRoomMoveSpeedPercent:
+                        GetOrCreateSpellEffects().AddBossRoomMoveSpeedPercent(effect.Magnitude);
+                        break;
                     case ItemEffectType.MaxHealthDamageAura:
                         PlayerDamageAura aura = GetComponent<PlayerDamageAura>();
                         if (aura == null)
@@ -111,6 +130,14 @@ namespace TrickalFanGame.Item
                             aura = gameObject.AddComponent<PlayerDamageAura>();
                         }
                         aura.AddStack(effect.Magnitude, effect.Radius, effect.IntervalSeconds);
+                        break;
+                    case ItemEffectType.AttackDamageAura:
+                        PlayerDamageAura attackAura = GetComponent<PlayerDamageAura>();
+                        if (attackAura == null)
+                        {
+                            attackAura = gameObject.AddComponent<PlayerDamageAura>();
+                        }
+                        attackAura.AddAttackDamageStack(effect.Magnitude, effect.Radius, effect.IntervalSeconds);
                         break;
                     case ItemEffectType.SkillDamagePercent:
                         stats.AddSkillDamagePercent(effect.Magnitude);
@@ -124,7 +151,7 @@ namespace TrickalFanGame.Item
                         {
                             health.SetShield(Mathf.Max(
                                 health.CurrentShield,
-                                health.MaxHealth * effect.Magnitude));
+                                health.GetMaxHealthRatioAmount(effect.Magnitude)));
                         }
                         break;
                     case ItemEffectType.MoveSpeed:
@@ -144,6 +171,9 @@ namespace TrickalFanGame.Item
                         break;
                     case ItemEffectType.HealOnKillMaxHealthPercent:
                         stats.AddHealOnKillMaxHealthPercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.HealOnKillEveryN:
+                        stats.AddPeriodicKillHeal(effect.Magnitude, effect.IntegerAmount);
                         break;
                     case ItemEffectType.DistanceDamage:
                         stats.AddDistanceDamage(
@@ -166,6 +196,23 @@ namespace TrickalFanGame.Item
                         stats.AddLowerGradeSkillProjectileBonus(
                             effect.IntegerAmount,
                             Mathf.CeilToInt(effect.HealthThreshold));
+                        break;
+                    case ItemEffectType.HealOverTimeBelowHealthOnce:
+                        PlayerLowHealthRecovery recovery = GetComponent<PlayerLowHealthRecovery>();
+                        if (recovery == null)
+                        {
+                            recovery = gameObject.AddComponent<PlayerLowHealthRecovery>();
+                        }
+                        recovery.BindRunProgress(runProgress);
+                        recovery.Configure(effect.HealthThreshold, effect.Magnitude, effect.DurationSeconds);
+                        break;
+                    case ItemEffectType.BasicAttackHitLightning:
+                        PlayerBasicAttackLightning lightning = GetComponent<PlayerBasicAttackLightning>();
+                        if (lightning == null)
+                        {
+                            lightning = gameObject.AddComponent<PlayerBasicAttackLightning>();
+                        }
+                        lightning.Configure(effect.IntegerAmount, effect.Magnitude);
                         break;
                     default:
                         // G-2 through G-6 connect the remaining validated contract types to runtime systems.
@@ -205,6 +252,18 @@ namespace TrickalFanGame.Item
                 default:
                     throw new ArgumentOutOfRangeException(nameof(effectType), effectType, null);
             }
+        }
+
+        private PlayerSpellEffects GetOrCreateSpellEffects()
+        {
+            PlayerSpellEffects spellEffects = GetComponent<PlayerSpellEffects>();
+            if (spellEffects == null)
+            {
+                spellEffects = gameObject.AddComponent<PlayerSpellEffects>();
+            }
+
+            spellEffects.ConfigureRunProgress(runProgress);
+            return spellEffects;
         }
 
         private void EvaluateSynergies()

@@ -1,5 +1,6 @@
 export type ItemRarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC';
 
+// Player HP values (MaxHealthFlat, HealOnKillEveryN magnitude) are half-heart units: 2 = 1 heart.
 export interface ItemEffectData {
   type: string;
   magnitude?: number;
@@ -12,6 +13,7 @@ export interface ItemEffectData {
   intervalSeconds?: number;
   spreadAngleDegrees?: number;
   scaleMultiplier?: number;
+  durationSeconds?: number;
 }
 
 export interface ItemCatalogEntry {
@@ -55,15 +57,15 @@ export const ITEM_CATALOG = [
   {
     id: 'item-14',
     name: '광기의 가면',
-    description: '1초마다 주변 적에게 최대 HP의 1% 피해를 줍니다.',
+    description: '1초마다 반경 2.5m의 주변 적에게 공격력의 20% 피해를 줍니다.',
     rarity: 'UNCOMMON',
     isActive: true,
     maxStacks: 3,
     effects: [
       {
-        type: 'MaxHealthDamageAura',
-        magnitude: 0.01,
-        radius: 1.5,
+        type: 'AttackDamageAura',
+        magnitude: 0.2,
+        radius: 2.5,
         intervalSeconds: 1,
       },
     ],
@@ -72,7 +74,7 @@ export const ITEM_CATALOG = [
     id: 'item-02',
     name: '풍선 갑옷',
     description:
-      '최대 HP가 2 증가하고 획득 시 최대 HP의 50%만큼 방어막을 얻습니다.',
+      '최대 HP가 1칸 증가하고 획득 시 최대 HP의 50%만큼 방어막을 얻습니다.',
     rarity: 'RARE',
     isActive: true,
     maxStacks: 2,
@@ -99,17 +101,18 @@ export const ITEM_CATALOG = [
   {
     id: 'item-08',
     name: '코미의 베개',
-    description: '적 처치 시 최대 HP의 5%를 회복합니다.',
+    description:
+      '적 2마리 처치마다 HP를 반 칸 회복합니다. 스택마다 필요한 처치 수가 1 줄어듭니다.',
     rarity: 'RARE',
     isActive: true,
     maxStacks: 2,
-    effects: [{ type: 'HealOnKillMaxHealthPercent', magnitude: 0.05 }],
+    effects: [{ type: 'HealOnKillEveryN', magnitude: 1, integerAmount: 2 }],
   },
   {
     id: 'item-15',
     name: '장난감 망원경',
     description:
-      '공격력이 15% 증가하고 거리에 따라 추가 피해가 최대 40% 증가합니다.',
+      '공격력이 15% 증가하고 2~6m 거리에서 추가 피해가 최대 40% 증가합니다.',
     rarity: 'EPIC',
     isActive: true,
     maxStacks: 1,
@@ -118,8 +121,8 @@ export const ITEM_CATALOG = [
       {
         type: 'DistanceDamage',
         magnitude: 0.4,
-        minimumDistance: 3,
-        maximumDistance: 8,
+        minimumDistance: 2,
+        maximumDistance: 6,
       },
     ],
   },
@@ -156,6 +159,80 @@ export const ITEM_CATALOG = [
         healthThreshold: 1,
         integerAmount: 2,
       },
+    ],
+  },
+  {
+    id: 'spell-catch-that-one',
+    name: '저놈 잡아라',
+    description: '다음에 입장한 전투방에서 기본 공격 피해가 10% 증가합니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'NextCombatRoomAttackDamagePercent', magnitude: 0.1 }],
+  },
+  {
+    id: 'spell-final-sprint',
+    name: '막판 스퍼트',
+    description: '보스방에서 공격속도가 30%, 이동속도가 5% 증가합니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'BossRoomAttackSpeedPercent', magnitude: 0.3 },
+      { type: 'BossRoomMoveSpeedPercent', magnitude: 0.05 },
+    ],
+  },
+  {
+    id: 'spell-afterimage',
+    name: '그건 내 잔상',
+    description: '스택당 이동속도가 10%, 공격속도가 5% 증가합니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 3,
+    effects: [
+      { type: 'MoveSpeedPercent', magnitude: 0.1 },
+      { type: 'AttackSpeedPercent', magnitude: 0.05 },
+    ],
+  },
+  {
+    id: 'artifact-life-gem',
+    name: '생명의 보석',
+    description:
+      'HP가 30% 이하가 되면 3초간 최대 HP의 45%를 회복합니다. 층마다 한 번 발동합니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'HealOverTimeBelowHealthOnce',
+        magnitude: 0.45,
+        healthThreshold: 0.3,
+        durationSeconds: 3,
+      },
+    ],
+  },
+  {
+    id: 'artifact-30kg-kettlebell',
+    name: '30KG 케틀벨',
+    description:
+      '스택당 저학년·고학년 스킬 피해가 25% 증가하고 이동속도가 10% 감소합니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      { type: 'SkillDamagePercent', magnitude: 0.25 },
+      { type: 'MoveSpeedPenaltyPercent', magnitude: 0.1 },
+    ],
+  },
+  {
+    id: 'artifact-clear-weather-card',
+    name: '날씨는 맑음 카드',
+    description: '기본 공격 10회 적중마다 공격력의 150% 번개 피해를 줍니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'BasicAttackHitLightning', magnitude: 1.5, integerAmount: 10 },
     ],
   },
   {

@@ -8,8 +8,9 @@ namespace TrickalFanGame.Player
     public sealed class PlayerStats : MonoBehaviour
     {
         [Header("Base Stats")]
-        [SerializeField, Min(0.1f)] private float baseMaxHealth = 10f;
-        [SerializeField, Min(0.01f)] private float baseAttackDamage = 1f;
+        [Tooltip("Half-heart units. 2 units = 1 heart.")]
+        [SerializeField, Min(1f)] private float baseMaxHealth = 10f;
+        [SerializeField, Min(0.01f)] private float baseAttackDamage = 10f;
         [SerializeField, Min(0f)] private float baseMoveSpeed = 5f;
         [SerializeField, Min(0.01f)] private float baseAttackSpeed = 1f;
         [SerializeField, Range(0f, 1f)] private float baseCriticalChance = 0.05f;
@@ -19,10 +20,15 @@ namespace TrickalFanGame.Player
         private float maxHealthBonus;
         private float flatAttackDamageBonus;
         private float attackDamagePercentBonus;
+        private float currentRoomAttackDamagePercentBonus;
         private float attackSpeedPercentBonus;
+        private float currentRoomAttackSpeedPercentBonus;
         private float criticalChanceBonus;
         private float skillDamagePercentBonus;
         private float moveSpeedBonus;
+        private float moveSpeedPercentBonus;
+        private float moveSpeedPenaltyPercent;
+        private float currentRoomMoveSpeedPercentBonus;
         private float moveSpeedPercentBelowHealthBonus;
         private float moveSpeedHealthThreshold;
         private int additionalProjectileCount;
@@ -31,6 +37,9 @@ namespace TrickalFanGame.Player
         private int pierceCount;
         private float healOnKill;
         private float healOnKillMaxHealthPercent;
+        private float periodicKillHealAmount;
+        private int periodicKillHealInterval;
+        private int periodicKillHealProgress;
         private float distanceDamageBonus;
         private float distanceDamageMinimum;
         private float distanceDamageMaximum;
@@ -38,18 +47,27 @@ namespace TrickalFanGame.Player
 
         public float MaxHealth => baseMaxHealth + maxHealthBonus;
         public float AttackDamage =>
-            (baseAttackDamage + flatAttackDamageBonus) * (1f + attackDamagePercentBonus);
+            (baseAttackDamage + flatAttackDamageBonus) * Mathf.Max(0f, 1f + attackDamagePercentBonus);
         public float SkillDamageMultiplier => 1f + skillDamagePercentBonus;
         public float MoveSpeed => (baseMoveSpeed + moveSpeedBonus) *
-            (1f + (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f));
-        public float AttackSpeed => baseAttackSpeed * (1f + attackSpeedPercentBonus);
+            Mathf.Max(0f, 1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent +
+                currentRoomMoveSpeedPercentBonus +
+                (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f));
+        public float AttackSpeed => baseAttackSpeed *
+            Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus);
         public float CriticalChance => Mathf.Clamp01(baseCriticalChance + criticalChanceBonus);
         public float CriticalDamageMultiplier => Mathf.Max(1f, baseCriticalDamageMultiplier);
         public int ProjectileCount => 1 + additionalProjectileCount;
         public int PierceCount => pierceCount;
         public float HealOnKill => healOnKill;
         public float HealOnKillMaxHealthPercent => healOnKillMaxHealthPercent;
-        public float HealOnKillAmount => healOnKill + MaxHealth * healOnKillMaxHealthPercent;
+        public float HealOnKillAmount => healOnKill +
+            (health != null
+                ? health.GetMaxHealthRatioAmount(healOnKillMaxHealthPercent)
+                : MaxHealth * healOnKillMaxHealthPercent);
+        public float PeriodicKillHealAmount => periodicKillHealAmount;
+        public int PeriodicKillHealInterval => periodicKillHealInterval;
+        public int PeriodicKillHealProgress => periodicKillHealProgress;
         public ProjectileSplitSettings ProjectileSplitSettings => projectileSplitSettings;
         public bool IsBelowMoveSpeedHealthThreshold =>
             moveSpeedPercentBelowHealthBonus > 0f && health != null && !health.IsDead &&
@@ -59,6 +77,7 @@ namespace TrickalFanGame.Player
         private void Awake()
         {
             health = GetComponent<Health>();
+            health.EnableHealthUnits();
             health.SetMaxHealth(MaxHealth, true);
         }
 
@@ -86,6 +105,31 @@ namespace TrickalFanGame.Player
         public void AddAttackSpeedPercent(float amount)
         {
             attackSpeedPercentBonus = Mathf.Max(0f, attackSpeedPercentBonus + amount);
+        }
+
+        public void AddMoveSpeedPercent(float amount)
+        {
+            moveSpeedPercentBonus = Mathf.Max(0f, moveSpeedPercentBonus + amount);
+        }
+
+        public void AddMoveSpeedPenaltyPercent(float amount)
+        {
+            moveSpeedPenaltyPercent = Mathf.Max(0f, moveSpeedPenaltyPercent + amount);
+        }
+
+        public void SetCurrentRoomAttackDamagePercent(float amount)
+        {
+            currentRoomAttackDamagePercentBonus = Mathf.Max(0f, amount);
+        }
+
+        public void SetCurrentRoomAttackSpeedPercent(float amount)
+        {
+            currentRoomAttackSpeedPercentBonus = Mathf.Max(0f, amount);
+        }
+
+        public void SetCurrentRoomMoveSpeedPercent(float amount)
+        {
+            currentRoomMoveSpeedPercentBonus = Mathf.Max(0f, amount);
         }
 
         public void AddCriticalChance(float amount)
@@ -154,6 +198,42 @@ namespace TrickalFanGame.Player
             healOnKillMaxHealthPercent = Mathf.Max(0f, healOnKillMaxHealthPercent + amount);
         }
 
+        // The first stack sets the kill interval and heal amount; each later stack lowers the interval by one kill.
+        public void AddPeriodicKillHeal(float amount, int killInterval)
+        {
+            if (amount <= 0f || killInterval <= 0)
+            {
+                return;
+            }
+
+            if (periodicKillHealInterval == 0)
+            {
+                periodicKillHealAmount = amount;
+                periodicKillHealInterval = killInterval;
+                return;
+            }
+
+            periodicKillHealInterval = Mathf.Max(1, periodicKillHealInterval - 1);
+        }
+
+        public float RegisterKillAndGetHealAmount()
+        {
+            float amount = HealOnKillAmount;
+            if (periodicKillHealInterval <= 0)
+            {
+                return amount;
+            }
+
+            periodicKillHealProgress++;
+            if (periodicKillHealProgress >= periodicKillHealInterval)
+            {
+                periodicKillHealProgress = 0;
+                amount += periodicKillHealAmount;
+            }
+
+            return amount;
+        }
+
         public void AddDistanceDamage(float maximumBonus, float minimumDistance, float maximumDistance)
         {
             if (maximumBonus <= 0f || minimumDistance < 0f || maximumDistance <= minimumDistance)
@@ -190,11 +270,15 @@ namespace TrickalFanGame.Player
             DamageSourceType sourceType,
             float multiplier = 1f)
         {
+            float roomMultiplier = sourceType is DamageSourceType.PlayerAttack or
+                DamageSourceType.PlayerProjectile
+                ? 1f + currentRoomAttackDamagePercentBonus
+                : 1f;
             return new DamageContext(
                 source,
                 sourceType,
                 AttackDamage,
-                multiplier,
+                multiplier * roomMultiplier,
                 DamageDeliveryType.Direct,
                 CriticalChance,
                 CriticalDamageMultiplier,

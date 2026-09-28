@@ -176,7 +176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
-  maxHealth: 4
+  maxHealth: 40
   currentShield: 0
 --- !u!114 &8331210927864804880
 MonoBehaviour:
@@ -204,7 +204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damage: 0.75
+  damageTier: 0
   cooldown: 1
 --- !u!114 &8225966343484896237
 MonoBehaviour:
@@ -280,4 +280,4 @@ MonoBehaviour:
   activeDuration: 0.12
   recoveryDuration: 0.65
   attackCooldown: 0.2
-  attackDamage: 1.25
+  damageTier: 1

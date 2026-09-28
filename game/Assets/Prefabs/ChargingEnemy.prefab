@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 3370441962758635034}
   - component: {fileID: 8950292197539721430}
   - component: {fileID: 232877580550626475}
+  - component: {fileID: 6783503925847087411}
   m_Layer: 6
   m_Name: ChargingEnemy
   m_TagString: Untagged
@@ -91,7 +92,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 461c317ff7bb3454189a69b1d2f34a09, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.5, b: 0.15, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -173,10 +174,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
-  maxHealth: 7
+  maxHealth: 70
   currentShield: 0
+  useHealthUnits: 0
 --- !u!114 &5150705397390829690
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,13 +221,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ChargingEnemyController
   detectionRange: 7
   pursuitSpeed: 2.75
-  pursuitDuration: 1.1
+  pursuitDuration: 0
   windupDuration: 0.65
   dashSpeed: 8
   dashDuration: 0.8
-  recoveryDuration: 0.75
-  chargeCooldown: 0
-  chargeDamage: 3
+  recoveryDuration: 0.6
+  chargeCooldown: 1.5
+  chargeDamageTier: 2
   target: {fileID: 0}
 --- !u!114 &3370441962758635034
 MonoBehaviour:
@@ -364,3 +366,17 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &6783503925847087411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 940017362510908874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
+  damageTier: 0
+  cooldown: 1

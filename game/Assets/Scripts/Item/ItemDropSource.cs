@@ -117,7 +117,7 @@ namespace TrickalFanGame.Item
                 return false;
             }
 
-            LastFallbackHealAmount = health.Heal(health.MaxHealth * FallbackHealMaxHealthRatio);
+            LastFallbackHealAmount = health.Heal(health.GetMaxHealthRatioAmount(FallbackHealMaxHealthRatio));
             LastDroppedDefinition = null;
             HasDropped = true;
             Debug.Log(

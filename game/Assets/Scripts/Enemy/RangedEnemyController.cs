@@ -17,7 +17,7 @@ namespace TrickalFanGame.Enemy
         [Header("Attack")]
         [SerializeField, Min(0.01f)] private float attackInterval = 1.5f;
         [SerializeField, Min(0.01f)] private float projectileSpeed = 5f;
-        [SerializeField, Min(0.01f)] private float projectileDamage = 1f;
+        [SerializeField] private EnemyDamageTier projectileDamageTier = EnemyDamageTier.Heavy;
         [SerializeField, Min(0.01f)] private float projectileLifetime = 4f;
         [SerializeField] private Transform target;
 
@@ -32,7 +32,7 @@ namespace TrickalFanGame.Enemy
         public float MoveSpeed => moveSpeed;
         public float MinimumAttackDistance => minimumAttackDistance;
         public float MaximumAttackDistance => maximumAttackDistance;
-        public float ProjectileDamage => projectileDamage;
+        public EnemyDamageTier ProjectileDamageTier => projectileDamageTier;
 
         public event Action<EnemyProjectile> ProjectileFired;
 
@@ -66,7 +66,7 @@ namespace TrickalFanGame.Enemy
             float configuredMaximumAttackDistance,
             float configuredAttackInterval,
             float configuredProjectileSpeed,
-            float configuredProjectileDamage,
+            EnemyDamageTier configuredProjectileDamageTier,
             float configuredProjectileLifetime)
         {
             moveSpeed = Mathf.Max(0f, configuredMoveSpeed);
@@ -78,13 +78,13 @@ namespace TrickalFanGame.Enemy
                 detectionRange);
             attackInterval = Mathf.Max(0.01f, configuredAttackInterval);
             projectileSpeed = Mathf.Max(0.01f, configuredProjectileSpeed);
-            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+            projectileDamageTier = configuredProjectileDamageTier;
             projectileLifetime = Mathf.Max(0.01f, configuredProjectileLifetime);
         }
 
-        public void SetProjectileDamage(float configuredProjectileDamage)
+        public void SetProjectileDamageTier(EnemyDamageTier configuredProjectileDamageTier)
         {
-            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+            projectileDamageTier = configuredProjectileDamageTier;
         }
 
         public void SetTarget(Transform configuredTarget)
@@ -152,7 +152,7 @@ namespace TrickalFanGame.Enemy
                 transform.position,
                 direction,
                 gameObject,
-                projectileDamage,
+                projectileDamageTier,
                 projectileSpeed,
                 projectileLifetime,
                 projectileSprite);

@@ -129,7 +129,7 @@ namespace TrickalFanGame.Editor
                 EventSystem eventSystem = EventSystem.current;
                 Assert(inventory.TryAcquire(first), "First HUD-3B artifact acquisition failed.");
                 Assert(view.IsShowing && view.CurrentName == "첫 아티팩트" &&
-                    view.CurrentDescription == "최대 HP +2 · 획득 시 최대 HP 50% 방어막" &&
+                    view.CurrentDescription == "최대 HP +1칸 · 획득 시 최대 HP 50% 방어막" &&
                     Mathf.Approximately(view.RemainingSeconds, 1.5f) && Mathf.Approximately(view.ToastCanvasGroup.alpha, 1f),
                     "First artifact acquisition must immediately show its name and one-line effect description.");
                 AssertMessageMesh(view.MessageText, view.CurrentName, view.CurrentDescription);

@@ -5,6 +5,7 @@ using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
+using TrickalFanGame.Room;
 using UnityEngine;
 
 namespace TrickalFanGame.Debugging
@@ -56,9 +57,10 @@ namespace TrickalFanGame.Debugging
         [SerializeField] private PlayerInventory playerInventory;
         [SerializeField] private Health playerHealth;
         [SerializeField] private PlayerStats playerStats;
+        [SerializeField] private RunProgress runProgress;
 
         [Header("Initial item loadout")]
-        [Tooltip("Play Mode 시작 시 적용할 아티팩트와 스택 수입니다. 0이면 목록에는 남지만 획득하지 않습니다.")]
+        [Tooltip("Play Mode 시작 시 적용할 아이템·스펠과 스택 수입니다. 0이면 목록에는 남지만 획득하지 않습니다.")]
         [SerializeField] private ItemLoadoutEntry[] itemLoadout = Array.Empty<ItemLoadoutEntry>();
 
         [Header("Enemy placements")]
@@ -79,6 +81,7 @@ namespace TrickalFanGame.Debugging
         public Vector2 RoomSize => roomSize;
         public bool HasAppliedLoadout { get; private set; }
         public int SpawnedEnemyCount => spawnedEnemies.Count(enemy => enemy != null);
+        public int CurrentFloor => runProgress != null ? Mathf.Max(1, runProgress.CurrentFloor) : 1;
         public BossController ActiveBoss => spawnedEnemies
             .Where(enemy => enemy != null)
             .Select(enemy => enemy.GetComponent<BossController>())
@@ -119,6 +122,8 @@ namespace TrickalFanGame.Debugging
             {
                 ApplyConfiguredLoadout();
             }
+
+            EnsureTestFloorInitialized();
 
             if (spawnEnemiesOnStart)
             {
@@ -234,6 +239,27 @@ namespace TrickalFanGame.Debugging
             playerHealth?.ResetHealth();
         }
 
+        public void DamagePlayerToLowHealth()
+        {
+            if (playerHealth == null || playerHealth.IsDead)
+            {
+                return;
+            }
+
+            float targetHealth = Mathf.Max(1f, Mathf.Floor(playerHealth.MaxHealth * 0.25f));
+            float damage = playerHealth.CurrentHealth - targetHealth;
+            if (damage > 0f)
+            {
+                playerHealth.TakeDamage(damage);
+            }
+        }
+
+        public void AdvanceTestFloor()
+        {
+            ResolveRunProgress();
+            runProgress?.RecordRoomEntry(CurrentFloor + 1, 1);
+        }
+
         private void ResolvePlayerReferences()
         {
             if (playerInventory == null)
@@ -247,6 +273,24 @@ namespace TrickalFanGame.Debugging
 
             playerHealth ??= playerInventory.GetComponent<Health>();
             playerStats ??= playerInventory.GetComponent<PlayerStats>();
+            ResolveRunProgress();
+        }
+
+        private void ResolveRunProgress()
+        {
+            if (runProgress == null)
+            {
+                runProgress = FindFirstObjectByType<RunProgress>();
+            }
+        }
+
+        private void EnsureTestFloorInitialized()
+        {
+            ResolveRunProgress();
+            if (runProgress != null && runProgress.CurrentFloor < 1)
+            {
+                runProgress.RecordRoomEntry(1, 1);
+            }
         }
 
         private void OnGUI()
@@ -256,15 +300,15 @@ namespace TrickalFanGame.Debugging
                 return;
             }
 
-            const float width = 330f;
-            Rect area = new(Screen.width - width - 10f, 10f, width, Mathf.Min(Screen.height - 20f, 650f));
+            const float width = 360f;
+            Rect area = new(Screen.width - width - 10f, 10f, width, Mathf.Min(Screen.height - 20f, 720f));
             GUILayout.BeginArea(area, "Item Test Room", GUI.skin.window);
             BossController activeBoss = ActiveBoss;
             string bossVitals = activeBoss == null
                 ? "BOSS HP --"
                 : $"BOSS {activeBoss.DisplayName}  HP {activeBoss.Health.CurrentHealth:0.#}/{activeBoss.Health.MaxHealth:0.#}";
             GUILayout.Label(
-                $"PLAYER HP {playerHealth.CurrentHealth:0.#}/{playerHealth.MaxHealth:0.#}  Shield {playerHealth.CurrentShield:0.#}\n" +
+                $"FLOOR {CurrentFloor}  PLAYER HP {playerHealth.CurrentHealth:0.#}/{playerHealth.MaxHealth:0.#}  Shield {playerHealth.CurrentShield:0.#}\n" +
                 bossVitals + "\n" +
                 $"ATK {playerStats.AttackDamage:0.##}  ASPD {playerStats.AttackSpeed:0.##}  " +
                 $"CRIT {playerStats.CriticalChance:P0}\n" +
@@ -282,7 +326,18 @@ namespace TrickalFanGame.Debugging
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.Label("Items — +1은 현재 Play에서 즉시 획득", GUI.skin.box);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("HP 25% (Life Gem)"))
+            {
+                DamagePlayerToLowHealth();
+            }
+            if (GUILayout.Button("Next Floor"))
+            {
+                AdvanceTestFloor();
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label("Items / Spells — +1은 현재 Play에서 즉시 획득", GUI.skin.box);
             panelScroll = GUILayout.BeginScrollView(panelScroll);
             foreach (ItemLoadoutEntry entry in itemLoadout)
             {
@@ -293,7 +348,8 @@ namespace TrickalFanGame.Debugging
 
                 GUILayout.BeginHorizontal();
                 int current = playerInventory.GetStackCount(entry.Item.ItemId);
-                GUILayout.Label($"{entry.Item.DisplayName}  {current}/{entry.Item.MaxStacks}");
+                string kind = entry.Item.Kind == ItemKind.Spell ? "SPELL" : "ART";
+                GUILayout.Label($"[{kind}] {entry.Item.DisplayName}  {current}/{entry.Item.MaxStacks}");
                 GUI.enabled = entry.Item.MaxStacks <= 0 || current < entry.Item.MaxStacks;
                 if (GUILayout.Button("+1", GUILayout.Width(42f)))
                 {
@@ -303,7 +359,12 @@ namespace TrickalFanGame.Debugging
                 GUILayout.EndHorizontal();
             }
             GUILayout.EndScrollView();
-            GUILayout.Label("스택을 줄이거나 초기화하려면 Play Mode를 다시 시작하세요.");
+            PlayerDamageAura aura = playerInventory.GetComponent<PlayerDamageAura>();
+            if (aura != null && aura.StackCount > 0)
+            {
+                GUILayout.Label($"광기의 가면 범위: {aura.Radius:0.##}m (Scene 뷰 Gizmo 표시 중)");
+            }
+            GUILayout.Label("생명의 보석: HP 25% → 회복 확인 → Next Floor → 다시 HP 25%.\n스택 초기화는 Play Mode를 다시 시작하세요.");
             GUILayout.EndArea();
         }
 

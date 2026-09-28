@@ -42,7 +42,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0f)] private float openCrossHalfWidth = 1.45f;
         [SerializeField, Min(0f)] private float arenaPadding = 0.75f;
         [SerializeField, Min(0f)] private float minionSpacing = 0.65f;
-        [SerializeField, Min(0.01f)] private float obstacleImpactDamage = 1f;
+        [SerializeField] private EnemyDamageTier obstacleImpactDamageTier = EnemyDamageTier.Light;
         [SerializeField, Min(0f)] private float obstacleKnockbackSpeed = 7f;
         [SerializeField, Min(0.01f)] private float obstacleKnockbackDuration = 0.2f;
 
@@ -102,7 +102,7 @@ namespace TrickalFanGame.Enemy
         public float CurrentShotInterval => shotInterval *
                                             (boss != null ? boss.CurrentTempoMultiplier : 1f);
         public float ObstacleImpactRadius => obstacleImpactRadius;
-        public float ObstacleImpactDamage => obstacleImpactDamage;
+        public EnemyDamageTier ObstacleImpactDamageTier => obstacleImpactDamageTier;
         public float ObstacleKnockbackSpeed => obstacleKnockbackSpeed;
         public bool HasPendingObstacleTelegraph => pendingObstaclePositions.Count > 0 &&
                                                    pendingObstacleTelegraphs.Any(item => item != null);
@@ -139,10 +139,11 @@ namespace TrickalFanGame.Enemy
             obstaclesPerThrowLimit = Mathf.Max(1, configuredObstaclesPerThrow);
         }
 
-        public void ConfigureObstacleImpact(float radius, float damage, float knockbackSpeed, float knockbackDuration)
+        public void ConfigureObstacleImpact(float radius, EnemyDamageTier damageTier, float knockbackSpeed,
+            float knockbackDuration)
         {
             obstacleImpactRadius = Mathf.Max(0f, radius);
-            obstacleImpactDamage = Mathf.Max(0.01f, damage);
+            obstacleImpactDamageTier = damageTier;
             obstacleKnockbackSpeed = Mathf.Max(0f, knockbackSpeed);
             obstacleKnockbackDuration = Mathf.Max(0.01f, knockbackDuration);
         }
@@ -350,7 +351,7 @@ namespace TrickalFanGame.Enemy
             Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
             if (direction.sqrMagnitude <= 0f) direction = Vector2.down;
             BossProjectile.Create(transform.position, direction * projectileSpeed, gameObject,
-                boss.ProjectileDamage, GetComponentInChildren<SpriteRenderer>()?.sprite);
+                boss.ProjectileDamageTier, GetComponentInChildren<SpriteRenderer>()?.sprite);
         }
 
         private void StopMovement()
@@ -426,8 +427,8 @@ namespace TrickalFanGame.Enemy
             Health targetHealth = target.GetComponentInParent<Health>();
             if (targetHealth == null || targetHealth.IsDead) return;
             targetHealth.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
-            targetHealth.TakeDamage(new DamageContext(gameObject, DamageSourceType.EnemyContact,
-                obstacleImpactDamage));
+            targetHealth.TakeDamage(HealthUnits.CreateEnemyDamageContext(gameObject, DamageSourceType.EnemyContact,
+                obstacleImpactDamageTier));
 
             KnockbackReceiver receiver = targetHealth.GetComponent<KnockbackReceiver>();
             if (receiver == null || targetHealth.IsDead) return;

@@ -132,7 +132,8 @@ namespace TrickalFanGame.Editor
                     "A fully capped valid pool must open one healing candidate.");
                 Assert(session.TrySelect(0) &&
                        Mathf.Approximately(health.CurrentHealth,
-                           healthBefore + health.MaxHealth * ArtifactRewardSelector.FallbackHealMaxHealthRatio) &&
+                           healthBefore +
+                           health.GetMaxHealthRatioAmount(ArtifactRewardSelector.FallbackHealMaxHealthRatio)) &&
                        inventory.AcquiredItems.Count == acquiredBefore,
                     "Healing must apply immediately without creating an Item acquisition record.");
                 float healthAfter = health.CurrentHealth;

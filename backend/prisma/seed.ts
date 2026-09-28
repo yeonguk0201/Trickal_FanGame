@@ -21,6 +21,7 @@ const character = {
 };
 
 const testUserId = '00000000-0000-4000-8000-000000000001';
+const testClientProfileId = '10000000-0000-4000-8000-000000000001';
 
 async function main() {
   await prisma.$transaction([
@@ -29,6 +30,7 @@ async function main() {
       update: {},
       create: {
         id: testUserId,
+        clientProfileId: testClientProfileId,
         nickname: 'test-player',
       },
     }),

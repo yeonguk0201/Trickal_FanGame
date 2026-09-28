@@ -33,7 +33,7 @@ namespace TrickalFanGame.Editor
             if (File.Exists(ScenePath))
             {
                 Scene existing = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
-                bool repaired = RemoveRunSessions(existing);
+                bool repaired = RepairCurrentTestContent(existing);
                 if (repaired)
                 {
                     EditorSceneManager.MarkSceneDirty(existing);
@@ -44,7 +44,7 @@ namespace TrickalFanGame.Editor
                 Debug.Log(
                     existingController != null
                         ? "Item Test Room opened. Edit the controller loadout and enemy placements, then enter Play Mode." +
-                          (repaired ? " Removed a legacy RunSession so this debug scene stays Backend-independent." : string.Empty)
+                          (repaired ? " Synchronized the current item catalog and required test enemies." : string.Empty)
                         : "Item Test Room opened, but its controller is missing. Run verification for details.");
                 return;
             }
@@ -178,6 +178,55 @@ namespace TrickalFanGame.Editor
                 controller);
         }
 
+        private static bool RepairCurrentTestContent(Scene scene)
+        {
+            bool changed = RemoveRunSessions(scene);
+            ItemTestRoomController controller = FindInScene<ItemTestRoomController>(scene);
+            PlayerInventory inventory = FindInScene<PlayerInventory>(scene);
+            if (controller == null || inventory == null)
+            {
+                return changed;
+            }
+
+            if (FindInScene<RunProgress>(scene) == null)
+            {
+                RunProgress progress = new GameObject("Run Progress").AddComponent<RunProgress>();
+                progress.transform.SetParent(controller.transform, false);
+                progress.TryInitializeRunSeed(20260901, out _);
+                changed = true;
+            }
+
+            string[] previousItemIds = controller.ItemLoadout
+                .Where(entry => entry?.Item != null)
+                .Select(entry => entry.Item.ItemId)
+                .ToArray();
+            ItemTestRoomController.ItemLoadoutEntry[] loadout = MergeCurrentLoadout(controller.ItemLoadout);
+            List<ItemTestRoomController.EnemyPlacement> placements = controller.EnemyPlacements
+                .Where(IsValidPlacement)
+                .ToList();
+            foreach (ItemTestRoomController.EnemyPlacement required in BuildDefaultEnemyPlacements())
+            {
+                if (required.EnemyPrefab != null &&
+                    !placements.Any(placement => placement?.EnemyPrefab == required.EnemyPrefab))
+                {
+                    placements.Add(required);
+                    changed = true;
+                }
+            }
+
+            changed |= !previousItemIds.SequenceEqual(
+                loadout.Select(entry => entry.Item.ItemId),
+                System.StringComparer.Ordinal);
+            controller.Configure(
+                inventory,
+                inventory.GetComponent<Health>(),
+                inventory.GetComponent<PlayerStats>(),
+                loadout,
+                placements.ToArray(),
+                controller.RoomSize);
+            return changed;
+        }
+
         private static bool RemoveRunSessions(Scene scene)
         {
             bool changed = false;
@@ -190,16 +239,35 @@ namespace TrickalFanGame.Editor
             return changed;
         }
 
-        private static ItemTestRoomController.ItemLoadoutEntry[] BuildDefaultLoadout()
+        internal static ItemTestRoomController.ItemLoadoutEntry[] BuildDefaultLoadout()
         {
-            return PhaseGArtifactCatalog.All
-                .Select(spec =>
+            IEnumerable<(string ItemId, int StartingStacks)> entries = PhaseGArtifactCatalog.All
+                .Select(spec => (ItemId: spec.ItemId, StartingStacks: spec.ItemId == "item-01" ? 1 : 0))
+                .Concat(Week16Content0Catalog.All.Select(spec =>
+                    (ItemId: spec.ItemId, StartingStacks: 0)));
+
+            return entries
+                .Select(entry =>
                 {
                     ItemDefinition item = AssetDatabase.LoadAssetAtPath<ItemDefinition>(
-                        $"Assets/Items/{spec.ItemId}.asset");
-                    int startingStacks = spec.ItemId == "item-01" ? 1 : 0;
-                    return new ItemTestRoomController.ItemLoadoutEntry(item, startingStacks);
+                        $"Assets/Items/{entry.ItemId}.asset");
+                    return new ItemTestRoomController.ItemLoadoutEntry(item, entry.StartingStacks);
                 })
+                .ToArray();
+        }
+
+        private static ItemTestRoomController.ItemLoadoutEntry[] MergeCurrentLoadout(
+            IReadOnlyList<ItemTestRoomController.ItemLoadoutEntry> existing)
+        {
+            Dictionary<string, ItemTestRoomController.ItemLoadoutEntry> current = existing
+                .Where(entry => entry?.Item != null && entry.Item.IsValid)
+                .GroupBy(entry => entry.Item.ItemId)
+                .ToDictionary(group => group.Key, group => group.First(), System.StringComparer.Ordinal);
+
+            return BuildDefaultLoadout()
+                .Select(required => current.TryGetValue(required.Item.ItemId, out var configured)
+                    ? configured
+                    : required)
                 .ToArray();
         }
 

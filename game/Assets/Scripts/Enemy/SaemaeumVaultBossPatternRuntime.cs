@@ -29,12 +29,12 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.1f)] private float jumpDistance = 4.8f;
         [SerializeField, Min(0.1f)] private float jumpHeight = 2f;
         [SerializeField, Min(0.1f)] private float landingRadius = 2.875f;
-        [SerializeField, Min(0.01f)] private float landingDamage = 2f;
+        [SerializeField] private EnemyDamageTier landingDamageTier = EnemyDamageTier.Medium;
         [SerializeField, Min(0f)] private float landingKnockbackSpeed = 7f;
         [SerializeField, Min(0.01f)] private float landingKnockbackDuration = 0.2f;
 
         [Header("Treasure heal")]
-        [SerializeField, Min(0.01f)] private float healPerUse = 15f;
+        [SerializeField, Min(0.01f)] private float healPerUse = 150f;
         [SerializeField, Min(1)] private int healPulses = 4;
 
         [Header("Arena and presentation")]
@@ -80,7 +80,7 @@ namespace TrickalFanGame.Enemy
         public int CurrentJump => currentJump;
         public int PhaseTwoMinimumJumps => Mathf.Max(1, phaseTwoMinimumJumps);
         public float JumpDistance => jumpDistance;
-        public float LandingDamage => landingDamage;
+        public EnemyDamageTier LandingDamageTier => landingDamageTier;
         public float LandingKnockbackSpeed => landingKnockbackSpeed;
         public float ApproachSpeed => approachSpeed;
         public float CurrentApproachSpeed => approachSpeed *
@@ -97,7 +97,7 @@ namespace TrickalFanGame.Enemy
             body.useFullKinematicContacts = true;
             ContactDamage contact = GetComponent<ContactDamage>();
             if (contact == null) contact = gameObject.AddComponent<ContactDamage>();
-            contact.Configure(2f, 0.8f);
+            contact.Configure(EnemyDamageTier.Heavy, 0.8f);
             health = GetComponent<Health>();
             visualTransform = GetComponentInChildren<SpriteRenderer>()?.transform;
             if (visualTransform != null) groundedVisualPosition = visualTransform.localPosition;
@@ -120,7 +120,7 @@ namespace TrickalFanGame.Enemy
         }
 
         public void ConfigureJumps(int firstMin, int firstMax, int secondMin, int secondMax,
-            float distance, float radius, float damage, float knockbackSpeed, float knockbackDuration,
+            float distance, float radius, EnemyDamageTier damageTier, float knockbackSpeed, float knockbackDuration,
             float firstJumpDuration = 0.69f, float secondJumpDuration = 0.62f)
         {
             phaseOneMinimumJumps = Mathf.Max(1, firstMin);
@@ -131,7 +131,7 @@ namespace TrickalFanGame.Enemy
             phaseTwoJumpDuration = Mathf.Max(0.1f, secondJumpDuration);
             jumpDistance = Mathf.Max(0.1f, distance);
             landingRadius = Mathf.Max(0.1f, radius);
-            landingDamage = Mathf.Max(0.01f, damage);
+            landingDamageTier = damageTier;
             landingKnockbackSpeed = Mathf.Max(0f, knockbackSpeed);
             landingKnockbackDuration = Mathf.Max(0.01f, knockbackDuration);
         }
@@ -334,7 +334,8 @@ namespace TrickalFanGame.Enemy
             Health targetHealth = target.GetComponentInParent<Health>();
             if (targetHealth == null || targetHealth.IsDead) return;
             targetHealth.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
-            targetHealth.TakeDamage(new DamageContext(gameObject, DamageSourceType.EnemyContact, landingDamage));
+            targetHealth.TakeDamage(HealthUnits.CreateEnemyDamageContext(
+                gameObject, DamageSourceType.EnemyContact, landingDamageTier));
 
             KnockbackReceiver receiver = targetHealth.GetComponent<KnockbackReceiver>();
             if (receiver == null || targetHealth.IsDead) return;
@@ -377,7 +378,7 @@ namespace TrickalFanGame.Enemy
             {
                 Vector2 projectileDirection = Quaternion.Euler(0f, 0f, startAngle + step * index) * direction;
                 BossProjectile.Create(transform.position, projectileDirection * projectileSpeed, gameObject,
-                    boss.ProjectileDamage, sprite);
+                    boss.ProjectileDamageTier, sprite);
             }
         }
 

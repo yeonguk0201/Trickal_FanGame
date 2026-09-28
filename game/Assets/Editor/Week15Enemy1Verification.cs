@@ -111,7 +111,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                charging.Configure(7f, 0.5f, 8f, 0.5f, 0.5f, 1f, 2f);
+                charging.Configure(7f, 0.5f, 8f, 0.5f, 0.5f, 1f, EnemyDamageTier.Heavy);
                 player.transform.position = Vector2.right * 3f;
                 charging.SetTarget(player.transform);
                 Vector3 idleScale = enemy.transform.localScale;

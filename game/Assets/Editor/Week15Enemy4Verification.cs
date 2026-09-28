@@ -72,7 +72,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                sniper.Configure(2.5f, 14f, 8f, 1f, 1f, 0.3f, 0.5f, 0.1f, 0.5f, 7f, 2f, 5f);
+                sniper.Configure(2.5f, 14f, 8f, 1f, 1f, 0.3f, 0.5f, 0.1f, 0.5f, 7f, EnemyDamageTier.Heavy, 5f);
                 player.transform.position = Vector2.right * 12f;
                 sniper.SetTarget(player.transform);
 
@@ -134,7 +134,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                sniper.Configure(2.5f, 14f, 8f, 1f, 0.4f, 0.2f, 0.5f, 0.1f, 0.5f, 7f, 2f, 5f);
+                sniper.Configure(2.5f, 14f, 8f, 1f, 0.4f, 0.2f, 0.5f, 0.1f, 0.5f, 7f, EnemyDamageTier.Heavy, 5f);
                 player.transform.position = Vector2.right * 8f;
                 sniper.SetTarget(player.transform);
                 sniper.TickBehavior(0f);

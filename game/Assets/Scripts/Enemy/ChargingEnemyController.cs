@@ -31,7 +31,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float dashDuration = 0.8f;
         [SerializeField, Min(0f)] private float recoveryDuration = 0.6f;
         [SerializeField, Min(0f)] private float chargeCooldown = 1.5f;
-        [SerializeField, Min(0.01f)] private float chargeDamage = 2f;
+        [SerializeField] private EnemyDamageTier chargeDamageTier = EnemyDamageTier.Heavy;
         [SerializeField] private Transform target;
 
         private Rigidbody2D body;
@@ -54,7 +54,7 @@ namespace TrickalFanGame.Enemy
         public float DashDuration => dashDuration;
         public float PursuitSpeed => pursuitSpeed;
         public float PursuitDuration => pursuitDuration;
-        public float ChargeDamage => chargeDamage;
+        public EnemyDamageTier ChargeDamageTier => chargeDamageTier;
         public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;
 
         public event Action<ChargingEnemyState> StateChanged;
@@ -104,7 +104,7 @@ namespace TrickalFanGame.Enemy
             float configuredDashDuration,
             float configuredRecoveryDuration,
             float configuredChargeCooldown,
-            float configuredChargeDamage)
+            EnemyDamageTier configuredChargeDamageTier)
         {
             detectionRange = Mathf.Max(0f, configuredDetectionRange);
             windupDuration = Mathf.Max(0.01f, configuredWindupDuration);
@@ -112,7 +112,7 @@ namespace TrickalFanGame.Enemy
             dashDuration = Mathf.Max(0.01f, configuredDashDuration);
             recoveryDuration = Mathf.Max(0f, configuredRecoveryDuration);
             chargeCooldown = Mathf.Max(0f, configuredChargeCooldown);
-            chargeDamage = Mathf.Max(0.01f, configuredChargeDamage);
+            chargeDamageTier = configuredChargeDamageTier;
             pursuitDuration = 0f;
             pursuitTimerStarted = false;
             SetState(ChargingEnemyState.Idle);
@@ -126,7 +126,7 @@ namespace TrickalFanGame.Enemy
             float configuredDashSpeed,
             float configuredDashDuration,
             float configuredRecoveryDuration,
-            float configuredChargeDamage)
+            EnemyDamageTier configuredChargeDamageTier)
         {
             detectionRange = Mathf.Max(0f, configuredDetectionRange);
             pursuitSpeed = Mathf.Max(0f, configuredPursuitSpeed);
@@ -136,14 +136,14 @@ namespace TrickalFanGame.Enemy
             dashDuration = Mathf.Max(0.01f, configuredDashDuration);
             recoveryDuration = Mathf.Max(0f, configuredRecoveryDuration);
             chargeCooldown = 0f;
-            chargeDamage = Mathf.Max(0.01f, configuredChargeDamage);
+            chargeDamageTier = configuredChargeDamageTier;
             pursuitTimerStarted = false;
             SetState(ChargingEnemyState.Idle);
         }
 
-        public void SetChargeDamage(float configuredChargeDamage)
+        public void SetChargeDamageTier(EnemyDamageTier configuredChargeDamageTier)
         {
-            chargeDamage = Mathf.Max(0.01f, configuredChargeDamage);
+            chargeDamageTier = configuredChargeDamageTier;
         }
 
         public void SetTarget(Transform configuredTarget)
@@ -249,7 +249,8 @@ namespace TrickalFanGame.Enemy
                 playerHealth.GetComponent<PlayerMovement>() != null)
             {
                 playerHealth.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
-                playerHealth.TakeDamage(new DamageContext(gameObject, DamageSourceType.EnemyContact, chargeDamage));
+                playerHealth.TakeDamage(HealthUnits.CreateEnemyDamageContext(
+                    gameObject, DamageSourceType.EnemyContact, chargeDamageTier));
                 EnterRecovery(currentTime);
                 return true;
             }

@@ -80,7 +80,7 @@ namespace TrickalFanGame.Editor
             Object.DestroyImmediate(instance.GetComponent<ContactDamage>());
             instance.AddComponent<BossController>();
             SerializedObject health = new(instance.GetComponent<Health>());
-            health.FindProperty("maxHealth").floatValue = 25f;
+            health.FindProperty("maxHealth").floatValue = 250f;
             health.ApplyModifiedPropertiesWithoutUndo();
             prefab = PrefabUtility.SaveAsPrefabAsset(instance, BossPrefabPath);
             Object.DestroyImmediate(instance);

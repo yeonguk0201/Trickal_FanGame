@@ -10,6 +10,7 @@ namespace TrickalFanGame.Combat
         EnemyContact,
         EnemyProjectile,
         PlayerDamageAura,
-        EnemyMelee
+        EnemyMelee,
+        PlayerItemLightning
     }
 }

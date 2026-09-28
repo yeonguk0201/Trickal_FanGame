@@ -17,20 +17,20 @@ namespace TrickalFanGame.Editor
             ConfigurePrefab(
                 BulhyojasonPrefabPath,
                 "BulhyojasonEnemy",
-                maxHealth: 6f,
+                maxHealth: 60f,
                 moveSpeed: 2.25f,
-                contactDamage: 2f,
-                meleeDamage: 3f,
+                contactDamageTier: EnemyDamageTier.Heavy,
+                meleeDamageTier: EnemyDamageTier.Critical,
                 color: Week15EnemyRoleColorSetup.BulhyojasonColor);
 
             CreateVariantIfMissing(BulhyojasonPrefabPath, SansamoPrefabPath, "SansamoEnemy");
             ConfigurePrefab(
                 SansamoPrefabPath,
                 "SansamoEnemy",
-                maxHealth: 4f,
+                maxHealth: 40f,
                 moveSpeed: 3.5f,
-                contactDamage: 0.75f,
-                meleeDamage: 1.25f,
+                contactDamageTier: EnemyDamageTier.Light,
+                meleeDamageTier: EnemyDamageTier.Medium,
                 color: Week15EnemyRoleColorSetup.SansamoColor);
             RemoveInheritedMeleeFromLegacyBoss();
 
@@ -107,8 +107,8 @@ namespace TrickalFanGame.Editor
             string objectName,
             float maxHealth,
             float moveSpeed,
-            float contactDamage,
-            float meleeDamage,
+            EnemyDamageTier contactDamageTier,
+            EnemyDamageTier meleeDamageTier,
             Color color)
         {
             GameObject contents = PrefabUtility.LoadPrefabContents(path);
@@ -151,8 +151,8 @@ namespace TrickalFanGame.Editor
                 serializedHealth.FindProperty("maxHealth").floatValue = maxHealth;
                 serializedHealth.ApplyModifiedPropertiesWithoutUndo();
                 chase.Configure(moveSpeed, 6f, 0.8f);
-                contact.Configure(contactDamage, 1f);
-                melee.Configure(1.15f, 0.4f, 0.12f, 0.65f, 0.2f, meleeDamage);
+                contact.Configure(contactDamageTier, 1f);
+                melee.Configure(1.15f, 0.4f, 0.12f, 0.65f, 0.2f, meleeDamageTier);
                 renderer.color = color;
 
                 if (PrefabUtility.SaveAsPrefabAsset(contents, path) == null)

@@ -79,9 +79,18 @@ namespace TrickalFanGame.Item
 
                     break;
                 case ItemEffectType.MaxHealthDamageAura:
+                case ItemEffectType.AttackDamageAura:
                     if (radius <= 0f || intervalSeconds <= 0f)
                     {
-                        error = "MaxHealthDamageAura requires a positive radius and tick interval.";
+                        error = $"{effectType} requires a positive radius and tick interval.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.HealOnKillEveryN:
+                    if (integerAmount <= 0)
+                    {
+                        error = "HealOnKillEveryN requires a positive kill count.";
                         return false;
                     }
 

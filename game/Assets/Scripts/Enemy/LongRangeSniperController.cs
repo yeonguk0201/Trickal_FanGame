@@ -31,7 +31,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float firingDuration = 0.08f;
         [SerializeField, Min(0f)] private float recoveryDuration = 0.65f;
         [SerializeField, Min(0.01f)] private float projectileSpeed = 7f;
-        [SerializeField, Min(0.01f)] private float projectileDamage = 2f;
+        [SerializeField] private EnemyDamageTier projectileDamageTier = EnemyDamageTier.Heavy;
         [SerializeField, Min(0.01f)] private float projectileLifetime = 5f;
         [SerializeField] private Transform target;
 
@@ -54,7 +54,7 @@ namespace TrickalFanGame.Enemy
         public float MoveSpeed => moveSpeed;
         public float DetectionRange => detectionRange;
         public float PreferredDistance => preferredDistance;
-        public float ProjectileDamage => projectileDamage;
+        public EnemyDamageTier ProjectileDamageTier => projectileDamageTier;
         public int StrafeDirection => strafeDirection;
         public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;
 
@@ -108,7 +108,7 @@ namespace TrickalFanGame.Enemy
             float configuredFiringDuration,
             float configuredRecoveryDuration,
             float configuredProjectileSpeed,
-            float configuredProjectileDamage,
+            EnemyDamageTier configuredProjectileDamageTier,
             float configuredProjectileLifetime)
         {
             moveSpeed = Mathf.Max(0f, configuredMoveSpeed);
@@ -121,7 +121,7 @@ namespace TrickalFanGame.Enemy
             firingDuration = Mathf.Max(0.01f, configuredFiringDuration);
             recoveryDuration = Mathf.Max(0f, configuredRecoveryDuration);
             projectileSpeed = Mathf.Max(0.01f, configuredProjectileSpeed);
-            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+            projectileDamageTier = configuredProjectileDamageTier;
             projectileLifetime = Mathf.Max(0.01f, configuredProjectileLifetime);
             relocationSequence = 0;
             strafeDirection = 1;
@@ -134,9 +134,9 @@ namespace TrickalFanGame.Enemy
             behavior?.SetTarget(configuredTarget);
         }
 
-        public void SetProjectileDamage(float configuredProjectileDamage)
+        public void SetProjectileDamageTier(EnemyDamageTier configuredProjectileDamageTier)
         {
-            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+            projectileDamageTier = configuredProjectileDamageTier;
         }
 
         public void TickBehavior(float currentTime)
@@ -277,7 +277,7 @@ namespace TrickalFanGame.Enemy
                 transform.position,
                 lockedDirection,
                 gameObject,
-                projectileDamage,
+                projectileDamageTier,
                 projectileSpeed,
                 projectileLifetime,
                 projectileSprite);

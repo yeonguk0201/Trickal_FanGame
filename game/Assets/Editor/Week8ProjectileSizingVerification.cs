@@ -35,9 +35,9 @@ namespace TrickalFanGame.Editor
             try
             {
                 ranged = EnemyProjectile.Create(
-                    Vector2.zero, Vector2.right, null, 1f, 1f, 1f, null);
+                    Vector2.zero, Vector2.right, null, EnemyDamageTier.Light, 1f, 1f, null);
                 boss = BossProjectile.Create(
-                    Vector2.zero, Vector2.right, null, 1f, null);
+                    Vector2.zero, Vector2.right, null, EnemyDamageTier.Medium, null);
 
                 VerifyProjectile(
                     "Ranged-enemy projectile",

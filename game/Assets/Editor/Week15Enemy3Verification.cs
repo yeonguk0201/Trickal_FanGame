@@ -62,7 +62,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                charging.ConfigurePursuitCharge(10f, 3f, 1f, 0.5f, 8f, 0.75f, 0.7f, 2f);
+                charging.ConfigurePursuitCharge(10f, 3f, 1f, 0.5f, 8f, 0.75f, 0.7f, EnemyDamageTier.Heavy);
                 player.transform.position = Vector2.right * 5f;
                 charging.SetTarget(player.transform);
 
@@ -122,7 +122,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                charging.ConfigurePursuitCharge(10f, 3f, 0.2f, 0.5f, 8f, 0.75f, 0.7f, 2f);
+                charging.ConfigurePursuitCharge(10f, 3f, 0.2f, 0.5f, 8f, 0.75f, 0.7f, EnemyDamageTier.Heavy);
                 player.transform.position = Vector2.right * 5f;
                 charging.SetTarget(player.transform);
                 charging.TickBehavior(0f);

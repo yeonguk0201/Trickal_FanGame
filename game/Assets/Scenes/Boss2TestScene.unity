@@ -1319,8 +1319,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52f62f5ee934d13b7239afb52b78bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerStats
-  baseMaxHealth: 5
-  baseAttackDamage: 1
+  baseMaxHealth: 10
+  baseAttackDamage: 10
   baseMoveSpeed: 5
   baseAttackSpeed: 1
   baseCriticalChance: 0.05

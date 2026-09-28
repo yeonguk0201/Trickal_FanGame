@@ -300,7 +300,8 @@ namespace TrickalFanGame.Editor
 
         private static BossProjectile CreateBossProjectile(Health owner)
         {
-            return BossProjectile.Create(Vector2.zero, Vector2.right, owner.gameObject, 1, null);
+            return BossProjectile.Create(Vector2.zero, Vector2.right, owner.gameObject,
+                EnemyDamageTier.Light, null);
         }
 
         private static int CountVisible(RoomNode[] nodes)

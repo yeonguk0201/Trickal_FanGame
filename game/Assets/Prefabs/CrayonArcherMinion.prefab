@@ -175,7 +175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
-  maxHealth: 3
+  maxHealth: 30
   currentShield: 0
 --- !u!114 &7339053098682609737
 MonoBehaviour:
@@ -240,7 +240,7 @@ MonoBehaviour:
   firingDuration: 0.08
   recoveryDuration: 0.65
   projectileSpeed: 7
-  projectileDamage: 2
+  projectileDamageTier: 2
   projectileLifetime: 5
   target: {fileID: 0}
 --- !u!114 &4591455748272535553
