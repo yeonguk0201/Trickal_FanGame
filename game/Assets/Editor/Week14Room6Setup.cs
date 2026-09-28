@@ -81,7 +81,12 @@ namespace TrickalFanGame.Editor
             }
 
             Undo.RecordObject(generator, "Configure Room-6 expanded template catalog");
-            generator.ConfigureTemplates(ContentVersion, templates);
+            // Keep Layouts that later setups registered (pillar, obstacle Layouts) and never lower the version.
+            templates = templates
+                .Concat(generator.RoomTemplates.Where(existing => existing != null &&
+                    templates.All(template => template.TemplateId != existing.TemplateId)))
+                .ToArray();
+            generator.ConfigureTemplates(Math.Max(ContentVersion, generator.RoomContentVersion), templates);
             EditorUtility.SetDirty(generator);
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             if (!EditorSceneManager.SaveScene(SceneManager.GetActiveScene()))

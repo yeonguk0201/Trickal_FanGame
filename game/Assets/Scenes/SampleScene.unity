@@ -2026,16 +2026,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d2d9250bc6cdce743be7738550951259, type: 2}
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
-  roomContentVersion: 2
+  roomContentVersion: 4
   roomTemplates:
   - {fileID: 11400000, guid: 684a6d37e34e4a640b4de439e8dd6680, type: 2}
-  - {fileID: 11400000, guid: 7e42edc154314df4aa56be0401028675, type: 2}
-  - {fileID: 11400000, guid: 96c440fa91f28a342ae804f9000e9e6a, type: 2}
-  - {fileID: 11400000, guid: 9c4ef623dfcfad048ae2af84d0410cef, type: 2}
-  - {fileID: 11400000, guid: 025c80049bfec5843b1f45e2c3f9a5d7, type: 2}
   - {fileID: 11400000, guid: 386c2e1a00ff0b948a82c708cd6bb049, type: 2}
   - {fileID: 11400000, guid: 4ac878bf9faf92e498255aa1ba52cbe7, type: 2}
   - {fileID: 11400000, guid: 807655f00c0bc124ba7aed2e8f024528, type: 2}
+  - {fileID: 11400000, guid: d582d98ad188b3c41bbd94118fa04e97, type: 2}
+  - {fileID: 11400000, guid: 4517121bdc108644cafcb5ad40bb93dd, type: 2}
+  - {fileID: 11400000, guid: a93cb28704aedfd428f780d46d039154, type: 2}
+  - {fileID: 11400000, guid: 2c2a80946d5e1f448bb8048ebae64166, type: 2}
+  - {fileID: 11400000, guid: 025c80049bfec5843b1f45e2c3f9a5d7, type: 2}
+  - {fileID: 11400000, guid: 7e42edc154314df4aa56be0401028675, type: 2}
+  - {fileID: 11400000, guid: 9c4ef623dfcfad048ae2af84d0410cef, type: 2}
+  - {fileID: 11400000, guid: 96c440fa91f28a342ae804f9000e9e6a, type: 2}
   encounterDefinitions:
   - {fileID: 11400000, guid: b65f49263c258d240b91a29c70b1a148, type: 2}
   - {fileID: 11400000, guid: 44567edd1d3df2649a0d93df54348ce1, type: 2}
@@ -2078,7 +2082,7 @@ MonoBehaviour:
   runProgress: {fileID: 1750892776}
   roomPrefab: {fileID: 3035332181880803975, guid: 4c3637cd1a19e3f4883f17715d95367f, type: 3}
   encounterEnemyRoster: {fileID: 11400000, guid: dbd3fb86e3fb0264686c348e9060667b, type: 2}
-  encounterClearRewardPrefab: {fileID: 6812840948383656007, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
+  encounterClearDropTable: {fileID: 11400000, guid: eea23f72b6b54874cb7d18a125855309, type: 2}
   floorBossPrefabs:
   - {fileID: 421685952657128216, guid: f991af9e6d8bc4e4f869e052eded37e0, type: 3}
   - {fileID: 2406316834951311537, guid: 6bef911f342ead54b94de8fab8306eb9, type: 3}
@@ -5740,6 +5744,7 @@ MonoBehaviour:
   roomNumber: 3
   contentRoot: {fileID: 1385583639}
   cameraAnchor: {fileID: 405032741}
+  initialSpawnPoint: {fileID: 0}
   defaultEntryPoint: {fileID: 811398679}
   doorways:
   - {fileID: 9463396}
@@ -9204,6 +9209,7 @@ MonoBehaviour:
   roomNumber: 7
   contentRoot: {fileID: 1840168143}
   cameraAnchor: {fileID: 122190428}
+  initialSpawnPoint: {fileID: 0}
   defaultEntryPoint: {fileID: 2086569722}
   doorways:
   - {fileID: 751719928}
@@ -33567,6 +33573,7 @@ MonoBehaviour:
   roomNumber: 6
   contentRoot: {fileID: 1104203980}
   cameraAnchor: {fileID: 1984256335}
+  initialSpawnPoint: {fileID: 0}
   defaultEntryPoint: {fileID: 1608240382}
   doorways:
   - {fileID: 71894948}
@@ -37329,6 +37336,7 @@ MonoBehaviour:
   roomNumber: 5
   contentRoot: {fileID: 1845246844}
   cameraAnchor: {fileID: 1254584129}
+  initialSpawnPoint: {fileID: 0}
   defaultEntryPoint: {fileID: 1853252605}
   doorways:
   - {fileID: 1118768431}
@@ -43867,6 +43875,7 @@ MonoBehaviour:
   roomNumber: 1
   contentRoot: {fileID: 824675414}
   cameraAnchor: {fileID: 1316919035}
+  initialSpawnPoint: {fileID: 0}
   defaultEntryPoint: {fileID: 1857720309}
   doorways:
   - {fileID: 117213977}
@@ -45822,6 +45831,7 @@ MonoBehaviour:
   roomNumber: 4
   contentRoot: {fileID: 525628580}
   cameraAnchor: {fileID: 73072134}
+  initialSpawnPoint: {fileID: 0}
   defaultEntryPoint: {fileID: 827396520}
   doorways:
   - {fileID: 1323438656}
@@ -50437,6 +50447,7 @@ MonoBehaviour:
   roomNumber: 2
   contentRoot: {fileID: 1213509306}
   cameraAnchor: {fileID: 1507682336}
+  initialSpawnPoint: {fileID: 0}
   defaultEntryPoint: {fileID: 1711062783}
   doorways:
   - {fileID: 13491383}
@@ -53065,7 +53076,6 @@ GameObject:
   - component: {fileID: 2018927169}
   - component: {fileID: 2018927170}
   - component: {fileID: 2018927173}
-  - component: {fileID: 2018927172}
   - component: {fileID: 2018927171}
   - component: {fileID: 2018927175}
   - component: {fileID: 2018927174}
@@ -53340,20 +53350,6 @@ MonoBehaviour:
   targetLayers:
     serializedVersion: 2
     m_Bits: 64
---- !u!114 &2018927172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2018927159}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10dc6910a9f04acc89854ebd53cdf2a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerSPDropper
-  pickupPrefab: {fileID: 6812840948383656007, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
-  dropChance: 0.25
 --- !u!114 &2018927173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53718,6 +53714,7 @@ MonoBehaviour:
   roomNumber: 8
   contentRoot: {fileID: 759484617}
   cameraAnchor: {fileID: 746151328}
+  initialSpawnPoint: {fileID: 0}
   defaultEntryPoint: {fileID: 126139910}
   doorways:
   - {fileID: 1010642425}

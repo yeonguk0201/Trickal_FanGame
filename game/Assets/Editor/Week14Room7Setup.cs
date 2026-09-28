@@ -74,6 +74,11 @@ namespace TrickalFanGame.Editor
                 .Append(TemplatePath)
                 .Select(Load<RoomTemplateDefinition>)
                 .ToArray();
+            // Keep Layouts that later setups registered and never lower the version.
+            RoomTemplateDefinition[] laterTemplates = generator.RoomTemplates
+                .Where(existing => existing != null &&
+                                   templates.All(template => template == null || template.TemplateId != existing.TemplateId))
+                .ToArray();
             EncounterDefinition[] encounters = generator.EncounterDefinitions
                 .Append(pillarEncounter)
                 .GroupBy(definition => definition.EncounterId, StringComparer.Ordinal)
@@ -82,9 +87,10 @@ namespace TrickalFanGame.Editor
                 .ToArray();
             if (templates.Any(template => template == null) || encounters.Length != 5)
                 throw new InvalidOperationException("Room-7 requires nine Room Templates and five Encounters.");
+            templates = templates.Concat(laterTemplates).ToArray();
 
             Undo.RecordObject(generator, "Configure Room-7 pillar content catalogs");
-            generator.ConfigureTemplates(RoomContentVersion, templates);
+            generator.ConfigureTemplates(Math.Max(RoomContentVersion, generator.RoomContentVersion), templates);
             generator.ConfigureEncounters(EncounterContentVersion, encounters);
             EditorUtility.SetDirty(generator);
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());

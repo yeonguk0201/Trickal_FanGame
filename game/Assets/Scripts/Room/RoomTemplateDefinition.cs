@@ -308,6 +308,28 @@ namespace TrickalFanGame.Room
             return true;
         }
 
+        // Obstacle Layout checks run once per catalog validation, not per Encounter resolution, because they
+        // flood-fill the room and sample sightlines.
+        public bool TryValidateLayout(out string error)
+        {
+            if (profile == null || roomPrefab == null)
+            {
+                error = $"Room template '{templateId}' needs a profile and Prefab before its Layout can be validated.";
+                return false;
+            }
+
+            if (!RoomObstacleLayout.TryCollectFootprints(roomPrefab, out List<RoomObstacleFootprint> footprints,
+                    out error) ||
+                !RoomObstacleLayout.TryValidate(templateId, profile.MovementBounds, profile.EncounterBounds,
+                    doorSlots, spawnPoints, footprints, out error))
+            {
+                error = $"Room template '{templateId}' has an invalid obstacle Layout. {error}";
+                return false;
+            }
+
+            return true;
+        }
+
         private static Vector2 ToLocal(Transform root, Transform child) => root.InverseTransformPoint(child.position);
 
         private static Vector2 ToLocal(Transform root, Vector3 worldPosition) =>
@@ -319,6 +341,25 @@ namespace TrickalFanGame.Room
 
     public static class RoomTemplateGeometry
     {
+        public static Rect RequiredDoorPassageBounds(RoomTemplateDoor door)
+        {
+            float halfWidth = RoomLayout.DoorOpeningLength * 0.5f;
+            Vector2 minimum = Vector2.Min(door.SlotPosition, door.SafeEntryPosition);
+            Vector2 maximum = Vector2.Max(door.SlotPosition, door.SafeEntryPosition);
+            if (door.Direction == RoomDoorDirection.Left || door.Direction == RoomDoorDirection.Right)
+            {
+                minimum.y -= halfWidth;
+                maximum.y += halfWidth;
+            }
+            else
+            {
+                minimum.x -= halfWidth;
+                maximum.x += halfWidth;
+            }
+
+            return Rect.MinMaxRect(minimum.x, minimum.y, maximum.x, maximum.y);
+        }
+
         public static bool IsInsideRequiredDoorPassage(RoomTemplateDoor door, Vector2 point)
         {
             const float tolerance = 0.0001f;
@@ -388,6 +429,12 @@ namespace TrickalFanGame.Room
                 if (!template.TryValidate(out error))
                 {
                     error = $"Room contract catalog contains an invalid template. {error}";
+                    return false;
+                }
+
+                if (!template.TryValidateLayout(out error))
+                {
+                    error = $"Room contract catalog contains an invalid Layout. {error}";
                     return false;
                 }
 
