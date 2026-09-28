@@ -133,11 +133,15 @@ namespace TrickalFanGame.Enemy
                 return;
             }
 
-            if (distance < minimumAttackDistance)
+            if (distance < minimumAttackDistance &&
+                EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, -direction, bodyRadius,
+                    out Vector2 retreat))
             {
-                body.linearVelocity = -direction * moveSpeed;
+                body.linearVelocity = retreat * moveSpeed;
                 return;
             }
+
+            // Obstacle-3: backed against an obstacle or wall, the enemy holds its ground and keeps firing.
 
             body.linearVelocity = Vector2.zero;
             TryFire(direction, currentTime);

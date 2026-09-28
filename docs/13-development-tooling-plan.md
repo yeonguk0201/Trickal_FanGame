@@ -298,7 +298,7 @@ ItemTestScene에서 독립된 Boss2TestScene을 생성하며, Play 시작 시 �
 | 실패 확인 | Week15 Enemy-0·2·3·5 | 프리팹·추적 기본값 변경으로 실패 (Obstacle-0 작업 중 확인) | 현재 값 기준으로 기대값 갱신 또는 폐기 |
 | 오래된 가정 | Week14 Room-8, Encounter-1·2 | Encounter 수를 `== 5`·`== 3`으로 고정 (현재 7종) | "필수 ID 포함"으로 완화. Room-8은 Floor-1·Play-1 전 필수 |
 | 오래된 가정 | Week14 Encounter-3 | 웨이브·스폰 수 고정 기대값 | 실행해 확인 |
-| 최신 계약 | Week16~18 (Artifact·Content·Item·Reward·Spell·Test, Resource-0·1·3, Obstacle-0·1·2), Hp1~5 | 이번 달 작업에서 통과 | 유지 |
+| 최신 계약 | Week16~18 (Artifact·Content·Item·Reward·Spell·Test, Resource-0·1·3, Obstacle-0·1·2·3), Hp1~5 | 이번 달 작업에서 통과 | 유지 |
 | 확인 필요 | Week6~8, Phase G·H, Week13 Frontend·HUD·Setting·Flow, Week14 Room-0~6·Artwork, Week15 Boss·Enemy-1·4·RoleColor, ItemTestRoom, ErpinWalkAnimation | 최근 실행 기록 없음. Week7·8 초기 방·층 검증은 이후 Room·Encounter 계약이 대체했을 가능성이 높음 | 전체 실행 후 유지·갱신·폐기 결정 |
 
 카탈로그를 통째로 다시 쓰는 Setup(`ConfigureTemplates`·`ConfigureEncounters`·Roster 호출):

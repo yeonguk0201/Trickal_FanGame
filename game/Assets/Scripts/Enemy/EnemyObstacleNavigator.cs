@@ -16,6 +16,8 @@ namespace TrickalFanGame.Enemy
         // Casts slightly thinner than the body so sliding along an obstacle does not read as blocked.
         private const float CastRadiusScale = 0.9f;
         private const float WaypointReachedDistance = CellSize * 0.35f;
+        public const float RetreatProbeDistance = 0.75f;
+        private static readonly float[] RetreatAngles = { 0f, 45f, -45f };
 
         private static readonly Vector2Int[] NeighborOffsets =
         {
@@ -55,6 +57,34 @@ namespace TrickalFanGame.Enemy
         public static bool HasLineOfFire(Vector2 from, Vector2 to)
         {
             return HasClearPath(from, to, ProjectileClearanceRadius / CastRadiusScale);
+        }
+
+        // Obstacle-3: backing away takes the straight line or a 45-degree turn from it, whichever is clear for a short
+        // step; with every option blocked the caller holds position instead of pushing into the obstacle.
+        public static bool TryFindRetreatDirection(Vector2 from, Vector2 away, float bodyRadius, out Vector2 direction)
+        {
+            direction = Vector2.zero;
+            if (away.sqrMagnitude <= 0.0001f) return false;
+            away.Normalize();
+            foreach (float angle in RetreatAngles)
+            {
+                Vector2 candidate = Rotate(away, angle);
+                if (HasClearPath(from, from + candidate * RetreatProbeDistance, bodyRadius))
+                {
+                    direction = candidate;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static Vector2 Rotate(Vector2 vector, float degrees)
+        {
+            float radians = degrees * Mathf.Deg2Rad;
+            float cos = Mathf.Cos(radians);
+            float sin = Mathf.Sin(radians);
+            return new Vector2(vector.x * cos - vector.y * sin, vector.x * sin + vector.y * cos);
         }
 
         public void Reset()

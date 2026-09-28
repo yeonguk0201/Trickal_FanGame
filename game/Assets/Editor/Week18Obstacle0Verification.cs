@@ -15,7 +15,7 @@ namespace TrickalFanGame.Editor
     public static class Week18Obstacle0Verification
     {
         // Far from every authored scene so only the verification colliders take part in physics queries.
-        private static readonly Vector2 Origin = new(5000f, 5000f);
+        internal static readonly Vector2 Origin = new(5000f, 5000f);
         private const float EnemyRadius = 0.5f;
         private const float WalkStep = 0.05f;
         private const int WalkStepLimit = 2000;
@@ -308,7 +308,7 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        private static GameObject CreateObstacle(Transform parent, Vector2 position)
+        internal static GameObject CreateObstacle(Transform parent, Vector2 position)
         {
             GameObject obstacle = new("Obstacle-0 Box");
             obstacle.transform.SetParent(parent);
@@ -318,7 +318,7 @@ namespace TrickalFanGame.Editor
             return obstacle;
         }
 
-        private static GameObject CreatePlayer(Transform parent, Vector2 position)
+        internal static GameObject CreatePlayer(Transform parent, Vector2 position)
         {
             GameObject player = new("Obstacle-0 Player");
             player.transform.SetParent(parent);
@@ -335,7 +335,7 @@ namespace TrickalFanGame.Editor
             return player;
         }
 
-        private static GameObject CreateEnemy<T>(Transform parent, out Rigidbody2D body, out T controller)
+        internal static GameObject CreateEnemy<T>(Transform parent, out Rigidbody2D body, out T controller)
             where T : MonoBehaviour
         {
             GameObject enemy = new($"Obstacle-0 {typeof(T).Name}");
