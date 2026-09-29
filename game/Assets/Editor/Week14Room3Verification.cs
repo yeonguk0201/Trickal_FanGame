@@ -105,8 +105,8 @@ namespace TrickalFanGame.Editor
             Assert(!normalOnly || template.AllowedRoomTypes.Count == 1 &&
                    template.AllowedRoomTypes[0] == RoomType.Normal,
                 $"Room Template '{expectedId}' must initially allow only normal combat rooms.");
-            Assert(template.DoorSlots.Count == 4 && template.SpawnPoints.Count == 3,
-                $"Room Template '{expectedId}' must have four doors and three SpawnPoints.");
+            Assert(template.DoorSlots.Count == 4 && template.SpawnPoints.Count >= 3,
+                $"Room Template '{expectedId}' must have four doors and at least three SpawnPoints.");
 
             RoomPrefab prefab = template.RoomPrefabAsset.GetComponent<RoomPrefab>();
             string error = null;

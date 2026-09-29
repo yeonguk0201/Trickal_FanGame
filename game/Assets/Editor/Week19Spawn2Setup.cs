@@ -64,7 +64,14 @@ namespace TrickalFanGame.Editor
 
             GameObject quickRanged = EnsureQuickRangedPrefab();
             EncounterEnemyRoster roster = ConfigureRoster(quickRanged);
-            EncounterDefinition[] definitions = ConfigureEncounters();
+            EncounterDefinition[] owned = ConfigureEncounters();
+            HashSet<string> ownedIds = new(owned.Select(definition => definition.EncounterId), StringComparer.Ordinal);
+            // Keep Encounters added by later setups (Encounter-4) when Spawn-2 is re-run.
+            EncounterDefinition[] definitions = generator.EncounterDefinitions
+                .Where(definition => definition != null && !ownedIds.Contains(definition.EncounterId))
+                .Concat(owned)
+                .OrderBy(definition => definition.EncounterId, StringComparer.Ordinal)
+                .ToArray();
 
             Undo.RecordObjects(new UnityEngine.Object[] { generator, assembler }, "Configure Spawn-2 candidates");
             generator.ConfigureEncounters(Math.Max(EncounterContentVersion, generator.EncounterContentVersion),

@@ -2042,16 +2042,26 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 96c440fa91f28a342ae804f9000e9e6a, type: 2}
   encounterDefinitions:
   - {fileID: 11400000, guid: 4907778ada3026a49be06d92587acd1f, type: 2}
+  - {fileID: 11400000, guid: c772248f175b1e241936daf830e6b432, type: 2}
   - {fileID: 11400000, guid: e6c654c38665fe54aa6539c9df976253, type: 2}
+  - {fileID: 11400000, guid: 76558042d69995d4cad9e1afab0134db, type: 2}
   - {fileID: 11400000, guid: c8b30f78c363dc149ac32b7e5882fe85, type: 2}
+  - {fileID: 11400000, guid: 22ae1bb65d130714bb94fbfd7a67a604, type: 2}
   - {fileID: 11400000, guid: 94e4e4dd862cc5840988235e9a3e0e6e, type: 2}
+  - {fileID: 11400000, guid: 3e15f8a00d62ec143bb084abf1d2e734, type: 2}
   - {fileID: 11400000, guid: 80a7092057cd99a408c52e0fb623476b, type: 2}
+  - {fileID: 11400000, guid: a670a1f25773c6749ab0606c83875873, type: 2}
   - {fileID: 11400000, guid: 589bfc92be646b64cb7f90ceba39a970, type: 2}
+  - {fileID: 11400000, guid: c072cc606c1dfe844afb698a8d6a92fc, type: 2}
   - {fileID: 11400000, guid: f2a98e5d6b165e0478f7e847936e3c9c, type: 2}
+  - {fileID: 11400000, guid: 1dd8a9f5c72615449b379e3876e10043, type: 2}
   - {fileID: 11400000, guid: 499cf59034c7de34da65b96e091d7be6, type: 2}
+  - {fileID: 11400000, guid: b60afb61ec232af429e5fb01936fc7fa, type: 2}
   - {fileID: 11400000, guid: 34f054e4d791a7246b7f362d1b09e3bd, type: 2}
+  - {fileID: 11400000, guid: ae9c2b01c5ba08a4d951a1d872c0bc56, type: 2}
   - {fileID: 11400000, guid: f058247391a23904c9ece2d6d6eb5578, type: 2}
-  encounterContentVersion: 8
+  - {fileID: 11400000, guid: 8cbc6bd8ca2b8ee4cb46c4e23b92aa34, type: 2}
+  encounterContentVersion: 9
   difficultyTable: {fileID: 11400000, guid: 5e297717d226fb243b795131d80fa24e, type: 2}
 --- !u!4 &43863915
 Transform:

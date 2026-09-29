@@ -35,4 +35,7 @@ MonoBehaviour:
   - {x: -3, y: 2}
   - {x: 0, y: -2}
   - {x: 3, y: 2}
-  spawnPointRoles: 030000000300000006000000
+  - {x: -5, y: -2}
+  - {x: 5, y: -2}
+  spawnPointRoles: 0300000003000000060000000300000003000000
+  layoutDifficultyModifier: 0

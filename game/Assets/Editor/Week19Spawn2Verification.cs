@@ -178,8 +178,8 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateDefinitions(FloorGenerator generator)
         {
-            Assert(generator.EncounterDefinitions.Count == Week19Spawn2Setup.Profiles.Length * 2,
-                "Spawn-2 must register exactly pressure and crossfire definitions for every profile.");
+            Assert(generator.EncounterDefinitions.Count >= Week19Spawn2Setup.Profiles.Length * 2,
+                "Spawn-2 must register pressure and crossfire definitions for every profile.");
             foreach (Week19Spawn2Setup.ProfileSpec spec in Week19Spawn2Setup.Profiles)
             {
                 foreach (string pattern in new[] { "pressure", "crossfire" })

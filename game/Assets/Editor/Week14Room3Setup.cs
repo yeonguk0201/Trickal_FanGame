@@ -175,17 +175,15 @@ namespace TrickalFanGame.Editor
                 ConfigureDoors(roomPrefab, roomSize);
 
                 BoxCollider2D encounter = roomPrefab.Controller.GetComponent<BoxCollider2D>();
-                if (encounter == null || roomPrefab.Controller.SpawnPoints.Count != spawnPoints.Length)
+                if (encounter == null || roomPrefab.Controller.SpawnPoints.Count == 0)
                 {
                     Debug.LogError($"Room-3 source Prefab Encounter is invalid for {prefabName}.");
                     return null;
                 }
 
                 encounter.size = EncounterBounds(roomSize).size;
-                for (int index = 0; index < spawnPoints.Length; index++)
-                {
-                    roomPrefab.Controller.SpawnPoints[index].localPosition = spawnPoints[index];
-                }
+                // The source Prefab may already carry Encounter-4 SpawnPoints; match the requested list exactly.
+                RoomSpawnPointAuthoring.Sync(roomPrefab.Controller, spawnPoints);
 
                 GameObject saved = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
                 if (saved == null)

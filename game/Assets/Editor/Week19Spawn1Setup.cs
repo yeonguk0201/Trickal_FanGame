@@ -35,8 +35,12 @@ namespace TrickalFanGame.Editor
 
             foreach (RoomTemplateDefinition template in generator.RoomTemplates.Where(template => template != null))
             {
+                // Roles for the original three points are derived here; SpawnPoints added by Encounter-4 keep theirs.
+                const int basePointCount = 3;
                 SpawnPointPlacementRole[] roles = RoomTemplateDefinition.BuildDefaultSpawnPointRoles(
-                    template.SpawnPoints);
+                        template.SpawnPoints.Take(basePointCount).ToArray())
+                    .Concat(template.SpawnPointRoles.Skip(basePointCount))
+                    .ToArray();
                 Undo.RecordObject(template, "Configure Spawn-1 placement roles");
                 template.Configure(
                     template.TemplateId,

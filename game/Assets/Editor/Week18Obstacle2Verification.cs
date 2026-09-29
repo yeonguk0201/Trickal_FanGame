@@ -91,7 +91,8 @@ namespace TrickalFanGame.Editor
         {
             Assert(template.TryValidate(out string error), error);
             Assert(template.TryValidateLayout(out error), error);
-            Assert(template.SpawnPoints.SequenceEqual(spec.SpawnPoints),
+            // Encounter-4 appends SpawnPoints after the Obstacle-2 authored ones.
+            Assert(template.SpawnPoints.Take(spec.SpawnPoints.Length).SequenceEqual(spec.SpawnPoints),
                 $"Layout '{spec.TemplateId}' must own its authored SpawnPoints.");
             Assert(!template.SpawnPoints.SequenceEqual(empty.SpawnPoints),
                 $"Layout '{spec.TemplateId}' must not reuse the empty room SpawnPoints.");
@@ -188,7 +189,8 @@ namespace TrickalFanGame.Editor
             RoomProfile profile = template.Profile;
             RoomTemplateDoor left = template.DoorSlots.Single(door => door.Direction == RoomDoorDirection.Left);
             Vector2 spawn = template.SpawnPoints[0];
-            Vector2 lastSpawn = template.SpawnPoints[template.SpawnPoints.Count - 1];
+            // The last Obstacle-2 authored point; Encounter-4 points after it can sit next to a door passage.
+            Vector2 lastSpawn = template.SpawnPoints[Math.Min(2, template.SpawnPoints.Count - 1)];
             Rect movement = profile.MovementBounds;
 
             ExpectFailure(template, valid, "overlap", "overlap",

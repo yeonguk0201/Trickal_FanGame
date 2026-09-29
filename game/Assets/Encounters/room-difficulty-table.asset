@@ -50,3 +50,7 @@ MonoBehaviour:
   - tier: 2
     nearWeight: 15
     farWeight: 50
+  minimumRoomEnemies: 2
+  maximumRoomEnemies: 7
+  maximumWaveEnemies: 4
+  maximumWaveRearFiring: 3

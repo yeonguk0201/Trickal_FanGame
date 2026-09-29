@@ -118,6 +118,77 @@ namespace TrickalFanGame.Room
         [SerializeField] private RoomDifficultyDistanceWeight[] distanceWeights =
             Array.Empty<RoomDifficultyDistanceWeight>();
 
+        // Encounter size limits. Zero means the limit is not configured (content versions before 9).
+        [SerializeField, Min(0)] private int minimumRoomEnemies;
+        [SerializeField, Min(0)] private int maximumRoomEnemies;
+        [SerializeField, Min(0)] private int maximumWaveEnemies;
+        [SerializeField, Min(0)] private int maximumWaveRearFiring;
+
+        public int MinimumRoomEnemies => minimumRoomEnemies;
+        public int MaximumRoomEnemies => maximumRoomEnemies;
+        public int MaximumWaveEnemies => maximumWaveEnemies;
+        public int MaximumWaveRearFiring => maximumWaveRearFiring;
+        public bool HasEncounterLimits => maximumRoomEnemies > 0;
+
+        public void ConfigureEncounterLimits(int minimumRoom, int maximumRoom, int maximumWave, int maximumWaveRear)
+        {
+            minimumRoomEnemies = minimumRoom;
+            maximumRoomEnemies = maximumRoom;
+            maximumWaveEnemies = maximumWave;
+            maximumWaveRearFiring = maximumWaveRear;
+        }
+
+        public bool TryValidateEncounterSize(EncounterDefinition definition, out string error)
+        {
+            if (!HasEncounterLimits)
+            {
+                error = null;
+                return true;
+            }
+
+            if (definition == null)
+            {
+                error = "Encounter size validation requires an Encounter.";
+                return false;
+            }
+
+            int total = 0;
+            foreach (EncounterWaveDefinition wave in definition.Waves)
+            {
+                int waveCount = 0;
+                int rearCount = 0;
+                foreach (EncounterSpawnRule rule in wave.SpawnRules)
+                {
+                    waveCount += rule.Count;
+                    // A rule counts as rear firing when any candidate can occupy a rear-firing slot.
+                    if (rule.Candidates.Any(candidate =>
+                            RoomTemplateDefinition.RequiredPlacementRole(candidate.EnemyRole) ==
+                            SpawnPointPlacementRole.RearFiring))
+                        rearCount += rule.Count;
+                }
+
+                if (waveCount > maximumWaveEnemies || rearCount > maximumWaveRearFiring)
+                {
+                    error = $"Encounter '{definition.EncounterId}' wave {wave.WaveNumber} has {waveCount} enemies " +
+                            $"({rearCount} rear firing), above the {maximumWaveEnemies} per wave " +
+                            $"({maximumWaveRearFiring} rear firing) limit.";
+                    return false;
+                }
+
+                total += waveCount;
+            }
+
+            if (total < minimumRoomEnemies || total > maximumRoomEnemies)
+            {
+                error = $"Encounter '{definition.EncounterId}' has {total} enemies, outside the room range " +
+                        $"{minimumRoomEnemies}~{maximumRoomEnemies}.";
+                return false;
+            }
+
+            error = null;
+            return true;
+        }
+
         public IReadOnlyList<EnemyThreatScore> ThreatScores => threatScores;
         public IReadOnlyList<RoomDifficultyTierBand> TierBands => tierBands;
         public IReadOnlyList<FloorDifficultyRange> FloorRanges => floorRanges;
@@ -203,6 +274,15 @@ namespace TrickalFanGame.Room
                     error = "Room difficulty distance weights must follow tier order and cannot be negative.";
                     return false;
                 }
+            }
+
+            if (HasEncounterLimits &&
+                (minimumRoomEnemies < 1 || maximumRoomEnemies < minimumRoomEnemies || maximumWaveEnemies < 1 ||
+                 maximumWaveEnemies > maximumRoomEnemies || maximumWaveRearFiring < 1 ||
+                 maximumWaveRearFiring > maximumWaveEnemies))
+            {
+                error = "Room difficulty table has inconsistent Encounter size limits.";
+                return false;
             }
 
             if (distanceWeights.Sum(weight => weight.NearWeight) <= 0 ||

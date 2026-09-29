@@ -139,12 +139,13 @@ namespace TrickalFanGame.Editor
             AssertWall(content, "Right Lower Wall",
                 new Vector2(RoomLayout.HorizontalWallCenter, -RoomLayout.VerticalWallSegmentCenter),
                 verticalWallSize);
-            Assert(prefab.Controller.SpawnPoints.Count == 3,
+            // Encounter-4 appends SpawnPoints; the original three must stay in place.
+            Assert(prefab.Controller.SpawnPoints.Count >= 3,
                 "The Basic room must keep its three existing SpawnPoints.");
-            for (int index = 0; index < prefab.Controller.SpawnPoints.Count; index++)
+            for (int index = 0; index < 3; index++)
             {
                 Assert(Approximately(prefab.Controller.SpawnPoints[index].localPosition,
-                        RoomLayout.SpawnPosition(index, prefab.Controller.SpawnPoints.Count)),
+                        RoomLayout.SpawnPosition(index, 3)),
                     $"Basic room SpawnPoint {index + 1} changed.");
             }
 

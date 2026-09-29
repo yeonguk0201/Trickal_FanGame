@@ -417,7 +417,8 @@ namespace TrickalFanGame.Room
             {
                 if (!difficultyTable.TryValidate(out error)) return false;
                 foreach (EncounterDefinition definition in definitions)
-                    if (!definition.TryValidateThreat(difficultyTable, out error)) return false;
+                    if (!definition.TryValidateThreat(difficultyTable, out error) ||
+                        !difficultyTable.TryValidateEncounterSize(definition, out error)) return false;
             }
 
             EncounterDefinition[] ordered = definitions.OrderBy(definition => definition.EncounterId,

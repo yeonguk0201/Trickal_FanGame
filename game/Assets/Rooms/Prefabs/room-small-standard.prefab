@@ -194,6 +194,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5623159015043818910}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &966380134814994891
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5483377183558259382}
+  m_Layer: 0
+  m_Name: Spawn 4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5483377183558259382
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966380134814994891}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3, y: 1.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3676909821600107298}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1206428648545289568
 GameObject:
   m_ObjectHideFlags: 0
@@ -767,6 +798,7 @@ Transform:
   - {fileID: 2232456458573893953}
   - {fileID: 301181593405198861}
   - {fileID: 3157513278471474965}
+  - {fileID: 5483377183558259382}
   m_Father: {fileID: 7794122128171806220}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &2803632862801219339
@@ -836,6 +868,7 @@ MonoBehaviour:
   - {fileID: 2232456458573893953}
   - {fileID: 301181593405198861}
   - {fileID: 3157513278471474965}
+  - {fileID: 5483377183558259382}
   preplacedEnemies: []
   doors: []
 --- !u!1 &3289781235865429125
