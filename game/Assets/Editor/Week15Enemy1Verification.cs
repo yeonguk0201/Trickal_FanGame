@@ -119,22 +119,22 @@ namespace TrickalFanGame.Editor
                 charging.TickBehavior(0f);
                 Vector3 telegraphScale = enemy.transform.localScale;
                 Assert(charging.State == ChargingEnemyState.Windup &&
-                       presentation.Phase == EnemyAttackPhase.Telegraph && telegraphScale != idleScale,
-                    "Windup must be stationary and visibly change the enemy silhouette.");
+                       presentation.Phase == EnemyAttackPhase.Telegraph && telegraphScale == idleScale,
+                    "Windup must preserve the physical body scale.");
 
                 charging.TickBehavior(0.5f);
                 Vector3 activeScale = enemy.transform.localScale;
                 Assert(charging.State == ChargingEnemyState.Dashing &&
                        presentation.Phase == EnemyAttackPhase.Active &&
-                       activeScale != telegraphScale && activeScale != idleScale,
-                    "The dangerous active phase must have a distinct silhouette from windup and idle.");
+                       activeScale == idleScale,
+                    "The active phase must preserve the physical body scale.");
 
                 charging.TickBehavior(1f);
                 Vector3 recoveryScale = enemy.transform.localScale;
                 Assert(charging.State == ChargingEnemyState.Recovering &&
                        presentation.Phase == EnemyAttackPhase.Recovery &&
-                       new[] { idleScale, telegraphScale, activeScale }.All(scale => scale != recoveryScale),
-                    "Recovery must expose a fourth, distinct silhouette and no active movement.");
+                       recoveryScale == idleScale,
+                    "Recovery must preserve body scale and stop active movement.");
 
                 charging.TickBehavior(1.5f);
                 charging.TickBehavior(2f);

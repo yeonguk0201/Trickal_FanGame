@@ -56,6 +56,10 @@ namespace TrickalFanGame.Enemy
         public float MoveSpeed => moveSpeed;
         public float DetectionRange => detectionRange;
         public float PreferredDistance => preferredDistance;
+        public float RelocationDuration => relocationDuration;
+        public float AimDuration => aimDuration;
+        public float RecoveryDuration => recoveryDuration;
+        public float ProjectileSpeed => projectileSpeed;
         public EnemyDamageTier ProjectileDamageTier => projectileDamageTier;
         public int StrafeDirection => strafeDirection;
         public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;

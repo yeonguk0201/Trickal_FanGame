@@ -48,11 +48,14 @@ namespace TrickalFanGame.Editor
             ValidateChaser();
             ValidateRanged();
             ValidateCharging();
+            ValidateMinimumChargeDistance();
+            ValidateChargingCollisionAngles();
             ValidateSniper();
             Debug.Log("Obstacle-0 verification passed: enemies walk straight while the line is clear, route around " +
                       "single and cup-shaped obstacles on a deterministic 0.5 grid without entering them, fall back " +
                       "safely when sealed in, ranged and sniper enemies hold fire and reposition while the line of " +
-                      "fire is blocked, and charging enemies only telegraph a charge along a clear line.");
+                      "fire is blocked, and charging enemies only telegraph a charge along a clear line, slide along " +
+                      "80-degree glancing obstacle contacts, and recover on frontal impacts.");
         }
 
         private static void ValidateNavigatorRoutes()
@@ -254,10 +257,152 @@ namespace TrickalFanGame.Editor
 
                 obstacle = CreateObstacle(root.transform, Origin + Vector2.right * 2f);
                 Physics2D.SyncTransforms();
+                charging.TickBehavior(5.2f);
+                LineRenderer preview = charging.GetComponent<LineRenderer>();
+                float previewLength = Vector2.Distance(preview.GetPosition(0), preview.GetPosition(1));
+                Assert(previewLength > 0.9f && previewLength < 1.1f &&
+                       charging.State == ChargingEnemyState.Windup,
+                    "The preview must end at body contact while retaining the committed windup.");
                 charging.TickBehavior(5.1f + 0.65f);
-                Assert(charging.State == ChargingEnemyState.Recovering && body.linearVelocity == Vector2.zero,
-                    "A charge whose line is blocked when the windup ends must recover instead of dashing.");
+                Assert(charging.State == ChargingEnemyState.Dashing && body.linearVelocity.x > 0f,
+                    "Cover appearing during windup must not cancel the committed dash.");
+                charging.TryResolveCollision(obstacle.GetComponent<Collider2D>(), Vector2.left, 5.8f);
+                Assert(charging.State == ChargingEnemyState.Recovering,
+                    "Only actual frontal contact must stop the committed dash.");
                 Assert(obstacle != null, "The blocking obstacle must remain for the dash check.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Physics2D.SyncTransforms();
+            }
+        }
+
+        private static void ValidateMinimumChargeDistance()
+        {
+            GameObject root = new("Minimum Charge Distance");
+            try
+            {
+                GameObject player = CreatePlayer(root.transform, Origin + Vector2.right * 1.9f);
+                CreateEnemy<ChargingEnemyController>(root.transform, out Rigidbody2D body,
+                    out ChargingEnemyController charging);
+                charging.Configure(10f, 0.1f, 9f, 0.8f, 0.6f, 0f, EnemyDamageTier.Heavy);
+                charging.SetTarget(player.transform);
+                Physics2D.SyncTransforms();
+                charging.TickBehavior(0f);
+                Assert(charging.State != ChargingEnemyState.Windup,
+                    "Less than one unit of body-to-body clearance must not start windup.");
+                player.transform.position = Origin + Vector2.right * 2.1f;
+                Physics2D.SyncTransforms();
+                charging.TickBehavior(0.1f);
+                Assert(charging.State == ChargingEnemyState.Windup,
+                    "More than one unit of clear travel must allow windup.");
+                player.transform.position = Origin + Vector2.right * 1.1f;
+                Physics2D.SyncTransforms();
+                charging.TickBehavior(0.21f);
+                Assert(charging.State == ChargingEnemyState.Dashing,
+                    "A target approaching after commitment must not cancel the dash.");
+            }
+            finally { Object.DestroyImmediate(root); Physics2D.SyncTransforms(); }
+        }
+
+        private static void ValidateChargingCollisionAngles()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ChargingEnemy.prefab");
+            GameObject instance = Object.Instantiate(prefab, Origin, Quaternion.identity);
+            try
+            {
+                EnemyAttackPresentation visual = instance.GetComponent<EnemyAttackPresentation>();
+                Vector3 initialScale = instance.transform.localScale;
+                Physics2D.SyncTransforms();
+                Vector3 initialBounds = instance.GetComponent<Collider2D>().bounds.size;
+                foreach (EnemyAttackPhase phase in Enum.GetValues(typeof(EnemyAttackPhase)))
+                {
+                    visual.SetPhase(phase);
+                    Physics2D.SyncTransforms();
+                    Assert(instance.transform.localScale == initialScale &&
+                           instance.GetComponent<Collider2D>().bounds.size == initialBounds,
+                        "The charging prefab must retain the same body size throughout every attack phase.");
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+
+            MethodInfo enterHandler = typeof(ChargingEnemyController).GetMethod("OnCollisionEnter2D",
+                BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(Collision2D) }, null);
+            MethodInfo stayHandler = typeof(ChargingEnemyController).GetMethod("OnCollisionStay2D",
+                BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(Collision2D) }, null);
+            Assert(enterHandler != null && stayHandler != null,
+                "The charger must resolve both new and persistent collision contacts while dashing.");
+
+            GameObject root = new("Obstacle-0 Charging Collision Angle Verification");
+            try
+            {
+                GameObject player = CreatePlayer(root.transform, Origin + Vector2.right * 4f);
+                CreateEnemy<ChargingEnemyController>(root.transform, out Rigidbody2D body,
+                    out ChargingEnemyController charging);
+                charging.Configure(10f, 0.1f, 9f, 0.8f, 0.6f, 0f, EnemyDamageTier.Heavy);
+                charging.SetTarget(player.transform);
+                charging.TickBehavior(0f);
+                charging.TickBehavior(0.1f);
+                Assert(charging.State == ChargingEnemyState.Dashing && charging.LockedDirection.x > 0.99f,
+                    "The collision-angle check requires a rightward dash.");
+
+                GameObject obstacle = CreateObstacle(root.transform, Origin + Vector2.right * 20f);
+                Collider2D obstacleCollider = obstacle.GetComponent<Collider2D>();
+                Assert(charging.TryResolveCollision(obstacleCollider, Vector2.right, 0.15f) &&
+                       charging.State == ChargingEnemyState.Dashing && charging.LockedDirection == Vector2.right,
+                    "A retained wall contact must not cancel or redirect a dash moving away from the wall.");
+                Assert(charging.TryResolveCollision(obstacleCollider, new Vector2(0.5f, 0.8660254f), 0.16f) &&
+                       charging.State == ChargingEnemyState.Dashing && charging.LockedDirection == Vector2.right,
+                    "Diagonal separation from a wall must preserve the original dash direction.");
+                float tangentComponent = Mathf.Cos(ChargingEnemyController.GlancingCollisionAngle * Mathf.Deg2Rad);
+                Vector2 thresholdNormal = new(-tangentComponent,
+                    Mathf.Sqrt(1f - tangentComponent * tangentComponent));
+                Assert(charging.TryResolveCollision(obstacleCollider, thresholdNormal, 0.2f) &&
+                       charging.State == ChargingEnemyState.Dashing &&
+                       Mathf.Abs(body.linearVelocity.magnitude - charging.DashSpeed) < 0.01f &&
+                       Vector2.Dot(body.linearVelocity.normalized, thresholdNormal) < 0.001f,
+                    "A glancing obstacle contact must preserve the dash along the wall tangent.");
+                Assert(charging.LockedDirection == Vector2.right,
+                    "Sliding must not overwrite the aimed charge direction.");
+                Vector2 firstSlideVelocity = body.linearVelocity;
+                Assert(charging.TryResolveCollision(obstacleCollider, thresholdNormal, 0.3f) &&
+                       charging.State == ChargingEnemyState.Dashing &&
+                       Vector2.Dot(body.linearVelocity.normalized, firstSlideVelocity.normalized) > 0.999f,
+                    "A persistent glancing contact must keep a stable tangent instead of stopping or oscillating.");
+                charging.TickBehavior(0.35f);
+                Assert(Vector2.Dot(body.linearVelocity.normalized, firstSlideVelocity.normalized) > 0.999f,
+                    "The tick after a reported contact must keep sliding along the wall.");
+                charging.TickBehavior(0.4f);
+                Assert(charging.State == ChargingEnemyState.Dashing &&
+                       Vector2.Dot(body.linearVelocity.normalized, Vector2.right) > 0.999f &&
+                       Mathf.Abs(body.linearVelocity.magnitude - charging.DashSpeed) < 0.01f,
+                    "Once the wall contact ends, the dash must resume its original aimed direction.");
+
+                charging.TickBehavior(0.91f);
+                Assert(charging.State == ChargingEnemyState.Recovering && body.linearVelocity == Vector2.zero,
+                    "Sliding must not extend the original dash time or distance budget.");
+
+                Object.DestroyImmediate(obstacle);
+                Object.DestroyImmediate(player);
+                Object.DestroyImmediate(body.gameObject);
+                Physics2D.SyncTransforms();
+
+                player = CreatePlayer(root.transform, Origin + new Vector2(4f, 10f));
+                CreateEnemy<ChargingEnemyController>(root.transform, out body, out charging);
+                body.transform.position = Origin + Vector2.up * 10f;
+                charging.Configure(10f, 0.1f, 9f, 0.8f, 0.6f, 0f, EnemyDamageTier.Heavy);
+                charging.SetTarget(player.transform);
+                charging.TickBehavior(1f);
+                charging.TickBehavior(1.1f);
+                obstacle = CreateObstacle(root.transform, Origin + new Vector2(20f, 10f));
+                obstacleCollider = obstacle.GetComponent<Collider2D>();
+                Assert(charging.TryResolveCollision(obstacleCollider, Vector2.left, 1.2f) &&
+                       charging.State == ChargingEnemyState.Recovering && body.linearVelocity == Vector2.zero,
+                    "A frontal obstacle impact must end the dash immediately instead of sliding.");
             }
             finally
             {

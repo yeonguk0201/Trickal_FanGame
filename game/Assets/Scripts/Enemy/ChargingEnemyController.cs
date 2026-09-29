@@ -20,10 +20,13 @@ namespace TrickalFanGame.Enemy
     [RequireComponent(typeof(Rigidbody2D), typeof(Health), typeof(KnockbackReceiver))]
     public sealed class ChargingEnemyController : MonoBehaviour
     {
+        public const float GlancingCollisionAngle = 60f;
+
         [Header("Detection")]
         [SerializeField, Min(0f)] private float detectionRange = 7f;
 
         [Header("Charge")]
+        [SerializeField, Min(0f)] private float minimumChargeDistance = 1f;
         [SerializeField, Min(0f)] private float pursuitSpeed = 2.5f;
         [SerializeField, Min(0f)] private float pursuitDuration = 1.1f;
         [SerializeField, Min(0.01f)] private float windupDuration = 0.65f;
@@ -33,6 +36,10 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0f)] private float chargeCooldown = 1.5f;
         [SerializeField] private EnemyDamageTier chargeDamageTier = EnemyDamageTier.Heavy;
         [SerializeField] private Transform target;
+
+        [Header("Development")]
+        [Tooltip("Log charge transitions and collision reasons in the Editor or a Development Build.")]
+        [SerializeField] private bool logChargeDiagnostics;
 
         private Rigidbody2D body;
         private Health health;
@@ -45,6 +52,7 @@ namespace TrickalFanGame.Enemy
         private float stateEndsAt;
         private float nextChargeTime;
         private Vector2 lockedDirection;
+        private Vector2 slideNormal;
         private bool pursuitTimerStarted;
         private readonly EnemyObstacleNavigator navigator = new();
         private float bodyRadius;
@@ -84,7 +92,35 @@ namespace TrickalFanGame.Enemy
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            TryResolveCollision(collision.collider, Time.time);
+            TryResolveCollision(collision, Time.time);
+        }
+
+        private void OnCollisionStay2D(Collision2D collision)
+        {
+            TryResolveCollision(collision, Time.time);
+        }
+
+        private bool TryResolveCollision(Collision2D collision, float currentTime)
+        {
+            if (collision == null)
+            {
+                return false;
+            }
+
+            Vector2 collisionNormal = Vector2.zero;
+            float strongestImpact = float.NegativeInfinity;
+            for (int i = 0; i < collision.contactCount; i++)
+            {
+                Vector2 candidate = collision.GetContact(i).normal;
+                float impact = -Vector2.Dot(lockedDirection, candidate);
+                if (impact > strongestImpact)
+                {
+                    strongestImpact = impact;
+                    collisionNormal = candidate;
+                }
+            }
+
+            return TryResolveCollision(collision.collider, collisionNormal, currentTime);
         }
 
         private void OnDisable()
@@ -95,6 +131,7 @@ namespace TrickalFanGame.Enemy
             }
 
             lockedDirection = Vector2.zero;
+            slideNormal = Vector2.zero;
             pursuitTimerStarted = false;
             SetState(ChargingEnemyState.Idle);
         }
@@ -199,15 +236,13 @@ namespace TrickalFanGame.Enemy
                     behavior.SetControllerMovementSuppressed(true);
                     body.linearVelocity = Vector2.zero;
                     TrackTargetDuringWindup();
-                    if (currentTime >= stateEndsAt && !HasClearChargePath())
-                    {
-                        // The telegraphed line became blocked: skip the dash as if it had hit the obstacle.
-                        EnterRecovery(currentTime);
-                    }
-                    else if (currentTime >= stateEndsAt)
+                    if (currentTime >= stateEndsAt)
                     {
                         stateEndsAt = currentTime + dashDuration;
+                        slideNormal = Vector2.zero;
                         body.linearVelocity = lockedDirection * dashSpeed;
+                        behavior.SetControllerMovementSuppressed(false);
+                        LogCharge("DashStarted");
                         SetState(ChargingEnemyState.Dashing);
                     }
 
@@ -216,11 +251,15 @@ namespace TrickalFanGame.Enemy
                     behavior.SetControllerMovementSuppressed(false);
                     if (currentTime >= stateEndsAt)
                     {
+                        LogCharge("DurationElapsed");
                         EnterRecovery(currentTime);
                     }
                     else
                     {
-                        body.linearVelocity = lockedDirection * dashSpeed;
+                        // Collision callbacks run after the physics step and refresh the contact while it lasts.
+                        // Once the charger clears the obstacle it resumes the aimed direction.
+                        body.linearVelocity = GetDashVelocity();
+                        slideNormal = Vector2.zero;
                     }
 
                     break;
@@ -249,6 +288,11 @@ namespace TrickalFanGame.Enemy
 
         public bool TryResolveCollision(Collider2D other, float currentTime)
         {
+            return TryResolveCollision(other, Vector2.zero, currentTime);
+        }
+
+        public bool TryResolveCollision(Collider2D other, Vector2 collisionNormal, float currentTime)
+        {
             if (State != ChargingEnemyState.Dashing || other == null)
             {
                 return false;
@@ -261,18 +305,82 @@ namespace TrickalFanGame.Enemy
                 playerHealth.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
                 playerHealth.TakeDamage(HealthUnits.CreateEnemyDamageContext(
                     gameObject, DamageSourceType.EnemyContact, chargeDamageTier));
+                LogCharge("PlayerHit", other, collisionNormal);
                 EnterRecovery(currentTime);
                 return true;
             }
 
-            if (other.GetComponentInParent<DoorController>() != null ||
-                other.gameObject.layer == LayerMask.NameToLayer("Environment"))
+            if (other.GetComponentInParent<DoorController>() != null)
             {
+                LogCharge("DoorHit", other, collisionNormal);
+                EnterRecovery(currentTime);
+                return true;
+            }
+
+            if (other.gameObject.layer == LayerMask.NameToLayer("Environment"))
+            {
+                bool wasSliding = slideNormal.sqrMagnitude > 0.001f;
+                if (TrySlideAlongObstacle(collisionNormal))
+                {
+                    if (!wasSliding && slideNormal.sqrMagnitude > 0.001f)
+                        LogCharge("WallSlide", other, collisionNormal);
+                    return true;
+                }
+
+                LogCharge("WallImpact", other, collisionNormal);
                 EnterRecovery(currentTime);
                 return true;
             }
 
             return false;
+        }
+
+        private bool TrySlideAlongObstacle(Vector2 collisionNormal)
+        {
+            if (collisionNormal.sqrMagnitude <= 0.001f || lockedDirection.sqrMagnitude <= 0.001f)
+            {
+                return false;
+            }
+
+            collisionNormal.Normalize();
+            Vector2 direction = lockedDirection.normalized;
+            float normalVelocity = Vector2.Dot(direction, collisionNormal);
+            // A retained contact may still be reported while the next dash leaves the wall.
+            // Preserve its outward direction instead of treating separation as a frontal impact.
+            if (normalVelocity >= 0f)
+            {
+                body.linearVelocity = lockedDirection * dashSpeed;
+                return true;
+            }
+
+            float impact = -normalVelocity;
+            float glancingImpactLimit = Mathf.Cos(GlancingCollisionAngle * Mathf.Deg2Rad);
+            if (impact > glancingImpactLimit)
+            {
+                return false;
+            }
+
+            Vector2 tangent = direction - collisionNormal * Vector2.Dot(direction, collisionNormal);
+            if (tangent.sqrMagnitude <= 0.001f)
+            {
+                return false;
+            }
+
+            // Slide only while touching; lockedDirection keeps the aimed charge direction.
+            slideNormal = collisionNormal;
+            body.linearVelocity = GetDashVelocity();
+            return true;
+        }
+
+        private Vector2 GetDashVelocity()
+        {
+            if (slideNormal.sqrMagnitude <= 0.001f)
+            {
+                return lockedDirection * dashSpeed;
+            }
+
+            Vector2 tangent = lockedDirection - slideNormal * Vector2.Dot(lockedDirection, slideNormal);
+            return tangent.sqrMagnitude > 0.001f ? tangent.normalized * dashSpeed : lockedDirection * dashSpeed;
         }
 
         private bool TryBeginWindup(float currentTime)
@@ -290,13 +398,19 @@ namespace TrickalFanGame.Enemy
 
             lockedDirection = offset.normalized;
             stateEndsAt = currentTime + windupDuration;
+            LogCharge("WindupStarted");
             SetState(ChargingEnemyState.Windup);
             return true;
         }
 
         private bool HasClearChargePath()
         {
-            return target != null &&
+            if (target == null) return false;
+            Vector2 offset = target.position - transform.position;
+            float targetClearance = offset.magnitude - bodyRadius -
+                                    EnemyObstacleNavigator.ResolveBodyRadius(target.gameObject);
+            return targetClearance >= minimumChargeDistance &&
+                   GetChargePreviewDistance(offset.normalized) >= minimumChargeDistance &&
                    EnemyObstacleNavigator.HasClearPath(transform.position, target.position, bodyRadius);
         }
 
@@ -322,7 +436,38 @@ namespace TrickalFanGame.Enemy
             if (chargePath == null || State != ChargingEnemyState.Windup ||
                 lockedDirection.sqrMagnitude <= 0.001f) return;
             chargePath.SetPosition(0, transform.position);
-            chargePath.SetPosition(1, (Vector2)transform.position + lockedDirection * dashSpeed * dashDuration);
+            chargePath.SetPosition(1, (Vector2)transform.position +
+                                     lockedDirection * GetChargePreviewDistance(lockedDirection));
+        }
+
+        private float GetChargePreviewDistance(Vector2 direction)
+        {
+            float distance = dashSpeed * dashDuration;
+            // The line describes the initial straight segment, up to the first body contact.
+            // Sliding after that contact remains a physical response, not a new aimed direction.
+            foreach (RaycastHit2D hit in Physics2D.CircleCastAll(transform.position, bodyRadius,
+                         direction, distance, EnemyObstacleNavigator.ObstacleMask))
+            {
+                if (hit.collider == null || hit.collider.isTrigger) continue;
+                if (hit.distance <= 0.001f)
+                {
+                    ColliderDistance2D separation = GetComponent<Collider2D>().Distance(hit.collider);
+                    if (Vector2.Dot(direction, separation.normal) <= 0f) continue;
+                }
+                distance = Mathf.Min(distance, hit.distance);
+            }
+            return distance;
+        }
+
+        private void LogCharge(string reason, Collider2D obstacle = null, Vector2 normal = default)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (!logChargeDiagnostics) return;
+            Debug.Log($"[Charge] {name}#{GetInstanceID()} {reason} state={State} " +
+                      $"position={(Vector2)transform.position} direction={lockedDirection} " +
+                      $"collider={(obstacle != null ? obstacle.name : "none")} normal={normal} " +
+                      $"time={Time.time:F3}", this);
+#endif
         }
 
         private void EnterPursuit(float currentTime)
@@ -356,6 +501,7 @@ namespace TrickalFanGame.Enemy
         private void EnterRecovery(float currentTime)
         {
             body.linearVelocity = Vector2.zero;
+            slideNormal = Vector2.zero;
             pursuitTimerStarted = false;
             stateEndsAt = currentTime + recoveryDuration;
             nextChargeTime = currentTime + chargeCooldown;
@@ -364,6 +510,8 @@ namespace TrickalFanGame.Enemy
 
         private void InterruptPattern(float currentTime, bool stopBody)
         {
+            if (State == ChargingEnemyState.Windup || State == ChargingEnemyState.Dashing)
+                LogCharge("InterruptedByTargetOrActionState");
             if (stopBody && body != null)
             {
                 body.linearVelocity = Vector2.zero;
@@ -375,6 +523,7 @@ namespace TrickalFanGame.Enemy
             }
 
             lockedDirection = Vector2.zero;
+            slideNormal = Vector2.zero;
             pursuitTimerStarted = false;
             nextChargeTime = Mathf.Max(nextChargeTime, currentTime + chargeCooldown);
             SetState(ChargingEnemyState.Idle);

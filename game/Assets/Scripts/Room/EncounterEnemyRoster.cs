@@ -66,7 +66,8 @@ namespace TrickalFanGame.Room
                 {
                     EncounterEnemyRole.Chaser => binding.Prefab.GetComponent<EnemyChase>() != null,
                     EncounterEnemyRole.FastChaser => binding.Prefab.GetComponent<EnemyChase>() != null,
-                    EncounterEnemyRole.Ranged => binding.Prefab.GetComponent<RangedEnemyController>() != null,
+                    EncounterEnemyRole.Ranged => binding.Prefab.GetComponent<RangedEnemyController>() != null ||
+                                                 binding.Prefab.GetComponent<MobileRangedEnemyController>() != null,
                     EncounterEnemyRole.Sniper => binding.Prefab.GetComponent<LongRangeSniperController>() != null,
                     EncounterEnemyRole.Charging => binding.Prefab.GetComponent<ChargingEnemyController>() != null,
                     EncounterEnemyRole.Boss => true,

@@ -455,9 +455,9 @@ namespace TrickalFanGame.Room
                 EncounterRuntimeWave[] waves = new EncounterRuntimeWave[node.Encounter.Waves.Count];
                 for (int waveIndex = 0; waveIndex < waves.Length; waveIndex++)
                 {
-                    if (!node.Encounter.TryResolveWave(node.Template, node.FloorNumber,
-                            node.DirectionalConnections, waveIndex, out ResolvedEncounterSpawn[] resolved, out error))
-                    { error = $"Room {node.RoomId} could not resolve Encounter '{node.EncounterId}' wave {waveIndex + 1}. {error}"; return false; }
+                    if (node.ResolvedEncounterWaves.Count != waves.Length)
+                    { error = $"Room {node.RoomId} is missing its persisted Encounter candidate selection."; return false; }
+                    ResolvedEncounterSpawn[] resolved = node.ResolvedEncounterWaves[waveIndex];
 
                     GameObject[] encounterPrefabs = new GameObject[resolved.Length];
                     Transform[] encounterSpawnPoints = new Transform[resolved.Length];

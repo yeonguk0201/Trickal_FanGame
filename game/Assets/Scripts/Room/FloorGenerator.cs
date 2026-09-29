@@ -56,6 +56,8 @@ namespace TrickalFanGame.Room
         public string TemplateId => Template != null ? Template.TemplateId : null;
         public EncounterDefinition Encounter { get; private set; }
         public string EncounterId => Encounter != null ? Encounter.EncounterId : null;
+        public IReadOnlyList<ResolvedEncounterSpawn[]> ResolvedEncounterWaves { get; private set; } =
+            Array.Empty<ResolvedEncounterSpawn[]>();
         public RoomType RoomType => Definition != null ? Definition.RoomType : RoomType.Normal;
         public IReadOnlyList<GeneratedRoomConnection> DirectionalConnections => connections;
         public IReadOnlyList<string> ConnectedRoomIds
@@ -85,9 +87,11 @@ namespace TrickalFanGame.Room
             Template = template;
         }
 
-        internal void AssignEncounter(EncounterDefinition encounter)
+        internal void AssignEncounter(EncounterDefinition encounter,
+            ResolvedEncounterSpawn[][] resolvedWaves = null)
         {
             Encounter = encounter;
+            ResolvedEncounterWaves = resolvedWaves ?? Array.Empty<ResolvedEncounterSpawn[]>();
         }
     }
 

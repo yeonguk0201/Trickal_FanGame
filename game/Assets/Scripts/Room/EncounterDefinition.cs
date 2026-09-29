@@ -32,12 +32,29 @@ namespace TrickalFanGame.Room
     }
 
     [Serializable]
+    public struct EncounterEnemyCandidate
+    {
+        [SerializeField] private EncounterEnemyRole enemyRole;
+        [SerializeField, Min(1)] private int weight;
+
+        public EncounterEnemyCandidate(EncounterEnemyRole configuredRole, int configuredWeight)
+        {
+            enemyRole = configuredRole;
+            weight = configuredWeight;
+        }
+
+        public EncounterEnemyRole EnemyRole => enemyRole;
+        public int Weight => weight;
+    }
+
+    [Serializable]
     public struct EncounterSpawnRule
     {
         [SerializeField] private EncounterEnemyRole enemyRole;
         [SerializeField, Min(1)] private int count;
         [SerializeField] private string spawnPointId;
         [SerializeField] private string spawnGroupId;
+        [SerializeField] private EncounterEnemyCandidate[] candidates;
 
         public EncounterSpawnRule(EncounterEnemyRole configuredRole, int configuredCount,
             string configuredSpawnPointId, string configuredSpawnGroupId)
@@ -46,12 +63,31 @@ namespace TrickalFanGame.Room
             count = configuredCount;
             spawnPointId = configuredSpawnPointId;
             spawnGroupId = configuredSpawnGroupId;
+            candidates = Array.Empty<EncounterEnemyCandidate>();
         }
 
-        public EncounterEnemyRole EnemyRole => enemyRole;
+        public EncounterSpawnRule(EncounterEnemyCandidate[] configuredCandidates, int configuredCount,
+            string configuredSpawnPointId, string configuredSpawnGroupId)
+        {
+            enemyRole = configuredCandidates != null && configuredCandidates.Length > 0
+                ? configuredCandidates[0].EnemyRole
+                : EncounterEnemyRole.Chaser;
+            count = configuredCount;
+            spawnPointId = configuredSpawnPointId;
+            spawnGroupId = configuredSpawnGroupId;
+            candidates = configuredCandidates ?? Array.Empty<EncounterEnemyCandidate>();
+        }
+
+        public EncounterEnemyRole EnemyRole => candidates != null && candidates.Length > 0
+            ? candidates[0].EnemyRole
+            : enemyRole;
         public int Count => count;
         public string SpawnPointId => spawnPointId;
         public string SpawnGroupId => spawnGroupId;
+        public bool HasWeightedCandidates => candidates != null && candidates.Length > 0;
+        public IReadOnlyList<EncounterEnemyCandidate> Candidates => HasWeightedCandidates
+            ? candidates
+            : new[] { new EncounterEnemyCandidate(enemyRole, 1) };
     }
 
     [Serializable]
@@ -150,10 +186,23 @@ namespace TrickalFanGame.Room
                 {
                     bool point = !string.IsNullOrWhiteSpace(rule.SpawnPointId);
                     bool group = !string.IsNullOrWhiteSpace(rule.SpawnGroupId);
-                    if (rule.Count < 1 || point == group ||
+                    if (rule.Count < 1 || point == group || rule.Candidates.Count == 0 ||
                         (point && !StableRoomId.TryValidate(rule.SpawnPointId, "SpawnPoint", out _)) ||
                         (group && !StableRoomId.TryValidate(rule.SpawnGroupId, "SpawnGroup", out _)))
                     { error = $"Encounter '{encounterId}' has an invalid spawn rule in wave {wave.WaveNumber}."; return false; }
+
+                    HashSet<EncounterEnemyRole> candidateRoles = new();
+                    foreach (EncounterEnemyCandidate candidate in rule.Candidates)
+                    {
+                        if (candidate.Weight < 1 || !Enum.IsDefined(typeof(EncounterEnemyRole), candidate.EnemyRole) ||
+                            candidate.EnemyRole == EncounterEnemyRole.Boss ||
+                            !candidateRoles.Add(candidate.EnemyRole))
+                        {
+                            error = $"Encounter '{encounterId}' wave {wave.WaveNumber} has an invalid, " +
+                                    "duplicated, or non-normal weighted enemy candidate.";
+                            return false;
+                        }
+                    }
                 }
             }
             error = null;
@@ -186,6 +235,13 @@ namespace TrickalFanGame.Room
             IReadOnlyList<GeneratedRoomConnection> connections, int waveIndex,
             out ResolvedEncounterSpawn[] resolved, out string error)
         {
+            return TryResolveWave(template, floorNumber, connections, waveIndex, 0, out resolved, out error);
+        }
+
+        public bool TryResolveWave(RoomTemplateDefinition template, int floorNumber,
+            IReadOnlyList<GeneratedRoomConnection> connections, int waveIndex, int selectionSeed,
+            out ResolvedEncounterSpawn[] resolved, out string error)
+        {
             resolved = Array.Empty<ResolvedEncounterSpawn>();
             if (!TryValidate(out error)) return false;
             if (template == null || template.Profile == null || !Supports(template.Profile, floorNumber))
@@ -199,8 +255,9 @@ namespace TrickalFanGame.Room
             HashSet<int> occupied = new();
             List<ResolvedEncounterSpawn> result = new();
             EncounterWaveDefinition wave = waves[waveIndex];
-            foreach (EncounterSpawnRule rule in wave.SpawnRules)
+            for (int ruleIndex = 0; ruleIndex < wave.SpawnRules.Count; ruleIndex++)
             {
+                EncounterSpawnRule rule = wave.SpawnRules[ruleIndex];
                 int[] candidates;
                 if (!string.IsNullOrWhiteSpace(rule.SpawnPointId))
                 {
@@ -215,31 +272,54 @@ namespace TrickalFanGame.Room
                     { error = $"Encounter '{encounterId}' wave {wave.WaveNumber} cannot resolve a spawn group. {error}"; return false; }
                 }
 
-                IEnumerable<int> available = candidates.Where(index => !occupied.Contains(index) &&
-                    IsSafe(template.SpawnPoints[index], activeDoors));
-                bool prefersCloseSpawn = rule.EnemyRole == EncounterEnemyRole.Chaser ||
-                                         rule.EnemyRole == EncounterEnemyRole.FastChaser;
-                available = prefersCloseSpawn
-                    ? available.OrderBy(index => template.SpawnPoints[index].sqrMagnitude).ThenBy(index => index)
-                    : available.OrderByDescending(index => template.SpawnPoints[index].sqrMagnitude).ThenBy(index => index);
-                int[] selected = available.Take(rule.Count).ToArray();
-                if (selected.Length != rule.Count)
+                for (int instanceIndex = 0; instanceIndex < rule.Count; instanceIndex++)
                 {
-                    error = $"Encounter '{encounterId}' wave {wave.WaveNumber} cannot place {rule.Count} " +
-                            $"{rule.EnemyRole} enemies without reusing a SpawnPoint or violating entry/door safety distance.";
-                    return false;
-                }
+                    EncounterEnemyCandidate[] viable = rule.Candidates.Where(candidate => candidates.Any(index =>
+                            !occupied.Contains(index) && template.SupportsEnemyRole(index, candidate.EnemyRole) &&
+                            IsSafe(template.SpawnPoints[index], activeDoors)))
+                        .ToArray();
+                    if (viable.Length == 0)
+                    {
+                        error = $"Encounter '{encounterId}' wave {wave.WaveNumber} cannot place candidate " +
+                                $"{instanceIndex + 1} of rule {ruleIndex + 1} on a role-compatible, safe, unused SpawnPoint.";
+                        return false;
+                    }
 
-                foreach (int index in selected)
-                {
-                    occupied.Add(index);
-                    result.Add(new ResolvedEncounterSpawn(rule.EnemyRole, index));
+                    int discriminator = (waveIndex + 1) * 10000 + (ruleIndex + 1) * 100 + instanceIndex + 1;
+                    int candidateSeed = FloorGenerator.DeriveSeed(selectionSeed, discriminator, 0x91E10DA5u);
+                    EncounterEnemyRole selectedRole = SelectWeightedRole(viable, candidateSeed);
+                    IEnumerable<int> available = candidates.Where(index => !occupied.Contains(index) &&
+                        template.SupportsEnemyRole(index, selectedRole) &&
+                        IsSafe(template.SpawnPoints[index], activeDoors));
+                    bool prefersCloseSpawn = selectedRole == EncounterEnemyRole.Chaser ||
+                                             selectedRole == EncounterEnemyRole.FastChaser;
+                    int selectedIndex = prefersCloseSpawn
+                        ? available.OrderBy(index => template.SpawnPoints[index].sqrMagnitude)
+                            .ThenBy(index => index).First()
+                        : available.OrderByDescending(index => template.SpawnPoints[index].sqrMagnitude)
+                            .ThenBy(index => index).First();
+                    occupied.Add(selectedIndex);
+                    result.Add(new ResolvedEncounterSpawn(selectedRole, selectedIndex));
                 }
             }
 
             resolved = result.ToArray();
             error = null;
             return true;
+        }
+
+        private static EncounterEnemyRole SelectWeightedRole(
+            IReadOnlyList<EncounterEnemyCandidate> candidates, int seed)
+        {
+            int totalWeight = candidates.Sum(candidate => candidate.Weight);
+            int roll = (int)(unchecked((uint)seed) % unchecked((uint)totalWeight));
+            foreach (EncounterEnemyCandidate candidate in candidates)
+            {
+                if (roll < candidate.Weight) return candidate.EnemyRole;
+                roll -= candidate.Weight;
+            }
+
+            throw new InvalidOperationException("A positive weighted enemy candidate list must select a role.");
         }
 
         private bool IsSafe(Vector2 point, IReadOnlyList<RoomTemplateDoor> doors)
@@ -310,7 +390,20 @@ namespace TrickalFanGame.Room
                 if (candidates.Count == 0)
                 { error = $"Room {node.RoomId} has no Encounter compatible with profile '{node.Template.Profile.ProfileId}' and floor {node.FloorNumber}. First rejection: {firstRejection}"; return false; }
                 int seed = FloorGenerator.DeriveSeed(node.ContentSeed, contentVersion, EncounterSalt);
-                node.AssignEncounter(candidates[(int)(unchecked((uint)seed) % (uint)candidates.Count)]);
+                EncounterDefinition selected = candidates[(int)(unchecked((uint)seed) % (uint)candidates.Count)];
+                ResolvedEncounterSpawn[][] resolvedWaves = new ResolvedEncounterSpawn[selected.Waves.Count][];
+                for (int waveIndex = 0; waveIndex < resolvedWaves.Length; waveIndex++)
+                {
+                    if (!selected.TryResolveWave(node.Template, node.FloorNumber, node.DirectionalConnections,
+                            waveIndex, seed, out resolvedWaves[waveIndex], out error))
+                    {
+                        error = $"Room {node.RoomId} could not persist Encounter '{selected.EncounterId}' " +
+                                $"wave {waveIndex + 1}. {error}";
+                        return false;
+                    }
+                }
+
+                node.AssignEncounter(selected, resolvedWaves);
             }
             error = null;
             return true;

@@ -126,9 +126,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2448a35b34fa40a9bfe4363b9fe5c889, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackPresentation
-  telegraphScale: {x: 1.25, y: 0.75}
-  activeScale: {x: 0.8, y: 1.3}
-  recoveryScale: {x: 1.15, y: 0.85}
+  telegraphScale: {x: 1, y: 1}
+  activeScale: {x: 1, y: 1}
+  recoveryScale: {x: 1, y: 1}
 --- !u!120 &5137025722086317585
 LineRenderer:
   serializedVersion: 3

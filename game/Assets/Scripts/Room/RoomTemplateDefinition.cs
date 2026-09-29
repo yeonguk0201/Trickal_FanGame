@@ -4,6 +4,16 @@ using UnityEngine;
 
 namespace TrickalFanGame.Room
 {
+    [Flags]
+    public enum SpawnPointPlacementRole
+    {
+        None = 0,
+        MeleePressure = 1 << 0,
+        RearFiring = 1 << 1,
+        ChargeLane = 1 << 2,
+        AllCombat = MeleePressure | RearFiring | ChargeLane,
+    }
+
     [Serializable]
     public struct RoomTemplateDoor
     {
@@ -37,6 +47,8 @@ namespace TrickalFanGame.Room
         [SerializeField, Min(1)] private int maximumFloor = 99;
         [SerializeField] private RoomTemplateDoor[] doorSlots = Array.Empty<RoomTemplateDoor>();
         [SerializeField] private Vector2[] spawnPoints = Array.Empty<Vector2>();
+        [SerializeField] private SpawnPointPlacementRole[] spawnPointRoles =
+            Array.Empty<SpawnPointPlacementRole>();
 
         public string TemplateId => templateId;
         public RoomProfile Profile => profile;
@@ -46,8 +58,36 @@ namespace TrickalFanGame.Room
         public int MaximumFloor => maximumFloor;
         public IReadOnlyList<RoomTemplateDoor> DoorSlots => doorSlots;
         public IReadOnlyList<Vector2> SpawnPoints => spawnPoints;
+        public IReadOnlyList<SpawnPointPlacementRole> SpawnPointRoles => spawnPointRoles;
 
         public static string SpawnPointId(int index) => $"spawn-{index + 1:00}";
+
+        public bool SupportsEnemyRole(int spawnPointIndex, EncounterEnemyRole enemyRole)
+        {
+            if (spawnPointRoles == null || spawnPointIndex < 0 || spawnPointIndex >= spawnPointRoles.Length)
+            {
+                return false;
+            }
+
+            SpawnPointPlacementRole required = RequiredPlacementRole(enemyRole);
+            return required == SpawnPointPlacementRole.None ||
+                   (spawnPointRoles[spawnPointIndex] & required) == required;
+        }
+
+        public static SpawnPointPlacementRole RequiredPlacementRole(EncounterEnemyRole enemyRole)
+        {
+            return enemyRole switch
+            {
+                EncounterEnemyRole.Chaser => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.FastChaser => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.Ranged => SpawnPointPlacementRole.RearFiring,
+                EncounterEnemyRole.Sniper => SpawnPointPlacementRole.RearFiring,
+                EncounterEnemyRole.Charging => SpawnPointPlacementRole.ChargeLane,
+                // Bosses use dedicated room templates and are not selected through the normal Spawn-1 contract.
+                EncounterEnemyRole.Boss => SpawnPointPlacementRole.None,
+                _ => SpawnPointPlacementRole.None,
+            };
+        }
 
         public bool TryResolveSpawnReference(
             string spawnPointId,
@@ -168,7 +208,8 @@ namespace TrickalFanGame.Room
             RoomTemplateDoor[] configuredDoorSlots,
             Vector2[] configuredSpawnPoints,
             int configuredMinimumFloor = 1,
-            int configuredMaximumFloor = 99)
+            int configuredMaximumFloor = 99,
+            SpawnPointPlacementRole[] configuredSpawnPointRoles = null)
         {
             templateId = configuredTemplateId;
             profile = configuredProfile;
@@ -178,6 +219,9 @@ namespace TrickalFanGame.Room
             maximumFloor = configuredMaximumFloor;
             doorSlots = configuredDoorSlots ?? Array.Empty<RoomTemplateDoor>();
             spawnPoints = configuredSpawnPoints ?? Array.Empty<Vector2>();
+            spawnPointRoles = configuredSpawnPointRoles != null
+                ? (SpawnPointPlacementRole[])configuredSpawnPointRoles.Clone()
+                : BuildDefaultSpawnPointRoles(spawnPoints);
         }
 
         public bool TryValidate(out string error)
@@ -268,9 +312,25 @@ namespace TrickalFanGame.Room
             }
 
             HashSet<Vector2> uniqueSpawns = new();
+            if (spawnPointRoles == null || spawnPointRoles.Length != spawnPoints.Length)
+            {
+                error = $"Room template '{templateId}' SpawnPoint role count does not match its SpawnPoints.";
+                return false;
+            }
+
+            SpawnPointPlacementRole declaredRoles = SpawnPointPlacementRole.None;
             for (int index = 0; index < spawnPoints.Length; index++)
             {
                 Vector2 point = spawnPoints[index];
+                SpawnPointPlacementRole placementRole = spawnPointRoles[index];
+                if (placementRole == SpawnPointPlacementRole.None ||
+                    (placementRole & ~SpawnPointPlacementRole.AllCombat) != 0)
+                {
+                    error = $"Room template '{templateId}' SpawnPoint {index + 1} has an invalid placement role.";
+                    return false;
+                }
+
+                declaredRoles |= placementRole;
                 if (!uniqueSpawns.Add(point) || !profile.EncounterBounds.Contains(point) ||
                     !Approximately(ToLocal(prefab.transform, prefab.Controller.SpawnPoints[index]), point))
                 {
@@ -287,6 +347,13 @@ namespace TrickalFanGame.Room
                         return false;
                     }
                 }
+            }
+
+            if (SupportsRoomType(RoomType.Normal) &&
+                (declaredRoles & SpawnPointPlacementRole.AllCombat) != SpawnPointPlacementRole.AllCombat)
+            {
+                error = $"Room template '{templateId}' needs melee-pressure, rear-firing, and charge-lane SpawnPoints.";
+                return false;
             }
 
             BoxCollider2D encounter = prefab.Controller.GetComponent<BoxCollider2D>();
@@ -337,6 +404,32 @@ namespace TrickalFanGame.Room
 
         private static bool Approximately(Vector2 first, Vector2 second) =>
             (first - second).sqrMagnitude < 0.0001f;
+
+        public static SpawnPointPlacementRole[] BuildDefaultSpawnPointRoles(IReadOnlyList<Vector2> points)
+        {
+            if (points == null || points.Count == 0)
+            {
+                return Array.Empty<SpawnPointPlacementRole>();
+            }
+
+            SpawnPointPlacementRole[] roles = new SpawnPointPlacementRole[points.Count];
+            for (int index = 0; index < points.Count; index++)
+            {
+                roles[index] = SpawnPointPlacementRole.RearFiring;
+            }
+
+            // Existing authored templates use three ordered points. The first two form the pressure pair used by
+            // two-melee waves, while the last point is the charge lane. Every point remains a valid ranged anchor,
+            // preserving the established three-enemy crossfire Encounter.
+            int pressureCount = Math.Min(2, points.Count);
+            for (int index = 0; index < pressureCount; index++)
+            {
+                roles[index] |= SpawnPointPlacementRole.MeleePressure;
+            }
+
+            roles[points.Count - 1] |= SpawnPointPlacementRole.ChargeLane;
+            return roles;
+        }
     }
 
     public static class RoomTemplateGeometry

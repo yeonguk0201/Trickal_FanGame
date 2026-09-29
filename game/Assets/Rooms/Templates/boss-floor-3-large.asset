@@ -35,3 +35,4 @@ MonoBehaviour:
   - {x: -6, y: 3.5}
   - {x: 0, y: 0}
   - {x: 6, y: -3.5}
+  spawnPointRoles: 030000000300000006000000
