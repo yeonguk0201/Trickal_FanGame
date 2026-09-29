@@ -41,7 +41,7 @@ namespace TrickalFanGame.Editor
                 ?.GetComponent<FloorGenerator>();
             RoomGraphAssembler assembler = UnityEngine.Object.FindFirstObjectByType<RoomGraphAssembler>();
             Assert(generator != null && assembler != null && assembler.EnemyRoster != null &&
-                   generator.EncounterContentVersion == Week19Spawn2Setup.EncounterContentVersion,
+                   generator.EncounterContentVersion >= Week19Spawn2Setup.EncounterContentVersion,
                 "Run Spawn-2 setup before verification.");
 
             ValidateQuickRangedPrefab(assembler.EnemyRoster);

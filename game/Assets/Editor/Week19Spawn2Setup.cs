@@ -67,7 +67,8 @@ namespace TrickalFanGame.Editor
             EncounterDefinition[] definitions = ConfigureEncounters();
 
             Undo.RecordObjects(new UnityEngine.Object[] { generator, assembler }, "Configure Spawn-2 candidates");
-            generator.ConfigureEncounters(EncounterContentVersion, definitions);
+            generator.ConfigureEncounters(Math.Max(EncounterContentVersion, generator.EncounterContentVersion),
+                definitions);
             assembler.ConfigureEncounterRoster(roster);
             EditorUtility.SetDirty(generator);
             EditorUtility.SetDirty(assembler);

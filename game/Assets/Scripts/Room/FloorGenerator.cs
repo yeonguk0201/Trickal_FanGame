@@ -58,6 +58,8 @@ namespace TrickalFanGame.Room
         public string EncounterId => Encounter != null ? Encounter.EncounterId : null;
         public IReadOnlyList<ResolvedEncounterSpawn[]> ResolvedEncounterWaves { get; private set; } =
             Array.Empty<ResolvedEncounterSpawn[]>();
+        public bool HasDifficulty { get; private set; }
+        public GeneratedRoomDifficulty Difficulty { get; private set; }
         public RoomType RoomType => Definition != null ? Definition.RoomType : RoomType.Normal;
         public IReadOnlyList<GeneratedRoomConnection> DirectionalConnections => connections;
         public IReadOnlyList<string> ConnectedRoomIds
@@ -92,6 +94,16 @@ namespace TrickalFanGame.Room
         {
             Encounter = encounter;
             ResolvedEncounterWaves = resolvedWaves ?? Array.Empty<ResolvedEncounterSpawn[]>();
+            HasDifficulty = false;
+            Difficulty = default;
+        }
+
+        internal void AssignEncounter(EncounterDefinition encounter, ResolvedEncounterSpawn[][] resolvedWaves,
+            GeneratedRoomDifficulty difficulty)
+        {
+            AssignEncounter(encounter, resolvedWaves);
+            HasDifficulty = true;
+            Difficulty = difficulty;
         }
     }
 
@@ -246,6 +258,7 @@ namespace TrickalFanGame.Room
         [SerializeField] private RoomTemplateDefinition[] roomTemplates = Array.Empty<RoomTemplateDefinition>();
         [SerializeField] private EncounterDefinition[] encounterDefinitions = Array.Empty<EncounterDefinition>();
         [SerializeField, Min(1)] private int encounterContentVersion = 1;
+        [SerializeField] private RoomDifficultyTable difficultyTable;
         private int runSeed; private bool hasRunSeed;
         public int RunSeed => runSeed;
         public bool HasRunSeed => hasRunSeed;
@@ -260,6 +273,7 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<RoomTemplateDefinition> RoomTemplates => roomTemplates;
         public IReadOnlyList<EncounterDefinition> EncounterDefinitions => encounterDefinitions;
         public int EncounterContentVersion => encounterContentVersion;
+        public RoomDifficultyTable DifficultyTable => difficultyTable;
 
         public void Configure(int floors, int rooms, RoomDefinition[] definitions) => Configure(floors, rooms, rooms, 2, 32, definitions);
         public void Configure(int floors, int minRooms, int maxRooms, int bossDistance, int retries, RoomDefinition[] definitions)
@@ -277,6 +291,11 @@ namespace TrickalFanGame.Room
         {
             encounterContentVersion = Mathf.Max(1, contentVersion);
             encounterDefinitions = definitions ?? Array.Empty<EncounterDefinition>();
+        }
+
+        public void ConfigureDifficulty(RoomDifficultyTable table)
+        {
+            difficultyTable = table;
         }
 
         public bool TryInitializeRunSeed(int seed, out string error)
@@ -320,6 +339,7 @@ namespace TrickalFanGame.Room
                     graph,
                     encounterDefinitions,
                     encounterContentVersion,
+                    difficultyTable,
                     out error))
             {
                 error = $"Encounter selection failed for run seed {seed}. {error}";

@@ -49,6 +49,8 @@ namespace TrickalFanGame.Room
         [SerializeField] private Vector2[] spawnPoints = Array.Empty<Vector2>();
         [SerializeField] private SpawnPointPlacementRole[] spawnPointRoles =
             Array.Empty<SpawnPointPlacementRole>();
+        // Added to the resolved Encounter threat to form the room difficulty score (obstacles, later traps).
+        [SerializeField] private int layoutDifficultyModifier;
 
         public string TemplateId => templateId;
         public RoomProfile Profile => profile;
@@ -59,6 +61,12 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<RoomTemplateDoor> DoorSlots => doorSlots;
         public IReadOnlyList<Vector2> SpawnPoints => spawnPoints;
         public IReadOnlyList<SpawnPointPlacementRole> SpawnPointRoles => spawnPointRoles;
+        public int LayoutDifficultyModifier => layoutDifficultyModifier;
+
+        public void ConfigureLayoutDifficultyModifier(int modifier)
+        {
+            layoutDifficultyModifier = modifier;
+        }
 
         public static string SpawnPointId(int index) => $"spawn-{index + 1:00}";
 

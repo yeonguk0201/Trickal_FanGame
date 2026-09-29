@@ -54,3 +54,5 @@ MonoBehaviour:
       - enemyRole: 2
         weight: 100
   clearCondition: 0
+  declaredMinimumThreat: 15
+  declaredMaximumThreat: 19

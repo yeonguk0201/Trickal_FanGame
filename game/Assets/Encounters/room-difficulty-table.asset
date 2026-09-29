@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eee72c3daf3be04c81f315fe9a9a6ed, type: 3}
+  m_Name: room-difficulty-table
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomDifficultyTable
+  threatScores:
+  - role: 0
+    score: 2
+  - role: 4
+    score: 3
+  - role: 1
+    score: 3
+  - role: 5
+    score: 4
+  - role: 2
+    score: 4
+  tierBands:
+  - tier: 0
+    minimumScore: 0
+  - tier: 1
+    minimumScore: 12
+  - tier: 2
+    minimumScore: 16
+  floorRanges:
+  - floorNumber: 1
+    minimumScore: 0
+    maximumScore: 18
+  - floorNumber: 2
+    minimumScore: 0
+    maximumScore: 20
+  - floorNumber: 3
+    minimumScore: 0
+    maximumScore: 22
+  distanceWeights:
+  - tier: 0
+    nearWeight: 40
+    farWeight: 10
+  - tier: 1
+    nearWeight: 45
+    farWeight: 40
+  - tier: 2
+    nearWeight: 15
+    farWeight: 50

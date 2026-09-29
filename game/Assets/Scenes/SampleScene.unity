@@ -2051,7 +2051,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 499cf59034c7de34da65b96e091d7be6, type: 2}
   - {fileID: 11400000, guid: 34f054e4d791a7246b7f362d1b09e3bd, type: 2}
   - {fileID: 11400000, guid: f058247391a23904c9ece2d6d6eb5578, type: 2}
-  encounterContentVersion: 7
+  encounterContentVersion: 8
+  difficultyTable: {fileID: 11400000, guid: 5e297717d226fb243b795131d80fa24e, type: 2}
 --- !u!4 &43863915
 Transform:
   m_ObjectHideFlags: 0
