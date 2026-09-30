@@ -105,9 +105,12 @@ namespace TrickalFanGame.Editor
 
                     secrets++;
                     GeneratedRoomNode secret = secretRooms[0];
+                    // Special-4 appends the shop after the secret room, so the secret room never saw it.
+                    GeneratedRoomNode[] beforeShop =
+                        floor.Nodes.Where(node => node.Role != GeneratedRoomRole.Shop).ToArray();
                     Dictionary<RoomGridPosition, GeneratedRoomNode> byPosition =
-                        floor.Nodes.ToDictionary(node => node.GridPosition);
-                    Assert(secret.RoomNumber == floor.Nodes.Count && secret.RoomType == RoomType.Reward &&
+                        beforeShop.ToDictionary(node => node.GridPosition);
+                    Assert(secret.RoomNumber == beforeShop.Length && secret.RoomType == RoomType.Reward &&
                            !secret.RequiresKey && secret.Encounter == null &&
                            secret.Template != null && secret.Template.SupportsRoomType(RoomType.Reward),
                         $"Seed {seed} floor {floor.FloorNumber} secret room must be the last, unlocked reward room.");
@@ -117,7 +120,7 @@ namespace TrickalFanGame.Editor
                            secret.DirectionalConnections.All(connection => connection.IsSecret),
                         $"Seed {seed} floor {floor.FloorNumber} secret room must link every touching room " +
                         "through hidden passages and never touch the start or boss room.");
-                    Assert(expectedNeighbors == BestCandidateNeighborCount(floor, byPosition),
+                    Assert(expectedNeighbors == BestCandidateNeighborCount(beforeShop, byPosition),
                         $"Seed {seed} floor {floor.FloorNumber} secret room must use a cell touching the most rooms.");
                     foreach (GeneratedRoomNode node in floor.Nodes)
                     foreach (GeneratedRoomConnection connection in node.DirectionalConnections)
@@ -161,11 +164,11 @@ namespace TrickalFanGame.Editor
             return count;
         }
 
-        private static int BestCandidateNeighborCount(GeneratedFloor floor,
+        private static int BestCandidateNeighborCount(IEnumerable<GeneratedRoomNode> nodes,
             IReadOnlyDictionary<RoomGridPosition, GeneratedRoomNode> byPosition)
         {
             int best = 0;
-            foreach (GeneratedRoomNode node in floor.Nodes.Where(node => node.Role != GeneratedRoomRole.Secret))
+            foreach (GeneratedRoomNode node in nodes.Where(node => node.Role != GeneratedRoomRole.Secret))
             foreach (RoomDoorDirection direction in Directions)
             {
                 RoomGridPosition cell = node.GridPosition.Offset(direction);

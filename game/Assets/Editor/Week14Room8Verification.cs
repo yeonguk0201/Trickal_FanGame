@@ -57,8 +57,10 @@ namespace TrickalFanGame.Editor
 
                 foreach (GeneratedFloor floor in first.Floors)
                 {
-                    int regularRooms = floor.Nodes.Count(node => node.Role != GeneratedRoomRole.Secret);
-                    Assert(regularRooms >= 6 && regularRooms <= 8 && floor.Nodes.Count - regularRooms <= 1,
+                    int secretRooms = floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Secret);
+                    int shopRooms = floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Shop);
+                    int regularRooms = floor.Nodes.Count - secretRooms - shopRooms;
+                    Assert(regularRooms >= 6 && regularRooms <= 8 && secretRooms <= 1 && shopRooms <= 1,
                         $"Seed {seed} floor {floor.FloorNumber} has an invalid room count.");
                     Assert(floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Start) == 1 &&
                            floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Boss) == 1,

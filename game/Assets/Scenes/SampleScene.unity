@@ -2026,7 +2026,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d2d9250bc6cdce743be7738550951259, type: 2}
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
-  roomContentVersion: 6
+  - {fileID: 11400000, guid: bbbef5a18185b6e428a3c5387645e964, type: 2}
+  roomContentVersion: 7
   roomTemplates:
   - {fileID: 11400000, guid: cd8ea15c0b6de5949bdfe798aa38e5e3, type: 2}
   - {fileID: 11400000, guid: 684a6d37e34e4a640b4de439e8dd6680, type: 2}
@@ -2065,7 +2066,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ae9c2b01c5ba08a4d951a1d872c0bc56, type: 2}
   - {fileID: 11400000, guid: f058247391a23904c9ece2d6d6eb5578, type: 2}
   - {fileID: 11400000, guid: 8cbc6bd8ca2b8ee4cb46c4e23b92aa34, type: 2}
-  encounterContentVersion: 10
+  encounterContentVersion: 11
   difficultyTable: {fileID: 11400000, guid: 5e297717d226fb243b795131d80fa24e, type: 2}
 --- !u!4 &43863915
 Transform:
@@ -2123,6 +2124,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d05d894249916b44fbfc8d46a8888f5e, type: 2}
   - {fileID: 11400000, guid: 4c6d17c2077a6fb43bbeda89f37d557c, type: 2}
   - {fileID: 11400000, guid: 582b1a831ceded4438116781274efe64, type: 2}
+  shopRoomPrefab: {fileID: 4476114902965739689, guid: a82065ee9eee8d34499405155bb64313, type: 3}
+  shopCatalog: {fileID: 11400000, guid: 3bc3c90a27b3d15489f27d764c008817, type: 2}
 --- !u!1 &49446195
 GameObject:
   m_ObjectHideFlags: 0

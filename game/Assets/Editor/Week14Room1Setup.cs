@@ -42,7 +42,8 @@ namespace TrickalFanGame.Editor
                 BasicTemplateId,
                 profile,
                 prefab,
-                new[] { RoomType.Normal, RoomType.Reward, RoomType.Boss },
+                // Special-4 shops use the Basic room like treasure and secret rooms.
+                new[] { RoomType.Normal, RoomType.Reward, RoomType.Boss, RoomType.Shop },
                 BuildDoorContracts(),
                 new[]
                 {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TrickalFanGame.Room
 {
-    public enum GeneratedRoomRole { Start, Intermediate, Treasure, Boss, Secret }
+    public enum GeneratedRoomRole { Start, Intermediate, Treasure, Boss, Secret, Shop }
     public enum RoomDoorDirection { Left, Right, Up, Down }
 
     public readonly struct RoomGridPosition : IEquatable<RoomGridPosition>
@@ -95,8 +95,8 @@ namespace TrickalFanGame.Room
 
         internal void AssignKeyRequirement(bool requiresKey)
         {
-            if (requiresKey && Role != GeneratedRoomRole.Treasure)
-                throw new InvalidOperationException($"Only treasure rooms can require a key: {RoomId}.");
+            if (requiresKey && Role is not (GeneratedRoomRole.Treasure or GeneratedRoomRole.Shop))
+                throw new InvalidOperationException($"Only treasure and shop rooms can require a key: {RoomId}.");
             RequiresKey = requiresKey;
         }
 
@@ -174,7 +174,7 @@ namespace TrickalFanGame.Room
         private bool TryValidateFloor(GeneratedFloor floor, HashSet<string> globalIds, out string error)
         {
             Dictionary<string, GeneratedRoomNode> byId = new(StringComparer.Ordinal);
-            List<RoomGridPosition> positions = new(); int starts = 0, bosses = 0, treasures = 0, secrets = 0;
+            List<RoomGridPosition> positions = new(); int starts = 0, bosses = 0, treasures = 0, secrets = 0, shops = 0;
             foreach (GeneratedRoomNode node in floor.Nodes)
             {
                 if (node == null || node.FloorNumber != floor.FloorNumber ||
@@ -193,6 +193,7 @@ namespace TrickalFanGame.Room
                 bosses += node.Role == GeneratedRoomRole.Boss ? 1 : 0;
                 treasures += node.Role == GeneratedRoomRole.Treasure ? 1 : 0;
                 secrets += node.Role == GeneratedRoomRole.Secret ? 1 : 0;
+                shops += node.Role == GeneratedRoomRole.Shop ? 1 : 0;
                 bool validRoleType = node.Role switch
                 {
                     GeneratedRoomRole.Start => node.RoomType == RoomType.Normal,
@@ -200,12 +201,13 @@ namespace TrickalFanGame.Room
                     GeneratedRoomRole.Treasure => node.RoomType == RoomType.Reward,
                     GeneratedRoomRole.Boss => node.RoomType == RoomType.Boss,
                     GeneratedRoomRole.Secret => node.RoomType == RoomType.Reward,
+                    GeneratedRoomRole.Shop => node.RoomType == RoomType.Shop,
                     _ => false,
                 };
                 if (!validRoleType)
                 { error = $"Room {node.RoomId} role {node.Role} does not match definition type {node.RoomType}."; return false; }
-                if (node.RequiresKey && node.Role != GeneratedRoomRole.Treasure)
-                { error = $"Room {node.RoomId} requires a key but is not a treasure room."; return false; }
+                if (node.RequiresKey && node.Role is not (GeneratedRoomRole.Treasure or GeneratedRoomRole.Shop))
+                { error = $"Room {node.RoomId} requires a key but is not a treasure or shop room."; return false; }
                 if (node.Template != null &&
                     (!node.Template.SupportsRoomType(node.RoomType) ||
                      !node.Template.SupportsConnections(node.DirectionalConnections)))
@@ -216,8 +218,8 @@ namespace TrickalFanGame.Room
                          node.DirectionalConnections, out error)))
                 { error = $"Room {node.RoomId} has an incompatible Encounter '{node.EncounterId}'. {error}"; return false; }
             }
-            if (secrets > 1)
-            { error = $"Floor {floor.FloorNumber} has {secrets} secret rooms; at most one is allowed."; return false; }
+            if (secrets > 1 || shops > 1)
+            { error = $"Floor {floor.FloorNumber} has {secrets} secret and {shops} shop rooms; at most one each is allowed."; return false; }
             if (starts != 1 || bosses != 1 || treasures < 1 ||
                 !byId.ContainsKey(floor.StartingRoomId) || !byId.ContainsKey(floor.BossRoomId))
             { error = $"Floor {floor.FloorNumber} must have one start, one boss, and at least one treasure room."; return false; }
@@ -255,6 +257,7 @@ namespace TrickalFanGame.Room
             { error = $"Floor {floor.FloorNumber} is disconnected or its boss is not an end room at distance {MinimumBossDistance}+."; return false; }
             foreach (GeneratedRoomNode node in floor.Nodes)
             {
+                if (node.Role == GeneratedRoomRole.Shop && !IsValidShop(node, byId, out error)) return false;
                 if (node.RequiresKey && !CanReachWithoutRoomForGeneration(
                         floor.StartingRoomId, floor.BossRoomId, node.RoomId, byId))
                 {
@@ -263,6 +266,23 @@ namespace TrickalFanGame.Room
                 }
             }
             error = null; return true;
+        }
+
+        // Special-4: the shop is a key-locked end room behind one regular door from the start or an intermediate
+        // room, so it never sits on the boss route and no hidden passage can bypass its lock.
+        private static bool IsValidShop(GeneratedRoomNode shop, IReadOnlyDictionary<string, GeneratedRoomNode> byId,
+            out string error)
+        {
+            if (!shop.RequiresKey || shop.DirectionalConnections.Count != 1 || shop.DirectionalConnections[0].IsSecret ||
+                byId[shop.DirectionalConnections[0].DestinationRoomId].Role is not
+                    (GeneratedRoomRole.Start or GeneratedRoomRole.Intermediate))
+            {
+                error = $"Shop room {shop.RoomId} must be a key-locked end room behind a start or intermediate room.";
+                return false;
+            }
+
+            error = null;
+            return true;
         }
 
         internal static bool CanReachWithoutRoomForGeneration(string start, string destination, string excluded,
@@ -311,9 +331,10 @@ namespace TrickalFanGame.Room
     {
         private const uint FloorSalt = 0xA341316Cu, TopologySalt = 0xC8013EA4u,
             ContentSalt = 0xAD90777Du, AttemptSalt = 0x7E95761Eu, TreasureLockSalt = 0x4B455931u,
-            SecretRoomSalt = 0x53435254u;
+            SecretRoomSalt = 0x53435254u, ShopRoomSalt = 0x53484F50u;
         public const int TreasureLockPercent = 50;
         public const int SecretRoomPercent = 50;
+        public const int ShopRoomPercent = 60;
         [SerializeField, Min(1)] private int floorCount = 3;
         [SerializeField, Min(3)] private int minimumRoomsPerFloor = 6;
         [SerializeField, Min(3)] private int maximumRoomsPerFloor = 8;
@@ -380,12 +401,13 @@ namespace TrickalFanGame.Room
             if (floorCount < 1 || minimumRoomsPerFloor < 3 || maximumRoomsPerFloor < minimumRoomsPerFloor ||
                 maximumRoomsPerFloor > 99 || minimumBossDistance < 1 || generationRetryLimit < 1)
             { error = $"Invalid generation settings for seed {seed}: floor count, room range, boss distance, or retry limit."; return false; }
-            if (!Pools(out List<RoomDefinition> normal, out List<RoomDefinition> reward, out List<RoomDefinition> boss, out error)) return false;
+            if (!Pools(out List<RoomDefinition> normal, out List<RoomDefinition> reward, out List<RoomDefinition> boss,
+                    out List<RoomDefinition> shop, out error)) return false;
             GeneratedFloor[] floors = new GeneratedFloor[floorCount];
             for (int i = 0; i < floorCount; i++)
             {
                 int floorSeed = DeriveSeed(seed, i + 1, FloorSalt);
-                if (!TryFloor(i + 1, floorSeed, normal, reward, boss, out floors[i], out string failure))
+                if (!TryFloor(i + 1, floorSeed, normal, reward, boss, shop, out floors[i], out string failure))
                 { error = $"Floor generation failed after {generationRetryLimit} attempts for run seed {seed}, floor seed {floorSeed}, floor {i + 1}. {failure}"; return false; }
             }
             graph = new GeneratedFloorGraph(floors, minimumBossDistance);
@@ -429,7 +451,7 @@ namespace TrickalFanGame.Room
         }
 
         private bool TryFloor(int floorNumber, int floorSeed, IReadOnlyList<RoomDefinition> normal,
-            IReadOnlyList<RoomDefinition> reward, IReadOnlyList<RoomDefinition> boss,
+            IReadOnlyList<RoomDefinition> reward, IReadOnlyList<RoomDefinition> boss, IReadOnlyList<RoomDefinition> shop,
             out GeneratedFloor floor, out string error)
         {
             int topologySeed = DeriveSeed(floorSeed, 0, TopologySalt), contentSeed = DeriveSeed(floorSeed, 0, ContentSalt);
@@ -463,7 +485,8 @@ namespace TrickalFanGame.Room
                 uint lockRoll = unchecked((uint)DeriveSeed(contentSeed, treasure.RoomNumber, TreasureLockSalt));
                 treasure.AssignKeyRequirement(optionalRoute && lockRoll % 100u < TreasureLockPercent);
                 nodes = AppendSecretRoom(floorNumber, contentSeed, nodes, reward);
-                floor =new GeneratedFloor(floorNumber, floorSeed, topologySeed, contentSeed,
+                nodes = AppendShopRoom(floorNumber, contentSeed, nodes, shop);
+                floor = new GeneratedFloor(floorNumber, floorSeed, topologySeed, contentSeed,
                     nodes[0].RoomId, nodes[bossIndex].RoomId, nodes); error = null; return true;
             }
             floor = null; error = $"Could not place an end-room boss at distance {minimumBossDistance}+ and a separate treasure room."; return false;
@@ -527,6 +550,45 @@ namespace TrickalFanGame.Room
             return result;
         }
 
+        // Special-4: an independent floor-content roll adds at most one shop after the secret room, so it changes no
+        // existing room number, role, position, seed, or hidden passage. It hangs off the start or an intermediate
+        // room as a key-locked end room on an empty cell; the secret room was placed before it and never links to it.
+        // Without a shop Room Definition (older verification configurations) floors simply have no shop.
+        private static GeneratedRoomNode[] AppendShopRoom(int floorNumber, int contentSeed, GeneratedRoomNode[] nodes,
+            IReadOnlyList<RoomDefinition> shop)
+        {
+            if (shop.Count == 0) return nodes;
+            StableRandom random = new(unchecked((uint)DeriveSeed(contentSeed, 0, ShopRoomSalt)));
+            if (random.NextIndex(100) >= ShopRoomPercent) return nodes;
+
+            HashSet<RoomGridPosition> occupied = new();
+            foreach (GeneratedRoomNode node in nodes) occupied.Add(node.GridPosition);
+            RoomDoorDirection[] directions =
+                { RoomDoorDirection.Left, RoomDoorDirection.Right, RoomDoorDirection.Up, RoomDoorDirection.Down };
+            List<(GeneratedRoomNode Parent, RoomDoorDirection Direction)> candidates = new();
+            foreach (GeneratedRoomNode node in nodes)
+            {
+                if (node.Role is not (GeneratedRoomRole.Start or GeneratedRoomRole.Intermediate)) continue;
+                foreach (RoomDoorDirection direction in directions)
+                    if (!occupied.Contains(node.GridPosition.Offset(direction))) candidates.Add((node, direction));
+            }
+            if (candidates.Count == 0) return nodes;
+
+            (GeneratedRoomNode parent, RoomDoorDirection outward) = candidates[random.NextIndex(candidates.Count)];
+            int roomNumber = nodes.Length + 1;
+            GeneratedRoomNode shopRoom = new(BuildRoomId(floorNumber, roomNumber), floorNumber, roomNumber,
+                parent.GridPosition.Offset(outward), GeneratedRoomRole.Shop,
+                DeriveSeed(contentSeed, roomNumber, ContentSalt), shop[random.NextIndex(shop.Count)]);
+            shopRoom.AssignKeyRequirement(true);
+            parent.ConnectTo(outward, shopRoom.RoomId);
+            shopRoom.ConnectTo(GeneratedFloorGraph.Opposite(outward), parent.RoomId);
+
+            GeneratedRoomNode[] result = new GeneratedRoomNode[nodes.Length + 1];
+            Array.Copy(nodes, result, nodes.Length);
+            result[nodes.Length] = shopRoom;
+            return result;
+        }
+
         private static List<MutableRoom> Grow(int count, ref StableRandom random)
         {
             List<MutableRoom> rooms = new() { new MutableRoom(new RoomGridPosition(0, 0)) };
@@ -582,9 +644,9 @@ namespace TrickalFanGame.Room
             return result;
         }
         private bool Pools(out List<RoomDefinition> normal, out List<RoomDefinition> reward,
-            out List<RoomDefinition> boss, out string error)
+            out List<RoomDefinition> boss, out List<RoomDefinition> shop, out string error)
         {
-            normal = new(); reward = new(); boss = new(); HashSet<string> ids = new(StringComparer.Ordinal);
+            normal = new(); reward = new(); boss = new(); shop = new(); HashSet<string> ids = new(StringComparer.Ordinal);
             foreach (RoomDefinition definition in roomDefinitions)
             {
                 if (definition == null) { error = "FloorGenerator has a missing room definition."; return false; }
@@ -592,6 +654,7 @@ namespace TrickalFanGame.Room
                 if (!ids.Add(definition.RoomDefinitionId)) { error = $"Room definition ID '{definition.RoomDefinitionId}' is duplicated."; return false; }
                 if (definition.RoomType == RoomType.Normal) normal.Add(definition);
                 else if (definition.RoomType == RoomType.Reward) reward.Add(definition); else if (definition.RoomType == RoomType.Boss) boss.Add(definition);
+                else if (definition.RoomType == RoomType.Shop) shop.Add(definition);
             }
             if (normal.Count == 0 || reward.Count == 0 || boss.Count == 0)
             { error = "FloorGenerator needs at least one normal, reward, and boss room definition."; return false; }

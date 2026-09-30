@@ -37,9 +37,9 @@ namespace TrickalFanGame.Editor
 
             ValidateGeneration(generator);
             ValidateFailureAndExpansion(generator);
-            ValidateMissingLegacyNodesAreReplaced(generator, assembler.ConfiguredRoomPrefab);
+            ValidateMissingLegacyNodesAreReplaced(generator, assembler);
             ValidatePrefabAndAssembly(assembler);
-            ValidateThreeFloorProgression(generator, assembler.ConfiguredRoomPrefab);
+            ValidateThreeFloorProgression(generator, assembler);
             Debug.Log("Phase F-5 verification passed: deterministic independent seeds, 6-8 room Random Growth, stable IDs, connectivity, required rooms, boss distance, shared 16x9 room layout and camera framing, wall-aligned doors, safe transition positions, directional slot binding, green normal doors, purple boss connections, cyan floor exits, state restoration, repeated encounter prefabs, bounded failures, 8-12 configuration expansion, visible gated floor exits, 1->2->3 progression, final Run clear, and idempotent Setup are valid.");
         }
 
@@ -64,9 +64,12 @@ namespace TrickalFanGame.Editor
 
             foreach (GeneratedFloor floor in first.Floors)
             {
-                int regularRooms = floor.Nodes.Count(node => node.Role != GeneratedRoomRole.Secret);
-                Assert(regularRooms >= 6 && regularRooms <= 8 && floor.Nodes.Count - regularRooms <= 1,
-                    $"Floor {floor.FloorNumber} is outside 6-8 regular rooms plus at most one secret room.");
+                // Special-3/4 append at most one secret room and one shop after the regular rooms.
+                int secretRooms = floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Secret);
+                int shopRooms = floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Shop);
+                int regularRooms = floor.Nodes.Count - secretRooms - shopRooms;
+                Assert(regularRooms >= 6 && regularRooms <= 8 && secretRooms <= 1 && shopRooms <= 1,
+                    $"Floor {floor.FloorNumber} is outside 6-8 regular rooms plus at most one secret room and shop.");
                 Assert(floor.FloorSeed != floor.TopologySeed && floor.TopologySeed != floor.ContentSeed,
                     $"Floor {floor.FloorNumber} seed streams must be independently derived.");
                 int starts = 0, bosses = 0, treasures = 0;
@@ -96,7 +99,9 @@ namespace TrickalFanGame.Editor
                     "Bounded generation failure must include the seed, retry limit, and failed invariant.");
                 probe.Configure(1, 8, 12, 3, 32, definitions);
                 Assert(probe.TryGenerateForSeed(8822, out GeneratedFloorGraph expanded, out error), error);
-                Assert(expanded.Nodes.Count >= 8 && expanded.Nodes.Count <= 12,
+                int expandedRegular = expanded.Nodes.Count(node =>
+                    node.Role is not (GeneratedRoomRole.Secret or GeneratedRoomRole.Shop));
+                Assert(expandedRegular >= 8 && expandedRegular <= 12,
                     "Changing settings alone must support an 8-12 room contract.");
             }
             finally { UnityEngine.Object.DestroyImmediate(holder); }
@@ -290,8 +295,9 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateMissingLegacyNodesAreReplaced(
             FloorGenerator generator,
-            RoomPrefab prefab)
+            RoomGraphAssembler configuredAssembler)
         {
+            RoomPrefab prefab = configuredAssembler.ConfiguredRoomPrefab;
             GameObject holder = new("Phase F-5 Missing Legacy Node Regression");
             try
             {
@@ -300,6 +306,7 @@ namespace TrickalFanGame.Editor
                 graph.Configure(new RoomNode[] { null }, null, null, null, progress);
                 RoomGraphAssembler assembler = holder.AddComponent<RoomGraphAssembler>();
                 assembler.Configure(generator, graph, progress, prefab);
+                assembler.ConfigureShop(configuredAssembler.ShopRoomPrefab, configuredAssembler.ShopCatalog);
 
                 Assert(assembler.TryApplyGeneratedGraphForVerification(
                     Week8RandomRoomSetup.FixedVerificationSeed,
@@ -313,8 +320,10 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        private static void ValidateThreeFloorProgression(FloorGenerator configured, RoomPrefab prefab)
+        private static void ValidateThreeFloorProgression(FloorGenerator configured,
+            RoomGraphAssembler configuredAssembler)
         {
+            RoomPrefab prefab = configuredAssembler.ConfiguredRoomPrefab;
             GameObject root = new("Phase F-5 Three Floor Progression");
             GameObject playerObject = new("Phase F-5 Progression Player");
             playerObject.transform.SetParent(root.transform);
@@ -335,6 +344,7 @@ namespace TrickalFanGame.Editor
                 graph.Configure(Array.Empty<RoomNode>(), null, player, null, progress);
                 RoomGraphAssembler assembler = root.AddComponent<RoomGraphAssembler>();
                 assembler.Configure(generator, graph, progress, prefab);
+                assembler.ConfigureShop(configuredAssembler.ShopRoomPrefab, configuredAssembler.ShopCatalog);
                 Assert(assembler.TryApplyGeneratedGraphForVerification(
                     Week8RandomRoomSetup.FixedVerificationSeed, out error), error);
 

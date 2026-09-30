@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TrickalFanGame.Item;
 using TrickalFanGame.Resource;
+using TrickalFanGame.Shop;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -10,6 +11,7 @@ namespace TrickalFanGame.Room
     {
         private readonly Dictionary<string, RoomRunState> roomStates = new(StringComparer.Ordinal);
         private readonly Dictionary<string, ItemRewardSelectionState> rewardSelections = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, ShopStockState> shopStocks = new(StringComparer.Ordinal);
         private readonly RunResourceWallet resources = new();
         private string activeRewardSelectionId;
 
@@ -89,6 +91,25 @@ namespace TrickalFanGame.Room
         {
             return !string.IsNullOrWhiteSpace(roomId) && roomStates.TryGetValue(roomId, out RoomRunState state)
                 ? state : null;
+        }
+
+        public ShopStockState GetShopStock(string shopId)
+        {
+            return !string.IsNullOrWhiteSpace(shopId) && shopStocks.TryGetValue(shopId, out ShopStockState stock)
+                ? stock : null;
+        }
+
+        // A shop rolls its offers once per Run; later floor builds reuse the stored stock and its sold slots.
+        public ShopStockState GetOrCreateShopStock(string shopId, Func<ShopStockState> create)
+        {
+            if (string.IsNullOrWhiteSpace(shopId))
+                throw new ArgumentException("A shop stock requires a stable shop ID.", nameof(shopId));
+            if (shopStocks.TryGetValue(shopId, out ShopStockState existing)) return existing;
+            ShopStockState created = create?.Invoke();
+            if (created == null || created.ShopId != shopId)
+                throw new InvalidOperationException($"Shop stock factory must create stock '{shopId}'.");
+            shopStocks.Add(shopId, created);
+            return created;
         }
 
         public ItemRewardSelectionState GetRewardSelection(string rewardId)
@@ -241,6 +262,7 @@ namespace TrickalFanGame.Room
             activeRewardSelectionId = null;
             roomStates.Clear();
             rewardSelections.Clear();
+            shopStocks.Clear();
             resources.Clear();
             RewardSelectionStateChanged?.Invoke();
         }

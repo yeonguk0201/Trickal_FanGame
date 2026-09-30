@@ -74,9 +74,12 @@ namespace TrickalFanGame.Editor
                     .Append('[').Append(floor.StartingRoomId)
                     .Append('>').Append(floor.BossRoomId).Append("]{");
 
-                // Special-3 appends the secret room and hidden passages without changing existing rooms.
+                // Special-3/4 append the secret room, hidden passages, and the shop without changing existing rooms.
+                string[] appendedIds = floor.Nodes
+                    .Where(candidate => candidate.Role is GeneratedRoomRole.Secret or GeneratedRoomRole.Shop)
+                    .Select(candidate => candidate.RoomId).ToArray();
                 foreach (GeneratedRoomNode node in floor.Nodes.Where(candidate =>
-                                 candidate.Role != GeneratedRoomRole.Secret).OrderBy(candidate => candidate.RoomNumber))
+                                 !appendedIds.Contains(candidate.RoomId)).OrderBy(candidate => candidate.RoomNumber))
                 {
                     signature.Append(node.RoomId).Append('@')
                         .Append(node.GridPosition.X).Append(',').Append(node.GridPosition.Y).Append(':')
@@ -85,7 +88,8 @@ namespace TrickalFanGame.Editor
                         .Append(node.ContentSeed).Append('(');
 
                     foreach (GeneratedRoomConnection connection in node.DirectionalConnections
-                                 .Where(candidate => !candidate.IsSecret).OrderBy(candidate => candidate.Direction))
+                                 .Where(candidate => !appendedIds.Contains(candidate.DestinationRoomId))
+                                 .OrderBy(candidate => candidate.Direction))
                     {
                         signature.Append(connection.Direction).Append('>')
                             .Append(connection.DestinationRoomId).Append(',');

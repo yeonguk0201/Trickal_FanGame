@@ -5,6 +5,7 @@ using TrickalFanGame.Enemy;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
 using TrickalFanGame.Resource;
+using TrickalFanGame.Shop;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -21,6 +22,8 @@ namespace TrickalFanGame.Room
         [SerializeField] private GameObject[] floorBossPrefabs = Array.Empty<GameObject>();
         [SerializeField] private ItemRewardSelectionSession rewardSelectionSession;
         [SerializeField] private ItemDefinition[] selectionRewardPool = Array.Empty<ItemDefinition>();
+        [SerializeField] private ShopRoom shopRoomPrefab;
+        [SerializeField] private ShopCatalog shopCatalog;
 
         private GeneratedFloorGraph generatedGraph;
         private GameObject currentFloorRoot;
@@ -41,6 +44,8 @@ namespace TrickalFanGame.Room
         public GameObject CurrentFloorRoot => currentFloorRoot;
         public ItemRewardSelectionSession RewardSelectionSession => rewardSelectionSession;
         public IReadOnlyList<ItemDefinition> SelectionRewardPool => selectionRewardPool;
+        public ShopRoom ShopRoomPrefab => shopRoomPrefab;
+        public ShopCatalog ShopCatalog => shopCatalog;
 
         public void Configure(
             FloorGenerator configuredGenerator,
@@ -79,6 +84,12 @@ namespace TrickalFanGame.Room
         {
             rewardSelectionSession = configuredSession;
             selectionRewardPool = configuredPool ?? Array.Empty<ItemDefinition>();
+        }
+
+        public void ConfigureShop(ShopRoom configuredPrefab, ShopCatalog configuredCatalog)
+        {
+            shopRoomPrefab = configuredPrefab;
+            shopCatalog = configuredCatalog;
         }
 
         public GameObject ResolveBossPrefab(int floorNumber)
@@ -259,7 +270,7 @@ namespace TrickalFanGame.Room
                 instance.Controller.Configure(generatedNode.FloorNumber, generatedNode.RoomNumber, runProgress,
                     null, spawnPoints, blockers);
                 bool safeRoom = generatedNode.Role is GeneratedRoomRole.Start or GeneratedRoomRole.Treasure or
-                    GeneratedRoomRole.Secret;
+                    GeneratedRoomRole.Secret or GeneratedRoomRole.Shop;
                 instance.Controller.BindRunState(state, safeRoom);
                 if (!BindDestructibleObstacles(instance, generatedNode, state, secretLink, out error))
                 {
@@ -267,6 +278,11 @@ namespace TrickalFanGame.Room
                     return false;
                 }
                 if (!ApplyEncounter(instance, generatedNode, state, out error))
+                {
+                    DestroyFloor(nextRoot);
+                    return false;
+                }
+                if (generatedNode.Role == GeneratedRoomRole.Shop && !TryBuildShop(instance, generatedNode, out error))
                 {
                     DestroyFloor(nextRoot);
                     return false;
@@ -312,6 +328,7 @@ namespace TrickalFanGame.Room
                         doorways.Add(slot.Doorway);
                         bool isBossConnection = generatedNode.Role == GeneratedRoomRole.Boss ||
                                                 destinationGenerated.Role == GeneratedRoomRole.Boss;
+                        // Treasure and shop key locks share the golden door palette.
                         bool requiresKey = destinationGenerated.RequiresKey;
                         slot.Blocker.ConfigureVisualKind(
                             isBossConnection ? DoorVisualKind.Boss :
@@ -368,6 +385,29 @@ namespace TrickalFanGame.Room
             SecretPassageWall wall = slot.Seal.GetComponent<SecretPassageWall>();
             if (wall == null) wall = slot.Seal.AddComponent<SecretPassageWall>();
             wall.Bind(secretState, neighborId, () => Bind(false));
+        }
+
+        // Special-4: the shop's stalls go into the room content; the stock rolls on the first build and is reused after.
+        private bool TryBuildShop(RoomPrefab instance, GeneratedRoomNode node, out string error)
+        {
+            if (shopRoomPrefab == null || shopCatalog == null || !shopCatalog.TryValidate(out error))
+            {
+                error = $"Shop room {node.RoomId} requires a ShopRoom Prefab and a valid ShopCatalog.";
+                return false;
+            }
+
+            PlayerInventory inventory = graph.Player != null ? graph.Player.GetComponent<PlayerInventory>() : null;
+            ShopStockState stock = runProgress != null
+                ? runProgress.GetOrCreateShopStock(ShopStockBuilder.BuildShopId(node.RoomId), () =>
+                    ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog, selectionRewardPool, inventory))
+                : ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog, selectionRewardPool, inventory);
+            Transform content = instance.Node.ContentRoot.transform;
+            ShopRoom shop = Instantiate(shopRoomPrefab, content);
+            shop.name = $"Shop - {node.RoomId}";
+            shop.transform.localPosition = Vector3.zero;
+            shop.Configure(runProgress, stock, content);
+            error = null;
+            return true;
         }
 
         private RoomPrefab ResolveRoomPrefab(GeneratedRoomNode generatedNode, out string error)

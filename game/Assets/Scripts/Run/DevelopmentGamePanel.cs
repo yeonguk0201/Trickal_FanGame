@@ -64,6 +64,7 @@ namespace TrickalFanGame.Run
             DrawResourceSection(progress);
             DrawRoomSection(assembler);
             DrawSecretSection(assembler);
+            DrawShopSection(assembler);
 
             if (!string.IsNullOrEmpty(status)) GUILayout.Label(status);
             GUILayout.EndArea();
@@ -74,7 +75,8 @@ namespace TrickalFanGame.Run
             GUILayout.Label("— Seed —");
             GUILayout.BeginHorizontal();
             seedText = GUILayout.TextField(seedText, GUILayout.Width(150f));
-            if (GUILayout.Button("Find secret F1")) FindSecretSeed(assembler);
+            if (GUILayout.Button("Find secret F1")) FindSeed(assembler, GeneratedRoomRole.Secret);
+            if (GUILayout.Button("Find shop F1")) FindSeed(assembler, GeneratedRoomRole.Shop);
             GUILayout.EndHorizontal();
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
@@ -155,7 +157,24 @@ namespace TrickalFanGame.Run
             GUILayout.EndHorizontal();
         }
 
-        private void FindSecretSeed(RoomGraphAssembler assembler)
+        private void DrawShopSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Shop —");
+            GeneratedFloor floor = assembler.GeneratedGraph?.FindFloor(assembler.Progress.CurrentFloor);
+            GeneratedRoomNode shop = floor?.Nodes.FirstOrDefault(node => node.Role == GeneratedRoomRole.Shop);
+            if (shop == null)
+            {
+                GUILayout.Label("This floor has no shop.");
+                return;
+            }
+
+            RoomRunState state = assembler.Progress.GetRoomState(shop.RoomId);
+            GUILayout.Label($"{shop.RoomId} at {shop.GridPosition}, {(state?.IsKeyLockOpen == true ? "unlocked" : "locked")}");
+            if (GUILayout.Button("Go to shop door"))
+                Teleport(assembler, shop.DirectionalConnections[0].DestinationRoomId);
+        }
+
+        private void FindSeed(RoomGraphAssembler assembler, GeneratedRoomRole role)
         {
             if (assembler.Generator == null) return;
             int start = int.TryParse(seedText, out int typed) ? typed + 1 :
@@ -164,13 +183,13 @@ namespace TrickalFanGame.Run
             {
                 int seed = unchecked(start + offset);
                 if (!assembler.Generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out _)) continue;
-                if (graph.FindFloor(1)?.Nodes.Any(node => node.Role == GeneratedRoomRole.Secret) != true) continue;
+                if (graph.FindFloor(1)?.Nodes.Any(node => node.Role == role) != true) continue;
                 seedText = seed.ToString();
-                status = $"Seed {seed} has a floor-1 secret room.";
+                status = $"Seed {seed} has a floor-1 {role} room.";
                 return;
             }
 
-            status = "No secret-room seed found nearby.";
+            status = $"No {role} room seed found nearby.";
         }
 
         private void RestartWithSeed()

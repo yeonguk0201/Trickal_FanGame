@@ -16,6 +16,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Verify Room-4 Seeded Template Selection")]
         public static void Verify()
         {
+            Week18Obstacle2Setup.OpenGameScene();
             FloorGenerator generator = GameObject.Find(Week8RandomRoomSetup.GeneratorObjectName)
                 ?.GetComponent<FloorGenerator>();
             Assert(generator != null, "Run Room-4 Setup before verification.");
