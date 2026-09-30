@@ -174,7 +174,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 70
   currentShield: 0
@@ -220,15 +220,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ChargingEnemyController
   detectionRange: 7
+  minimumChargeDistance: 1
   pursuitSpeed: 2.75
   pursuitDuration: 0
   windupDuration: 0.65
-  dashSpeed: 8
+  dashSpeed: 9.5
   dashDuration: 0.8
   recoveryDuration: 0.6
   chargeCooldown: 1.5
   chargeDamageTier: 2
   target: {fileID: 0}
+  logChargeDiagnostics: 0
 --- !u!114 &3370441962758635034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -376,7 +378,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
   damageTier: 0
   cooldown: 1

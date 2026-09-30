@@ -45,7 +45,8 @@ namespace TrickalFanGame.Editor
                     renderer.color = Week15EnemyRoleColorSetup.LowBloodSugarColor;
                 }
 
-                charging.ConfigurePursuitCharge(7f, 2.75f, 1.1f, 0.65f, 8f, 0.8f, 0.75f, EnemyDamageTier.Heavy);
+                charging.ConfigurePursuitCharge(7f, 2.75f, 1.1f, 0.65f,
+                    Week19Tune1Setup.ChargingDashSpeed, 0.8f, 0.75f, EnemyDamageTier.Heavy);
                 if (PrefabUtility.SaveAsPrefabAsset(contents, Week15Enemy0Setup.ChargingPrefabPath) == null)
                 {
                     throw new UnityException("Failed to save the Enemy-3 charging prefab.");

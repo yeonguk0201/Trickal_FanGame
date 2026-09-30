@@ -30,8 +30,8 @@ namespace TrickalFanGame.Editor
                    Mathf.Approximately(ranged.Speed, 1.5f),
                 "Ranged must use HP 30, heavy projectile damage, and move speed 1.5.");
             Assert(charging.Health == 70 && charging.Damage == EnemyDamageTier.Heavy &&
-                   Mathf.Approximately(charging.Speed, 8f),
-                "Charging must use HP 70, heavy charge damage, and dash speed 8.");
+                   Mathf.Approximately(charging.Speed, Week19Tune1Setup.ChargingDashSpeed),
+                $"Charging must use HP 70, heavy charge damage, and dash speed {Week19Tune1Setup.ChargingDashSpeed}.");
 
             HashSet<float> speedValues = new() { chaser.Speed, ranged.Speed, charging.Speed };
             Assert(speedValues.Count == 3,

@@ -83,9 +83,9 @@ namespace TrickalFanGame.Editor
                    Approximately(quickController.FourShotChance, Week19Spawn2Setup.QuickFourShotChance) &&
                    Approximately(quickController.MaximumPredictionTime,
                        Week19Spawn2Setup.QuickMaximumPredictionTime) &&
-                   quickController.ProjectileDamageTier == EnemyDamageTier.Medium &&
+                   quickController.ProjectileDamageTier == Week19Tune1Setup.QuickRangedProjectileDamageTier &&
                    sniper.ProjectileDamageTier == EnemyDamageTier.Heavy,
-                "Quick ranged must move, predict, and burst-fire with the configured medium-damage contract.");
+                "Quick ranged must move, predict, and burst-fire with the configured Tune-1 damage contract.");
             Assert(roster.TryResolve(EncounterEnemyRole.Ranged, out GameObject resolved, out string error) &&
                    resolved == quick, error ?? "The Ranged role must resolve to the new quick ranged Prefab.");
         }

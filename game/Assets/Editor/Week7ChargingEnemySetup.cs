@@ -81,7 +81,8 @@ namespace TrickalFanGame.Editor
                 }
 
                 SetMaxHealth(contents.GetComponent<Health>(), 70);
-                charging.Configure(7f, 0.65f, 8f, 0.8f, 0.6f, 1.5f, EnemyDamageTier.Heavy);
+                charging.Configure(7f, 0.65f, Week19Tune1Setup.ChargingDashSpeed, 0.8f, 0.6f, 1.5f,
+                    EnemyDamageTier.Heavy);
                 Rigidbody2D body = contents.GetComponent<Rigidbody2D>();
                 if (body != null)
                 {

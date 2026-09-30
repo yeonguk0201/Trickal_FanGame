@@ -84,7 +84,8 @@ namespace TrickalFanGame.Editor
                     contents.AddComponent<LineRenderer>();
                 }
 
-                sniper.Configure(2.5f, 14f, 8f, 1f, 1f, 0.3f, 0.7f, 0.08f, 0.65f, 7f, EnemyDamageTier.Heavy, 5f);
+                sniper.Configure(2.5f, 14f, 8f, 1f, 1f, 0.3f, 0.7f, 0.08f, 0.65f,
+                    Week19Tune1Setup.SniperProjectileSpeed, EnemyDamageTier.Heavy, 5f);
                 Health health = contents.GetComponent<Health>();
                 if (health == null)
                 {

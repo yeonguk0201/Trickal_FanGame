@@ -90,7 +90,7 @@ namespace TrickalFanGame.Editor
             {
                 SetMaxHealth(contents.GetComponent<Health>(), 70);
                 contents.GetComponent<ChargingEnemyController>()
-                    .Configure(7f, 0.65f, 8f, 0.8f, 0.6f, 1.5f, EnemyDamageTier.Heavy);
+                    .Configure(7f, 0.65f, Week19Tune1Setup.ChargingDashSpeed, 0.8f, 0.6f, 1.5f, EnemyDamageTier.Heavy);
                 Save(contents, ChargingPrefabPath);
             }
             finally

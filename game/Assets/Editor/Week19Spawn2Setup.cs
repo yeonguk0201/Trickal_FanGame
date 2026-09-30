@@ -134,7 +134,7 @@ namespace TrickalFanGame.Editor
                     QuickBurstRestDuration,
                     QuickFourShotChance,
                     6.5f,
-                    EnemyDamageTier.Medium,
+                    Week19Tune1Setup.QuickRangedProjectileDamageTier,
                     5f,
                     QuickMaximumPredictionTime);
 
