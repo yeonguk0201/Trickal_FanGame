@@ -230,6 +230,10 @@ namespace TrickalFanGame.Room
             Dictionary<string, RoomPrefab> instances = new(StringComparer.Ordinal);
             Dictionary<string, GeneratedRoomNode> generatedNodes = new(StringComparer.Ordinal);
             List<RoomNode> nodes = new(floor.Nodes.Count);
+            GeneratedRoomNode secretRoom = null;
+            foreach (GeneratedRoomNode generatedNode in floor.Nodes)
+                if (generatedNode.Role == GeneratedRoomRole.Secret) secretRoom = generatedNode;
+            SecretRoomLink secretLink = secretRoom != null ? new SecretRoomLink(graph) : null;
             foreach (GeneratedRoomNode generatedNode in floor.Nodes)
             {
                 RoomPrefab sourcePrefab = ResolveRoomPrefab(generatedNode, out error);
@@ -254,9 +258,10 @@ namespace TrickalFanGame.Room
                     generatedNode.Role == GeneratedRoomRole.Boss ? 1 : int.MaxValue);
                 instance.Controller.Configure(generatedNode.FloorNumber, generatedNode.RoomNumber, runProgress,
                     null, spawnPoints, blockers);
-                bool safeRoom = generatedNode.Role == GeneratedRoomRole.Start || generatedNode.Role == GeneratedRoomRole.Treasure;
+                bool safeRoom = generatedNode.Role is GeneratedRoomRole.Start or GeneratedRoomRole.Treasure or
+                    GeneratedRoomRole.Secret;
                 instance.Controller.BindRunState(state, safeRoom);
-                if (!BindDestructibleObstacles(instance, generatedNode, state, out error))
+                if (!BindDestructibleObstacles(instance, generatedNode, state, secretLink, out error))
                 {
                     DestroyFloor(nextRoot);
                     return false;
@@ -276,7 +281,8 @@ namespace TrickalFanGame.Room
                         selectionRewardPool);
                 if (instance.RewardRoom != null)
                 {
-                    instance.RewardRoom.gameObject.SetActive(generatedNode.Role == GeneratedRoomRole.Treasure);
+                    instance.RewardRoom.gameObject.SetActive(generatedNode.Role is GeneratedRoomRole.Treasure or
+                        GeneratedRoomRole.Secret);
                     instance.RewardRoom.Configure(generatedNode.FloorNumber, generatedNode.RoomNumber,
                         runProgress, instance.RewardRoom.GetComponent<ItemDropSource>(), instance.Controller,
                         rewardSelectionSession, selectionRewardPool);
@@ -287,6 +293,7 @@ namespace TrickalFanGame.Room
                 nodes.Add(node);
             }
 
+            if (secretLink != null) secretLink.Target = instances[secretRoom.RoomId].Node;
             foreach (GeneratedRoomNode generatedNode in floor.Nodes)
             {
                 RoomPrefab instance = instances[generatedNode.RoomId];
@@ -299,15 +306,27 @@ namespace TrickalFanGame.Room
                     if (generatedNode.TryGetConnection(direction, out GeneratedRoomConnection connection))
                     {
                         RoomPrefab destinationPrefab = instances[connection.DestinationRoomId];
+                        GeneratedRoomNode destinationGenerated = generatedNodes[connection.DestinationRoomId];
                         destination = destinationPrefab.Node;
                         entry = destinationPrefab.FindSlot(GeneratedFloorGraph.Opposite(direction)).EntryPoint;
                         doorways.Add(slot.Doorway);
                         bool isBossConnection = generatedNode.Role == GeneratedRoomRole.Boss ||
-                                                generatedNodes[connection.DestinationRoomId].Role == GeneratedRoomRole.Boss;
+                                                destinationGenerated.Role == GeneratedRoomRole.Boss;
+                        bool requiresKey = destinationGenerated.RequiresKey;
                         slot.Blocker.ConfigureVisualKind(
-                            isBossConnection ? DoorVisualKind.Boss : DoorVisualKind.Normal);
+                            isBossConnection ? DoorVisualKind.Boss :
+                            requiresKey ? DoorVisualKind.KeyLockedTreasure :
+                            connection.IsSecret ? DoorVisualKind.SecretPassage : DoorVisualKind.Normal);
+                        if (connection.IsSecret)
+                            BindSecretPassage(slot, instance, generatedNode, destination, entry, destinationGenerated);
+                        else
+                            slot.Bind(graph, instance.Node, destination, entry, instance.Controller,
+                                requiresKey, runProgress?.GetRoomState(destinationGenerated.RoomId));
                     }
-                    slot.Bind(graph, instance.Node, destination, entry, instance.Controller);
+                    else
+                    {
+                        slot.Bind(graph, instance.Node, null, null, instance.Controller);
+                    }
                 }
                 instance.Node.SetDoorways(doorways.ToArray());
                 instance.Node.SetVisible(false);
@@ -326,6 +345,29 @@ namespace TrickalFanGame.Room
             currentFloorRoot = nextRoot;
             if (previousRoot != null) DestroyFloor(previousRoot);
             return true;
+        }
+
+        // Special-3: a hidden passage stays a sealed wall until the secret room state opens it, from a bomb on either
+        // wall or from entering the secret room. The same state drives both sides, and it survives floor rebuilds.
+        private void BindSecretPassage(RoomDoorSlot slot, RoomPrefab instance, GeneratedRoomNode generatedNode,
+            RoomNode destination, Transform entry, GeneratedRoomNode destinationGenerated)
+        {
+            bool fromSecret = generatedNode.Role == GeneratedRoomRole.Secret;
+            string secretId = fromSecret ? generatedNode.RoomId : destinationGenerated.RoomId;
+            string neighborId = fromSecret ? destinationGenerated.RoomId : generatedNode.RoomId;
+            RoomRunState secretState = runProgress?.GetRoomState(secretId);
+            bool requiresKey = destinationGenerated.RequiresKey;
+            RoomRunState keyLockState = runProgress?.GetRoomState(destinationGenerated.RoomId);
+            RoomGraphController graphController = graph;
+            RoomNode source = instance.Node;
+            RoomController sourceRoom = instance.Controller;
+            void Bind(bool isSealed) => slot.Bind(graphController, source, destination, entry, sourceRoom,
+                requiresKey, keyLockState, isSealed);
+
+            Bind(secretState?.IsSecretPassageOpen(neighborId) != true);
+            SecretPassageWall wall = slot.Seal.GetComponent<SecretPassageWall>();
+            if (wall == null) wall = slot.Seal.AddComponent<SecretPassageWall>();
+            wall.Bind(secretState, neighborId, () => Bind(false));
         }
 
         private RoomPrefab ResolveRoomPrefab(GeneratedRoomNode generatedNode, out string error)
@@ -423,8 +465,14 @@ namespace TrickalFanGame.Room
         }
 
         private bool BindDestructibleObstacles(RoomPrefab instance, GeneratedRoomNode node, RoomRunState state,
-            out string error)
+            SecretRoomLink secretLink, out string error)
         {
+            if (!RoomObstacleVariantSlot.TryResolveForRoom(instance, node.ContentSeed, out error))
+            {
+                error = $"Room {node.RoomId} could not resolve its obstacle variants. {error}";
+                return false;
+            }
+
             HashSet<string> ids = new(StringComparer.Ordinal);
             foreach (DestructibleObstacle obstacle in instance.GetComponentsInChildren<DestructibleObstacle>(true))
             {
@@ -435,7 +483,8 @@ namespace TrickalFanGame.Room
                     return false;
                 }
 
-                obstacle.Bind(state, node.ContentSeed, instance.Node.ContentRoot.transform, runProgress);
+                obstacle.Bind(state, node.ContentSeed, instance.Node.ContentRoot.transform, runProgress, secretLink,
+                    instance.Node, instance.Controller);
             }
 
             error = null;
@@ -678,16 +727,35 @@ namespace TrickalFanGame.Room
         {
             foreach (RoomDoorway doorway in binding.OrderedDoorways)
             {
+                GeneratedRoomNode destinationGenerated = FindGeneratedNode(doorway.Destination.RoomId);
+                bool requiresKey = destinationGenerated?.RequiresKey == true;
+                DoorController visual = doorway.GetComponentInChildren<DoorController>();
+                visual?.ConfigureVisualKind(requiresKey
+                    ? DoorVisualKind.KeyLockedTreasure
+                    : DoorVisualKind.Normal);
                 doorway.Configure(
                     graph,
                     binding.SceneNode,
                     doorway.Destination,
                     doorway.DestinationEntryPoint,
                     doorway.RequiredClearedRoom,
-                    doorway.AllowsOneWay);
+                    doorway.AllowsOneWay,
+                    requiresKey,
+                    runProgress?.GetRoomState(destinationGenerated?.RoomId),
+                    visual);
             }
 
             binding.SceneNode.SetDoorways(binding.OrderedDoorways);
+        }
+
+        private GeneratedRoomNode FindGeneratedNode(string roomId)
+        {
+            if (generatedGraph != null)
+            {
+                foreach (GeneratedRoomNode node in generatedGraph.Nodes)
+                    if (string.Equals(node.RoomId, roomId, StringComparison.Ordinal)) return node;
+            }
+            return null;
         }
 
         private sealed class RoomBinding

@@ -57,7 +57,8 @@ namespace TrickalFanGame.Editor
 
                 foreach (GeneratedFloor floor in first.Floors)
                 {
-                    Assert(floor.Nodes.Count >= 6 && floor.Nodes.Count <= 8,
+                    int regularRooms = floor.Nodes.Count(node => node.Role != GeneratedRoomRole.Secret);
+                    Assert(regularRooms >= 6 && regularRooms <= 8 && floor.Nodes.Count - regularRooms <= 1,
                         $"Seed {seed} floor {floor.FloorNumber} has an invalid room count.");
                     Assert(floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Start) == 1 &&
                            floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Boss) == 1,
@@ -114,6 +115,7 @@ namespace TrickalFanGame.Editor
             RoomGraphController graph = assembler.Graph;
             SerializedObject serializedGraph = new(graph);
             serializedGraph.FindProperty("transitionCooldown").floatValue = 0f;
+            serializedGraph.FindProperty("returnDoorwayBlockDuration").floatValue = 0f;
             serializedGraph.ApplyModifiedPropertiesWithoutUndo();
             RoomNode first = graph.Nodes.Single(node => node.RoomId == firstRoomId);
             RoomNode second = graph.Nodes.Single(node => node.RoomId == secondRoomId);
@@ -215,8 +217,9 @@ namespace TrickalFanGame.Editor
                 if (!generator.TryGenerateForSeed(candidateSeed, out GeneratedFloorGraph graph, out _)) continue;
                 foreach (GeneratedRoomNode node in graph.Nodes)
                 foreach (GeneratedRoomConnection connection in node.DirectionalConnections.Where(connection =>
-                             connection.Direction == RoomDoorDirection.Left ||
-                             connection.Direction == RoomDoorDirection.Right))
+                             !connection.IsSecret &&
+                             (connection.Direction == RoomDoorDirection.Left ||
+                              connection.Direction == RoomDoorDirection.Right)))
                 {
                     GeneratedRoomNode other = graph.Nodes.First(candidate =>
                         candidate.RoomId == connection.DestinationRoomId);

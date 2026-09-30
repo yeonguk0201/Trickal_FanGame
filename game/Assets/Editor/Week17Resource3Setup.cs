@@ -102,7 +102,7 @@ namespace TrickalFanGame.Editor
             return table;
         }
 
-        // Stable drop IDs to pickup prefabs. "pit" stays empty until the secret room passage exists (Special-3).
+        // Stable drop IDs to pickup prefabs. "pit" is the Special-3 secret pit, which leads to the floor's secret room.
         public static GameObject LoadDropPrefab(string dropId)
         {
             switch (dropId)
@@ -126,7 +126,7 @@ namespace TrickalFanGame.Editor
                         : dropId == "key" ? RunResourceType.Key : RunResourceType.Bomb;
                     return Week17Resource1Setup.LoadPrefab(type).gameObject;
                 case "pit":
-                    return null;
+                    return Week20Special3Setup.EnsureSecretPitPrefab().gameObject;
                 default:
                     throw new InvalidOperationException($"Unknown drop '{dropId}'.");
             }

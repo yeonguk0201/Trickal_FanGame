@@ -149,7 +149,8 @@ namespace TrickalFanGame.Editor
                 collider.includeLayers = LayerMask.GetMask("Enemy");
                 collider.excludeLayers = 0;
                 collider.layerOverridePriority = 1;
-                SetFloat(contents.GetComponent<Health>(), "maxHealth", 50f);
+                // Two floor-1 hits at the base attack damage of 10.
+                SetFloat(contents.GetComponent<Health>(), "maxHealth", 20f);
                 TestEnemy obstacle = contents.GetComponent<TestEnemy>();
                 obstacle.ConfigureReward(false);
                 obstacle.ConfigureBossCollision(true);

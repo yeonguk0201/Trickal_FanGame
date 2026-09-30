@@ -1330,7 +1330,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.2, y: 0.3}
+  m_Size: {x: 1.6, y: 0.3}
   m_EdgeRadius: 0
 --- !u!114 &4020093167907055599
 MonoBehaviour:
@@ -2729,7 +2729,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.2, y: 0.3}
+  m_Size: {x: 1.6, y: 0.3}
   m_EdgeRadius: 0
 --- !u!114 &6408542339360529057
 MonoBehaviour:
@@ -3815,7 +3815,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.3, y: 2.2}
+  m_Size: {x: 0.3, y: 1.6}
   m_EdgeRadius: 0
 --- !u!114 &2433683983823243335
 MonoBehaviour:
@@ -3912,7 +3912,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.3, y: 2.2}
+  m_Size: {x: 0.3, y: 1.6}
   m_EdgeRadius: 0
 --- !u!114 &1641480893317064168
 MonoBehaviour:
@@ -3991,8 +3991,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3572122502397127060}
   m_SourcePrefab: {fileID: 100100000, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+--- !u!1 &457708268496307304 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+  m_PrefabInstance: {fileID: 1546977299353006644}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3572122502397127060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 457708268496307304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d0718375ef4bc1a80d9bc7bdd5a815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomObstacleVariantSlot
+  variantTable: {fileID: 11400000, guid: 65bedf6089c570a41a59458ba053a658, type: 2}
 --- !u!4 &5787473653584513699 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4982893477891225751, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
@@ -4057,8 +4078,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2111603242495697410}
   m_SourcePrefab: {fileID: 100100000, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+--- !u!1 &785812407027117229 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+  m_PrefabInstance: {fileID: 1858342524386417393}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2111603242495697410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785812407027117229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d0718375ef4bc1a80d9bc7bdd5a815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomObstacleVariantSlot
+  variantTable: {fileID: 11400000, guid: 65bedf6089c570a41a59458ba053a658, type: 2}
 --- !u!4 &6695976994986730086 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4982893477891225751, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
@@ -4123,8 +4165,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6483205163781259260}
   m_SourcePrefab: {fileID: 100100000, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+--- !u!1 &3909898225026027637 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+  m_PrefabInstance: {fileID: 2697466162264368681}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6483205163781259260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3909898225026027637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d0718375ef4bc1a80d9bc7bdd5a815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomObstacleVariantSlot
+  variantTable: {fileID: 11400000, guid: 65bedf6089c570a41a59458ba053a658, type: 2}
 --- !u!4 &6938243936166502078 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4982893477891225751, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
@@ -4185,8 +4248,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7505215705295082698}
   m_SourcePrefab: {fileID: 100100000, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+--- !u!1 &4145770393890092439 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+  m_PrefabInstance: {fileID: 3072950985280865227}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7505215705295082698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4145770393890092439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d0718375ef4bc1a80d9bc7bdd5a815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomObstacleVariantSlot
+  variantTable: {fileID: 11400000, guid: 65bedf6089c570a41a59458ba053a658, type: 2}
 --- !u!4 &8035437221836979036 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4982893477891225751, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
@@ -4251,13 +4335,34 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7658610292976918776}
   m_SourcePrefab: {fileID: 100100000, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
 --- !u!4 &1081152440261186697 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4982893477891225751, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
   m_PrefabInstance: {fileID: 5343465283195612190}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6415977777781905986 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+  m_PrefabInstance: {fileID: 5343465283195612190}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7658610292976918776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415977777781905986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d0718375ef4bc1a80d9bc7bdd5a815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomObstacleVariantSlot
+  variantTable: {fileID: 11400000, guid: 65bedf6089c570a41a59458ba053a658, type: 2}
 --- !u!1001 &7152651982125527614
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4317,13 +4422,34 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6978627629655440576}
   m_SourcePrefab: {fileID: 100100000, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
 --- !u!4 &2766784823854156457 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4982893477891225751, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
   m_PrefabInstance: {fileID: 7152651982125527614}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8101623345917314146 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+  m_PrefabInstance: {fileID: 7152651982125527614}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6978627629655440576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8101623345917314146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d0718375ef4bc1a80d9bc7bdd5a815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomObstacleVariantSlot
+  variantTable: {fileID: 11400000, guid: 65bedf6089c570a41a59458ba053a658, type: 2}
 --- !u!1001 &8234406098811632019
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4383,13 +4509,34 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5442007148254658755}
   m_SourcePrefab: {fileID: 100100000, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
 --- !u!4 &3990391097354027268 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4982893477891225751, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
   m_PrefabInstance: {fileID: 8234406098811632019}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7019862973678489551 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+  m_PrefabInstance: {fileID: 8234406098811632019}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5442007148254658755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7019862973678489551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d0718375ef4bc1a80d9bc7bdd5a815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomObstacleVariantSlot
+  variantTable: {fileID: 11400000, guid: 65bedf6089c570a41a59458ba053a658, type: 2}
 --- !u!1001 &8879450226700910446
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4449,10 +4596,31 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6158023690105278987}
   m_SourcePrefab: {fileID: 100100000, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
 --- !u!4 &4475715841296812025 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4982893477891225751, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
   m_PrefabInstance: {fileID: 8879450226700910446}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7500684126471113010 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1382020792111085148, guid: 6e7f8cccfd3d2bd4d9a372615813307c, type: 3}
+  m_PrefabInstance: {fileID: 8879450226700910446}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6158023690105278987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7500684126471113010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d0718375ef4bc1a80d9bc7bdd5a815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomObstacleVariantSlot
+  variantTable: {fileID: 11400000, guid: 65bedf6089c570a41a59458ba053a658, type: 2}

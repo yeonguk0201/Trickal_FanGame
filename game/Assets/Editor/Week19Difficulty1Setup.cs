@@ -130,7 +130,8 @@ namespace TrickalFanGame.Editor
 
         private static void ConfigureLayoutModifiers(FloorGenerator generator)
         {
-            string[] obstacleLayouts = Week18Obstacle2Setup.Layouts.Select(layout => layout.TemplateId).ToArray();
+            string[] obstacleLayouts = Week18Obstacle2Setup.Layouts.Select(layout => layout.TemplateId)
+                .Concat(Week20Obstacle4Setup.Layouts.Select(layout => layout.TemplateId)).ToArray();
             foreach (RoomTemplateDefinition template in generator.RoomTemplates.Where(template => template != null))
             {
                 int modifier = obstacleLayouts.Contains(template.TemplateId, StringComparer.Ordinal)

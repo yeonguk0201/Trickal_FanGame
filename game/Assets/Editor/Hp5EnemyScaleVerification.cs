@@ -16,12 +16,13 @@ namespace TrickalFanGame.Editor
         private const float PlayerAttackDamage = 10f;
         private const float SaemaeumHealPerUse = 150f;
 
-        // D-7: every enemy-side HP value is 10x its pre-HP-5 value.
+        // D-7: every enemy-side HP value is 10x its pre-HP-5 value, except the Buseureogi obstacles that were
+        // retuned to two base-damage hits (20) on 2026-09-30.
         private static readonly (string Prefab, float Health)[] EnemyHealth =
         {
             ("TestEnemy", 60f), ("SansamoEnemy", 40f), ("RangedEnemy", 30f), ("HighBloodSugarFairy", 30f),
-            ("ChargingEnemy", 70f), ("BuseureogiCrumbMinion", 30f), ("BuseureogiCreamObstacle", 50f),
-            ("BuseureogiDoughObstacle", 50f), ("CrayonAxeMinion", 40f), ("CrayonShieldMinion", 40f),
+            ("ChargingEnemy", 70f), ("BuseureogiCrumbMinion", 30f), ("BuseureogiCreamObstacle", 20f),
+            ("BuseureogiDoughObstacle", 20f), ("CrayonAxeMinion", 40f), ("CrayonShieldMinion", 40f),
             ("CrayonArcherMinion", 30f), ("CrayonMageMinion", 30f), ("TestBoss", 250f),
             ("SaemaeumVaultBoss", 800f), ("CrayonHeroBoss", 1100f),
         };

@@ -44,6 +44,10 @@ namespace TrickalFanGame.Run
         private CreateRunRequest pendingRequest;
         private IGameApiClient apiClient;
         private static int? lastGeneratedRunSeed;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Development panel only: the next Run starts with this seed instead of a random one, then it clears.
+        public static int? DevelopmentSeedOverride { get; set; }
+#endif
 
         public bool HasStarted => hasStarted;
         public bool HasEnded => hasEnded;
@@ -249,6 +253,13 @@ namespace TrickalFanGame.Run
             }
 
             int generatedSeed = CreateRunSeed();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (DevelopmentSeedOverride.HasValue)
+            {
+                generatedSeed = DevelopmentSeedOverride.Value;
+                DevelopmentSeedOverride = null;
+            }
+#endif
             if (runProgress.TryInitializeRunSeed(generatedSeed, out string error))
             {
                 return true;

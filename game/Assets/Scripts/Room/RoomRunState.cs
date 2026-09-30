@@ -12,9 +12,34 @@ namespace TrickalFanGame.Room
         public bool HasClaimedArtifact { get; private set; }
         public int CompletedWaveCount { get; private set; }
         public bool HasGrantedClearReward { get; private set; }
+        public bool IsKeyLockOpen { get; private set; }
         public IReadOnlyCollection<string> DestroyedObstacleIds => destroyedObstacleIds;
         private readonly HashSet<string> destroyedObstacleIds = new(StringComparer.Ordinal);
+        // Secret rooms only: neighbor room IDs whose hidden passage is open on both sides.
+        public IReadOnlyCollection<string> OpenedSecretPassages => openedSecretPassages;
+        private readonly HashSet<string> openedSecretPassages = new(StringComparer.Ordinal);
+        public bool IsSecretDiscovered => HasVisited || openedSecretPassages.Count > 0;
         public event Action Changed;
+
+        public bool IsSecretPassageOpen(string neighborRoomId) =>
+            !string.IsNullOrWhiteSpace(neighborRoomId) && openedSecretPassages.Contains(neighborRoomId);
+
+        public bool TryOpenSecretPassage(string neighborRoomId)
+        {
+            if (string.IsNullOrWhiteSpace(neighborRoomId) || !openedSecretPassages.Add(neighborRoomId)) return false;
+            Changed?.Invoke();
+            return true;
+        }
+
+        // Entering the secret room opens every hidden passage it has, so the player can walk out either way.
+        public bool TryOpenSecretPassages(IEnumerable<string> neighborRoomIds)
+        {
+            bool opened = false;
+            foreach (string neighborRoomId in neighborRoomIds)
+                opened |= !string.IsNullOrWhiteSpace(neighborRoomId) && openedSecretPassages.Add(neighborRoomId);
+            if (opened) Changed?.Invoke();
+            return opened;
+        }
 
         public void MarkVisited()
         {
@@ -75,6 +100,14 @@ namespace TrickalFanGame.Room
             if (HasGrantedClearReward) return false;
             HasVisited = true;
             HasGrantedClearReward = true;
+            Changed?.Invoke();
+            return true;
+        }
+
+        public bool TryOpenKeyLock()
+        {
+            if (IsKeyLockOpen) return false;
+            IsKeyLockOpen = true;
             Changed?.Invoke();
             return true;
         }

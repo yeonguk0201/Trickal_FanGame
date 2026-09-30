@@ -30,5 +30,5 @@ MonoBehaviour:
     prefab: {fileID: 1421089735375027616, guid: 615b40b3d6223ad4a9363c3e586e6072, type: 3}
     weight: 30
   - dropId: pit
-    prefab: {fileID: 0}
+    prefab: {fileID: 7750439286643652206, guid: 57d675207a33ad145a3bd3dd8b5f7312, type: 3}
     weight: 2

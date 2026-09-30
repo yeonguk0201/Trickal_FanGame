@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TrickalFanGame.Room
 {
-    public enum GeneratedRoomRole { Start, Intermediate, Treasure, Boss }
+    public enum GeneratedRoomRole { Start, Intermediate, Treasure, Boss, Secret }
     public enum RoomDoorDirection { Left, Right, Up, Down }
 
     public readonly struct RoomGridPosition : IEquatable<RoomGridPosition>
@@ -26,10 +26,13 @@ namespace TrickalFanGame.Room
 
     public readonly struct GeneratedRoomConnection
     {
-        public GeneratedRoomConnection(RoomDoorDirection direction, string destinationRoomId)
-        { Direction = direction; DestinationRoomId = destinationRoomId; }
+        public GeneratedRoomConnection(RoomDoorDirection direction, string destinationRoomId, bool isSecret = false)
+        { Direction = direction; DestinationRoomId = destinationRoomId; IsSecret = isSecret; }
         public RoomDoorDirection Direction { get; }
         public string DestinationRoomId { get; }
+        // A hidden passage to or from the floor's secret room. It stays a wall until a bomb or an entry opens it,
+        // so required-route checks (boss distance, key-lock bypass, difficulty distance) ignore it.
+        public bool IsSecret { get; }
     }
 
     public sealed class GeneratedRoomNode
@@ -60,6 +63,7 @@ namespace TrickalFanGame.Room
             Array.Empty<ResolvedEncounterSpawn[]>();
         public bool HasDifficulty { get; private set; }
         public GeneratedRoomDifficulty Difficulty { get; private set; }
+        public bool RequiresKey { get; private set; }
         public RoomType RoomType => Definition != null ? Definition.RoomType : RoomType.Normal;
         public IReadOnlyList<GeneratedRoomConnection> DirectionalConnections => connections;
         public IReadOnlyList<string> ConnectedRoomIds
@@ -77,16 +81,23 @@ namespace TrickalFanGame.Room
                 if (candidate.Direction == direction) { connection = candidate; return true; }
             connection = default; return false;
         }
-        internal void ConnectTo(RoomDoorDirection direction, string destinationRoomId)
+        internal void ConnectTo(RoomDoorDirection direction, string destinationRoomId, bool isSecret = false)
         {
             if (TryGetConnection(direction, out _))
                 throw new InvalidOperationException($"Room {RoomId} already has a {direction} connection.");
-            connections.Add(new GeneratedRoomConnection(direction, destinationRoomId));
+            connections.Add(new GeneratedRoomConnection(direction, destinationRoomId, isSecret));
         }
 
         internal void AssignTemplate(RoomTemplateDefinition template)
         {
             Template = template;
+        }
+
+        internal void AssignKeyRequirement(bool requiresKey)
+        {
+            if (requiresKey && Role != GeneratedRoomRole.Treasure)
+                throw new InvalidOperationException($"Only treasure rooms can require a key: {RoomId}.");
+            RequiresKey = requiresKey;
         }
 
         internal void AssignEncounter(EncounterDefinition encounter,
@@ -163,7 +174,7 @@ namespace TrickalFanGame.Room
         private bool TryValidateFloor(GeneratedFloor floor, HashSet<string> globalIds, out string error)
         {
             Dictionary<string, GeneratedRoomNode> byId = new(StringComparer.Ordinal);
-            List<RoomGridPosition> positions = new(); int starts = 0, bosses = 0, treasures = 0;
+            List<RoomGridPosition> positions = new(); int starts = 0, bosses = 0, treasures = 0, secrets = 0;
             foreach (GeneratedRoomNode node in floor.Nodes)
             {
                 if (node == null || node.FloorNumber != floor.FloorNumber ||
@@ -181,16 +192,20 @@ namespace TrickalFanGame.Room
                 starts += node.Role == GeneratedRoomRole.Start ? 1 : 0;
                 bosses += node.Role == GeneratedRoomRole.Boss ? 1 : 0;
                 treasures += node.Role == GeneratedRoomRole.Treasure ? 1 : 0;
+                secrets += node.Role == GeneratedRoomRole.Secret ? 1 : 0;
                 bool validRoleType = node.Role switch
                 {
                     GeneratedRoomRole.Start => node.RoomType == RoomType.Normal,
                     GeneratedRoomRole.Intermediate => node.RoomType == RoomType.Normal,
                     GeneratedRoomRole.Treasure => node.RoomType == RoomType.Reward,
                     GeneratedRoomRole.Boss => node.RoomType == RoomType.Boss,
+                    GeneratedRoomRole.Secret => node.RoomType == RoomType.Reward,
                     _ => false,
                 };
                 if (!validRoleType)
                 { error = $"Room {node.RoomId} role {node.Role} does not match definition type {node.RoomType}."; return false; }
+                if (node.RequiresKey && node.Role != GeneratedRoomRole.Treasure)
+                { error = $"Room {node.RoomId} requires a key but is not a treasure room."; return false; }
                 if (node.Template != null &&
                     (!node.Template.SupportsRoomType(node.RoomType) ||
                      !node.Template.SupportsConnections(node.DirectionalConnections)))
@@ -201,6 +216,8 @@ namespace TrickalFanGame.Room
                          node.DirectionalConnections, out error)))
                 { error = $"Room {node.RoomId} has an incompatible Encounter '{node.EncounterId}'. {error}"; return false; }
             }
+            if (secrets > 1)
+            { error = $"Floor {floor.FloorNumber} has {secrets} secret rooms; at most one is allowed."; return false; }
             if (starts != 1 || bosses != 1 || treasures < 1 ||
                 !byId.ContainsKey(floor.StartingRoomId) || !byId.ContainsKey(floor.BossRoomId))
             { error = $"Floor {floor.FloorNumber} must have one start, one boss, and at least one treasure room."; return false; }
@@ -213,15 +230,60 @@ namespace TrickalFanGame.Room
                         connection.DestinationRoomId == node.RoomId || !byId.TryGetValue(connection.DestinationRoomId, out GeneratedRoomNode destination))
                     { error = $"Room {node.RoomId} has a duplicate, self, or missing connection."; return false; }
                     if (!destination.GridPosition.Equals(node.GridPosition.Offset(connection.Direction)) ||
-                        !destination.TryGetConnection(Opposite(connection.Direction), out GeneratedRoomConnection reverse) || reverse.DestinationRoomId != node.RoomId)
+                        !destination.TryGetConnection(Opposite(connection.Direction), out GeneratedRoomConnection reverse) || reverse.DestinationRoomId != node.RoomId ||
+                        reverse.IsSecret != connection.IsSecret)
                     { error = $"Room {node.RoomId} has a direction or reverse-link mismatch at {connection.Direction}."; return false; }
+                    bool touchesSecret = node.Role == GeneratedRoomRole.Secret || destination.Role == GeneratedRoomRole.Secret;
+                    if (connection.IsSecret != touchesSecret ||
+                        (touchesSecret && (node.Role is GeneratedRoomRole.Start or GeneratedRoomRole.Boss ||
+                                           destination.Role is GeneratedRoomRole.Start or GeneratedRoomRole.Boss)))
+                    { error = $"Room {node.RoomId} has an invalid secret passage at {connection.Direction}."; return false; }
                 }
             }
             Dictionary<string, int> distances = Distances(floor.StartingRoomId, byId);
-            if (distances.Count != floor.Nodes.Count || !distances.TryGetValue(floor.BossRoomId, out int bossDistance) ||
+            int secretRooms = 0;
+            foreach (GeneratedRoomNode node in floor.Nodes)
+            {
+                if (node.Role != GeneratedRoomRole.Secret) continue;
+                secretRooms++;
+                if (node.DirectionalConnections.Count == 0)
+                { error = $"Secret room {node.RoomId} needs at least one hidden passage."; return false; }
+            }
+            // Secret rooms are reachable only through hidden passages; every other room needs a regular route.
+            if (distances.Count != floor.Nodes.Count - secretRooms ||!distances.TryGetValue(floor.BossRoomId, out int bossDistance) ||
                 bossDistance < MinimumBossDistance || byId[floor.BossRoomId].DirectionalConnections.Count != 1)
             { error = $"Floor {floor.FloorNumber} is disconnected or its boss is not an end room at distance {MinimumBossDistance}+."; return false; }
+            foreach (GeneratedRoomNode node in floor.Nodes)
+            {
+                if (node.RequiresKey && !CanReachWithoutRoomForGeneration(
+                        floor.StartingRoomId, floor.BossRoomId, node.RoomId, byId))
+                {
+                    error = $"Locked treasure room {node.RoomId} blocks the required boss route.";
+                    return false;
+                }
+            }
             error = null; return true;
+        }
+
+        internal static bool CanReachWithoutRoomForGeneration(string start, string destination, string excluded,
+            IReadOnlyDictionary<string, GeneratedRoomNode> byId)
+        {
+            if (start == excluded || destination == excluded) return false;
+            HashSet<string> visited = new(StringComparer.Ordinal) { start };
+            Queue<string> queue = new();
+            queue.Enqueue(start);
+            while (queue.Count > 0)
+            {
+                string current = queue.Dequeue();
+                if (current == destination) return true;
+                foreach (GeneratedRoomConnection connection in byId[current].DirectionalConnections)
+                {
+                    if (!connection.IsSecret && connection.DestinationRoomId != excluded &&
+                        visited.Add(connection.DestinationRoomId))
+                        queue.Enqueue(connection.DestinationRoomId);
+                }
+            }
+            return false;
         }
 
         private static Dictionary<string, int> Distances(string start, IReadOnlyDictionary<string, GeneratedRoomNode> byId)
@@ -231,7 +293,8 @@ namespace TrickalFanGame.Room
             {
                 string current = queue.Dequeue();
                 foreach (GeneratedRoomConnection connection in byId[current].DirectionalConnections)
-                    if (result.TryAdd(connection.DestinationRoomId, result[current] + 1)) queue.Enqueue(connection.DestinationRoomId);
+                    if (!connection.IsSecret && result.TryAdd(connection.DestinationRoomId, result[current] + 1))
+                        queue.Enqueue(connection.DestinationRoomId);
             }
             return result;
         }
@@ -247,7 +310,10 @@ namespace TrickalFanGame.Room
     public sealed class FloorGenerator : MonoBehaviour
     {
         private const uint FloorSalt = 0xA341316Cu, TopologySalt = 0xC8013EA4u,
-            ContentSalt = 0xAD90777Du, AttemptSalt = 0x7E95761Eu;
+            ContentSalt = 0xAD90777Du, AttemptSalt = 0x7E95761Eu, TreasureLockSalt = 0x4B455931u,
+            SecretRoomSalt = 0x53435254u;
+        public const int TreasureLockPercent = 50;
+        public const int SecretRoomPercent = 50;
         [SerializeField, Min(1)] private int floorCount = 3;
         [SerializeField, Min(3)] private int minimumRoomsPerFloor = 6;
         [SerializeField, Min(3)] private int maximumRoomsPerFloor = 8;
@@ -389,10 +455,76 @@ namespace TrickalFanGame.Room
                 }
                 for (int i = 0; i < rooms.Count; i++) foreach (MutableConnection c in rooms[i].Connections)
                     nodes[i].ConnectTo(c.Direction, nodes[c.Destination].RoomId);
-                floor = new GeneratedFloor(floorNumber, floorSeed, topologySeed, contentSeed,
+                Dictionary<string, GeneratedRoomNode> byId = new(StringComparer.Ordinal);
+                foreach (GeneratedRoomNode node in nodes) byId.Add(node.RoomId, node);
+                GeneratedRoomNode treasure = nodes[treasureIndex];
+                bool optionalRoute = GeneratedFloorGraph.CanReachWithoutRoomForGeneration(
+                    nodes[0].RoomId, nodes[bossIndex].RoomId, treasure.RoomId, byId);
+                uint lockRoll = unchecked((uint)DeriveSeed(contentSeed, treasure.RoomNumber, TreasureLockSalt));
+                treasure.AssignKeyRequirement(optionalRoute && lockRoll % 100u < TreasureLockPercent);
+                nodes = AppendSecretRoom(floorNumber, contentSeed, nodes, reward);
+                floor =new GeneratedFloor(floorNumber, floorSeed, topologySeed, contentSeed,
                     nodes[0].RoomId, nodes[bossIndex].RoomId, nodes); error = null; return true;
             }
             floor = null; error = $"Could not place an end-room boss at distance {minimumBossDistance}+ and a separate treasure room."; return false;
+        }
+
+        // Special-3: an independent floor-content roll adds at most one secret room after the regular rooms, so it
+        // never changes existing room numbers, roles, positions, or seeds. It takes the empty grid cell touching the
+        // most rooms (ties by seed) that is not next to the start or boss room, and links every touching room through
+        // a hidden passage. A Basic 16x9 room fits beside every profile on the 20x13 grid, so template selection
+        // cannot run out of space for it.
+        private static GeneratedRoomNode[] AppendSecretRoom(int floorNumber, int contentSeed, GeneratedRoomNode[] nodes,
+            IReadOnlyList<RoomDefinition> reward)
+        {
+            StableRandom random = new(unchecked((uint)DeriveSeed(contentSeed, 0, SecretRoomSalt)));
+            if (random.NextIndex(100) >= SecretRoomPercent) return nodes;
+
+            Dictionary<RoomGridPosition, GeneratedRoomNode> byPosition = new();
+            foreach (GeneratedRoomNode node in nodes) byPosition.Add(node.GridPosition, node);
+            RoomDoorDirection[] directions =
+                { RoomDoorDirection.Left, RoomDoorDirection.Right, RoomDoorDirection.Up, RoomDoorDirection.Down };
+            List<RoomGridPosition> best = new();
+            HashSet<RoomGridPosition> considered = new();
+            int bestNeighbors = 0;
+            foreach (GeneratedRoomNode node in nodes)
+            {
+                foreach (RoomDoorDirection outward in directions)
+                {
+                    RoomGridPosition cell = node.GridPosition.Offset(outward);
+                    if (byPosition.ContainsKey(cell) || !considered.Add(cell)) continue;
+                    int neighbors = 0;
+                    bool forbidden = false;
+                    foreach (RoomDoorDirection direction in directions)
+                    {
+                        if (!byPosition.TryGetValue(cell.Offset(direction), out GeneratedRoomNode neighbor)) continue;
+                        neighbors++;
+                        forbidden |= neighbor.Role is GeneratedRoomRole.Start or GeneratedRoomRole.Boss;
+                    }
+
+                    if (forbidden || neighbors < bestNeighbors) continue;
+                    if (neighbors > bestNeighbors) { bestNeighbors = neighbors; best.Clear(); }
+                    best.Add(cell);
+                }
+            }
+            if (best.Count == 0) return nodes;
+
+            RoomGridPosition position = best[random.NextIndex(best.Count)];
+            int roomNumber = nodes.Length + 1;
+            GeneratedRoomNode secret = new(BuildRoomId(floorNumber, roomNumber), floorNumber, roomNumber, position,
+                GeneratedRoomRole.Secret, DeriveSeed(contentSeed, roomNumber, ContentSalt),
+                reward[random.NextIndex(reward.Count)]);
+            foreach (RoomDoorDirection direction in directions)
+            {
+                if (!byPosition.TryGetValue(position.Offset(direction), out GeneratedRoomNode neighbor)) continue;
+                secret.ConnectTo(direction, neighbor.RoomId, true);
+                neighbor.ConnectTo(GeneratedFloorGraph.Opposite(direction), secret.RoomId, true);
+            }
+
+            GeneratedRoomNode[] result = new GeneratedRoomNode[nodes.Length + 1];
+            Array.Copy(nodes, result, nodes.Length);
+            result[nodes.Length] = secret;
+            return result;
         }
 
         private static List<MutableRoom> Grow(int count, ref StableRandom random)

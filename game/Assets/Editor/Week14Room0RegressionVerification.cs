@@ -74,7 +74,9 @@ namespace TrickalFanGame.Editor
                     .Append('[').Append(floor.StartingRoomId)
                     .Append('>').Append(floor.BossRoomId).Append("]{");
 
-                foreach (GeneratedRoomNode node in floor.Nodes.OrderBy(candidate => candidate.RoomNumber))
+                // Special-3 appends the secret room and hidden passages without changing existing rooms.
+                foreach (GeneratedRoomNode node in floor.Nodes.Where(candidate =>
+                                 candidate.Role != GeneratedRoomRole.Secret).OrderBy(candidate => candidate.RoomNumber))
                 {
                     signature.Append(node.RoomId).Append('@')
                         .Append(node.GridPosition.X).Append(',').Append(node.GridPosition.Y).Append(':')
@@ -83,7 +85,7 @@ namespace TrickalFanGame.Editor
                         .Append(node.ContentSeed).Append('(');
 
                     foreach (GeneratedRoomConnection connection in node.DirectionalConnections
-                                 .OrderBy(candidate => candidate.Direction))
+                                 .Where(candidate => !candidate.IsSecret).OrderBy(candidate => candidate.Direction))
                     {
                         signature.Append(connection.Direction).Append('>')
                             .Append(connection.DestinationRoomId).Append(',');

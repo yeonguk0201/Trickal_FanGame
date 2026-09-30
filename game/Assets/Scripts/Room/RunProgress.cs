@@ -52,6 +52,11 @@ namespace TrickalFanGame.Room
             return IsProgressionStopped ? 0 : resources.Add(type, amount);
         }
 
+        public bool TrySpendResource(RunResourceType type, int amount = 1)
+        {
+            return !IsProgressionStopped && resources.TrySpend(type, amount);
+        }
+
         public bool TrySetGeneratedGraph(GeneratedFloorGraph graph, out string error)
         {
             if (graph == null)
@@ -191,9 +196,24 @@ namespace TrickalFanGame.Room
 
             CurrentFloor = Mathf.Max(1, floorNumber);
             CurrentRoom = Mathf.Max(1, roomNumber);
-            GetRoomState(FloorGenerator.BuildRoomId(CurrentFloor, CurrentRoom))?.MarkVisited();
+            string roomId = FloorGenerator.BuildRoomId(CurrentFloor, CurrentRoom);
+            RoomRunState state = GetRoomState(roomId);
+            state?.MarkVisited();
+            OpenSecretPassagesOnEntry(roomId, state);
             RoomChanged?.Invoke(CurrentFloor, CurrentRoom);
             Debug.Log($"Run progress: Floor {CurrentFloor}, Room {CurrentRoom}.", this);
+        }
+
+        private void OpenSecretPassagesOnEntry(string roomId, RoomRunState state)
+        {
+            GeneratedFloor floor = GeneratedGraph?.FindFloor(CurrentFloor);
+            if (floor == null || state == null) return;
+            foreach (GeneratedRoomNode node in floor.Nodes)
+            {
+                if (node.RoomId != roomId) continue;
+                if (node.Role == GeneratedRoomRole.Secret) state.TryOpenSecretPassages(node.ConnectedRoomIds);
+                return;
+            }
         }
 
         public void StopProgression()

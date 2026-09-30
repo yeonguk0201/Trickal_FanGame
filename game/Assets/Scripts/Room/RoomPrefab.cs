@@ -12,6 +12,8 @@ namespace TrickalFanGame.Room
         public const float DoorOpeningLength = 2.4f;
         public const float DoorThickness = 0.45f;
         public const float DoorLength = 2.2f;
+        // Door-1: 2/3 of the opening, so the player center must be inside the frame to pass.
+        public const float TransitionLength = 1.6f;
         public const float SealThickness = 0.55f;
         public const float SealLength = 2.3f;
         public const float TransitionThickness = 0.3f;

@@ -93,7 +93,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DestructibleObstacle
   obstacleId: obstacle-01
-  requiredHits: 5
+  variantId: rock
+  requiredHits: 4
   dropTable: {fileID: 11400000, guid: ddb98bb22884ded4abd9c06ffb6bf01f, type: 2}
   visual: {fileID: 8966589268689890781}
   intactColor: {r: 0.62, g: 0.45, b: 0.3, a: 1}

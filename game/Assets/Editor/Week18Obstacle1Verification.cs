@@ -56,9 +56,9 @@ namespace TrickalFanGame.Editor
             ValidateNonPlayerSourcesDoNotBreak();
             ValidateDropOnceAndRevisit(table);
             Debug.Log("Obstacle-1 verification passed: the 1x1 Environment obstacle blocks players, enemies, " +
-                      "projectiles and charges, breaks on exactly the 5th player attack or skill hit regardless of " +
+                      "projectiles and charges, breaks on exactly the 4th player attack or skill hit regardless of " +
                       "attack power, ignores enemy projectiles and charges, rolls its seeded 3% drop (heart 25 / SP " +
-                      "25 / key 10 / bomb 8 / elif 30 / pit 2 with pit dropping nothing) once, and stays broken " +
+                      "25 / key 10 / bomb 8 / elif 30 / pit 2, pit re-weighted without a secret room) once, and stays broken " +
                       "without a second drop when the room is rebuilt from its state.");
         }
 
@@ -74,9 +74,9 @@ namespace TrickalFanGame.Editor
             Assert(prefab.layer == LayerMask.NameToLayer("Environment"),
                 "The destructible obstacle must use the Environment layer so everything treats it as terrain.");
             bool valid = obstacle.TryValidate(out string error);
-            Assert(obstacle.RequiredHits == DestructibleObstacle.DefaultRequiredHits && obstacle.RequiredHits == 5 &&
+            Assert(obstacle.RequiredHits == DestructibleObstacle.DefaultRequiredHits && obstacle.RequiredHits == 4 &&
                    obstacle.DropTable == table && valid,
-                $"The destructible obstacle must need 5 hits and use the basic drop table. {error}");
+                $"The destructible obstacle must need 4 hits and use the basic drop table. {error}");
             Assert(prefab.GetComponentInChildren<Health>(true) == null &&
                    prefab.GetComponent<Rigidbody2D>() == null,
                 "The destructible obstacle must break by hit count, not Health, and never move.");
@@ -123,7 +123,8 @@ namespace TrickalFanGame.Editor
                    byId["bomb"].Prefab.GetComponent<RunResourcePickup>().ResourceType == RunResourceType.Bomb &&
                    byId["elif"].Prefab.GetComponent<RunResourcePickup>().ResourceType == RunResourceType.Elif,
                 "Obstacle drop candidates must spawn their matching pickups.");
-            Assert(byId["pit"].Prefab == null, "The pit candidate must drop nothing until Special-3 adds the passage.");
+            Assert(byId["pit"].Prefab != null && byId["pit"].Prefab.GetComponent<SecretPit>() != null,
+                "The pit candidate must spawn the Special-3 secret pit.");
 
             Dictionary<string, int> counts = table.Entries.ToDictionary(entry => entry.DropId, _ => 0);
             int drops = 0;
@@ -162,7 +163,7 @@ namespace TrickalFanGame.Editor
             try
             {
                 DestructibleObstacle obstacle = CreateObstacle(root.transform, Origin);
-                for (int hit = 1; hit <= 4; hit++)
+                for (int hit = 1; hit < DestructibleObstacle.DefaultRequiredHits; hit++)
                 {
                     Assert(obstacle.RegisterPlayerHit() && obstacle.HitsTaken == hit && !obstacle.IsBroken &&
                            obstacle.gameObject.activeSelf,
@@ -170,8 +171,8 @@ namespace TrickalFanGame.Editor
                 }
 
                 Assert(obstacle.RegisterPlayerHit() && obstacle.IsBroken && !obstacle.gameObject.activeSelf,
-                    "The 5th hit must break the obstacle and remove it from the room.");
-                Assert(!obstacle.RegisterPlayerHit() && obstacle.HitsTaken == 5,
+                    "The final hit must break the obstacle and remove it from the room.");
+                Assert(!obstacle.RegisterPlayerHit() && obstacle.HitsTaken == DestructibleObstacle.DefaultRequiredHits,
                     "A broken obstacle must ignore further hits.");
             }
             finally
@@ -198,11 +199,11 @@ namespace TrickalFanGame.Editor
                 InvokeLifecycle(attack, "Awake");
                 DestructibleObstacle meleeTarget = CreateObstacle(root.transform, Origin + Vector2.down);
                 Physics2D.SyncTransforms();
-                for (int swing = 1; swing <= 4; swing++) Invoke(attack, "DealDamage");
-                Assert(meleeTarget.HitsTaken == 4 && !meleeTarget.IsBroken,
+                for (int swing = 1; swing < DestructibleObstacle.DefaultRequiredHits; swing++) Invoke(attack, "DealDamage");
+                Assert(meleeTarget.HitsTaken == DestructibleObstacle.DefaultRequiredHits - 1 && !meleeTarget.IsBroken,
                     "Each melee swing must count one hit, and huge attack power must not break it early.");
                 Invoke(attack, "DealDamage");
-                Assert(meleeTarget.IsBroken, "The 5th melee swing must break the obstacle.");
+                Assert(meleeTarget.IsBroken, "The final melee swing must break the obstacle.");
 
                 // Basic projectile: one hit, then the projectile stops like at a wall.
                 DestructibleObstacle projectileTarget = CreateObstacle(root.transform, Origin + Vector2.right * 3f);
@@ -343,8 +344,9 @@ namespace TrickalFanGame.Editor
                 DestructibleObstacle pitObstacle = CreateObstacle(root.transform, Origin);
                 pitObstacle.Bind(pitState, pitRoomSeed, root.transform, progress);
                 BreakWithHits(pitObstacle);
-                Assert(pitObstacle.IsBroken && pitObstacle.LastDrop == null && pitState.IsObstacleDestroyed(obstacleId),
-                    "A pit roll must break the obstacle without dropping anything until Special-3.");
+                Assert(pitObstacle.IsBroken && pitState.IsObstacleDestroyed(obstacleId) &&
+                       (pitObstacle.LastDrop == null || pitObstacle.LastDrop.GetComponent<SecretPit>() == null),
+                    "Without a secret room on the floor, a pit roll must re-weight to another candidate, not a pit.");
 
                 RoomRunState emptyState = new("floor-01-room-04");
                 DestructibleObstacle emptyObstacle = CreateObstacle(root.transform, Origin);

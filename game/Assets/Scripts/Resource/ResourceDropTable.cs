@@ -76,7 +76,11 @@ namespace TrickalFanGame.Resource
             return true;
         }
 
-        public bool TryRoll(int seed, out ResourceDropEntry entry)
+        public bool TryRoll(int seed, out ResourceDropEntry entry) => TryRoll(seed, null, out entry);
+
+        // Unavailable candidates (such as the secret pit on a floor without a secret room) leave the weighted pick,
+        // so the drop chance stays the same and the remaining candidates share their weight.
+        public bool TryRoll(int seed, Predicate<ResourceDropEntry> isAvailable, out ResourceDropEntry entry)
         {
             entry = null;
             if (!TryValidate(out _))
@@ -91,10 +95,13 @@ namespace TrickalFanGame.Resource
             }
 
             int totalWeight = 0;
-            foreach (ResourceDropEntry candidate in entries) totalWeight += candidate.Weight;
+            foreach (ResourceDropEntry candidate in entries)
+                if (isAvailable == null || isAvailable(candidate)) totalWeight += candidate.Weight;
+            if (totalWeight <= 0) return false;
             int pick = Mathf.Min(totalWeight - 1, (int)(NextUnit(ref state) * totalWeight));
             foreach (ResourceDropEntry candidate in entries)
             {
+                if (isAvailable != null && !isAvailable(candidate)) continue;
                 if (pick < candidate.Weight)
                 {
                     entry = candidate;

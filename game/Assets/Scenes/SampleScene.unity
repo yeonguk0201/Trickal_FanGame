@@ -2026,8 +2026,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d2d9250bc6cdce743be7738550951259, type: 2}
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
-  roomContentVersion: 4
+  roomContentVersion: 6
   roomTemplates:
+  - {fileID: 11400000, guid: cd8ea15c0b6de5949bdfe798aa38e5e3, type: 2}
   - {fileID: 11400000, guid: 684a6d37e34e4a640b4de439e8dd6680, type: 2}
   - {fileID: 11400000, guid: 386c2e1a00ff0b948a82c708cd6bb049, type: 2}
   - {fileID: 11400000, guid: 4ac878bf9faf92e498255aa1ba52cbe7, type: 2}
@@ -2037,9 +2038,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a93cb28704aedfd428f780d46d039154, type: 2}
   - {fileID: 11400000, guid: 2c2a80946d5e1f448bb8048ebae64166, type: 2}
   - {fileID: 11400000, guid: 025c80049bfec5843b1f45e2c3f9a5d7, type: 2}
+  - {fileID: 11400000, guid: 2f432c532142ad049914402d66bfbf27, type: 2}
   - {fileID: 11400000, guid: 7e42edc154314df4aa56be0401028675, type: 2}
+  - {fileID: 11400000, guid: 6db8706b343978240be992cbbca5f3b7, type: 2}
   - {fileID: 11400000, guid: 9c4ef623dfcfad048ae2af84d0410cef, type: 2}
   - {fileID: 11400000, guid: 96c440fa91f28a342ae804f9000e9e6a, type: 2}
+  - {fileID: 11400000, guid: 3f45984d4d128684284b91641a67ae79, type: 2}
   encounterDefinitions:
   - {fileID: 11400000, guid: 4907778ada3026a49be06d92587acd1f, type: 2}
   - {fileID: 11400000, guid: c772248f175b1e241936daf830e6b432, type: 2}
@@ -2061,7 +2065,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ae9c2b01c5ba08a4d951a1d872c0bc56, type: 2}
   - {fileID: 11400000, guid: f058247391a23904c9ece2d6d6eb5578, type: 2}
   - {fileID: 11400000, guid: 8cbc6bd8ca2b8ee4cb46c4e23b92aa34, type: 2}
-  encounterContentVersion: 9
+  encounterContentVersion: 10
   difficultyTable: {fileID: 11400000, guid: 5e297717d226fb243b795131d80fa24e, type: 2}
 --- !u!4 &43863915
 Transform:
@@ -31078,6 +31082,8 @@ MonoBehaviour:
   roomCamera: {fileID: 519420034}
   runProgress: {fileID: 1750892776}
   transitionCooldown: 0.2
+  doorwayInvulnerabilityDuration: 0.75
+  returnDoorwayBlockDuration: 0.4
 --- !u!4 &1265728905
 Transform:
   m_ObjectHideFlags: 0
@@ -53095,6 +53101,7 @@ GameObject:
   - component: {fileID: 2018927174}
   - component: {fileID: 2018927176}
   - component: {fileID: 2018927177}
+  - component: {fileID: 2018927178}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -53443,6 +53450,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
+--- !u!114 &2018927178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018927159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a6d35fc92f4cd3986d4ae10be73f50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Resource.PlayerBombController
+  runProgress: {fileID: 1750892776}
+  bombPrefab: {fileID: 1338291427342382308, guid: ab87abf1b99199c42a64c96f3e85cb49, type: 3}
 --- !u!1 &2024060499
 GameObject:
   m_ObjectHideFlags: 0

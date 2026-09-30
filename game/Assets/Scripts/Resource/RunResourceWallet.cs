@@ -44,6 +44,24 @@ namespace TrickalFanGame.Resource
             return granted;
         }
 
+        public bool TrySpend(RunResourceType type, int amount = 1)
+        {
+            if (amount <= 0 || !IsDefined(type))
+            {
+                return false;
+            }
+
+            int index = (int)type;
+            if (counts[index] < amount)
+            {
+                return false;
+            }
+
+            counts[index] -= amount;
+            Changed?.Invoke(type, counts[index]);
+            return true;
+        }
+
         public void Clear()
         {
             foreach (RunResourceType type in AllTypes)

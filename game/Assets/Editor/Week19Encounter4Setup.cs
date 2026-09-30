@@ -50,6 +50,13 @@ namespace TrickalFanGame.Editor
                 ["large-cover-blocks"] = new[] { Point(-8.5f, -4f), Point(8.5f, 4f), Point(0f, 2.5f) },
                 ["large-split-lanes"] = new[] { Point(-8f, 4f), Point(8f, -4f), Point(-2f, 4f) },
                 ["large-scattered-rubble"] = new[] { Point(-5f, 4f), Point(5f, -4f), Point(-9f, -4.5f) },
+                ["small-offset-cover"] = new[]
+                {
+                    new AddedSpawnPoint(new Vector2(3f, 1.5f), SpawnPointPlacementRole.AllCombat),
+                },
+                ["basic-diamond-cover"] = new[] { Point(-5f, -2f), Point(5f, -2f) },
+                ["wide-twin-cover"] = new[] { Point(-7f, -2f), Point(7f, -2f) },
+                ["tall-side-pockets"] = new[] { Point(3f, 3.5f), Point(-3f, -3.5f) },
             };
 
         public readonly struct SwarmSpec

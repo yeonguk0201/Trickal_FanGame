@@ -15,14 +15,23 @@ namespace TrickalFanGame.Room
         [SerializeField] private RoomCameraController roomCamera;
         [SerializeField] private RunProgress runProgress;
         [SerializeField, Min(0f)] private float transitionCooldown = 0.2f;
+        [SerializeField, Min(0f)] private float doorwayInvulnerabilityDuration = 0.75f;
+        [SerializeField, Min(0f)] private float returnDoorwayBlockDuration = 0.4f;
 
         private float nextTransitionTime;
+        private RoomNode returnBlockedDestination;
+        private float returnBlockedUntil;
 
         public RoomNode CurrentNode { get; private set; }
         public IReadOnlyList<RoomNode> Nodes => nodes;
         public RunProgress Progress => runProgress;
         public PlayerMovement Player => player;
         public RoomCameraController RoomCamera => roomCamera;
+        public float DoorwayInvulnerabilityDuration => doorwayInvulnerabilityDuration;
+        public float ReturnDoorwayBlockDuration => returnDoorwayBlockDuration;
+
+        public bool IsReturnDoorwayBlocked(RoomNode destination) =>
+            destination != null && destination == returnBlockedDestination && Time.unscaledTime < returnBlockedUntil;
 
         public void Configure(
             RoomNode[] configuredNodes,
@@ -53,11 +62,7 @@ namespace TrickalFanGame.Room
             Transform destinationEntryPoint,
             PlayerMovement transitioningPlayer)
         {
-            if (!enabled || source == null || destination == null || transitioningPlayer == null ||
-                source != CurrentNode || !source.HasConnectionTo(destination) ||
-                runProgress?.IsRewardSelectionPending == true ||
-                transitioningPlayer.GetComponent<PlayerActionState>()?.CanTransition == false ||
-                Time.unscaledTime < nextTransitionTime)
+            if (source == null || !source.HasConnectionTo(destination) || IsReturnDoorwayBlocked(destination))
             {
                 return false;
             }
@@ -71,10 +76,38 @@ namespace TrickalFanGame.Room
                 return false;
             }
 
+            if (!TryMoveBetweenRooms(source, destination, entryPoint.position, transitioningPlayer)) return false;
+            returnBlockedDestination = source;
+            returnBlockedUntil = Time.unscaledTime + returnDoorwayBlockDuration;
+            return true;
+        }
+
+        // Special-3 pit: moves between rooms of the current floor that need not be adjacent, such as a pit into the
+        // secret room. It applies the same transition guards, cooldown and invulnerability as a doorway.
+        public bool TryTeleport(RoomNode source, RoomNode destination, Vector2 destinationPosition,
+            PlayerMovement transitioningPlayer)
+        {
+            if (destination == null || source == destination || Array.IndexOf(nodes, destination) < 0) return false;
+            if (!TryMoveBetweenRooms(source, destination, destinationPosition, transitioningPlayer)) return false;
+            returnBlockedDestination = null;
+            return true;
+        }
+
+        private bool TryMoveBetweenRooms(RoomNode source, RoomNode destination, Vector2 destinationPosition,
+            PlayerMovement transitioningPlayer)
+        {
+            if (!enabled || source == null || destination == null || transitioningPlayer == null ||
+                source != CurrentNode || runProgress?.IsRewardSelectionPending == true ||
+                transitioningPlayer.GetComponent<PlayerActionState>()?.CanTransition == false ||
+                Time.unscaledTime < nextTransitionTime)
+            {
+                return false;
+            }
+
             Vector2 previousPlayerPosition = transitioningPlayer.transform.position;
             ClearTransientProjectiles();
             destination.SetVisible(true);
-            MovePlayer(transitioningPlayer, entryPoint.position);
+            MovePlayer(transitioningPlayer, destinationPosition);
             source.SetVisible(false);
 
             if (!TryShowRoom(destination, transitioningPlayer.transform, out string cameraError))
@@ -90,6 +123,8 @@ namespace TrickalFanGame.Room
             CurrentNode.MarkVisited();
             runProgress?.RecordRoomEntry(CurrentNode.FloorNumber, CurrentNode.RoomNumber);
             nextTransitionTime = Time.unscaledTime + transitionCooldown;
+            transitioningPlayer.GetComponent<DamageInvulnerability>()
+                ?.BeginWindow(Time.time, doorwayInvulnerabilityDuration);
             return true;
         }
 
@@ -116,6 +151,7 @@ namespace TrickalFanGame.Room
         {
             if (!TryValidateConfiguration(out error)) return false;
             bool enteredDifferentRoom = CurrentNode != startingNode;
+            returnBlockedDestination = null;
             ActivateOnly(startingNode);
             CurrentNode = startingNode;
             CurrentNode.MarkVisited();

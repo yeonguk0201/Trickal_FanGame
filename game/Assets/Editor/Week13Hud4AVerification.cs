@@ -104,8 +104,11 @@ namespace TrickalFanGame.Editor
         {
             Assert(view.CurrentRoomId == current.RoomId,
                 "HUD-4A current room does not match RunProgress.");
-            Assert(view.VisibleMarkers.Count >= current.DirectionalConnections.Count + 1 &&
-                view.VisibleConnectionCount >= current.DirectionalConnections.Count,
+            // Special-3 hidden passages stay off the map until opened.
+            GeneratedRoomConnection[] knownConnections =
+                current.DirectionalConnections.Where(connection => !connection.IsSecret).ToArray();
+            Assert(view.VisibleMarkers.Count >= knownConnections.Length + 1 &&
+                view.VisibleConnectionCount >= knownConnections.Length,
                 "HUD-4A must retain the explored graph and include every direct connection of the current room.");
             MinimapRoomMarkerView currentMarker = view.VisibleMarkers.Single(marker => marker.IsCurrent);
             Assert(currentMarker.RoomId == current.RoomId &&
@@ -114,7 +117,7 @@ namespace TrickalFanGame.Editor
                 $"Room={currentMarker.RoomId}, Position={currentMarker.GetComponent<RectTransform>().anchoredPosition}, " +
                 $"Outline={currentMarker.CurrentOutline.gameObject.activeSelf}, Symbol='{currentMarker.SymbolText.text}'.");
 
-            foreach (GeneratedRoomConnection connection in current.DirectionalConnections)
+            foreach (GeneratedRoomConnection connection in knownConnections)
             {
                 GeneratedRoomNode destination = FindRoom(floor, connection.DestinationRoomId);
                 MinimapRoomMarkerView marker = view.VisibleMarkers.Single(candidate => candidate.RoomId == destination.RoomId);

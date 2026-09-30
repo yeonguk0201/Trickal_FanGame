@@ -269,6 +269,23 @@ namespace TrickalFanGame.Room
             }
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Development panel only: kills the current wave through the normal death path, so wave progress, clear
+        // state, and clear rewards run exactly as in play.
+        public int KillAliveEnemiesForDevelopment()
+        {
+            int killed = 0;
+            foreach (Health enemy in new List<Health>(enemyDeathHandlers.Keys))
+            {
+                if (enemy == null || enemy.IsDead) continue;
+                enemy.TakeDamage(enemy.CurrentHealth + enemy.CurrentShield + 1f);
+                killed += enemy.IsDead ? 1 : 0;
+            }
+
+            return killed;
+        }
+#endif
+
         public void RegisterEnemy(Health enemyHealth)
         {
             if (enemyHealth == null || enemyHealth.IsDead || enemyDeathHandlers.ContainsKey(enemyHealth))

@@ -195,9 +195,12 @@ namespace TrickalFanGame.Editor
         private static int CountRuntimePickups(RoomGraphAssembler assembler) =>
             assembler.CurrentFloorRoot.GetComponentsInChildren<ItemPickup>(true).Length;
 
+        // Special-3 secret rooms are also Reward rooms; this verifier checks the floor's treasure room.
         private static RoomPrefab FindRoom(RoomGraphAssembler assembler, RoomType type) =>
             assembler.CurrentFloorRoot.GetComponentsInChildren<RoomPrefab>(true)
-                .Single(room => room.Node.Definition.RoomType == type);
+                .Single(room => room.Node.Definition.RoomType == type &&
+                                assembler.GeneratedGraph.Nodes.Single(node => node.RoomId == room.Node.RoomId).Role !=
+                                GeneratedRoomRole.Secret);
 
         private static T FindSingle<T>(Scene scene, string label) where T : Component
         {

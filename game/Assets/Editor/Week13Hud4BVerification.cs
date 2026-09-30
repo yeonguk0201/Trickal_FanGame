@@ -161,7 +161,7 @@ namespace TrickalFanGame.Editor
             foreach (GeneratedRoomNode node in floor.Nodes)
                 if (visited.Contains(node.RoomId))
                     foreach (GeneratedRoomConnection connection in node.DirectionalConnections)
-                        expectedVisible.Add(connection.DestinationRoomId);
+                        if (!connection.IsSecret) expectedVisible.Add(connection.DestinationRoomId);
 
             Assert(view.VisibleMarkers.Select(marker => marker.RoomId).ToHashSet(StringComparer.Ordinal)
                     .SetEquals(expectedVisible),
@@ -177,6 +177,7 @@ namespace TrickalFanGame.Editor
                 if (!visited.Contains(node.RoomId)) continue;
                 foreach (GeneratedRoomConnection connection in node.DirectionalConnections)
                 {
+                    if (connection.IsSecret) continue;
                     string key = string.CompareOrdinal(node.RoomId, connection.DestinationRoomId) < 0
                         ? node.RoomId + "|" + connection.DestinationRoomId
                         : connection.DestinationRoomId + "|" + node.RoomId;
@@ -231,7 +232,7 @@ namespace TrickalFanGame.Editor
                 if (current.RoomId == destination.RoomId) break;
                 foreach (GeneratedRoomConnection connection in current.DirectionalConnections)
                 {
-                    if (previous.ContainsKey(connection.DestinationRoomId)) continue;
+                    if (connection.IsSecret || previous.ContainsKey(connection.DestinationRoomId)) continue;
                     previous.Add(connection.DestinationRoomId, current.RoomId);
                     queue.Enqueue(FindRoom(floor, connection.DestinationRoomId));
                 }

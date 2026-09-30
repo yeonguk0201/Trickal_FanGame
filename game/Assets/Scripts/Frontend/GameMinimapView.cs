@@ -91,7 +91,7 @@ namespace TrickalFanGame.Frontend
             {
                 if (!visitedIds.Contains(node.RoomId)) continue;
                 foreach (GeneratedRoomConnection connection in node.DirectionalConnections)
-                    visibleIds.Add(connection.DestinationRoomId);
+                    if (IsPassageKnown(node, connection)) visibleIds.Add(connection.DestinationRoomId);
             }
 
             List<GeneratedRoomNode> visibleNodes = new();
@@ -123,7 +123,7 @@ namespace TrickalFanGame.Frontend
             {
                 foreach (GeneratedRoomConnection connection in node.DirectionalConnections)
                 {
-                    if (!visibleIds.Contains(connection.DestinationRoomId) ||
+                    if (!visibleIds.Contains(connection.DestinationRoomId) || !IsPassageKnown(node, connection) ||
                         (!visitedIds.Contains(node.RoomId) && !visitedIds.Contains(connection.DestinationRoomId)))
                         continue;
                     string key = string.CompareOrdinal(node.RoomId, connection.DestinationRoomId) < 0
@@ -138,6 +138,24 @@ namespace TrickalFanGame.Frontend
                 AddMarker(node, runProgress.GetRoomState(node.RoomId), positions[node.RoomId],
                     node.RoomId == current.RoomId, visualScale);
             }
+        }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Development panel only: shows secret rooms and hidden passages before they are discovered.
+        public static bool DevelopmentRevealSecrets { get; set; }
+#endif
+
+        // Special-3: a hidden passage (and the secret room behind it) appears only once it is open.
+        private bool IsPassageKnown(GeneratedRoomNode node, GeneratedRoomConnection connection)
+        {
+            if (!connection.IsSecret) return true;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (DevelopmentRevealSecrets) return true;
+#endif
+            bool fromSecret = node.Role == GeneratedRoomRole.Secret;
+            RoomRunState secretState = runProgress.GetRoomState(fromSecret ? node.RoomId : connection.DestinationRoomId);
+            return secretState != null &&
+                   secretState.IsSecretPassageOpen(fromSecret ? connection.DestinationRoomId : node.RoomId);
         }
 
         private void Subscribe()
