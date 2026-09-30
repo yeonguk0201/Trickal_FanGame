@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a73bdf2426d4a0ebd2e2432b8f10f75, type: 3}
+  m_Name: pressure-chaser-ranged
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.EncounterDefinition
+  encounterId: pressure-chaser-ranged
+  allowedProfiles:
+  - {fileID: 11400000, guid: 1ff92c9396d895b4a88f5ddfd322caef, type: 2}
+  - {fileID: 11400000, guid: 3023cd9bb6e97db488bb4618fb6fe3c2, type: 2}
+  - {fileID: 11400000, guid: cacd1b9601f488d4b9659bd51e1ca96c, type: 2}
+  - {fileID: 11400000, guid: 90d790e5b5de53c4580db588ccac9c58, type: 2}
+  - {fileID: 11400000, guid: 5ad08fbc187b8fa4f8866429fe478968, type: 2}
+  minimumFloor: 1
+  maximumFloor: 3
+  minimumPlayerDistance: 1.5
+  minimumDoorDistance: 2
+  waves:
+  - waveNumber: 1
+    startCondition: 0
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 0
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+    - enemyRole: 1
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+  clearCondition: 0

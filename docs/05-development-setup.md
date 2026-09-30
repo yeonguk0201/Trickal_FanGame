@@ -122,10 +122,12 @@ pnpm 11은 의존성의 설치 스크립트를 기본적으로 보류할 수 있
 
 ```text
 TrickalFanGame/
+├── .agents/              # 저장소 전용 Codex 스킬
 ├── game/                  # Unity 프로젝트
 ├── backend/               # NestJS + Prisma
 ├── web/                   # Next.js App Router
 ├── docs/
+├── AGENTS.md              # 저장소 공통 개발 규칙
 ├── .gitignore
 └── README.md
 ```
@@ -333,6 +335,9 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 - [ ] `pnpm dev`로 Web이 실행된다.
 - [ ] Web에서 `NEXT_PUBLIC_API_URL`의 Backend health check를 호출할 수 있다.
 - [ ] CORS 설정으로 브라우저 요청이 차단되지 않는다.
+- `web/`에서 `pnpm test`를 실행하면 실제 Database를 변경하지 않고 통계·랭킹의 빈 데이터,
+  전체·부분 오류, 로딩과 다시 시도 복구, 일부 데이터와 긴 이름을 검증한다.
+- Web 변경 후 `pnpm test`, `pnpm lint`, `pnpm build`를 순서대로 실행한다.
 
 ### 13.4 Unity 연동
 
@@ -380,7 +385,139 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 
 ---
 
-## 17. 참고 자료
+## 17. 개발 보조 도구
+
+### 13주차 Frontend Flow
+
+- `Trickal Fan Game > Week 13 > Setup Frontend Flow`: Edit Mode에서 실행한다. 수정 중인 Scene의 저장 여부를 확인한 뒤 `Assets/Scenes/FrontendScene.unity`를 생성하거나 갱신하고 단독으로 연다. 기존 이름의 UI 오브젝트와 Scene GUID를 재사용한다. Frontend를 첫 번째 활성 Build Scene으로 등록하며 기존 `SampleScene`은 전투용 Game Scene으로 보존한다. 다른 Build Scene 항목도 보존한다.
+- `Trickal Fan Game > Week 13 > Setup Flow-4 Run Launch`: Game Scene의 기존 `RunSession` 옆에 조기 Bootstrap을 중복 없이 구성하고, 이전 전투 Scene 캐릭터 선택 UI와 진행 조회 참조를 연결한 뒤 Frontend 구성도 갱신한다. 완료 후 Frontend Scene을 연다.
+- `Trickal Fan Game > Week 13 > Verify Flow-4 Run Launch`: Frontend의 단일 Scene 전환기와 Game Scene의 단일 Bootstrap, `RunSession`·진행 조회·이전 선택 UI·방 그래프·인벤토리 참조 및 Build Settings를 검사한다.
+- `Trickal Fan Game > Week 13 > Verify Frontend Flow`: Frontend를 연 상태에서 실행한다. 시작 Scene 순서, 전투·Run 컴포넌트 부재, Canvas·입력 시스템 중복, 화면·버튼 참조, 캐릭터 정의의 유효성·고유 ID, 1920×1080 Scaler와 좌우 64·상하 54 안전 여백을 검사한다. Edit Mode에서는 720p·1080p·1440p와 비16:9 크기의 실제 RectTransform/TMP 경계도 별도 미리보기 Scene에서 검사한다. 실패 시 예외가 발생하며 성공 로그는 `Week 13 Frontend verification passed`다.
+- `Trickal Fan Game > Week 13 > Verify Skill-1 and Skill-2`: Frontend Scene의 320×520 세로형 캐릭터 카드, 진행 조회의 로딩·빈 상태·실패, 레벨·경험치·포인트·두 스킬 표시, 목표 레벨 강화 요청의 중복 차단과 성공·오류 갱신을 검사한다.
+- `Trickal Fan Game > Week 13 > Export Home Previews (720p and 1080p)`: `game/Logs/Week13FrontendPreviews/home-1280x720.png`, `home-1920x1080.png`를 만든다. 별도 미리보기 Scene에서 홈 UI를 렌더링하므로 현재 Scene은 바뀌지 않는다. 이 이미지는 배치 확인용이며 실제 Overlay Canvas의 Game View 확인을 대체하지 않는다.
+- `Trickal Fan Game > Development > Clear Local Profile (Editor)`: Editor Play Mode에서 사용하는
+  `userId`와 닉네임을 삭제한다. 확인 창에서 승인한 경우에만 실행하며 `clientProfileId`와 음량 등
+  다른 PlayerPrefs는 유지한다. Play Mode 중 실행하면 Frontend Scene을 다시 연다.
+- Development Build의 Frontend 좌상단에는 `DEV: RESET LOCAL PROFILE` 버튼이 나타난다. `RESET`을
+  다시 눌러 확인하면 해당 EXE의 `userId`와 닉네임을 삭제하고 Frontend Scene을 다시 연다.
+  `clientProfileId`를 유지하므로 같은 닉네임을 제출하면 Backend의 멱등 등록 응답을 검증할 수 있다.
+  이 상태에서 다른 닉네임을 제출하면 같은 프로필 ID의 변경 요청이므로
+  `PROFILE_IDEMPOTENCY_CONFLICT`가 발생한다. 대소문자 구분을 별도 사용자처럼 시험하려면 서로 다른
+  `clientProfileId`가 필요하다.
+  이 버튼은 정식 빌드에는 나타나지 않는다.
+- 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13FrontendVerification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 두 번 실행, GUID·Game Scene 보존, 잘못된 참조·중복 버튼·전투 오브젝트·시작 순서의 거부까지 검사한다. 렌더링 미리보기가 포함되어 `-nographics`를 사용하지 않는다. 검증 실패는 비정상 종료 코드로 반환된다.
+- Skill-1~2 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13SkillUpgradeVerification.SetupAndVerifyBatch -logFile <로그 경로>`. Frontend Setup을 두 번 실행해 Scene GUID를 보존한 뒤 조회·강화 상태와 전체 Frontend 레이아웃 회귀를 검사한다.
+- Play Mode 자동 검증: 구성 후 별도 Unity 프로세스에서 `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13FrontendPlayVerification.RunBatch -logFile <로그 경로>`를 사용한다. `-quit`는 넣지 않는다. 타이틀 선행, 프로필 재시도·저장, 홈 진입, 데이터 기반 에르핀 카드, 선택 전 확인 차단, 단일 확정 이벤트, 뒤로가기·재진입 상태 초기화와 Flow-4 전 Run 미생성을 검사한 뒤 성공 0/실패 1로 종료한다.
+- Flow-4 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Flow4Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Flow-4 Setup 두 번, 두 Scene GUID와 Bootstrap 단일성, Game 참조 및 전체 Frontend 레이아웃 회귀를 검사한다.
+- Flow-5 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Flow5Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Flow-5 Setup 두 번, 두 Scene GUID, 전체 화면 결과 UI·전환 단일성·Frontend Scene 격리와 Flow-4 회귀를 검사한다.
+- Flow-5 Play Mode 통합: Unity `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Flow5PlayVerification.RunBatch -logFile <로그 경로>`. 실제 사망 종료 후 서버 연결 실패 시 결과를 즉시 표시하고 요청을 로컬 큐에 보관하는지, 동일 `clientRunId` 자동 복구와 성장 캐시 반영, 확정 성장 순차 연출·건너뛰기와 캐릭터 선택/홈 복귀 상태 정리를 검사하며 완료 시 검증기가 Editor를 종료한다.
+- Flow-4 Play Mode: Unity `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Flow4PlayVerification.RunBatch -logFile <로그 경로>`. `-quit`는 넣지 않는다. Frontend 확정부터 Game Scene까지 이동하여 로컬 사용자·캐릭터 전달, 단일 Run과 UUID `clientRunId`, 새 seed·첫 방·빈 인벤토리, 이전 선택 UI 비활성화와 종료 전 `POST /runs` 미호출을 검사한다.
+- HUD-1 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-1 HP and SP`. Game Scene에 HP 바, 반복 SP 슬롯과 저학년 스킬 사용 가능 표시를 구성하고 실제 플레이어 상태에 연결한다.
+- HUD-1 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud1Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 두 번, Game Scene GUID·계층 단일성, HP 피해·회복, SP 획득·소비·최대치 증가, 저학년 스킬 사용 가능 조건과 Flow-4 회귀를 검사한다.
+- HUD-2 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-2 Skill States`. Game Scene 우하단에 저학년·고학년 임시 아이콘, 실제 입력 키, 사용 가능 상태와 고학년 쿨타임 표시를 구성한다.
+- HUD-2 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud2Verification.SetupAndVerifyBatch -logFile <로그 경로>`. HUD-1 구성을 보존하며 Setup 두 번, Game Scene GUID·계층 단일성, 두 스킬의 실제 입력 가능 조건, 고학년 사용 중·쿨타임 중간값·종료 경계, `Time.timeScale = 0` 정지와 Flow-4 회귀를 검사한다.
+- HUD-3A 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-3A Artifact List`. Game Scene 좌하단에 실제 인벤토리와 연결된 48×48 임시 아티팩트 아이콘, 스택 배지와 10종 초과 `+N` 표시를 구성한다.
+- HUD-3A 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud3AVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 빈 상태, 중복 획득 스택, 11종 획득 순서·10개 제한·`+1`, 재구성 상태 유지, Setup 두 번과 HUD-2·Flow-4 회귀를 검사한다.
+- HUD-3B 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-3B Artifact Acquisition Toast`. Game Scene 중앙의 단일 TMP 메시로 28px 이름과 그 아래 보조색 20px 효과 설명을 구성하고 동적 설명에 필요한 TMP 글리프를 Build용 폰트 아틀라스에 추가한다.
+- HUD-3B 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud3BVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 이름·설명의 실제 2줄 TMP 메시와 선호 높이, 폰트 글리프, 1.5초 unscaled 시간 경계, 연속 획득 큐, 최대 스택 거부, 입력·시간 불변, Setup 두 번과 HUD-3A·HUD-2·Flow-4 회귀를 검사한다.
+- HUD-3B Build에서 이름만 보이고 효과 설명이 사라지는 문제의 조사·해결 과정은 [트러블슈팅 §2](./troubleshooting/17-troubleshooting.md#2-unity-build에서-tmp-두-번째-줄이-표시되지-않는-문제)에 기록한다.
+- HUD-3C 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-3C Pause Artifact List`. Game Scene에 `Esc` 일시정지·복귀와 10종 초과분을 포함한 전체 아티팩트 이름·스택·설명 스크롤 목록을 구성한다.
+- HUD-3C 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud3CVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 빈 목록, 12종 전체 획득 순서, 초과 항목 스택·설명, timeScale·전투 입력 루프 정지와 상태 보존, 중첩 거부, Setup 두 번과 HUD-3B·HUD-3A·HUD-2·Flow-4 회귀를 검사한다.
+- HUD-4A 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-4A Minimap Foundation`. Game Scene 우상단 220×180 영역에 실제 생성 그래프의 격자 방향대로 방과 연결선을 구성하고 현재 방을 `P`와 외곽선으로 강조한다.
+- HUD-4A 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud4AVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 고정 seed 생성 그래프에서 시작방과 인접방 이동 후의 현재 방, 상·하·좌·우 상대 위치와 연결선 수를 검사하고 Setup 두 번, Scene GUID·계층 단일성과 HUD-3C·HUD-7A·Flow-4 회귀를 확인한다.
+- HUD-4B 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-4B Explored Minimap`. 방문한 방과 그 인접 미방문방을 층 그래프에 누적하고, `?` 미확인·`P` 현재·`V` 클리어·`S/T/B` 특수 문 표식을 구성한다. 인접한 보물방·보스방은 문 종류와 함께 `T`·`B`를 공개하지만 실제 진입 전에는 `V`를 표시하지 않는다.
+- HUD-4B 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud4BVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 보물방까지 실제 그래프 경로를 이동하며 누적 공개, 이전 방 유지, 특수 문 공개, 보물방 선클리어와 실제 방문 분리, 진입 전 `V` 은닉, 패널 자동 맞춤과 HUD-4A·HUD-3C·HUD-7A·Flow-4 회귀를 검사한다.
+- HUD-4C 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-4C Floor Name`. 미니맵 머리글은 `요정의 숲 · N층`을 상시 표시하고, 첫 층과 다른 층 진입 때만 같은 문구를 화면 중앙보다 180px 위에 1.5초 표시한다. 같은 층의 방 이동에는 알림을 다시 표시하지 않으며 일반 방 이름·번호도 노출하지 않는다.
+- HUD-4C 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud4CVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 숫자 층 이름과 미래의 층별 고유 이름 대체, 초기화 순서가 달라도 첫 층 알림 보장, 같은 층 방 이동 시 무알림, 층 전환 시 갱신, 1.5초 unscaled 시간 경계, 단일 TMP 메시 생성·높이, 입력·시간 불변, Setup 두 번과 HUD-4B·Flow-4 회귀를 검사한다.
+- HUD-5 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-5 Boss Status`. Game Scene 하단 중앙 720×64 영역에 현재 방의 활성 보스 이름, 현재·최대 HP 게이지와 페이즈를 표시한다. 현재 임시 보스는 실제 구현 상태에 맞춰 `보스`, `페이즈 1 / 1`을 사용한다.
+- HUD-5 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud5Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 활성 보스방에서만 표시, 피해·페이즈 즉시 갱신, 처치·일반 방 복귀 시 숨김, 입력 비차단과 하단 안전 영역, Setup 두 번, Scene GUID와 HUD-4C·Flow-4 회귀를 검사한다.
+- HUD-7B 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup HUD-7B Pause Menu`. HUD-3C 일시정지 화면을 실제 `PlayerStats` 상세 수치, 전체 아티팩트 목록과 `게임으로 돌아가기` 버튼을 갖춘 메뉴로 확장하고 Game Scene EventSystem을 구성한다.
+- HUD-7B 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud7BVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 실시간 상세 스탯, 일시정지 중에만 활성화되는 UI 입력, 첫 포커스·팝업 내부 제한·이전 선택 복원, 다른 시간정지 화면 중첩 거부, Setup 두 번과 HUD-3C·Flow-4 회귀를 검사한다.
+- HUD-7C 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud7CVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 홈 나가기 확인 UI와 안전 행동 첫 포커스, Setup 두 번, Game Scene GUID와 HUD-7B·Flow-5 회귀를 검사한다.
+- HUD-7C Play Mode: Unity `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud7CPlayVerification.RunBatch -logFile <로그 경로>`. `-quit`는 넣지 않는다. 확인 취소 시 같은 Run·일시정지·API 요청 0회를 유지하고, 확정 시 결과 저장·보상 없이 Run 상태를 정리해 Frontend 홈의 시간과 첫 포커스를 복원하는지 검사한 뒤 Editor를 종료한다.
+- HUD-7D 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud7DVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 같은 캐릭터 재시작 버튼과 공용 확인 UI, Setup 두 번, Game Scene GUID와 HUD-7C 회귀를 검사한다.
+- HUD-7D Play Mode: Unity `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud7DPlayVerification.RunBatch -logFile <로그 경로>`. `-quit`는 넣지 않는다. 취소 시 기존 Run ID·seed·진행을 유지하고, 확정 시 결과 저장 없이 같은 캐릭터와 새 Run ID·seed, 1층 1번 방·처치 0·빈 인벤토리로 시작하는지 검사한 뒤 Editor를 종료한다.
+- Setting-1A 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup Setting-1A Audio`. `Assets/Audio`의 홈·전투 BGM과 UI 클릭음을 임포트 규칙에 맞추고 Frontend·Game Scene의 영속 오디오 컨트롤러에 연결한다. 같은 경로의 음원 교체 후에도 이 메뉴를 다시 실행한다.
+- Setting-1A 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Setting1AVerification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 두 번, 음원 임포트 설정, Scene별 단일 컨트롤러·두 Source, Scene GUID, BGM 라우팅과 저장 음량 계산을 검사한다.
+- Setting-1A Play Mode: Unity `-batchmode -nographics -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Setting1APlayVerification.RunBatch -logFile <로그 경로>`. `-quit`는 넣지 않는다. 실제 버튼 클릭음, 즉시 음량 적용, `Frontend → Game → Frontend` BGM 전환과 저장값 재로드를 검사한 뒤 Editor를 종료한다.
+- Setting-1B 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup Setting-1B Display`. Frontend·Game 카메라와 두 UI 기준 프레임에 중앙 16:9 비율 제어를 중복 없이 구성하고 기본 빌드 화면을 1920×1080 테두리 없는 전체 화면, 크기 조절 불가 창으로 설정한다.
+- Setting-1B 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Setting1BVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 지원 해상도·저장 계약, 16:9·4:3·울트라와이드 뷰포트 계산, 두 Scene 구성, Setup 두 번과 Scene GUID를 검사한다.
+- Setting-1B Play Mode: Unity `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Setting1BPlayVerification.RunBatch -logFile <로그 경로>`. `-quit`는 넣지 않는다. 설정 UI에서 1280×720 창 모드를 적용·재로드하고 Game Scene 전환 뒤 카메라와 HUD 기준 프레임을 검사한 뒤 Editor를 종료한다.
+- Room-0 Basic 방 회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room0RegressionVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 기존 Basic Prefab GUID, `16 × 9` 방과 `20 × 13` 격자, 카메라·문·안전 진입점·SpawnPoint, 고정 seed의 3층 결과, 양방향 이동·전투 클리어·재방문 상태를 함께 검사한다.
+- Room-1 구성: Unity 메뉴 `Trickal Fan Game > Week 14 > Setup Room-1 Profile and Template Contract`. 기존 Prefab이나 Scene을 수정하지 않고 `basic` Room Profile과 `basic-standard` Room Template 에셋을 생성·갱신한다.
+- Room-1 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room1Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 재실행 GUID, Profile·Template 필드와 Prefab 좌표 일치, 누락·중복 ID 거부, Run 상태 분리와 전체 Room-0 회귀를 검사한다.
+- Room-2 축별 카메라 경계: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room2Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Small·Basic 고정, Wide 가로, Tall 세로, Large 양축 추적과 극단 좌표 제한, 잘못된 입력 거부, 방 로컬 좌표 런타임 적용 및 Room-0~1 회귀를 검사한다.
+- Room-3 구성: Unity 메뉴 `Trickal Fan Game > Week 14 > Setup Room-3 Small Basic Wide Templates`. 기존 Basic Prefab을 보존하면서 Small `12 × 6.75`와 Wide `24 × 9` Profile·Prefab·Template을 생성·갱신한다.
+- Room-3 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room3Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 재실행 GUID, 세 Template의 벽·문·안전 진입점·Encounter·SpawnPoint·카메라 계약, 필수 통로 침범 거부와 Room-0~2 회귀를 검사한다.
+- Room-4 구성: Unity 메뉴 `Trickal Fan Game > Week 14 > Setup Room-4 Seeded Template Selection`. Game Scene의 `FloorGenerator`에 콘텐츠 버전 1과 Small·Basic·Wide Template 카탈로그를 중복 없이 연결한다.
+- Room-4 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room4Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 같은 seed·버전 결정성, 카탈로그 순서 독립성, RoomType·방향·AABB 필터, 128 seed의 세 Template 선택과 겹침 방지, 콘텐츠 버전 변화·누락 호환 실패 및 Room-0~3 회귀를 검사한다.
+- Room-5 구성: Unity 메뉴 `Trickal Fan Game > Week 14 > Setup Room-5 Runtime Room Transitions`. Room-4 카탈로그를 보존하고 런타임 조립기가 선택된 Small·Basic·Wide Prefab과 Profile을 사용하도록 준비하며 플레이어 물리 보간을 켜 Wide 카메라의 렌더 프레임 추적을 안정화한다.
+- Room-5 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room5Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 세 크기의 실제 Prefab 인스턴스, 플레이어 물리 보간, 서로 다른 Profile 사이 양방향 이동과 반대편 안전 진입점, 현재 방 단독 활성화, 카메라 유효 경계, RunProgress·미니맵 실루엣 갱신, Setup 재실행과 Room-0~4 회귀를 검사한다.
+- Encounter-1 구성: Unity 메뉴 `Trickal Fan Game > Week 14 > Setup Encounter-1 Contract`. Small·Basic·Wide와 1~3층을 허용하는 추적형·원거리형·돌진형 단일 역할 Encounter 에셋을 생성·갱신하고 Game Scene의 `FloorGenerator`에 콘텐츠 버전 1 카탈로그를 연결한다.
+- Encounter-1 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Encounter1Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 안정 ID, 적 역할·수, Profile·층, SpawnPoint/Group, 안전거리, 웨이브·클리어 조건, 128 seed 결정성·카탈로그 순서 독립성, 잘못된 참조·거리·중복 ID 실패, Setup 재실행 GUID와 Room-0~5 회귀를 검사한다.
+- Encounter-2 구성: Unity 메뉴 `Trickal Fan Game > Week 14 > Setup Encounter-2 Mixed Encounters`. 역할 로스터를 기존 추적형·원거리형·돌진형 Prefab에 연결하고 `pressure-chaser-ranged`, `lane-charging-ranged`, `crossfire-ranged` 세 Encounter를 콘텐츠 버전 2 카탈로그로 구성한다.
+- Encounter-2 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Encounter2Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 256 seed 선택, 활성 출입구 안전거리, 고유 SpawnPoint, 역할 우선 배치, 실제 Prefab 인스턴스, 로스터 실패 경로, Setup 재실행 GUID와 Room-0~5 회귀를 검사한다.
+- Encounter-3 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Encounter3Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 2~3층 2웨이브 선택, 필수 적 전멸 경계, 웨이브 단일 시작·종료, 완료 웨이브 복원, SP 클리어 보상 1회 생성, 재진입·방 재구성 중복 방지, Setup 재실행 GUID와 Room-0~5 회귀를 검사한다.
+- Room-6 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room6Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Tall 세로·Large 양축 카메라, 1~3층별 Wide/Tall/Large 보스 후보, Template 층 범위, 512 seed 결정성·AABB 비겹침·후보 선택, Tall/Large Encounter 해석, Setup 재실행 GUID와 Encounter-3·Room-0~5 회귀를 검사한다.
+- Room-7 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room7Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Large 중앙 고정 기둥의 비파괴·무드롭 계약, 네 방향 우회 통로, 플레이어 이동 sweep, 양쪽 투사체 사선, 추적 Rigidbody와 돌진 정지, 1,024 seed의 `pillar-crossfire` 호환 선택, Setup 재실행 GUID와 Room-0~6 회귀를 검사한다.
+- Room-8 3층 Run 종합 자동 검증: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room8Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 256개 3층 seed의 Template·Encounter·웨이브 결정성과 전체 후보 노출, 이종 크기 좌우문 양방향 전환의 단일 활성 방·카메라 첫 프레임 제한, 부분 웨이브 복원과 층 재로딩 뒤 클리어·SP 보상 단일성을 Room-0~7 회귀와 함께 검사한다.
+- Room-8 렌더 잔상 수동 확인: `FrontendScene`에서 Play 후 Wide/Large 방의 좌·우 카메라 추적 끝에서 Basic/Small/Tall 방으로 이동하고 다시 돌아온다. 전환 직후와 카메라 정지 뒤 모두 넘어온 쪽 화면 끝에 이전 방 사각형, 방 사이 빈 공간과 비활성 방이 보이지 않아야 한다. Game 카메라는 `SolidColor`와 배경 알파 `1`이어야 한다. Room-8 완료 시에는 이 화면 확인을 자동 Play Mode 검증과 함께 남긴다.
+- Encounter-2 수동 확인: `FrontendScene`에서 Play 후 일반 전투방을 진행한다. 추적형+원거리형에서는 추적형이 접근하는 동안 원거리형에게 파고들 수 있어야 하고, 돌진형+원거리형에서는 돌진 예고 후 옆으로 피할 공간이 남아야 한다. 원거리형 3마리 방에서는 입장 위치에 투사체가 즉시 겹치거나 모든 회피 방향이 동시에 막히지 않아야 한다. 세 조합 모두 적이 출입구 위에 생성되지 않고 전멸 시 문이 열려야 한다.
+- Room-8 물리 보간 Play Mode: Unity `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room8PlayVerification.RunBatch -logFile <로그 경로>`. `-quit`와 `-nographics`는 넣지 않는다. 별도 빈 Scene에서 실제 Room Prefab·문 트리거·보간 Rigidbody로 Wide/Large ↔ Basic/Small/Tall의 좌우 왕복 24개 전환을 실행하고, 첫 5프레임의 표시/물리 좌표 일치·안전 진입점·카메라 경계·단일 방 활성·보간 설정 보존을 검사한다. 게임 Run 생성이나 API 요청 없이 성공 0/실패 1로 자동 종료한다.
+- Enemy-0 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Enemy0Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 세 일반 적 Prefab에 공유 행동 컨텍스트를 중복 없이 구성하고 GUID를 보존하며, 방 전투 시작·피격 경계, 감지 거리 밖 지속 추적, 플레이어·적 사망, 넉백, 방 비활성화 정리와 기존 추적형·원거리형·돌진형 행동 회귀를 검사한다.
+- Enemy-3 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Enemy3Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 두 번의 Prefab GUID·컴포넌트 단일성, 추격 → 방향 고정 예고선 → 돌진 → 회복 → 즉시 재추격, Large 방 대비 돌진 거리, 벽 충돌과 넉백·사망·방 비활성화 정리 및 Enemy-0~1·기존 적 밸런스 회귀를 검사한다.
+- Enemy-4 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Enemy4Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 기존 원거리 Prefab 보존과 신규 저격형 Prefab의 Setup 재실행 GUID·컴포넌트 단일성, 재배치 → 방향 고정 조준선 → 발사 → 회복, 근거리 사격, 선택적 좌우 이동, 시간·막힘 방향 반전, 플레이어보다 느린 후퇴, 넉백·사망·방 비활성화 정리 및 Enemy-0~1·기존 적 밸런스 회귀를 검사한다.
+- 일반 적 임시 식별 색상: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15EnemyRoleColorVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 불효자손 갈색·산사모 초록·저혈당 파랑·고혈당 분홍을 멱등 적용하고, 네 Prefab GUID, 색상 쌍 구분 거리, 저혈당 대기색과 돌진 예고·위험색 분리 및 Enemy-2~4 행동 회귀를 검사한다.
+- Enemy-5 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Enemy5Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 사용자 제공 투명 PNG 4종의 Sprite 임포트와 Prefab·역할 로스터 연결, Setup 두 번의 에셋·Prefab·Encounter GUID, Small의 저격형 제외, Large의 저격·돌진 웨이브 분리, 1,024 seed 노출과 Enemy-2~4 행동 회귀를 검사한다.
+- Boss-0 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Boss0Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 큰 임시 보스 Prefab의 GUID와 Setup 재실행 안정성, 콘텐츠 seed 기반 패턴 순서, 예고 → 실행 → 후딜 → 재사용 대기 시간 경계, 즉시 반복 방지, HP 3단계 HUD, 세 보스 Room Profile의 충돌 여유, 사망·방 비활성화 시 소환물·투사체 정리와 HUD-5 회귀를 검사한다.
+- Boss-2 구성: Unity 메뉴 `Trickal Fan Game > Week 15 > Setup Boss-2 Saemaeum Vault`. 부스러기 Prefab을 보존하면서 사용자 에셋 `Boss_SaemaeumGeumgo.png`, 새마음금고 전용 Prefab, 접근 투척·연속 점프·보물 회복과 2페이즈 수치를 멱등 구성하고 Run 조립기의 2층 보스 슬롯에 연결한다.
+- Boss-2 즉시 전투: `Trickal Fan Game > Debug > Open Boss-2 Test Room`을 선택하고 Play한다. 처음 실행하면 기존 ItemTestScene을 복사해 별도 `Assets/Scenes/Boss2TestScene.unity`를 만들고 새마음금고 한 마리만 시작 시 생성한다. 오른쪽 패널에서 플레이어와 살아 있는 보스의 현재/최대 HP를 함께 확인하며, `Heal / Reset HP`와 `Respawn Enemies`로 반복 테스트한다. 이후에는 해당 Scene을 직접 열어 Play해도 된다. `Debug > Verify Boss-2 Test Room`에서 참조·단일 보스 생성·HP 표시 대상·Scene GUID 유지 검사를 실행할 수 있다.
+- Boss-2 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Boss2Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 Prefab·사용자 Sprite GUID, 전용 런타임과 Tall Room 충돌 여유, 탄성 실루엣, 5회×5발 부채꼴 투척, 같은 seed의 1페이즈 3~5회·2페이즈 4~6회와 거리 4.8 점프, 착지 예고 정리·피해·넉백, 회복량 15와 1페이즈 무제한 재선택, 2페이즈 회복 제외·가속, 생성된 2층 보스방의 새마음금고 Prefab·Sprite 연결과 Boss-0~1·HUD-5 회귀를 검사한다.
+- Boss-3 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Boss3Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 보스·4종 졸개 Prefab과 사용자 Sprite GUID, Large Room 충돌 여유, 가중 패턴 선택, 압박 공격 3회와 9/7.5초 절대 간격을 요구하는 내려찍기, 이동을 유지하는 2~3회 검격, 25/50/25%·25/30/45%의 1~3회 추적 대시와 연계 종료 뒤 0.3초 완전 정지, 원거리 2+근거리 2 소환과 최대 HP 15% 피해 재활성화, 황금 3방향 중첩 피해 9, 3층 보스방 연결 및 Boss-0~2·HUD-5 회귀를 검사한다.
+- Boss-4 구성·3층 Run 회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Boss4Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회와 Scene GUID 보존, 세 층 보스·Room Profile·Encounter 연결, 여러 seed의 3층 그래프, 1·2층 보상 단일 생성, 포털 층 이동, 최종 클리어 이벤트 1회와 재진입·재호출 중복 방지를 검사한다.
+- Reward-1 선택 세션 자동 회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week16Reward1Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Reward-0 후보 회귀와 함께 열린 후보의 재구성·원본 풀 순서 독립 복원, 선택 중 전투·방·층 이동 차단, 취소 시 차단 해제와 동일 후보 재개, Item 또는 회복의 단일 적용, 반복 입력·완료 보상 재방문 중복 방지와 Run 초기화를 검사한다.
+- Reward-2 가디자인 구성: Unity 메뉴 `Trickal Fan Game > Week 16 > Setup Reward-2 Placeholder Cards`. `SampleScene`의 Game HUD에 `1920 × 1080` 기준 단색 Overlay와 교체 가능한 세로 카드 3장, 별도 `선택`·`취소` 버튼을 멱등 구성하고 종류·이름·등급·효과·스택 또는 회복 HP 필드와 마우스·키보드 입력을 연결한다.
+- Reward-2 카드 UI 자동 회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week16Reward2Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회와 Scene GUID, 활성 Item 전체·회복 카드 정보, 긴 문구 높이, 명시적 Navigation·포커스 범위·키보드 Submit·마우스 Pointer, 선택·취소와 동일 후보 재개, 색상 외 상태 표식, 확정 직후 Item HUD와 스탯 갱신을 검사한다.
+- Reward-3 방·보스 연결 구성: Unity 메뉴 `Trickal Fan Game > Week 16 > Setup Reward-3 Room Integration`. 모든 Room Prefab의 보물방 중앙에 상호작용 마커와 `[E] 보상 선택` 안내를 구성하고, 활성 아티팩트·스펠 통합 풀을 보물방 선택 보상과 1·2층 보스 단일 Pickup에 연결한다.
+- Reward-3 통합 자동 회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week16Reward3Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Reward-0~2 회귀, Setup 2회와 Scene GUID, 보물방 진입 시 자동 미표시·중앙 상호작용·취소 후 동일 후보 재개·선택 후 단일 지급·재구성 복원, 1·2층 보스의 통합 풀 Pickup 하나와 즉시 포털 해제·중복 방지, 최종 보스 무보상을 3층 연속 Run으로 검사한다.
+- 보스 테스트방: `Trickal Fan Game > Debug > Open Boss Test Room`에서 Play Mode를 시작하고 크레용사용을 선택한다. 패널의 `Show Crayon Recognition Radius`를 켜면 약 `6.36`의 검격 인지 반경이 파란 원으로 표시된다. 보스는 원 안에서도 계속 접근하며 2~3회 검격해야 한다. 대시는 첫 `0.2초`와 연속 대시 사이 `0.1초` 동안 플레이어를 추적 조준한 뒤 고정 방향으로 출발하고, 전체 연계가 끝난 뒤에는 `0.3초` 동안 완전히 멈춰야 한다. 첫 소환 뒤 최대 HP 15% 피해를 줄 때마다 원거리 2+근거리 2 소환이 다시 후보가 되며, 황금 내려찍기는 세 예고선의 근거리 중첩에서 최대 피해 9를 줘야 한다. Edit Mode의 `Trickal Fan Game > Debug > Verify Boss Test Room`은 보스 3종 생성과 크레용사용 인지 반경 표시 토글을 검사한다.
+- Boss-2 수동 플레이: `ItemTestScene`에 `Assets/Prefabs/SaemaeumVaultBoss.prefab`을 임시 배치하고 다른 적을 비활성화한 뒤 Play한다. 작은 탄성 이동과 깊은 점프 웅크림이 구분되고, 계속 이동하면 연속 착지를 피할 수 있으며 가만히 있으면 맞아야 한다. 최종 착지와 회복 중 공격 기회가 있고, HP 50% 이하 전환 뒤에는 회복하지 않으며 접근·점프 리듬이 빨라져야 한다. 확인 뒤 임시 Scene 변경은 저장하지 않는다.
+- 같은 프로젝트를 연 Unity가 있으면 배치 실행이 잠길 수 있다. 기존 Editor를 강제 종료하지 않고 수동 메뉴를 실행하거나 독립된 복사본에서 검증한다.
+- Boss-2 점프 후속 확인: `Trickal Fan Game > Week 15 > Verify Boss-2 Saemaeum Vault`는 공중 Trigger, 포물선 높이, 근거리 착지 피해와 종료·취소 복원을 추가 검사한다. Play에서 착지 예고 안에 서면 공중 몸체에 먼저 밀려나지 않고 착지 순간 피해·넉백을 받아야 하며, 예고 밖으로 이동하면 피할 수 있어야 한다. 몸체는 도약 중 상승했다 착지점으로 내려와야 한다.
+
+수동 확인: `FrontendScene`을 열고 Game View에 Fixed Resolution `1280 × 720`, `1920 × 1080`을 각각 추가하여 Play한다. 타이틀에서 저장 프로필의 홈 진입과 새 사용자의 닉네임 등록 진입을 각각 확인한다. 홈에서는 네 버튼의 마우스 호버, 위·아래 키 순환과 Enter/Space를 확인한다. 게임 시작에서는 에르핀 카드 선택 표시, 확인 활성화, 뒤로가기와 재진입 시 선택 초기화를 확인한다. 확인을 누르면 Game Scene으로 한 번 이동해 1층 첫 방에서 전투를 시작해야 하며 이전 캐릭터 선택 창이 다시 나타나지 않아야 한다. Run 종료 전에는 Backend 전적이 생성되지 않아야 한다.
+
+저장소 공통 불변 규칙은 루트 `AGENTS.md`에 둔다. 기능 하나를 계획부터 검증과 체크리스트 갱신까지 진행할 때는
+`.agents/skills/trickal-feature-cycle/SKILL.md`의 저장소 전용 스킬을 사용한다.
+
+향후 Unity 콘텐츠 생성기·검증기, Unity ↔ Backend 계약 검사, 플레이테스트 텔레메트리와 조건부 Unity MCP는
+[개발 생산성·검증 인프라 계획](./13-development-tooling-plan.md)에 따라 도입한다.
+
+현재 구현된 Phase C·D·F Unity 도구:
+
+- `Trickal Fan Game > Debug > Open or Create Item Test Room`: 랜덤 층 생성과 Backend Run 저장에서 분리된 `Assets/Scenes/ItemTestScene.unity`를 생성하거나 연다. Hierarchy의 `Item Test Room`을 선택하고 `Item Loadout`에서 시작 아티팩트 스택을, `Enemy Placements`에서 적 Prefab·활성 여부·로컬 좌표·회전을 설정한 뒤 Play Mode를 시작한다. 활성 아티팩트 10종과 호환성 확인용 비활성 `item-06`이 기본 목록에 포함되며, 기본 적 배치에는 불효자손·산사모·저혈당·고혈당 요정과 원거리 적이 들어 있다.
+- 기존 `ItemTestScene`에 산사모·고혈당 요정이 없다면 `Trickal Fan Game > Debug > Add Week 15 Enemy Color Samples`를 실행한다. 기존 배치는 유지한 채 두 디버그 샘플만 추가한다.
+- Play Mode 오른쪽 `Item Test Room` 패널에서 현재 HP·방어막·공격력·공격속도·치명타·이동속도·투사체·관통 수치를 확인한다. 각 아이템의 `+1`로 즉시 한 스택을 획득하고, `Heal / Reset HP`와 `Respawn Enemies`로 같은 설정을 반복 검증한다. 스택 감소와 완전 초기화는 Play Mode를 다시 시작한다.
+- `Trickal Fan Game > Debug > Verify Item Test Room`: 전용 씬 격리, 아이템 목록·중복·최대 스택, 적 Prefab의 `Health`, Backend 저장 세션 부재를 검사한다. `ItemTestScene`을 연 상태에서 Edit Mode와 Play Mode에 각각 실행하며 성공 시 Console에 `Item Test Room verification passed`가 출력되고 오류가 없어야 한다.
+
+- `Trickal Fan Game > Setup Phase C Lower Grade Skill`: Play Mode 밖에서 Player 컴포넌트와 SP 픽업·유도탄 프리팹을 생성 또는 갱신하고 씬을 저장한다.
+- `Trickal Fan Game > Verify Phase C Lower Grade Skill`: SP 경계, 처치 드롭, 입력 방향 중심 36° 부채꼴과 `1→3→2→4` 슬롯 순서, 0.08초 간격 4발 연사, 다수 적 거리순 배분, 현재 공격력 100% 중첩 폭발, 타깃 없음과 SP 부족 경로를 검사한다. 성공 시 Console에 `Phase C verification passed`가 출력되고 불변조건 위반 시 예외로 실패한다.
+- `Trickal Fan Game > Setup Phase D High Grade Skill`: Play Mode 밖에서 Player 행동 상태·고학년 스킬 컴포넌트와 적 넉백 수신기를 생성 또는 갱신하고 씬·적 프리팹을 저장한다. 재실행해도 중복 컴포넌트를 만들지 않는다.
+- `Trickal Fan Game > Verify Phase D High Grade Skill`: Q 쿨타임, 조향·무적 돌진, 행동·전환 게이트, 200% 범위 피해, 일반/보스 넉백 후 경직, 충돌 후 플레이어 무적 경직, 시간 만료 감속과 사망 정리를 검사한다. 성공 시 Console에 `Phase D verification passed`가 출력되고 불변조건 위반 시 예외로 실패한다.
+- `Trickal Fan Game > Setup Phase F-1 Random Room Definitions`: Play Mode 밖에서 `Assets/Rooms/Definitions`의 일반방 3종·보상방 1종·보스방 1종 정의 에셋과 씬의 `Phase F Floor Generator`를 생성 또는 갱신한다. 재실행해도 오브젝트나 에셋을 중복 생성하지 않는다.
+- `Trickal Fan Game > Verify Phase F-1 Random Room Graph`: 고정 seed 재현성, 안정적인 `floor-XX-room-YY` ID, 중복 ID 거부, 시작→일반/보상→보스 연결, 전 층 도달 가능성과 잘못된 정의 실패를 검사한다. 성공 시 Console에 `Phase F-1 random room graph verification passed`가 출력된다.
+- `Trickal Fan Game > Setup Phase F-2 Generated Room Graph Binding`: F-1 Setup을 갱신한 뒤 생성 결과를 Phase E에서 검증된 9개 방의 정의·몬스터 구성·보상방 활성 상태·출입구 순서에 적용하고 `RoomGraphController`를 연결한다. 완료된 Phase E-7 그래프가 선행되어야 하며 재실행해도 assembler나 출입구를 중복 생성하지 않는다.
+- `Trickal Fan Game > Verify Phase F-2 Generated Room Graph Binding`: 생성 노드와 씬 방의 1:1 대응, 몬스터 패턴, 보상방 활성화, 정확한 출입구 순서와 graph 참조, 재적용 멱등성, 방 수 불일치 실패를 검사한다. 성공 시 Console에 `Phase F-2 generated room graph binding verification passed`가 출력된다.
+- `Trickal Fan Game > Setup Phase H-5 Meta Progression`: Play Mode 밖에서 기존 `RunSession`에 `PlayerProgressClient`를 하나만 추가하거나 갱신하고 `test-player`, 저학년 스킬과 고학년 스킬 참조를 연결해 씬을 저장한다. Backend와 seed가 먼저 실행 중이어야 실제 온라인 진행을 조회할 수 있다.
+- `Trickal Fan Game > Verify Phase H-5 Meta Progression`: 온라인·캐시·Lv.1 폴백, Lv.1/Lv.10 실제 스킬 효과, 새 스냅샷 덮어쓰기, 클리어·사망 Run DTO, 중복 종료 방지, 동일 `clientRunId` 재시도, 성공·네트워크 실패·충돌 결과 표시를 검사한다. Edit Mode와 Play Mode에서 각각 실행해 `Phase H-5 verification passed`와 Console 오류 0개를 확인한다.
+
+- 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
+- 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.
+- 개발 도구의 실행 실패가 게임 진행을 멈추는지 여부와 실패 종료 코드를 명확히 기록한다.
+
+---
+
+## 18. 참고 자료
 
 - Node.js Releases: https://nodejs.org/en/about/previous-releases
 - pnpm Installation: https://pnpm.io/installation

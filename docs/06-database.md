@@ -39,14 +39,15 @@ Database 설계의 주요 목표는 다음과 같다.
 
 ```text
 User
- │
- └──< Run
+ ├──< Run
        │
        ├── Character
        │
        └──< RunItem
                │
                └── Item
+ │
+ └──< UserCharacterProgress >── Character
 ```
 
 즉,
@@ -54,6 +55,7 @@ User
 - 하나의 Run은 하나의 Character를 사용한다.
 - 하나의 Run은 여러 개의 Item을 획득할 수 있다.
 - 하나의 Item은 여러 Run에서 사용될 수 있다.
+- 한 명의 User는 캐릭터마다 하나의 UserCharacterProgress를 가진다.
 
 ## 4. ERD
 MVP 기준의 기본 ERD는 다음과 같다.
@@ -73,6 +75,7 @@ MVP 기준의 기본 ERD는 다음과 같다.
 │     runs     │
 ├──────────────┤
 │ id PK        │
+│ client_run_id│
 │ user_id FK   │
 │ character_id │
 │ started_at   │
@@ -107,6 +110,8 @@ MVP 기준의 기본 ERD는 다음과 같다.
 │ description  │
 │ rarity       │
 │ is_active    │
+│ max_stacks   │
+│ effect_data  │
 └──────────────┘
 
 ┌──────────────────┐
@@ -117,6 +122,19 @@ MVP 기준의 기본 ERD는 다음과 같다.
 │ description      │
 │ is_active        │
 └──────────────────┘
+
+┌─────────────────────────┐
+│ user_character_progress │
+├─────────────────────────┤
+│ id PK                   │
+│ user_id FK              │
+│ character_id FK         │
+│ level                   │
+│ experience              │
+│ skill_points            │
+│ low_grade_skill_level   │
+│ high_grade_skill_level  │
+└─────────────────────────┘
 ```
 
 ## 5. Table 목록
@@ -129,6 +147,7 @@ MVP에서는 다음 테이블을 우선 사용한다.
 | items | 아이템 정보 |
 | runs | 하나의 게임 플레이 기록 |
 | run_items | Run에서 획득한 아이템 기록 |
+| user_character_progress | 캐릭터별 레벨, 경험치, 스킬 포인트와 스킬 레벨 |
 
 초기에는 이 정도로 시작한다.
 필요한 경우 개발 과정에서 다음 테이블을 추가할 수 있다.
@@ -143,13 +162,15 @@ MVP에서는 다음 테이블을 우선 사용한다.
 
 ## 6. users
 유저 정보를 저장한다.
-현재 프로젝트의 핵심은 로그인 시스템이 아니라 전적 검색이므로 MVP에서는 최소한의 유저 정보만 관리한다.
+현재 프로젝트의 핵심은 로그인 시스템이 아니라 로컬 플레이어의 진행과 전적 검색이므로 MVP에서는
+최소한의 유저 정보만 관리한다. 비밀번호, 로그인 토큰과 기기 식별자는 저장하지 않는다.
 
 ### Schema: users
 
 | Column | Type | 설명 |
 |---|---|---|
 | id | UUID | 유저 고유 ID |
+| client_profile_id | UUID | Unity 로컬 프로필 등록 멱등성 키 |
 | nickname | VARCHAR | 유저 닉네임 |
 | created_at | TIMESTAMP | 생성 시간 |
 | updated_at | TIMESTAMP | 수정 시간 |
@@ -157,12 +178,45 @@ MVP에서는 다음 테이블을 우선 사용한다.
 ### 6.1 User ID
 User의 식별자는 UUID를 우선 사용한다.
 예: `550e8400-e29b-41d4-a716-446655440000`
-닉네임을 Primary Key로 사용하지 않는다. 닉네임은 변경될 수 있기 때문이다.
+닉네임을 Primary Key로 사용하지 않는다. MVP에서는 변경 기능을 제공하지 않지만 향후 정책이
+바뀌더라도 User와 기존 Run의 관계는 UUID로 유지되어야 한다.
 
 ### 6.2 Nickname
-닉네임은 Web에서 유저 검색의 기준으로 사용한다.
-예: `GET /api/users?nickname=테스트유저`
-닉네임은 필요에 따라 Unique 제약을 적용한다.
+닉네임은 Unity의 최초 로컬 플레이어 등록과 Web 유저 검색의 기준으로 사용한다.
+
+- 넷째 달 이후 새로 등록하는 닉네임은 앞뒤 공백을 제거한 뒤 한글·영문·숫자 2~12자여야 한다.
+- 영문 대소문자를 구분하며 입력한 표기를 그대로 보존한다.
+- `Erpin`과 `erpin`은 서로 다른 값으로 허용한다.
+- `nickname`에 Unique 제약을 적용해 최종 등록 시점의 동시 요청도 중복 생성되지 않게 한다.
+- MVP에서는 생성 후 닉네임 변경과 사용자 전환을 제공하지 않는다.
+
+기존 개발·검증 데이터에는 `test-player`처럼 새 등록 규칙에 포함되지 않는 닉네임이 있을 수 있다.
+조회 호환성을 위해 기존 행을 강제로 변경하지 않으며 2~12자 문자 규칙은 Backend의 신규 등록
+DTO에 적용한다. Database는 대소문자를 구분하는 Unique 제약을 전체 User에 유지한다.
+
+Unity는 등록 요청 전에 `clientProfileId`를 생성해 `userId`, 닉네임과 함께 로컬에 보관한다.
+`client_profile_id`는 응답 유실 후 같은 등록을 안전하게 재시도하기 위한 멱등성 키이며 로그인 토큰이나
+소유권 증명이 아니다. 검색·전적 응답에는 이를 노출하지 않는다.
+
+### 6.3 로컬 플레이어 등록 Transaction
+
+최초 등록은 User와 현재 활성 캐릭터의 초기 `UserCharacterProgress`를 하나의 Transaction으로 만든다.
+현재 활성 캐릭터는 에르핀 1종이며 레벨 1, 경험치 0, 스킬 포인트 0, 두 스킬 레벨 1로 시작한다.
+
+```text
+client_profile_id 조회
+  ├─ 기존 User와 nickname 일치 → 기존 User·진행 결과 반환
+  ├─ 기존 User와 nickname 불일치 → PROFILE_IDEMPOTENCY_CONFLICT
+  └─ 없음
+      → nickname 형식 검증
+      → 대소문자를 구분하는 nickname 중복 확인
+      → User 생성
+      → 활성 캐릭터별 UserCharacterProgress 생성
+      → Commit
+```
+
+닉네임 중복이나 진행 데이터 생성 실패가 발생하면 전체를 Rollback한다. User만 존재하거나 초기
+진행 데이터만 누락된 부분 생성 상태를 허용하지 않는다.
 
 ## 7. characters
 플레이 가능한 캐릭터 정보를 저장한다.
@@ -183,12 +237,12 @@ User의 식별자는 UUID를 우선 사용한다.
 현재:
 ```text
 characters
-  character_a
+  erpin
 ```
 향후:
 ```text
 characters
-  character_a
+  erpin
   character_b
   character_c
 ```
@@ -196,6 +250,30 @@ characters
 Run에는 캐릭터 ID만 저장한다.
 `runs.character_id` ↓ `characters.id`
 따라서 캐릭터가 추가되더라도 runs 테이블 구조는 변경하지 않는다.
+
+### 7.2 User Character Progress
+
+Run 외부의 캐릭터별 성장 상태를 저장한다. 경험치는 소비 재화가 아니라 현재 레벨 구간에서
+누적되는 값이며, 레벨업할 때 필요한 양만 차감하고 초과분은 다음 구간으로 이월한다.
+
+### Schema: user_character_progress
+
+| Column | Type | 설명 |
+|---|---|---|
+| id | UUID | 진행 데이터 고유 ID |
+| user_id | UUID | 유저 ID |
+| character_id | VARCHAR | 캐릭터 ID |
+| level | INTEGER | 캐릭터 레벨, 기본 1, MVP 최대 19 |
+| experience | INTEGER | 현재 레벨 구간에 남은 경험치 |
+| skill_points | INTEGER | 사용하지 않은 스킬 포인트 |
+| low_grade_skill_level | INTEGER | 저학년 스킬 레벨, 1~10 |
+| high_grade_skill_level | INTEGER | 고학년 스킬 레벨, 1~10 |
+| created_at | TIMESTAMP | 생성 시간 |
+| updated_at | TIMESTAMP | 수정 시간 |
+
+- `(user_id, character_id)`에 Unique 제약을 둔다.
+- 최대 캐릭터 레벨과 레벨별 필요 경험치는 Backend 설정 또는 캐릭터 진행 데이터로 관리한다.
+- 향후 최대 레벨이 늘어나도 테이블 구조를 변경하지 않는다.
 
 ## 8. items
 게임에서 사용할 수 있는 아이템 정보를 저장한다.
@@ -210,12 +288,15 @@ MVP에서는 약 10종의 아이템을 구현한다.
 | description | TEXT | 아이템 설명 |
 | rarity | VARCHAR | 희귀도 |
 | is_active | BOOLEAN | 사용 가능 여부 |
+| max_stacks | INTEGER | Run 내 최대 스택 |
+| effect_data | JSONB | Unity와 동일한 복합 효과 계약과 필수 수치 |
 | created_at | TIMESTAMP | 생성 시간 |
 | updated_at | TIMESTAMP | 수정 시간 |
 
 ### 8.1 Item 데이터와 실제 효과
-아이템의 실제 효과는 Unity에서 게임 로직으로 처리한다.
-Database에는 기본적으로 아이템의 식별 및 표시 정보를 저장한다.
+아이템의 실제 효과 적용은 Unity에서 게임 로직으로 처리한다.
+Database에는 식별·표시 정보와 함께 Unity 계약 드리프트를 검사할 수 있도록 최대 스택과 구조화된
+복합 효과 데이터도 저장한다. Backend는 이 데이터를 직접 전투 계산에 사용하지 않는다.
 예:
 ```text
 items
@@ -223,8 +304,22 @@ items
   name: 공격력 강화
   description: 공격력 증가
   rarity: COMMON
+  max_stacks: 5
+  effect_data: [{ "type": "AttackDamagePercent", "magnitude": 0.05 }]
 ```
 Unity에서는 해당 `item_id`를 기준으로 실제 효과를 적용한다.
+
+`rarity`는 다음 안정적인 문자열 계약을 사용한다.
+
+| 게임 표시 | DB 값 |
+|---|---|
+| 일반 | `COMMON` |
+| 고급 | `UNCOMMON` |
+| 희귀 | `RARE` |
+| 전설 | `EPIC` |
+
+등급별 기본 드롭 가중치는 Unity 아이템 데이터에서 관리한다. Database의 rarity는 전적 표시,
+통계와 Run 종료 경험치 계산에 사용한다.
 
 ## 9. runs
 Database의 핵심 테이블이다.
@@ -235,6 +330,8 @@ Database의 핵심 테이블이다.
 | Column | Type | 설명 |
 |---|---|---|
 | id | UUID | Run 고유 ID |
+| client_run_id | UUID | Unity가 Run 시작 시 생성하는 멱등성 식별자 |
+| request_fingerprint | CHAR(64) | `client_run_id`를 제외한 정규화 요청의 SHA-256 |
 | user_id | UUID | 플레이한 유저 |
 | character_id | VARCHAR / UUID | 사용 캐릭터 |
 | started_at | TIMESTAMP | 게임 시작 시간 |
@@ -244,7 +341,17 @@ Database의 핵심 테이블이다.
 | is_cleared | BOOLEAN | 클리어 여부 |
 | kill_count | INTEGER | 총 처치 수 |
 | death_reason | VARCHAR | 사망 원인 |
+| experience_gained | INTEGER | 해당 Run에 한 번만 지급된 경험치 |
+| progress_snapshot | JSONB | 최초 지급 직후 API에 반환한 캐릭터 진행 결과 |
 | created_at | TIMESTAMP | 기록 생성 시간 |
+
+`client_run_id`에는 Unique 제약을 둔다. Unity가 네트워크 실패 후 같은 Run을 재전송하면 Backend는
+요청 지문을 비교해 새 Run과 경험치를 만들지 않고 `experience_gained`와 `progress_snapshot`에
+보존된 최초 결과를 반환한다. 같은 ID에 다른 Run 내용이 전송되면 멱등성 충돌로 거절한다.
+
+지문은 `client_run_id` 자체를 제외한 Run 필드 전체와 `order`로 정렬한 RunItem의 `item_id`,
+`floor`, `item_order`, `acquired_at`을 정규화한 뒤 계산한다. 배열 전송 순서만 다른 같은 내용은
+동일 요청이지만, 획득 순서나 시각을 포함한 실제 내용이 다르면 충돌이다.
 
 ## 10. Run 상태
 Run은 기본적으로 다음 두 가지 결과를 가진다.
@@ -353,15 +460,17 @@ MVP 기준 Foreign Key 관계는 다음과 같다.
 - `runs.character_id` ↓ `characters.id`
 - `run_items.run_id` ↓ `runs.id`
 - `run_items.item_id` ↓ `items.id`
+- `user_character_progress.user_id` ↓ `users.id`
+- `user_character_progress.character_id` ↓ `characters.id`
 
 전체 구조:
 ```text
 users
+  ├────< runs >──── characters
+  │        │
+  │        └────< run_items >──── items
   │
-  └────< runs >──── characters
-           │
-           │
-           └────< run_items >──── items
+  └────< user_character_progress >──── characters
 ```
 
 ## 18. 데이터 정규화
@@ -378,8 +487,9 @@ users
 Unity에서 Run이 종료되면 다음과 같은 데이터가 생성된다.
 ```json
 {
+  "clientRunId": "client-generated-run-uuid",
   "userId": "user-id",
-  "characterId": "character-a",
+  "characterId": "erpin",
   "startedAt": "2026-08-14T20:00:00Z",
   "endedAt": "2026-08-14T20:10:23Z",
   "playTime": 623,
@@ -391,12 +501,14 @@ Unity에서 Run이 종료되면 다음과 같은 데이터가 생성된다.
     {
       "itemId": "item-01",
       "floor": 1,
-      "order": 1
+      "order": 1,
+      "acquiredAt": "2026-08-14T20:02:10Z"
     },
     {
       "itemId": "item-02",
       "floor": 2,
-      "order": 2
+      "order": 2,
+      "acquiredAt": "2026-08-14T20:05:30Z"
     }
   ]
 }
@@ -425,7 +537,7 @@ Backend API
        │
        └── run_items INSERT
 ```
-하나의 Run을 저장할 때 runs와 run_items가 함께 저장되어야 한다.
+하나의 Run을 저장할 때 runs, run_items, 경험치와 캐릭터 진행 상태가 함께 저장되어야 한다.
 가능하면 하나의 Transaction으로 처리한다.
 
 ## 21. Transaction
@@ -450,15 +562,54 @@ COMMIT;
 모든 과정이 성공해야 저장을 확정한다.
 중간에 오류가 발생하면 `ROLLBACK` 하여 전체 저장을 취소한다.
 
+### 21.1 Run 경험치와 멱등성 Transaction
+
+```text
+client_run_id 조회
+  ├─ 이미 존재하고 요청 지문 일치 → 저장된 Run·경험치·진행 스냅샷 반환
+  ├─ 이미 존재하고 요청 지문 불일치 → RUN_IDEMPOTENCY_CONFLICT
+  └─ 없음
+      → Run과 RunItem 저장
+      → Backend가 획득 경험치 계산
+      → UserCharacterProgress 잠금/조회
+      → 필요 경험치를 순서대로 차감하며 최대 Lv.19까지 연속 레벨업
+      → 상승한 레벨 수만큼 skill_points 지급
+      → 진행 상태 저장
+      → Commit
+```
+
+Run 저장, 경험치 지급, 스킬 포인트 지급은 하나의 Transaction에서 처리한다. 같은
+`client_run_id`가 동시에 요청되어도 Unique 제약과 Transaction으로 한 번만 지급되도록 한다.
+
+### 21.2 아티팩트 선택 보상 저장
+
+보물방이나 보스 보상에서 후보 3개를 표시하더라도 Database에는 실제로 선택해 적용한 아티팩트만
+`run_items`에 저장한다. 선택하지 않은 후보와 화면 선택 상태는 기본 Run 전적에 필요하지 않으므로
+저장하지 않는다. 따라서 선택 보상 도입 자체는 새 테이블이나 Run 스키마 변경을 요구하지 않는다.
+
 ## 22. Index 설계
 Web에서 자주 조회하는 데이터에는 Index를 적용한다.
 초기에는 다음 Index를 우선 고려한다.
 
-- `users.nickname`: 유저 검색 (`WHERE nickname = ?`)
+- `users.nickname`: 대소문자를 구분하는 정확 일치 유저 검색 (`WHERE nickname = ?`).
+  `@unique`가 만드는 B-tree 고유 인덱스로 최대 1건을 조회하므로 별도 검색 인덱스나
+  페이지네이션이 필요하지 않다. 향후 부분 일치나 대소문자 무시 검색으로 바꿀 때는 현재
+  인덱스를 그대로 사용할 수 있다고 가정하지 않고 실제 실행 계획을 확인한 뒤 전용 인덱스를 추가한다.
+- `users.client_profile_id`: 같은 로컬 프로필 등록 재전송을 한 User 결과로 연결하는 Unique 인덱스.
 - `runs.user_id`: 유저의 전적 조회 (`WHERE user_id = ?`)
 - `runs.character_id`: 캐릭터별 통계 (`WHERE character_id = ?`)
 - `runs.is_cleared`: 클리어 기록 조회 (`WHERE is_cleared = true`)
 - `run_items.item_id`: 아이템 선택률 계산 (`GROUP BY item_id`)
+- `runs(reached_floor DESC, play_time ASC, ended_at ASC, id ASC)`: 최고 도달 층 랭킹의
+  주 정렬과 안정적인 보조 정렬
+- `runs(is_cleared, play_time ASC, ended_at ASC, id ASC)`: 클리어 Run 필터와 최단
+  클리어 타임 랭킹
+- `runs(user_id, is_cleared)`: 유저별 클리어 횟수 집계
+
+11주차 통계 구현은 사용자·캐릭터·아이템 카탈로그와 Run의 집계 필드만 한 번의 읽기
+Transaction에서 가져오며, RunItem은 `item_id`만 조회해 같은 Run 내부에서 중복을 제거한다.
+현재 MVP 데이터 규모에서는 일관된 스냅샷과 계산 규칙 검증을 우선한다. 데이터가 메모리 집계에
+부담이 되는 규모가 되면 API 계약은 유지하고 Database `GROUP BY`/CTE 집계와 캐시로 교체한다.
 
 ## 23. Ranking Query를 고려한 Index
 랭킹 기능을 고려하여 다음과 같은 컬럼을 자주 조회한다.
@@ -483,7 +634,7 @@ MVP에서는 별도의 통계 테이블을 만들지 않는다.
 
 ## 25. 캐릭터 통계
 예:
-`전체 Run` ↓ `Character A 사용 Run` ↓ `Clear 수 / 전체 Run 수` ↓ `Win Rate`
+`전체 Run` ↓ `에르핀 사용 Run` ↓ `Clear 수 / 전체 Run 수` ↓ `Win Rate`
 현재는 캐릭터가 1종뿐이지만 향후 캐릭터가 추가되면 자동으로 통계를 확장할 수 있다.
 
 ## 26. 아이템 통계
@@ -597,6 +748,9 @@ enemies
 - 실시간 HP 변화
 - 실시간 전투 상태
 - 방 내부의 임시 상태
+- Unity 로컬 설정과 Frontend 화면 상태
+- 아티팩트 선택 화면에 제시됐지만 선택하지 않은 후보
+- Room Profile, Encounter 웨이브와 실시간 적 경계 상태
 
 이러한 데이터는 서버에 저장할 필요가 없다.
 
@@ -621,10 +775,12 @@ enemies
 ```text
 ┌──────────────┐
 │    users     │
-└──────┬───────┘
-       │
-       │ 1:N
-       ▼
+└──┬────────┬──┘
+   │        │
+   │        └──────────< user_character_progress >────────── characters
+   │
+   │ 1:N
+   ▼
 ┌──────────────┐
 │     runs     │
 └──────┬───────┘
@@ -659,6 +815,7 @@ enemies
 | items | 필수 | 아이템 관리 |
 | runs | 핵심 | 플레이 기록 |
 | run_items | 핵심 | 아이템 획득 기록 |
+| user_character_progress | 핵심 | 캐릭터 레벨, 경험치, 포인트와 두 스킬 레벨 |
 | run_events | 추후 | 상세 플레이 로그 |
 | item_synergies | 추후 | 아이템 시너지 관리 |
 | enemies | 추후 | 몬스터 데이터 관리 |
@@ -678,6 +835,9 @@ Run
 
 ## 36. 데이터 무결성
 Backend는 다음 조건을 보장해야 한다.
+- 닉네임 형식과 대소문자를 구분하는 Unique 제약을 적용한다.
+- `client_profile_id`에 Unique 제약을 적용하고 같은 ID의 다른 닉네임 요청을 충돌로 거절한다.
+- User와 초기 캐릭터 진행 데이터를 부분 생성하지 않는다.
 - 존재하지 않는 User ID를 저장하지 않는다.
 - 존재하지 않는 Character ID를 저장하지 않는다.
 - 존재하지 않는 Item ID를 저장하지 않는다.
@@ -685,6 +845,10 @@ Backend는 다음 조건을 보장해야 한다.
 - 유효하지 않은 Floor를 저장하지 않는다.
 - 유효하지 않은 Item ID를 저장하지 않는다.
 - Run과 Run Item이 불완전하게 저장되지 않도록 한다.
+- `(user_id, character_id)` 진행 데이터가 중복되지 않도록 한다.
+- 캐릭터 레벨은 1~19, 두 스킬 레벨은 각각 1~10 범위를 보장한다.
+- 스킬 포인트가 음수가 되지 않도록 한다.
+- 같은 `client_run_id`에 경험치를 두 번 지급하지 않는다.
 
 ## 37. 데이터 신뢰 경계
 Unity에서 전달되는 데이터는 신뢰하지 않는다.
@@ -716,7 +880,7 @@ Database
 예를 들어 Unity는 다음과 같은 데이터를 전송한다.
 ```json
 {
-  "characterId": "character-a",
+  "characterId": "erpin",
   "reachedFloor": 3,
   "playTime": 623,
   "isCleared": true,
@@ -754,13 +918,19 @@ Unity와 Web은 Database에 직접 접근하지 않는다.
 ## 40. Definition of Done
 Database 설계는 다음 조건을 만족하면 MVP 기준 완료로 정의한다.
 - [ ] users 테이블 정의
+- [ ] 닉네임 형식·대소문자·Unique 계약 정의
+- [ ] client_profile_id 등록 멱등성 제약 정의
+- [ ] User와 초기 캐릭터 진행 생성 Transaction 정의
 - [ ] characters 테이블 정의
 - [ ] items 테이블 정의
 - [ ] runs 테이블 정의
 - [ ] run_items 테이블 정의
+- [ ] user_character_progress 테이블 정의
 - [ ] Foreign Key 관계 정의
 - [ ] 기본 Index 정의
 - [ ] Run 저장 Transaction 정의
+- [ ] Run 경험치 지급과 연속 레벨업 Transaction 정의
+- [ ] client_run_id 멱등성 제약 정의
 - [ ] Run Result 데이터 구조 정의
 - [ ] 유저 전적 조회 구조 정의
 - [ ] 랭킹 조회에 필요한 데이터 정의
@@ -773,6 +943,7 @@ Database 설계는 다음 조건을 만족하면 MVP 기준 완료로 정의한�
                          │    users     │
                          │              │
                          │ id           │
+                         │ client_profile_id │
                          │ nickname     │
                          └──────┬───────┘
                                 │
@@ -812,7 +983,108 @@ Database 설계는 다음 조건을 만족하면 MVP 기준 완료로 정의한�
                          │ description  │
                          │ rarity       │
                          │ is_active    │
+                         │ max_stacks   │
+                         │ effect_data  │
                          └──────────────┘
 ```
 
 본 프로젝트의 Database는 하나의 플레이 세션을 Run으로 정의하고, `User` → `Run` → `RunItem` → `Item`의 관계를 중심으로 게임 플레이 데이터를 저장한다. 이를 기반으로 유저 전적, 랭킹, 캐릭터 통계, 아이템 통계 등의 Web 서비스를 제공한다.
+
+---
+
+## 42. ID 관리 정책
+
+이 프로젝트는 세 가지 ID 체계를 사용한다. 출시 후 ID의 의미를 바꾸거나 재사용하지 않는다.
+
+### 42.1 ID 형식별 사용 영역
+
+| 형식 | 사용 영역 | 예시 | 생성 주체 |
+|------|-----------|------|-----------|
+| UUID | User, Run, RunItem, UserCharacterProgress | `550e8400-e29b-41d4-a716-446655440000` | 서버 자동 생성 |
+| UUID | clientProfileId (프로필 등록 멱등성 키) | `10000000-0000-4000-8000-000000000001` | Unity 클라이언트 |
+| UUID | clientRunId (멱등성 키) | `00000000-0000-4000-8000-000000000001` | Unity 클라이언트 |
+| 문자열 (VARCHAR) | Character | `erpin` | 개발자 수동 할당 |
+| 문자열 (VARCHAR) | Item | `item-01`, `item-15` | 개발자 수동 할당 |
+| SHA-256 해시 | requestFingerprint | 64자 해시 | Backend 계산 |
+
+### 42.2 Item ID 규칙
+
+- **형식:** `item-{숫자}` (예: `item-01`, `item-12`)
+- **숫자 범위:** 01부터 시작, 0-패딩 2자리 사용
+- **연속성 불요:** 중간 번호 건너뛰기 허용 (item-05 비활성, item-06 비활성 등)
+- **재사용 금지:** 한 번 할당된 ID는 다른 아이템에 재사용하지 않음
+- **의미 변경 금지:** 기존 ID의 효과나 이름을 완전히 다른 것으로 바꾸지 않음
+
+현재 할당된 Item ID:
+
+| ID | 이름 | 상태 |
+|---|---|---|
+| `item-01` | 급조한 목검 | 활성 |
+| `item-02` | 풍선 갑옷 | 활성 |
+| `item-03` | 도깨비 감투 | 활성 |
+| `item-04` | 낡은 화살 | 활성 |
+| `item-05` | 투사체 크기 강화 | 비활성 (레거시) |
+| `item-06` | 다중 투사체 | 비활성 (레거시, 시너지 계약 보존) |
+| `item-07` | 공격 범위 강화 | 비활성 (레거시) |
+| `item-08` | 코미의 베개 | 활성 |
+| `item-09` | 피격 반격 | 비활성 (레거시) |
+| `item-10` | 추가 공격 | 비활성 (레거시) |
+| `item-11` | 다야의 다이아몬드 커터 | 활성 |
+| `item-12` | 녹슨 송곳 | 활성 |
+| `item-13` | 에르핀의 지팡이 | 활성 |
+| `item-14` | 광기의 가면 | 활성 |
+| `item-15` | 장난감 망원경 | 활성 |
+
+새 아이템 추가 시 `item-16`부터 순차 할당한다.
+
+### 42.3 Character ID 규칙
+
+- **형식:** 영문 소문자 문자열 (예: `erpin`)
+- **최대 길이:** 64자 (VARCHAR(64))
+- **재사용 금지:** 삭제된 캐릭터 ID를 새 캐릭터에 재사용하지 않음
+
+현재 할당된 Character ID:
+
+| ID | 이름 | 상태 |
+|---|---|---|
+| `erpin` | 에르핀 | 활성 |
+
+### 42.4 Rarity 계약
+
+희귀도는 Unity와 Database에서 다른 형식을 사용하지만 의미는 동일하다.
+
+| 게임 표시 | Unity Enum | Database 값 |
+|---|---|---|
+| 일반 | `Common (0)` | `COMMON` |
+| 고급 | `Uncommon (1)` | `UNCOMMON` |
+| 희귀 | `Rare (2)` | `RARE` |
+| 전설 | `Epic (3)` | `EPIC` |
+
+Backend API는 문자열(`COMMON` 등)을 사용하고, Unity는 정수(0~3)를 사용한다.
+변환은 Unity의 `ItemRarity` enum과 Backend의 `ItemRarity` 상수에서 처리한다.
+
+### 42.5 ItemEffectType 계약
+
+효과 타입은 Unity enum의 정수값으로 에셋에 저장되며 Backend는 사용하지 않는다.
+새 효과 추가 시 기존 번호를 재사용하지 않고 끝에 추가한다.
+
+| 번호 | 타입 | 용도 |
+|---|---|---|
+| 0~5 | 레거시 효과 | AttackDamage, MaxHealth, MoveSpeed, MultiShot, Pierce, HealOnKill |
+| 6~18 | Phase G 효과 | AttackDamagePercent, CriticalChance, DistanceDamage, SplitAfterPierce 등 |
+
+### 42.6 Unity ↔ Backend 계약 동기화
+
+- Unity의 `ItemDefinition` 에셋과 Backend의 `ITEM_CATALOG`는 동일한 ID, 이름, 희귀도, 활성 상태를 유지해야 한다.
+- `/contract-drift-check` 명령으로 불일치를 검사할 수 있다.
+- 한쪽만 변경하면 Run 저장 시 `ITEM_NOT_FOUND` 오류가 발생한다.
+
+### 42.7 ID 변경이 필요할 때
+
+ID 자체는 변경하지 않는다. 대신:
+
+1. **효과 조정:** 같은 ID를 유지하고 수치만 변경
+2. **완전히 다른 아이템:** 새 ID 할당 (기존 ID는 비활성 처리)
+3. **아이템 삭제:** `isActive = false`로 비활성화 (ID와 기록 보존)
+
+이 정책은 기존 Run 기록의 무결성을 보장하고, 전적에서 "이 Run에서 획득한 item-01"이 항상 같은 의미를 유지하도록 한다.

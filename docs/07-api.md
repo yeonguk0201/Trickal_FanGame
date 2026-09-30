@@ -155,11 +155,14 @@ POST /api/runs
 ## User API
 
 ```text
+POST /api/users
+GET /api/users/search?q={nickname}
 GET /api/users/:nickname
 GET /api/users/:nickname/runs
+PUT /api/users/:nickname/characters/:characterId/skills/:skillType
 ```
 
-유저 정보 및 전적 조회.
+로컬 플레이어 등록, 유저 정보 및 전적 조회, 캐릭터 스킬 강화.
 
 ---
 
@@ -209,8 +212,10 @@ POST /api/runs
 
 ```json
 {
+  "clientRunId": "client-generated-run-uuid",
   "userId": "user-uuid",
-  "characterId": "character-a",
+  "characterId": "erpin",
+  "gameVersion": "0.1.0",
   "startedAt": "2026-08-14T20:00:00Z",
   "endedAt": "2026-08-14T20:10:23Z",
   "playTime": 623,
@@ -222,17 +227,20 @@ POST /api/runs
     {
       "itemId": "item-01",
       "floor": 1,
-      "order": 1
+      "order": 1,
+      "acquiredAt": "2026-08-14T20:02:10Z"
     },
     {
       "itemId": "item-02",
       "floor": 2,
-      "order": 2
+      "order": 2,
+      "acquiredAt": "2026-08-14T20:05:30Z"
     },
     {
       "itemId": "item-03",
       "floor": 3,
-      "order": 3
+      "order": 3,
+      "acquiredAt": "2026-08-14T20:08:45Z"
     }
   ]
 }
@@ -244,8 +252,10 @@ POST /api/runs
 
 | Field | Type | Required | 설명 |
 |---|---|---:|---|
+| `clientRunId` | UUID | O | Unity가 Run 시작 시 생성하는 멱등성 식별자 |
 | `userId` | UUID | O | 유저 ID |
 | `characterId` | string | O | 캐릭터 ID |
+| `gameVersion` | string | O | 게임 버전 |
 | `startedAt` | datetime | O | 게임 시작 시간 |
 | `endedAt` | datetime | O | 게임 종료 시간 |
 | `playTime` | integer | O | 플레이 시간(초) |
@@ -265,7 +275,8 @@ POST /api/runs
 {
   "itemId": "item-01",
   "floor": 1,
-  "order": 1
+  "order": 1,
+  "acquiredAt": "2026-08-14T20:02:10Z"
 }
 ```
 
@@ -274,6 +285,7 @@ POST /api/runs
 | `itemId` | string | O | 아이템 ID |
 | `floor` | integer | O | 획득한 층 |
 | `order` | integer | O | 획득 순서 |
+| `acquiredAt` | ISO 8601 string | O | Run 시작 시각과 종료 시각 사이의 UTC 획득 시각 |
 
 ---
 
@@ -288,6 +300,10 @@ userId
     ↓
 존재하는 User인가?
 
+clientRunId
+    ↓
+이미 저장된 Run이면 기존 저장·경험치 결과를 반환하는가?
+
 characterId
     ↓
 존재하는 Character인가?
@@ -295,6 +311,10 @@ characterId
 itemId
     ↓
 존재하는 Item인가?
+
+acquiredAt
+    ↓
+startedAt 이상, endedAt 이하인가?
 
 playTime
     ↓
@@ -327,12 +347,34 @@ HTTP/1.1 201 Created
 {
   "success": true,
   "data": {
-    "runId": "run-uuid"
+    "runId": "run-uuid",
+    "experienceGained": 400,
+    "progress": {
+      "characterId": "erpin",
+      "level": 3,
+      "experience": 120,
+      "experienceToNextLevel": 900,
+      "skillPoints": 2,
+      "lowGradeSkillLevel": 1,
+      "highGradeSkillLevel": 1
+    }
   }
 }
 ```
 
-Unity는 생성된 Run ID를 저장할 수 있다.
+Unity는 생성된 Run ID와 Backend가 계산한 캐릭터 진행 결과를 표시한다. 한 Run의 경험치가 여러
+레벨 조건을 충족하면 Backend는 최대 Lv.19 또는 경험치 부족 시점까지 연속 레벨업하고, 상승한
+레벨 수만큼 스킬 포인트를 지급한다.
+
+같은 `clientRunId`와 동일한 Run 내용을 재전송하면 새 Run이나 경험치를 만들지 않고
+동일한 결과를 `200 OK`로 반환한다. 같은 `clientRunId`에 다른 Run 내용을 보내면
+`RUN_IDEMPOTENCY_CONFLICT`로 전체 요청을 거절한다.
+최초 저장은 `201 Created`를 사용한다.
+
+동일 여부는 `clientRunId`를 제외한 모든 Run 필드와 `order`로 정렬한 아이템의 `itemId`,
+`floor`, `order`, `acquiredAt`으로 계산한 SHA-256 지문으로 판정한다. 재전송에는 이후의 Run이나
+스킬 강화로 바뀐 현재 진행이 아니라 최초 지급 직후 저장한 `experienceGained`와 `progress`
+스냅샷을 반환한다.
 
 ---
 
@@ -374,11 +416,152 @@ Unity는 생성된 Run ID를 저장할 수 있다.
 }
 ```
 
+같은 `clientRunId`에 다른 플레이 데이터가 전송된 경우 (`409 Conflict`):
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RUN_IDEMPOTENCY_CONFLICT",
+    "message": "같은 clientRunId에 다른 플레이 데이터가 전송되었습니다."
+  }
+}
+```
+
 ---
 
 # 9. User API
 
-# 9.1 Get User
+# 9.1 Create Local Player
+
+Unity에서 처음 게임을 시작한 로컬 플레이어를 등록한다. 이는 비밀번호나 로그인 세션을 만드는
+계정 API가 아니며 한 PC에 저장할 User 참조를 발급하는 최소 등록 계약이다.
+
+```http
+POST /api/users
+```
+
+요청:
+
+```json
+{
+  "clientProfileId": "client-generated-profile-uuid",
+  "nickname": "Erpin123"
+}
+```
+
+등록 규칙:
+
+- 앞뒤 공백을 제거한다.
+- 공백 제거 후 한글·영문·숫자만 허용한다.
+- 길이는 2~12자다.
+- 영문 대소문자를 구분하므로 `Erpin`과 `erpin`은 서로 다른 닉네임이다.
+- 닉네임 중복 확인 UI가 있어도 최종 `POST`에서 다시 Unique 제약을 확인한다.
+- `clientProfileId`는 Unity가 최초 요청 전에 한 번 생성한 UUID이며 응답 유실 후 재시도에도 유지한다.
+- User와 현재 활성 캐릭터의 초기 `UserCharacterProgress`를 하나의 Transaction으로 생성한다.
+- 현재 MVP의 에르핀 진행은 Lv.1, 경험치 0, 스킬 포인트 0, 두 스킬 Lv.1로 시작한다.
+
+최초 생성 성공 응답은 `201 Created`다. 같은 `clientProfileId`와 닉네임을 재전송해 기존 User를
+반환할 때는 `200 OK`와 같은 응답 형태를 사용한다.
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "user-uuid",
+    "clientProfileId": "client-generated-profile-uuid",
+    "nickname": "Erpin123",
+    "characterProgress": [
+      {
+        "characterId": "erpin",
+        "level": 1,
+        "experience": 0,
+        "experienceToNextLevel": 400,
+        "skillPoints": 0,
+        "lowGradeSkillLevel": 1,
+        "highGradeSkillLevel": 1
+      }
+    ]
+  }
+}
+```
+
+오류:
+
+| HTTP | Code | 조건 |
+|---:|---|---|
+| 409 | `NICKNAME_ALREADY_EXISTS` | 대소문자까지 같은 닉네임이 이미 존재 |
+| 409 | `PROFILE_IDEMPOTENCY_CONFLICT` | 같은 clientProfileId로 다른 닉네임을 요청 |
+| 422 | `VALIDATION_ERROR` | 길이·문자·공백 제거 후 형식이 잘못됨 |
+| 500 | `INTERNAL_SERVER_ERROR` | User와 초기 진행 생성 Transaction 실패 |
+
+같은 `clientProfileId`와 같은 닉네임을 재전송하면 기존 User와 현재 캐릭터 진행 결과를 반환하며
+데이터를 추가로 생성하지 않는다. 새로운 `clientProfileId`로 이미 사용 중인 닉네임을
+요청하면 `NICKNAME_ALREADY_EXISTS`를 반환한다. 닉네임만으로 기존 사용자의 소유권을 증명할 수
+없기 때문에 기존 User 연결 API처럼 동작시키지 않는다.
+
+---
+
+# 9.2 Search Users
+
+닉네임으로 전적 페이지에 진입할 유저를 검색한다.
+
+```http
+GET /api/users/search?q=test-player
+```
+
+MVP 검색 정책:
+
+- `q`의 앞뒤 공백은 제거한다.
+- 공백 제거 후 길이는 2~50자여야 한다.
+- 닉네임은 대소문자를 구분해 정확히 일치한다.
+- 정확 일치이므로 결과는 최대 1개이며 페이지네이션을 사용하지 않는다.
+- 결과가 있다면 닉네임 오름차순으로 본 것과 동일한 안정적인 순서다.
+- 응답에는 전적 이동에 필요한 공개 필드 `nickname`만 포함하며 UUID나 진행 데이터는 노출하지 않는다.
+
+성공 응답:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "nickname": "test-player"
+    }
+  ]
+}
+```
+
+일치하는 유저가 없으면 `200 OK`와 빈 배열을 반환한다.
+
+```json
+{
+  "success": true,
+  "data": []
+}
+```
+
+`q`가 없거나, 빈 문자열이거나, 길이 범위를 벗어나면 `422 Unprocessable Entity`를 반환한다.
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "요청 데이터가 유효하지 않습니다."
+  }
+}
+```
+
+Database 예외는 공통 오류 계약에 따라 세부 내용을 노출하지 않고
+`500 INTERNAL_SERVER_ERROR`로 반환한다.
+
+Unity의 닉네임 등록 화면은 이 정확 일치 검색을 사전 중복 확인에 재사용할 수 있다. 검색 결과가
+비어 있어도 동시에 다른 등록이 완료될 수 있으므로 최종 판정은 항상 `POST /api/users` 응답을 따른다.
+
+---
+
+# 9.3 Get User
 
 특정 유저의 기본 정보와 주요 전적을 조회한다.
 
@@ -394,7 +577,7 @@ GET /api/users/test-player
 
 ---
 
-# 9.2 User Response
+# 9.4 User Response
 
 ```json
 {
@@ -409,14 +592,28 @@ GET /api/users/test-player
       "averagePlayTime": 582,
       "averageFloor": 2.4,
       "highestFloor": 5
-    }
+    },
+    "characterProgress": [
+      {
+        "characterId": "erpin",
+        "characterName": "에르핀",
+        "level": 3,
+        "maxLevel": 19,
+        "experience": 120,
+        "experienceToNextLevel": 900,
+        "skillPoints": 2,
+        "lowGradeSkillLevel": 1,
+        "highGradeSkillLevel": 1,
+        "maxSkillLevel": 10
+      }
+    ]
   }
 }
 ```
 
 ---
 
-# 9.3 User Stats
+# 9.5 User Stats
 
 유저 페이지에서 다음 통계를 제공한다.
 
@@ -430,6 +627,72 @@ Highest Floor
 ```
 
 통계는 `runs` 데이터를 기반으로 Backend에서 계산한다.
+
+Run이 없는 유저는 `totalRuns`, `clears`, `winRate`, `averagePlayTime`, `averageFloor`,
+`highestFloor`를 모두 `0`으로 반환한다. 닉네임에 해당하는 유저가 없으면 `404 Not Found`와
+`USER_NOT_FOUND`를 반환하며 일반 Backend 실패와 구분한다.
+
+---
+
+# 9.6 Upgrade Character Skill
+
+캐릭터의 미사용 스킬 포인트 1을 소비해 지정한 스킬을 1레벨 강화한다.
+
+```http
+PUT /api/users/:nickname/characters/:characterId/skills/:skillType
+```
+
+`skillType`은 다음 안정적인 값을 사용한다.
+
+```text
+LOW_GRADE
+HIGH_GRADE
+```
+
+요청 본문에는 클라이언트가 원하는 다음 레벨을 전달한다.
+
+```json
+{
+  "targetLevel": 2
+}
+```
+
+`targetLevel`은 현재 레벨과 같거나 정확히 1 높아야 한다. 현재 레벨과 같으면 재전송으로 보고
+포인트를 다시 차감하지 않은 채 현재 상태를 반환한다. 현재 레벨보다 2 이상 높거나 낮으면
+`INVALID_SKILL_TARGET_LEVEL` 오류를 반환한다.
+
+Backend는 다음을 하나의 Transaction으로 처리한다.
+
+```text
+UserCharacterProgress 조회 및 잠금
+  → targetLevel과 현재 스킬 레벨 검증
+  → targetLevel이 현재와 같으면 현재 결과 반환
+  → skillPoints >= 1 검증
+  → 대상 스킬 레벨 < 10 검증
+  → skillPoints 1 차감
+  → 대상 스킬 레벨 1 증가
+  → 저장된 진행 상태 반환
+```
+
+성공 응답:
+
+```json
+{
+  "success": true,
+  "data": {
+    "characterId": "erpin",
+    "level": 3,
+    "experience": 120,
+    "experienceToNextLevel": 900,
+    "skillPoints": 1,
+    "lowGradeSkillLevel": 2,
+    "highGradeSkillLevel": 1
+  }
+}
+```
+
+스킬 포인트가 없으면 `SKILL_POINT_NOT_ENOUGH`, 이미 Lv.10이면 `SKILL_LEVEL_MAX`, 진행 데이터가
+없으면 `CHARACTER_PROGRESS_NOT_FOUND` 오류를 반환한다.
 
 ---
 
@@ -457,11 +720,19 @@ Pagination을 기본적으로 지원한다.
 GET /api/users/test-player/runs?page=1&limit=20
 ```
 
+- `page` 기본값은 `1`, 허용 범위는 `1~1,000,000`의 정수다.
+- `limit` 기본값은 `20`, 허용 범위는 `1~100`의 정수다.
+- Web 전적 화면은 한 페이지에 10개를 요청한다.
+- 정렬은 `endedAt DESC`, 같은 종료 시각에서는 `runId DESC`를 사용한다.
+- 전체 Run이 없을 때도 1페이지는 유효하며 빈 배열과 `totalPages: 1`을 반환한다.
+- 마지막 페이지보다 큰 `page`는 `RUN_PAGE_OUT_OF_RANGE`를 반환한다.
+- 숫자가 아니거나 허용 범위를 벗어난 값은 `VALIDATION_ERROR`를 반환한다.
+
 향후 다음과 같은 Filter를 추가할 수 있다.
 
 ```text
 ?result=clear
-?character=character-a
+?character=erpin
 ?sort=latest
 ```
 
@@ -478,8 +749,8 @@ MVP에서는 필요한 기능만 구현한다.
     {
       "runId": "run-001",
       "character": {
-        "id": "character-a",
-        "name": "Character A"
+        "id": "erpin",
+        "name": "에르핀"
       },
       "reachedFloor": 3,
       "playTime": 623,
@@ -490,8 +761,8 @@ MVP에서는 필요한 기능만 구현한다.
     {
       "runId": "run-002",
       "character": {
-        "id": "character-a",
-        "name": "Character A"
+        "id": "erpin",
+        "name": "에르핀"
       },
       "reachedFloor": 2,
       "playTime": 451,
@@ -503,7 +774,20 @@ MVP에서는 필요한 기능만 구현한다.
   "meta": {
     "page": 1,
     "limit": 20,
-    "total": 32
+    "total": 32,
+    "totalPages": 2
+  }
+}
+```
+
+범위를 벗어난 페이지 (`422 Unprocessable Entity`):
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RUN_PAGE_OUT_OF_RANGE",
+    "message": "요청한 전적 페이지가 범위를 벗어났습니다."
   }
 }
 ```
@@ -540,9 +824,10 @@ GET /api/runs/run-uuid
       "nickname": "test-player"
     },
     "character": {
-      "id": "character-a",
-      "name": "Character A"
+      "id": "erpin",
+      "name": "에르핀"
     },
+    "gameVersion": "0.1.0",
     "startedAt": "2026-08-14T20:00:00Z",
     "endedAt": "2026-08-14T20:10:23Z",
     "playTime": 623,
@@ -554,267 +839,112 @@ GET /api/runs/run-uuid
       {
         "itemId": "item-01",
         "name": "Item A",
+        "rarity": "COMMON",
         "floor": 1,
-        "order": 1
+        "order": 1,
+        "acquiredAt": "2026-08-14T20:02:10Z"
       },
       {
         "itemId": "item-02",
         "name": "Item B",
+        "rarity": "UNCOMMON",
         "floor": 2,
-        "order": 2
+        "order": 2,
+        "acquiredAt": "2026-08-14T20:05:30Z"
       },
       {
         "itemId": "item-03",
         "name": "Item C",
+        "rarity": "RARE",
         "floor": 3,
-        "order": 3
+        "order": 3,
+        "acquiredAt": "2026-08-14T20:08:45Z"
       }
     ]
   }
 }
 ```
 
+`items`는 `order ASC`로 반환한다. 같은 `itemId`를 여러 번 획득한 경우에도 각 획득의
+`floor`, `order`, `acquiredAt`을 별도 항목으로 유지한다. Run이 없으면 `404 Not Found`와
+`RUN_NOT_FOUND`를 반환하며, Database 또는 네트워크 실패와 구분한다.
+
+`deathReason`은 `ENEMY`, `BOSS`, `HAZARD`, `UNKNOWN` 또는 클리어 Run의 `null`을 사용한다.
+
 ---
 
 # 12. Ranking API
 
-전체 유저의 랭킹을 조회한다.
+전체 기간의 저장 Run을 대상으로 유저당 대표 기록 하나를 반환한다.
 
 ```http
-GET /api/rankings
+GET /api/rankings?type=highest-floor&page=1&limit=20
 ```
 
----
+- `type`: `highest-floor`(기본값), `fastest-clear`, `most-clears`
+- `page`: 1 이상, 기본값 1
+- `limit`: 1~100, 기본값 20
+- 범위를 벗어난 유효 페이지는 성공 응답과 빈 `data`를 반환한다.
+- 잘못된 Query는 `422 VALIDATION_ERROR`를 반환한다.
 
-# 12.1 Ranking Type
+`highest-floor`는 `reachedFloor DESC`, `playTime ASC`, `endedAt ASC`, `nickname ASC`,
+`runId ASC` 순으로 각 유저의 대표 Run과 전체 순서를 정한다. `fastest-clear`는 클리어 Run만
+대상으로 `playTime ASC` 이후 동일한 보조 정렬을 사용한다. `most-clears`는 유저별
+`clears DESC`, `totalRuns DESC`, `nickname ASC`, `userId ASC` 순이다. 순위는 동률이어도
+페이지 전체에서 연속된 위치 순위이며, 같은 저장 데이터에는 항상 같은 순서가 나온다.
 
-MVP에서는 다음 랭킹을 우선 지원한다.
-
-```text
-highest-floor
-fastest-clear
-```
-
-Query Parameter:
-
-```http
-GET /api/rankings?type=highest-floor
-```
-
-또는
-
-```http
-GET /api/rankings?type=fastest-clear
-```
-
----
-
-# 12.2 Highest Floor Ranking
-
-가장 높은 층에 도달한 유저를 기준으로 정렬한다.
-
-```http
-GET /api/rankings?type=highest-floor
-```
-
-정렬:
-
-```text
-reachedFloor DESC
-```
-
-동일 층인 경우 추가적인 정렬 기준을 사용할 수 있다.
-
-예:
-
-```text
-reachedFloor DESC
-playTime ASC
-```
-
----
-
-# 12.3 Fastest Clear Ranking
-
-클리어한 Run 중 플레이 시간이 짧은 순으로 정렬한다.
-
-```http
-GET /api/rankings?type=fastest-clear
-```
-
-조건:
-
-```text
-isCleared = true
-```
-
-정렬:
-
-```text
-playTime ASC
-```
-
----
-
-# 12.4 Ranking Response
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "rank": 1,
-      "nickname": "player-a",
-      "character": {
-        "id": "character-a",
-        "name": "Character A"
-      },
-      "reachedFloor": 5,
-      "playTime": 812,
-      "runId": "run-001"
-    },
-    {
-      "rank": 2,
-      "nickname": "player-b",
-      "character": {
-        "id": "character-a",
-        "name": "Character A"
-      },
-      "reachedFloor": 4,
-      "playTime": 921,
-      "runId": "run-002"
-    }
-  ]
-}
-```
+Run 기반 랭킹 항목은 `rank`, `nickname`, `runId`, `character`, `reachedFloor`,
+`playTime`, `endedAt`을 반환한다. `most-clears` 항목은 `rank`, `nickname`,
+`clears`, `totalRuns`를 반환한다. 내부 유저 UUID는 공개하지 않는다. 응답의 `meta`는 `type`, `page`, `limit`, `total`,
+`totalPages`를 포함한다.
 
 ---
 
 # 13. Statistics API
 
-게임 전체의 통계를 조회한다.
+통계 모집단은 별도 기간 필터가 없는 전체 저장 Run이다. 비율은 `0~100` 퍼센트, 분모가
+0인 비율과 평균·최댓값은 0이다. 현재 계약은 테스트/개발 Run을 임의로 제외하지 않는다.
 
 ```http
 GET /api/statistics
+GET /api/statistics/users/:nickname
+GET /api/statistics/characters
+GET /api/statistics/items
+GET /api/statistics/floors
 ```
 
----
-
-# 13.1 Statistics Response
-
-```json
-{
-  "success": true,
-  "data": {
-    "totalUsers": 120,
-    "totalRuns": 1520,
-    "totalClears": 420,
-    "winRate": 27.63,
-    "averagePlayTime": 581,
-    "averageReachedFloor": 2.7
-  }
-}
-```
+전체 통계는 `totalUsers`, `totalRuns`, `totalClears`, `clearRate`, `averagePlayTime`,
+`averageReachedFloor`, `highestReachedFloor`을 반환한다. 유저 통계는 `nickname`과 유저 범위의
+동일 Run 지표를 반환하며 없는 닉네임은 `404 USER_NOT_FOUND`이다.
 
 ---
 
 # 14. Character Statistics API
 
-캐릭터별 통계를 조회한다.
-
-```http
-GET /api/statistics/characters
-```
-
----
-
-# 14.1 Character Statistics Response
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "characterId": "character-a",
-      "characterName": "Character A",
-      "totalRuns": 1520,
-      "clears": 420,
-      "winRate": 27.63,
-      "averageFloor": 2.7,
-      "averagePlayTime": 581
-    }
-  ]
-}
-```
-
-현재는 캐릭터가 1종이므로 하나의 데이터만 존재한다.
-
-향후 캐릭터가 추가되면 자동으로 여러 캐릭터의 통계를 반환한다.
+`GET /api/statistics/characters`는 캐릭터 카탈로그의 모든 캐릭터를 반환한다. Run이 없는
+캐릭터도 0값으로 포함하며 `totalRuns DESC`, `characterId ASC`로 정렬한다. 각 항목은
+`characterId`, `characterName`, `totalRuns`, `clears`, `clearRate`,
+`averageReachedFloor`, `averagePlayTime`을 포함한다.
 
 ---
 
 # 15. Item Statistics API
 
-아이템별 통계를 조회한다.
-
-```http
-GET /api/statistics/items
-```
-
----
-
-# 15.1 Item Statistics Response
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "itemId": "item-01",
-      "itemName": "Item A",
-      "pickCount": 540,
-      "pickRate": 35.52,
-      "clearCount": 180,
-      "clearRate": 33.33
-    },
-    {
-      "itemId": "item-02",
-      "itemName": "Item B",
-      "pickCount": 420,
-      "pickRate": 27.63,
-      "clearCount": 140,
-      "clearRate": 33.33
-    }
-  ]
-}
-```
+`GET /api/statistics/items`는 아이템 카탈로그의 모든 아이템을 반환한다. 같은 Run에서 같은
+아이템을 여러 번 획득해도 고유 Run 한 건으로 센다. `acquiredRunCount`는 획득한 고유 Run 수,
+`selectionRate`는 `acquiredRunCount / 전체 Run 수 × 100`,
+`clearRateAfterAcquisition`은 `획득 후 클리어 Run 수 / acquiredRunCount × 100`이다.
+획득 Run 수 내림차순, `itemId` 오름차순으로 정렬하며 미획득 아이템도 0값으로 포함한다.
 
 ---
 
-# 16. Item Statistics 계산
+# 16. Floor Statistics API
 
-아이템 선택률은 다음과 같이 계산한다.
-
-```text
-Item Pick Rate
-=
-해당 아이템을 획득한 Run 수
-/
-전체 Run 수
-× 100
-```
-
-예:
-
-```text
-전체 Run = 1,000
-
-Item A 획득 Run = 300
-
-Pick Rate
-= 300 / 1,000 × 100
-= 30%
-```
+`GET /api/statistics/floors`는 1층부터 실제 최고 도달 층까지 오름차순으로 반환한다.
+`reachedRunCount`는 `reachedFloor >= floor`인 Run 수, `reachRate`의 분모는 전체 Run이다.
+`deathCount`는 해당 층에서 끝난 미클리어 Run 수이며 `deathRate`의 분모는 해당 층 도달 Run이다.
+`clearCount`는 해당 층에 도달한 최종 클리어 Run 수이며 `clearRate`도 해당 층 도달 Run을
+분모로 한다. Run이 하나도 없으면 빈 배열을 반환한다.
 
 ---
 
@@ -867,6 +997,12 @@ MVP에서 사용할 주요 Error Code:
 | `CHARACTER_NOT_FOUND` | 캐릭터 없음 |
 | `ITEM_NOT_FOUND` | 아이템 없음 |
 | `RUN_NOT_FOUND` | Run 없음 |
+| `RUN_IDEMPOTENCY_CONFLICT` | 같은 clientRunId에 다른 Run 내용이 전송됨 |
+| `CHARACTER_PROGRESS_NOT_FOUND` | 캐릭터 진행 데이터 없음 |
+| `SKILL_POINT_NOT_ENOUGH` | 사용할 수 있는 스킬 포인트 부족 |
+| `SKILL_LEVEL_MAX` | 대상 스킬이 최대 Lv.10 |
+| `INVALID_SKILL_TYPE` | `LOW_GRADE`, `HIGH_GRADE`가 아닌 스킬 종류 |
+| `INVALID_SKILL_TARGET_LEVEL` | 현재 레벨과 일치하지 않는 강화 목표 |
 | `INVALID_RUN_DATA` | 잘못된 Run 데이터 |
 | `INTERNAL_SERVER_ERROR` | 서버 내부 오류 |
 
@@ -899,6 +1035,9 @@ Backend에서는 API Request / Response를 명확하게 정의한다.
 예:
 
 ```text
+CreateUserRequest
+CreateUserResponse
+
 CreateRunRequest
 CreateRunResponse
 
@@ -934,8 +1073,8 @@ Web Response:
 ```json
 {
   "character": {
-    "id": "character-a",
-    "name": "Character A"
+    "id": "erpin",
+    "name": "에르핀"
   }
 }
 ```
@@ -949,14 +1088,29 @@ Backend에서 필요한 데이터를 조합하여 Web에 적합한 형태로 반
 Unity는 다음 API를 사용한다.
 
 ```text
+POST /api/users
+GET /api/users/:nickname
+PUT /api/users/:nickname/characters/:characterId/skills/:skillType
 POST /api/runs
 ```
 
-MVP에서는 게임 플레이 중 지속적으로 API를 호출하지 않는다.
+`POST /api/users`는 최초 로컬 플레이어 등록에만 사용하고 요청 전 생성한 `clientProfileId`와 성공
+응답의 `id`, `nickname`을 Unity 로컬 프로필에 저장한다. 이후 Frontend에서 진행을 조회하고 스킬을
+강화하며, 게임 플레이 중에는 지속적으로 API를 호출하지 않는다.
 
 기본적인 통신 시점:
 
 ```text
+최초 GAME START
+    ↓
+clientProfileId 생성·저장
+    ↓
+POST /api/users
+    ↓
+userId·nickname 로컬 저장
+    ↓
+Frontend 진행 조회·스킬 강화
+    ↓
 Game Start
     ↓
 Local Game Play
@@ -973,6 +1127,10 @@ POST /api/runs
 # 24. Unity Network Error 처리
 
 게임 종료 시 서버 통신이 실패할 가능성을 고려한다.
+
+Run 시작 전 캐릭터 진행 조회가 실패하면 마지막으로 성공한 로컬 진행 스냅샷을 사용한다. 저장된
+스냅샷도 없으면 두 스킬을 Lv.1로 적용하고 오프라인 기본값을 사용 중임을 표시한다. 진행 중인
+Run에는 시작 시 스냅샷을 유지하며 Web 등에서 강화된 값은 다음 Run부터 적용한다.
 
 예:
 
@@ -1030,6 +1188,10 @@ Retry 2
 
 구체적인 Retry 횟수와 Backoff 전략은 구현 단계에서 결정한다.
 
+Run 재시도는 최초 요청과 동일한 `clientRunId`를 반드시 사용한다. Backend는 이 값을 기준으로
+이미 저장된 Run인지 확인하며, 기존 Run이면 경험치와 스킬 포인트를 다시 지급하지 않고 최초 처리
+결과를 반환한다. 로컬 재전송 데이터에도 `clientRunId`를 함께 보존한다.
+
 ---
 
 # 26. API Versioning
@@ -1072,17 +1234,23 @@ MVP에서는 최소한의 보안을 적용한다.
 
 초기 MVP에서는 복잡한 로그인 시스템을 구현하지 않는다.
 
-게임에서 전적 저장에 필요한 최소한의 식별 방식만 사용한다.
+게임에서 전적 저장에 필요한 최소한의 식별 방식만 사용한다. 최초 등록의 `clientProfileId`, 응답의
+`userId`와 닉네임을 한 PC의 로컬 프로필에 저장하지만 이는 인증 토큰이 아니며 사용자 소유권을
+증명하지 않는다.
+닉네임 변경, 사용자 전환과 기존 사용자의 새 기기 복구는 MVP 범위에서 제공하지 않는다.
 
-향후 필요할 경우 다음과 같은 인증 시스템을 추가한다.
+향후 계정 복구가 필요해지면 **로컬 우선 게스트 → 선택적 계정 연동** 구조로 확장한다.
 
-```text
-JWT
-OAuth
-Supabase Auth
-```
+1. 서버 연결 여부와 관계없이 기기에서 로컬 게스트 프로필을 만들고 바로 플레이한다.
+2. 미전송 Run은 게스트 소유자 ID와 `clientRunId`를 함께 보관해 연결 복구 후 순서대로 동기화한다.
+3. 사용자가 원할 때 비밀번호·복구 코드 또는 외부 인증처럼 소유권을 증명할 수 있는 수단으로
+   계정을 만든 뒤 기존 게스트 진행도를 하나의 트랜잭션으로 연결한다.
+4. 앱 삭제·새 기기에서는 연동 계정으로 서버 진행도를 복구한다. 닉네임과 `clientProfileId`만으로는
+   계정 소유권을 인정하거나 복구하지 않는다.
+5. 계정 전환 시 미전송 Run은 원래 소유자에게 계속 귀속하며 다른 계정으로 전송하지 않는다.
 
-인증 시스템은 MVP 이후 확장한다.
+구체적인 세션 방식은 JWT, OAuth 또는 관리형 인증을 비교해 정한다. 이 계정·연동 기능은 현재
+넷째 달 MVP에서 구현하지 않고, 로컬 플레이와 Run 동기화가 안정된 뒤 별도 기능 조각으로 진행한다.
 
 ---
 
@@ -1095,7 +1263,7 @@ Web은 Backend API를 통해 데이터를 조회한다.
 ```text
 User Search
     ↓
-GET /api/users/:nickname
+GET /api/users/search?q={nickname}
 ```
 
 ```text
@@ -1129,14 +1297,16 @@ GET /api/statistics
 | Web Page | API |
 |---|---|
 | Home | `/api/statistics` |
-| User Search | `/api/users/:nickname` |
+| User Search | `/api/users/search?q={nickname}` |
 | User Profile | `/api/users/:nickname` |
 | User Run History | `/api/users/:nickname/runs` |
 | Run Detail | `/api/runs/:runId` |
 | Ranking | `/api/rankings` |
 | Statistics | `/api/statistics` |
+| User Statistics | `/api/statistics/users/:nickname` |
 | Character Stats | `/api/statistics/characters` |
 | Item Stats | `/api/statistics/items` |
+| Floor Stats | `/api/statistics/floors` |
 
 ---
 
@@ -1152,6 +1322,8 @@ GET /api/statistics
 │   └── GET /:runId
 │
 ├── users
+│   ├── POST /
+│   ├── GET /search?q={nickname}
 │   └── GET /:nickname
 │       └── GET /runs
 │
@@ -1160,8 +1332,10 @@ GET /api/statistics
 │
 └── statistics
     ├── GET /
+    ├── GET /users/:nickname
     ├── GET /characters
-    └── GET /items
+    ├── GET /items
+    └── GET /floors
 ```
 
 ---
@@ -1186,6 +1360,24 @@ runs
 run_items
  ↓
 PostgreSQL
+```
+
+## 32.1.1 로컬 플레이어 등록
+
+```text
+Unity 최초 실행
+ ↓
+clientProfileId 생성·로컬 저장
+ ↓
+POST /api/users
+ ↓
+Nickname Validation / Unique Check
+ ↓
+User + UserCharacterProgress Transaction
+ ↓
+clientProfileId + userId + nickname 응답
+ ↓
+Unity 로컬 프로필 저장
 ```
 
 ---
@@ -1267,7 +1459,13 @@ MVP에서는 다음 API만 구현한다.
 ### 필수
 
 ```text
+POST /api/users
+
 POST /api/runs
+
+PUT /api/users/:nickname/characters/:characterId/skills/:skillType
+
+GET /api/users/search?q={nickname}
 
 GET /api/users/:nickname
 
@@ -1279,9 +1477,13 @@ GET /api/rankings
 
 GET /api/statistics
 
+GET /api/statistics/users/:nickname
+
 GET /api/statistics/characters
 
 GET /api/statistics/items
+
+GET /api/statistics/floors
 ```
 
 ---
@@ -1385,6 +1587,10 @@ Database
 
 API 설계는 다음 조건을 만족하면 MVP 기준 완료로 정의한다.
 
+- [ ] 로컬 플레이어 등록 API 정의
+- [ ] 닉네임 형식·대소문자·중복 오류 정의
+- [ ] clientProfileId 재전송과 충돌 계약 정의
+- [ ] User와 초기 캐릭터 진행의 원자적 생성 응답 정의
 - [ ] Run 저장 API 정의
 - [ ] User 조회 API 정의
 - [ ] User Run History API 정의

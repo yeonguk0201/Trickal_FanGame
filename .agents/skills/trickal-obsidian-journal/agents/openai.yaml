@@ -1,0 +1,4 @@
+interface:
+  display_name: "Trickal 개발 기록"
+  short_description: "완료한 개발 작업을 근거 기반 옵시디언 기록으로 정리"
+  default_prompt: "$trickal-obsidian-journal을 사용해 방금 끝낸 유의미한 개발 작업을 옵시디언에 기록해줘."

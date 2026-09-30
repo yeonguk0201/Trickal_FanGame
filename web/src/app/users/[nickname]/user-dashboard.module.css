@@ -1,0 +1,80 @@
+.page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 56px 0 88px; }
+.hero { padding: 34px; border: 1px solid var(--line); border-radius: 28px; background: linear-gradient(135deg, #fff9e7 0%, #fff 62%); box-shadow: var(--shadow); }
+.hero h1 { margin-top: 8px; font-size: clamp(2rem, 6vw, 4rem); letter-spacing: -0.06em; }
+.backLink { display: inline-block; margin-bottom: 28px; color: var(--muted); }
+.dataNav { display: flex; gap: 8px; margin: -16px 0 24px; }
+.dataNav a { padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: white; font-size: .82rem; font-weight: 800; }
+.eyebrow { color: var(--accent-dark); font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 30px; }
+.stats div { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 16px; background: rgb(255 255 255 / 72%); }
+.stats span, .sectionHeading span, .xpHeader, .characterId { color: var(--muted); font-size: .84rem; }
+.stats strong { font-size: 1.25rem; }
+.section { margin-top: 54px; }
+.sectionHeading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 18px; }
+.sectionHeading h2 { margin-top: 5px; font-size: 1.7rem; }
+.progressGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+.progressCard { padding: 26px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: var(--shadow); }
+.levelRow, .xpHeader, .pointBanner, .skillRow, .skillRow > div { display: flex; align-items: center; justify-content: space-between; }
+.levelRow h3 { font-size: 1.35rem; }
+.levelRow > strong { color: var(--accent-dark); font-size: 1.45rem; }
+.levelRow small { color: var(--muted); font-size: .75rem; }
+.xpHeader { margin-top: 24px; }
+.xpTrack { height: 10px; margin-top: 8px; overflow: hidden; border-radius: 999px; background: #eee8d8; }
+.xpTrack span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), #ffb35c); }
+.pointBanner { margin: 22px 0 12px; padding: 13px 15px; border-radius: 14px; background: var(--ink); color: white; }
+.pointBanner strong { font-size: 1.25rem; }
+.skills { display: grid; gap: 10px; }
+.skillRow { gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.skillRow > div { flex: 1; }
+.skillRow button, .inlineError button, .inlineError a, .statusPage button { border: 0; border-radius: 10px; padding: 10px 14px; background: var(--accent); color: #2b1705; font: inherit; font-weight: 800; cursor: pointer; }
+.skillRow button:disabled { cursor: not-allowed; background: #ece8de; color: #8a867c; }
+.success, .error { margin-top: 14px; padding: 11px 13px; border-radius: 10px; font-size: .9rem; }
+.success { background: #eaf8ee; color: #24633a; }
+.error, .inlineError { background: #fff0ed; color: #9f2e27; }
+.runList { display: grid; gap: 10px; list-style: none; }
+.runCard { display: grid; grid-template-columns: 76px 1.1fr repeat(3, .8fr) 1.4fr 24px; align-items: center; gap: 12px; padding: 17px 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); transition: transform 150ms ease, border-color 150ms ease; }
+.runCard:hover { transform: translateY(-2px); border-color: var(--accent); }
+.runCard time { color: var(--muted); font-size: .84rem; text-align: right; }
+.runCharacter { font-weight: 800; }
+.clearBadge, .deathBadge { width: fit-content; padding: 5px 9px; border-radius: 999px; font-size: .78rem; font-weight: 800; }
+.clearBadge { background: #e6f6ea; color: #22773d; }
+.deathBadge { background: #fff0ed; color: #ad332c; }
+.arrow { color: var(--accent-dark); font-size: 1.2rem; }
+.runChart { display: flex; height: 230px; align-items: end; gap: clamp(5px, 1.5vw, 14px); padding: 28px 22px 18px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); box-shadow: var(--shadow); }
+.runBar { display: grid; min-width: 0; height: 100%; flex: 1; grid-template-rows: 24px 1fr 20px; align-items: end; justify-items: center; gap: 5px; }
+.runBar i { width: min(36px, 80%); min-height: 12px; border-radius: 7px 7px 3px 3px; transition: filter 150ms ease, transform 150ms ease; }
+.runBar:hover i, .runBar:focus-visible i { filter: brightness(.9); transform: scaleX(1.08); }
+.clearBar { background: linear-gradient(#ffd86f, #edae2c); }
+.deathBar { background: linear-gradient(#ef8c7f, #c94e43); }
+.barValue, .runBar small { font-size: .75rem; font-style: normal; font-weight: 800; }
+.runBar small { color: var(--muted); }
+.chartNote { margin-top: 10px; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+.empty, .inlineError { padding: 34px; border: 1px dashed var(--line-strong); border-radius: 18px; color: var(--muted); text-align: center; }
+.inlineError button { margin-top: 14px; }
+.inlineError a { display: inline-block; margin-top: 14px; }
+.pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; margin-top: 22px; }
+.pagination a, .pagination span { width: min(100%, 132px); padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-weight: 800; text-align: center; }
+.pagination a:first-child, .pagination span:first-child { justify-self: start; }
+.pagination a:last-child, .pagination span:last-child { justify-self: end; }
+.pagination span { color: var(--muted); opacity: .55; }
+.pagination strong { font-size: .9rem; text-align: center; }
+.statusPage { display: grid; place-items: center; align-content: center; gap: 16px; min-height: 100vh; padding: 24px; text-align: center; }
+.statusPage > p:not(.eyebrow) { color: var(--muted); }
+.statusPage > a { color: var(--accent-dark); text-decoration: underline; }
+
+@media (max-width: 760px) {
+  .page { padding-top: 24px; }
+  .hero { padding: 24px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .runCard { grid-template-columns: auto 1fr auto; }
+  .runCard > span:nth-child(3), .runCard > span:nth-child(4), .runCard > span:nth-child(5) { color: var(--muted); font-size: .84rem; }
+  .runCard time { grid-column: 2 / 3; text-align: left; }
+  .arrow { grid-column: 3; grid-row: 1 / 3; }
+}
+
+@media (max-width: 480px) {
+  .stats { grid-template-columns: 1fr; }
+  .progressGrid { grid-template-columns: 1fr; }
+  .pagination { grid-template-columns: 1fr 1fr; }
+  .pagination strong { grid-column: 1 / 3; grid-row: 1; }
+}

@@ -1,0 +1,3 @@
+ALTER TABLE "items"
+ADD COLUMN "max_stacks" INTEGER NOT NULL DEFAULT 1,
+ADD COLUMN "effect_data" JSONB NOT NULL DEFAULT '[]'::jsonb;
