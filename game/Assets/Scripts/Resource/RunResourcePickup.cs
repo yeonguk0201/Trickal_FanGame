@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TrickalFanGame.Resource
 {
-    // A pushable floor pickup for elif, keys or bombs. It is collected when the Run can still hold more of its
+    // A pushable floor pickup for gold, keys or bombs. It is collected when the Run can still hold more of its
     // resource; at the 99 cap it stays on the floor like a heart that does not fit.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]

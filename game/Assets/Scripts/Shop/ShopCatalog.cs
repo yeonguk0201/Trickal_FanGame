@@ -30,7 +30,7 @@ namespace TrickalFanGame.Shop
         public int Price => price;
     }
 
-    // Special-4 price list: fixed elif prices per Item rarity and per consumable, tunable without code changes.
+    // Special-4 price list: fixed gold prices per Item rarity and per consumable, tunable without code changes.
     [CreateAssetMenu(menuName = "Trickal Fan Game/Shop Catalog", fileName = "ShopCatalog")]
     public sealed class ShopCatalog : ScriptableObject
     {

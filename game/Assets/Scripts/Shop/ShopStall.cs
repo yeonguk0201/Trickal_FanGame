@@ -13,7 +13,7 @@ namespace TrickalFanGame.Shop
     public sealed class ShopStall : MonoBehaviour
     {
         public const string BuyPrompt = "[E] 구매";
-        public const string NotEnoughElifPrompt = "엘리프 부족";
+        public const string NotEnoughGoldPrompt = "골드 부족";
 
         private static readonly Color AffordableColor = new(0.9f, 0.98f, 1f, 1f);
         private static readonly Color UnaffordableColor = new(1f, 0.45f, 0.4f, 1f);
@@ -120,7 +120,7 @@ namespace TrickalFanGame.Shop
                 display.transform.localScale = source != null ? source.transform.lossyScale : itemScale;
             }
 
-            if (label != null && Offer != null) label.text = $"{Offer.DisplayName}\n{Offer.Price} 엘리프";
+            if (label != null && Offer != null) label.text = $"{Offer.DisplayName}\n{Offer.Price} 골드";
         }
 
         private void RefreshVisuals()
@@ -131,7 +131,7 @@ namespace TrickalFanGame.Shop
             if (prompt == null) return;
             prompt.gameObject.SetActive(CanInteract);
             bool affordable = owner != null && owner.CanAfford(Offer);
-            prompt.text = affordable ? BuyPrompt : NotEnoughElifPrompt;
+            prompt.text = affordable ? BuyPrompt : NotEnoughGoldPrompt;
             prompt.color = affordable ? AffordableColor : UnaffordableColor;
         }
     }

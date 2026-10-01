@@ -47,7 +47,7 @@ namespace TrickalFanGame.Editor
             ValidateRunProgressLifecycle();
             ValidatePickupCollection();
             ValidateColliderFiltering();
-            Debug.Log("Resource-1 run resource verification passed: elif, key and bomb pickups each grant 1, " +
+            Debug.Log("Resource-1 run resource verification passed: gold, key and bomb pickups each grant 1, " +
                       "counts cap at 99 with the overflow dropped, a full resource leaves its pickup on the " +
                       "floor, a pickup never grants twice, only the player collects, nothing is granted after " +
                       "the Run ends, and every count starts at 0 and resets with the Run.");
@@ -89,7 +89,7 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateWallet()
         {
-            Assert((int)RunResourceType.Elif == 0 && (int)RunResourceType.Key == 1 &&
+            Assert((int)RunResourceType.Gold == 0 && (int)RunResourceType.Key == 1 &&
                    (int)RunResourceType.Bomb == 2,
                 "RunResourceType values are serialized in prefabs and must stay stable.");
 
@@ -197,13 +197,13 @@ namespace TrickalFanGame.Editor
                 }
 
                 progress.ResetProgress();
-                progress.TryAddResource(RunResourceType.Elif, 97);
-                pickupObject = CreatePickup(RunResourceType.Elif, out RunResourcePickup bigElif);
-                SerializedObject serialized = new(bigElif);
+                progress.TryAddResource(RunResourceType.Gold, 97);
+                pickupObject = CreatePickup(RunResourceType.Gold, out RunResourcePickup bigGold);
+                SerializedObject serialized = new(bigGold);
                 serialized.FindProperty("amount").intValue = 5;
                 serialized.ApplyModifiedPropertiesWithoutUndo();
-                Assert(bigElif.Collect(progress) && pickupObject == null &&
-                       progress.GetResourceCount(RunResourceType.Elif) == RunResourceWallet.MaxCount,
+                Assert(bigGold.Collect(progress) && pickupObject == null &&
+                       progress.GetResourceCount(RunResourceType.Gold) == RunResourceWallet.MaxCount,
                     "A pickup that only partly fits must fill to 99, drop the rest and disappear.");
 
                 progress.ResetProgress();

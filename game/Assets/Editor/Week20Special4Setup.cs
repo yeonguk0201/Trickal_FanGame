@@ -28,7 +28,7 @@ namespace TrickalFanGame.Editor
         public const int RoomContentVersion = 7;
         public const int EncounterContentVersion = 11;
 
-        // Prices confirmed 2026-10-01. Elif income is tuned later (special obstacles), not here.
+        // Prices confirmed 2026-10-01. Gold income is tuned later (special obstacles), not here.
         public const int CommonPrice = 10;
         public const int UncommonPrice = 15;
         public const int RarePrice = 20;
@@ -174,7 +174,7 @@ namespace TrickalFanGame.Editor
 
             TextMeshPro label = Text(stallObject.transform, "Label", font, new Vector2(0f, 1.3f), 2.6f,
                 new Color(1f, 0.93f, 0.62f, 1f));
-            label.text = "상품\n0 엘리프";
+            label.text = "상품\n0 골드";
             TextMeshPro prompt = Text(stallObject.transform, "Prompt", font, new Vector2(0f, -0.95f), 3f,
                 new Color(0.9f, 0.98f, 1f, 1f));
             prompt.text = ShopStall.BuyPrompt;
@@ -209,7 +209,7 @@ namespace TrickalFanGame.Editor
 
         private static void EnsureGlyphs(TMP_FontAsset font)
         {
-            string required = "상품엘리프부족구매[E]0123456789" +
+            string required = "상품골드부족구매[E]0123456789" +
                               string.Concat(Consumables.Select(spec => spec.Name));
             if (!font.HasCharacters(required) && !font.TryAddCharacters(required, out string missing))
                 throw new InvalidOperationException("Missing Special-4 shop glyphs: " + missing);

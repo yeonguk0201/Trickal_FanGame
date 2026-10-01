@@ -77,7 +77,7 @@ namespace TrickalFanGame.Debugging
         [Header("Resources")]
         [Tooltip("디버그 패널의 Spawn Heart로 플레이어 옆에 생성할 체력 회복 픽업입니다.")]
         [SerializeField] private HealthPickup healthPickupPrefab;
-        [Tooltip("디버그 패널의 Spawn 버튼으로 생성할 엘리프·열쇠·폭탄 픽업입니다. 자원 종류별로 하나씩 둡니다.")]
+        [Tooltip("디버그 패널의 Spawn 버튼으로 생성할 골드·열쇠·폭탄 픽업입니다. 자원 종류별로 하나씩 둡니다.")]
         [SerializeField] private RunResourcePickup[] resourcePickupPrefabs = Array.Empty<RunResourcePickup>();
 
         private readonly List<GameObject> spawnedEnemies = new();
@@ -356,12 +356,12 @@ namespace TrickalFanGame.Debugging
             }
 
             GUILayout.Label(
-                $"ELIF {runProgress.GetResourceCount(RunResourceType.Elif)}  " +
+                $"GOLD {runProgress.GetResourceCount(RunResourceType.Gold)}  " +
                 $"KEY {runProgress.GetResourceCount(RunResourceType.Key)}  " +
                 $"BOMB {runProgress.GetResourceCount(RunResourceType.Bomb)}  (max {RunResourceWallet.MaxCount})",
                 GUI.skin.box);
             GUILayout.BeginHorizontal();
-            foreach (RunResourceType type in new[] { RunResourceType.Elif, RunResourceType.Key, RunResourceType.Bomb })
+            foreach (RunResourceType type in new[] { RunResourceType.Gold, RunResourceType.Key, RunResourceType.Bomb })
             {
                 GUI.enabled = resourcePickupPrefabs.Any(prefab => prefab != null && prefab.ResourceType == type);
                 if (GUILayout.Button($"Spawn {type}"))
@@ -372,7 +372,7 @@ namespace TrickalFanGame.Debugging
             GUI.enabled = true;
             if (GUILayout.Button("+98 All"))
             {
-                runProgress.TryAddResource(RunResourceType.Elif, 98);
+                runProgress.TryAddResource(RunResourceType.Gold, 98);
                 runProgress.TryAddResource(RunResourceType.Key, 98);
                 runProgress.TryAddResource(RunResourceType.Bomb, 98);
             }

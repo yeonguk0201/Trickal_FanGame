@@ -39,7 +39,7 @@ namespace TrickalFanGame.Editor
 
         public static readonly PickupSpec[] Specs =
         {
-            new(RunResourceType.Elif, ElifPrefabPath, "Elif Pickup", new Color(1f, 0.82f, 0.2f), 0.35f),
+            new(RunResourceType.Gold, ElifPrefabPath, "Elif Pickup", new Color(1f, 0.82f, 0.2f), 0.35f),
             new(RunResourceType.Key, KeyPrefabPath, "Key Pickup", new Color(0.75f, 0.85f, 0.95f), 0.4f),
             new(RunResourceType.Bomb, BombPrefabPath, "Bomb Pickup", new Color(0.18f, 0.18f, 0.22f), 0.5f),
         };
@@ -55,7 +55,7 @@ namespace TrickalFanGame.Editor
 
             Selection.activeObject = AssetDatabase.LoadAssetAtPath<GameObject>(ElifPrefabPath);
             Debug.Log(
-                "Resource-1 pickups ready: elif, key and bomb pickups each grant 1, are held up to 99 per Run, " +
+                "Resource-1 pickups ready: gold, key and bomb pickups each grant 1, are held up to 99 per Run, " +
                 "and stay on the floor as pushable bodies once that resource is full. Open the Item Test Room " +
                 "to spawn them from its debug panel.");
         }

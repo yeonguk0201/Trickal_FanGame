@@ -216,7 +216,7 @@ namespace TrickalFanGame.Editor
             ResourceDropTable table = ScriptableObject.CreateInstance<ResourceDropTable>();
             try
             {
-                GameObject elif = Week17Resource1Setup.LoadPrefab(RunResourceType.Elif).gameObject;
+                GameObject elif = Week17Resource1Setup.LoadPrefab(RunResourceType.Gold).gameObject;
                 table.Configure(1f, new[]
                 {
                     new ResourceDropEntry("elif", elif, 50),

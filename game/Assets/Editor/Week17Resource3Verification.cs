@@ -72,10 +72,10 @@ namespace TrickalFanGame.Editor
             Assert(byId["heart"].Prefab.GetComponent<HealthPickup>() != null,
                 "The heart drop must spawn the health pickup.");
             Assert(byId["sp"].Prefab.GetComponent<SPPickup>() != null, "The sp drop must spawn the SP pickup.");
-            Assert(ResourceTypeOf(byId["elif"]) == RunResourceType.Elif &&
+            Assert(ResourceTypeOf(byId["elif"]) == RunResourceType.Gold &&
                    ResourceTypeOf(byId["key"]) == RunResourceType.Key &&
                    ResourceTypeOf(byId["bomb"]) == RunResourceType.Bomb,
-                "Elif, key and bomb drops must spawn their Resource-1 pickups.");
+                "Gold, key and bomb drops must spawn their Resource-1 pickups.");
         }
 
         private static void ValidateSeededDistribution(ResourceDropTable table)

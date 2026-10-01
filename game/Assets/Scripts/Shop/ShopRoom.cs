@@ -11,12 +11,12 @@ namespace TrickalFanGame.Shop
     {
         Purchased,
         SoldOut,
-        NotEnoughElif,
+        NotEnoughGold,
         ItemUnavailable,
         Unavailable,
     }
 
-    // Special-4: the shop room's stalls. A purchase checks the offer, spends its elif, marks the slot sold, and only then
+    // Special-4: the shop room's stalls. A purchase checks the offer, spends its gold, marks the slot sold, and only then
     // grants it: an Item goes straight to the inventory, a consumable drops as a floor pickup in front of its stall.
     [DisallowMultipleComponent]
     public sealed class ShopRoom : MonoBehaviour
@@ -53,7 +53,7 @@ namespace TrickalFanGame.Shop
         }
 
         public bool CanAfford(ShopOffer offer) =>
-            offer != null && runProgress != null && runProgress.GetResourceCount(RunResourceType.Elif) >= offer.Price;
+            offer != null && runProgress != null && runProgress.GetResourceCount(RunResourceType.Gold) >= offer.Price;
 
         public bool IsSold(ShopOffer offer) => offer == null || stock == null || stock.IsPurchased(offer.SlotIndex);
 
@@ -69,11 +69,11 @@ namespace TrickalFanGame.Shop
             if (offer.Kind == ShopOfferKind.Item &&
                 (inventory == null || !ArtifactRewardSelector.IsEligible(offer.Item, inventory)))
                 return ShopPurchaseResult.ItemUnavailable;
-            if (!runProgress.TrySpendResource(RunResourceType.Elif, offer.Price)) return ShopPurchaseResult.NotEnoughElif;
+            if (!runProgress.TrySpendResource(RunResourceType.Gold, offer.Price)) return ShopPurchaseResult.NotEnoughGold;
 
             if (offer.Kind == ShopOfferKind.Item && !inventory.TryAcquire(offer.Item))
             {
-                runProgress.TryAddResource(RunResourceType.Elif, offer.Price);
+                runProgress.TryAddResource(RunResourceType.Gold, offer.Price);
                 return ShopPurchaseResult.ItemUnavailable;
             }
 

@@ -122,7 +122,7 @@ namespace TrickalFanGame.Editor
                 case "bomb":
                     if (!Week17Resource1Setup.EnsurePrefabs(out error))
                         throw new InvalidOperationException($"Drops require the Resource-1 pickups. {error}");
-                    RunResourceType type = dropId == "elif" ? RunResourceType.Elif
+                    RunResourceType type = dropId == "elif" ? RunResourceType.Gold
                         : dropId == "key" ? RunResourceType.Key : RunResourceType.Bomb;
                     return Week17Resource1Setup.LoadPrefab(type).gameObject;
                 case "pit":

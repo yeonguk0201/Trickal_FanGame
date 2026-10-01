@@ -55,7 +55,7 @@ namespace TrickalFanGame.Editor
             Debug.Log("Special-4 verification passed: floors reproduce a 60% key-locked shop end room (at most one) " +
                       "beside the start or an intermediate room without changing existing rooms or the boss route, " +
                       "stock rolls two distinct Items at rarity prices and two distinct consumables, entry takes one " +
-                      "key, purchases spend elif exactly once, Items go to the inventory, consumables drop as floor " +
+                      "key, purchases spend gold exactly once, Items go to the inventory, consumables drop as floor " +
                       "pickups, and stock, sold slots, and the open lock survive floor rebuilds.");
         }
 
@@ -66,12 +66,12 @@ namespace TrickalFanGame.Editor
             Assert(catalog != null && catalog.TryValidate(out error), error ?? "The shop catalog is missing.");
             Assert(catalog.GetItemPrice(ItemRarity.Common) == 10 && catalog.GetItemPrice(ItemRarity.Uncommon) == 15 &&
                    catalog.GetItemPrice(ItemRarity.Rare) == 20 && catalog.GetItemPrice(ItemRarity.Epic) == 25,
-                "Item prices must be 10/15/20/25 elif by rarity.");
+                "Item prices must be 10/15/20/25 gold by rarity.");
             Assert(catalog.Consumables.Select(entry => (entry.ConsumableId, entry.Price)).SequenceEqual(new[]
                    {
                        ("heart", 3), ("key", 5), ("bomb", 5),
                    }),
-                "Consumable prices must be heart 3, key 5, bomb 5 elif.");
+                "Consumable prices must be heart 3, key 5, bomb 5 gold.");
             Assert(catalog.Consumables[0].PickupPrefab.GetComponent<HealthPickup>() != null &&
                    catalog.Consumables[1].PickupPrefab.GetComponent<RunResourcePickup>()?.ResourceType ==
                    RunResourceType.Key &&
@@ -128,6 +128,12 @@ namespace TrickalFanGame.Editor
                 withoutShop.Configure(generator.FloorCount, generator.MinimumRoomsPerFloor,
                     generator.MaximumRoomsPerFloor, generator.MinimumBossDistance, generator.GenerationRetryLimit,
                     generator.RoomDefinitions.Where(candidate => candidate.RoomType != RoomType.Shop).ToArray());
+                // Legacy generation appends shops without changing the base rooms. Floor-1 budgets the total first,
+                // so adding a shop deliberately removes one regular room; test the old append contract separately.
+                FloorGenerator legacyWithShop = holder.AddComponent<FloorGenerator>();
+                legacyWithShop.Configure(generator.FloorCount, generator.MinimumRoomsPerFloor,
+                    generator.MaximumRoomsPerFloor, generator.MinimumBossDistance, generator.GenerationRetryLimit,
+                    generator.RoomDefinitions.ToArray());
 
                 int floors = 0, shops = 0, runtimeSeed = 0;
                 HashSet<GeneratedRoomRole> parentRoles = new();
@@ -136,6 +142,7 @@ namespace TrickalFanGame.Editor
                     Assert(generator.TryGenerateForSeed(seed, out GeneratedFloorGraph first, out string error), error);
                     Assert(generator.TryGenerateForSeed(seed, out GeneratedFloorGraph repeated, out error), error);
                     Assert(withoutShop.TryGenerateForSeed(seed, out GeneratedFloorGraph baseline, out error), error);
+                    Assert(legacyWithShop.TryGenerateForSeed(seed, out GeneratedFloorGraph legacy, out error), error);
                     foreach (GeneratedFloor floor in first.Floors)
                     {
                         floors++;
@@ -144,7 +151,8 @@ namespace TrickalFanGame.Editor
                         Assert(shopRooms.Length <= 1 &&
                                Signature(floor, true) == Signature(repeated.FindFloor(floor.FloorNumber), true),
                             $"Seed {seed} floor {floor.FloorNumber} must reproduce at most one shop.");
-                        Assert(Signature(floor, false) == Signature(baseline.FindFloor(floor.FloorNumber), false),
+                        Assert(Signature(legacy.FindFloor(floor.FloorNumber), false) ==
+                               Signature(baseline.FindFloor(floor.FloorNumber), false),
                             $"Seed {seed} floor {floor.FloorNumber} shop changed an existing room or passage.");
                         if (shopRooms.Length == 0) continue;
 
@@ -275,22 +283,22 @@ namespace TrickalFanGame.Editor
             Assert(inventory != null, "Runtime shop verification requires the player inventory.");
             ShopOffer item = stock.Offers.First(offer => offer.Kind == ShopOfferKind.Item);
             int stacks = inventory.GetStackCount(item.Item.ItemId);
-            Assert(shop.TryPurchase(item.SlotIndex, inventory) == ShopPurchaseResult.NotEnoughElif &&
-                   !stock.IsPurchased(item.SlotIndex) && progress.GetResourceCount(RunResourceType.Elif) == 0 &&
+            Assert(shop.TryPurchase(item.SlotIndex, inventory) == ShopPurchaseResult.NotEnoughGold &&
+                   !stock.IsPurchased(item.SlotIndex) && progress.GetResourceCount(RunResourceType.Gold) == 0 &&
                    inventory.GetStackCount(item.Item.ItemId) == stacks,
-                "Without enough elif a purchase must change nothing.");
+                "Without enough gold a purchase must change nothing.");
 
             int budget = stock.Offers.Sum(offer => offer.Price);
-            Assert(progress.TryAddResource(RunResourceType.Elif, budget) == budget, "Verification elif must fit.");
+            Assert(progress.TryAddResource(RunResourceType.Gold, budget) == budget, "Verification gold must fit.");
             Assert(shop.TryPurchase(item.SlotIndex, inventory) == ShopPurchaseResult.Purchased &&
                    stock.IsPurchased(item.SlotIndex) && inventory.GetStackCount(item.Item.ItemId) == stacks + 1 &&
-                   progress.GetResourceCount(RunResourceType.Elif) == budget - item.Price &&
+                   progress.GetResourceCount(RunResourceType.Gold) == budget - item.Price &&
                    shop.LastDroppedPickup == null && shop.Stalls[item.SlotIndex].IsSold &&
                    !shop.Stalls[item.SlotIndex].Display.gameObject.activeSelf,
                 "An Item purchase must spend its price once, go to the inventory, and empty the stall.");
             Assert(shop.TryPurchase(item.SlotIndex, inventory) == ShopPurchaseResult.SoldOut &&
                    inventory.GetStackCount(item.Item.ItemId) == stacks + 1 &&
-                   progress.GetResourceCount(RunResourceType.Elif) == budget - item.Price,
+                   progress.GetResourceCount(RunResourceType.Gold) == budget - item.Price,
                 "A sold slot must not be bought again.");
 
             int spent = item.Price;
@@ -298,7 +306,7 @@ namespace TrickalFanGame.Editor
             {
                 Assert(shop.TryPurchase(consumable.SlotIndex, inventory) == ShopPurchaseResult.Purchased &&
                        stock.IsPurchased(consumable.SlotIndex) &&
-                       progress.GetResourceCount(RunResourceType.Elif) == budget - spent - consumable.Price,
+                       progress.GetResourceCount(RunResourceType.Gold) == budget - spent - consumable.Price,
                     $"Buying {consumable.OfferId} must spend its price once.");
                 spent += consumable.Price;
                 GameObject drop = shop.LastDroppedPickup;
@@ -319,7 +327,7 @@ namespace TrickalFanGame.Editor
                    progress.GetResourceCount(RunResourceType.Bomb) == 0,
                 "Bought consumables must wait on the floor instead of being granted directly.");
 
-            int elifBeforeReload = progress.GetResourceCount(RunResourceType.Elif);
+            int goldBeforeReload = progress.GetResourceCount(RunResourceType.Gold);
             Assert(assembler.TryLoadFloor(2, null, out error) && assembler.TryLoadFloor(1, null, out error), error);
             RoomPrefab rebuiltRoom = FindRuntimeRoom(assembler, shopNode.RoomId);
             ShopRoom rebuilt = rebuiltRoom.GetComponentInChildren<ShopRoom>(true);
@@ -328,9 +336,9 @@ namespace TrickalFanGame.Editor
                    rebuilt.Stalls.All(stall => stall.IsSold == stock.IsPurchased(stall.Offer.SlotIndex)) &&
                    rebuilt.Stalls.Count(stall => stall.IsSold) == 1 + ShopCatalog.ConsumableOfferCount &&
                    progress.GetRoomState(shopNode.RoomId).IsKeyLockOpen &&
-                   progress.GetResourceCount(RunResourceType.Elif) == elifBeforeReload &&
+                   progress.GetResourceCount(RunResourceType.Gold) == goldBeforeReload &&
                    inventory.GetStackCount(item.Item.ItemId) == stacks + 1,
-                "Floor rebuilds must keep the same stock, sold slots, open lock, and spent elif.");
+                "Floor rebuilds must keep the same stock, sold slots, open lock, and spent gold.");
             ShopOffer remaining = stock.Offers.Single(offer => !stock.IsPurchased(offer.SlotIndex));
             Assert(rebuilt.Stalls[remaining.SlotIndex].Display.gameObject.activeSelf &&
                    rebuilt.Stalls[remaining.SlotIndex].Label.text.Contains(remaining.Price.ToString()),
@@ -341,8 +349,8 @@ namespace TrickalFanGame.Editor
                    !stock.IsPurchased(remaining.SlotIndex),
                 "Shops must not sell after the Run stops.");
             progress.ResetProgress();
-            Assert(progress.GetShopStock(stock.ShopId) == null && progress.GetResourceCount(RunResourceType.Elif) == 0,
-                "A new Run must forget shop stock and elif.");
+            Assert(progress.GetShopStock(stock.ShopId) == null && progress.GetResourceCount(RunResourceType.Gold) == 0,
+                "A new Run must forget shop stock and gold.");
         }
 
         private static RoomPrefab FindRuntimeRoom(RoomGraphAssembler assembler, string roomId)

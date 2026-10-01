@@ -121,7 +121,7 @@ namespace TrickalFanGame.Editor
                    byId["sp"].Prefab.GetComponent<SPPickup>() != null &&
                    byId["key"].Prefab.GetComponent<RunResourcePickup>().ResourceType == RunResourceType.Key &&
                    byId["bomb"].Prefab.GetComponent<RunResourcePickup>().ResourceType == RunResourceType.Bomb &&
-                   byId["elif"].Prefab.GetComponent<RunResourcePickup>().ResourceType == RunResourceType.Elif,
+                   byId["elif"].Prefab.GetComponent<RunResourcePickup>().ResourceType == RunResourceType.Gold,
                 "Obstacle drop candidates must spawn their matching pickups.");
             Assert(byId["pit"].Prefab != null && byId["pit"].Prefab.GetComponent<SecretPit>() != null,
                 "The pit candidate must spawn the Special-3 secret pit.");
