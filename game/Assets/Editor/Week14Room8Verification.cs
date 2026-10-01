@@ -18,7 +18,8 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Verify Room-8 Full Run Integration")]
         public static void Verify()
         {
-            Week14Room7Verification.Verify();
+            // Validate the current catalog below. Room-7's historical pillar-crossfire is no longer a required Encounter.
+            Week18Obstacle2Setup.OpenGameScene();
             RoomGraphAssembler assembler = UnityEngine.Object.FindFirstObjectByType<RoomGraphAssembler>();
             Assert(assembler != null && assembler.Generator != null && assembler.Graph != null &&
                    assembler.Progress != null && assembler.EnemyRoster != null &&
@@ -60,7 +61,11 @@ namespace TrickalFanGame.Editor
                     int secretRooms = floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Secret);
                     int shopRooms = floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Shop);
                     int regularRooms = floor.Nodes.Count - secretRooms - shopRooms;
-                    Assert(regularRooms >= 6 && regularRooms <= 8 && secretRooms <= 1 && shopRooms <= 1,
+                    bool validSize = floor.Settings != null
+                        ? floor.Nodes.Count >= floor.Settings.MinimumTotalRooms &&
+                          floor.Nodes.Count <= floor.Settings.MaximumTotalRooms
+                        : regularRooms >= generator.MinimumRoomsPerFloor && regularRooms <= generator.MaximumRoomsPerFloor;
+                    Assert(validSize && secretRooms <= 1 && shopRooms <= 1,
                         $"Seed {seed} floor {floor.FloorNumber} has an invalid room count.");
                     Assert(floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Start) == 1 &&
                            floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Boss) == 1,
@@ -101,9 +106,9 @@ namespace TrickalFanGame.Editor
             };
             Assert(requiredTemplates.All(templates.Contains),
                 "The Room-8 seed range did not exercise every authored Room Template.");
-            Assert(encounters.Count == 5 && encounters.Contains(Week14Encounter3Setup.EncounterId) &&
-                   encounters.Contains(Week14Room7Setup.EncounterId),
-                "The Room-8 seed range did not exercise all five Encounter definitions.");
+            string[] requiredPatterns = { "pressure", "crossfire", "swarm", "elite-pair" };
+            Assert(requiredPatterns.All(pattern => encounters.Any(id => id.EndsWith($"-{pattern}-v1", StringComparison.Ordinal))),
+                "The Room-8 seed range did not exercise the four current Encounter patterns.");
         }
 
         private static void ValidateHorizontalMixedSizeTransitions(RoomGraphAssembler assembler)
@@ -164,7 +169,7 @@ namespace TrickalFanGame.Editor
             Assert(seed > 0, "Could not find a three-floor Run containing the two-wave Encounter.");
             PrepareRun(assembler, seed);
             GeneratedRoomNode generated = assembler.GeneratedGraph.Nodes.First(node =>
-                node.EncounterId == Week14Encounter3Setup.EncounterId);
+                node.Encounter != null && node.ResolvedEncounterWaves.Count == 2);
             Assert(assembler.TryLoadFloor(generated.FloorNumber, assembler.Graph.Player, out string error), error);
 
             RoomPrefab room = assembler.CurrentFloorRoot.GetComponentsInChildren<RoomPrefab>(true)
@@ -176,7 +181,7 @@ namespace TrickalFanGame.Editor
             List<GameObject> spawned = new();
             room.Controller.EnemySpawned += spawned.Add;
             room.Controller.BeginCombat(playerHealth);
-            Assert(room.Controller.CurrentWaveNumber == 2 && spawned.Count == 2 &&
+            Assert(room.Controller.CurrentWaveNumber == 2 && spawned.Count == generated.ResolvedEncounterWaves[1].Length &&
                    state.CompletedWaveCount == 1 && !state.IsCleared,
                 "Revisiting a partial room did not resume at its first incomplete wave.");
             foreach (GameObject enemy in spawned.ToArray()) Kill(enemy);
@@ -245,7 +250,7 @@ namespace TrickalFanGame.Editor
         {
             for (int seed = 1; seed <= 4096; seed++)
                 if (generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out _) &&
-                    graph.Nodes.Any(node => node.EncounterId == Week14Encounter3Setup.EncounterId)) return seed;
+                    graph.Nodes.Any(node => node.Encounter != null && node.ResolvedEncounterWaves.Count == 2)) return seed;
             return -1;
         }
 

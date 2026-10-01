@@ -1,0 +1,875 @@
+fileFormatVersion: 2
+guid: 77b135c1edaef60409c8485e171614bd
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 677699896297823014
+    second: room-closed-v3_0
+  - first:
+      213: -6274176352738932663
+    second: patch-0-0
+  - first:
+      213: 5847976116484115261
+    second: patch-1-0
+  - first:
+      213: 7447655569047672488
+    second: patch-2-0
+  - first:
+      213: 7137245822596671902
+    second: patch-3-0
+  - first:
+      213: 3278387775765789275
+    second: patch-4-0
+  - first:
+      213: -714869852494871504
+    second: patch-0-1
+  - first:
+      213: 2647271574643463810
+    second: patch-1-1
+  - first:
+      213: -3654367388297373901
+    second: patch-2-1
+  - first:
+      213: -4428216747114297057
+    second: patch-3-1
+  - first:
+      213: -4931993354762219594
+    second: patch-4-1
+  - first:
+      213: 5164353248911084154
+    second: patch-0-2
+  - first:
+      213: 9099708962835891728
+    second: patch-1-2
+  - first:
+      213: 786840096062951856
+    second: patch-2-2
+  - first:
+      213: -7582738862065286984
+    second: patch-3-2
+  - first:
+      213: -3219524314285971356
+    second: patch-4-2
+  - first:
+      213: 370535347193092699
+    second: patch-0-3
+  - first:
+      213: -7422114293212794377
+    second: patch-1-3
+  - first:
+      213: -4308852472092390636
+    second: patch-2-3
+  - first:
+      213: -8790806761510440188
+    second: patch-3-3
+  - first:
+      213: 174923047583293112
+    second: patch-4-3
+  - first:
+      213: 1689271556881064299
+    second: patch-0-4
+  - first:
+      213: 2811013946754111393
+    second: patch-1-4
+  - first:
+      213: 8993532734823671433
+    second: patch-2-4
+  - first:
+      213: -2559760368145993344
+    second: patch-3-4
+  - first:
+      213: -986794450096353230
+    second: patch-4-4
+  - first:
+      213: 4242934465384800012
+    second: left-closed
+  - first:
+      213: 2921683457872635292
+    second: right-closed
+  - first:
+      213: 6022010277708917496
+    second: up-closed
+  - first:
+      213: 4397470119280336979
+    second: down-closed
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: patch-0-0
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 751
+        width: 170
+        height: 190
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94807d469d5ade8a0800000000000000
+      internalID: -6274176352738932663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-1-0
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 751
+        width: 470
+        height: 190
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3b01064b4f282150800000000000000
+      internalID: 5847976116484115261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-2-0
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 751
+        width: 292
+        height: 190
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a6db8ad7436b5760800000000000000
+      internalID: 7447655569047672488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-3-0
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 751
+        width: 470
+        height: 190
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e99e38ac2479c0360800000000000000
+      internalID: 7137245822596671902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-4-0
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 751
+        width: 170
+        height: 190
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5ab08aff4c2f7d20800000000000000
+      internalID: 3278387775765789275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-0-1
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 641
+        width: 170
+        height: 110
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 034486d18a54416f0800000000000000
+      internalID: -714869852494871504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-1-1
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 641
+        width: 470
+        height: 110
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 286dc96a87ffcb420800000000000000
+      internalID: 2647271574643463810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-2-1
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 641
+        width: 292
+        height: 110
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33753c5d834194dc0800000000000000
+      internalID: -3654367388297373901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-3-1
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 641
+        width: 470
+        height: 110
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1901d78450db82c0800000000000000
+      internalID: -4428216747114297057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-4-1
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 641
+        width: 170
+        height: 110
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bf8fc6bc2a0e8bb0800000000000000
+      internalID: -4931993354762219594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-0-2
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 381
+        width: 170
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7acafffae77ba740800000000000000
+      internalID: 5164353248911084154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-1-2
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 381
+        width: 470
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0168541e619a84e70800000000000000
+      internalID: 9099708962835891728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-2-2
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 381
+        width: 292
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b1ddd406ea6bea00800000000000000
+      internalID: 786840096062951856
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-3-2
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 381
+        width: 470
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b08c061e23b4c690800000000000000
+      internalID: -7582738862065286984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-4-2
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 381
+        width: 170
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4686045a1b3f153d0800000000000000
+      internalID: -3219524314285971356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-0-3
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 221
+        width: 170
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5a9b226fe7642500800000000000000
+      internalID: 370535347193092699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-1-3
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 221
+        width: 470
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f1b3b6df5a5ff890800000000000000
+      internalID: -7422114293212794377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-2-3
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 221
+        width: 292
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41b8e538181e334c0800000000000000
+      internalID: -4308852472092390636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-3-3
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 221
+        width: 470
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 403711b73d7c00680800000000000000
+      internalID: -8790806761510440188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-4-3
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 221
+        width: 170
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8be1b32c5937d6200800000000000000
+      internalID: 174923047583293112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-0-4
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 0
+        width: 170
+        height: 221
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b612115e78f717710800000000000000
+      internalID: 1689271556881064299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-1-4
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 0
+        width: 470
+        height: 221
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a792fa8a4ab20720800000000000000
+      internalID: 2811013946754111393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-2-4
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 0
+        width: 292
+        height: 221
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 986230f5f527fcc70800000000000000
+      internalID: 8993532734823671433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-3-4
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 0
+        width: 470
+        height: 221
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 081f882e187e97cd0800000000000000
+      internalID: -2559760368145993344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: patch-4-4
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 0
+        width: 170
+        height: 221
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2301ea70da33e42f0800000000000000
+      internalID: -986794450096353230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: left-closed
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 381
+        width: 170
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0fd58e8a6ee1ea30800000000000000
+      internalID: 4242934465384800012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: right-closed
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 381
+        width: 170
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9522ac00a7eb8820800000000000000
+      internalID: 2921683457872635292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: up-closed
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 751
+        width: 292
+        height: 190
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fa679c017a729350800000000000000
+      internalID: 6022010277708917496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: down-closed
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 0
+        width: 292
+        height: 221
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 350691256c3f60d30800000000000000
+      internalID: 4397470119280336979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      down-closed: 4397470119280336979
+      left-closed: 4242934465384800012
+      patch-0-0: -6274176352738932663
+      patch-0-1: -714869852494871504
+      patch-0-2: 5164353248911084154
+      patch-0-3: 370535347193092699
+      patch-0-4: 1689271556881064299
+      patch-1-0: 5847976116484115261
+      patch-1-1: 2647271574643463810
+      patch-1-2: 9099708962835891728
+      patch-1-3: -7422114293212794377
+      patch-1-4: 2811013946754111393
+      patch-2-0: 7447655569047672488
+      patch-2-1: -3654367388297373901
+      patch-2-2: 786840096062951856
+      patch-2-3: -4308852472092390636
+      patch-2-4: 8993532734823671433
+      patch-3-0: 7137245822596671902
+      patch-3-1: -4428216747114297057
+      patch-3-2: -7582738862065286984
+      patch-3-3: -8790806761510440188
+      patch-3-4: -2559760368145993344
+      patch-4-0: 3278387775765789275
+      patch-4-1: -4931993354762219594
+      patch-4-2: -3219524314285971356
+      patch-4-3: 174923047583293112
+      patch-4-4: -986794450096353230
+      right-closed: 2921683457872635292
+      room-closed-v3_0: 677699896297823014
+      up-closed: 6022010277708917496
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

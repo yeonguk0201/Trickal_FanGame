@@ -70,7 +70,20 @@ namespace TrickalFanGame.Room
 
         public bool TryEnterFromContact(PlayerMovement player)
         {
-            return player != null && ContainsPassageCenter(player.transform.position) && TryEnter(player);
+            return player != null && ContainsPassageCenter(player.transform.position) &&
+                   IsMovingIntoPassage(player.MovementIntent) && TryEnter(player);
+        }
+
+        public bool IsMovingIntoPassage(Vector2 movementIntent)
+        {
+            if (source == null || movementIntent.sqrMagnitude < 0.001f) return false;
+            Vector2 outward = transform.position - source.transform.position;
+            // Use the door normal, not the player's facing or collision velocity. A player can
+            // still face the exit while standing still, or have zero velocity against a barrier.
+            outward = Mathf.Abs(outward.x) > Mathf.Abs(outward.y)
+                ? new Vector2(Mathf.Sign(outward.x), 0f)
+                : new Vector2(0f, Mathf.Sign(outward.y));
+            return Vector2.Dot(movementIntent.normalized, outward) > 0.5f;
         }
 
         /// <summary>

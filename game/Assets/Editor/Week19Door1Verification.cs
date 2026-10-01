@@ -169,6 +169,11 @@ namespace TrickalFanGame.Editor
                 Assert(!firstToSecond.TryEnterFromContact(player) && graph.CurrentNode == first.Node,
                     "Contact with the center outside the door width must not transition.");
                 SetPlayerPosition(player, body, new Vector2(7.1f, 0.3f));
+                SetPrivateField(player, "movement", Vector2.up);
+                Assert(!firstToSecond.TryEnterFromContact(player), "Sliding along a wall must not enter a doorway.");
+                SetPrivateField(player, "movement", Vector2.zero);
+                Assert(!firstToSecond.TryEnterFromContact(player), "Standing in a trigger must not enter a doorway.");
+                SetPrivateField(player, "movement", Vector2.right);
                 Assert(firstToSecond.TryEnterFromContact(player) && graph.CurrentNode == second.Node,
                     "Contact with the center inside the door width must transition.");
 

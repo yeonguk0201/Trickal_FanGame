@@ -23,6 +23,7 @@ namespace TrickalFanGame.Room
         public static readonly Color SecretOpenColor = new(0.46f, 0.38f, 0.32f);
 
         [SerializeField] private Collider2D blocker;
+        [SerializeField] private Collider2D interiorBlocker;
         [SerializeField] private SpriteRenderer visual;
         [SerializeField] private bool remainBlockingWhenOpen;
         [SerializeField] private DoorVisualKind visualKind;
@@ -63,6 +64,7 @@ namespace TrickalFanGame.Room
             IsLocked = encounterLocked || keyLocked;
             blocker.enabled = IsLocked || IsPortalBarrier;
             blocker.isTrigger = false;
+            if (interiorBlocker != null) interiorBlocker.enabled = IsLocked;
 
             if (visual != null)
             {
@@ -76,6 +78,12 @@ namespace TrickalFanGame.Room
             remainBlockingWhenOpen = shouldRemainBlockingWhenOpen;
             blocker.isTrigger = false;
             blocker.enabled = IsLocked || IsPortalBarrier;
+        }
+
+        public void ConfigureInteriorBlocker(Collider2D configuredBlocker)
+        {
+            interiorBlocker = configuredBlocker;
+            if (interiorBlocker != null) interiorBlocker.enabled = IsLocked;
         }
 
         public void ConfigureVisualKind(DoorVisualKind configuredKind)

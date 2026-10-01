@@ -344,7 +344,7 @@ namespace TrickalFanGame.Editor
             {
                 string current = queue.Dequeue();
                 foreach (GeneratedRoomConnection connection in byId[current].DirectionalConnections)
-                    if (result.TryAdd(connection.DestinationRoomId, result[current] + 1))
+                    if (!connection.IsSecret && result.TryAdd(connection.DestinationRoomId, result[current] + 1))
                         queue.Enqueue(connection.DestinationRoomId);
             }
 

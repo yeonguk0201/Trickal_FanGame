@@ -1,0 +1,267 @@
+fileFormatVersion: 2
+guid: db715b2fb45028f498bac460464b4cf0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1319493766608282925
+    second: side-doors_0
+  - first:
+      213: -6319777617330140953
+    second: side-doors_1
+  - first:
+      213: 4450687134367013088
+    second: side-doors_2
+  - first:
+      213: -8204091387500995745
+    second: side-doors_3
+  - first:
+      213: -3745128254783796222
+    second: side-doors_4
+  - first:
+      213: 3907494735727277445
+    second: side-doors_5
+  - first:
+      213: 2396660380457875176
+    second: side-doors_6
+  - first:
+      213: -6247490096099208417
+    second: side-doors_7
+  - first:
+      213: 9055274443610417927
+    second: side-doors_8
+  - first:
+      213: -3374762236844184931
+    second: side-doors_9
+  - first:
+      213: 5722097543742385074
+    second: side-doors_10
+  - first:
+      213: -161931578350068720
+    second: side-doors_11
+  - first:
+      213: -2461313707485492586
+    second: side-doors_12
+  - first:
+      213: -6347308124129103908
+    second: side-doors_13
+  - first:
+      213: 3567436334955630707
+    second: side-doors_14
+  - first:
+      213: -719830484356772736
+    second: side-doors_15
+  - first:
+      213: 1639883802611576177
+    second: side-doors_16
+  - first:
+      213: 412224615921045006
+    second: side-doors_17
+  - first:
+      213: 6735381381639382536
+    second: side-open
+  - first:
+      213: 5486178014344734503
+    second: side-closed
+  - first:
+      213: 8344214035217340339
+    second: side-locked
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: side-open
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 799
+        width: 181
+        height: 285
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80625675ea1e87d50800000000000000
+      internalID: 6735381381639382536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side-closed
+      rect:
+        serializedVersion: 2
+        x: 787
+        y: 799
+        width: 181
+        height: 285
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 727639746d1d22c40800000000000000
+      internalID: 5486178014344734503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side-locked
+      rect:
+        serializedVersion: 2
+        x: 787
+        y: 174
+        width: 181
+        height: 285
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b755fa947a9cc370800000000000000
+      internalID: 8344214035217340339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      side-closed: 5486178014344734503
+      side-doors_0: -1319493766608282925
+      side-doors_1: -6319777617330140953
+      side-doors_10: 5722097543742385074
+      side-doors_11: -161931578350068720
+      side-doors_12: -2461313707485492586
+      side-doors_13: -6347308124129103908
+      side-doors_14: 3567436334955630707
+      side-doors_15: -719830484356772736
+      side-doors_16: 1639883802611576177
+      side-doors_17: 412224615921045006
+      side-doors_2: 4450687134367013088
+      side-doors_3: -8204091387500995745
+      side-doors_4: -3745128254783796222
+      side-doors_5: 3907494735727277445
+      side-doors_6: 2396660380457875176
+      side-doors_7: -6247490096099208417
+      side-doors_8: 9055274443610417927
+      side-doors_9: -3374762236844184931
+      side-locked: 8344214035217340339
+      side-open: 6735381381639382536
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

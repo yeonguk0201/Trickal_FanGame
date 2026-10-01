@@ -4,6 +4,29 @@ using UnityEngine;
 
 namespace TrickalFanGame.Room
 {
+    [Serializable]
+    public sealed class FloorGenerationSettings
+    {
+        [SerializeField] private int minimumTotalRooms;
+        [SerializeField] private int maximumTotalRooms;
+        [SerializeField] private int minimumBossDistance;
+
+        public FloorGenerationSettings(int minimum, int maximum, int bossDistance)
+        { minimumTotalRooms = minimum; maximumTotalRooms = maximum; minimumBossDistance = bossDistance; }
+        public int MinimumTotalRooms => minimumTotalRooms;
+        public int MaximumTotalRooms => maximumTotalRooms;
+        public int MinimumBossDistance => minimumBossDistance;
+
+        // Reserve one secret room and one shop. The remaining regular rooms must fit the boss route.
+        public bool TryValidate(out string error)
+        {
+            if (minimumTotalRooms < 5 || maximumTotalRooms < minimumTotalRooms || maximumTotalRooms > 99 ||
+                minimumBossDistance < 1 || minimumBossDistance > minimumTotalRooms - 3)
+            { error = "Floor settings need 5~99 total rooms and a boss route that fits after reserving two special rooms."; return false; }
+            error = null; return true;
+        }
+    }
+
     public enum GeneratedRoomRole { Start, Intermediate, Treasure, Boss, Secret, Shop }
     public enum RoomDoorDirection { Left, Right, Up, Down }
 
@@ -121,11 +144,13 @@ namespace TrickalFanGame.Room
     public sealed class GeneratedFloor
     {
         public GeneratedFloor(int floorNumber, int floorSeed, int topologySeed, int contentSeed,
-            string startingRoomId, string bossRoomId, GeneratedRoomNode[] nodes)
+            string startingRoomId, string bossRoomId, GeneratedRoomNode[] nodes,
+            FloorGenerationSettings settings = null)
         {
             FloorNumber = floorNumber; FloorSeed = floorSeed; TopologySeed = topologySeed;
             ContentSeed = contentSeed; StartingRoomId = startingRoomId; BossRoomId = bossRoomId;
             Nodes = nodes ?? Array.Empty<GeneratedRoomNode>();
+            Settings = settings;
         }
         public int FloorNumber { get; }
         public int FloorSeed { get; }
@@ -134,6 +159,7 @@ namespace TrickalFanGame.Room
         public string StartingRoomId { get; }
         public string BossRoomId { get; }
         public IReadOnlyList<GeneratedRoomNode> Nodes { get; }
+        public FloorGenerationSettings Settings { get; }
     }
 
     public sealed class GeneratedFloorGraph
@@ -173,6 +199,12 @@ namespace TrickalFanGame.Room
 
         private bool TryValidateFloor(GeneratedFloor floor, HashSet<string> globalIds, out string error)
         {
+            if (floor.Settings != null)
+            {
+                if (!floor.Settings.TryValidate(out error)) return false;
+                if (floor.Nodes.Count < floor.Settings.MinimumTotalRooms || floor.Nodes.Count > floor.Settings.MaximumTotalRooms)
+                { error = $"Floor {floor.FloorNumber} is outside its total room range."; return false; }
+            }
             Dictionary<string, GeneratedRoomNode> byId = new(StringComparer.Ordinal);
             List<RoomGridPosition> positions = new(); int starts = 0, bosses = 0, treasures = 0, secrets = 0, shops = 0;
             foreach (GeneratedRoomNode node in floor.Nodes)
@@ -220,9 +252,9 @@ namespace TrickalFanGame.Room
             }
             if (secrets > 1 || shops > 1)
             { error = $"Floor {floor.FloorNumber} has {secrets} secret and {shops} shop rooms; at most one each is allowed."; return false; }
-            if (starts != 1 || bosses != 1 || treasures < 1 ||
+            if (starts != 1 || bosses != 1 || treasures != 1 ||
                 !byId.ContainsKey(floor.StartingRoomId) || !byId.ContainsKey(floor.BossRoomId))
-            { error = $"Floor {floor.FloorNumber} must have one start, one boss, and at least one treasure room."; return false; }
+            { error = $"Floor {floor.FloorNumber} must have one start, one boss, and one treasure room."; return false; }
             foreach (GeneratedRoomNode node in floor.Nodes)
             {
                 HashSet<string> destinations = new(StringComparer.Ordinal); HashSet<RoomDoorDirection> directions = new();
@@ -252,9 +284,10 @@ namespace TrickalFanGame.Room
                 { error = $"Secret room {node.RoomId} needs at least one hidden passage."; return false; }
             }
             // Secret rooms are reachable only through hidden passages; every other room needs a regular route.
+            int requiredBossDistance = floor.Settings?.MinimumBossDistance ?? MinimumBossDistance;
             if (distances.Count != floor.Nodes.Count - secretRooms ||!distances.TryGetValue(floor.BossRoomId, out int bossDistance) ||
-                bossDistance < MinimumBossDistance || byId[floor.BossRoomId].DirectionalConnections.Count != 1)
-            { error = $"Floor {floor.FloorNumber} is disconnected or its boss is not an end room at distance {MinimumBossDistance}+."; return false; }
+                bossDistance < requiredBossDistance || byId[floor.BossRoomId].DirectionalConnections.Count != 1)
+            { error = $"Floor {floor.FloorNumber} is disconnected or its boss is not an end room at distance {requiredBossDistance}+."; return false; }
             foreach (GeneratedRoomNode node in floor.Nodes)
             {
                 if (node.Role == GeneratedRoomRole.Shop && !IsValidShop(node, byId, out error)) return false;
@@ -331,7 +364,7 @@ namespace TrickalFanGame.Room
     {
         private const uint FloorSalt = 0xA341316Cu, TopologySalt = 0xC8013EA4u,
             ContentSalt = 0xAD90777Du, AttemptSalt = 0x7E95761Eu, TreasureLockSalt = 0x4B455931u,
-            SecretRoomSalt = 0x53435254u, ShopRoomSalt = 0x53484F50u;
+            SecretRoomSalt = 0x53435254u, ShopRoomSalt = 0x53484F50u, FloorSizeSalt = 0x53495A45u;
         public const int TreasureLockPercent = 50;
         public const int SecretRoomPercent = 50;
         public const int ShopRoomPercent = 60;
@@ -346,6 +379,8 @@ namespace TrickalFanGame.Room
         [SerializeField] private EncounterDefinition[] encounterDefinitions = Array.Empty<EncounterDefinition>();
         [SerializeField, Min(1)] private int encounterContentVersion = 1;
         [SerializeField] private RoomDifficultyTable difficultyTable;
+        // Empty keeps the legacy regular-room range. Otherwise one entry is required for every active floor.
+        [SerializeField] private FloorGenerationSettings[] floorSettings = Array.Empty<FloorGenerationSettings>();
         private int runSeed; private bool hasRunSeed;
         public int RunSeed => runSeed;
         public bool HasRunSeed => hasRunSeed;
@@ -361,6 +396,10 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<EncounterDefinition> EncounterDefinitions => encounterDefinitions;
         public int EncounterContentVersion => encounterContentVersion;
         public RoomDifficultyTable DifficultyTable => difficultyTable;
+        public IReadOnlyList<FloorGenerationSettings> FloorSettings => floorSettings;
+
+        public void ConfigureFloorSettings(FloorGenerationSettings[] settings)
+        { floorSettings = settings == null ? Array.Empty<FloorGenerationSettings>() : (FloorGenerationSettings[])settings.Clone(); }
 
         public void Configure(int floors, int rooms, RoomDefinition[] definitions) => Configure(floors, rooms, rooms, 2, 32, definitions);
         public void Configure(int floors, int minRooms, int maxRooms, int bossDistance, int retries, RoomDefinition[] definitions)
@@ -401,6 +440,18 @@ namespace TrickalFanGame.Room
             if (floorCount < 1 || minimumRoomsPerFloor < 3 || maximumRoomsPerFloor < minimumRoomsPerFloor ||
                 maximumRoomsPerFloor > 99 || minimumBossDistance < 1 || generationRetryLimit < 1)
             { error = $"Invalid generation settings for seed {seed}: floor count, room range, boss distance, or retry limit."; return false; }
+            if (floorSettings.Length != 0)
+            {
+                if (floorSettings.Length != floorCount)
+                { error = "Floor settings must have exactly one entry for every active floor."; return false; }
+                for (int i = 0; i < floorSettings.Length; i++)
+                {
+                    if (floorSettings[i] == null)
+                    { error = $"Floor {i + 1} settings are missing."; return false; }
+                    if (!floorSettings[i].TryValidate(out error))
+                    { error = $"Floor {i + 1}: {error}"; return false; }
+                }
+            }
             if (!Pools(out List<RoomDefinition> normal, out List<RoomDefinition> reward, out List<RoomDefinition> boss,
                     out List<RoomDefinition> shop, out error)) return false;
             GeneratedFloor[] floors = new GeneratedFloor[floorCount];
@@ -455,13 +506,25 @@ namespace TrickalFanGame.Room
             out GeneratedFloor floor, out string error)
         {
             int topologySeed = DeriveSeed(floorSeed, 0, TopologySalt), contentSeed = DeriveSeed(floorSeed, 0, ContentSalt);
+            FloorGenerationSettings settings = floorSettings.Length == 0 ? null : floorSettings[floorNumber - 1];
+            int requiredBossDistance = settings?.MinimumBossDistance ?? minimumBossDistance;
+            int totalRooms = 0, reservedSpecialRooms = 0;
+            if (settings != null)
+            {
+                StableRandom sizeRandom = new(unchecked((uint)DeriveSeed(floorSeed, 0, FloorSizeSalt)));
+                totalRooms = sizeRandom.NextInclusive(settings.MinimumTotalRooms, settings.MaximumTotalRooms);
+                reservedSpecialRooms = (RollSpecialRoom(contentSeed, SecretRoomSalt, SecretRoomPercent) ? 1 : 0) +
+                    (shop.Count > 0 && RollSpecialRoom(contentSeed, ShopRoomSalt, ShopRoomPercent) ? 1 : 0);
+            }
             for (int attempt = 0; attempt < generationRetryLimit; attempt++)
             {
                 StableRandom random = new(unchecked((uint)DeriveSeed(topologySeed, attempt, AttemptSalt)));
-                List<MutableRoom> rooms = Grow(random.NextInclusive(minimumRoomsPerFloor, maximumRoomsPerFloor), ref random);
+                List<MutableRoom> rooms = settings == null
+                    ? Grow(random.NextInclusive(minimumRoomsPerFloor, maximumRoomsPerFloor), ref random)
+                    : GrowWithBossRoute(totalRooms - reservedSpecialRooms, requiredBossDistance, ref random);
                 if (rooms == null) continue;
                 Dictionary<int, int> distance = MutableDistances(rooms);
-                int bossIndex = BossIndex(rooms, distance, ref random);
+                int bossIndex = BossIndex(rooms, distance, requiredBossDistance, ref random);
                 if (bossIndex < 0) continue;
                 int treasureIndex = TreasureIndex(rooms, distance, bossIndex, ref random);
                 if (treasureIndex < 0) continue;
@@ -486,10 +549,18 @@ namespace TrickalFanGame.Room
                 treasure.AssignKeyRequirement(optionalRoute && lockRoll % 100u < TreasureLockPercent);
                 nodes = AppendSecretRoom(floorNumber, contentSeed, nodes, reward);
                 nodes = AppendShopRoom(floorNumber, contentSeed, nodes, shop);
+                // Retry topology if a reserved special room had no valid cell; never change the size or special rolls.
+                if (settings != null && nodes.Length != totalRooms) continue;
                 floor = new GeneratedFloor(floorNumber, floorSeed, topologySeed, contentSeed,
-                    nodes[0].RoomId, nodes[bossIndex].RoomId, nodes); error = null; return true;
+                    nodes[0].RoomId, nodes[bossIndex].RoomId, nodes, settings); error = null; return true;
             }
-            floor = null; error = $"Could not place an end-room boss at distance {minimumBossDistance}+ and a separate treasure room."; return false;
+            floor = null; error = $"Could not place an end-room boss at distance {requiredBossDistance}+, a separate treasure room, and the reserved special rooms."; return false;
+        }
+
+        private static bool RollSpecialRoom(int contentSeed, uint salt, int percent)
+        {
+            StableRandom random = new(unchecked((uint)DeriveSeed(contentSeed, 0, salt)));
+            return random.NextIndex(100) < percent;
         }
 
         // Special-3: an independent floor-content roll adds at most one secret room after the regular rooms, so it
@@ -611,7 +682,61 @@ namespace TrickalFanGame.Room
             }
             return rooms.Count == count ? rooms : null;
         }
-        private int BossIndex(IReadOnlyList<MutableRoom> rooms, IReadOnlyDictionary<int, int> distances, ref StableRandom random)
+        // Build a self-avoiding required route first, then branch without extending its protected end room.
+        // This prevents small floors with a long minimum route from failing through unlucky shallow growth.
+        private static List<MutableRoom> GrowWithBossRoute(int count, int bossDistance, ref StableRandom random)
+        {
+            List<MutableRoom> rooms = new() { new MutableRoom(new RoomGridPosition(0, 0)) };
+            HashSet<RoomGridPosition> occupied = new() { rooms[0].Position };
+            RoomDoorDirection[] directions = { RoomDoorDirection.Left, RoomDoorDirection.Right, RoomDoorDirection.Up, RoomDoorDirection.Down };
+            while (rooms.Count <= bossDistance)
+            {
+                int source = rooms.Count - 1;
+                int first = random.NextIndex(4);
+                bool added = false;
+                for (int offset = 0; offset < 4; offset++)
+                {
+                    RoomDoorDirection direction = directions[(first + offset) % 4];
+                    RoomGridPosition position = rooms[source].Position.Offset(direction);
+                    if (!occupied.Add(position)) continue;
+                    AddRoom(rooms, source, direction, position);
+                    added = true;
+                    break;
+                }
+                if (!added) return null;
+            }
+            int protectedEnd = bossDistance;
+            while (rooms.Count < count)
+            {
+                List<(int Source, RoomDoorDirection Direction, RoomGridPosition Position)> candidates = new();
+                for (int source = 0; source < rooms.Count; source++)
+                {
+                    if (source == protectedEnd) continue;
+                    foreach (RoomDoorDirection direction in directions)
+                    {
+                        RoomGridPosition position = rooms[source].Position.Offset(direction);
+                        if (!occupied.Contains(position)) candidates.Add((source, direction, position));
+                    }
+                }
+                if (candidates.Count == 0) return null;
+                var chosen = candidates[random.NextIndex(candidates.Count)];
+                occupied.Add(chosen.Position);
+                AddRoom(rooms, chosen.Source, chosen.Direction, chosen.Position);
+            }
+            return rooms;
+        }
+
+        private static void AddRoom(List<MutableRoom> rooms, int source, RoomDoorDirection direction, RoomGridPosition position)
+        {
+            int destination = rooms.Count;
+            MutableRoom added = new(position);
+            rooms.Add(added);
+            rooms[source].Connections.Add(new MutableConnection(direction, destination));
+            added.Connections.Add(new MutableConnection(GeneratedFloorGraph.Opposite(direction), source));
+        }
+
+        private static int BossIndex(IReadOnlyList<MutableRoom> rooms, IReadOnlyDictionary<int, int> distances,
+            int minimumBossDistance, ref StableRandom random)
         {
             List<int> choices = new(); int greatest = minimumBossDistance - 1;
             for (int i = 1; i < rooms.Count; i++)

@@ -385,7 +385,11 @@ GeneratedFloorGraph
     └── DirectionalConnections
 ```
 
-MVP의 첫 설정은 층당 6~8방을 생성하고, 콘텐츠가 늘어난 뒤 8~12방까지 설정으로 확장한다.
+현재 Floor-1은 `FloorGenerator.floorSettings`에 활성 층마다 `FloorGenerationSettings`를 하나씩 둔다.
+특수방 포함 총 방 수는 8~12/8~12/12~18, 보스 최소 거리는 4/5/5다. 총 방 수를 독립 seed로
+정하고 비밀방·상점 예약분을 뺀 뒤 보스 필수 경로와 가지를 만든다. `GeneratedFloor.Settings`가
+최종 그래프의 총 방 수·층별 보스 거리 검증 기준을 제공한다. 설정이 비어 있으면 기존 6~8방에
+특수방을 추가하는 경로를 유지한다. 현재 3층 Run과 Backend·Web 계약은 유지한다.
 `floor-XX-room-YY`는 생성 순서에 따른 안정 키이며 격자 좌표와 분리한다. 같은 seed와 콘텐츠
 버전에서는 같은 room ID, 좌표, 연결, 방 종류와 콘텐츠 정의가 생성되어야 한다.
 

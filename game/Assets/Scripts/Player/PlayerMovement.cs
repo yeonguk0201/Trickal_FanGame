@@ -19,6 +19,7 @@ namespace TrickalFanGame.Player
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
         public Vector2 CurrentVelocity => body.linearVelocity;
         public float CurrentMoveSpeed => stats.MoveSpeed;
+        public Vector2 MovementIntent => health != null && !health.IsDead ? movement : Vector2.zero;
 
         private void Awake()
         {

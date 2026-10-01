@@ -44,8 +44,16 @@ namespace TrickalFanGame.Editor
             Assert(roomCamera != null && roomCamera.orthographic &&
                    Mathf.Approximately(roomCamera.orthographicSize, RoomLayout.CameraOrthographicSize),
                 "The Basic room camera must keep its fixed orthographic framing.");
-            Assert(generator.TryGenerateForSeed(Week8RandomRoomSetup.FixedVerificationSeed,
-                out GeneratedFloorGraph generated, out error), error);
+            // Floor-1 intentionally changes the active topology. Keep this historical hash check on legacy settings.
+            FloorGenerationSettings[] activeSettings = generator.FloorSettings.ToArray();
+            GeneratedFloorGraph generated;
+            try
+            {
+                generator.ConfigureFloorSettings(null);
+                Assert(generator.TryGenerateForSeed(Week8RandomRoomSetup.FixedVerificationSeed,
+                    out generated, out error), error);
+            }
+            finally { generator.ConfigureFloorSettings(activeSettings); }
 
             string signature = BuildSignature(generated);
             string signatureHash = BuildSha256(signature);
