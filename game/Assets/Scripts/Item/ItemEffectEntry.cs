@@ -136,6 +136,15 @@ namespace TrickalFanGame.Item
                     }
 
                     break;
+                case ItemEffectType.RegenerateSPHalvesOverTime:
+                    if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "RegenerateSPHalvesOverTime requires positive half-SP units, a positive tick " +
+                                "interval and a duration of at least one tick.";
+                        return false;
+                    }
+
+                    break;
                 case ItemEffectType.Pierce:
                 case ItemEffectType.MaxSP:
                 case ItemEffectType.MultiShot:
@@ -158,7 +167,9 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.SplitAfterPierce &&
                    type != ItemEffectType.MaxSP &&
                    type != ItemEffectType.SkillProjectileBonusAtSP &&
-                   type != ItemEffectType.MultiShot;
+                   type != ItemEffectType.MultiShot &&
+                   type != ItemEffectType.RestoreAllSPWithOvercharge &&
+                   type != ItemEffectType.RegenerateSPHalvesOverTime;
         }
     }
 }

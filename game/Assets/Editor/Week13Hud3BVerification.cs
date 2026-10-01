@@ -84,7 +84,8 @@ namespace TrickalFanGame.Editor
             foreach (string guid in assetGuids)
             {
                 ItemDefinition definition = AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid));
-                if (definition == null || !definition.IsValid) continue;
+                // Single-use spells never reach the artifact acquisition notification.
+                if (definition == null || !definition.IsValid || definition.IsSingleUse) continue;
                 string description = ArtifactEffectDescription.Build(definition);
                 Assert(!string.IsNullOrWhiteSpace(description) && !description.Contains("\n") && !description.Contains("\r"),
                     "Artifact description must be a non-empty single line for " + definition.ItemId + ".");

@@ -73,7 +73,7 @@ namespace TrickalFanGame.Frontend
             if (candidate.IsItem)
             {
                 ItemDefinition definition = candidate.Definition;
-                SetText(kindText, definition.Kind == ItemKind.Spell ? "스펠" : "아티팩트");
+                SetText(kindText, ItemKindText.GetDisplayName(definition.Kind));
                 SetText(nameText, definition.DisplayName);
                 SetText(rarityText, RarityLabel(definition.Rarity));
                 SetText(effectText, ArtifactEffectDescription.Build(definition));

@@ -15,6 +15,7 @@ namespace TrickalFanGame.Item
         private readonly List<AcquiredItem> acquiredItems = new();
         private readonly List<ItemDefinition> acquiredDefinitions = new();
         private readonly Dictionary<string, int> stackCounts = new();
+        private readonly HashSet<string> recordedSingleUseInstanceIds = new(StringComparer.Ordinal);
         private PlayerStats stats;
         private Health health;
         private PlayerSP playerSP;
@@ -51,6 +52,13 @@ namespace TrickalFanGame.Item
                 return false;
             }
 
+            if (definition.IsSingleUse)
+            {
+                Debug.LogError(
+                    $"[PlayerInventory] {definition.ItemId} is single-use and must be held in the spell slot.", this);
+                return false;
+            }
+
             stackCounts.TryGetValue(definition.ItemId, out int currentStacks);
             if (definition.MaxStacks > 0 && currentStacks >= definition.MaxStacks)
             {
@@ -67,16 +75,42 @@ namespace TrickalFanGame.Item
             ApplyEffect(definition);
             EvaluateSynergies();
 
-            int floor = Mathf.Max(1, runProgress != null ? runProgress.CurrentFloor : 1);
-            acquiredItems.Add(new AcquiredItem(
-                definition.ItemId,
-                floor,
-                acquiredItems.Count + 1,
-                Time.realtimeSinceStartup));
+            RecordAcquisition(definition.ItemId);
 
             ItemAcquired?.Invoke(definition, newStackCount);
             Debug.Log($"[PlayerInventory] Acquired {definition.DisplayName} x{newStackCount}.", this);
             return true;
+        }
+
+        // A single-use item is recorded for the Run result once per pickup instance, when it first enters the slot.
+        // Swapping it out and picking the same instance up again does not record it twice (Contract-0 §4.1).
+        public bool TryRecordSingleUseAcquisition(ItemDefinition definition, string instanceId)
+        {
+            if (definition == null || !definition.IsValid || !definition.IsSingleUse ||
+                string.IsNullOrWhiteSpace(instanceId))
+            {
+                Debug.LogError("[PlayerInventory] A single-use acquisition needs a valid definition and instance ID.",
+                    this);
+                return false;
+            }
+
+            if (!recordedSingleUseInstanceIds.Add(instanceId))
+            {
+                return false;
+            }
+
+            RecordAcquisition(definition.ItemId);
+            return true;
+        }
+
+        private void RecordAcquisition(string itemId)
+        {
+            int floor = Mathf.Max(1, runProgress != null ? runProgress.CurrentFloor : 1);
+            acquiredItems.Add(new AcquiredItem(
+                itemId,
+                floor,
+                acquiredItems.Count + 1,
+                Time.realtimeSinceStartup));
         }
 
         public int GetStackCount(string itemId)

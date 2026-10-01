@@ -21,6 +21,9 @@ describe('Item catalog', () => {
       'artifact-life-gem',
       'artifact-30kg-kettlebell',
       'artifact-clear-weather-card',
+      'single-spell-aroma-therapy',
+      'single-spell-meditation-time',
+      'single-spell-catch-that-one',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -39,8 +42,11 @@ describe('Item catalog', () => {
       'RARE',
       'RARE',
       'EPIC',
+      'UNCOMMON',
+      'UNCOMMON',
+      'UNCOMMON',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(16);
+    expect(new Set(active.map((item) => item.id)).size).toBe(19);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -152,5 +158,56 @@ describe('Item catalog', () => {
         maxStacks: 1,
       },
     ]);
+  });
+
+  it('matches the single-use spell contracts', () => {
+    expect(
+      ITEM_CATALOG.filter((item) => item.id.startsWith('single-spell-')),
+    ).toMatchObject([
+      {
+        id: 'single-spell-aroma-therapy',
+        name: '아로마 테라피',
+        rarity: 'UNCOMMON',
+        isActive: true,
+        maxStacks: 1,
+        effects: [{ type: 'RestoreAllSPWithOvercharge', integerAmount: 1 }],
+      },
+      {
+        id: 'single-spell-meditation-time',
+        name: '명상의 시간',
+        rarity: 'UNCOMMON',
+        isActive: true,
+        maxStacks: 1,
+        effects: [
+          {
+            type: 'RegenerateSPHalvesOverTime',
+            integerAmount: 1,
+            intervalSeconds: 1,
+            durationSeconds: 12,
+          },
+        ],
+      },
+      {
+        id: 'single-spell-catch-that-one',
+        name: '저놈 잡아라',
+        rarity: 'UNCOMMON',
+        isActive: true,
+        maxStacks: 1,
+        effects: [
+          { type: 'CurrentRoomBasicAttackDamagePercent', magnitude: 0.1 },
+        ],
+      },
+    ]);
+  });
+
+  it('keeps the legacy spell-catch-that-one active for past Run records', () => {
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'spell-catch-that-one'),
+    ).toMatchObject({
+      name: '저놈 잡아라',
+      rarity: 'UNCOMMON',
+      isActive: true,
+      effects: [{ type: 'NextCombatRoomAttackDamagePercent', magnitude: 0.1 }],
+    });
   });
 });

@@ -1,6 +1,7 @@
 using System.Linq;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Frontend;
+using TrickalFanGame.Item;
 using TrickalFanGame.Player;
 using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
@@ -24,6 +25,8 @@ namespace TrickalFanGame.Run
         private string seedText = string.Empty;
         private string status = string.Empty;
         private float nextHighlightRefresh;
+        private Vector2 scrollPosition;
+        private ItemDefinition[] singleUseItems;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateForDevelopment()
@@ -39,6 +42,9 @@ namespace TrickalFanGame.Run
             if (Keyboard.current?.f1Key.wasPressedThisFrame == true) visible = !visible;
             RoomGraphAssembler assembler = FindFirstObjectByType<RoomGraphAssembler>();
             if (assembler == null) return;
+            if (invulnerable) MarkAssisted("Invulnerable");
+            if (revealSecrets) MarkAssisted("Reveal secrets");
+            if (DestructibleObstacle.DevelopmentForceNextSecretPit) MarkAssisted("Forced pit");
 
             // Other systems clear explicit invulnerability (reset, ultimate end), so the toggle is re-applied.
             if (invulnerable) PlayerHealth(assembler)?.SetInvulnerable(true);
@@ -52,22 +58,58 @@ namespace TrickalFanGame.Run
         private void OnGUI()
         {
             RoomGraphAssembler assembler = FindFirstObjectByType<RoomGraphAssembler>();
-            if (!visible || assembler == null || assembler.Progress == null) return;
+            if (!visible) return;
+            if (assembler == null || assembler.Progress == null)
+            {
+                if (string.IsNullOrEmpty(RunSession.LastDevelopmentPlaytestReport)) return;
+                GUILayout.BeginArea(new Rect(12f, 60f, 340f, 160f), GUI.skin.box);
+                GUILayout.Label(RunSession.LastDevelopmentPlaytestReport);
+                if (GUILayout.Button("Copy last Play-1 record"))
+                    GUIUtility.systemCopyBuffer = RunSession.LastDevelopmentPlaytestReport;
+                GUILayout.EndArea();
+                return;
+            }
 
             RunProgress progress = assembler.Progress;
             GUILayout.BeginArea(new Rect(12f, 60f, 340f, Screen.height - 72f), GUI.skin.box);
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
             GUILayout.Label($"DEV PANEL (F1)   seed {(progress.HasRunSeed ? progress.RunSeed.ToString() : "-")}");
             GUILayout.Label($"Floor {progress.CurrentFloor} Room {progress.CurrentRoom}");
+            DrawPlaytestSection();
 
             DrawSeedSection(assembler);
             DrawPlayerSection(assembler);
+            DrawSpellSlotSection(assembler);
             DrawResourceSection(progress);
             DrawRoomSection(assembler);
             DrawSecretSection(assembler);
             DrawShopSection(assembler);
 
             if (!string.IsNullOrEmpty(status)) GUILayout.Label(status);
+            GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        private void DrawPlaytestSection()
+        {
+            DevelopmentPlaytestRecord record = FindFirstObjectByType<RunSession>()?.DevelopmentPlaytest;
+            if (record == null) return;
+            GUILayout.Label("— Play-1: real time, includes pauses —");
+            GUILayout.Label(string.Join("  ", Enumerable.Range(1, 3).Select(floor =>
+                $"F{floor} {record.GetFloorSeconds(floor, Time.realtimeSinceStartupAsDouble):F1}s")));
+            GUILayout.Label(record.IsAssisted ? "Assisted run" : "No test assistance recorded");
+            if (GUILayout.Button("Copy Play-1 record"))
+                GUIUtility.systemCopyBuffer = record.Format(Time.realtimeSinceStartupAsDouble);
+        }
+
+        private static void MarkAssisted(string action) =>
+            FindFirstObjectByType<RunSession>()?.DevelopmentPlaytest?.MarkAssisted(action);
+
+        private static bool AssistedButton(string label)
+        {
+            if (!GUILayout.Button(label)) return false;
+            MarkAssisted(label);
+            return true;
         }
 
         private void DrawSeedSection(RoomGraphAssembler assembler)
@@ -87,28 +129,73 @@ namespace TrickalFanGame.Run
             Health health = PlayerHealth(assembler);
             PlayerSP sp = assembler.Graph?.Player != null ? assembler.Graph.Player.GetComponent<PlayerSP>() : null;
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Full HP") && health != null)
+            if (AssistedButton("Full HP") && health != null)
                 status = $"Healed {health.Heal(health.MaxHealth)}.";
-            if (GUILayout.Button("Full SP") && sp != null)
+            if (AssistedButton("Full SP") && sp != null)
                 status = sp.TryAdd(sp.MaxSP - sp.CurrentSP) ? "SP filled." : "SP already full.";
             GUILayout.EndHorizontal();
             bool nextInvulnerable = GUILayout.Toggle(invulnerable, "Invulnerable");
             if (nextInvulnerable != invulnerable)
             {
                 invulnerable = nextInvulnerable;
+                if (invulnerable) MarkAssisted("Invulnerable");
                 if (!invulnerable) health?.SetInvulnerable(false);
             }
+        }
+
+        // Drops a single-use item next to the player, so it is picked up through the normal slot path.
+        private void DrawSpellSlotSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Spell slot —");
+            PlayerSpellSlot slot = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<PlayerSpellSlot>()
+                : null;
+            if (slot == null || slot.PickupPrefab == null)
+            {
+                GUILayout.Label("The player has no spell slot.");
+                return;
+            }
+
+            PlayerSingleUseEffects effects = slot.GetComponent<PlayerSingleUseEffects>();
+            GUILayout.Label($"Held: {(slot.HasItem ? slot.HeldDefinition.DisplayName : "-")}" +
+                            (effects != null && effects.IsRegenerating
+                                ? $"   SP regen {effects.RegenerationRemainingSeconds:F1}s"
+                                : string.Empty) +
+                            (effects != null && effects.IsRoomAttackBoostActive
+                                ? $"   Room ATK +{effects.RoomAttackDamagePercent:P0}"
+                                : string.Empty));
+#if UNITY_EDITOR
+            singleUseItems ??= UnityEditor.AssetDatabase.FindAssets("t:ItemDefinition")
+                .Select(guid => UnityEditor.AssetDatabase.LoadAssetAtPath<ItemDefinition>(
+                    UnityEditor.AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(item => item != null && item.IsSingleUse && item.IsValid)
+                .OrderBy(item => item.ItemId, System.StringComparer.Ordinal)
+                .ToArray();
+            foreach (ItemDefinition item in singleUseItems)
+            {
+                if (!AssistedButton($"Drop {item.DisplayName}")) continue;
+                RoomPrefab room = CurrentRoom(assembler);
+                SingleUseItemPickup pickup = Instantiate(slot.PickupPrefab,
+                    slot.transform.position + Vector3.right * 1.2f, Quaternion.identity,
+                    room != null ? room.transform : null);
+                pickup.name = $"Single Use Item ({item.ItemId})";
+                pickup.Configure(item, null, false);
+                status = $"Dropped {item.DisplayName} next to the player.";
+            }
+#else
+            GUILayout.Label("Single-use drops are editor-only.");
+#endif
         }
 
         private void DrawResourceSection(RunProgress progress)
         {
             GUILayout.Label($"— Resources — bomb {progress.GetResourceCount(RunResourceType.Bomb)}  " +
                             $"key {progress.GetResourceCount(RunResourceType.Key)}  " +
-                            $"elif {progress.GetResourceCount(RunResourceType.Elif)}");
+                            $"gold {progress.GetResourceCount(RunResourceType.Gold)}");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("+10 Bomb")) progress.TryAddResource(RunResourceType.Bomb, 10);
-            if (GUILayout.Button("+10 Key")) progress.TryAddResource(RunResourceType.Key, 10);
-            if (GUILayout.Button("+10 Elif")) progress.TryAddResource(RunResourceType.Elif, 10);
+            if (AssistedButton("+10 Bomb")) progress.TryAddResource(RunResourceType.Bomb, 10);
+            if (AssistedButton("+10 Key")) progress.TryAddResource(RunResourceType.Key, 10);
+            if (AssistedButton("+10 Gold")) progress.TryAddResource(RunResourceType.Gold, 10);
             GUILayout.EndHorizontal();
         }
 
@@ -116,7 +203,7 @@ namespace TrickalFanGame.Run
         {
             GUILayout.Label("— Room —");
             RoomController controller = CurrentRoom(assembler)?.Controller;
-            if (GUILayout.Button("Kill current wave") && controller != null)
+            if (AssistedButton("Kill current wave") && controller != null)
                 status = $"Killed {controller.KillAliveEnemiesForDevelopment()} enemies.";
         }
 
@@ -141,6 +228,7 @@ namespace TrickalFanGame.Run
             if (nextReveal != revealSecrets)
             {
                 revealSecrets = nextReveal;
+                if (revealSecrets) MarkAssisted("Reveal secrets");
                 GameMinimapView.DevelopmentRevealSecrets = revealSecrets;
                 FindFirstObjectByType<GameMinimapView>()?.RefreshNow();
                 ApplyWallHighlight(revealSecrets);
@@ -148,12 +236,13 @@ namespace TrickalFanGame.Run
 
             DestructibleObstacle.DevelopmentForceNextSecretPit = GUILayout.Toggle(
                 DestructibleObstacle.DevelopmentForceNextSecretPit, "Next broken obstacle drops a pit");
+            if (DestructibleObstacle.DevelopmentForceNextSecretPit) MarkAssisted("Forced pit");
             if (secret == null) return;
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Go to secret neighbor"))
+            if (AssistedButton("Go to secret neighbor"))
                 Teleport(assembler, secret.DirectionalConnections[0].DestinationRoomId);
-            if (GUILayout.Button("Go to secret room")) Teleport(assembler, secret.RoomId);
+            if (AssistedButton("Go to secret room")) Teleport(assembler, secret.RoomId);
             GUILayout.EndHorizontal();
         }
 
@@ -170,7 +259,7 @@ namespace TrickalFanGame.Run
 
             RoomRunState state = assembler.Progress.GetRoomState(shop.RoomId);
             GUILayout.Label($"{shop.RoomId} at {shop.GridPosition}, {(state?.IsKeyLockOpen == true ? "unlocked" : "locked")}");
-            if (GUILayout.Button("Go to shop door"))
+            if (AssistedButton("Go to shop door"))
                 Teleport(assembler, shop.DirectionalConnections[0].DestinationRoomId);
         }
 

@@ -21,6 +21,8 @@ namespace TrickalFanGame.Frontend
         private static readonly Color HpHealColor = new(0.35f, 1f, 0.62f, 0.8f);
         private static readonly Color SpActiveColor = new(0.3f, 0.78f, 1f, 1f);
         private static readonly Color SpInactiveColor = new(0.18f, 0.28f, 0.38f, 0.55f);
+        private static readonly Color SpHalfColor = new(0.24f, 0.53f, 0.69f, 0.8f);
+        private static readonly Color SpOverchargeColor = new(1f, 0.82f, 0.32f, 1f);
         private static readonly Color SkillReadyColor = new(0.3f, 0.88f, 0.72f, 1f);
         private static readonly Color SkillUnavailableColor = new(0.25f, 0.3f, 0.36f, 0.7f);
 
@@ -51,6 +53,7 @@ namespace TrickalFanGame.Frontend
         private readonly List<HeartIcon> hearts = new();
         private float previousHealth;
         private int previousSP;
+        private bool previousHalfSP;
         private float healthFeedbackUntil;
         private float heartPulseUntil;
         private float spFeedbackUntil;
@@ -82,6 +85,8 @@ namespace TrickalFanGame.Frontend
         public int PulsingHeartCount { get; private set; }
         public int SlotCount => spSlots.Count;
         public int ActiveSlotCount { get; private set; }
+        public bool IsShowingHalfSlot { get; private set; }
+        public int OverchargeSlotCount { get; private set; }
         public bool IsLowerGradeSkillAvailable { get; private set; }
         public bool IsHighGradeSkillAvailable { get; private set; }
         public float HighGradeCooldownRemaining { get; private set; }
@@ -177,6 +182,7 @@ namespace TrickalFanGame.Frontend
             if (playerSP != null)
             {
                 previousSP = playerSP.CurrentSP;
+                previousHalfSP = playerSP.HasHalfSP;
                 RefreshSP(playerSP.CurrentSP, playerSP.MaxSP, false);
             }
 
@@ -245,20 +251,28 @@ namespace TrickalFanGame.Frontend
         {
             LastSPDelta = current - previousSP;
             previousSP = current;
-            RefreshSP(current, maximum, true);
+            bool halfChanged = playerSP != null && playerSP.HasHalfSP != previousHalfSP;
+            previousHalfSP = playerSP != null && playerSP.HasHalfSP;
+            RefreshSP(current, maximum, true, halfChanged);
             RefreshSkillStateAt(Time.time);
         }
 
-        private void RefreshSP(int current, int maximum, bool showFeedback)
+        // Overcharge adds slots past the maximum; a half slot dims the next empty slot instead of filling it.
+        private void RefreshSP(int current, int maximum, bool showFeedback, bool halfChanged = false)
         {
-            EnsureSlotCount(Mathf.Max(1, maximum));
-            ActiveSlotCount = Mathf.Clamp(current, 0, maximum);
+            EnsureSlotCount(Mathf.Max(1, Mathf.Max(maximum, current)));
+            ActiveSlotCount = Mathf.Clamp(current, 0, spSlots.Count);
+            OverchargeSlotCount = Mathf.Max(0, current - maximum);
+            IsShowingHalfSlot = playerSP != null && playerSP.HasHalfSP && current < maximum;
             for (int i = 0; i < spSlots.Count; i++)
             {
-                spSlots[i].color = i < ActiveSlotCount ? SpActiveColor : SpInactiveColor;
+                spSlots[i].color = i < ActiveSlotCount
+                    ? i >= maximum ? SpOverchargeColor : SpActiveColor
+                    : i == ActiveSlotCount && IsShowingHalfSlot ? SpHalfColor : SpInactiveColor;
             }
-            if (spValueText != null) spValueText.text = $"SP {current} / {maximum}";
-            if (showFeedback && LastSPDelta != 0)
+            if (spValueText != null)
+                spValueText.text = $"SP {current}{(IsShowingHalfSlot ? ".5" : string.Empty)} / {maximum}";
+            if (showFeedback && (LastSPDelta != 0 || halfChanged))
             {
                 SetSlotScale(Vector3.one * 1.12f);
                 spFeedbackUntil = Time.unscaledTime + feedbackDuration;

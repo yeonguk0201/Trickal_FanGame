@@ -39,7 +39,7 @@ namespace TrickalFanGame.Editor
             ItemDefinition[] pool = AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" })
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(path => AssetDatabase.LoadAssetAtPath<ItemDefinition>(path))
-                .Where(definition => definition != null && definition.IsActive)
+                .Where(definition => definition != null && definition.IsActive && !definition.IsSingleUse)
                 .ToArray();
             Assert(pool.Any(definition => definition.Kind == ItemKind.Artifact) &&
                    pool.Any(definition => definition.Kind == ItemKind.Spell),

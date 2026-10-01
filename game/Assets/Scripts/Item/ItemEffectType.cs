@@ -31,5 +31,12 @@ namespace TrickalFanGame.Item
         BasicAttackHitLightning = 25,
         HealOnKillEveryN = 26,
         AttackDamageAura = 27,
+        // Single-use effects (Spell-0). They run only when the slot item is used, never while held.
+        // IntegerAmount = SP allowed above the maximum after filling.
+        RestoreAllSPWithOvercharge = 28,
+        // IntegerAmount = half-SP units per tick, every IntervalSeconds for DurationSeconds.
+        RegenerateSPHalvesOverTime = 29,
+        // Magnitude = basic attack damage bonus in the room where the item is used (Spell-1). Leaving the room ends it.
+        CurrentRoomBasicAttackDamagePercent = 30,
     }
 }

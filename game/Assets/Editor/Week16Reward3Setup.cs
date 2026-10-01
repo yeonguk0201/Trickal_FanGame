@@ -23,7 +23,9 @@ namespace TrickalFanGame.Editor
             ItemDefinition[] pool = AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" })
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(AssetDatabase.LoadAssetAtPath<ItemDefinition>)
-                .Where(definition => definition != null && definition.IsActive && definition.IsValid)
+                // Single-use spells and retired legacy spells never join the selection reward pool (Contract-0 §2.2, §3).
+                .Where(definition => definition != null && definition.IsActive && definition.IsValid &&
+                                     !definition.IsSingleUse && !LegacySpellRetirement.IsRetired(definition))
                 .OrderBy(definition => definition.ItemId, StringComparer.Ordinal)
                 .ToArray();
 

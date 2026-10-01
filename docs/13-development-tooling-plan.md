@@ -113,6 +113,8 @@ Build에서만 자동 생성되고 정식 빌드에는 포함하지 않는다. 1
 기존 경로를 거쳐 저장·중복 지급 규칙을 우회하지 않는다. 적·장애물 배치 같은 2단계 도구는 방 상태 저장과
 Layout 검증을 우회하므로 Game Scene이 아닌 별도 테스트 씬(아이템 테스트 룸 방식)에서 진행한다(사용자 결정).
 - [x] 1단계 개발 패널 훅 자동 검증 (`Week20DevPanelVerification.Verify`, 2026-10-01; 패널 UI 조작은 수동 확인 대기)
+- [x] 21주차 Spell-0(2026-10-02): `— Spell slot —` 섹션 추가. 보유 아이템·명상 남은 시간 표시와 일회용 아이템 `Drop` 버튼(Editor 전용, 보조 Run 표시). 픽업은 일반 슬롯 획득 경로로 줍는다. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 버튼 조작은 수동 확인 대기
+- [x] 21주차 Spell-1(2026-10-02): `— Spell slot —` 보유 표시 줄에 저놈 잡아라 활성 시 `Room ATK +N%` 추가. `Drop` 목록은 일회용 에셋을 자동 수집하므로 새 버튼 코드는 없다. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 표시 확인은 수동 확인 대기
 - [ ] 2단계: 적·장애물 배치 전용 테스트 씬
 
 - 공통 Editor 구성 유틸리티
@@ -298,6 +300,18 @@ ItemTestScene에서 독립된 Boss2TestScene을 생성하며, Play 시작 시 �
 
 ### Unity 검증기 정리 후보 — 2026-09-29
 
+- Play-1(2026-10-01): 개발용 층별 실시간 측정·종료 기록·보조 도구 사용 표시와 `F1` 기록 복사를 추가했다.
+  `Week20Play1Verification.VerifyBatch`는 시간 누적·종료 후 동결과 현재 Room-8·자원·장애물·특수방·보상
+  검증을 Scene별로 분리 실행하며 수동 seed 후보를 출력한다. 실제 전체 Run 자동 플레이는 후속 후보로
+  유지한다. Unity 배치 검증 통과·종료 코드 0을 확인했다. 측정·회귀 검증만으로 Play-1을 완료 처리하지 않는다.
+
+- Floor-1(2026-10-01): `Week20Floor1Verification`에 층별 규모 검증과 관련 회귀를 묶는
+  `VerifyWithRegressionsBatch`를 추가했다. Room-0의 이전 seed 해시는 활성 층별 설정을 잠시 분리한
+  이전 생성 경로에서 확인하고 원래 설정을 복원한다. Special-4의 상점 추가 전후 동일성도 이전 생성
+  경로에서 검사하며, Floor-1에서는 총 방 수 예약 때문에 상점 유무에 따라 일반 방 수가 달라진다.
+  Difficulty-1 검증의 거리 계산은 숨김 통로를 제외하도록 현재 계약에 맞췄다. 전체 구형 검증기 정리는
+  별도 후보로 유지하며 이 회귀 묶음이 전체 검증기 실행을 대체하지 않는다.
+
 `game/Assets/Editor`에 `*Verification.cs`가 96개 쌓였다. 개수 자체는 빌드·런타임 비용이 없어 문제가 아니지만,
 원래 실패하는 검증이 섞이면 새 회귀를 놓치고, 예전 Setup을 다시 실행하면 최신 카탈로그를 되돌린다.
 아래는 전체 배치를 돌리지 않은 **정적 1차 분류**이며, 실제 정리 전에 전체 실행으로 확인한다.
@@ -306,7 +320,8 @@ ItemTestScene에서 독립된 Boss2TestScene을 생성하며, Play 시작 시 �
 | ---- | ---- | ---- | -------------- |
 | 실패 확인 | Week14 Room-7 | 카탈로그에 `pillar-crossfire` Encounter가 없어 조회 실패 (2026-09-29 실행) | Encounter 포함 여부 결정 후 검증 갱신 |
 | 실패 확인 | Week15 Enemy-0·2·3·5 | 프리팹·추적 기본값 변경으로 실패 (Obstacle-0 작업 중 확인) | 현재 값 기준으로 기대값 갱신 또는 폐기 |
-| 오래된 가정 | Week14 Room-8, Encounter-1·2 | Encounter 수를 `== 5`·`== 3`으로 고정 (현재 7종) | "필수 ID 포함"으로 완화. Room-8은 Floor-1·Play-1 전 필수 |
+| 갱신·실행 통과 | Week14 Room-8 | 예전 6~8방·폐기된 pillar-crossfire·스폰 2개 고정 기대값 | Floor-1 층별 총 방 수·현재 Encounter 네 패턴·실제 두 번째 웨이브 규모로 갱신, Play-1 준비 배치에서 통과 (2026-10-01) |
+| 오래된 가정 | Week14 Encounter-1·2 | Encounter 수 `== 3` 고정 | 필수 현재 ID 포함 조건으로 갱신 검토 |
 | 오래된 가정 | Week14 Encounter-3 | 웨이브·스폰 수 고정 기대값 | 실행해 확인 |
 | 최신 계약 | Week16~18 (Artifact·Content·Item·Reward·Spell·Test, Resource-0·1·3, Obstacle-0·1·2·3), Hp1~5 | 이번 달 작업에서 통과 | 유지 |
 | 확인 필요 | Week6~8, Phase G·H, Week13 Frontend·HUD·Setting·Flow, Week14 Room-0~6·Artwork, Week15 Boss·Enemy-1·4·RoleColor, ItemTestRoom, ErpinWalkAnimation | 최근 실행 기록 없음. Week7·8 초기 방·층 검증은 이후 Room·Encounter 계약이 대체했을 가능성이 높음 | 전체 실행 후 유지·갱신·폐기 결정 |
@@ -325,3 +340,14 @@ Week14 Encounter-1·2·3, Room-4·6·7, Week15 Enemy-5, Week18 Obstacle-2. 이 �
 - T5: 8주차 회고 또는 Unity 수동 검증 시간이 누적될 때
 
 각 점검에서는 도구를 만들었는지가 아니라 실제 개발 시간, 누락 위험 또는 재현성이 개선됐는지를 기준으로 다음 투자를 결정한다.
+
+## 요정마을 Artwork 적용 도구 (2026-10-01)
+
+사용자가 제공한 네 장의 타일·벽·문 이미지를 기존 방 계약에 맞춰 적용하는 Editor Setup과 검증기를 추가한다.
+`FairyVillageArtworkSetup`은 모든 RoomPrefab의 시각 구성만 갱신한다. 2026-10-02 사용자 미감 피드백에 따라
+공통 전경을 분리한 연결 구간으로 교체하며, 문·모서리 비율을 보존하고 긴 벽·잔디 구간을 함께 늘린다.
+바닥의 반복·반전 배치를 제거하고, 방향별 문과 봉인 벽을 같은 좌표의 상태 에셋으로 구성한다.
+`FairyVillageArtworkVerification`은 두 번 적용하여 중복·참조 변동과 Collider·GUID 변경을 검사하고 문 상태를 검증한다.
+별도 렌더 진입점은 시각 검토용 PNG를 만든다. 세부 범위와 수동 확인은
+[22-fairy-village-artwork.md](./22-fairy-village-artwork.md), 실행 메뉴는
+[05-development-setup.md](./05-development-setup.md)를 따른다. 기존 콘텐츠 Setup 이후에는 Artwork 적용을 다시 실행한다.

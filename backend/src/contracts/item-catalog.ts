@@ -236,6 +236,43 @@ export const ITEM_CATALOG = [
     ],
   },
   {
+    id: 'single-spell-aroma-therapy',
+    name: '아로마 테라피',
+    description:
+      '사용하면 SP를 최대치보다 1 많게 즉시 회복합니다. 초과분은 SP를 사용해 최대치 이하가 되면 사라지며, 이미 초과 충전 상태면 사용할 수 없습니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'RestoreAllSPWithOvercharge', integerAmount: 1 }],
+  },
+  {
+    id: 'single-spell-meditation-time',
+    name: '명상의 시간',
+    description:
+      '사용하면 12초 동안 1초마다 SP를 반 칸씩 최대치까지 회복합니다. 방과 층을 이동해도 유지되며, 다시 사용하면 지속 시간이 처음부터 갱신됩니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'RegenerateSPHalvesOverTime',
+        integerAmount: 1,
+        intervalSeconds: 1,
+        durationSeconds: 12,
+      },
+    ],
+  },
+  {
+    id: 'single-spell-catch-that-one',
+    name: '저놈 잡아라',
+    description:
+      '전투 중인 방에서 사용하면 그 방에 있는 동안 기본 공격 피해가 10% 증가합니다. 방을 떠나면 해제되며, 시작방·보상방이나 이미 클리어한 방에서는 사용할 수 없습니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'CurrentRoomBasicAttackDamagePercent', magnitude: 0.1 }],
+  },
+  {
     id: 'item-06',
     name: '다중 투사체',
     description:

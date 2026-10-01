@@ -81,9 +81,20 @@ namespace TrickalFanGame.Frontend
                     $"반경 {Number(effect.Radius)}m 적에게 {Number(effect.IntervalSeconds)}초마다 공격력의 {Percent(effect.Magnitude)} 피해",
                 ItemEffectType.BasicAttackHitLightning =>
                     $"기본 공격 {effect.IntegerAmount}회 적중마다 공격력의 {Percent(effect.Magnitude)} 번개 피해",
+                ItemEffectType.RestoreAllSPWithOvercharge => effect.IntegerAmount > 0
+                    ? $"SP를 최대치 +{effect.IntegerAmount}까지 즉시 회복 (초과분은 SP 사용 시 사라짐)"
+                    : "SP를 최대치까지 즉시 회복",
+                ItemEffectType.RegenerateSPHalvesOverTime =>
+                    $"{Number(effect.DurationSeconds)}초간 {Number(effect.IntervalSeconds)}초마다 SP {SPHalves(effect.IntegerAmount)} 회복",
+                ItemEffectType.CurrentRoomBasicAttackDamagePercent =>
+                    $"사용한 전투방에서 기본 공격 피해 +{Percent(effect.Magnitude)} (방을 떠나면 해제)",
                 _ => effect.EffectType.ToString(),
             };
         }
+
+        private static string SPHalves(int halves) => halves == 1
+            ? "반 칸"
+            : halves % 2 == 0 ? $"{halves / 2}칸" : $"{halves / 2}.5칸";
 
         private static string Percent(float value) => Mathf.RoundToInt(value * 100f) + "%";
         // Player HP values are half-heart units: 1 unit = half a heart.

@@ -21,6 +21,8 @@ namespace TrickalFanGame.Player
         private float flatAttackDamageBonus;
         private float attackDamagePercentBonus;
         private float currentRoomAttackDamagePercentBonus;
+        // Single-use spells own this source, so the legacy spell refresh never overwrites it.
+        private float singleUseRoomAttackDamagePercentBonus;
         private float attackSpeedPercentBonus;
         private float currentRoomAttackSpeedPercentBonus;
         private float criticalChanceBonus;
@@ -55,6 +57,8 @@ namespace TrickalFanGame.Player
                 (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f));
         public float AttackSpeed => baseAttackSpeed *
             Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus);
+        public float BasicAttackRoomDamageMultiplier =>
+            1f + currentRoomAttackDamagePercentBonus + singleUseRoomAttackDamagePercentBonus;
         public float CriticalChance => Mathf.Clamp01(baseCriticalChance + criticalChanceBonus);
         public float CriticalDamageMultiplier => Mathf.Max(1f, baseCriticalDamageMultiplier);
         public int ProjectileCount => 1 + additionalProjectileCount;
@@ -120,6 +124,11 @@ namespace TrickalFanGame.Player
         public void SetCurrentRoomAttackDamagePercent(float amount)
         {
             currentRoomAttackDamagePercentBonus = Mathf.Max(0f, amount);
+        }
+
+        public void SetSingleUseRoomAttackDamagePercent(float amount)
+        {
+            singleUseRoomAttackDamagePercentBonus = Mathf.Max(0f, amount);
         }
 
         public void SetCurrentRoomAttackSpeedPercent(float amount)
@@ -272,7 +281,7 @@ namespace TrickalFanGame.Player
         {
             float roomMultiplier = sourceType is DamageSourceType.PlayerAttack or
                 DamageSourceType.PlayerProjectile
-                ? 1f + currentRoomAttackDamagePercentBonus
+                ? BasicAttackRoomDamageMultiplier
                 : 1f;
             return new DamageContext(
                 source,
