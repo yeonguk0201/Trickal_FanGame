@@ -148,6 +148,12 @@ namespace TrickalFanGame.Item
                     case ItemEffectType.MoveSpeedPenaltyPercent:
                         stats.AddMoveSpeedPenaltyPercent(effect.Magnitude);
                         break;
+                    case ItemEffectType.ProjectileSpeedPercent:
+                        stats.AddProjectileSpeedPercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.ProjectileLifetimePercent:
+                        stats.AddProjectileLifetimePercent(effect.Magnitude);
+                        break;
                     case ItemEffectType.NextCombatRoomAttackDamagePercent:
                         GetOrCreateSpellEffects().AddNextCombatRoomAttackDamagePercent(effect.Magnitude);
                         break;

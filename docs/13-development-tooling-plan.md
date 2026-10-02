@@ -115,6 +115,7 @@ Layout 검증을 우회하므로 Game Scene이 아닌 별도 테스트 씬(아�
 - [x] 1단계 개발 패널 훅 자동 검증 (`Week20DevPanelVerification.Verify`, 2026-10-01; 패널 UI 조작은 수동 확인 대기)
 - [x] 21주차 Spell-0(2026-10-02): `— Spell slot —` 섹션 추가. 보유 아이템·명상 남은 시간 표시와 일회용 아이템 `Drop` 버튼(Editor 전용, 보조 Run 표시). 픽업은 일반 슬롯 획득 경로로 줍는다. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 버튼 조작은 수동 확인 대기
 - [x] 21주차 Spell-1(2026-10-02): `— Spell slot —` 보유 표시 줄에 저놈 잡아라 활성 시 `Room ATK +N%` 추가. `Drop` 목록은 일회용 에셋을 자동 수집하므로 새 버튼 코드는 없다. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 표시 확인은 수동 확인 대기
+- [x] 21주차 Spell-3(2026-10-02): 보유 표시 줄에 막판 스퍼트 활성 시 `Room ASPD +N% MS +N%` 추가(저놈 잡아라 `Room ATK`와 별도 표시). Spell-2 그건 내 잔상은 `Drop` 자동 수집만 사용하며 패널 코드 변경 없음. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 표시 확인은 수동 확인 대기
 - [ ] 2단계: 적·장애물 배치 전용 테스트 씬
 
 - 공통 Editor 구성 유틸리티

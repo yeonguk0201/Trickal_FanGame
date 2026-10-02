@@ -84,6 +84,15 @@ namespace TrickalFanGame.Room
             return true;
         }
 
+        // 그건 내 잔상: an escaped Encounter restarts from its first wave on the next entry. A cleared room never resets.
+        public bool ResetEncounterProgress()
+        {
+            if (IsCleared || CompletedWaveCount == 0) return false;
+            CompletedWaveCount = 0;
+            Changed?.Invoke();
+            return true;
+        }
+
         public bool IsObstacleDestroyed(string obstacleId) =>
             !string.IsNullOrWhiteSpace(obstacleId) && destroyedObstacleIds.Contains(obstacleId);
 

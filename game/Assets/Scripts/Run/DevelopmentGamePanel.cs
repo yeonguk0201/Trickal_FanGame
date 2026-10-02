@@ -161,8 +161,12 @@ namespace TrickalFanGame.Run
                             (effects != null && effects.IsRegenerating
                                 ? $"   SP regen {effects.RegenerationRemainingSeconds:F1}s"
                                 : string.Empty) +
-                            (effects != null && effects.IsRoomAttackBoostActive
+                            (effects != null && effects.RoomAttackDamagePercent > 0f
                                 ? $"   Room ATK +{effects.RoomAttackDamagePercent:P0}"
+                                : string.Empty) +
+                            (effects != null && effects.RoomAttackSpeedPercent > 0f
+                                ? $"   Room ASPD +{effects.RoomAttackSpeedPercent:P0} " +
+                                  $"MS +{effects.RoomMoveSpeedPercent:P0}"
                                 : string.Empty));
 #if UNITY_EDITOR
             singleUseItems ??= UnityEditor.AssetDatabase.FindAssets("t:ItemDefinition")

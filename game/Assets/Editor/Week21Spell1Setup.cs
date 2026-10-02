@@ -1,11 +1,7 @@
 using System;
-using System.Linq;
 using TrickalFanGame.Item;
-using TrickalFanGame.Room;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace TrickalFanGame.Editor
 {
@@ -30,7 +26,7 @@ namespace TrickalFanGame.Editor
             Undo.SetCurrentGroupName("Setup Spell-1 Catch That One");
 
             ConfigureItem();
-            RetireLegacyFromRewardPool();
+            LegacySpellRetirement.RetireFromGameSceneRewardPool("Retire legacy spells from the reward pool");
 
             AssetDatabase.SaveAssets();
             Undo.CollapseUndoOperations(group);
@@ -59,23 +55,6 @@ namespace TrickalFanGame.Editor
             if (!definition.IsValid)
                 throw new InvalidOperationException($"{CatchThatOneId} is not a valid item contract.");
             EditorUtility.SetDirty(definition);
-        }
-
-        private static void RetireLegacyFromRewardPool()
-        {
-            Scene scene = EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath, OpenSceneMode.Single);
-            RoomGraphAssembler assembler = scene.GetRootGameObjects()
-                .SelectMany(root => root.GetComponentsInChildren<RoomGraphAssembler>(true)).Single();
-            ItemDefinition[] pool = assembler.SelectionRewardPool.ToArray();
-            ItemDefinition[] retained = pool.Where(item => !LegacySpellRetirement.IsRetired(item)).ToArray();
-            if (retained.Length == pool.Length) return;
-
-            Undo.RecordObject(assembler, "Retire legacy spells from the reward pool");
-            assembler.ConfigureSelectionRewards(assembler.RewardSelectionSession, retained);
-            EditorUtility.SetDirty(assembler);
-            EditorSceneManager.MarkSceneDirty(scene);
-            if (!EditorSceneManager.SaveScene(scene))
-                throw new InvalidOperationException("Game Scene save failed during Spell-1 setup.");
         }
     }
 }

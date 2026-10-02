@@ -54,7 +54,9 @@ namespace TrickalFanGame.Editor
                 Effect(ItemEffectType.HealOnKillEveryN, magnitude: 1f, integerAmount: 2)),
             Spec("item-15", "장난감 망원경", ItemRarity.Epic, true, 1,
                 Effect(ItemEffectType.AttackDamagePercent, magnitude: 0.15f),
-                Effect(ItemEffectType.DistanceDamage, magnitude: 0.40f, minimumDistance: 2f, maximumDistance: 6f)),
+                Effect(ItemEffectType.DistanceDamage, magnitude: 0.40f, minimumDistance: 2f, maximumDistance: 6f),
+                // Range-0 (2026-10-02): flight time +30%, so the basic attack range grows from about 5.3 to about 6.9.
+                Effect(ItemEffectType.ProjectileLifetimePercent, magnitude: 0.30f)),
             Spec("item-11", "다야의 다이아몬드 커터", ItemRarity.Epic, true, 1,
                 Effect(ItemEffectType.Pierce, integerAmount: 1),
                 Effect(ItemEffectType.SplitAfterPierce, secondaryMagnitude: 0.30f, integerAmount: 3,

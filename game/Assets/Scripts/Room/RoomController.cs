@@ -269,6 +269,33 @@ namespace TrickalFanGame.Room
             }
         }
 
+        // 그건 내 잔상: the player escaped mid-fight. The remaining enemies leave without counting as kills, the room
+        // returns to waiting with its doors open, and the next entry restarts the Encounter from the first wave.
+        // Terrain and reward state (obstacles, pickups, clear reward) belong to the room state and stay untouched.
+        public bool TryAbandonCombat()
+        {
+            if (State != RoomState.Combat || IsProgressionStopped) return false;
+
+            foreach (KeyValuePair<Health, Action> entry in enemyDeathHandlers)
+            {
+                Health enemy = entry.Key;
+                if (enemy == null) continue;
+                enemy.Died -= entry.Value;
+                if (Array.IndexOf(preplacedEnemies, enemy) >= 0) enemy.gameObject.SetActive(false);
+                else if (Application.isPlaying) Destroy(enemy.gameObject);
+                else DestroyImmediate(enemy.gameObject);
+            }
+
+            enemyDeathHandlers.Clear();
+            UnsubscribeFromPlayer();
+            runState?.ResetEncounterProgress();
+            HasStarted = false;
+            CurrentWaveNumber = 0;
+            ChangeState(RoomState.Waiting);
+            SetDoorsLocked(false);
+            return true;
+        }
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // Development panel only: kills the current wave through the normal death path, so wave progress, clear
         // state, and clear rewards run exactly as in play.

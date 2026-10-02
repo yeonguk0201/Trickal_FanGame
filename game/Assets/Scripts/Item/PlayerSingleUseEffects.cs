@@ -14,6 +14,8 @@ namespace TrickalFanGame.Item
     {
         private const float TickTolerance = 0.0001f;
 
+        [SerializeField] private RoomGraphController roomGraph;
+
         private Health health;
         private PlayerSP playerSP;
         private PlayerStats playerStats;
@@ -27,15 +29,20 @@ namespace TrickalFanGame.Item
         private int regenerationDeliveredTicks;
         private float regenerationElapsed;
 
-        // 저놈 잡아라: basic attack bonus bound to the room where it was used. Leaving that room, death or the end of
-        // the Run removes it, and nothing brings it back on a revisit.
-        private RunProgress roomAttackProgress;
-        private string roomAttackRoomId;
+        // 저놈 잡아라 and 막판 스퍼트: bonuses bound to the room where they were used. Leaving that room, death or the
+        // end of the Run removes them all, and nothing brings them back on a revisit.
+        private RunProgress roomBoostProgress;
+        private string roomBoostRoomId;
         private float roomAttackDamagePercent;
+        private float roomAttackSpeedPercent;
+        private float roomMoveSpeedPercent;
 
-        public bool IsRoomAttackBoostActive => !string.IsNullOrEmpty(roomAttackRoomId);
-        public string RoomAttackBoostRoomId => roomAttackRoomId;
-        public float RoomAttackDamagePercent => IsRoomAttackBoostActive ? roomAttackDamagePercent : 0f;
+        public RoomGraphController RoomGraph => roomGraph;
+        public bool IsRoomBoostActive => !string.IsNullOrEmpty(roomBoostRoomId);
+        public string RoomBoostRoomId => roomBoostRoomId;
+        public float RoomAttackDamagePercent => IsRoomBoostActive ? roomAttackDamagePercent : 0f;
+        public float RoomAttackSpeedPercent => IsRoomBoostActive ? roomAttackSpeedPercent : 0f;
+        public float RoomMoveSpeedPercent => IsRoomBoostActive ? roomMoveSpeedPercent : 0f;
 
         public bool IsRegenerating => regenerationDeliveredTicks < regenerationTotalTicks;
         public int RegenerationTotalTicks => regenerationTotalTicks;
@@ -52,15 +59,20 @@ namespace TrickalFanGame.Item
             spellSlot = GetComponent<PlayerSpellSlot>();
         }
 
+        public void Configure(RoomGraphController configuredRoomGraph)
+        {
+            roomGraph = configuredRoomGraph;
+        }
+
         private void Update()
         {
             AdvanceRegeneration(Time.deltaTime);
-            RefreshRoomAttackBoost();
+            RefreshRoomBoost();
         }
 
         private void OnDisable()
         {
-            ClearRoomAttackBoost();
+            ClearRoomBoost();
         }
 
         public bool CanExecute(ItemDefinition definition, out string reason)
@@ -140,17 +152,17 @@ namespace TrickalFanGame.Item
             return delivered;
         }
 
-        // Ends the room attack bonus once the player is no longer in the room it was used in.
-        public void RefreshRoomAttackBoost()
+        // Ends the room bonuses once the player is no longer in the room they were used in.
+        public void RefreshRoomBoost()
         {
-            if (!IsRoomAttackBoostActive) return;
+            if (!IsRoomBoostActive) return;
 
             EnsureReferences();
-            if (health == null || health.IsDead || roomAttackProgress == null ||
-                roomAttackProgress.IsProgressionStopped ||
-                !string.Equals(CurrentRoomId(roomAttackProgress), roomAttackRoomId, StringComparison.Ordinal))
+            if (health == null || health.IsDead || roomBoostProgress == null ||
+                roomBoostProgress.IsProgressionStopped ||
+                !string.Equals(CurrentRoomId(roomBoostProgress), roomBoostRoomId, StringComparison.Ordinal))
             {
-                ClearRoomAttackBoost();
+                ClearRoomBoost();
             }
         }
 
@@ -201,9 +213,17 @@ namespace TrickalFanGame.Item
                         return false;
                     }
 
-                    if (!IsInUnclearedCombatRoom(out reason)) return false;
-                    reason = string.Empty;
-                    return true;
+                    return IsInUnclearedCombatRoom(false, out reason);
+                case ItemEffectType.CurrentBossRoomSpeedPercent:
+                    if (playerStats == null)
+                    {
+                        reason = "The player has no stats.";
+                        return false;
+                    }
+
+                    return IsInUnclearedCombatRoom(true, out reason);
+                case ItemEffectType.EscapeToFloorStartRoom:
+                    return CanEscape(out reason, out _, out _);
                 default:
                     reason = $"{effect.EffectType} is not a connected single-use effect.";
                     return false;
@@ -229,55 +249,154 @@ namespace TrickalFanGame.Item
                               $"every {regenerationInterval}s.", this);
                     break;
                 case ItemEffectType.CurrentRoomBasicAttackDamagePercent:
-                    StartRoomAttackBoost(effect.Magnitude);
+                    StartRoomBoost(effect.Magnitude, 0f, 0f);
+                    break;
+                case ItemEffectType.CurrentBossRoomSpeedPercent:
+                    StartRoomBoost(0f, effect.Magnitude, effect.SecondaryMagnitude);
+                    break;
+                case ItemEffectType.EscapeToFloorStartRoom:
+                    EscapeToStartRoom();
                     break;
             }
         }
 
-        // Another use in the same room adds to the bonus; it still ends when the room is left.
-        private void StartRoomAttackBoost(float percent)
+        // 그건 내 잔상: move first, then reset the escaped room, so a refused move never leaves a reset room behind.
+        private void EscapeToStartRoom()
+        {
+            if (!CanEscape(out string reason, out RoomNode source, out RoomController sourceRoom))
+                throw new InvalidOperationException("[PlayerSingleUseEffects] Escape refused: " + reason);
+
+            RoomNode start = roomGraph.StartingNode;
+            if (!roomGraph.TryTeleport(source, start, start.InitialSpawnPosition, GetComponent<PlayerMovement>()))
+                throw new InvalidOperationException($"[PlayerSingleUseEffects] Escape to {start.RoomId} failed.");
+            if (!sourceRoom.TryAbandonCombat())
+                Debug.LogError($"[PlayerSingleUseEffects] {source.RoomId} could not reset after the escape.", this);
+            Debug.Log($"[PlayerSingleUseEffects] Escaped {source.RoomId} to {start.RoomId}.", this);
+        }
+
+        // Escaping needs a combat or boss room whose fight is running, on the floor the graph is showing.
+        private bool CanEscape(out string reason, out RoomNode source, out RoomController sourceRoom)
+        {
+            source = null;
+            sourceRoom = null;
+            RunProgress progress = spellSlot != null ? spellSlot.Progress : null;
+            RoomGraphController graph = ResolveRoomGraph();
+            PlayerMovement player = GetComponent<PlayerMovement>();
+            if (graph == null || player == null || progress == null ||
+                (graph.Progress != null && graph.Progress != progress))
+            {
+                reason = "The player is not in a room graph.";
+                return false;
+            }
+
+            source = graph.CurrentNode;
+            RoomNode start = graph.StartingNode;
+            GeneratedRoomNode node = FindCurrentNode(progress);
+            if (source == null || start == null || node == null ||
+                !string.Equals(source.RoomId, node.RoomId, StringComparison.Ordinal))
+            {
+                reason = "The player is not in a generated room.";
+                return false;
+            }
+
+            if (source == start || node.Role is not (GeneratedRoomRole.Intermediate or GeneratedRoomRole.Boss))
+            {
+                reason = "It can only be used in a combat room.";
+                return false;
+            }
+
+            sourceRoom = FindRoomController(source);
+            if (sourceRoom == null || sourceRoom.State != RoomState.Combat || sourceRoom.IsProgressionStopped)
+            {
+                reason = "It can only be used during combat.";
+                return false;
+            }
+
+            if (!graph.CanTeleport(source, start, player))
+            {
+                reason = "The player cannot move between rooms right now.";
+                return false;
+            }
+
+            reason = string.Empty;
+            return true;
+        }
+
+        private RoomGraphController ResolveRoomGraph()
+        {
+            if (roomGraph == null) roomGraph = FindFirstObjectByType<RoomGraphController>();
+            return roomGraph;
+        }
+
+        private static RoomController FindRoomController(RoomNode node)
+        {
+            RoomPrefab prefab = node.GetComponent<RoomPrefab>();
+            if (prefab != null && prefab.Controller != null) return prefab.Controller;
+            return node.ContentRoot != null ? node.ContentRoot.GetComponentInChildren<RoomController>(true) : null;
+        }
+
+        // Another use in the same room adds to the bonuses; they still end when the room is left.
+        private void StartRoomBoost(float attackDamage, float attackSpeed, float moveSpeed)
         {
             RunProgress progress = spellSlot.Progress;
             string roomId = CurrentRoomId(progress);
-            if (!string.Equals(roomAttackRoomId, roomId, StringComparison.Ordinal)) ClearRoomAttackBoost();
+            if (!string.Equals(roomBoostRoomId, roomId, StringComparison.Ordinal)) ClearRoomBoost();
 
-            if (roomAttackProgress != progress)
+            if (roomBoostProgress != progress)
             {
-                if (roomAttackProgress != null) roomAttackProgress.RoomChanged -= HandleRoomChanged;
-                roomAttackProgress = progress;
-                roomAttackProgress.RoomChanged += HandleRoomChanged;
+                if (roomBoostProgress != null) roomBoostProgress.RoomChanged -= HandleRoomChanged;
+                roomBoostProgress = progress;
+                roomBoostProgress.RoomChanged += HandleRoomChanged;
             }
 
-            roomAttackRoomId = roomId;
-            roomAttackDamagePercent += percent;
+            roomBoostRoomId = roomId;
+            roomAttackDamagePercent += attackDamage;
+            roomAttackSpeedPercent += attackSpeed;
+            roomMoveSpeedPercent += moveSpeed;
             playerStats.SetSingleUseRoomAttackDamagePercent(roomAttackDamagePercent);
-            Debug.Log($"[PlayerSingleUseEffects] Basic attack +{roomAttackDamagePercent:P0} in {roomId}.", this);
+            playerStats.SetSingleUseRoomSpeedPercent(roomAttackSpeedPercent, roomMoveSpeedPercent);
+            Debug.Log($"[PlayerSingleUseEffects] Room bonus in {roomId}: basic attack +{roomAttackDamagePercent:P0}, " +
+                      $"attack speed +{roomAttackSpeedPercent:P0}, move speed +{roomMoveSpeedPercent:P0}.", this);
         }
 
         private void HandleRoomChanged(int _, int __)
         {
-            RefreshRoomAttackBoost();
+            RefreshRoomBoost();
         }
 
-        private void ClearRoomAttackBoost()
+        private void ClearRoomBoost()
         {
-            if (roomAttackProgress != null) roomAttackProgress.RoomChanged -= HandleRoomChanged;
-            bool wasActive = IsRoomAttackBoostActive;
-            roomAttackProgress = null;
-            roomAttackRoomId = null;
+            if (roomBoostProgress != null) roomBoostProgress.RoomChanged -= HandleRoomChanged;
+            bool wasActive = IsRoomBoostActive;
+            roomBoostProgress = null;
+            roomBoostRoomId = null;
             roomAttackDamagePercent = 0f;
-            if (playerStats != null) playerStats.SetSingleUseRoomAttackDamagePercent(0f);
-            if (wasActive) Debug.Log("[PlayerSingleUseEffects] Room basic attack bonus ended.", this);
+            roomAttackSpeedPercent = 0f;
+            roomMoveSpeedPercent = 0f;
+            if (playerStats != null)
+            {
+                playerStats.SetSingleUseRoomAttackDamagePercent(0f);
+                playerStats.SetSingleUseRoomSpeedPercent(0f, 0f);
+            }
+
+            if (wasActive) Debug.Log("[PlayerSingleUseEffects] Room bonuses ended.", this);
         }
 
         // Room-bound effects need a room that is still being fought; a safe or cleared room would waste the item.
-        private bool IsInUnclearedCombatRoom(out string reason)
+        // Boss-only effects (막판 스퍼트) also refuse ordinary combat rooms.
+        private bool IsInUnclearedCombatRoom(bool bossOnly, out string reason)
         {
             RunProgress progress = spellSlot != null ? spellSlot.Progress : null;
             GeneratedRoomNode node = FindCurrentNode(progress);
             if (node == null)
             {
                 reason = "The player is not in a generated room.";
+                return false;
+            }
+
+            if (bossOnly && node.Role != GeneratedRoomRole.Boss)
+            {
+                reason = "It can only be used in a boss room.";
                 return false;
             }
 

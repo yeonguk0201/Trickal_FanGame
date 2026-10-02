@@ -106,7 +106,7 @@ namespace TrickalFanGame.Editor
             test.Progress.RecordRoomEntry(1, 1);
             test.Give(item, "spell1-1");
             Assert(test.Slot.TryUse() == SpellSlotUseResult.ConditionNotMet && test.Slot.HeldDefinition == item &&
-                   !effects.IsRoomAttackBoostActive,
+                   !effects.IsRoomBoostActive,
                 "The start room must refuse 저놈 잡아라 and keep it in the slot.");
             test.Progress.RecordRoomEntry(1, 4);
             Assert(test.Slot.TryUse() == SpellSlotUseResult.ConditionNotMet && test.Slot.HasItem,
@@ -119,13 +119,13 @@ namespace TrickalFanGame.Editor
             test.Progress.RecordRoomEntry(1, 3);
             Time.timeScale = 0f;
             Assert(test.Slot.TryUse() == SpellSlotUseResult.Paused && test.Slot.HasItem &&
-                   !effects.IsRoomAttackBoostActive,
+                   !effects.IsRoomBoostActive,
                 "저놈 잡아라 must not be used while paused.");
             Time.timeScale = 1f;
 
             string combatRoomId = FloorGenerator.BuildRoomId(1, 3);
             Assert(test.Slot.TryUse() == SpellSlotUseResult.Used && !test.Slot.HasItem &&
-                   effects.IsRoomAttackBoostActive && effects.RoomAttackBoostRoomId == combatRoomId &&
+                   effects.IsRoomBoostActive && effects.RoomBoostRoomId == combatRoomId &&
                    Approximately(effects.RoomAttackDamagePercent, 0.1f),
                 "An uncleared combat room must consume 저놈 잡아라 and start the room bonus.");
             AssertMultipliers(test, 1.1f, "The used room must grant +10% basic attack damage only.");
@@ -137,24 +137,24 @@ namespace TrickalFanGame.Editor
             AssertMultipliers(test, 1.2f, "Two uses in one room must grant +20% basic attack damage.");
 
             test.Progress.GetRoomState(combatRoomId).MarkCleared();
-            effects.RefreshRoomAttackBoost();
-            Assert(effects.IsRoomAttackBoostActive, "Clearing the room must keep the bonus until the player leaves.");
+            effects.RefreshRoomBoost();
+            Assert(effects.IsRoomBoostActive, "Clearing the room must keep the bonus until the player leaves.");
 
             test.Progress.RecordRoomEntry(1, 1);
-            Assert(!effects.IsRoomAttackBoostActive && effects.RoomAttackBoostRoomId == null,
+            Assert(!effects.IsRoomBoostActive && effects.RoomBoostRoomId == null,
                 "Leaving the room must end the bonus.");
             AssertMultipliers(test, 1f, "Leaving the room must remove the basic attack bonus.");
             test.Progress.RecordRoomEntry(1, 3);
-            Assert(!effects.IsRoomAttackBoostActive, "Revisiting the used room must not bring the bonus back.");
+            Assert(!effects.IsRoomBoostActive, "Revisiting the used room must not bring the bonus back.");
             AssertMultipliers(test, 1f, "A revisit must keep the base basic attack damage.");
 
             // The boss room is a combat room too, and moving to the next floor leaves it.
             test.Give(item, "spell1-3");
             test.Progress.RecordRoomEntry(1, 5);
-            Assert(test.Slot.TryUse() == SpellSlotUseResult.Used && effects.IsRoomAttackBoostActive,
+            Assert(test.Slot.TryUse() == SpellSlotUseResult.Used && effects.IsRoomBoostActive,
                 "An uncleared boss room must accept 저놈 잡아라.");
             test.Progress.RecordRoomEntry(2, 5);
-            Assert(!effects.IsRoomAttackBoostActive, "Moving to another floor must end the bonus.");
+            Assert(!effects.IsRoomBoostActive, "Moving to another floor must end the bonus.");
 
             Assert(test.Inventory.AcquiredItems.Count == 3 &&
                    test.Inventory.AcquiredItems.All(record => record.ItemId == item.ItemId),
@@ -188,8 +188,8 @@ namespace TrickalFanGame.Editor
                 test.Give(item, "spell1-stop");
                 Assert(test.Slot.TryUse() == SpellSlotUseResult.Used, "Start a room bonus before the Run ends.");
                 test.Progress.StopProgression();
-                test.Effects.RefreshRoomAttackBoost();
-                Assert(!test.Effects.IsRoomAttackBoostActive, "The end of the Run must end the bonus.");
+                test.Effects.RefreshRoomBoost();
+                Assert(!test.Effects.IsRoomBoostActive, "The end of the Run must end the bonus.");
                 AssertMultipliers(test, 1f, "The end of the Run must remove the basic attack bonus.");
             }
 
@@ -199,8 +199,8 @@ namespace TrickalFanGame.Editor
                 test.Give(item, "spell1-death");
                 Assert(test.Slot.TryUse() == SpellSlotUseResult.Used, "Start a room bonus before death.");
                 test.Health.TakeDamage(test.Health.MaxHealth * 10f);
-                test.Effects.RefreshRoomAttackBoost();
-                Assert(test.Health.IsDead && !test.Effects.IsRoomAttackBoostActive, "Death must end the bonus.");
+                test.Effects.RefreshRoomBoost();
+                Assert(test.Health.IsDead && !test.Effects.IsRoomBoostActive, "Death must end the bonus.");
             }
         }
 

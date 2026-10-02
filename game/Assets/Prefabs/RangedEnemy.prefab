@@ -219,7 +219,7 @@ MonoBehaviour:
   attackInterval: 1.5
   projectileSpeed: 5
   projectileDamageTier: 2
-  projectileLifetime: 4
+  projectileLifetime: 1.8
   target: {fileID: 0}
 --- !u!114 &6274296918522010085
 MonoBehaviour:

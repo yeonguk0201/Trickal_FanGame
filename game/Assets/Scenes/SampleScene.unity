@@ -2131,8 +2131,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 625e0be83fd749cb861e619dfb23d4e3, type: 2}
   - {fileID: 11400000, guid: 2e3b460311314c30be140bb33f554042, type: 2}
   - {fileID: 11400000, guid: eb5f979e22d646bd852848ba85098dc7, type: 2}
-  - {fileID: 11400000, guid: d05d894249916b44fbfc8d46a8888f5e, type: 2}
-  - {fileID: 11400000, guid: 582b1a831ceded4438116781274efe64, type: 2}
   shopRoomPrefab: {fileID: 4476114902965739689, guid: a82065ee9eee8d34499405155bb64313, type: 3}
   shopCatalog: {fileID: 11400000, guid: 3bc3c90a27b3d15489f27d764c008817, type: 2}
 --- !u!1 &49446195
@@ -46085,8 +46083,8 @@ RectTransform:
   - {fileID: 324430192}
   - {fileID: 2124110317}
   - {fileID: 2055390319}
-  - {fileID: 1115359048}
   - {fileID: 1482537771}
+  - {fileID: 1115359048}
   m_Father: {fileID: 1389115082}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -54050,6 +54048,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0afba69b1002ea44d9c068deff6417c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.PlayerSingleUseEffects
+  roomGraph: {fileID: 1265728904}
 --- !u!1 &2024060499
 GameObject:
   m_ObjectHideFlags: 0

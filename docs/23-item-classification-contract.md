@@ -54,7 +54,7 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 - `spell-catch-that-one`, `spell-final-sprint`, `spell-afterimage`의 ID·이름·설명·등급·효과(21~23 포함)를
   바꾸지 않는다. Unity 에셋과 GUID를 보존한다.
 - **Unity**: Spell-1~3에서 `selectionRewardPool`(따라서 상점 아이템 상품)에서 제거한다. 제거 대상은
-  `Editor/LegacySpellRetirement.cs` 목록으로 관리하며 Spell-1(2026-10-02)에서 `spell-catch-that-one`을 제거했다. 에셋의 `isActive`는
+  `Editor/LegacySpellRetirement.cs` 목록으로 관리하며 Spell-1(2026-10-02)에서 `spell-catch-that-one`을, Spell-2(2026-10-02)에서 `spell-afterimage`를, Spell-3(2026-10-02)에서 `spell-final-sprint`를 제거했다. 레거시 스펠 3종이 모두 빠져 선택 보상 풀은 아티팩트만 담으며, Reward-3 Setup·검증도 "레거시 스펠 없음"을 요구하도록 바꿨다. 에셋의 `isActive`는
   바꾸지 않아 아이템 테스트 씬 로드아웃과 과거 효과 검증이 계속 동작하게 한다. 신규 풀 제외는
   `isActive`가 아니라 "획득 풀에 `ItemKind.Spell`이 없음"이라는 검증 불변조건으로 보장한다.
 - **Backend**: 카탈로그의 `isActive=true`를 유지한다. `false`로 바꾸면 이전 빌드나 진행 중 재전송이
@@ -90,6 +90,15 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
   Spell-1(2026-10-02)에서 `CurrentRoomBasicAttackDamagePercent = 30`(`magnitude` = 사용한 방의 기본 공격 피해 증가율)을
   추가했다. 레거시 21(`NextCombatRoomAttackDamagePercent`)은 재사용하지 않고, `PlayerStats`의 별도 방 한정 피해
   출처로 합산해 레거시 스펠과 서로 덮어쓰지 않는다.
+  Spell-2(2026-10-02)에서 `EscapeToFloorStartRoom = 31`(수치 필드 없음)을 추가했다. 레거시 `spell-afterimage`의
+  `MoveSpeedPercent`·`AttackSpeedPercent`(19·9)는 그대로 두고 일회용 스펠은 이 효과만 쓴다.
+  Spell-3(2026-10-02)에서 `CurrentBossRoomSpeedPercent = 32`(`magnitude` = 공격속도, `secondaryMagnitude` = 이동속도
+  증가율)를 추가했다. 레거시 22·23은 재사용하지 않고 `PlayerStats`의 별도 방 한정 속도 출처로 합산한다.
+  Range-0(2026-10-02)에서 `ProjectileSpeedPercent = 33`(`magnitude` = 기본 공격 탄속 증가율)과
+  `ProjectileLifetimePercent = 34`(`magnitude` = 기본 공격 체공 시간 증가율)를 추가했다. 사거리 = 체공 시간 × 탄속이므로
+  둘 다 사거리를 늘린다. 탄속(33)은 **계약만** 열어둔 상태다. 체공 시간(34)은 같은 날 `item-15` 장난감 망원경의
+  세 번째 효과(`magnitude` 0.3, 사거리 약 5.3 → 약 6.9)로 추가했고 Backend 카탈로그 `effectData`·설명에도 같은 값을 기록했다.
+  기존 두 효과(공격력 +15%, 2~6m 거리 비례 피해)와 ID·등급·스택은 그대로다.
 - 일회용 아이템(`SingleUseSpell`, `JjangsemSpell`)은 `maxStacks = 1`이다. 보유 중에는 **효과가 적용되지
   않고**, 사용 성공 시에만 효과를 실행한다. `PlayerInventory`의 상시 효과 적용·아티팩트 HUD·일시정지
   아티팩트 목록에 들어가지 않는다.
@@ -179,3 +188,4 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | Flight-0 | 가짜 날개는 `ItemKind.Artifact`, 전용 풀 소속으로만 획득 |
 | Jjangsem-0·1 | `jjangsem-` 접두사, 일회용 아이템 비복제 |
 | Verify-0 | 풀별 분류 불변조건과 Unity↔Backend 카탈로그 ID·등급 일치 검사 |
+| Range-0 | 효과 33·34는 뒤에 추가, 33은 아이템 미사용·34는 `item-15`만 사용(검증기가 확인), 아이템 추가 시 Backend 카탈로그·seed 동시 반영 |

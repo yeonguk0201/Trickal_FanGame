@@ -23,6 +23,8 @@ namespace TrickalFanGame.Player
         private float currentRoomAttackDamagePercentBonus;
         // Single-use spells own this source, so the legacy spell refresh never overwrites it.
         private float singleUseRoomAttackDamagePercentBonus;
+        private float singleUseRoomAttackSpeedPercentBonus;
+        private float singleUseRoomMoveSpeedPercentBonus;
         private float attackSpeedPercentBonus;
         private float currentRoomAttackSpeedPercentBonus;
         private float criticalChanceBonus;
@@ -46,6 +48,8 @@ namespace TrickalFanGame.Player
         private float distanceDamageMinimum;
         private float distanceDamageMaximum;
         private ProjectileSplitSettings projectileSplitSettings;
+        private float projectileSpeedPercentBonus;
+        private float projectileLifetimePercentBonus;
 
         public float MaxHealth => baseMaxHealth + maxHealthBonus;
         public float AttackDamage =>
@@ -53,10 +57,11 @@ namespace TrickalFanGame.Player
         public float SkillDamageMultiplier => 1f + skillDamagePercentBonus;
         public float MoveSpeed => (baseMoveSpeed + moveSpeedBonus) *
             Mathf.Max(0f, 1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent +
-                currentRoomMoveSpeedPercentBonus +
+                currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus +
                 (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f));
         public float AttackSpeed => baseAttackSpeed *
-            Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus);
+            Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus +
+                             singleUseRoomAttackSpeedPercentBonus);
         public float BasicAttackRoomDamageMultiplier =>
             1f + currentRoomAttackDamagePercentBonus + singleUseRoomAttackDamagePercentBonus;
         public float CriticalChance => Mathf.Clamp01(baseCriticalChance + criticalChanceBonus);
@@ -73,6 +78,9 @@ namespace TrickalFanGame.Player
         public int PeriodicKillHealInterval => periodicKillHealInterval;
         public int PeriodicKillHealProgress => periodicKillHealProgress;
         public ProjectileSplitSettings ProjectileSplitSettings => projectileSplitSettings;
+        // Range-0: basic attack travel distance = flight time × shot speed.
+        public float ProjectileSpeedMultiplier => 1f + projectileSpeedPercentBonus;
+        public float ProjectileLifetimeMultiplier => 1f + projectileLifetimePercentBonus;
         public bool IsBelowMoveSpeedHealthThreshold =>
             moveSpeedPercentBelowHealthBonus > 0f && health != null && !health.IsDead &&
             (health.CurrentHealth <= health.MaxHealth * moveSpeedHealthThreshold ||
@@ -129,6 +137,12 @@ namespace TrickalFanGame.Player
         public void SetSingleUseRoomAttackDamagePercent(float amount)
         {
             singleUseRoomAttackDamagePercentBonus = Mathf.Max(0f, amount);
+        }
+
+        public void SetSingleUseRoomSpeedPercent(float attackSpeed, float moveSpeed)
+        {
+            singleUseRoomAttackSpeedPercentBonus = Mathf.Max(0f, attackSpeed);
+            singleUseRoomMoveSpeedPercentBonus = Mathf.Max(0f, moveSpeed);
         }
 
         public void SetCurrentRoomAttackSpeedPercent(float amount)
@@ -253,6 +267,16 @@ namespace TrickalFanGame.Player
             distanceDamageBonus += maximumBonus;
             distanceDamageMinimum = minimumDistance;
             distanceDamageMaximum = maximumDistance;
+        }
+
+        public void AddProjectileSpeedPercent(float amount)
+        {
+            projectileSpeedPercentBonus = Mathf.Max(0f, projectileSpeedPercentBonus + amount);
+        }
+
+        public void AddProjectileLifetimePercent(float amount)
+        {
+            projectileLifetimePercentBonus = Mathf.Max(0f, projectileLifetimePercentBonus + amount);
         }
 
         public void ConfigureProjectileSplit(

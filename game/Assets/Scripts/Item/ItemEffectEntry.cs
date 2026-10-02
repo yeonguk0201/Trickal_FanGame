@@ -136,6 +136,14 @@ namespace TrickalFanGame.Item
                     }
 
                     break;
+                case ItemEffectType.CurrentBossRoomSpeedPercent:
+                    if (secondaryMagnitude < 0f)
+                    {
+                        error = "CurrentBossRoomSpeedPercent requires a non-negative move speed bonus.";
+                        return false;
+                    }
+
+                    break;
                 case ItemEffectType.RegenerateSPHalvesOverTime:
                     if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds < intervalSeconds)
                     {
@@ -169,7 +177,8 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.SkillProjectileBonusAtSP &&
                    type != ItemEffectType.MultiShot &&
                    type != ItemEffectType.RestoreAllSPWithOvercharge &&
-                   type != ItemEffectType.RegenerateSPHalvesOverTime;
+                   type != ItemEffectType.RegenerateSPHalvesOverTime &&
+                   type != ItemEffectType.EscapeToFloorStartRoom;
         }
     }
 }

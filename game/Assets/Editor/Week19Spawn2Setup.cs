@@ -135,7 +135,7 @@ namespace TrickalFanGame.Editor
                     QuickFourShotChance,
                     6.5f,
                     Week19Tune1Setup.QuickRangedProjectileDamageTier,
-                    5f,
+                    Week21Range0Setup.QuickRangedProjectileLifetime,
                     QuickMaximumPredictionTime);
 
                 SpriteRenderer renderer = root.GetComponent<SpriteRenderer>();

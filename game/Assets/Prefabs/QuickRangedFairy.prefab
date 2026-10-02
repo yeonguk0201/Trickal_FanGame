@@ -126,6 +126,6 @@ MonoBehaviour:
   fourShotChance: 0.4
   projectileSpeed: 6.5
   projectileDamageTier: 0
-  projectileLifetime: 5
+  projectileLifetime: 1.4
   maximumPredictionTime: 0.25
   target: {fileID: 0}

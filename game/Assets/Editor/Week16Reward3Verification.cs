@@ -51,8 +51,8 @@ namespace TrickalFanGame.Editor
                        .Distinct(StringComparer.Ordinal).Count() == assembler.SelectionRewardPool.Count,
                 "Reward-3 selection pool must contain only unique active valid Items.");
             Assert(assembler.SelectionRewardPool.Any(definition => definition.Kind == ItemKind.Artifact) &&
-                   assembler.SelectionRewardPool.Any(definition => definition.Kind == ItemKind.Spell),
-                "Reward-3 must integrate Artifact and Spell definitions in one pool.");
+                   assembler.SelectionRewardPool.All(definition => definition.Kind != ItemKind.Spell),
+                "Reward-3 must hold Artifacts and no retired legacy Spell in one pool (Contract-0 §3).");
             string[] roomPrefabPaths = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Rooms/Prefabs" })
                 .Select(AssetDatabase.GUIDToAssetPath).ToArray();
             Assert(roomPrefabPaths.Length > 0 && roomPrefabPaths.All(path =>

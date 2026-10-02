@@ -241,7 +241,7 @@ MonoBehaviour:
   recoveryDuration: 0.65
   projectileSpeed: 7
   projectileDamageTier: 2
-  projectileLifetime: 5
+  projectileLifetime: 1.7
   target: {fileID: 0}
 --- !u!114 &4591455748272535553
 MonoBehaviour:

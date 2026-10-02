@@ -16,11 +16,14 @@ namespace TrickalFanGame.Frontend
                 return BuildLegacy(definition.EffectType, definition.EffectValue);
             }
 
-            string first = BuildEffect(effects[0]);
-            if (effects.Count == 1) return first;
+            List<string> parts = new();
+            foreach (ItemEffectEntry effect in effects)
+            {
+                string part = BuildEffect(effect);
+                if (!string.IsNullOrEmpty(part)) parts.Add(part);
+            }
 
-            string second = BuildEffect(effects[1]);
-            return string.IsNullOrEmpty(second) ? first : first + " · " + second;
+            return string.Join(" · ", parts);
         }
 
         private static string BuildLegacy(ItemEffectType type, float value)
@@ -88,6 +91,12 @@ namespace TrickalFanGame.Frontend
                     $"{Number(effect.DurationSeconds)}초간 {Number(effect.IntervalSeconds)}초마다 SP {SPHalves(effect.IntegerAmount)} 회복",
                 ItemEffectType.CurrentRoomBasicAttackDamagePercent =>
                     $"사용한 전투방에서 기본 공격 피해 +{Percent(effect.Magnitude)} (방을 떠나면 해제)",
+                ItemEffectType.CurrentBossRoomSpeedPercent =>
+                    $"사용한 보스방에서 공격속도 +{Percent(effect.Magnitude)}·이동속도 +{Percent(effect.SecondaryMagnitude)} (방을 떠나면 해제)",
+                ItemEffectType.ProjectileSpeedPercent => $"탄속 +{Percent(effect.Magnitude)} (사거리 증가)",
+                ItemEffectType.ProjectileLifetimePercent => $"사거리 +{Percent(effect.Magnitude)}",
+                ItemEffectType.EscapeToFloorStartRoom =>
+                    "전투 중 현재 층 시작방으로 탈출 (탈출한 방은 다시 들어가면 처음부터 시작)",
                 _ => effect.EffectType.ToString(),
             };
         }

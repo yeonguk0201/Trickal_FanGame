@@ -112,7 +112,7 @@ export const ITEM_CATALOG = [
     id: 'item-15',
     name: '장난감 망원경',
     description:
-      '공격력이 15% 증가하고 2~6m 거리에서 추가 피해가 최대 40% 증가합니다.',
+      '공격력이 15% 증가하고 2~6m 거리에서 추가 피해가 최대 40% 증가하며 사거리가 30% 증가합니다.',
     rarity: 'EPIC',
     isActive: true,
     maxStacks: 1,
@@ -124,6 +124,7 @@ export const ITEM_CATALOG = [
         minimumDistance: 2,
         maximumDistance: 6,
       },
+      { type: 'ProjectileLifetimePercent', magnitude: 0.3 },
     ],
   },
   {
@@ -271,6 +272,32 @@ export const ITEM_CATALOG = [
     isActive: true,
     maxStacks: 1,
     effects: [{ type: 'CurrentRoomBasicAttackDamagePercent', magnitude: 0.1 }],
+  },
+  {
+    id: 'single-spell-afterimage',
+    name: '그건 내 잔상',
+    description:
+      '전투 중인 방에서 사용하면 현재 층 시작방으로 탈출합니다. 탈출한 방은 다시 들어가면 처음부터 전투가 시작되며, 부순 장애물과 바닥의 보상은 그대로 남습니다. 시작방이나 전투 중이 아닌 방에서는 사용할 수 없습니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'EscapeToFloorStartRoom' }],
+  },
+  {
+    id: 'single-spell-final-sprint',
+    name: '막판 스퍼트',
+    description:
+      '아직 클리어하지 않은 보스방에서 사용하면 그 방에 있는 동안 공격속도가 30%, 이동속도가 5% 증가합니다. 방을 떠나면 해제되며, 보스방 밖이나 클리어한 보스방에서는 사용할 수 없습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'CurrentBossRoomSpeedPercent',
+        magnitude: 0.3,
+        secondaryMagnitude: 0.05,
+      },
+    ],
   },
   {
     id: 'item-06',

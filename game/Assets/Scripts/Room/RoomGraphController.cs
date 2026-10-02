@@ -23,6 +23,7 @@ namespace TrickalFanGame.Room
         private float returnBlockedUntil;
 
         public RoomNode CurrentNode { get; private set; }
+        public RoomNode StartingNode => startingNode;
         public IReadOnlyList<RoomNode> Nodes => nodes;
         public RunProgress Progress => runProgress;
         public PlayerMovement Player => player;
@@ -87,19 +88,27 @@ namespace TrickalFanGame.Room
         public bool TryTeleport(RoomNode source, RoomNode destination, Vector2 destinationPosition,
             PlayerMovement transitioningPlayer)
         {
-            if (destination == null || source == destination || Array.IndexOf(nodes, destination) < 0) return false;
+            if (!CanTeleport(source, destination, transitioningPlayer)) return false;
             if (!TryMoveBetweenRooms(source, destination, destinationPosition, transitioningPlayer)) return false;
             returnBlockedDestination = null;
             return true;
         }
 
+        // Reports whether TryTeleport would pass its transition guards, so a caller can check before spending an item.
+        public bool CanTeleport(RoomNode source, RoomNode destination, PlayerMovement transitioningPlayer) =>
+            destination != null && source != destination && Array.IndexOf(nodes, destination) >= 0 &&
+            CanMoveBetweenRooms(source, destination, transitioningPlayer);
+
+        private bool CanMoveBetweenRooms(RoomNode source, RoomNode destination, PlayerMovement transitioningPlayer) =>
+            enabled && source != null && destination != null && transitioningPlayer != null &&
+            source == CurrentNode && runProgress?.IsRewardSelectionPending != true &&
+            transitioningPlayer.GetComponent<PlayerActionState>()?.CanTransition != false &&
+            Time.unscaledTime >= nextTransitionTime;
+
         private bool TryMoveBetweenRooms(RoomNode source, RoomNode destination, Vector2 destinationPosition,
             PlayerMovement transitioningPlayer)
         {
-            if (!enabled || source == null || destination == null || transitioningPlayer == null ||
-                source != CurrentNode || runProgress?.IsRewardSelectionPending == true ||
-                transitioningPlayer.GetComponent<PlayerActionState>()?.CanTransition == false ||
-                Time.unscaledTime < nextTransitionTime)
+            if (!CanMoveBetweenRooms(source, destination, transitioningPlayer))
             {
                 return false;
             }

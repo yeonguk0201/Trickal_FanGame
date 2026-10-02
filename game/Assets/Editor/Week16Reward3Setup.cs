@@ -32,10 +32,11 @@ namespace TrickalFanGame.Editor
             if (pool.Length < ArtifactRewardSelector.MaximumCandidateCount ||
                 pool.Select(definition => definition.ItemId).Distinct(StringComparer.Ordinal).Count() != pool.Length ||
                 !pool.Any(definition => definition.Kind == ItemKind.Artifact) ||
-                !pool.Any(definition => definition.Kind == ItemKind.Spell))
+                pool.Any(definition => definition.Kind == ItemKind.Spell))
             {
+                // Spell-3 retired the last legacy spell, so the pool now holds Artifacts only (Contract-0 §3).
                 throw new InvalidOperationException(
-                    "Reward-3 requires at least three unique active Items containing both Artifact and Spell kinds.");
+                    "Reward-3 requires at least three unique active Artifacts and no legacy Spell.");
             }
 
             Undo.RecordObject(assembler, "Configure Reward-3 Room Integration");

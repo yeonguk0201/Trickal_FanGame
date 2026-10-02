@@ -650,6 +650,61 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
   방을 나가면 표시가 사라지고 같은 방에 다시 들어가도 돌아오지 않아야 한다. 보물방 선택 보상·상점 아이템 상품에
   레거시 저놈 잡아라가 더 이상 나오지 않아야 한다.
 
+- Spell-2 그건 내 잔상 일회용 전환: 메뉴 `Trickal Fan Game > Week 21 > Setup Spell-2 Afterimage`가
+  `Assets/Items/single-spell-afterimage.asset`을 GUID를 보존하며 멱등 구성하고, Game Scene 플레이어의
+  `PlayerSingleUseEffects.roomGraph`를 `RoomGraphController`로 연결하며, 선택 보상 풀(상점 아이템 상품 공유)에서
+  레거시 `spell-afterimage`를 뺀다. 레거시 에셋·ID·Backend 카탈로그는 그대로 활성이다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 21 > Verify Spell-2 Afterimage`, 배치는 Unity `-batchmode -nographics
+  -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week21Spell2Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. 실제 Game Scene 층을 고정 seed로 조립해 Setup 2회 GUID, 효과 타입 31 추가와 기존 번호 보존,
+  에셋·설명 계약, 레거시 계약 불변과 풀 제외, 씬 연결, 시작방·전투 시작 전·클리어한 방·일시정지·방 이동 차단 시
+  사용 거부·미소비, 2웨이브 전투방의 2웨이브 도중 탈출 시 시작방 이동·남은 적 제거(처치 수 불변)·미클리어·웨이브
+  0·문 열림·클리어 보상 미지급, 부순 장애물·바닥 픽업 유지, 시작방 재사용 거부, 재진입 시 같은 1웨이브 재시작과
+  실제 클리어 1회 보상, 보스방 탈출 후 같은 보스 최대 HP 재시작을 검사한다. 관련 회귀를 함께 돌리려면
+  `VerifyWithRegressionsBatch`(Encounter-4·Special-3·Spell-1 포함)를 사용한다. 2026-10-02 두 배치 모두 통과·종료
+  코드 0을 확인했고 Slot-0·Spell-0·Reward-3 회귀(`Verify`)도 통과했다. `Week14Encounter3Verification.Verify`는 이후
+  Encounter 목록 변경으로 이번 변경과 무관하게 실패한다(`Encounter-3 catalog or content version is not configured`).
+  수동 확인: Game Scene Play → `F1` 패널 `Drop 그건 내 잔상`으로 픽업을 떨어뜨려 줍는다. 시작방과 적이 나오기 전
+  방에서는 Shift를 눌러도 슬롯에 남아야 한다. 전투 중인 방에서 사용하면 시작방으로 이동하고 미니맵에서 그 방이
+  미클리어로 남아야 하며, 다시 들어가면 문이 잠기고 첫 웨이브부터 시작해야 한다. 그 방에서 부순 장애물과 떨어진
+  픽업은 그대로여야 한다. 보스방에서 보스 HP를 깎은 뒤 탈출하고 다시 들어가면 보스 HP가 가득 차 있어야 한다.
+
+- Spell-3 막판 스퍼트 일회용 전환: 메뉴 `Trickal Fan Game > Week 21 > Setup Spell-3 Final Sprint`가
+  `Assets/Items/single-spell-final-sprint.asset`을 GUID를 보존하며 멱등 구성하고, 선택 보상 풀(상점 아이템 상품 공유)에서
+  마지막 레거시 스펠 `spell-final-sprint`를 뺀다. 이제 풀은 아티팩트만 담으므로 `Week16Reward3Setup`·검증은 레거시 스펠이
+  없어야 통과한다. 레거시 에셋·ID·Backend 카탈로그는 그대로 활성이다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 21 > Verify Spell-3 Final Sprint`, 배치는 Unity `-batchmode -nographics
+  -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week21Spell3Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 GUID, 효과 타입 32 추가와 레거시 22·23 보존, 에셋·설명·값 검증, 레거시 계약 불변,
+  은퇴 목록 3종과 아티팩트 전용 풀, 시작방·전투방·보물방·클리어한 보스방 사용 거부·미소비, 일시정지 거부, 미클리어
+  보스방 사용 시 공속 ×1.3·이속 ×1.05(피해 ×1), 같은 방 재사용 누적, 저놈 잡아라와 동시 적용, 보스 처치 후 방 안 유지,
+  방·층 이탈 해제와 재방문 미발동, 레거시 스펠과 합산(공속 ×1.6), Run 종료·사망 해제, 인스턴스별 획득 기록을 검사한다.
+  관련 회귀는 `VerifyWithRegressionsBatch`(Spell-1·Spell-2·Week16 Spell-1·Reward-3 포함)다. 2026-10-02 두 배치 모두
+  통과·종료 코드 0을 확인했고 `Week16Reward3Verification.SetupAndVerifyBatch`, Special-4 상점, 개발 패널, Slot-0, Spell-0
+  회귀도 통과했다. Special-4 검증기는 편집 모드에서 플레이어 인벤토리를 깨우지 않아 아티팩트 상품 구매 시 실패했으므로
+  구매 전에 `PlayerInventory.Awake`를 호출하도록 고쳤다(이전에는 같은 seed의 첫 상품이 레거시 스펠이라 드러나지 않았다).
+  수동 확인: Game Scene Play → `F1` 패널 `Drop 막판 스퍼트`로 픽업을 떨어뜨려 줍는다. 시작방·일반 전투방에서 Shift를
+  누르면 슬롯에 남아야 하고, 보스방에서 사용하면 패널에 `Room ASPD +30% MS +5%`가 표시되며 공격·이동이 빨라져야 한다.
+  보스방을 나가면 표시가 사라져야 한다. 보물방 선택 보상·상점 아이템 상품에 스펠이 더 이상 나오지 않아야 한다.
+
+- Range-0 투사체 사거리(사거리 = 체공 시간 × 탄속): 메뉴 `Trickal Fan Game > Week 21 > Setup Range-0 Projectile Lifetimes`가
+  원거리 적 Prefab 5종의 `projectileLifetime`만 멱등하게 맞춘다(원거리형 1.8초·빠른 원거리형 1.4초·저격형 1.3초·크레용 궁수
+  1.7초·마법사 1.4초). 이전 Setup(Week7 원거리형·밸런스, Enemy-4, Spawn-2)도 같은 상수를 써서 다시 실행해도 값이 되돌아가지
+  않는다. 플레이어 체공 시간은 `PlayerProjectileAttack.baseProjectileLifetime` 기본값 2/3초(사거리 약 5.3)다(Game Scene에서 덮어쓰지 않음).
+  자동 검증 메뉴는 `Trickal Fan Game > Week 21 > Verify Range-0 Projectile Range`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week21Range0Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  Setup 2회 GUID, 효과 타입 33·34 추가와 32 보존, 효과 검증·설명, 탄속 효과 미사용과 체공 시간 효과는 장난감 망원경만 사용
+  (+30%, 세 효과 모두 설명에 표시, 획득 시 사거리 약 6.9), 적 5종 수명과 사거리(방 너비 16 미만),
+  플레이어 기본 사거리 8과 탄속·체공 시간 가산 스택, 체공 시간 만료 시 즉시 소멸과 직렬화 수명 대체값, 적 투사체 만료를
+  검사한다. 2026-10-02 배치 통과(종료 코드 0)를 확인했고, 투사체 회귀 `PhaseGProjectileEffectsVerification`,
+  `Week7RangedEnemyVerification`, `Week7DamageContextVerification`, `Week15Enemy4Verification`, `Week19Spawn2Verification`의
+  `Verify`도 통과했다. 망원경 추가 후 Range-0 배치, `PhaseGArtifactContractVerification`·`PhaseGProjectileEffectsVerification`·
+  `Week13Hud3BVerification`의 `Verify`와 Backend 카탈로그 Jest도 통과했다. 아이템 설명은 이제 앞 2개가 아니라 모든 효과를 보여준다.
+  수동 확인: Game Scene Play → 빈 방에서 한 방향으로 공격하면 탄이 방 너비의 1/3쯤(약 5.3)에서 페이드 없이 사라져야 하고,
+  앞으로 이동하며 쏘면 조금 더, 물러나며 쏘면 조금 덜 날아가야 한다. 일반 원거리형 탄은 약 9, 저격형 탄은 약 14에서
+  사라져야 하며 보스 탄막은 이전처럼 벽까지 날아가야 한다. 장난감 망원경을 얻으면 기본 공격이 약 6.9까지 날아가야 하고,
+  획득 알림 설명 끝에 `사거리 +30%`가 보여야 한다.
+
 - 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
 - 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.
 - 개발 도구의 실행 실패가 게임 진행을 멈추는지 여부와 실패 종료 코드를 명확히 기록한다.

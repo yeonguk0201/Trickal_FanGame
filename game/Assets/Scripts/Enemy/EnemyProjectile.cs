@@ -91,8 +91,15 @@ namespace TrickalFanGame.Enemy
         {
             if (IsLaunched && currentTime >= expiresAt)
             {
-                StopAtBoundary();
+                Expire();
             }
+        }
+
+        // Range-0: travel distance = lifetime × speed per enemy. Reaching the end of the range is kept apart from
+        // hits so an end-of-range visual asset can attach here later. For now it disappears immediately.
+        private void Expire()
+        {
+            StopAtBoundary();
         }
 
         public bool TryHit(Collider2D other)

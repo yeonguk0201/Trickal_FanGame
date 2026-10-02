@@ -38,5 +38,16 @@ namespace TrickalFanGame.Item
         RegenerateSPHalvesOverTime = 29,
         // Magnitude = basic attack damage bonus in the room where the item is used (Spell-1). Leaving the room ends it.
         CurrentRoomBasicAttackDamagePercent = 30,
+        // Spell-2: moves the player from a room in combat to the current floor's start room. The escaped room drops
+        // its remaining enemies and restarts its Encounter on the next entry. No value fields are used.
+        EscapeToFloorStartRoom = 31,
+        // Spell-3: Magnitude = attack speed and SecondaryMagnitude = move speed bonus in the boss room where the item
+        // is used. Leaving the room ends both.
+        CurrentBossRoomSpeedPercent = 32,
+        // Range-0: basic attack travel distance = flight time × shot speed, so both effects lengthen the range.
+        // Magnitude = basic attack shot speed bonus. Opened as a contract; no item uses it yet.
+        ProjectileSpeedPercent = 33,
+        // Magnitude = basic attack flight time bonus (the telescope candidate). Opened as a contract; no item uses it yet.
+        ProjectileLifetimePercent = 34,
     }
 }

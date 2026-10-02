@@ -74,7 +74,8 @@ namespace TrickalFanGame.Editor
                 }
 
                 SetMaxHealth(contents.GetComponent<Health>(), 30);
-                ranged.Configure(1.5f, 8f, 3f, 6f, 1.5f, 5f, EnemyDamageTier.Heavy, 4f);
+                ranged.Configure(1.5f, 8f, 3f, 6f, 1.5f, 5f, EnemyDamageTier.Heavy,
+                    Week21Range0Setup.RangedProjectileLifetime);
                 SpriteRenderer renderer = contents.GetComponent<SpriteRenderer>();
                 if (renderer != null)
                 {

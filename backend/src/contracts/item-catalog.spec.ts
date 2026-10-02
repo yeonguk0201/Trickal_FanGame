@@ -24,6 +24,8 @@ describe('Item catalog', () => {
       'single-spell-aroma-therapy',
       'single-spell-meditation-time',
       'single-spell-catch-that-one',
+      'single-spell-afterimage',
+      'single-spell-final-sprint',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -45,8 +47,10 @@ describe('Item catalog', () => {
       'UNCOMMON',
       'UNCOMMON',
       'UNCOMMON',
+      'UNCOMMON',
+      'RARE',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(19);
+    expect(new Set(active.map((item) => item.id)).size).toBe(21);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -63,6 +67,9 @@ describe('Item catalog', () => {
       isActive: true,
       maxStacks: 1,
     });
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'item-15')?.effects[2],
+    ).toEqual({ type: 'ProjectileLifetimePercent', magnitude: 0.3 });
   });
 
   it('stores every required compound and conditional parameter explicitly', () => {
@@ -197,7 +204,58 @@ describe('Item catalog', () => {
           { type: 'CurrentRoomBasicAttackDamagePercent', magnitude: 0.1 },
         ],
       },
+      {
+        id: 'single-spell-afterimage',
+        name: '그건 내 잔상',
+        rarity: 'UNCOMMON',
+        isActive: true,
+        maxStacks: 1,
+        effects: [{ type: 'EscapeToFloorStartRoom' }],
+      },
+      {
+        id: 'single-spell-final-sprint',
+        name: '막판 스퍼트',
+        rarity: 'RARE',
+        isActive: true,
+        maxStacks: 1,
+        effects: [
+          {
+            type: 'CurrentBossRoomSpeedPercent',
+            magnitude: 0.3,
+            secondaryMagnitude: 0.05,
+          },
+        ],
+      },
     ]);
+  });
+
+  it('keeps the legacy spell-final-sprint active for past Run records', () => {
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'spell-final-sprint'),
+    ).toMatchObject({
+      name: '막판 스퍼트',
+      rarity: 'RARE',
+      isActive: true,
+      effects: [
+        { type: 'BossRoomAttackSpeedPercent', magnitude: 0.3 },
+        { type: 'BossRoomMoveSpeedPercent', magnitude: 0.05 },
+      ],
+    });
+  });
+
+  it('keeps the legacy spell-afterimage active for past Run records', () => {
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'spell-afterimage'),
+    ).toMatchObject({
+      name: '그건 내 잔상',
+      rarity: 'UNCOMMON',
+      isActive: true,
+      maxStacks: 3,
+      effects: [
+        { type: 'MoveSpeedPercent', magnitude: 0.1 },
+        { type: 'AttackSpeedPercent', magnitude: 0.05 },
+      ],
+    });
   });
 
   it('keeps the legacy spell-catch-that-one active for past Run records', () => {
