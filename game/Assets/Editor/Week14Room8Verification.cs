@@ -188,9 +188,12 @@ namespace TrickalFanGame.Editor
             Assert(state.CompletedWaveCount == 2 && state.IsCleared && state.HasGrantedClearReward,
                 "The final required-enemy wipe did not persist clear and reward state.");
             RoomClearRewardSpawner clearDrop = room.Controller.GetComponent<RoomClearRewardSpawner>();
+            // Chest-1: the clear reward is a seeded chest when the assembler has a chest content table.
             Assert(clearDrop != null && clearDrop.HasRolled &&
-                   (clearDrop.LastSpawnedReward != null) == clearDrop.DropTable.TryRoll(clearDrop.DropSeed, out _),
-                "The completed Encounter did not roll its one seeded clear drop.");
+                   (clearDrop.LastSpawnedReward != null) == (clearDrop.ChestTable != null
+                       ? clearDrop.ChestTable.TryRollChest(clearDrop.ChestSeed, out _)
+                       : clearDrop.DropTable.TryRoll(clearDrop.DropSeed, out _)),
+                "The completed Encounter did not roll its one seeded clear reward.");
 
             int otherFloor = generated.FloorNumber == 1 ? 2 : 1;
             Assert(assembler.TryLoadFloor(otherFloor, assembler.Graph.Player, out error), error);

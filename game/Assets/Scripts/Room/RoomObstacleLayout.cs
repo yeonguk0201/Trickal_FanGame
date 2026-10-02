@@ -161,6 +161,24 @@ namespace TrickalFanGame.Room
             return true;
         }
 
+        // Whether an actor-sized circle centered on a point can stand there and walk to it from origin, on the same
+        // grid TryValidate uses for doors and SpawnPoints.
+        public static Func<Vector2, bool> CreateReachability(Rect movementBounds, Vector2 origin,
+            IReadOnlyList<RoomObstacleFootprint> footprints)
+        {
+            IReadOnlyList<RoomObstacleFootprint> solid = footprints ?? Array.Empty<RoomObstacleFootprint>();
+            ReachabilityGrid grid = new(movementBounds, solid);
+            bool[] reached = grid.FloodFrom(origin);
+            Rect inner = Expand(movementBounds, -ActorRadius + Tolerance);
+            return point =>
+            {
+                if (!inner.Contains(point) || !grid.IsReachable(reached, point)) return false;
+                foreach (RoomObstacleFootprint footprint in solid)
+                    if (Distance(point, footprint.Bounds) < ActorRadius - Tolerance) return false;
+                return true;
+            };
+        }
+
         public static float SightCoverage(Vector2 origin, IReadOnlyList<Vector2> samples,
             IReadOnlyList<RoomObstacleFootprint> footprints)
         {

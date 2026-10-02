@@ -2112,6 +2112,7 @@ MonoBehaviour:
   roomPrefab: {fileID: 3035332181880803975, guid: 4c3637cd1a19e3f4883f17715d95367f, type: 3}
   encounterEnemyRoster: {fileID: 11400000, guid: dbd3fb86e3fb0264686c348e9060667b, type: 2}
   encounterClearDropTable: {fileID: 11400000, guid: eea23f72b6b54874cb7d18a125855309, type: 2}
+  chestContentTable: {fileID: 11400000, guid: 48012de1a8d9a0d409c734fa4cf5845c, type: 2}
   floorBossPrefabs:
   - {fileID: 421685952657128216, guid: f991af9e6d8bc4e4f869e052eded37e0, type: 3}
   - {fileID: 2406316834951311537, guid: 6bef911f342ead54b94de8fab8306eb9, type: 3}
@@ -53864,6 +53865,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 6672909068823224852, guid: 5f4d0be98be9bde468436f42ab847e2b, type: 3}
   spawnOffset: 0.65
   baseProjectileSpeed: 8
+  baseProjectileLifetime: 0.6666667
   inheritedVelocityFactor: 0.25
   attackCooldown: 0.35
   multiShotSpreadAngle: 12

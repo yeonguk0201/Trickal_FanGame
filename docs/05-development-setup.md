@@ -705,6 +705,49 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
   사라져야 하며 보스 탄막은 이전처럼 벽까지 날아가야 한다. 장난감 망원경을 얻으면 기본 공격이 약 6.9까지 날아가야 하고,
   획득 알림 설명 끝에 `사거리 +30%`가 보여야 한다.
 
+- Chest-0 상자 3종·개봉 상태: 메뉴 `Trickal Fan Game > Week 22 > Setup Chest-0 Chest Prefab`이
+  `Assets/Prefabs/TreasureChest.prefab`(Environment 레이어, 고체 `BoxCollider2D`와 full contacts Kinematic `Rigidbody2D`, `TreasureChest`, 0.8 크기 자리표시 스프라이트)을
+  GUID를 보존하며 멱등 구성한다. 종류(`ChestKind` Normal 0·Golden 1·Diamond 2)와 방 내부 ID는 배치할 때 인스턴스마다
+  정하고, 개봉·소멸 상태는 `RoomRunState`의 상자 기록에 남는다. 안전 위치는 `ChestPlacement.TryFindSafeLocalPosition`이
+  고른다. 아직 Game Scene이나 클리어 보상에는 연결하지 않는다(Chest-1).
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Chest-0 Chests`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week22Chest0Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 GUID, enum 값, Prefab 고체 충돌체·Kinematic 바디·레이어·크기와 Environment 레이어 충돌(플레이어·적·플레이어 탄·픽업·벽),
+  스크립트 시뮬레이션 1초 밀기(상자 약 1.2 vs 같은 조건 하트 약 4.25, 반대·옆 입력 미이동, 벽 앞 정지),
+  플레이어 위치 회피, 모든 Template에서 내용물 7개 낙하 지점 확보,
+  상자 기록의 멱등 등록·종류 고정·잘못된 ID 거부·1회 개봉·미개봉만 소멸, 일반상자 접촉 1회 개봉, 황금상자 열쇠 0개
+  미개봉·열쇠 1개만 소비, 폭탄의 일반·황금 미개봉, 다이아몬드 접촉 미개봉·사거리 밖 미개봉·겹친 폭발 1회 개봉·자원
+  미소비, 재구성 시 개봉 유지와 종류 불일치 거부, 소멸 상자 미복귀, Run 종료 후 미개봉, 모든 Room Template의 안전
+  배치(장애물·문 통로·진입점·다른 상자 회피, 도달 가능, 같은 결과 재현, 중앙 기둥 회피)와 실제 조립 방에서
+  Environment 충돌체 미중첩, 같은 층 이동 시 유지·실제 층 이동 시 미개봉 상자만 소멸을 검사한다. 관련 회귀는
+  `VerifyWithRegressionsBatch`(Room-8·Obstacle-1·Special-3·Spell-2 포함)다. 2026-10-03 두 배치 모두 통과·종료 코드 0을
+  확인했다. Room-8은 Special-3 뒤에 같은 프로세스에서 돌리면 남은 방 전환 쿨다운 때문에 경로 이동이 실패하므로
+  회귀 순서에서 먼저 실행한다(단독 실행은 통과).
+  수동 확인: 상자가 실제 Run에 나오는 Chest-1 이후 진행한다.
+
+- Chest-1 클리어 상자·내용물: 메뉴 `Trickal Fan Game > Week 22 > Setup Chest-1 Clear Chests`가
+  `Assets/Items/Drops/chest-content-table.asset`(상자 33%, 종류 75/20/5, 일반 1~3개 60/30/10·스펠 5%, 황금 2~4개,
+  다이아몬드 4~6개, 구 클리어 드롭과 같은 픽업·가중치, 구현된 일회용 스펠 전부, Chest-0 상자 Prefab, Slot-0 픽업 Prefab)을
+  GUID를 보존하며 멱등 구성하고 Game Scene `RoomGraphAssembler.chestContentTable`에 연결한다. 표가 있으면 전투방 클리어는
+  구 드롭 표(`room-clear-drop-table`, 비교용으로 유지)를 쓰지 않는다. 개발 패널 `F1` → `— Chest —`의 `Chest Normal`·
+  `Chest Golden`·`Chest Diamond`는 현재 방에 상자를 강제로 놓고 보조 Run으로 표시한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Chest-1 Clear Chests`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week22Chest1Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 GUID, 표 값과 구 드롭 가중치·픽업 일치, 스펠 목록(짱셈·레거시 제외), 잘못된 표 거부,
+  20만 seed 상자 33%·종류 75/20/5, 종류별 6만 seed 개수 분포·소모품 비율·스펠 확률·seed 재현, 구 드롭 대비 자원별 기대
+  지급량(로그에 표 출력, docs/21 Chest-1 비교표와 대조), 모든 층 전투방의 상자 전용 클리어 보상, 상자 없는 클리어의 1회
+  추첨, 상자 1개 배치·재클리어 무시·구 드롭 없음, 같은 층 재구성 시 미개봉 상자 복원, 개봉 시 seed 내용물 1회·상자 주변
+  배치, 개봉 후 재구성 시 내용물 미재지급, 층 이탈 시 미개봉 상자 소멸, 개발 상자 3종 ID·간격·개봉, 스펠 픽업 인스턴스 ID와
+  벗어난 뒤 획득을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Room-8·Resource-3·Chest-0·개발 패널 포함)다.
+  Room-8·Resource-3의 클리어 드롭 검사는 상자 모드를 따르도록 갱신했다(Resource-3은 표·seed·스포너 단위 검사를 그대로
+  두고 조립기 통합만 Chest-1 검사로 넘긴다). 2026-10-03 두 배치와 Chest-0 회귀 배치 모두 통과·종료 코드 0을 확인했다.
+  Setup의 Game Scene 저장 때 Range-0에서 추가된 `baseProjectileLifetime` 기본값(2/3초)이 함께 직렬화되었다(값 변화 없음).
+  수동 확인: Game Scene Play → 전투방 몇 개를 클리어하면 일부 방(약 1/3) 중앙 근처에 상자가 나와야 한다. 또는 `F1` 패널
+  `Chest Normal`/`Chest Golden`/`Chest Diamond`로 현재 방에 상자를 놓는다. 일반상자는 닿으면 열리며 주변에 픽업 1~3개가
+  떨어지고, 황금상자는 열쇠 없이 닿으면 그대로·열쇠가 있으면 1개 줄며 2~4개, 다이아몬드 상자는 닿아도 그대로이고 폭탄을
+  옆에서 터뜨리면 4~6개가 떨어져야 한다. 연 상자는 어두워지고 다시 닿아도 아무것도 나오지 않아야 하며, 방을 나갔다
+  들어와도 그대로여야 한다. 다음 층으로 가면 열지 않은 상자는 사라진다. 패널에 `Assisted run`이 표시되어야 한다.
+
 - 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
 - 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.
 - 개발 도구의 실행 실패가 게임 진행을 멈추는지 여부와 실패 종료 코드를 명확히 기록한다.

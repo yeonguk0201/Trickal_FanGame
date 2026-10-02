@@ -202,6 +202,14 @@ namespace TrickalFanGame.Editor
         // cleared room keeps its single roll across a floor unload/reload.
         private static void ValidateAssemblerIntegration(RoomGraphAssembler assembler, ResourceDropTable table)
         {
+            // Chest-1 replaced the assembler's clear drop with chests and Week22Chest1Verification owns that path.
+            // The table, seeded roll and spawner checks above still cover the legacy single-pickup drop mode.
+            if (assembler.ChestContentTable != null)
+            {
+                Week22Chest1Verification.ValidateEncounterRoomsUseChests(assembler);
+                return;
+            }
+
             Health playerHealth = assembler.Graph != null && assembler.Graph.Player != null
                 ? assembler.Graph.Player.GetComponent<Health>()
                 : null;

@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39de8d18221a0a543945aa93eb89170a, type: 3}
+  m_Name: chest-content-table
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ChestContentTable
+  chestChance: 0.33
+  kinds:
+  - kind: 0
+    weight: 75
+    minimumCount: 1
+    countWeights: 3c0000001e0000000a000000
+    spellChance: 0.05
+  - kind: 1
+    weight: 20
+    minimumCount: 2
+    countWeights: 010000000100000001000000
+    spellChance: 0
+  - kind: 2
+    weight: 5
+    minimumCount: 4
+    countWeights: 010000000100000001000000
+    spellChance: 0
+  consumables:
+  - dropId: heart
+    prefab: {fileID: 303849290133622444, guid: fe735d51964ab6243baf43f8c7221f9a, type: 3}
+    weight: 30
+  - dropId: sp
+    prefab: {fileID: 2738873779375130701, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
+    weight: 30
+  - dropId: gold
+    prefab: {fileID: 1421089735375027616, guid: 615b40b3d6223ad4a9363c3e586e6072, type: 3}
+    weight: 20
+  - dropId: key
+    prefab: {fileID: 5401781955347040268, guid: 0488521fa1d47a84d95253f53e50f9d7, type: 3}
+    weight: 12
+  - dropId: bomb
+    prefab: {fileID: 55609960391072830, guid: 523aa0bd7b8a129418565809a9f40126, type: 3}
+    weight: 8
+  spells:
+  - {fileID: 11400000, guid: 27abb698b3a5c524fb24c4959e1f9ce8, type: 2}
+  - {fileID: 11400000, guid: 357cb4cc394bacd4dbe9310b1974f57d, type: 2}
+  - {fileID: 11400000, guid: 76fcd715ffd998d4088df117e7dbfe35, type: 2}
+  - {fileID: 11400000, guid: da4ddba585fe8c542a00cc75ee71fa89, type: 2}
+  - {fileID: 11400000, guid: 374ba4fdc2ee0ed43a98a2d7f3730399, type: 2}
+  chestPrefab: {fileID: 2912694241956306997, guid: 50f7c33047ea94743a682f09811b116d, type: 3}
+  spellPickupPrefab: {fileID: 1815312715874959976, guid: c1702e67b68926b479f3c3350b823624, type: 3}

@@ -106,6 +106,7 @@ namespace TrickalFanGame.Resource
 
             DestructibleObstacle.DestroyByBombInCircle(center, explosionRadius);
             SecretPassageWall.OpenByBombInCircle(center, explosionRadius);
+            TreasureChest.OpenByBombInCircle(center, explosionRadius);
             if (visual != null)
             {
                 visual.color = explosionColor;

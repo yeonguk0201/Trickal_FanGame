@@ -19,6 +19,7 @@ namespace TrickalFanGame.Room
         [SerializeField] private RoomPrefab roomPrefab;
         [SerializeField] private EncounterEnemyRoster encounterEnemyRoster;
         [SerializeField] private ResourceDropTable encounterClearDropTable;
+        [SerializeField] private ChestContentTable chestContentTable;
         [SerializeField] private GameObject[] floorBossPrefabs = Array.Empty<GameObject>();
         [SerializeField] private ItemRewardSelectionSession rewardSelectionSession;
         [SerializeField] private ItemDefinition[] selectionRewardPool = Array.Empty<ItemDefinition>();
@@ -39,6 +40,7 @@ namespace TrickalFanGame.Room
         public RoomPrefab ConfiguredRoomPrefab => roomPrefab;
         public EncounterEnemyRoster EnemyRoster => encounterEnemyRoster;
         public ResourceDropTable EncounterClearDropTable => encounterClearDropTable;
+        public ChestContentTable ChestContentTable => chestContentTable;
         public IReadOnlyList<GameObject> FloorBossPrefabs => floorBossPrefabs;
         public GeneratedFloorGraph GeneratedGraph => generatedGraph;
         public GameObject CurrentFloorRoot => currentFloorRoot;
@@ -72,6 +74,12 @@ namespace TrickalFanGame.Room
         public void ConfigureEncounterClearDrop(ResourceDropTable configuredTable)
         {
             encounterClearDropTable = configuredTable;
+        }
+
+        // Chest-1: combat room clears roll a chest instead of the old single-pickup drop table.
+        public void ConfigureChestContents(ChestContentTable configuredTable)
+        {
+            chestContentTable = configuredTable;
         }
 
         public void ConfigureFloorBossPrefabs(GameObject[] configuredPrefabs)
@@ -565,7 +573,22 @@ namespace TrickalFanGame.Room
 
                 controller.ConfigurePreplacedEnemies(Array.Empty<Health>());
                 controller.ConfigureEncounterWaves(waves);
-                if (encounterClearDropTable != null)
+                if (chestContentTable != null)
+                {
+                    if (!chestContentTable.TryValidate(out error))
+                    { error = $"Room {node.RoomId} requires a valid chest content table. {error}"; return false; }
+                    if (node.Template == null || runProgress == null)
+                    { error = $"Room {node.RoomId} needs its Template and Run progress to place a chest."; return false; }
+                    RoomClearRewardSpawner rewardSpawner = controller.GetComponent<RoomClearRewardSpawner>();
+                    if (rewardSpawner == null)
+                        rewardSpawner = controller.gameObject.AddComponent<RoomClearRewardSpawner>();
+                    rewardSpawner.ConfigureChest(chestContentTable,
+                        new RoomChestSite(instance, node.Template, state, runProgress,
+                            graph != null && graph.Player != null ? graph.Player.transform : null),
+                        RoomClearRewardSpawner.DeriveChestSeed(node.ContentSeed));
+                    controller.ConfigureClearReward(rewardSpawner);
+                }
+                else if (encounterClearDropTable != null)
                 {
                     RoomClearRewardSpawner rewardSpawner = controller.GetComponent<RoomClearRewardSpawner>();
                     if (rewardSpawner == null)

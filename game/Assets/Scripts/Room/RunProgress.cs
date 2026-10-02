@@ -215,14 +215,24 @@ namespace TrickalFanGame.Room
                 return;
             }
 
+            int previousFloor = CurrentFloor;
             CurrentFloor = Mathf.Max(1, floorNumber);
             CurrentRoom = Mathf.Max(1, roomNumber);
+            if (previousFloor > 0 && previousFloor != CurrentFloor) DiscardClosedChests(previousFloor);
             string roomId = FloorGenerator.BuildRoomId(CurrentFloor, CurrentRoom);
             RoomRunState state = GetRoomState(roomId);
             state?.MarkVisited();
             OpenSecretPassagesOnEntry(roomId, state);
             RoomChanged?.Invoke(CurrentFloor, CurrentRoom);
             Debug.Log($"Run progress: Floor {CurrentFloor}, Room {CurrentRoom}.", this);
+        }
+
+        // Chest-0: unopened chests vanish with the floor, like floor pickups, and are never granted again.
+        private void DiscardClosedChests(int floorNumber)
+        {
+            GeneratedFloor floor = GeneratedGraph?.FindFloor(floorNumber);
+            if (floor == null) return;
+            foreach (GeneratedRoomNode node in floor.Nodes) GetRoomState(node.RoomId)?.DiscardClosedChests();
         }
 
         private void OpenSecretPassagesOnEntry(string roomId, RoomRunState state)

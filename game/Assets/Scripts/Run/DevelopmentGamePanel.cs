@@ -81,6 +81,7 @@ namespace TrickalFanGame.Run
             DrawPlayerSection(assembler);
             DrawSpellSlotSection(assembler);
             DrawResourceSection(progress);
+            DrawChestSection(assembler);
             DrawRoomSection(assembler);
             DrawSecretSection(assembler);
             DrawShopSection(assembler);
@@ -201,6 +202,48 @@ namespace TrickalFanGame.Run
             if (AssistedButton("+10 Key")) progress.TryAddResource(RunResourceType.Key, 10);
             if (AssistedButton("+10 Gold")) progress.TryAddResource(RunResourceType.Gold, 10);
             GUILayout.EndHorizontal();
+        }
+
+        // Chest-1: forces a chest of each kind into the current room through the normal chest path (assisted Run).
+        private void DrawChestSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Chest —");
+            if (assembler.ChestContentTable == null)
+            {
+                GUILayout.Label("No chest content table is configured.");
+                return;
+            }
+
+            GUILayout.BeginHorizontal();
+            foreach (ChestKind kind in new[] { ChestKind.Normal, ChestKind.Golden, ChestKind.Diamond })
+            {
+                if (!AssistedButton($"Chest {kind}")) continue;
+                status = TrySpawnChest(assembler, kind, out string message) ? message : $"Chest failed: {message}";
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        private static bool TrySpawnChest(RoomGraphAssembler assembler, ChestKind kind, out string message)
+        {
+            RoomPrefab room = CurrentRoom(assembler);
+            GeneratedRoomNode node = room != null
+                ? assembler.GeneratedGraph?.FindFloor(room.Node.FloorNumber)?.Nodes
+                    .FirstOrDefault(candidate => candidate.RoomId == room.Node.RoomId)
+                : null;
+            RoomRunState state = room != null ? assembler.Progress.GetRoomState(room.Node.RoomId) : null;
+            if (node?.Template == null || state == null)
+            {
+                message = "The current room has no generated Template or Run state.";
+                return false;
+            }
+
+            TreasureChest chest = RoomChestSpawner.SpawnDevelopmentChest(assembler.ChestContentTable,
+                new RoomChestSite(room, node.Template, state, assembler.Progress,
+                    assembler.Graph.Player != null ? assembler.Graph.Player.transform : null), node.ContentSeed, kind,
+                out string error);
+            message = chest != null ? $"Placed {kind} chest {chest.ChestId}." : error;
+            return chest != null;
         }
 
         private void DrawRoomSection(RoomGraphAssembler assembler)
