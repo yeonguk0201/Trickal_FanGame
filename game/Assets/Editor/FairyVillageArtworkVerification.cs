@@ -18,6 +18,7 @@ namespace TrickalFanGame.Editor
         public static void Verify()
         {
             VerifyForegroundTransparency();
+            VerifySpecialDoorMasks();
             VerifyInnerBoundaryKeyContact();
             string[] paths = FairyVillageArtworkSetup.PrefabPaths();
             float? referenceClearance = null;
@@ -129,14 +130,81 @@ namespace TrickalFanGame.Editor
                             "Key lock must keep both the artwork and barrier active.");
                         Assert(inner.enabled, "Key-locked door must fill its central gap.");
                         slot.Blocker.SetKeyLocked(false);
+                        slot.Blocker.ConfigureVisualKind(DoorVisualKind.Normal);
                         binding.Refresh();
                         Assert(visual.sprite == open, "Unlock must restore open artwork.");
                         Assert(!inner.enabled, "Unlock must release the inner boundary immediately.");
+                        Vector2 registeredSize = visual.bounds.size;
+                        foreach (string family in FairyVillageArtworkSetup.DoorFamilies)
+                        {
+                            slot.Blocker.ConfigureVisualKind(FairyVillageArtworkSetup.FamilyKind(family));
+                            binding.Refresh();
+                            string prefix = slot.Direction.ToString().ToLowerInvariant() + "-" + family;
+                            Assert(visual.sprite.name.StartsWith(prefix) && visual.sprite.name.EndsWith("open"),
+                                "Every special doorway needs its own direction and open art: " + prefix);
+                            Assert(((Vector2)visual.bounds.size - registeredSize).sqrMagnitude < 0.000001f,
+                                "Generated canvas size differences must not move the doorway joins.");
+                            Assert(AssetDatabase.GetAssetPath(visual.sprite) == FairyVillageArtworkSetup.FamilyPath(family, "open",
+                                FairyVillageArtworkSetup.FamilyVersion(family, slot.Direction)),
+                                "Only approved directions should switch to revised special door artwork.");
+                            if (front != null) Assert(front.sprite == visual.sprite &&
+                                AssetDatabase.GetAssetPath(front.GetComponent<ConnectedRoomPatch>().ForegroundMask) ==
+                                    FairyVillageArtworkSetup.FamilyMaskPath(family, "open"),
+                                "Special lower door must use its own silhouette and transparent aperture.");
+                            slot.Blocker.SetKeyLocked(true);
+                            binding.Refresh();
+                            Assert(inner.enabled && (family == "secret" ? visual.sprite.name.EndsWith("sealed") :
+                                visual.sprite.name.StartsWith(prefix) && !visual.sprite.name.EndsWith("open")),
+                                "Locked special door must close its gap and preserve its room identity.");
+                            if (family != "secret") Assert(AssetDatabase.GetAssetPath(visual.sprite) ==
+                                FairyVillageArtworkSetup.FamilyPath(family, "closed", FairyVillageArtworkSetup.FamilyVersion(family, slot.Direction)),
+                                "Closed special door must use the same revision as its open frame.");
+                            if (front != null) Assert(front.sprite == visual.sprite &&
+                                front.GetComponent<ConnectedRoomPatch>().ForegroundMask != null,
+                                "Special closed lower door must retain a foreground mask.");
+                            slot.Blocker.SetKeyLocked(false);
+                            binding.Refresh();
+                            Assert(!inner.enabled && visual.sprite.name.StartsWith(prefix) && visual.sprite.name.EndsWith("open"),
+                                "Unlocking must preserve the special doorway's identity.");
+                        }
                     }
                 }
                 finally { UnityEngine.Object.DestroyImmediate(instance); }
             }
             Debug.Log($"Fairy Village artwork verification passed: {paths.Length} templates; floor, walls, door states and portal barriers.");
+        }
+
+        private static void VerifySpecialDoorMasks()
+        {
+            foreach (string family in FairyVillageArtworkSetup.DoorFamilies)
+            foreach (string state in family == "secret" ? new[] { "open" } : new[] { "open", "closed" })
+            {
+                Texture2D mask = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                try
+                {
+                    Assert(mask.LoadImage(System.IO.File.ReadAllBytes(FairyVillageArtworkSetup.FamilyMaskPath(family, state))),
+                        "Missing special doorway mask.");
+                    Assert(Mathf.Abs(mask.width - 1672) <= 1 && mask.height == 941 && mask.GetPixel(836, 470).a < 0.01f,
+                        "Special doorway masks must preserve registration and remove the floor.");
+                    Assert(state == "open" ? mask.GetPixel(836, 61).a < 0.05f : mask.GetPixel(836, 61).a > 0.9f,
+                        "Open passages must be transparent; closed panels must remain opaque: " + family);
+                    if (family == "secret") Assert(mask.GetPixel(836, 941 - 770 - 1).a > 0.8f,
+                        "The lower secret opening must retain its connected upper hedge cap in the foreground.");
+                }
+                finally { UnityEngine.Object.DestroyImmediate(mask); }
+            }
+            foreach (GeneratedRoomRole role in new[] { GeneratedRoomRole.Shop, GeneratedRoomRole.Treasure,
+                GeneratedRoomRole.Boss, GeneratedRoomRole.Secret })
+            {
+                GeneratedRoomNode normal = new GeneratedRoomNode("art-normal", 1, 1, GeneratedRoomRole.Intermediate, null);
+                GeneratedRoomNode special = new GeneratedRoomNode("art-special", 1, 2, role, null);
+                DoorVisualKind expected = role switch { GeneratedRoomRole.Shop => DoorVisualKind.Shop,
+                    GeneratedRoomRole.Treasure => DoorVisualKind.KeyLockedTreasure,
+                    GeneratedRoomRole.Boss => DoorVisualKind.Boss, _ => DoorVisualKind.SecretPassage };
+                Assert(RoomGraphAssembler.ConnectionVisualKind(normal, special) == expected &&
+                    RoomGraphAssembler.ConnectionVisualKind(special, normal) == expected,
+                    "Special door identity must persist in both directions without depending on a key lock.");
+            }
         }
 
         private static void VerifyForegroundTransparency()
@@ -249,7 +317,8 @@ namespace TrickalFanGame.Editor
             Debug.Log("Connected Fairy Village previews saved: Basic, door states, Wide, Tall, Large.");
         }
 
-        private static void RenderRoom(string path, string filename, bool showStates, bool depthPreview = false, int doorDepth = -1)
+        private static void RenderRoom(string path, string filename, bool showStates, bool depthPreview = false, int doorDepth = -1,
+            DoorVisualKind? family = null, bool mixedDoors = false, RoomDoorDirection? focus = null)
         {
             UnityEditor.SceneManagement.EditorSceneManager.NewScene(
                 UnityEditor.SceneManagement.NewSceneSetup.EmptyScene);
@@ -268,6 +337,11 @@ namespace TrickalFanGame.Editor
                     ? DoorVisualKind.KeyLockedTreasure : DoorVisualKind.Normal);
                 slot.Blocker.SetKeyLocked(showStates && slot.Direction == RoomDoorDirection.Right ||
                     doorDepth == 2 && slot.Direction == RoomDoorDirection.Down);
+                if (family.HasValue) slot.Blocker.ConfigureVisualKind(family.Value);
+                if (focus.HasValue) slot.Blocker.SetLocked(doorDepth > 0);
+                if (mixedDoors) slot.Blocker.ConfigureVisualKind(slot.Direction switch {
+                    RoomDoorDirection.Up => DoorVisualKind.Boss, RoomDoorDirection.Down => DoorVisualKind.KeyLockedTreasure,
+                    RoomDoorDirection.Left => DoorVisualKind.Shop, _ => DoorVisualKind.SecretPassage });
                 slot.Blocker.GetComponent<FairyVillageDoorArtwork>().Refresh();
             }
             Camera camera = new GameObject("Artwork Preview Camera").AddComponent<Camera>();
@@ -289,6 +363,16 @@ namespace TrickalFanGame.Editor
                 Actor(player, doorDepth >= 0 ? -0.65f : -3); Actor(monster, doorDepth >= 0 ? 0.65f : 3);
             }
             camera.orthographicSize = Mathf.Max(size.y / 2 + 0.7f, (size.x + 1.4f) / (2f * 1600f / 900f));
+            if (family.HasValue && depthPreview)
+            {
+                camera.transform.position = new Vector3(0, -size.y / 2 + 0.6f, -10);
+                camera.orthographicSize = 1.9f;
+            }
+            if (focus.HasValue)
+            {
+                camera.transform.position = new Vector3(focus == RoomDoorDirection.Left ? -size.x / 2 + 0.5f : size.x / 2 - 0.5f, 0, -10);
+                camera.orthographicSize = 1.9f;
+            }
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.055f, 0.075f, 0.06f);
             camera.gameObject.AddComponent<UniversalAdditionalCameraData>();
@@ -318,7 +402,50 @@ namespace TrickalFanGame.Editor
         {
             SetupAndVerifyBatch();
             Week14Room0RegressionVerification.Verify();
+            OpenFreshGameScene();
+            Week20Special1Verification.Verify();
+            OpenFreshGameScene();
+            Week20Special3Verification.Verify();
+            VerifyShopAndRenderBatch();
+        }
+
+        private static void OpenFreshGameScene() => UnityEditor.SceneManagement.EditorSceneManager.OpenScene(
+            Week13FrontendSetup.GameScenePath, UnityEditor.SceneManagement.OpenSceneMode.Single);
+
+        public static void VerifyShopAndRenderBatch()
+        {
+            // Edit-mode time does not advance between synchronous verifiers. Reload the scene
+            // so the previous secret-room transition cannot leave a cooldown in the shop test.
+            OpenFreshGameScene();
+            Week20Special4Verification.Verify();
+            RenderSpecialDoorsBatch();
+        }
+
+        public static void RenderSpecialDoorsBatch()
+        {
             RenderPreviewBatch();
+            foreach (string family in FairyVillageArtworkSetup.DoorFamilies)
+            {
+                RenderRoom(Week8GridFloorSetup.PrefabPath, "fairy-village-" + family + "-preview.png", false,
+                    family: FairyVillageArtworkSetup.FamilyKind(family));
+                RenderRoom(Week8GridFloorSetup.PrefabPath, "fairy-village-" + family + "-depth-preview.png", false, true, 0,
+                    FairyVillageArtworkSetup.FamilyKind(family));
+                if (family != "secret") RenderRoom(Week8GridFloorSetup.PrefabPath, "fairy-village-" + family + "-closed-preview.png",
+                    false, true, 1, FairyVillageArtworkSetup.FamilyKind(family));
+                if (family != "secret") foreach (RoomDoorDirection direction in new[] { RoomDoorDirection.Left, RoomDoorDirection.Right })
+                    foreach (bool closed in new[] { false, true })
+                        RenderRoom(Week8GridFloorSetup.PrefabPath,
+                            $"fairy-village-{family}-{direction.ToString().ToLowerInvariant()}-{(closed ? "closed" : "open")}-v{FairyVillageArtworkSetup.FamilyVersion(family, direction)}-preview.png",
+                            false, doorDepth: closed ? 1 : 0, family: FairyVillageArtworkSetup.FamilyKind(family), focus: direction);
+            }
+            RenderRoom(Week8GridFloorSetup.PrefabPath, "fairy-village-special-doors-gallery.png", false, mixedDoors: true);
+        }
+
+        public static void ApplyRevisionAndRenderBatch()
+        {
+            SetupAndVerifyBatch();
+            Week14Room0RegressionVerification.Verify();
+            RenderSpecialDoorsBatch();
         }
 
         private static string CollisionSnapshot() => string.Join("\n", FairyVillageArtworkSetup.PrefabPaths().Select(path =>

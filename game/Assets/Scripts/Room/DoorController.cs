@@ -8,6 +8,7 @@ namespace TrickalFanGame.Room
         Boss,
         KeyLockedTreasure,
         SecretPassage,
+        Shop,
     }
 
     [RequireComponent(typeof(Collider2D))]
@@ -94,6 +95,7 @@ namespace TrickalFanGame.Room
             {
                 DoorVisualKind.Boss => BossLockedColor,
                 DoorVisualKind.KeyLockedTreasure => KeyLockedColor,
+                DoorVisualKind.Shop => KeyLockedColor,
                 DoorVisualKind.SecretPassage => SecretLockedColor,
                 _ => NormalLockedColor,
             };
@@ -101,6 +103,7 @@ namespace TrickalFanGame.Room
             {
                 DoorVisualKind.Boss => BossOpenColor,
                 DoorVisualKind.KeyLockedTreasure => KeyOpenColor,
+                DoorVisualKind.Shop => KeyOpenColor,
                 DoorVisualKind.SecretPassage => SecretOpenColor,
                 _ => NormalOpenColor,
             };

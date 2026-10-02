@@ -334,14 +334,8 @@ namespace TrickalFanGame.Room
                         destination = destinationPrefab.Node;
                         entry = destinationPrefab.FindSlot(GeneratedFloorGraph.Opposite(direction)).EntryPoint;
                         doorways.Add(slot.Doorway);
-                        bool isBossConnection = generatedNode.Role == GeneratedRoomRole.Boss ||
-                                                destinationGenerated.Role == GeneratedRoomRole.Boss;
-                        // Treasure and shop key locks share the golden door palette.
                         bool requiresKey = destinationGenerated.RequiresKey;
-                        slot.Blocker.ConfigureVisualKind(
-                            isBossConnection ? DoorVisualKind.Boss :
-                            requiresKey ? DoorVisualKind.KeyLockedTreasure :
-                            connection.IsSecret ? DoorVisualKind.SecretPassage : DoorVisualKind.Normal);
+                        slot.Blocker.ConfigureVisualKind(ConnectionVisualKind(generatedNode, destinationGenerated, connection.IsSecret));
                         if (connection.IsSecret)
                             BindSecretPassage(slot, instance, generatedNode, destination, entry, destinationGenerated);
                         else
@@ -793,9 +787,7 @@ namespace TrickalFanGame.Room
                 GeneratedRoomNode destinationGenerated = FindGeneratedNode(doorway.Destination.RoomId);
                 bool requiresKey = destinationGenerated?.RequiresKey == true;
                 DoorController visual = doorway.GetComponentInChildren<DoorController>();
-                visual?.ConfigureVisualKind(requiresKey
-                    ? DoorVisualKind.KeyLockedTreasure
-                    : DoorVisualKind.Normal);
+                visual?.ConfigureVisualKind(ConnectionVisualKind(binding.GeneratedNode, destinationGenerated));
                 doorway.Configure(
                     graph,
                     binding.SceneNode,
@@ -809,6 +801,17 @@ namespace TrickalFanGame.Room
             }
 
             binding.SceneNode.SetDoorways(binding.OrderedDoorways);
+        }
+
+        public static DoorVisualKind ConnectionVisualKind(GeneratedRoomNode source, GeneratedRoomNode destination,
+            bool isSecret = false)
+        {
+            bool HasRole(GeneratedRoomRole role) => source?.Role == role || destination?.Role == role;
+            if (isSecret || HasRole(GeneratedRoomRole.Secret)) return DoorVisualKind.SecretPassage;
+            if (HasRole(GeneratedRoomRole.Boss)) return DoorVisualKind.Boss;
+            if (HasRole(GeneratedRoomRole.Treasure)) return DoorVisualKind.KeyLockedTreasure;
+            if (HasRole(GeneratedRoomRole.Shop)) return DoorVisualKind.Shop;
+            return DoorVisualKind.Normal;
         }
 
         private GeneratedRoomNode FindGeneratedNode(string roomId)

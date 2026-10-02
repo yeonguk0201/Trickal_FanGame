@@ -269,8 +269,8 @@ namespace TrickalFanGame.Editor
             Assert(assembler.Graph.TryReplaceFloor(assembler.Graph.Nodes.ToArray(), parentRoom.Node,
                 assembler.Graph.Player, out error), error);
             Assert(door.Doorway.RequiresKey && door.Blocker.IsLocked &&
-                   door.Blocker.VisualKind == DoorVisualKind.KeyLockedTreasure,
-                "The shop door must use the golden key lock.");
+                   door.Blocker.VisualKind == DoorVisualKind.Shop,
+                "The shop door must use its coin identity while retaining the key lock.");
             Assert(!door.Doorway.TryEnter(assembler.Graph.Player) && !shopState.IsKeyLockOpen &&
                    assembler.Graph.CurrentNode == parentRoom.Node,
                 "The shop must reject entry without a key.");

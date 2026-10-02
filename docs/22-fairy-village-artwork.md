@@ -122,3 +122,34 @@ Small의 승인된 47% 설정은 그대로 보존한다. 다른 크기는 등록
 ## 작은 방 기준 80% 조정 (2026-10-02)
 
 사용자 요청에 따라 Small 기준을 60%에서 80%로 높였다. 기준 계수는 0.63에서 0.84(1.05×0.80)로 변경했다. 모든 방의 하단 경계가 직전 설정보다 약 0.176 유닛 안쪽으로 이동하며, 크기별 동일한 가림 깊이와 전경·문 상태 동작을 유지한다. `output/artwork-bottom-boundary-80-percent.log`의 16개 템플릿 적용·반복 적용·가림 깊이·잠금 경계·열쇠 접촉·Room-0·Fixed Room Graph 검증 및 화면 생성은 종료 코드 0으로 완료했다. 새 Run에서 체감을 확인한다.
+
+## 특수 방 출입구 (2026-10-02)
+
+기존 연결 벽·잔디를 유지하고 내장 imagegen으로 네 종류의 출입구를 생성했다. `Assets/Rooms/Artwork/FairyVillage/room-{shop,treasure,boss,secret}-open-v1.png`에 네 방향을 등록했으며, 상점·보물방·보스방은 `room-*-closed-v1.png`도 추가했다. 생성 요청문은 `output/special-door-prompts.txt`에 보존한다.
+
+- 상점: 사용자 금화 참고의 잎 무늬 금화, 기존 목재와 돌기둥, 닫힌 목재 문짝.
+- 보물방: 흰 대리석 기둥, 금색 구조물과 왕관, 잠긴 금색 문짝·사슬·자물쇠.
+- 보스방: 자주색 구조물, 철제 보강과 뿔 장식, 무거운 닫힌 문짝.
+- 비밀방: 부서진 돌과 찢긴 수풀로 둘러싸인 구멍. 발견 전에는 기존 봉인 벽을 유지한다.
+
+각 상태의 `door-*-cutout-v1.png`는 별도로 생성한 투명 전경 윤곽이다. 아래 문만 정렬 순서 20으로 캐릭터·몬스터 앞에 그리며, 열린 구멍은 투명하고 닫힌 문짝은 불투명하다. 원본 색과 전경 alpha를 결합하는 기존 방식과 Small 기준 하단 경계 80%는 유지한다. 생성 캔버스의 가로 1픽셀 차이는 정규화한 Sprite 슬라이스 좌표로 등록한다.
+
+`DoorVisualKind` 기존 숫자는 유지하고 끝에 Shop을 추가했다. 방 역할로 양방향 출입구의 종류를 결정하므로 열쇠 잠금을 해제해도 상점·보물방 외형을 유지한다. 잠금 소비, 충돌, 폭탄 발견·진입 규칙은 기존 런타임을 사용한다. Backend·Web 데이터 계약은 변경하지 않는다.
+
+수동 확인: 새 Run을 시작하여 상점 금화, 보물방 왕관·대리석, 보스 장식을 네 방향에서 확인한다. 비밀벽은 폭탄으로 발견하기 전에는 평범한 벽, 발견 후에는 뚫린 구멍이어야 한다. 아래쪽 각 출입구에 접근하면 장식 윤곽만 캐릭터 앞에 겹치고 열린 통로에는 캐릭터가 보여야 한다. 적용 메뉴는 `Trickal Fan Game/Artwork/Apply Fairy Village Tiles and Walls`, 검증 메뉴는 `Trickal Fan Game/Artwork/Verify Fairy Village Tiles and Walls`이다.
+
+검증 근거: `output/artwork-special-doors.log`에서 16개 템플릿·문 진입·Room-0·보물방 열쇠 소비와 비밀벽 폭탄 발견/재방문 검증을 통과했다. 이어 실행한 상점 검증은 편집 모드에서 직전 비밀방 이동의 쿨다운이 남아 실패했으므로 검증 사이에 Game Scene을 다시 여는 방식으로 격리했다. `output/artwork-special-doors-shop-render.log`에서 상점 열쇠·구매·재방문 검증과 전체 문 렌더링을 종료 코드 0으로 완료했다. 확대 렌더링에서 왕관 보석의 붉은색이 기존 크로마 필터에 제거되는 현상을 확인해 near-pure red만 제외하도록 조정했고, Sprite 교체 시 atlas 좌표도 갱신한다. `output/artwork-special-doors-final-render.log`의 최종 전경 검증·렌더링 및 `output/artwork-special-doors-idempotence.log`의 반복 적용·문 경계 검증은 모두 종료 코드 0이다. 기존 방 master의 Sprite 식별자와 프리팹 GUID를 보존했다.
+
+조합 화면 `output/fairy-village-special-doors-gallery.png`는 위 보스·아래 보물·왼쪽 상점·오른쪽 비밀방을 한 방에 배치한 비교용 렌더링이다. `output/fairy-village-{shop,treasure,boss,secret}-depth-preview.png`와 닫힌 문 화면에서 벽 연결 및 전경 윤곽 가림을 확인했다. 실제 게임은 생성된 연결 방의 역할을 따라 각각의 출입구를 선택한다.
+
+## 특수 세로 문 구조 수정 (2026-10-02)
+
+후속 수정: 과도한 입체 구조 생성은 사용자 중단 요청으로 채택하지 않았다. 이후 기존 v2를 기준으로 보물방 측면의 대리석 기둥과 잎 경계 기울기를 완만하게 조정하고 좁은 음영만 보강했다. 보스방은 측면 해골과 두 뿔을 문틀의 기둥 사이 중앙 쪽으로 옮겼다. 열림·닫힘 master `room-{treasure,boss}-{open,closed}-v3.png`의 좌우 슬라이스만 적용하고 위·아래, 상점, 비밀방은 이전 참조를 유지한다. 내장 imagegen 요청문은 `output/side-door-v3-subtle-prompts.txt`에 보존한다. `output/artwork-side-doors-v3-subtle.log`에서 16개 템플릿 반복 적용·충돌/GUID 보존·가림·Door-1·Room-0·Fixed Room Graph 검증 및 렌더링이 종료 코드 0으로 완료되었다. 좌우 열림·닫힘 8개 `fairy-village-{treasure,boss}-{left,right}-{open,closed}-v3-preview.png`를 확인했다. 실제 조작과 미감 평가는 새 Run에서 확인한다.
+
+사용자가 직접 기울인 참고 그림을 기준으로 내장 imagegen에서 보물·보스·상점의 좌우 문을 다시 생성했다. 보물방은 왕관을 바깥쪽 금색 아치의 중앙에 배치하고 위·아래 대리석 기둥과 함께 기울인다. 보스방은 두 뿔과 해골 장식이 있는 자주색 문틀을 열림·닫힘 상태에서 같은 구조로 사용한다. 상점의 닫힌 세로 문은 벽 길이 방향으로 두 문짝을 나누고 중앙의 비스듬한 가로 틈 양쪽에 문고리를 하나씩 배치한다.
+
+상점 메달은 새 참고의 두꺼운 금색 테두리, 황갈색 안쪽 원판, 입체적인 잎을 반영하여 네 방향에 적용했다. 보물·보스의 위·아래 문은 v1을 유지하고 좌우에만 v2를 사용한다. 비밀방은 아래 구멍의 상단에 연결된 잎과 깨진 돌 테두리를 추가한 v2를 사용하며, 다른 방향은 v1을 유지한다. 상점과 비밀방의 아래쪽 전경 alpha도 새 master에 맞추어 생성했다. 요청문은 `output/side-door-v2-prompts.txt`에 저장했다.
+
+생성 캔버스의 1~2픽셀 차이를 정규화된 슬라이스와 원래 문 패치의 월드 크기 보존으로 처리한다. 특수 문 패치의 가장자리에는 기존 문 주변 색을 섞어 사각형 잔디 색 이음새를 완화한다. 외곽의 왕관·뿔이 흐려지지 않도록 외측 혼합 폭은 2픽셀로 제한한다. 이동 경계는 승인된 Small 기준 80%를 유지하며 런타임 잠금·열쇠·폭탄 규칙과 Backend·Web 계약은 변경하지 않았다.
+
+`output/artwork-side-doors-v2.log` 및 `output/artwork-side-doors-v2-final.log`: Unity 컴파일, 16개 템플릿 반복 적용과 기존 충돌·GUID 보존, 방 크기별 가림 깊이, 열린/닫힌 문 전경 투명도, 비밀문 상단 alpha, Door-1, Room-0 및 Fixed Room Graph 검증을 종료 코드 0으로 완료했다. `output/fairy-village-{shop,treasure,boss}-{left,right}-{open,closed}-v2-preview.png`의 12개 확대 렌더링과 비밀방 하단 전경 화면을 확인했다. 실제 조작 확인은 새 Run에서 특수 방 연결 문과 폭탄 발견 후 아래 비밀문을 확인한다.

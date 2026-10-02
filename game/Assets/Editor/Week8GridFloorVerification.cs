@@ -148,12 +148,23 @@ namespace TrickalFanGame.Editor
                         $"{node.RoomId} {direction} slot does not match generated connectivity.");
                     if (connected)
                     {
-                        bool expectsBossVisual = generatedNode.Role == GeneratedRoomRole.Boss ||
-                                                 generatedNodes[connection.DestinationRoomId].Role == GeneratedRoomRole.Boss;
-                        bool expectsKeyLock = generatedNodes[connection.DestinationRoomId].RequiresKey;
-                        DoorVisualKind expectedVisualKind = expectsBossVisual
-                            ? DoorVisualKind.Boss : expectsKeyLock
-                                ? DoorVisualKind.KeyLockedTreasure : DoorVisualKind.Normal;
+                        GeneratedRoomNode other = generatedNodes[connection.DestinationRoomId];
+                        bool expectsKeyLock = other.RequiresKey;
+                        bool HasRole(GeneratedRoomRole role) => generatedNode.Role == role || other.Role == role;
+                        DoorVisualKind expectedVisualKind = connection.IsSecret || HasRole(GeneratedRoomRole.Secret)
+                            ? DoorVisualKind.SecretPassage : HasRole(GeneratedRoomRole.Boss) ? DoorVisualKind.Boss :
+                            HasRole(GeneratedRoomRole.Treasure) ? DoorVisualKind.KeyLockedTreasure :
+                            HasRole(GeneratedRoomRole.Shop) ? DoorVisualKind.Shop : DoorVisualKind.Normal;
+                        Color lockedColor = expectedVisualKind switch {
+                            DoorVisualKind.Boss => DoorController.BossLockedColor,
+                            DoorVisualKind.Shop or DoorVisualKind.KeyLockedTreasure => DoorController.KeyLockedColor,
+                            DoorVisualKind.SecretPassage => DoorController.SecretLockedColor,
+                            _ => DoorController.NormalLockedColor };
+                        Color openColor = expectedVisualKind switch {
+                            DoorVisualKind.Boss => DoorController.BossOpenColor,
+                            DoorVisualKind.Shop or DoorVisualKind.KeyLockedTreasure => DoorController.KeyOpenColor,
+                            DoorVisualKind.SecretPassage => DoorController.SecretOpenColor,
+                            _ => DoorController.NormalOpenColor };
                         Assert(slot.Doorway.Destination.RoomId == connection.DestinationRoomId &&
                                slot.Doorway.DestinationEntryPoint == slot.Doorway.Destination.GetComponent<RoomPrefab>()
                                    .FindSlot(GeneratedFloorGraph.Opposite(direction)).EntryPoint,
@@ -180,18 +191,14 @@ namespace TrickalFanGame.Editor
                         Assert(slot.Blocker.IsLocked && slot.Blocker.IsPortalBarrierActive && blockerCollider.enabled &&
                                transitionTrigger.enabled && transitionTrigger.isTrigger,
                             $"{node.RoomId} {direction} locked door must block without disabling its transition trigger.");
-                        Assert(Approximately(slot.Blocker.VisualColor, expectsBossVisual
-                                ? DoorController.BossLockedColor : expectsKeyLock
-                                    ? DoorController.KeyLockedColor : DoorController.NormalLockedColor),
+                        Assert(Approximately(slot.Blocker.VisualColor, lockedColor),
                             $"{node.RoomId} {direction} locked door color does not match its connection kind.");
                         slot.Blocker.SetLocked(false);
                         Assert(slot.Blocker.IsLocked == expectsKeyLock && slot.Blocker.IsPortalBarrier &&
                                slot.Blocker.IsPortalBarrierActive && blockerCollider.enabled &&
                                transitionTrigger.enabled && transitionTrigger.isTrigger,
                             $"{node.RoomId} {direction} open door must preserve its portal barrier and transition trigger.");
-                        Assert(Approximately(slot.Blocker.VisualColor, expectsBossVisual
-                                ? DoorController.BossOpenColor : expectsKeyLock
-                                    ? DoorController.KeyLockedColor : DoorController.NormalOpenColor),
+                        Assert(Approximately(slot.Blocker.VisualColor, expectsKeyLock ? lockedColor : openColor),
                             $"{node.RoomId} {direction} open door color does not match its connection kind.");
                     }
                 }

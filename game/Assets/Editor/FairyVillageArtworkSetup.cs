@@ -19,6 +19,13 @@ namespace TrickalFanGame.Editor
         public const string ClosedDoorMaskPath = Folder + "door-closed-foreground-cutout-v1.png";
         public const string ClosedBoundaryName = "Fairy Village Closed Door Boundary";
         public const float MasterScale = 16f / 1572f;
+        public static readonly string[] DoorFamilies = { "shop", "treasure", "boss", "secret" };
+        public static string FamilyPath(string family, string state, int version = 2) => Folder + $"room-{family}-{state}-v{version}.png";
+        public static int FamilyVersion(string family, RoomDoorDirection direction) => family switch {
+            "shop" => 2, "secret" => direction == RoomDoorDirection.Down ? 2 : 1,
+            _ => direction == RoomDoorDirection.Left || direction == RoomDoorDirection.Right ? 3 : 1 };
+        public static string FamilyMaskPath(string family, string state) =>
+            Folder + $"door-{family}-{state}-cutout-v{(family == "shop" || family == "secret" ? 2 : 1)}.png";
         // Common registered cuts preserve corner and door scale; long wall/grass spans resize together.
         private static readonly int[] SourceX = { 50, 220, 690, 982, 1452, 1622 };
         private static readonly int[] SourceY = { 0, 190, 300, 560, 720, 941 };
@@ -32,6 +39,16 @@ namespace TrickalFanGame.Editor
             ImportForegroundMask(OpenDoorMaskPath);
             ImportForegroundMask(ClosedDoorMaskPath);
             Slice("open"); Slice("closed"); Slice("locked"); Slice("sealed");
+            foreach (string family in DoorFamilies)
+            {
+                SliceFamily(family, "open");
+                if (family != "shop") SliceFamily(family, "open", 1);
+                ImportForegroundMask(FamilyMaskPath(family, "open"));
+                if (family == "secret") continue;
+                SliceFamily(family, "closed");
+                if (family != "shop") SliceFamily(family, "closed", 1);
+                ImportForegroundMask(FamilyMaskPath(family, "closed"));
+            }
             Shader shader = AssetDatabase.LoadAssetAtPath<Shader>(Folder + "ConnectedRoom.shader");
             if (shader == null || ShaderUtil.ShaderHasError(shader)) throw new InvalidOperationException("Invalid connected room shader.");
             Material material = AssetDatabase.LoadAssetAtPath<Material>(Folder + "connected-room.mat");
@@ -107,6 +124,14 @@ namespace TrickalFanGame.Editor
                     if (binding == null) binding = blocker.gameObject.AddComponent<FairyVillageDoorArtwork>();
                     binding.Configure(slot.Blocker, visual, visual.sprite, Load("closed", DoorName(slot.Direction, "closed")),
                         Load("locked", DoorName(slot.Direction, "locked")));
+                    binding.ConfigureVariants(DoorFamilies.Select(family => new FairyVillageDoorArtwork.Variant {
+                        kind = FamilyKind(family),
+                        open = LoadFamily(family, "open", slot.Direction),
+                        closed = family == "secret" ? Load("sealed", DoorName(slot.Direction, "sealed")) : LoadFamily(family, "closed", slot.Direction),
+                        locked = family == "secret" ? Load("sealed", DoorName(slot.Direction, "sealed")) : LoadFamily(family, "closed", slot.Direction),
+                        openMask = AssetDatabase.LoadAssetAtPath<Texture2D>(FamilyMaskPath(family, "open")),
+                        closedMask = AssetDatabase.LoadAssetAtPath<Texture2D>(family == "secret" ? ForegroundMaskPath : FamilyMaskPath(family, "closed"))
+                    }).ToArray());
                     BoxCollider2D innerBlocker = BuildInnerBoundary(blocker, ClosedBoundaryName, slot.Direction, content, size);
                     innerBlocker.gameObject.AddComponent<ClosedDoorBoundary>().Configure(slot.Doorway);
                     slot.Blocker.ConfigureInteriorBlocker(innerBlocker);
@@ -258,12 +283,68 @@ namespace TrickalFanGame.Editor
         private static Sprite Load(string state, string name) => AssetDatabase.LoadAllAssetsAtPath(Folder + $"room-{state}-v3.png")
             .OfType<Sprite>().First(s => s.name == name);
 
+        public static DoorVisualKind FamilyKind(string family) => family switch {
+            "shop" => DoorVisualKind.Shop, "treasure" => DoorVisualKind.KeyLockedTreasure,
+            "boss" => DoorVisualKind.Boss, "secret" => DoorVisualKind.SecretPassage,
+            _ => throw new ArgumentException("Unknown door family: " + family) };
+
+        private static Sprite LoadFamily(string family, string state, RoomDoorDirection direction) =>
+            AssetDatabase.LoadAllAssetsAtPath(FamilyPath(family, state, FamilyVersion(family, direction))).OfType<Sprite>()
+                .First(s => s.name == DoorName(direction, family + "-" + (family == "treasure" && state == "closed" ? "locked" : state)));
+
+        private static void SliceFamily(string family, string state, int version = 0)
+        {
+            if (version == 0) version = family == "treasure" || family == "boss" ? 3 : 2;
+            string path = FamilyPath(family, state, version);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null) throw new InvalidOperationException("Missing special door atlas: " + path);
+#pragma warning disable CS0618
+            if (importer.textureType == TextureImporterType.Sprite && importer.spriteImportMode == SpriteImportMode.Multiple &&
+                importer.spritePixelsPerUnit == 100 && importer.spritesheet.Length == 4) return;
+#pragma warning restore CS0618
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Multiple;
+            importer.spritePixelsPerUnit = 100;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = false;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.maxTextureSize = 2048;
+            importer.GetSourceTextureWidthAndHeight(out int sourceWidth, out int sourceHeight);
+            TextureImporterSettings settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            settings.spriteMeshType = SpriteMeshType.FullRect;
+            importer.SetTextureSettings(settings);
+#pragma warning disable CS0618
+            importer.spritesheet = Enum.GetValues(typeof(RoomDoorDirection)).Cast<RoomDoorDirection>().Select(direction => {
+                (int col, int row) = DoorCell(direction);
+                SpriteMetaData metadata = Metadata(DoorName(direction, family + "-" +
+                    (family == "treasure" && state == "closed" ? "locked" : state)), col, row);
+                // Generated canvases can differ by one pixel. Register cuts in normalized source coordinates.
+                Rect rect = metadata.rect;
+                metadata.rect = new Rect(rect.x * sourceWidth / 1672f, rect.y * sourceHeight / 941f,
+                    rect.width * sourceWidth / 1672f, rect.height * sourceHeight / 941f);
+                return metadata;
+            }).ToArray();
+#pragma warning restore CS0618
+            importer.SaveAndReimport();
+        }
+
         private static void Slice(string state)
         {
             string path = Folder + $"room-{state}-v3.png";
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
             TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
             if (importer == null) throw new InvalidOperationException("Missing room master: " + path);
+#pragma warning disable CS0618
+            // Existing registered masters already carry stable Sprite IDs. Do not rebuild their metadata.
+            SpriteMetaData[] existing = importer.spritesheet;
+            if (importer.textureType == TextureImporterType.Sprite && importer.spriteImportMode == SpriteImportMode.Multiple &&
+                importer.spritePixelsPerUnit == 100 && existing.Length == 29 &&
+                Enum.GetValues(typeof(RoomDoorDirection)).Cast<RoomDoorDirection>().All(direction =>
+                    existing.Any(sprite => sprite.name == DoorName(direction, state)))) return;
+#pragma warning restore CS0618
             importer.textureType = TextureImporterType.Sprite; importer.spriteImportMode = SpriteImportMode.Multiple;
             importer.spritePixelsPerUnit = 100; importer.alphaIsTransparency = true; importer.mipmapEnabled = false;
             importer.filterMode = FilterMode.Bilinear; importer.textureCompression = TextureImporterCompression.Uncompressed;
