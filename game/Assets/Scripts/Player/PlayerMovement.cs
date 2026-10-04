@@ -17,6 +17,7 @@ namespace TrickalFanGame.Player
         private Vector2 movement;
 
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
+        public bool IsAimingAttack { get; private set; }
         public Vector2 CurrentVelocity => body.linearVelocity;
         public float CurrentMoveSpeed => stats.MoveSpeed;
         public Vector2 MovementIntent => health != null && !health.IsDead ? movement : Vector2.zero;
@@ -41,6 +42,7 @@ namespace TrickalFanGame.Player
 
         private void Update()
         {
+            IsAimingAttack = false;
             if (Time.timeScale <= 0f) return;
             if (health.IsDead)
             {
@@ -74,7 +76,17 @@ namespace TrickalFanGame.Player
             }
 
             movement = ReadMovement();
-            if (movement.sqrMagnitude > 0.001f)
+            PlayerProjectileAttack projectileAttack = GetComponent<PlayerProjectileAttack>();
+            PlayerAttack meleeAttack = GetComponent<PlayerAttack>();
+            bool hasAttack = (projectileAttack != null && projectileAttack.isActiveAndEnabled) ||
+                             (meleeAttack != null && meleeAttack.isActiveAndEnabled);
+            // Read the same input as the attacks, even between shots; movement must not override held aim.
+            if (hasAttack && actionState.CanBasicAttack && PlayerAttack.TryReadAttackDirection(out Vector2 aim))
+            {
+                IsAimingAttack = true;
+                SetFacingDirection(aim);
+            }
+            else if (movement.sqrMagnitude > 0.001f)
             {
                 SetFacingDirection(movement);
             }

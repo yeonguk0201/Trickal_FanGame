@@ -763,6 +763,116 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 기본·작은·넓은·세로·큰 방 및 문 상태별 Unity 렌더를 `output/`에 저장한다. 그래픽 장치가 필요하므로
 이 렌더 진입점에서는 `-nographics`를 사용하지 않는다.
 
+### 일반 적 이동 모션
+
+기존 4종 프리팹에 이동 모션이 연결되어 있다. 새 Run에서 불효자손은 통통 튀고,
+산사모·저혈당 요정·고혈당 요정은 걷는다. 새 에셋을 적용할 때는 다음 메뉴를 사용한다.
+
+- 적용: `Trickal Fan Game > Artwork > Setup Enemy Movement Animations`
+- 자동 검증: `Trickal Fan Game > Artwork > Verify Enemy Movement Animations`
+- 렌더 미리보기: `Trickal Fan Game > Artwork > Export Enemy Movement Preview`
+
+배치 진입점은 `TrickalFanGame.Editor.EnemyMovementAnimationVerification.SetupAndVerifyBatch`이며,
+반복 적용, 걷기 4프레임의 순서·루프·크기·기준점, 원본 Idle 복원, 물리 판정 보존,
+벽·공격·넉백 억제와 재활성화를 검사한다. 걷기는 메시 변형 없이 기존 SpriteRenderer로 재생하며,
+프레임 에셋은 `game/Assets/Art/Enemies/FairyKingdom/Walking/`에 있다.
+`ExportPreview` 진입점은 같은 검증 후 `game/Logs/EnemyMovementPreviewV2/`에 16개 PNG를 저장한다.
+렌더 미리보기에는 그래픽 장치가 필요하므로 `-nographics`를 사용하지 않는다.
+
+Play Mode 수동 확인: 새 Run에서 각 적이 실제로 이동할 때만 모션을 재생하고, 정지·피격·공격 예고
+중에는 원래 자세로 돌아오는지 확인한다. 방을 재방문해 그림이 사라지거나 두 번 표시되지 않는지도
+확인한다. 움직임 크기와 보폭은 각 프리팹의 `EnemyMovementAnimator`에서 조정할 수 있다.
+
+### 일반 적 공격 모션
+
+불효자손은 엎어지며 공격하고, 산사모는 꽃줄기를 뒤로 감았다가 앞으로 휘두른다.
+저혈당 요정은 웅크린 준비 후 프라이팬을 앞으로 내밀며 돌진하고, 고혈당 요정은 파를 들어
+던진다. 기존 전투의 Telegraph·Active·Recovery에 실제 포즈 PNG를 연결했다. 공격 단계는 이동
+모션보다 우선하며 목표/잠긴 돌진·발사 방향에 따라 좌우 반전한다. 루트 배율과 Collider는 고정이다.
+고혈당 요정의 실제 발사는 별도 파 PNG를 사용하고, 파 색상을 유지하며 발사 방향으로 회전한다.
+파는 200 PPU로 등록해 최초 적용보다 표시 크기를 2배 키웠다. 투사체 루트 배율 0.3과 원형 판정의
+월드 반지름 0.15는 유지한다. 피해량·발사 속도·수명은 기존 값을 유지한다. 졸개에는 이 그림/파가 상속되지 않는다.
+
+- 적용: `Trickal Fan Game > Artwork > Setup Enemy Attack Animations` (이동 모션 적용 이후)
+- 검증: `Trickal Fan Game > Artwork > Verify Enemy Attack Animations`
+- 미리보기: `Trickal Fan Game > Artwork > Export Enemy Attack Preview`
+- 배치: `TrickalFanGame.Editor.EnemyAttackAnimationVerification.SetupAndVerifyBatch`
+- 에셋: `Assets/Art/Enemies/FairyKingdom/Attacking/`; [프롬프트 기록](./art-prompts/enemy-attack.md)
+
+Play Mode에서 새 Run의 네 적을 만나 준비→공격→회복→이동 연결과 좌우 방향을 확인한다.
+특히 산사모의 꽃 끝과 실제 근접 판정 범위, 저혈당 요정의 긴 돌진 자세, 고혈당 요정의 손에서
+파가 사라지는 시점과 실제 투사체 가독성을 확인한다. 프리팹 반영 전 이미 소환된 개체는 새 Run에서 확인한다.
+
+### 보스 이동 모션
+
+기존 부스러기·새마음금고는 띠용띠용 이동, 크레용사용은 망토·팔이 조금씩 움직이는 4포즈 걷기를 사용한다.
+새마음금고의 바닥 보물은 본체의 작은 도약과 공격 점프 중 바닥에 남고 착지 때 압축·반동한다.
+
+- 적용: `Trickal Fan Game > Artwork > Setup Boss Movement Animations`
+- 자동 검증: `Trickal Fan Game > Artwork > Verify Boss Movement Animations`
+- 렌더 미리보기: `Trickal Fan Game > Artwork > Export Boss Movement Preview`
+
+배치 진입점은 `TrickalFanGame.Editor.BossMovementAnimationVerification.SetupAndVerifyBatch`다.
+반복 Setup과 GUID 보존, 표시·물리 분리, 정지·패턴 억제, 재활성화, 실제 새마음금고 점프와 착지 반동,
+소환 적 외형 보존, 일반 적 및 Boss-0~3·HUD-5 회귀를 확인한다. 회귀 전에 Game Scene을 열되 저장하지 않는다.
+`ExportPreview`는 같은 검증 후 `game/Logs/BossMovementPreview/`에 이동 32장과 공격 점프 36장을 저장한다.
+그래픽 장치가 필요하므로 렌더 진입점에는 `-nographics`를 사용하지 않는다.
+에셋은 `game/Assets/Art/Bosses/FairyKingdom/Movement/`에 있다.
+
+Play Mode 수동 확인: 새 Run의 보스방 또는 BossTestScene에서 본체가 이동할 때만 주기가 진행하고,
+새마음금고의 보석은 체공 중 바닥에 남으며 착지 때 들썩여야 한다. 크레용사용의 대시·내려베기·황금 변신
+예고와 소환 적 외형이 정상인지, 방 재방문 때 그림이 중복되지 않는지 확인한다.
+움직임 크기와 보폭은 보스 프리팹의 `BossMovementAnimator`에서 조정한다.
+
+금고 공격 점프는 바닥 준비 → 체공 → 바닥 착지 압축 → 복원/다음 준비 순서다. 체공 중에는 눌리지 않고,
+스케일 변화에도 바닥 기준점을 유지한다. 착지 피해와 보석 반동은 표시상 바닥에 닿는 순간에 발생한다.
+부스러기·금고의 작은 도약도 경계 속도를 부드럽게 연결하고 표시를 보간한다. 보스 이동 자동 검증은
+곡선 경계의 연속성·준비와 착지 바닥 고정·체공 자세를 포함한다.
+
+비교용 임시 상태(2026-10-03): 사용자 요청으로 `BossMovementAnimator`의 본체 가로·세로 변형식과
+금고 패턴의 `ApplyScale` 배율 적용을 주석 처리했다. 본체는 원본 비율을 유지하며 점프 높이·이동·
+방향 반전·금고 보석 반동은 그대로다. 따라서 위의 준비/착지 압축은 현재 표시되지 않는다.
+주석 처리한 기존 식은 복원용으로 코드에 남아 있고 검증기는 현재 원본 비율 유지 상태를 확인한다.
+
+2026-10-04 현재 상태: 부스러기·금고는 실제 생성한 4개 도약 포즈 에셋을 재생한다. 본체 런타임 스케일
+변형은 계속 비활성화하며, 그림 안의 크림/팔/뚜껑/슬라임 변화가 준비·체공·착지를 표현한다.
+`Setup Boss Movement Animations`가 `Buseureogi_Hop_0..3.png`·`Vault_Hop_0..3.png`를 등록한다.
+금고 공격은 준비·체공·착지 상태에 맞는 프레임을 직접 선택하고, 실제 높이와 이동은 런타임이 처리한다.
+`Export Boss Movement Preview`는 `game/Logs/BossDrawnHopPreview/`에 이동 120장(0.025초 간격,
+부스러기·금고는 프리팹의 1페이즈 이동 속도)과 금고 공격 36장을 출력한다. 정규화된 카메라로 포즈를
+비교하는 미리보기이며 실제 게임 카메라 화면은 아니다. 자동 검증에 고유 4포즈와 실제 공격 포즈 선택을
+포함한다. 새 Run에서 띠용 이동·공격 착지·보석 반동·좌우 반전·히트박스 보존을 확인한다.
+
+일반 적과 보스 모두 실제 좌우 이동 방향에 따라 그림을 반전한다. 정지·수직 이동·방 배치 이동은
+마지막 방향을 유지하고, 일반 적의 넉백은 방향을 바꾸지 않는다. 새마음금고는 본체와 바닥 보물 레이어가
+같은 방향으로 반전한다. Collider와 루트 Transform은 반전하지 않는다.
+
+플레이어는 기본 공격 방향키를 누르는 동안 이동보다 공격 방향을 우선해 바라본다. 발사 간격 중에도
+유지하며 제자리 공격에는 해당 방향의 첫 포즈를 사용한다. 공격 키를 놓으면 이동 방향을 다시 따른다.
+궁극기 대시와 공격이 차단된 상태에서는 기존 행동 방향을 유지한다. 원거리·근접 기본 공격의 입력은
+같은 방향 판독을 사용한다. `Tools > Trickal > Verify Erpin Walk Animation`에서 좌우 반대 이동·공격,
+위쪽 공격 포즈, 제자리 공격, 공격 해제·비활성화, 근접 공격과 궁극기 대시를 자동 확인한다.
+2026-10-03 배치 `TrickalFanGame.Editor.ErpinWalkAnimationVerification.Verify` 통과·종료 코드 0
+(`game/Logs/player-attack-facing-verification.log`). 실제 Play Mode에서는 D+←, A+→를 누르고 이동과
+탄 방향을 유지하면서 몸만 공격 방향으로 향하는지 확인한다.
+
+### 크레용사용 소환 졸개 걷기
+
+궁병·마법사·도끼병·방패병은 각자 4개의 실제 걷기 포즈를 사용한다. 에셋은
+`game/Assets/Art/Bosses/FairyKingdom/Movement/Minions/`의 640×640 PNG, 400 PPU다.
+
+- 적용: `Trickal Fan Game > Artwork > Setup Crayon Minion Movement Animations`
+- 검증: `Trickal Fan Game > Artwork > Verify Enemy Movement Animations` (일반 적과 졸개 8종)
+- 미리보기: `Trickal Fan Game > Artwork > Export Crayon Minion Movement Preview`
+
+일반 적 Setup도 네 졸개의 전용 프레임 연결을 함께 적용한다. 각 졸개의 원본 Sprite와 Collider·AI·소환
+구성은 보존한다. `EnemyMovementAnimationVerification.ExportMinionPreview` 배치는 일반 적·보스 Setup,
+모션 검증과 Boss-0~3·HUD-5 회귀 후 `game/Logs/CrayonMinionMovementPreview/`에 16개의 포즈 PNG를
+출력한다. 그래픽 장치가 필요하므로 `-nographics`를 넣지 않는다. 2026-10-04 배치 통과·종료 코드 0.
+포즈 확인용 미리보기이며 실제 게임 카메라·이동 속도 영상은 아니다. Play Mode에서는 새 Run 또는
+BossTestScene의 크레용사용 소환 후 네 졸개가 이동할 때만 걷고, 좌우로 반전하며 공격 예고·정지·넉백
+중 원본 그림으로 돌아오는지 확인한다. 방 재활성화 때 그림이 중복되지 않아야 한다.
+
 ## 18. 참고 자료
 
 - Node.js Releases: https://nodejs.org/en/about/previous-releases

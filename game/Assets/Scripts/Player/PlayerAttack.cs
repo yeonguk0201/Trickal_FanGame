@@ -66,7 +66,7 @@ namespace TrickalFanGame.Player
             DestructibleObstacle.HitInCircle(center, attackRadius);
         }
 
-        private static bool TryReadAttackDirection(out Vector2 direction)
+        internal static bool TryReadAttackDirection(out Vector2 direction)
         {
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null)

@@ -292,7 +292,8 @@ namespace TrickalFanGame.Enemy
 
         private void Fire(float currentTime)
         {
-            Sprite projectileSprite = spriteRenderer != null ? spriteRenderer.sprite : null;
+            Sprite drawnProjectile = GetComponent<EnemyAttackArtwork>()?.ProjectileSprite;
+            Sprite projectileSprite = drawnProjectile != null ? drawnProjectile : spriteRenderer != null ? spriteRenderer.sprite : null;
             EnemyProjectile projectile = EnemyProjectile.Create(
                 transform.position,
                 lockedDirection,
@@ -300,7 +301,7 @@ namespace TrickalFanGame.Enemy
                 projectileDamageTier,
                 projectileSpeed,
                 projectileLifetime,
-                projectileSprite);
+                projectileSprite, drawnProjectile != null);
             ProjectileFired?.Invoke(projectile);
             stateEndsAt = currentTime + firingDuration;
             SetState(LongRangeSniperState.Firing);

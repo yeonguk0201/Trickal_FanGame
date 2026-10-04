@@ -31,7 +31,8 @@ namespace TrickalFanGame.Enemy
             EnemyDamageTier damageTier,
             float speed,
             float lifetime,
-            Sprite sprite)
+            Sprite sprite,
+            bool authoredArtwork = false)
         {
             GameObject projectileObject = new("Enemy Projectile");
             if (source != null && source.transform.parent != null)
@@ -42,7 +43,11 @@ namespace TrickalFanGame.Enemy
             projectileObject.transform.position = position;
             SpriteRenderer renderer = projectileObject.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
-            renderer.color = new Color(0.2f, 0.8f, 1f);
+            renderer.color = authoredArtwork ? Color.white : new Color(0.2f, 0.8f, 1f);
+            // Authored projectile points left; only rotate the artwork, leaving the circular hitbox unchanged.
+            if (authoredArtwork && direction.sqrMagnitude > 0.001f)
+                renderer.transform.rotation = Quaternion.Euler(0f, 0f,
+                    Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 180f);
 
             Rigidbody2D projectileBody = projectileObject.AddComponent<Rigidbody2D>();
             projectileBody.bodyType = RigidbodyType2D.Kinematic;

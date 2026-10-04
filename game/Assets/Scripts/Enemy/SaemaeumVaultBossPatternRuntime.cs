@@ -51,9 +51,11 @@ namespace TrickalFanGame.Enemy
         private Health health;
         private Transform visualTransform;
         private Vector3 groundedVisualPosition;
+        private float visualHeight;
         private Collider2D[] jumpColliders;
         private bool[] originalTriggerStates;
         private bool jumping;
+        private int jumpPoseIndex = -1;
         private Transform target;
         private Rect arenaBounds;
         private uint randomState;
@@ -78,6 +80,8 @@ namespace TrickalFanGame.Enemy
         public float FanSpreadDegrees => Mathf.Clamp(fanSpreadDegrees, 0f, 180f);
         public int PlannedJumpCount => jumpCount;
         public int CurrentJump => currentJump;
+        public bool IsJumping => jumping;
+        public int JumpPoseIndex => jumpPoseIndex;
         public int PhaseTwoMinimumJumps => Mathf.Max(1, phaseTwoMinimumJumps);
         public float JumpDistance => jumpDistance;
         public EnemyDamageTier LandingDamageTier => landingDamageTier;
@@ -168,6 +172,7 @@ namespace TrickalFanGame.Enemy
             {
                 StopMovement();
                 ApplyScale(jumpCrouchScale);
+                jumpPoseIndex = 1;
                 return;
             }
             if (state == BossActionState.Telegraph && execution == BossPatternExecution.SaemaeumTreasureHeal)
@@ -247,7 +252,8 @@ namespace TrickalFanGame.Enemy
             if (body != null) body.linearVelocity = direction.normalized * CurrentApproachSpeed;
             else transform.position = next;
             float bounce = 0.5f + 0.5f * Mathf.Sin(now * 9f);
-            ApplyScale(Vector2.Lerp(idleScale, bounceSquashScale, bounce));
+            ApplyScale(GetComponent<BossMovementAnimator>() != null
+                ? idleScale : Vector2.Lerp(idleScale, bounceSquashScale, bounce));
             while (firedVolleys < VolleysPerPattern && now >= nextThrowTime)
             {
                 FireTreasureVolley();
@@ -268,6 +274,9 @@ namespace TrickalFanGame.Enemy
                 jumpColliders[index].isTrigger = true;
             }
             jumping = true;
+            jumpPoseIndex = 1;
+            ApplyScale(jumpCrouchScale);
+            SetVisualHeight(0f);
             int minimum = boss != null && boss.CurrentPhase >= 2 ? phaseTwoMinimumJumps : phaseOneMinimumJumps;
             int maximum = boss != null && boss.CurrentPhase >= 2 ? phaseTwoMaximumJumps : phaseOneMaximumJumps;
             jumpCount = minimum + NextRandom(maximum - minimum + 1);
@@ -294,27 +303,47 @@ namespace TrickalFanGame.Enemy
             int jumpIndex = Mathf.Min(jumpCount - 1, Mathf.FloorToInt(scaled));
             while (jumpIndex > currentJump)
             {
-                ResolveLanding(jumpDestination);
-                resolvedJumpCount++;
+                if (resolvedJumpCount <= currentJump)
+                {
+                    ResolveLanding(jumpDestination);
+                    resolvedJumpCount++;
+                }
                 ClearLandingTelegraph();
                 currentJump++;
                 jumpStart = jumpDestination;
                 LockNextJumpDestination();
             }
             float jumpProgress = scaled - jumpIndex;
-            // Ground travel and visual altitude are independent in this top-down world.
-            Vector2 position = Vector2.Lerp(jumpStart, jumpDestination, jumpProgress);
+            // Crouch on the floor, fly, then compress and recover on the floor. Keep the total cycle duration.
+            const float takeoff = 0.16f, contact = 0.82f, compression = 0.90f;
+            jumpPoseIndex = jumpProgress < takeoff ? 1 : jumpProgress < contact ? 2 :
+                jumpProgress < 0.96f ? 3 : currentJump == jumpCount - 1 ? 0 : 1;
+            float flight = Mathf.Clamp01((jumpProgress - takeoff) / (contact - takeoff));
+            Vector2 position = Vector2.Lerp(jumpStart, jumpDestination, Mathf.SmoothStep(0f, 1f, flight));
             if (body != null) body.position = position;
             else transform.position = position;
-            SetVisualHeight(4f * jumpHeight * jumpProgress * (1f - jumpProgress));
-            if (jumpProgress < 0.22f) ApplyScale(jumpCrouchScale);
-            else if (jumpProgress < 0.78f) ApplyScale(jumpStretchScale);
-            else ApplyScale(landingScale);
-            if (sequenceProgress >= 1f && resolvedJumpCount < jumpCount)
+            float arc = Mathf.Sin(flight * Mathf.PI);
+            SetVisualHeight(jumpHeight * arc * arc);
+            if (jumpProgress < takeoff)
+                ApplyScale(Vector2.Lerp(jumpCrouchScale, jumpStretchScale,
+                    Mathf.SmoothStep(0f, 1f, jumpProgress / takeoff)));
+            else if (jumpProgress < contact)
+                ApplyScale(Vector2.Lerp(jumpStretchScale, idleScale,
+                    Mathf.SmoothStep(0f, 1f, (flight - 0.6f) / 0.4f)));
+            else if (jumpProgress < compression)
+                ApplyScale(Vector2.Lerp(idleScale, landingScale,
+                    Mathf.SmoothStep(0f, 1f, (jumpProgress - contact) / (compression - contact))));
+            else
+                ApplyScale(Vector2.Lerp(landingScale, currentJump == jumpCount - 1 ? idleScale : jumpCrouchScale,
+                    Mathf.SmoothStep(0f, 1f, (jumpProgress - compression) / (1f - compression))));
+            if (jumpProgress >= contact && resolvedJumpCount <= currentJump)
             {
                 ResolveLanding(jumpDestination);
-                resolvedJumpCount = jumpCount;
+                resolvedJumpCount++;
                 ClearLandingTelegraph();
+            }
+            if (sequenceProgress >= 1f)
+            {
                 EndJump();
             }
         }
@@ -329,6 +358,7 @@ namespace TrickalFanGame.Enemy
 
         private void ResolveLanding(Vector2 impactPosition)
         {
+            GetComponent<BossMovementAnimator>()?.NotifyLanding();
             if (target == null || ((Vector2)target.position - impactPosition).sqrMagnitude >
                 landingRadius * landingRadius) return;
             Health targetHealth = target.GetComponentInParent<Health>();
@@ -471,13 +501,20 @@ namespace TrickalFanGame.Enemy
 
         private void SetVisualHeight(float height)
         {
+            visualHeight = height;
             if (visualTransform == null || visualTransform == transform) return;
             visualTransform.localPosition = groundedVisualPosition;
+            BossMovementAnimator animator = GetComponent<BossMovementAnimator>();
+            Sprite sprite = animator != null && animator.BodySprite != null ? animator.BodySprite
+                : visualTransform.GetComponent<SpriteRenderer>()?.sprite;
+            if (sprite != null)
+                visualTransform.localPosition += Vector3.up * sprite.bounds.min.y * (idleScale.y - visualTransform.localScale.y);
             visualTransform.position += Vector3.up * height;
         }
 
         private void EndJump()
         {
+            jumpPoseIndex = -1;
             if (jumping)
             {
                 for (int index = 0; index < jumpColliders.Length; index++)
@@ -499,7 +536,13 @@ namespace TrickalFanGame.Enemy
         private void ApplyScale(Vector2 scale)
         {
             if (visualTransform == null) visualTransform = GetComponentInChildren<SpriteRenderer>()?.transform;
-            if (visualTransform != null) visualTransform.localScale = new Vector3(scale.x, scale.y, 1f);
+            if (visualTransform != null)
+            {
+                // Temporarily disabled for comparing the artwork at its original proportions.
+                // visualTransform.localScale = new Vector3(scale.x, scale.y, 1f);
+                visualTransform.localScale = new Vector3(idleScale.x, idleScale.y, 1f);
+                SetVisualHeight(visualHeight);
+            }
         }
 
         private void ResolveComponents()

@@ -353,3 +353,25 @@ Week14 Encounter-1·2·3, Room-4·6·7, Week15 Enemy-5, Week18 Obstacle-2. 이 �
 별도 렌더 진입점은 시각 검토용 PNG를 만든다. 세부 범위와 수동 확인은
 [22-fairy-village-artwork.md](./22-fairy-village-artwork.md), 실행 메뉴는
 [05-development-setup.md](./05-development-setup.md)를 따른다. 기존 콘텐츠 Setup 이후에는 Artwork 적용을 다시 실행한다.
+
+## 일반 적 공격 Artwork 도구 (2026-10-04)
+
+`EnemyAttackAnimationSetup`은 일반 적 4종의 준비·공격·회복 포즈와 고혈당 요정의 파 투사체를
+프리팹에 연결한다. 반복 적용하며 기존 GUID와 전투 수치를 유지한다. 원본 일치 조건과 보스 경계
+제거로 소환 졸개/보스가 일반 적 공격 그림을 상속하는 것을 막는다.
+`EnemyAttackAnimationVerification`은 실제 전투 단계와 이동 표시의 우선순위, 물리 Transform·Collider
+고정, 넉백/비활성화 복원, 졸개 제외와 실제 발사 경로의 파 Sprite·색상·방향·속도·판정 크기를 검사한다.
+`ExportPreview`는 네 단계의 Unity 렌더를 `game/Logs/EnemyAttackPreview/`에 저장한다.
+메뉴와 Play 확인 항목은 [개발 환경](./05-development-setup.md)의 일반 적 공격 모션을 따른다.
+
+## 적·보스 이동 Artwork 도구 (2026-10-03)
+
+`EnemyMovementAnimationSetup`과 `BossMovementAnimationSetup`은 기존 프리팹의 표시용 컴포넌트와
+프레임·분리 레이어만 구성한다. 각각의 Verification은 반복 적용·GUID·물리 판정 보존·정지와 공격 억제·
+재활성화를 검사한다. 보스 검증은 실제 새마음금고 점프의 바닥 보물 고정·착지 반동과 Boss-0~3 회귀도
+확인한다. 두 렌더 진입점으로 Unity에서 주기별 PNG를 내보낸다. 자동 검증과 렌더는 통과했으며 실제
+Play Mode 가독성 확인은 남아 있다. 실행 메뉴와 배치는 [개발 환경 안내](./05-development-setup.md),
+범위와 체크리스트는 [요정왕국 적·보스 계획](./18-fairy-kingdom-enemy-boss-plan.md)을 따른다.
+
+2026-10-04 일반 적 도구에 크레용사용 소환 졸개 4종의 전용 걷기 에셋 적용과 공통 검증을 추가했다.
+별도 미리보기 메뉴로 네 포즈 주기의 Unity PNG를 생성하며, 기존 보스 소환 회귀와 함께 통과했다.

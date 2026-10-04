@@ -82,6 +82,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5137025722086317585}
+    - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4705972044401733503}
+    - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7242146462803268354}
   m_SourcePrefab: {fileID: 100100000, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
 --- !u!1 &7096289180192387305 stripped
 GameObject:
@@ -98,7 +104,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 630159b1d73c4d698638e42e95a53b30, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.LongRangeSniperController
   moveSpeed: 2.5
   detectionRange: 14
@@ -124,7 +130,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2448a35b34fa40a9bfe4363b9fe5c889, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackPresentation
   telegraphScale: {x: 1, y: 1}
   activeScale: {x: 1, y: 1}
@@ -239,3 +245,44 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &4705972044401733503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7096289180192387305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d246f996c0c688b41a3753dd434e55fa, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyMovementAnimator
+  motion: 0
+  motionMaterial: {fileID: 2100000, guid: ab8ab0ec49b0edf469edf1ab0b4d55d7, type: 2}
+  strideLength: 1
+  amplitude: 0
+  walkFrames:
+  - {fileID: 21300000, guid: 20a7b22f6ca2feb4492d64e804735274, type: 3}
+  - {fileID: 21300000, guid: 56c8255a9fb312f43a09ba59cd3ce9f0, type: 3}
+  - {fileID: 21300000, guid: 2148a2f9dab48db4f91e1c921d95f494, type: 3}
+  - {fileID: 21300000, guid: 0675f98f5a5b85c4db7c71c1428e70b7, type: 3}
+  walkReferenceSprite: {fileID: 21300000, guid: 89f5a572fe62ff9418c33b6930c08716, type: 3}
+--- !u!114 &7242146462803268354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7096289180192387305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5554c9e758ec2345b5c930bc27aa1c9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackArtwork
+  referenceSprite: {fileID: 21300000, guid: 89f5a572fe62ff9418c33b6930c08716, type: 3}
+  frames:
+  - {fileID: 21300000, guid: 05aa1a006d4c76e4183c4546247c7738, type: 3}
+  - {fileID: 21300000, guid: f21ea084fa9b3d04a893779fafc77c94, type: 3}
+  - {fileID: 21300000, guid: fa62f28b046bc7f44888a75bdf8a90f9, type: 3}
+  - {fileID: 21300000, guid: 07f542f15215fea4681b2394f65ea8c0, type: 3}
+  projectileSprite: {fileID: 21300000, guid: 2d1310d27f0334542addc98b47b90c62, type: 3}

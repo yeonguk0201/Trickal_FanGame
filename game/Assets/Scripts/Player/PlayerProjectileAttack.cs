@@ -69,7 +69,7 @@ namespace TrickalFanGame.Player
         private void Update()
         {
             if (Time.timeScale <= 0f) return;
-            if (!CanAttack || Time.time < nextAttackTime || !TryReadAttackDirection(out Vector2 direction))
+            if (!CanAttack || Time.time < nextAttackTime || !PlayerAttack.TryReadAttackDirection(out Vector2 direction))
             {
                 return;
             }
@@ -135,19 +135,5 @@ namespace TrickalFanGame.Player
                 direction.x * sine + direction.y * cosine);
         }
 
-        private static bool TryReadAttackDirection(out Vector2 direction)
-        {
-            Keyboard keyboard = Keyboard.current;
-            if (keyboard != null)
-            {
-                if (keyboard.leftArrowKey.isPressed) { direction = Vector2.left; return true; }
-                if (keyboard.rightArrowKey.isPressed) { direction = Vector2.right; return true; }
-                if (keyboard.downArrowKey.isPressed) { direction = Vector2.down; return true; }
-                if (keyboard.upArrowKey.isPressed) { direction = Vector2.up; return true; }
-            }
-
-            direction = Vector2.zero;
-            return false;
-        }
     }
 }

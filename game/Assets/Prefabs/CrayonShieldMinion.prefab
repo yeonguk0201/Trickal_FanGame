@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 2267487297711112900}
   - component: {fileID: 631700262731000456}
   - component: {fileID: 7391070505766005571}
+  - component: {fileID: 3040447778529561264}
   m_Layer: 6
   m_Name: CrayonShieldMinion
   m_TagString: Untagged
@@ -174,10 +175,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 40
   currentShield: 0
+  useHealthUnits: 0
 --- !u!114 &857411489093036311
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,7 +190,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b65f8e205289b64b91a50cb0721cb5a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.TestEnemy
   allowsSPDrop: 0
   destroyOnBossCollision: 0
@@ -202,7 +204,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
   damageTier: 0
   cooldown: 1
@@ -216,7 +218,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f54127202aaa284d837f6e0e8434051, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyChase
   moveSpeed: 3.5
   detectionRange: 6
@@ -232,7 +234,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
@@ -246,7 +248,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa527e4c75f4de29f4975b643b25cab, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyBehaviorContext
 --- !u!114 &631700262731000456
 MonoBehaviour:
@@ -258,7 +260,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2448a35b34fa40a9bfe4363b9fe5c889, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackPresentation
   telegraphScale: {x: 1, y: 1}
   activeScale: {x: 1, y: 1}
@@ -273,7 +275,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a5d48cde2f894e368eb80c129624af0e, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.MeleeEnemyAttack
   attackRange: 1.15
   telegraphDuration: 0.4
@@ -281,3 +283,25 @@ MonoBehaviour:
   recoveryDuration: 0.65
   attackCooldown: 0.2
   damageTier: 1
+--- !u!114 &3040447778529561264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2407568717261891106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d246f996c0c688b41a3753dd434e55fa, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyMovementAnimator
+  motion: 0
+  motionMaterial: {fileID: 2100000, guid: ab8ab0ec49b0edf469edf1ab0b4d55d7, type: 2}
+  strideLength: 0.8
+  amplitude: 0
+  walkFrames:
+  - {fileID: 21300000, guid: 01cb309a81d68a04ba878b5ee9a95015, type: 3}
+  - {fileID: 21300000, guid: 4c2364824c48f8647bb93210eef6975f, type: 3}
+  - {fileID: 21300000, guid: 181e9530efd5b4e4ca184162a20436b4, type: 3}
+  - {fileID: 21300000, guid: e50630e8e477afd4db1403b38d0460fb, type: 3}
+  walkReferenceSprite: {fileID: 21300000, guid: 96b4c57e0b62d56428315073aa6a0f10, type: 3}

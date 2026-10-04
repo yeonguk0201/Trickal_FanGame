@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 7907375859331342769}
   - component: {fileID: 4591455748272535553}
   - component: {fileID: 2675726354441553869}
+  - component: {fileID: 73491838197361982}
   m_Layer: 6
   m_Name: CrayonArcherMinion
   m_TagString: Untagged
@@ -173,10 +174,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 30
   currentShield: 0
+  useHealthUnits: 0
 --- !u!114 &7339053098682609737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,7 +189,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b65f8e205289b64b91a50cb0721cb5a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.TestEnemy
   allowsSPDrop: 0
   destroyOnBossCollision: 0
@@ -201,7 +203,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
@@ -215,7 +217,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa527e4c75f4de29f4975b643b25cab, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyBehaviorContext
 --- !u!114 &7907375859331342769
 MonoBehaviour:
@@ -227,7 +229,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 630159b1d73c4d698638e42e95a53b30, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.LongRangeSniperController
   moveSpeed: 2.5
   detectionRange: 14
@@ -253,7 +255,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2448a35b34fa40a9bfe4363b9fe5c889, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackPresentation
   telegraphScale: {x: 1, y: 1}
   activeScale: {x: 1, y: 1}
@@ -368,3 +370,25 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &73491838197361982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1716652274724679613}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d246f996c0c688b41a3753dd434e55fa, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyMovementAnimator
+  motion: 0
+  motionMaterial: {fileID: 2100000, guid: ab8ab0ec49b0edf469edf1ab0b4d55d7, type: 2}
+  strideLength: 1
+  amplitude: 0
+  walkFrames:
+  - {fileID: 21300000, guid: 60fd0f3a62fbcb248b565321174d1374, type: 3}
+  - {fileID: 21300000, guid: 61db5990cd152994da5b5bbc12e8559e, type: 3}
+  - {fileID: 21300000, guid: 68b4926a1eda429498d6ab4d5efcf47e, type: 3}
+  - {fileID: 21300000, guid: acc4cc29077d17f45959aa1e56c95c1d, type: 3}
+  walkReferenceSprite: {fileID: 21300000, guid: fd27228cfd4f7f54590e8a9ed176319e, type: 3}

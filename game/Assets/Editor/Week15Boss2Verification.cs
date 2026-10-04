@@ -117,8 +117,8 @@ namespace TrickalFanGame.Editor
                 runtime.OnPatternStateChanged(BossActionState.Telegraph,
                     BossPatternExecution.SaemaeumJumpSequence, 0.95f);
                 Vector3 rootScale = root.transform.localScale;
-                Assert(runtime.CurrentVisualScale.x > runtime.CurrentVisualScale.y * 1.8f,
-                    "Dangerous jump crouch must be substantially wider and lower than idle movement.");
+                Assert(runtime.CurrentVisualScale == Vector3.one,
+                    "Jump preparation must keep original artwork proportions while runtime deformation is disabled.");
                 Assert(root.transform.localScale == rootScale,
                     "Jump crouch changed the root scale and therefore the collision silhouette.");
                 runtime.OnPatternStateChanged(BossActionState.Active,
@@ -127,8 +127,8 @@ namespace TrickalFanGame.Editor
                 float flightSampleTime = GetPrivateField<float>(runtime, "phaseOneJumpDuration") * 0.5f;
                 runtime.TickPattern(BossActionState.Active,
                     BossPatternExecution.SaemaeumJumpSequence, flightSampleTime);
-                Assert(runtime.CurrentVisualScale.y > runtime.CurrentVisualScale.x * 1.5f,
-                    "Boss-2 flight must stretch vertically so it cannot be mistaken for ordinary movement.");
+                Assert(runtime.CurrentVisualScale == Vector3.one,
+                    "Boss-2 flight must keep original artwork proportions while runtime deformation is disabled.");
                 Assert(root.transform.localScale == rootScale,
                     "Jump flight changed the root scale and therefore the collision silhouette.");
                 Assert(boss.OwnedObjectCount == 1,

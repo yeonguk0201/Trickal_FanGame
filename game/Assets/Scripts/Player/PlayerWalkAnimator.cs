@@ -91,7 +91,7 @@ namespace TrickalFanGame.Player
             {
                 elapsed = 0f;
                 frameIndex = 0;
-                spriteRenderer.sprite = idleSprite;
+                spriteRenderer.sprite = movement.IsAimingAttack ? SelectFrames(movement.FacingDirection)[0] : idleSprite;
                 return;
             }
 
