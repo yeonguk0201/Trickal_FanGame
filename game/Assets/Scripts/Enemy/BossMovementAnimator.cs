@@ -15,6 +15,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private Sprite bodySprite;
         [SerializeField] private Sprite[] walkFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] hopFrames = Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] healFrames = Array.Empty<Sprite>();
         [SerializeField] private SpriteRenderer[] groundTreasures = Array.Empty<SpriteRenderer>();
         [SerializeField, Min(0.1f)] private float strideLength = 1.4f;
         [SerializeField, Min(0f)] private float hopHeight = 0.45f;
@@ -45,6 +46,9 @@ namespace TrickalFanGame.Enemy
         public Sprite GetWalkFrame(int i) => walkFrames[i];
         public int HopFrameCount => hopFrames.Length;
         public Sprite GetHopFrame(int i) => hopFrames[i];
+        public int HealFrameCount => healFrames.Length;
+        public Sprite GetHealFrame(int i) => healFrames[i];
+        public void ConfigureHealing(Sprite[] frames) => healFrames = frames ?? Array.Empty<Sprite>();
         public int TreasureCount => groundTreasures.Length;
         public SpriteRenderer GetTreasure(int i) => groundTreasures[i];
         public bool IsAnimating => moving;
@@ -181,6 +185,13 @@ namespace TrickalFanGame.Enemy
             {
                 if (animate && walkFrames.Length > 0)
                     artwork.sprite = walkFrames[Mathf.FloorToInt(Mathf.Repeat(progress, 1f) * walkFrames.Length)];
+                return;
+            }
+            if (style == BossMovementStyle.VaultHop && vault != null && vault.HealPoseIndex >= 0 &&
+                healFrames.Length == 4 && healFrames[vault.HealPoseIndex] != null &&
+                !boss.IsActionSuppressed && boss.State != BossActionState.PhaseTransition)
+            {
+                artwork.sprite = healFrames[vault.HealPoseIndex];
                 return;
             }
             if (hopFrames.Length == 4)

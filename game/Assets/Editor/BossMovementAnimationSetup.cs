@@ -26,6 +26,8 @@ namespace TrickalFanGame.Editor
             Sprite vaultBody = Import(Folder + "/Vault_Body.png");
             Sprite left = Import(Folder + "/Vault_Ground_Left.png");
             Sprite right = Import(Folder + "/Vault_Ground_Right.png");
+            Sprite[] healFrames = new Sprite[4];
+            for (int i = 0; i < healFrames.Length; i++) healFrames[i] = Import($"{Folder}/Vault_Heal_{i}.png");
             for (int i = 0; i < PrefabPaths.Length; i++)
             {
                 GameObject root = PrefabUtility.LoadPrefabContents(PrefabPaths[i]);
@@ -47,6 +49,7 @@ namespace TrickalFanGame.Editor
                     animator.Configure((BossMovementStyle)i, source, i == 1 ? vaultBody : null,
                         i == 2 ? frames : Array.Empty<Sprite>(), treasures,
                         i == 2 ? 1.6f : 1.35f, i == 0 ? 0.48f : 0.42f, i < 2 ? hopFrames[i] : null);
+                    if (i == 1) animator.ConfigureHealing(healFrames);
                     if (PrefabUtility.SaveAsPrefabAsset(root, PrefabPaths[i]) == null)
                         throw new InvalidOperationException("Could not save " + PrefabPaths[i]);
                 }

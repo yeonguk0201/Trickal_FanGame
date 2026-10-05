@@ -1110,3 +1110,18 @@ Q 고학년 돌격에서 한 손으로 지팡이를 든 준비·달리기 그림
 2026-10-05 고학년 그림 및 걷기·고학년·저학년 회귀 통과 (`game/Logs/erpin-one-hand-high-grade.log`, 종료 코드 0).
 Play Mode에서 새 Run의 Q 돌격·WASD 방향 전환·적/보스 충돌과 회복, Q 취소·시간 종료를 확인한다.
 `game/Logs/ErpinHighGradePreview/erpin-one-hand-complete.gif`는 포즈 비교용이다.
+
+### 새마음금고 보석 회복 모션
+
+회복 예고에서 보석을 들고 뒤돌고, 회복 중에는 등 보이는 두 씹기 포즈를 번갈아 재생한다.
+회복 종료 후 정면 복귀 포즈를 짧게 보여주고 기존 정면으로 돌아온다. 회복량·지급 타이밍은 유지한다.
+
+- 적용 프리팹: `Assets/Prefabs/SaemaeumVaultBoss.prefab` (회복 프레임 연결 완료)
+- 재구성: `Trickal Fan Game > Artwork > Setup Boss Movement Animations`
+- 검증: `Trickal Fan Game > Artwork > Verify Vault Healing Animation`
+- 배치: `-executeMethod TrickalFanGame.Editor.VaultHealingAnimationVerification.Verify`
+- [에셋·프롬프트·수동 확인](./art-prompts/vault-healing.md)
+
+2026-10-06 배치는 프로젝트 잠금과 열린 Editor가 있는 상태에서 검증 진입 전에 종료 코드 1로 끝났다
+(`game/Logs/VaultHealingVerification.log`). 자동 통과·Play 확인은 미완료다. 열린 Editor에서 검증 메뉴와
+`Trickal Fan Game > Debug > Open Boss-2 Test Room`의 1페이즈 회복을 확인한다.
