@@ -242,7 +242,10 @@ namespace TrickalFanGame.Enemy
         {
             if (target == null) return;
             Vector2 current = transform.position;
-            Vector2 direction = ((Vector2)target.position - current).normalized;
+            Vector2 offset = (Vector2)target.position - current;
+            Vector2 direction = offset.magnitude > BossTargetSpacing.ResolveStopDistance(gameObject, target)
+                ? offset.normalized
+                : Vector2.zero;
             Rect movementArea = ShrinkArena();
             if ((current.x <= movementArea.xMin && direction.x < 0f) ||
                 (current.x >= movementArea.xMax && direction.x > 0f)) direction.x = 0f;

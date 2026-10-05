@@ -38,6 +38,10 @@ namespace TrickalFanGame.Player
             {
                 gameObject.AddComponent<DamageInvulnerability>();
             }
+            if (GetComponent<PlayerHitPassThrough>() == null)
+            {
+                gameObject.AddComponent<PlayerHitPassThrough>();
+            }
         }
 
         private void Update()
