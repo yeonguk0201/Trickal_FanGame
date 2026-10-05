@@ -18,6 +18,7 @@ namespace TrickalFanGame.Enemy
         private Transform target;
         private Health targetHealth;
         private bool controllerMovementSuppressed;
+        private bool controllerVelocityOwned;
 
         public bool IsAlerted { get; private set; }
         public Transform Target => target;
@@ -109,8 +110,20 @@ namespace TrickalFanGame.Enemy
             }
         }
 
+        // A controller that moves the body itself during an action (a melee lunge) owns the velocity, so suppressed
+        // movement components do not zero it between that controller's ticks.
+        public void SetControllerVelocityOwned(bool owned)
+        {
+            controllerVelocityOwned = owned;
+        }
+
         public void StopForSuppression()
         {
+            if (controllerVelocityOwned && !IsActionSuppressed)
+            {
+                return;
+            }
+
             if (body != null && (knockback == null || !knockback.IsKnockedBack))
             {
                 body.linearVelocity = Vector2.zero;
@@ -121,6 +134,7 @@ namespace TrickalFanGame.Enemy
         {
             IsAlerted = false;
             controllerMovementSuppressed = false;
+            controllerVelocityOwned = false;
             knockback?.Stop();
             StopForSuppression();
         }
