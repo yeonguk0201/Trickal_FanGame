@@ -16,6 +16,9 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private Sprite[] walkFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] hopFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] healFrames = Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] crayonAttackFrames = Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] goldenAttackFrames = Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] awakeningFrames = Array.Empty<Sprite>();
         [SerializeField] private SpriteRenderer[] groundTreasures = Array.Empty<SpriteRenderer>();
         [SerializeField, Min(0.1f)] private float strideLength = 1.4f;
         [SerializeField, Min(0f)] private float hopHeight = 0.45f;
@@ -49,6 +52,18 @@ namespace TrickalFanGame.Enemy
         public int HealFrameCount => healFrames.Length;
         public Sprite GetHealFrame(int i) => healFrames[i];
         public void ConfigureHealing(Sprite[] frames) => healFrames = frames ?? Array.Empty<Sprite>();
+        public void ConfigureCrayonAttacks(Sprite[] frames) => crayonAttackFrames = frames ?? Array.Empty<Sprite>();
+        public int CrayonAttackFrameCount => crayonAttackFrames.Length;
+        public Sprite GetCrayonAttackFrame(int i) => crayonAttackFrames[i];
+        public int GoldenAttackFrameCount => goldenAttackFrames.Length;
+        public Sprite GetGoldenAttackFrame(int i) => goldenAttackFrames[i];
+        public void ConfigureGoldenAttacks(Sprite[] frames) => goldenAttackFrames = frames ?? Array.Empty<Sprite>();
+        public int AwakeningFrameCount => awakeningFrames.Length;
+        public Sprite GetAwakeningFrame(int i) => awakeningFrames[i];
+        public void ConfigureAwakening(Sprite[] transition)
+        {
+            awakeningFrames = transition ?? Array.Empty<Sprite>();
+        }
         public int TreasureCount => groundTreasures.Length;
         public SpriteRenderer GetTreasure(int i) => groundTreasures[i];
         public bool IsAnimating => moving;
@@ -183,6 +198,34 @@ namespace TrickalFanGame.Enemy
             }
             if (style == BossMovementStyle.CrayonWalk)
             {
+                if (boss.State == BossActionState.PhaseTransition && awakeningFrames.Length == 4)
+                {
+                    float elapsed = boss.PhaseTransitionDuration - Mathf.Max(0f, boss.StateEndsAt - Time.time);
+                    int frame = Mathf.Clamp(Mathf.FloorToInt(elapsed / Mathf.Max(0.001f, boss.PhaseTransitionDuration) * 4f), 0, 3);
+                    if (awakeningFrames[frame] != null) artwork.sprite = awakeningFrames[frame];
+                    if (frame == 2)
+                    {
+                        float settle = Mathf.Clamp01(elapsed / Mathf.Max(0.001f, boss.PhaseTransitionDuration) * 4f - 2f);
+                        artwork.color = Color.Lerp(new Color(1.4f, 1.4f, 1.4f, source.color.a), source.color, settle);
+                        artwork.transform.localScale = Vector3.one * Mathf.Lerp(1.035f, 1f, settle);
+                    }
+                    return;
+                }
+                bool golden = boss.CurrentPhase >= 2 && knight != null && knight.AwakenedSprite != null;
+                Sprite[] attacks = golden ? goldenAttackFrames : crayonAttackFrames;
+                if (knight != null && knight.AttackPoseIndex >= 0 && attacks.Length == 14 &&
+                    attacks[knight.AttackPoseIndex] != null && !boss.IsActionSuppressed &&
+                    boss.State != BossActionState.PhaseTransition && boss.State != BossActionState.Defeated)
+                {
+                    artwork.sprite = attacks[knight.AttackPoseIndex];
+                    return;
+                }
+                // Awaiting dedicated golden walking poses: keep the supplied awakened body between attacks.
+                if (golden)
+                {
+                    artwork.sprite = knight.AwakenedSprite;
+                    return;
+                }
                 if (animate && walkFrames.Length > 0)
                     artwork.sprite = walkFrames[Mathf.FloorToInt(Mathf.Repeat(progress, 1f) * walkFrames.Length)];
                 return;

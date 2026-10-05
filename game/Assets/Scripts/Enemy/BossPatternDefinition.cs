@@ -25,16 +25,20 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private string patternId = "boss-pattern";
         [SerializeField] private BossPatternExecution execution = BossPatternExecution.SignalOnly;
         [SerializeField, Min(0.01f)] private float telegraphDuration = 0.5f;
+        // Fixed warning time remains the same when a later phase speeds up the pattern.
+        [SerializeField, Min(0f)] private float additionalTelegraphDuration;
         [SerializeField, Min(0.01f)] private float activeDuration = 0.2f;
         [SerializeField, Min(0.01f)] private float recoveryDuration = 0.5f;
         [SerializeField, Min(0f)] private float reuseCooldown = 1f;
 
         public BossPatternDefinition(string patternId, BossPatternExecution execution,
-            float telegraphDuration, float activeDuration, float recoveryDuration, float reuseCooldown)
+            float telegraphDuration, float activeDuration, float recoveryDuration, float reuseCooldown,
+            float additionalTelegraphDuration = 0f)
         {
             this.patternId = string.IsNullOrWhiteSpace(patternId) ? "boss-pattern" : patternId.Trim();
             this.execution = execution;
             this.telegraphDuration = Mathf.Max(0.01f, telegraphDuration);
+            this.additionalTelegraphDuration = Mathf.Max(0f, additionalTelegraphDuration);
             this.activeDuration = Mathf.Max(0.01f, activeDuration);
             this.recoveryDuration = Mathf.Max(0.01f, recoveryDuration);
             this.reuseCooldown = Mathf.Max(0f, reuseCooldown);
@@ -43,6 +47,8 @@ namespace TrickalFanGame.Enemy
         public string PatternId => string.IsNullOrWhiteSpace(patternId) ? "boss-pattern" : patternId.Trim();
         public BossPatternExecution Execution => execution;
         public float TelegraphDuration => Mathf.Max(0.01f, telegraphDuration);
+        public float GetTelegraphDuration(float tempoMultiplier) =>
+            Mathf.Max(0.01f, TelegraphDuration * tempoMultiplier + Mathf.Max(0f, additionalTelegraphDuration));
         public float ActiveDuration => Mathf.Max(0.01f, activeDuration);
         public float RecoveryDuration => Mathf.Max(0.01f, recoveryDuration);
         public float ReuseCooldown => Mathf.Max(0f, reuseCooldown);

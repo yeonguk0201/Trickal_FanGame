@@ -268,7 +268,8 @@ MonoBehaviour:
   patterns:
   - patternId: crayon-map-cleaving-slash
     execution: 8
-    telegraphDuration: 1.05
+    telegraphDuration: 1.3
+    additionalTelegraphDuration: 1.35
     activeDuration: 0.32
     recoveryDuration: 1.05
     reuseCooldown: 0
@@ -360,7 +361,7 @@ MonoBehaviour:
   slashSelectionWeight: 15
   arenaPadding: 0.7
   fallbackHalfExtents: {x: 7.5, y: 5.5}
-  phaseTwoColor: {r: 1, g: 0.78, b: 0.18, a: 1}
+  awakenedSprite: {fileID: 21300000, guid: 7badf55ec3f541969562e7b933298707, type: 3}
 --- !u!114 &4214231554976169602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -382,6 +383,41 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d5c21565b092ff54c9b87eaccf39faed, type: 3}
   - {fileID: 21300000, guid: 97dcd5c743d0ea3458b32ad8e293432b, type: 3}
   hopFrames: []
+  crayonAttackFrames:
+  - {fileID: 21300000, guid: 773b6efc33a4416b81c6a936cc2a8f37, type: 3}
+  - {fileID: 21300000, guid: 5eb5380a709a40ad9848fbcd7a9d6e03, type: 3}
+  - {fileID: 21300000, guid: 984319141f5741378887b21b5cfe6897, type: 3}
+  - {fileID: 21300000, guid: d31224014fbd4ffa9319210266450f8f, type: 3}
+  - {fileID: 21300000, guid: 8e442ccf3aee4c50be40590fbd820c4e, type: 3}
+  - {fileID: 21300000, guid: d82fb6c0e3ff47d190687e6c694d4d46, type: 3}
+  - {fileID: 21300000, guid: 79add901f2124bd48cb73603e27a8958, type: 3}
+  - {fileID: 21300000, guid: c3b89b80461444f9aea37c81b67b2d11, type: 3}
+  - {fileID: 21300000, guid: 71705e9b22d4445c81be4fad15003b9a, type: 3}
+  - {fileID: 21300000, guid: ea57f7fafb454154b7bea53bf28753a1, type: 3}
+  - {fileID: 21300000, guid: 35f94f79e2144dc98007dc062672a672, type: 3}
+  - {fileID: 21300000, guid: 377c499b864d459eb45bd16416669063, type: 3}
+  - {fileID: 21300000, guid: 92e3514ffe564d49a3ebe7c030cda18a, type: 3}
+  - {fileID: 21300000, guid: 3023325219f84c259c8e68891ef7f971, type: 3}
+  goldenAttackFrames:
+  - {fileID: 21300000, guid: 1d27e3b288ca4bcca60f831f0a70923f, type: 3}
+  - {fileID: 21300000, guid: eff4458c11254e3887e935d2e0e7d538, type: 3}
+  - {fileID: 21300000, guid: 39c88ec6185b4491aa4085b359ea2d09, type: 3}
+  - {fileID: 21300000, guid: 58ee4be9ea6a4f5dbf55f555d1440a7f, type: 3}
+  - {fileID: 21300000, guid: 4127c68c968847e6bef544c80ffdb03f, type: 3}
+  - {fileID: 21300000, guid: e04fc83ccdf64bfbbabe3c3b6352ecc6, type: 3}
+  - {fileID: 21300000, guid: 0d2720000b054265b84ee1f28248053a, type: 3}
+  - {fileID: 21300000, guid: 87a000a8c3a34837940422f4cae4288b, type: 3}
+  - {fileID: 21300000, guid: 0dadb134ff194a099ef3359fa7ec4137, type: 3}
+  - {fileID: 21300000, guid: b79bbe07214e42a99706bd55c025df4b, type: 3}
+  - {fileID: 21300000, guid: 5c4aefa937a147c796673459bc067765, type: 3}
+  - {fileID: 21300000, guid: d0ea3c7e8ce04ec39a05449d853ce66f, type: 3}
+  - {fileID: 21300000, guid: 601e226afd884dc2a89e3ed08e8d3430, type: 3}
+  - {fileID: 21300000, guid: 777c7801c2ed4ff9871fc58d865d0421, type: 3}
+  awakeningFrames:
+  - {fileID: 21300000, guid: 6a260a3a3b724bb48a14ad10ffd6b501, type: 3}
+  - {fileID: 21300000, guid: 5fb0eb48f07b1e34f91adadfca9eaa49, type: 3}
+  - {fileID: 21300000, guid: 02853204a17ac11468455902c6321ae2, type: 3}
+  - {fileID: 21300000, guid: e86f25c3eabc45140ac8f164536136eb, type: 3}
   groundTreasures: []
   strideLength: 1.6
   hopHeight: 0.42

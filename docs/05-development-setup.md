@@ -1194,3 +1194,54 @@ Play Mode에서 새 Run의 Q 돌격·WASD 방향 전환·적/보스 충돌과 �
 2026-10-06 배치는 프로젝트 잠금과 열린 Editor가 있는 상태에서 검증 진입 전에 종료 코드 1로 끝났다
 (`game/Logs/VaultHealingVerification.log`). 자동 통과·Play 확인은 미완료다. 열린 Editor에서 검증 메뉴와
 `Trickal Fan Game > Debug > Open Boss-2 Test Room`의 1페이즈 회복을 확인한다.
+
+### 크레용사용 일반 공격·대시·내려찍기 모션
+
+2026-10-06 후속 수정: 시트에 최소 112px 셀 여백을 확보하고 해당 포즈의 픽셀만 분리하여
+이웃 조각을 제거했다. 최종 16장 모두 1024px 캔버스·8px 투명 테두리·단일 연결 영역 검사를 통과했다.
+차징은 작은 노란 아우라 → 높은 주황 아우라 → 큰 붉은 아우라로 누적되고, 마지막 단계가 타격 직전까지
+남는다. 프리팹은 14개 Sprite를 사용한다. 이번 Unity 배치는 열린 프로젝트 잠금으로 검증 진입 전에
+종료했다 (`game/Logs/CrayonHeroAuraVerification.log`). 아래 초기 발광 버전의 성공 기록은 새 아우라
+버전의 검증 결과가 아니므로 열린 Editor에서 위 검증 메뉴를 다시 실행한다.
+
+일반 공격은 머리 위에서 내려 베고, 연속 대시는 위→아래·아래→위 대각선을 번갈아 사용한다.
+내려찍기는 예고 시작부터 실제 타격 시각까지 아우라를 세 단계로 누적하고, 기존 피해 판정 틱에
+내려찍는 그림으로 바뀐다. 황금 2페이즈의 짧은 예고 시간에도 차징 세 단계를 유지한다.
+
+- 적용: `Assets/Prefabs/CrayonHeroBoss.prefab` (공격·아우라 14개 Sprite 연결 완료)
+- 재구성: `Trickal Fan Game > Artwork > Setup Boss Movement Animations`
+- 검증: `Trickal Fan Game > Artwork > Verify Crayon Hero Attack Animations`
+- 배치: `-executeMethod TrickalFanGame.Editor.CrayonHeroAttackAnimationVerification.Verify`
+- [에셋·프롬프트·타이밍·검증 기록](./art-prompts/crayon-hero-attacks.md)
+
+2026-10-06 최종 프레임 대상 검증과 기존 보스 이동 검증 통과, 배치 종료 코드 0
+(`game/Logs/CrayonHeroAttackFocusedVerification.log`). 더 넓은 Boss-3 회귀는 대상 검증 이후
+기존 Boss-2 Game Scene 조립기·프리팹 참조 검사에서 실패했다. Play 확인은
+`Trickal Fan Game > Debug > Open Boss Test Room` → `Boss 3 - Crayon Hero` 선택 후 진행한다.
+### 크레용사용 각성 본체와 2페이즈 진입 표시
+
+제공된 흰금색 보석·노란 망토·빛 날개 원본을 각성 본체로 연결했다. 기존 금색 곱하기는 제거했다.
+1.25초 전환에서 칼을 머리 위로 쭉 뻗고, 빛 날개를 펼치며 각성 모습으로 바뀐 뒤 원본 자세로 정착한다.
+본체/전환 파일과 재현 방법은 [각성 에셋 기록](./art-prompts/crayon-hero-awakening.md)을 참조한다.
+
+정적 검사는 `./scripts/verify-crayon-awakening.ps1`로 실행한다. Unity 검증 메뉴는
+`Trickal Fan Game > Artwork > Verify Crayon Hero Awakening`이다. 칼을 위로 뻗고 날개를 펼치는
+수정 후 Unity 배치 검증은 종료 코드 0과 성공 로그를 확인했으며, 실제 Play Mode 화면 확인은 별도다.
+BossTestScene 또는 새 Run에서 HP를 50% 이하로 낮춰 순간 변신과 각성 본체 유지를 확인한다.
+
+### 크레용사용 각성 공격과 금빛 차징
+
+각성 원본을 기준으로 일반 하향 베기·교차 대시·내려찍기와 3단계 금빛 검 아우라를 연결했다.
+공격 프레임은 2페이즈의 실제 공격 포즈 인덱스를 사용하며, 완료 후 원본 각성 자세로 돌아온다.
+아우라는 실제 내려찍기 시각까지 세 단계로 커지고 마지막 단계가 피해 직전까지 유지된다.
+프롬프트·에셋·재현 방법은 [각성 공격 기록](./art-prompts/crayon-hero-golden-attacks.md)을 참조한다.
+
+정적 검사: `./scripts/verify-crayon-awakening.ps1 -GoldenAttacks`.
+Unity 메뉴: `Trickal Fan Game > Artwork > Verify Crayon Hero Golden Attacks`.
+전체 `Verify Crayon Hero Attack Animations` 배치는 종료 코드 0과 성공 로그를 확인했다.
+일반/각성 피해 시점·대시 교대·3단계 충전·변신과 대기 복원·보스 이동 회귀를 검증했으며,
+실제 Play Mode에서 공격 이펙트와 날개, 3회 금빛 충전의 가독성은 별도로 확인한다.
+
+2026-10-06 내려찍기 차징 시간을 조정했다. Prefab과 Week15Boss3Setup의 예고를 1.05 → 1.30초로 맞추었고 방향 고정 후 0.2초는 유지했다. 총 차징은 일반 1.50초, 각성 1.214초이며 아우라 3단계는 실제 피해 시각까지 자동으로 분배된다. 검증기는 Prefab의 실제 패턴 시간을 읽어 검사한다. Unity 6000.3.22f1의 CrayonHeroAttackAnimationVerification.Verify 배치가 종료 코드 0으로 통과했다(로그: game/Logs/CrayonHeroChargeDurationVerification.log). 실제 화면 확인은 별도다.
+
+2026-10-06 추가 조정: 내려찍기 전체 차징에 일반·각성 모두 1.35초씩 추가했다. 일반은 1.50 → 2.85초, 각성은 1.214 → 2.564초이다. BossPatternDefinition.additionalTelegraphDuration은 페이즈 배속을 적용한 예고에 고정 시간으로 더하며, 해당 Prefab과 Setup의 내려찍기만 1.35로 설정했다. 방향 고정 0.2초와 아우라 3단계/피해 동기화는 유지한다. Unity CrayonHeroAttackAnimationVerification.Verify가 종료 코드 0으로 통과했다(로그: game/Logs/CrayonHeroChargeExtensionVerification.log). 실제 화면 확인은 별도다.

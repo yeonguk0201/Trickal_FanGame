@@ -28,6 +28,15 @@ namespace TrickalFanGame.Editor
             Sprite right = Import(Folder + "/Vault_Ground_Right.png");
             Sprite[] healFrames = new Sprite[4];
             for (int i = 0; i < healFrames.Length; i++) healFrames[i] = Import($"{Folder}/Vault_Heal_{i}.png");
+            Sprite[] attacks = new Sprite[14];
+            string[] attackNames = { "Swing", "Dash", "Slam" };
+            for (int group = 0; group < 3; group++)
+                for (int pose = 0; pose < 4; pose++)
+                    attacks[group * 4 + pose] = Import($"{Folder}/CrayonHero_{attackNames[group]}_{pose}.png");
+            attacks[8] = Import($"{Folder}/CrayonHero_SlamCharge_0.png");
+            attacks[9] = Import($"{Folder}/CrayonHero_SlamCharge_1.png");
+            attacks[12] = Import($"{Folder}/CrayonHero_SlamCharge_2.png");
+            attacks[13] = Import($"{Folder}/CrayonHero_SlamCharge_3.png");
             for (int i = 0; i < PrefabPaths.Length; i++)
             {
                 GameObject root = PrefabUtility.LoadPrefabContents(PrefabPaths[i]);
@@ -50,6 +59,11 @@ namespace TrickalFanGame.Editor
                         i == 2 ? frames : Array.Empty<Sprite>(), treasures,
                         i == 2 ? 1.6f : 1.35f, i == 0 ? 0.48f : 0.42f, i < 2 ? hopFrames[i] : null);
                     if (i == 1) animator.ConfigureHealing(healFrames);
+                    if (i == 2)
+                    {
+                        animator.ConfigureCrayonAttacks(attacks);
+                        ConfigureGoldenFrames(animator);
+                    }
                     if (PrefabUtility.SaveAsPrefabAsset(root, PrefabPaths[i]) == null)
                         throw new InvalidOperationException("Could not save " + PrefabPaths[i]);
                 }
@@ -99,6 +113,25 @@ namespace TrickalFanGame.Editor
             Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
             if (sprite == null) throw new InvalidOperationException("Could not import " + path);
             return sprite;
+        }
+
+        private static void ConfigureGoldenFrames(BossMovementAnimator animator)
+        {
+            var transition = new Sprite[4];
+            for (int i = 0; i < 4; i++) transition[i] = Import($"{Folder}/CrayonHero_Awaken_{i}.png");
+            animator.ConfigureAwakening(transition);
+            var attacks = new Sprite[14];
+            string[] names = { "Swing", "Dash", "Slam" };
+            for (int group = 0; group < 3; group++)
+                for (int i = 0; i < 4; i++)
+                    attacks[group * 4 + i] = Import($"{Folder}/CrayonHero_Golden_{names[group]}_{i}.png");
+            attacks[8] = Import($"{Folder}/CrayonHero_Golden_SlamCharge_0.png");
+            attacks[9] = Import($"{Folder}/CrayonHero_Golden_SlamCharge_1.png");
+            attacks[12] = Import($"{Folder}/CrayonHero_Golden_SlamCharge_2.png");
+            attacks[13] = Import($"{Folder}/CrayonHero_Golden_SlamCharge_3.png");
+            animator.ConfigureGoldenAttacks(attacks);
+            animator.GetComponent<CrayonHeroBossPatternRuntime>().ConfigureAwakenedArtwork(
+                Import($"{Folder}/CrayonHero_Awakened.png"));
         }
     }
 }
