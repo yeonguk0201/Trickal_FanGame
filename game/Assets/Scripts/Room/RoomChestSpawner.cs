@@ -38,7 +38,7 @@ namespace TrickalFanGame.Room
     }
 
     // Chest-1: puts a chest into a room at a safe position and, when it opens, drops its rolled contents at free points
-    // around its solid body as ordinary floor pickups. The first position is stored in the chest's Run state, so a
+    // around its solid body as ordinary floor pickups (Chest-2: a golden special reward is an ordinary ItemPickup). The first position is stored in the chest's Run state, so a
     // rebuilt room puts the chest back on the same spot. An opened chest from an earlier build never drops again.
     public static class RoomChestSpawner
     {
@@ -125,7 +125,10 @@ namespace TrickalFanGame.Room
         {
             List<GameObject> spawned = new();
             if (table == null || chest == null || contents == null || site == null) return spawned;
-            int total = contents.Consumables.Count + (contents.Spell != null ? 1 : 0);
+            // Chest-2: the special reward skips artifacts the opening player already holds at their stack limit.
+            ItemDefinition special = table.ResolveSpecialReward(contents,
+                site.Player != null ? site.Player.GetComponentInParent<PlayerInventory>() : null);
+            int total = contents.Consumables.Count + (contents.Spell != null ? 1 : 0) + (special != null ? 1 : 0);
             Transform room = site.Room.transform;
             RoomObstacleLayout.TryCollectFootprints(site.Room.gameObject, out List<RoomObstacleFootprint> footprints,
                 out _);
@@ -147,6 +150,16 @@ namespace TrickalFanGame.Room
                     if (pickup.TryGetComponent(out RunResourcePickup resourcePickup))
                         resourcePickup.BindRunProgress(site.Progress);
                     spawned.Add(pickup);
+                    continue;
+                }
+
+                if (special != null && index == total - 1)
+                {
+                    ItemPickup artifact = UnityEngine.Object.Instantiate(table.ArtifactPickupPrefab, position,
+                        Quaternion.identity, site.Parent);
+                    artifact.name = $"Chest Artifact {special.ItemId} - {site.State.RoomId} {chest.ChestId}";
+                    artifact.Configure(special);
+                    spawned.Add(artifact.gameObject);
                     continue;
                 }
 

@@ -117,6 +117,7 @@ Layout 검증을 우회하므로 Game Scene이 아닌 별도 테스트 씬(아�
 - [x] 21주차 Spell-1(2026-10-02): `— Spell slot —` 보유 표시 줄에 저놈 잡아라 활성 시 `Room ATK +N%` 추가. `Drop` 목록은 일회용 에셋을 자동 수집하므로 새 버튼 코드는 없다. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 표시 확인은 수동 확인 대기
 - [x] 21주차 Spell-3(2026-10-02): 보유 표시 줄에 막판 스퍼트 활성 시 `Room ASPD +N% MS +N%` 추가(저놈 잡아라 `Room ATK`와 별도 표시). Spell-2 그건 내 잔상은 `Drop` 자동 수집만 사용하며 패널 코드 변경 없음. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 표시 확인은 수동 확인 대기
 - [x] 22주차 Chest-1(2026-10-03): `— Chest —` 섹션에 `Chest Normal`·`Chest Golden`·`Chest Diamond` 버튼 추가. 현재 방의 안전 위치에 `dev-chest-NN` 상자를 실제 상자 경로(방 상태 기록·1회 개봉·층 이탈 소멸)로 놓고 보조 Run으로 표시한다. 패널 회귀 `Week20DevPanelVerification.Verify`와 생성 경로 `Week22Chest1Verification` 통과, 버튼 조작은 수동 확인 대기
+- [x] 22주차 Flight-0(2026-10-03): `— Chest —` 아래 `Golden exclusive` 줄에 비행 여부 표시와 황금 전용 아티팩트 `Drop` 버튼 추가(보조 Run, 일반 `ItemPickup` 획득 경로). Chest-2 전까지 가짜 날개를 얻는 유일한 경로다. 패널 회귀 `Week20DevPanelVerification.Verify`와 획득 경로 `Week22Flight0Verification` 통과, 버튼 조작은 수동 확인 대기
 - [ ] 2단계: 적·장애물 배치 전용 테스트 씬
 
 - 공통 Editor 구성 유틸리티

@@ -162,8 +162,16 @@ namespace TrickalFanGame.Run
                             (effects != null && effects.IsRegenerating
                                 ? $"   SP regen {effects.RegenerationRemainingSeconds:F1}s"
                                 : string.Empty) +
+                            (effects != null && (effects.IsDamageRecoveryActive || effects.PendingRecoveryCount > 0)
+                                ? $"   Fruit {effects.DamageRecoveryRemainingSeconds:F1}s " +
+                                  $"heals {effects.PendingRecoveryCount}"
+                                : string.Empty) +
                             (effects != null && effects.RoomAttackDamagePercent > 0f
                                 ? $"   Room ATK +{effects.RoomAttackDamagePercent:P0}"
+                                : string.Empty) +
+                            (effects != null && effects.RoomCriticalDamagePercent > 0f
+                                ? $"   Room CRIT +{effects.RoomCriticalChancePercent:P0} " +
+                                  $"DMG +{effects.RoomCriticalDamagePercent:P0}"
                                 : string.Empty) +
                             (effects != null && effects.RoomAttackSpeedPercent > 0f
                                 ? $"   Room ASPD +{effects.RoomAttackSpeedPercent:P0} " +
@@ -222,6 +230,26 @@ namespace TrickalFanGame.Run
             }
 
             GUILayout.EndHorizontal();
+
+            // Flight-0: golden chest exclusive artifacts dropped directly as a normal floor pickup, without waiting
+            // for a golden chest's 25% special reward (Chest-2).
+            ChestContentTable table = assembler.ChestContentTable;
+            PlayerFlight flight = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<PlayerFlight>()
+                : null;
+            GUILayout.Label($"Golden exclusive   flying {(flight != null && flight.IsFlying ? "yes" : "no")}");
+            if (table.ArtifactPickupPrefab == null || assembler.Graph?.Player == null) return;
+            foreach (ItemDefinition artifact in table.GoldenExclusiveArtifacts)
+            {
+                if (artifact == null || !AssistedButton($"Drop {artifact.DisplayName}")) continue;
+                RoomPrefab room = CurrentRoom(assembler);
+                ItemPickup pickup = Instantiate(table.ArtifactPickupPrefab,
+                    assembler.Graph.Player.transform.position + Vector3.right * 1.2f, Quaternion.identity,
+                    room != null ? room.transform : null);
+                pickup.name = $"Item Pickup ({artifact.ItemId})";
+                pickup.Configure(artifact);
+                status = $"Dropped {artifact.DisplayName} next to the player.";
+            }
         }
 
         private static bool TrySpawnChest(RoomGraphAssembler assembler, ChestKind kind, out string message)

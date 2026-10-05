@@ -102,7 +102,8 @@ namespace TrickalFanGame.Editor
                 Physics2D.SyncTransforms();
                 WalkAndAssertArrival(start, goal, "cup-shaped obstacle");
 
-                // Sealed in: there is no route, so the navigator must fall back to the straight line.
+                // Sealed in: there is no route. Flight-0 (D3) replaced the straight-line fallback: the enemy walks to
+                // the reachable cell nearest the goal and holds there, which here is the cell it already stands in.
                 foreach (Vector2 cell in new[]
                          {
                              new Vector2(-1.5f, -1.5f), new Vector2(-1.5f, -0.5f), new Vector2(-1.5f, 0.5f),
@@ -115,9 +116,10 @@ namespace TrickalFanGame.Editor
                 Physics2D.SyncTransforms();
                 EnemyObstacleNavigator sealedNavigator = new();
                 Assert(!EnemyObstacleNavigator.TryFindPath(start, goal, EnemyRadius, new List<Vector2>()) &&
-                       Vector2.Dot(sealedNavigator.GetMoveDirection(start, goal, EnemyRadius, 0f), Vector2.right) >
-                       0.999f,
-                    "A sealed-in enemy must fall back to the straight direction instead of failing.");
+                       sealedNavigator.GetMoveDirection(start, goal, EnemyRadius, 0f).sqrMagnitude < 0.0001f &&
+                       !sealedNavigator.IsGoalReachable,
+                    "A sealed-in enemy must hold at the reachable point nearest the goal instead of pushing into " +
+                    "the wall.");
             }
             finally
             {

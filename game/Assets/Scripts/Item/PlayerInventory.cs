@@ -254,6 +254,14 @@ namespace TrickalFanGame.Item
                         }
                         lightning.Configure(effect.IntegerAmount, effect.Magnitude);
                         break;
+                    case ItemEffectType.Flight:
+                        PlayerFlight flight = GetComponent<PlayerFlight>();
+                        if (flight == null)
+                        {
+                            flight = gameObject.AddComponent<PlayerFlight>();
+                        }
+                        flight.TryStartFlying();
+                        break;
                     default:
                         // G-2 through G-6 connect the remaining validated contract types to runtime systems.
                         break;

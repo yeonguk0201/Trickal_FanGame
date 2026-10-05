@@ -1,11 +1,15 @@
 using System.Collections.Generic;
+using TrickalFanGame.Room;
 using UnityEngine;
 
 namespace TrickalFanGame.Enemy
 {
     // Obstacle-0 movement rule: walk straight while the body-sized line to the goal is clear, otherwise follow an
     // A* path over a 0.5-unit grid of Environment-free cells. Rooms are small and hand-authored, so the grid is built
-    // on demand around the enemy and its goal instead of baked per room.
+    // on demand around the enemy and its goal instead of baked per room. Terrain-0: walking also avoids pits, while
+    // lines of fire only check Environment because projectiles pass over pits. Flight-0 (D3): when the goal cannot be
+    // reached on foot (a flying player over a pit or obstacle, or a sealed-off target), the enemy walks to the reachable
+    // cell nearest the goal and holds there instead of pushing into the edge.
     public sealed class EnemyObstacleNavigator
     {
         public const float CellSize = 0.5f;
@@ -29,11 +33,20 @@ namespace TrickalFanGame.Enemy
         private int pathIndex;
         private float nextRepathTime = float.NegativeInfinity;
         private Vector2 plannedGoal;
+        private bool plannedGoalReachable = true;
+        private bool hasNearestPoint;
+        private Vector2 nearestPoint;
+        private Vector2 nearestPointGoal;
 
         public IReadOnlyList<Vector2> Path => path;
         public bool IsFollowingPath => pathIndex < path.Count;
+        // False while the last plan could only get near the goal.
+        public bool IsGoalReachable => plannedGoalReachable;
 
-        public static int ObstacleMask => LayerMask.GetMask("Environment");
+        // What a walking enemy cannot cross.
+        public static int ObstacleMask => RoomPit.MovementBlockMask;
+        // What stops a projectile.
+        public static int LineOfFireMask => LayerMask.GetMask("Environment");
 
         public static float ResolveBodyRadius(GameObject owner)
         {
@@ -46,17 +59,22 @@ namespace TrickalFanGame.Enemy
         // True when a body of the given radius can travel straight from one point to the other.
         public static bool HasClearPath(Vector2 from, Vector2 to, float bodyRadius)
         {
-            Vector2 offset = to - from;
-            float distance = offset.magnitude;
-            if (distance <= 0.0001f) return true;
-            return Physics2D.CircleCast(from, Mathf.Max(0.01f, bodyRadius * CastRadiusScale), offset / distance,
-                distance, ObstacleMask).collider == null;
+            return IsCastClear(from, to, bodyRadius * CastRadiusScale, ObstacleMask);
         }
 
         // True when an enemy projectile fired from one point would reach the other without hitting an obstacle.
         public static bool HasLineOfFire(Vector2 from, Vector2 to)
         {
-            return HasClearPath(from, to, ProjectileClearanceRadius / CastRadiusScale);
+            return IsCastClear(from, to, ProjectileClearanceRadius, LineOfFireMask);
+        }
+
+        private static bool IsCastClear(Vector2 from, Vector2 to, float radius, int mask)
+        {
+            Vector2 offset = to - from;
+            float distance = offset.magnitude;
+            if (distance <= 0.0001f) return true;
+            return Physics2D.CircleCast(from, Mathf.Max(0.01f, radius), offset / distance, distance, mask)
+                .collider == null;
         }
 
         // Obstacle-3: backing away takes the straight line or a 45-degree turn from it, whichever is clear for a short
@@ -92,6 +110,8 @@ namespace TrickalFanGame.Enemy
             path.Clear();
             pathIndex = 0;
             nextRepathTime = float.NegativeInfinity;
+            plannedGoalReachable = true;
+            hasNearestPoint = false;
         }
 
         // Unit direction to move this tick, or zero when already at the goal.
@@ -110,11 +130,21 @@ namespace TrickalFanGame.Enemy
             {
                 nextRepathTime = currentTime + RepathInterval;
                 plannedGoal = goal;
-                if (!TryFindPath(from, goal, bodyRadius, path))
-                {
-                    path.Clear();
-                }
                 pathIndex = 0;
+                if (hasNearestPoint && (goal - nearestPointGoal).sqrMagnitude <= CellSize * CellSize &&
+                    FindPathOrNearest(from, nearestPoint, bodyRadius, path))
+                {
+                    // Two sides of a pit can be almost equally near, and the grid shifts with the enemy, so choosing
+                    // again on every repath would flip between them. The chosen point stays until the player moves on.
+                    plannedGoalReachable = false;
+                }
+                else
+                {
+                    plannedGoalReachable = FindPathOrNearest(from, goal, bodyRadius, path);
+                    hasNearestPoint = !plannedGoalReachable;
+                    nearestPoint = path.Count > 0 ? path[path.Count - 1] : from;
+                    nearestPointGoal = goal;
+                }
             }
 
             // Skip waypoints already reached, then aim at the farthest one still visible (string pulling).
@@ -131,15 +161,26 @@ namespace TrickalFanGame.Enemy
 
             if (!IsFollowingPath)
             {
-                // No route (for example a target sealed off): fall back to the straight line and let physics slide.
-                return direct.normalized;
+                // At the goal's last cell the enemy closes the remaining gap; at the point nearest an unreachable
+                // goal it holds position.
+                return plannedGoalReachable ? direct.normalized : Vector2.zero;
             }
 
             Vector2 toWaypoint = path[pathIndex] - from;
             return toWaypoint.sqrMagnitude > 0.0001f ? toWaypoint.normalized : direct.normalized;
         }
 
+        // True with the full path when the goal is reachable; false with an empty list otherwise.
         public static bool TryFindPath(Vector2 from, Vector2 goal, float bodyRadius, List<Vector2> result)
+        {
+            if (FindPathOrNearest(from, goal, bodyRadius, result) && result.Count > 0) return true;
+            result.Clear();
+            return false;
+        }
+
+        // Returns whether the goal is reachable. When it is not, the result leads to the reachable cell nearest the
+        // goal (empty when the enemy already stands there).
+        public static bool FindPathOrNearest(Vector2 from, Vector2 goal, float bodyRadius, List<Vector2> result)
         {
             result.Clear();
             Vector2 min = Vector2.Min(from, goal) - Vector2.one * SearchMargin;
@@ -204,19 +245,39 @@ namespace TrickalFanGame.Enemy
                 }
             }
 
-            if (parent[targetIndex] < 0 && targetIndex != startIndex)
+            bool reachable = targetIndex == startIndex || parent[targetIndex] >= 0;
+            int endIndex = targetIndex;
+            if (!reachable)
             {
-                return false;
+                // Every cell reachable from the start is closed now; take the one nearest the goal, preferring the
+                // cheaper walk on a tie so an enemy already at the edge stays put.
+                endIndex = startIndex;
+                float bestDistance = (CellCenter(start.x, start.y, origin) - goal).sqrMagnitude;
+                for (int index = 0; index < cellCount; index++)
+                {
+                    if (!closed[index]) continue;
+                    float distance = (CellCenter(index % width, index / width, origin) - goal).sqrMagnitude;
+                    if (distance < bestDistance - 0.0001f ||
+                        (Mathf.Abs(distance - bestDistance) <= 0.0001f && cost[index] < cost[endIndex]))
+                    {
+                        bestDistance = distance;
+                        endIndex = index;
+                    }
+                }
+
+                // The grid is laid out around the enemy, so cell centers shift as it walks. Once walking cannot get
+                // at least half a cell closer, it holds instead of chasing the shifting cell.
+                if ((from - goal).magnitude <= Mathf.Sqrt(bestDistance) + CellSize * 0.5f) return false;
             }
 
-            for (int index = targetIndex; index != startIndex && index >= 0; index = parent[index])
+            for (int index = endIndex; index != startIndex && index >= 0; index = parent[index])
             {
                 result.Add(CellCenter(index % width, index / width, origin));
             }
 
             result.Reverse();
-            if (result.Count > 0) result[result.Count - 1] = goal;
-            return result.Count > 0;
+            if (reachable && result.Count > 0) result[result.Count - 1] = goal;
+            return reachable;
         }
 
         private static Vector2Int ToCell(Vector2 point, Vector2 origin, int width, int height)

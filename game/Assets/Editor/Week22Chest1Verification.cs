@@ -35,7 +35,8 @@ namespace TrickalFanGame.Editor
         };
         private const float ExpectedKeyCostPerClear = 0.066f;
         private const float ExpectedBombCostPerClear = 0.0165f;
-        private const float ExpectedSpellsPerClear = 0.012375f;
+        // Normal 5% plus the diamond chest's guaranteed spell (Chest-2).
+        private const float ExpectedSpellsPerClear = 0.028875f;
 
         public static void SetupAndVerifyBatch()
         {
@@ -92,7 +93,7 @@ namespace TrickalFanGame.Editor
             Assert(Mathf.Approximately(table.ChestChance, 0.33f), "Chests must appear on 33% of clears (§3.1).");
             AssertRule(table.FindRule(ChestKind.Normal), 75, 1, new[] { 60, 30, 10 }, 0.05f);
             AssertRule(table.FindRule(ChestKind.Golden), 20, 2, new[] { 1, 1, 1 }, 0f);
-            AssertRule(table.FindRule(ChestKind.Diamond), 5, 4, new[] { 1, 1, 1 }, 0f);
+            AssertRule(table.FindRule(ChestKind.Diamond), 5, 4, new[] { 1, 1, 1 }, 1f);
 
             ResourceDropTable oldTable =
                 AssetDatabase.LoadAssetAtPath<ResourceDropTable>(Week17Resource3Setup.RoomClearDropTablePath);
@@ -108,10 +109,7 @@ namespace TrickalFanGame.Editor
                     $"Chest consumable '{id}' must keep the old clear drop weight and pickup (D2).");
             }
 
-            ItemDefinition[] expectedSpells = AssetDatabase.FindAssets("t:ItemDefinition")
-                .Select(guid => AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid)))
-                .Where(item => item != null && item.Kind == ItemKind.SingleUseSpell && item.IsActive && item.IsValid)
-                .OrderBy(item => item.ItemId, StringComparer.Ordinal).ToArray();
+            ItemDefinition[] expectedSpells = Week22Chest1Setup.FindSingleUseItems(ItemKind.SingleUseSpell);
             Assert(expectedSpells.Length > 0 && table.Spells.SequenceEqual(expectedSpells) &&
                    table.Spells.All(spell => spell.Kind != ItemKind.JjangsemSpell && spell.Kind != ItemKind.Spell),
                 "Normal chests must draw from every implemented single-use spell and never a jjangsem or legacy spell.");
@@ -186,7 +184,8 @@ namespace TrickalFanGame.Editor
                     foreach (ResourceDropEntry entry in contents.Consumables) consumables[entry.DropId]++;
                     consumableTotal += count;
                     if (contents.Spell == null) continue;
-                    Assert(table.Spells.Contains(contents.Spell), $"{kind} chest rolled a spell outside the table.");
+                    Assert(table.Spells.Contains(contents.Spell) || table.JjangsemSpells.Contains(contents.Spell),
+                        $"{kind} chest rolled a spell outside the table.");
                     spells++;
                 }
 

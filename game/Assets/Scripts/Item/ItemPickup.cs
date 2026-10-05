@@ -8,6 +8,8 @@ namespace TrickalFanGame.Item
     {
         [SerializeField] private ItemDefinition definition;
 
+        public ItemDefinition Definition => definition;
+
         public void Configure(ItemDefinition configuredDefinition)
         {
             definition = configuredDefinition;

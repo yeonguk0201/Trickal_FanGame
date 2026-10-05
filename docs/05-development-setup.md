@@ -748,6 +748,115 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
   옆에서 터뜨리면 4~6개가 떨어져야 한다. 연 상자는 어두워지고 다시 닿아도 아무것도 나오지 않아야 하며, 방을 나갔다
   들어와도 그대로여야 한다. 다음 층으로 가면 열지 않은 상자는 사라진다. 패널에 `Assisted run`이 표시되어야 한다.
 
+- Terrain-0 구덩이 지형: 메뉴 `Trickal Fan Game > Week 22 > Setup Terrain-0 Pit Layouts`가 Physics 레이어 `Pit`(10번,
+  Player·Enemy·Pickup과만 충돌)을 TagManager·2D 충돌 행렬에 등록하고, `Assets/Prefabs/RoomPit.prefab`(Pit 레이어, 고체
+  `BoxCollider2D`, `RoomPit`, 테두리·구멍 자리표시 스프라이트, 정렬 -10/-9)과 새 Layout `basic-central-pit`·`large-pit-lanes`의
+  Template·Prefab을 GUID를 보존하며 멱등 구성한다. Layout은 Game Scene 생성기 카탈로그에 등록하고(방 콘텐츠 버전 9),
+  Encounter-4 SpawnPoint 확장과 요정마을 그림 재적용, Layout 난이도 +1을 함께 처리한다. 구덩이는 Layout 검증에서 도달성·문
+  통로·SpawnPoint·상자 배치에는 장애물처럼 막히고 사선 검사에서는 제외된다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Terrain-0 Pit Layouts`, 배치는 Unity `-batchmode -quit -projectPath
+  <game 경로> -executeMethod TrickalFanGame.Editor.Week22Terrain0Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  요정마을 그림을 다시 적용하므로 `-nographics`를 넣지 않는다. Setup 2회 GUID, `Pit` 레이어와 32개 레이어 충돌 행렬, 이동/사선
+  마스크와 상자 밀기 마스크, Prefab 고체·레이어·정렬과 잘못된 트리거·레이어 거부, `SecretPit`과의 분리, 두 Layout의 프로필·
+  Normal 전용·1~99층·난이도 +1·SpawnPoint 5/6개·구덩이 위치와 크기·장애물 후보 슬롯·구덩이의 사선 비차단, Layout 검증기의
+  문 통로·SpawnPoint·격자·최소 크기·장애물 중첩·이동 범위·문 단절 거부, 스크립트 시뮬레이션의 Player·Enemy·Pickup 차단과
+  플레이어 탄·적 탄 통과, 적 경로가 구덩이를 우회하고 사선은 통과, 상자와 내용물의 구덩이 회피, 512 seed 반복 재현과
+  두 Layout의 1~3층 등장을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-2·Difficulty-1·Encounter-4·
+  Obstacle-4·Chest-0·Chest-1 포함)다. 적 이동 마스크 변경은 `Week18Obstacle0Verification.VerifyWithEnemyRegressionsBatch`로,
+  새 방 그림은 `FairyVillageArtworkVerification.Verify`(18개 Template)로 확인했다. 2026-10-03 위 배치 모두 통과·종료 코드 0.
+  수동 확인: Game Scene Play → 전투방을 돌다 보면 일부 방(전투방 약 7개 중 1개)에 어두운 사각 구덩이가 있다. Basic 방은
+  중앙 4×2, Large 방은 좌우 3×2 구덩이 4개와 가운데 바위 4개다. 플레이어는 구덩이 위로 걸어갈 수 없고, 구덩이 너머로 쏜
+  기본 공격은 그대로 날아가야 한다. 근접 적은 구덩이를 돌아서 다가오고, 원거리 적은 구덩이 건너편에서도 사격해야 한다.
+  상자는 구덩이 위에 생기지 않고, 밀어도 구덩이 안으로 들어가지 않아야 한다. 방 클리어가 멈추지 않아야 한다.
+
+- Flight-0 시스트의 가짜 날개·비행: 메뉴 `Trickal Fan Game > Week 22 > Setup Flight-0 Fake Wings`가
+  `Assets/Items/artifact-sist-fake-wings.asset`(Epic 아티팩트, 효과 35 `Flight`, 최대 1스택)을 GUID를 보존하며 멱등 구성하고,
+  `chest-content-table`의 황금 전용 아티팩트 풀(`ItemPickup` Prefab 포함)에 넣는다. Game Scene 선택 보상 풀에 황금 전용
+  아티팩트가 있으면 빼고(Reward-3 Setup도 `GoldenChestExclusivePool` 목록을 제외), 이름·설명 글리프를 추가한다. Chest-1을 먼저
+  실행해야 한다. 개발 패널 `F1` → `— Chest —` 아래 `Golden exclusive`에 비행 여부와 `Drop 시스트의 가짜 날개`(보조 Run)가 있다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Flight-0 Fake Wings`, 배치는 Unity `-batchmode -quit -projectPath
+  <game 경로> -executeMethod TrickalFanGame.Editor.Week22Flight0Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  Setup 2회 GUID, 효과 35 번호, 아이템 계약·ID 접두사·설명 한 줄·글리프, 황금 전용 풀 단독 소속과 잘못된 풀(스펠·중복·
+  Prefab 없음) 거부, 선택 보상 풀 제외, 프로젝트 전체 직렬화 파일 중 날개 GUID 참조가 상자 표 하나뿐인지, Game Scene
+  플레이어의 비행 미직렬화·`Pit` 미제외와 정적 비행 상태 없음(새 Run은 걸어서 시작), 이동 분류(장애물 2종만 낮은 장애물,
+  벽·문·상자·비밀 통로 벽 제외), 스크립트 시뮬레이션에서 걷기는 구덩이·장애물 2종·벽·상자에 막히고 비행은 구덩이·장애물 2종만
+  통과·벽·상자는 막힘, 적은 계속 구덩이에 막힘, 장애물 안에서 시작한 비행 플레이어 미밀림, 정렬 +2·그림자 1개, 인벤토리
+  획득 시 비행 시작·Environment 전체 미제외·2번째 획득 거부·Run 기록 1회, 비행 중 적 탄·폭탄 자해 피해 유지, 폭탄의 구덩이
+  위 거부·미소비와 장애물 2종 위 최근접 보행 지점(옆 구덩이도 회피), 적이 구덩이·장애물 위 플레이어 앞 가장자리까지 와서
+  대기를 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Terrain-0·Chest-0·Chest-1·Special-2·Special-3·Reward-3·HUD-3B·
+  Obstacle-0 포함)다. Obstacle-0의 "막힌 목표는 직선 대체" 검사는 D3 결정에 따라 "가장 가까운 도달 지점에서 대기"로 바꿨다.
+  적 경로 변경은 `Week18Obstacle0Verification.VerifyWithEnemyRegressionsBatch`, 패널은 `Week20DevPanelVerification.Verify`로
+  확인했다. 2026-10-03 위 배치 모두 통과·종료 코드 0, Backend Jest 132개·빌드 통과.
+  수동 확인: Game Scene Play → `F1` → `Drop 시스트의 가짜 날개` → 오른쪽 픽업을 주우면 획득 알림이 뜨고 발밑에 그림자가
+  생기며 패널에 `flying yes`가 보여야 한다. 구덩이 방에서 구덩이 위로, 바위 위로 지나갈 수 있어야 하고 벽·문·상자는 막혀야
+  한다. 구덩이 위에서 `F`는 아무 일도 없고 폭탄 수가 그대로여야 하며, 바위 위에서 `F`를 누르면 폭탄이 바위 옆 바닥에 놓여야
+  한다. 근접 적은 구덩이 가장자리까지 와서 멈추고, 원거리 적은 계속 쏴야 한다. 적 탄과 내 폭탄에 피해를 받아야 한다.
+  비밀방 구덩이 위로 날아가면 바로 비밀방으로 떨어져야 한다. Run을 끝내고 새 Run을 시작하면 그림자 없이 걸어서 시작해야 한다.
+
+- Chest-2 황금 특별 보상·다이아몬드 스펠: 메뉴 `Trickal Fan Game > Week 22 > Setup Chest-2 Special Rewards`가 Chest-1의 표
+  구성(`Week22Chest1Setup.EnsureTable`)을 다시 실행해 `chest-content-table`의 종류 규칙에 황금 `specialRewardChance` 0.25,
+  다이아몬드 `spellChance` 1·`jjangsemShare` 0.25를 넣고, 활성·유효한 짱셈스펠 에셋을 `jjangsemSpells`에 모은다(현재 0개).
+  GUID와 Flight-0의 황금 전용 풀은 보존한다. 전용 풀이 비어 있으면 실패하므로 Chest-1 → Flight-0 → Chest-2 순서로 실행한다.
+  Game Scene은 바꾸지 않는다. 짱셈스펠을 새로 구현하면 이 Setup을 다시 실행한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Chest-2 Special Rewards`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week22Chest2Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 GUID, 종류별 규칙 값(황금 25%가 20~30% 안), 풀별 허용 분류(전용 풀은
+  `GoldenChestExclusivePool`의 유효 아티팩트, 스펠 목록은 일회용 스펠, 짱셈 목록은 구현된 짱셈스펠)와 잘못된 표(일반·
+  다이아몬드의 특별 보상, 황금의 짱셈 비율, 짱셈 목록의 스펠·중복) 거부, 종류별 6만 seed의 특별 보상 25%·일반/다이아몬드
+  0%·다이아몬드 스펠 100%·seed 재현, 임시 짱셈스펠을 넣은 복사본의 다이아몬드 짱셈 비율 25%와 일반·황금 미등장·소모품과
+  당첨 불변, 실제 클리어 경로의 황금상자 당첨 시 전용 아티팩트 픽업 1개 + seed 소모품·상자 주변 배치·재개봉과 층 재구성 시
+  미재지급, 미당첨 상자의 소모품 전용, 최대 스택 보유 시 특별 보상 미지급·소모품 유지, 다이아몬드 상자의 스펠 픽업 1개
+  (인스턴스 ID·벗어난 뒤 획득)와 소모품 4~6개를 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Chest-1·Chest-0·개발
+  패널·Flight-0 포함, Flight-0 때문에 `-nographics` 없이 실행)다. Chest-1 검증의 다이아몬드 스펠 확률(0 → 1)과 클리어당 스펠
+  기대값(0.0124 → 0.0289)을 함께 갱신했다. 2026-10-05 두 배치 모두 통과·종료 코드 0.
+  수동 확인: Game Scene Play → `F1` → `+10 Key`·`+10 Bomb` → `Chest Golden`을 여러 번 눌러 상자를 열면 약 4개 중 1개에서
+  소모품과 함께 `시스트의 가짜 날개` 픽업이 나와야 한다. 주우면 비행이 시작되고, 그 뒤에 여는 황금상자에서는 날개가 더
+  나오지 않고 소모품만 나와야 한다. `Chest Diamond` 옆에서 폭탄을 터뜨리면 소모품 4~6개와 스펠 픽업 1개가 항상 나와야 하고,
+  스펠은 한 번 벗어났다가 다시 닿으면 슬롯에 들어와야 한다. 연 상자는 다시 닿거나 방을 나갔다 와도 아무것도 나오지 않아야 한다.
+  2026-10-05 사용자 화면 확인 완료.
+
+- Jjangsem-0 빅우드의 열매: 메뉴 `Trickal Fan Game > Week 22 > Setup Jjangsem-0 Bigwood Fruit`가
+  `Assets/Items/jjangsem-bigwood-fruit.asset`(Rare 짱셈스펠, 효과 36 `ReduceAndRecoverDamageTaken`: `magnitude` 1 = 피해
+  감소 반 칸, `integerAmount` 2 = 추가 회복 1칸, `intervalSeconds` 2, `durationSeconds` 10)을 GUID를 보존하며 멱등 구성하고,
+  이름·설명 글리프를 추가한 뒤 Chest-1의 표 구성을 다시 실행해 `chest-content-table.jjangsemSpells`에 넣는다. Game Scene은
+  바꾸지 않는다. Backend `ITEM_CATALOG`에 같은 ID·등급·효과를 추가했으므로 로컬 DB는 `backend/`에서 seed를 다시 실행해야
+  이 아이템을 가진 Run이 저장된다(없으면 `ITEM_NOT_FOUND`).
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Jjangsem-0 Bigwood Fruit`, 배치는 Unity `-batchmode -quit -projectPath
+  <game 경로> -executeMethod TrickalFanGame.Editor.Week22Jjangsem0Verification.SetupAndVerifyBatch -logFile <로그 경로>`다
+  (글리프 추가 때문에 `-nographics` 없이 실행). Setup 2회 GUID, 효과 36 번호와 필드 검증, 아이템 계약·ID 접두사·설명·글리프,
+  표의 짱셈 목록 단독 소속과 다이아몬드 상자 등장·선택 보상 풀 제외, `Health`의 피해 감소(방어막보다 먼저, 해제·초기화),
+  사용 시 10초 창과 소비, 1칸 피해 → 반 칸 피해 → 2초 뒤 1.5칸 회복, 일시정지 중 정지, 방·층 이동 유지, 방어막 전부 흡수 시
+  미회복·방어막 관통분만 회복, 피해별 개별 회복과 최대 HP 상한, 10초 뒤 피해의 미감소·미회복과 예약 회복 도착, 재사용 시
+  10초 갱신·감소 미중첩, Run 종료와 사망 시 효과·예약 회복 제거(사망 방지 없음), 스펠과의 슬롯 교체·일시정지 미사용·1회
+  소비·인스턴스별 획득 기록을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Slot-0·Spell-0~3·Chest-2·Chest-1·개발
+  패널 포함)다. 2026-10-05 두 배치 통과·종료 코드 0, Backend Jest 133개 통과.
+  수동 확인: Game Scene Play → `F1` → `— Spell slot —`의 `Drop 빅우드의 열매` → 픽업을 주우면 슬롯 HUD에 보라색 짱셈스펠로
+  표시되어야 한다. 전투방에서 Left Shift로 사용하면 슬롯이 비고 패널에 `Fruit 10.0s`가 줄어들어야 한다. 그동안 적에게
+  맞으면 하트가 평소보다 반 칸 덜 줄고, 약 2초 뒤 줄어든 양보다 1칸 더 회복되어야 한다. 10초가 지난 뒤 맞으면 평소대로
+  줄고 회복되지 않아야 한다. `Chest Diamond`를 여러 번 열면 약 4개 중 1개에서 스펠 대신 빅우드의 열매가 나와야 한다.
+  2026-10-05 사용자 화면 확인 완료.
+
+- Spell-5 소형 스펠 4종: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-5 Small Spells`가 `Assets/Items/`에
+  `single-spell-armor-festival-invitation`(Rare, 효과 37 `GainShield` `magnitude` 4), `single-spell-amelia-love-letter`
+  (Uncommon, 효과 38 `SpawnHealthPickups` `integerAmount` 2), `single-spell-random-coin`(Common, 효과 39 `GainRandomGold`
+  `integerAmount` 2·`magnitude` 10), `single-spell-decisive-strike`(Uncommon, 효과 40 `CurrentRoomCriticalBonus`
+  `magnitude` 0.5 = 치명타 피해·`secondaryMagnitude` 0.15 = 치명타 확률)를 GUID를 보존하며 멱등 구성한다. Game Scene 플레이어의 `PlayerSingleUseEffects.heartPickupPrefab`에
+  `HealthPickup.prefab`을 연결하고(이미 연결돼 있으면 Scene을 저장하지 않음), 글리프를 추가한 뒤 Chest-1의 표 구성을 다시
+  실행해 상자 스펠 풀에 넣는다. Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시
+  실행한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Spell-5 Small Spells`, 배치는 Unity `-batchmode -quit -projectPath
+  <game 경로> -executeMethod TrickalFanGame.Editor.Week22Spell5Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  Setup 2회 GUID, 효과 37~40 번호와 필드 검증, 4종의 계약·설명·글리프, Scene 플레이어의 하트 Prefab, 상자 스펠 목록 편입과
+  선택 보상 풀 제외, 방어막 2칸 획득·기존 방어막 합산·일시정지 미사용, 하트 Prefab 미설정 시 미소비·가득 찬 HP에서 사용·
+  1.1 거리의 서로 다른 빈 지점 2곳·막힌 지점 회피·HP 부족 시 1칸 회복, 골드 2~10 범위와 변동·범위 밖 추첨 보정·지갑 상한
+  잘림·가득 찬 지갑에서 미소비, 치명타 확률 +15%p·피해 +50%p의 시작방·클리어방 거부·같은 방 합산·이탈/재방문/사망 해제·치명타 확률과
+  기본 공격 피해 불변을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Slot-0·Spell-0~3·Jjangsem-0·Chest-2·Chest-1·개발
+  패널 포함)다. 2026-10-05 두 배치 통과·종료 코드 0, Backend Jest 133개 통과.
+  수동 확인: Game Scene Play → `F1` → `— Spell slot —`의 `Drop ...` 버튼으로 각 스펠을 떨어뜨려 줍고 Left Shift로 사용한다.
+  갑옷축제 초대장은 방어막이 2칸 늘어야 한다. 아멜리아의 러브레터는 캐릭터 옆에 하트 2개가 생기고, HP가 가득하면 주워지지
+  않고 밀려야 한다. 랜덤코인은 골드가 2~10 늘어야 한다. 회심의 일격은 시작방에서는 사용되지 않고 슬롯에 남아야 하며,
+  전투 중인 방에서 사용하면 패널에 `Room CRIT +15% DMG +50%`가 보이고 방을 나가면 사라져야 한다.
+
 - 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
 - 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.
 - 개발 도구의 실행 실패가 게임 진행을 멈추는지 여부와 실패 종료 코드를 명확히 기록한다.

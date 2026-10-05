@@ -26,6 +26,12 @@ describe('Item catalog', () => {
       'single-spell-catch-that-one',
       'single-spell-afterimage',
       'single-spell-final-sprint',
+      'single-spell-armor-festival-invitation',
+      'single-spell-amelia-love-letter',
+      'single-spell-random-coin',
+      'single-spell-decisive-strike',
+      'artifact-sist-fake-wings',
+      'jjangsem-bigwood-fruit',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -49,8 +55,14 @@ describe('Item catalog', () => {
       'UNCOMMON',
       'UNCOMMON',
       'RARE',
+      'RARE',
+      'UNCOMMON',
+      'COMMON',
+      'UNCOMMON',
+      'EPIC',
+      'RARE',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(21);
+    expect(new Set(active.map((item) => item.id)).size).toBe(27);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -164,6 +176,11 @@ describe('Item catalog', () => {
         rarity: 'EPIC',
         maxStacks: 1,
       },
+      {
+        id: 'artifact-sist-fake-wings',
+        rarity: 'EPIC',
+        maxStacks: 1,
+      },
     ]);
   });
 
@@ -226,7 +243,77 @@ describe('Item catalog', () => {
           },
         ],
       },
+      {
+        id: 'single-spell-armor-festival-invitation',
+        name: '갑옷축제 초대장',
+        rarity: 'RARE',
+        isActive: true,
+        maxStacks: 1,
+        effects: [{ type: 'GainShield', magnitude: 4 }],
+      },
+      {
+        id: 'single-spell-amelia-love-letter',
+        name: '아멜리아의 러브레터',
+        rarity: 'UNCOMMON',
+        isActive: true,
+        maxStacks: 1,
+        effects: [{ type: 'SpawnHealthPickups', integerAmount: 2 }],
+      },
+      {
+        id: 'single-spell-random-coin',
+        name: '랜덤코인',
+        rarity: 'COMMON',
+        isActive: true,
+        maxStacks: 1,
+        effects: [{ type: 'GainRandomGold', integerAmount: 2, magnitude: 10 }],
+      },
+      {
+        id: 'single-spell-decisive-strike',
+        name: '회심의 일격',
+        rarity: 'UNCOMMON',
+        isActive: true,
+        maxStacks: 1,
+        effects: [
+          {
+            type: 'CurrentRoomCriticalBonus',
+            magnitude: 0.5,
+            secondaryMagnitude: 0.15,
+          },
+        ],
+      },
     ]);
+  });
+
+  it('adds the golden chest exclusive fake wings as a flight artifact (Flight-0)', () => {
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'artifact-sist-fake-wings'),
+    ).toMatchObject({
+      name: '시스트의 가짜 날개',
+      rarity: 'EPIC',
+      isActive: true,
+      maxStacks: 1,
+      effects: [{ type: 'Flight' }],
+    });
+  });
+
+  it('adds the first jjangsem spell, the bigwood fruit (Jjangsem-0)', () => {
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'jjangsem-bigwood-fruit'),
+    ).toMatchObject({
+      name: '빅우드의 열매',
+      rarity: 'RARE',
+      isActive: true,
+      maxStacks: 1,
+      effects: [
+        {
+          type: 'ReduceAndRecoverDamageTaken',
+          magnitude: 1,
+          integerAmount: 2,
+          intervalSeconds: 2,
+          durationSeconds: 10,
+        },
+      ],
+    });
   });
 
   it('keeps the legacy spell-final-sprint active for past Run records', () => {

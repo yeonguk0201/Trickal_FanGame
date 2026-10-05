@@ -317,7 +317,7 @@ namespace TrickalFanGame.Enemy
                 return true;
             }
 
-            if (other.gameObject.layer == LayerMask.NameToLayer("Environment"))
+            if (((1 << other.gameObject.layer) & EnemyObstacleNavigator.ObstacleMask) != 0)
             {
                 bool wasSliding = slideNormal.sqrMagnitude > 0.001f;
                 if (TrySlideAlongObstacle(collisionNormal))

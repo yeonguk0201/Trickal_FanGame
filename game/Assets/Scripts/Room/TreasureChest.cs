@@ -88,7 +88,7 @@ namespace TrickalFanGame.Room
             chestBody.useFullKinematicContacts = true;
         }
 
-        public static int PushBlockMask => LayerMask.GetMask("Environment", "Enemy", "Pickup");
+        public static int PushBlockMask => LayerMask.GetMask("Environment", RoomPit.LayerName, "Enemy", "Pickup");
 
         // Sets the room-local ID and kind of a fresh instance, before it is bound to the room state.
         public void Configure(string configuredChestId, ChestKind configuredKind)

@@ -49,5 +49,21 @@ namespace TrickalFanGame.Item
         ProjectileSpeedPercent = 33,
         // Magnitude = basic attack flight time bonus (the telescope candidate). Opened as a contract; no item uses it yet.
         ProjectileLifetimePercent = 34,
+        // Flight-0 (시스트의 가짜 날개): the player flies over pits and low obstacles until the Run ends. Walls, doors
+        // and chests still stop the player and damage is unchanged. No value fields are used.
+        Flight = 35,
+        // Jjangsem-0 (빅우드의 열매): for DurationSeconds every hit on the player is reduced by Magnitude health units,
+        // and each hit that still costs HP is healed IntervalSeconds later by that HP damage plus IntegerAmount units.
+        ReduceAndRecoverDamageTaken = 36,
+        // Spell-5 single-use effects.
+        // 갑옷축제 초대장: Magnitude = shield gained in health units, added to the current shield.
+        GainShield = 37,
+        // 아멜리아의 러브레터: IntegerAmount = heart pickups dropped around the player.
+        SpawnHealthPickups = 38,
+        // 랜덤코인: gains a random amount of gold from IntegerAmount to Magnitude, both inclusive.
+        GainRandomGold = 39,
+        // 회심의 일격: Magnitude = critical damage and SecondaryMagnitude = critical chance bonus in the combat room
+        // where the item is used. Leaving the room ends both.
+        CurrentRoomCriticalBonus = 40,
     }
 }

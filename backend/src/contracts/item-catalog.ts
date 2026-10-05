@@ -300,6 +300,80 @@ export const ITEM_CATALOG = [
     ],
   },
   {
+    id: 'single-spell-armor-festival-invitation',
+    name: '갑옷축제 초대장',
+    description:
+      '사용하면 방어막 2칸을 얻습니다. 이미 있는 방어막에 더해집니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'GainShield', magnitude: 4 }],
+  },
+  {
+    id: 'single-spell-amelia-love-letter',
+    name: '아멜리아의 러브레터',
+    description:
+      '사용하면 캐릭터 주변에 HP 1칸을 회복하는 하트 2개가 떨어집니다. HP가 가득 차 있으면 하트는 바닥에 남습니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'SpawnHealthPickups', integerAmount: 2 }],
+  },
+  {
+    id: 'single-spell-random-coin',
+    name: '랜덤코인',
+    description:
+      '사용하면 골드를 2~10 사이에서 무작위로 얻습니다. 골드가 이미 가득 차 있으면 사용할 수 없습니다.',
+    rarity: 'COMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'GainRandomGold', integerAmount: 2, magnitude: 10 }],
+  },
+  {
+    id: 'single-spell-decisive-strike',
+    name: '회심의 일격',
+    description:
+      '전투 중인 방에서 사용하면 그 방에 있는 동안 치명타 확률이 15%p, 치명타 피해가 50%p 증가합니다. 방을 떠나면 해제되며, 시작방·보상방이나 이미 클리어한 방에서는 사용할 수 없습니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'CurrentRoomCriticalBonus',
+        magnitude: 0.5,
+        secondaryMagnitude: 0.15,
+      },
+    ],
+  },
+  {
+    id: 'artifact-sist-fake-wings',
+    name: '시스트의 가짜 날개',
+    description:
+      'Run이 끝날 때까지 날아다니며 구덩이와 장애물 위를 지나갈 수 있습니다. 벽·닫힌 문·상자는 통과하지 못하고 피해는 그대로 받습니다. 황금상자에서만 얻을 수 있습니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'Flight' }],
+  },
+  {
+    id: 'jjangsem-bigwood-fruit',
+    name: '빅우드의 열매',
+    description:
+      '사용하면 10초 동안 받는 피해가 하트 반 칸씩 줄고, HP 피해를 받을 때마다 2초 뒤 그 피해에 하트 1칸을 더해 회복합니다. 방어막이 막은 피해는 회복하지 않으며, 사망하면 효과가 끝납니다. 다이아몬드 상자에서만 얻을 수 있습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'ReduceAndRecoverDamageTaken',
+        magnitude: 1,
+        integerAmount: 2,
+        intervalSeconds: 2,
+        durationSeconds: 10,
+      },
+    ],
+  },
+  {
     id: 'item-06',
     name: '다중 투사체',
     description:

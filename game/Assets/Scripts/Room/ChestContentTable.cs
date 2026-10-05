@@ -8,7 +8,8 @@ using UnityEngine;
 namespace TrickalFanGame.Room
 {
     // Chest-1: how many consumables a chest kind holds and how likely it adds a spell. countWeights[i] is the weight of
-    // holding minimumCount + i consumables.
+    // holding minimumCount + i consumables. Chest-2: specialRewardChance is the golden chest's chance of one exclusive
+    // artifact, and jjangsemShare is how often a diamond chest's spell is a jjangsem spell instead.
     [Serializable]
     public sealed class ChestKindRule
     {
@@ -17,15 +18,20 @@ namespace TrickalFanGame.Room
         [SerializeField, Min(1)] private int minimumCount = 1;
         [SerializeField] private int[] countWeights = { 1 };
         [SerializeField, Range(0f, 1f)] private float spellChance;
+        [SerializeField, Range(0f, 1f)] private float specialRewardChance;
+        [SerializeField, Range(0f, 1f)] private float jjangsemShare;
 
         public ChestKindRule(ChestKind configuredKind, int configuredWeight, int configuredMinimumCount,
-            int[] configuredCountWeights, float configuredSpellChance)
+            int[] configuredCountWeights, float configuredSpellChance, float configuredSpecialRewardChance = 0f,
+            float configuredJjangsemShare = 0f)
         {
             kind = configuredKind;
             weight = configuredWeight;
             minimumCount = configuredMinimumCount;
             countWeights = configuredCountWeights ?? Array.Empty<int>();
             spellChance = configuredSpellChance;
+            specialRewardChance = configuredSpecialRewardChance;
+            jjangsemShare = configuredJjangsemShare;
         }
 
         public ChestKind Kind => kind;
@@ -34,6 +40,8 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<int> CountWeights => countWeights;
         public int MaximumCount => minimumCount + countWeights.Length - 1;
         public float SpellChance => spellChance;
+        public float SpecialRewardChance => specialRewardChance;
+        public float JjangsemShare => jjangsemShare;
 
         public float ExpectedCount
         {
@@ -52,24 +60,33 @@ namespace TrickalFanGame.Room
         }
     }
 
-    // What one chest holds: consumable drop candidates (one pickup each) and an optional single-use spell.
+    // What one chest holds: consumable drop candidates (one pickup each), an optional single-use item (a spell or a
+    // jjangsem spell) and whether the golden special reward hit. The special reward's artifact is chosen when the chest
+    // opens (ChestContentTable.ResolveSpecialReward), from the seeded SpecialRewardPick.
     public sealed class ChestContents
     {
-        public ChestContents(ChestKind kind, IReadOnlyList<ResourceDropEntry> consumables, ItemDefinition spell)
+        public ChestContents(ChestKind kind, IReadOnlyList<ResourceDropEntry> consumables, ItemDefinition spell,
+            bool hasSpecialReward = false, float specialRewardPick = 0f)
         {
             Kind = kind;
             Consumables = consumables ?? Array.Empty<ResourceDropEntry>();
             Spell = spell;
+            HasSpecialReward = hasSpecialReward;
+            SpecialRewardPick = specialRewardPick;
         }
 
         public ChestKind Kind { get; }
         public IReadOnlyList<ResourceDropEntry> Consumables { get; }
         public ItemDefinition Spell { get; }
+        public bool HasSpecialReward { get; }
+        public float SpecialRewardPick { get; }
     }
 
     // Chest-1: the seeded chest rolls. A combat room clear first rolls whether a chest appears (33%) and its kind
     // (75/20/5 of those); the contents come from a separate roll of the same seed, so a revisit or floor rebuild
-    // replays the same chest and contents. Golden special rewards and diamond spells are Chest-2.
+    // replays the same chest and contents. Chest-2 (D2, 2026-10-05): a golden chest has a 25% special reward, one
+    // golden exclusive artifact the player can still acquire when it opens (none if every candidate is at its stack
+    // limit), and a diamond chest always holds one spell, 25% of the time a jjangsem spell once one is implemented.
     [CreateAssetMenu(menuName = "Trickal Fan Game/Chest Content Table", fileName = "ChestContentTable")]
     public sealed class ChestContentTable : ScriptableObject
     {
@@ -81,6 +98,12 @@ namespace TrickalFanGame.Room
         [SerializeField] private ItemDefinition[] spells = Array.Empty<ItemDefinition>();
         [SerializeField] private TreasureChest chestPrefab;
         [SerializeField] private SingleUseItemPickup spellPickupPrefab;
+        // Flight-0: artifacts only a golden chest's special reward can give (Contract-0 §2.1, pool membership instead
+        // of a kind). They never join the selection reward pool or shop stock. Chest-2 rolls the special reward.
+        [SerializeField] private ItemDefinition[] goldenExclusiveArtifacts = Array.Empty<ItemDefinition>();
+        [SerializeField] private ItemPickup artifactPickupPrefab;
+        // Chest-2: implemented jjangsem spells a diamond chest may hold. Empty until Jjangsem-0; spells fill in.
+        [SerializeField] private ItemDefinition[] jjangsemSpells = Array.Empty<ItemDefinition>();
 
         public float ChestChance => chestChance;
         public IReadOnlyList<ChestKindRule> Kinds => kinds;
@@ -88,6 +111,10 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<ItemDefinition> Spells => spells;
         public TreasureChest ChestPrefab => chestPrefab;
         public SingleUseItemPickup SpellPickupPrefab => spellPickupPrefab;
+        public IReadOnlyList<ItemDefinition> GoldenExclusiveArtifacts =>
+            goldenExclusiveArtifacts ?? Array.Empty<ItemDefinition>();
+        public ItemPickup ArtifactPickupPrefab => artifactPickupPrefab;
+        public IReadOnlyList<ItemDefinition> JjangsemSpells => jjangsemSpells ?? Array.Empty<ItemDefinition>();
 
         public void Configure(float configuredChestChance, ChestKindRule[] configuredKinds,
             ResourceDropEntry[] configuredConsumables, ItemDefinition[] configuredSpells,
@@ -100,6 +127,21 @@ namespace TrickalFanGame.Room
             chestPrefab = configuredChestPrefab;
             spellPickupPrefab = configuredSpellPickupPrefab;
         }
+
+        public void ConfigureGoldenExclusivePool(ItemDefinition[] configuredArtifacts,
+            ItemPickup configuredArtifactPickupPrefab)
+        {
+            goldenExclusiveArtifacts = configuredArtifacts ?? Array.Empty<ItemDefinition>();
+            artifactPickupPrefab = configuredArtifactPickupPrefab;
+        }
+
+        public void ConfigureJjangsemSpells(ItemDefinition[] configuredJjangsemSpells)
+        {
+            jjangsemSpells = configuredJjangsemSpells ?? Array.Empty<ItemDefinition>();
+        }
+
+        public bool IsGoldenExclusive(ItemDefinition definition) =>
+            definition != null && Array.IndexOf(goldenExclusiveArtifacts ?? Array.Empty<ItemDefinition>(), definition) >= 0;
 
         public ChestKindRule FindRule(ChestKind kind)
         {
@@ -140,9 +182,18 @@ namespace TrickalFanGame.Room
                 }
 
                 if (rule.Weight < 0 || rule.MinimumCount < 1 || rule.CountWeights.Count == 0 ||
-                    rule.SpellChance < 0f || rule.SpellChance > 1f)
+                    rule.SpellChance < 0f || rule.SpellChance > 1f || rule.SpecialRewardChance < 0f ||
+                    rule.SpecialRewardChance > 1f || rule.JjangsemShare < 0f || rule.JjangsemShare > 1f)
                 {
-                    error = $"{name} {rule.Kind} rule has an invalid weight, count or spell chance.";
+                    error = $"{name} {rule.Kind} rule has an invalid weight, count or chance.";
+                    return false;
+                }
+
+                // Contract-0 §3: only golden chests give the special reward and only diamond chests jjangsem spells.
+                if ((rule.SpecialRewardChance > 0f && rule.Kind != ChestKind.Golden) ||
+                    (rule.JjangsemShare > 0f && rule.Kind != ChestKind.Diamond))
+                {
+                    error = $"{name} {rule.Kind} must not give a golden special reward or a jjangsem spell.";
                     return false;
                 }
 
@@ -198,11 +249,22 @@ namespace TrickalFanGame.Room
             HashSet<ItemDefinition> seenSpells = new();
             foreach (ItemDefinition spell in spells)
             {
-                // Contract-0 §3: chests outside Chest-2 hold single-use spells only, never jjangsem spells.
+                // Contract-0 §3: the spell list holds single-use spells only; jjangsem spells have their own list.
                 if (spell == null || !spell.IsValid || !spell.IsActive || spell.Kind != ItemKind.SingleUseSpell ||
                     !seenSpells.Add(spell))
                 {
                     error = $"{name} spells must be distinct, active and valid single-use spells.";
+                    return false;
+                }
+            }
+
+            HashSet<ItemDefinition> seenJjangsemSpells = new();
+            foreach (ItemDefinition jjangsem in JjangsemSpells)
+            {
+                if (jjangsem == null || !jjangsem.IsValid || !jjangsem.IsActive ||
+                    jjangsem.Kind != ItemKind.JjangsemSpell || !seenJjangsemSpells.Add(jjangsem))
+                {
+                    error = $"{name} jjangsem spells must be distinct, active and valid jjangsem spells.";
                     return false;
                 }
             }
@@ -222,6 +284,23 @@ namespace TrickalFanGame.Room
             if (spellPickupPrefab == null)
             {
                 error = $"{name} needs the single-use item pickup Prefab.";
+                return false;
+            }
+
+            HashSet<ItemDefinition> seenArtifacts = new();
+            foreach (ItemDefinition artifact in GoldenExclusiveArtifacts)
+            {
+                if (artifact == null || !artifact.IsValid || !artifact.IsActive || artifact.Kind != ItemKind.Artifact ||
+                    !seenArtifacts.Add(artifact))
+                {
+                    error = $"{name} golden exclusive artifacts must be distinct, active and valid artifacts.";
+                    return false;
+                }
+            }
+
+            if (seenArtifacts.Count > 0 && artifactPickupPrefab == null)
+            {
+                error = $"{name} needs the artifact pickup Prefab for its golden exclusive artifacts.";
                 return false;
             }
 
@@ -294,10 +373,41 @@ namespace TrickalFanGame.Room
                 }
             }
 
-            ItemDefinition spell = rule.SpellChance > 0f && NextUnit(ref state) < rule.SpellChance
-                ? spells[PickIndex(ref state, spells.Length)]
+            // Every draw below comes after the Chest-1 draws, so a chest keeps the consumables and spell hit it had.
+            ItemDefinition spell = null;
+            if (rule.SpellChance > 0f && NextUnit(ref state) < rule.SpellChance)
+            {
+                IReadOnlyList<ItemDefinition> jjangsemPool = JjangsemSpells;
+                bool isJjangsem = rule.JjangsemShare > 0f && jjangsemPool.Count > 0 &&
+                                  NextUnit(ref state) < rule.JjangsemShare;
+                spell = isJjangsem
+                    ? jjangsemPool[PickIndex(ref state, jjangsemPool.Count)]
+                    : spells[PickIndex(ref state, spells.Length)];
+            }
+
+            bool hasSpecialReward = false;
+            float specialRewardPick = 0f;
+            if (rule.SpecialRewardChance > 0f && GoldenExclusiveArtifacts.Count > 0)
+            {
+                hasSpecialReward = NextUnit(ref state) < rule.SpecialRewardChance;
+                specialRewardPick = NextUnit(ref state);
+            }
+
+            return new ChestContents(kind, picked, spell, hasSpecialReward, specialRewardPick);
+        }
+
+        // The golden special reward for a chest that is opening: one exclusive artifact the player can still acquire,
+        // chosen by the seeded pick. Null when the roll missed or every candidate is at its stack limit, so no pickup
+        // the player cannot take is left on the floor (D2, 2026-10-05).
+        public ItemDefinition ResolveSpecialReward(ChestContents contents, PlayerInventory inventory)
+        {
+            if (contents == null || !contents.HasSpecialReward) return null;
+            List<ItemDefinition> candidates = new();
+            foreach (ItemDefinition artifact in GoldenExclusiveArtifacts)
+                if (ArtifactRewardSelector.IsEligible(artifact, inventory)) candidates.Add(artifact);
+            return candidates.Count > 0
+                ? candidates[Mathf.Min(candidates.Count - 1, (int)(contents.SpecialRewardPick * candidates.Count))]
                 : null;
-            return new ChestContents(kind, picked, spell);
         }
 
         private int TotalKindWeight()

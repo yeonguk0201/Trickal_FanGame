@@ -9,6 +9,8 @@ namespace TrickalFanGame.Combat
         [SerializeField, Min(0f)] private float currentShield;
         [SerializeField] private bool useHealthUnits;
 
+        // Flat amount taken off every hit before the shield (빅우드의 열매). Health units when the owner uses them.
+        private float incomingDamageReduction;
         private bool explicitInvulnerability;
         private DamageInvulnerability damageInvulnerability;
 
@@ -16,6 +18,7 @@ namespace TrickalFanGame.Combat
         public float MaxHealth => maxHealth;
         public float CurrentShield => currentShield;
         public bool UsesHealthUnits => useHealthUnits;
+        public float IncomingDamageReduction => incomingDamageReduction;
         public float MaxHealthHearts => useHealthUnits ? HealthUnits.ToHearts(maxHealth) : maxHealth;
         public bool IsDead { get; private set; }
         public bool IsInvulnerable => explicitInvulnerability ||
@@ -45,6 +48,12 @@ namespace TrickalFanGame.Combat
             if (useHealthUnits)
             {
                 result = new DamageResult(HealthUnits.ToDamageUnits(result.FinalDamage), result.IsCritical);
+            }
+
+            if (incomingDamageReduction > 0f)
+            {
+                result = new DamageResult(Mathf.Max(0f, result.FinalDamage - incomingDamageReduction),
+                    result.IsCritical);
             }
 
             float amount = result.FinalDamage;
@@ -98,9 +107,15 @@ namespace TrickalFanGame.Combat
             CurrentHealth = maxHealth;
             SetShield(0f);
             IsDead = false;
+            incomingDamageReduction = 0f;
             explicitInvulnerability = false;
             ResolveDamageInvulnerability()?.ResetHitWindow();
             Changed?.Invoke(CurrentHealth, MaxHealth);
+        }
+
+        public void SetIncomingDamageReduction(float amount)
+        {
+            incomingDamageReduction = Mathf.Max(0f, amount);
         }
 
         public void SetInvulnerable(bool invulnerable)

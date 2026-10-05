@@ -6,22 +6,28 @@ namespace TrickalFanGame.Room
 {
     public readonly struct RoomObstacleFootprint
     {
-        public RoomObstacleFootprint(string obstacleId, Rect bounds, bool isDestructible)
+        public RoomObstacleFootprint(string obstacleId, Rect bounds, bool isDestructible, bool isPit = false)
         {
             ObstacleId = obstacleId;
             Bounds = bounds;
-            IsDestructible = isDestructible;
+            IsDestructible = isDestructible && !isPit;
+            IsPit = isPit;
         }
 
         public string ObstacleId { get; }
         // Room-local collider rectangle.
         public Rect Bounds { get; }
         public bool IsDestructible { get; }
+        // Terrain-0: a pit blocks walking like an obstacle but projectiles and sightlines pass over it.
+        public bool IsPit { get; }
+        public bool BlocksProjectiles => !IsPit;
+        public string Kind => IsPit ? "pit" : "obstacle";
     }
 
     // Static checks for an authored obstacle Layout. Obstacles are treated as solid even when destructible, so a
     // Layout never needs attacks or bombs to keep its doors connected, its SpawnPoints reachable, or its ranged
-    // SpawnPoints able to fire into the combat area.
+    // SpawnPoints able to fire into the combat area. Pits (Terrain-0) block reachability like obstacles but never
+    // block sightlines.
     public static class RoomObstacleLayout
     {
         public const float ActorRadius = 0.5f;
@@ -57,6 +63,13 @@ namespace TrickalFanGame.Room
                 footprints.Add(new RoomObstacleFootprint(obstacle.ObstacleId, bounds, false));
             }
 
+            foreach (RoomPit pit in roomPrefab.GetComponentsInChildren<RoomPit>(true))
+            {
+                if (!TryReadBox(root, pit.gameObject, pit.PitId, out Rect bounds, out error))
+                    return false;
+                footprints.Add(new RoomObstacleFootprint(pit.PitId, bounds, false, true));
+            }
+
             error = null;
             return true;
         }
@@ -85,8 +98,8 @@ namespace TrickalFanGame.Room
                 {
                     if (Overlaps(passage, footprint.Bounds))
                     {
-                        error = $"Layout '{layoutId}' obstacle '{footprint.ObstacleId}' blocks the {door.Direction} " +
-                                "required door passage.";
+                        error = $"Layout '{layoutId}' {footprint.Kind} '{footprint.ObstacleId}' blocks the " +
+                                $"{door.Direction} required door passage.";
                         return false;
                     }
                 }
@@ -98,7 +111,7 @@ namespace TrickalFanGame.Room
                 {
                     if (Distance(spawnPoints[index], footprint.Bounds) < ActorRadius - Tolerance)
                     {
-                        error = $"Layout '{layoutId}' SpawnPoint {index + 1} overlaps obstacle " +
+                        error = $"Layout '{layoutId}' SpawnPoint {index + 1} overlaps {footprint.Kind} " +
                                 $"'{footprint.ObstacleId}'.";
                         return false;
                     }
@@ -117,7 +130,7 @@ namespace TrickalFanGame.Room
             {
                 if (!grid.IsReachable(reachable, door.SafeEntryPosition))
                 {
-                    error = $"Layout '{layoutId}' obstacles cut the {door.Direction} safe entry off from the " +
+                    error = $"Layout '{layoutId}' obstacles or pits cut the {door.Direction} safe entry off from the " +
                             $"{doors[0].Direction} safe entry.";
                     return false;
                 }
@@ -189,7 +202,8 @@ namespace TrickalFanGame.Room
                 bool blocked = false;
                 foreach (RoomObstacleFootprint footprint in footprints)
                 {
-                    if (SegmentIntersects(origin, sample, Expand(footprint.Bounds, ProjectileClearance)))
+                    if (footprint.BlocksProjectiles &&
+                        SegmentIntersects(origin, sample, Expand(footprint.Bounds, ProjectileClearance)))
                     {
                         blocked = true;
                         break;
@@ -211,7 +225,7 @@ namespace TrickalFanGame.Room
                 RoomObstacleFootprint footprint = footprints[index];
                 if (!ids.Add(footprint.ObstacleId ?? string.Empty))
                 {
-                    error = $"Layout '{layoutId}' duplicates obstacle ID '{footprint.ObstacleId}'.";
+                    error = $"Layout '{layoutId}' duplicates {footprint.Kind} ID '{footprint.ObstacleId}'.";
                     return false;
                 }
 
@@ -219,7 +233,7 @@ namespace TrickalFanGame.Room
                 if (bounds.xMin < movementBounds.xMin - Tolerance || bounds.xMax > movementBounds.xMax + Tolerance ||
                     bounds.yMin < movementBounds.yMin - Tolerance || bounds.yMax > movementBounds.yMax + Tolerance)
                 {
-                    error = $"Layout '{layoutId}' obstacle '{footprint.ObstacleId}' leaves the movement bounds.";
+                    error = $"Layout '{layoutId}' {footprint.Kind} '{footprint.ObstacleId}' leaves the movement bounds.";
                     return false;
                 }
 
@@ -231,12 +245,21 @@ namespace TrickalFanGame.Room
                     return false;
                 }
 
+                if (footprint.IsPit &&
+                    (bounds.width < GridStep * 2f - Tolerance || bounds.height < GridStep * 2f - Tolerance ||
+                     !OnGrid(bounds.xMin) || !OnGrid(bounds.xMax) || !OnGrid(bounds.yMin) || !OnGrid(bounds.yMax)))
+                {
+                    error = $"Layout '{layoutId}' pit '{footprint.ObstacleId}' must be at least 1x1 with edges on " +
+                            $"the {GridStep} grid.";
+                    return false;
+                }
+
                 for (int other = 0; other < index; other++)
                 {
                     if (Overlaps(bounds, footprints[other].Bounds))
                     {
-                        error = $"Layout '{layoutId}' obstacles '{footprints[other].ObstacleId}' and " +
-                                $"'{footprint.ObstacleId}' overlap.";
+                        error = $"Layout '{layoutId}' {footprints[other].Kind} '{footprints[other].ObstacleId}' " +
+                                $"and {footprint.Kind} '{footprint.ObstacleId}' overlap.";
                         return false;
                     }
                 }
@@ -314,7 +337,7 @@ namespace TrickalFanGame.Room
         private static bool Approximately(Vector2 first, Vector2 second) =>
             (first - second).sqrMagnitude < Tolerance;
 
-        // Cells whose centers keep an actor-sized circle clear of every obstacle and inside the movement bounds.
+        // Cells whose centers keep an actor-sized circle clear of every obstacle and pit and inside the movement bounds.
         private sealed class ReachabilityGrid
         {
             private readonly Rect bounds;

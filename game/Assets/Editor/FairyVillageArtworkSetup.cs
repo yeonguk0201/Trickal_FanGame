@@ -60,6 +60,15 @@ namespace TrickalFanGame.Editor
             Debug.Log("Connected Fairy Village modules applied to all templates. Start a new run to refresh rooms.");
         }
 
+        // Re-applies the connected artwork to one room Prefab whose walls a Layout setup has just rebuilt.
+        public static void ApplyToPrefab(string path)
+        {
+            Material material = AssetDatabase.LoadAssetAtPath<Material>(Folder + "connected-room.mat");
+            if (material == null)
+                throw new InvalidOperationException("Run Apply Fairy Village Tiles and Walls before a Layout setup.");
+            Apply(path, material);
+        }
+
         public static string[] PrefabPaths() => AssetDatabase.FindAssets("t:Prefab", new[] { Week8GridFloorSetup.PrefabFolder })
             .Select(AssetDatabase.GUIDToAssetPath).Where(p => AssetDatabase.LoadAssetAtPath<GameObject>(p).GetComponent<RoomPrefab>() != null)
             .OrderBy(p => p).ToArray();

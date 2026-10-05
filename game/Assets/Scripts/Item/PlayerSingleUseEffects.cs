@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
+using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
 using UnityEngine;
 
@@ -13,8 +15,21 @@ namespace TrickalFanGame.Item
     public sealed class PlayerSingleUseEffects : MonoBehaviour, ISingleUseItemExecutor
     {
         private const float TickTolerance = 0.0001f;
+        // 아멜리아의 러브레터: hearts land this far from the player, at the first free points around them.
+        public const float HeartDropDistance = 1.1f;
+        private const float HeartDropClearance = 0.35f;
+        private static readonly Vector2[] HeartDropDirections =
+        {
+            Vector2.right, Vector2.left, Vector2.up, Vector2.down,
+            new Vector2(1f, 1f).normalized, new Vector2(-1f, 1f).normalized,
+            new Vector2(1f, -1f).normalized, new Vector2(-1f, -1f).normalized,
+        };
+
+        // 랜덤코인: inclusive minimum and maximum. Replaced in verification to pin the amount.
+        private static Func<int, int, int> goldRollProvider = DefaultGoldRoll;
 
         [SerializeField] private RoomGraphController roomGraph;
+        [SerializeField] private HealthPickup heartPickupPrefab;
 
         private Health health;
         private PlayerSP playerSP;
@@ -36,8 +51,32 @@ namespace TrickalFanGame.Item
         private float roomAttackDamagePercent;
         private float roomAttackSpeedPercent;
         private float roomMoveSpeedPercent;
+        private float roomCriticalDamagePercent;
+        private float roomCriticalChancePercent;
+
+        // 빅우드의 열매: while the window runs every hit is reduced, and each hit that still costs HP is healed back
+        // after a delay with a bonus. Game time only, kept across rooms and floors. Hits after the window are not
+        // healed, heals already pending still arrive, and death or the end of the Run drops everything.
+        private float recoveryRemainingSeconds;
+        private float recoveryDelaySeconds;
+        private int recoveryBonusUnits;
+        private bool isRecoverySubscribed;
+        private readonly List<PendingRecovery> pendingRecoveries = new();
+
+        private struct PendingRecovery
+        {
+            public float RemainingSeconds;
+            public float Amount;
+        }
 
         public RoomGraphController RoomGraph => roomGraph;
+        public HealthPickup HeartPickupPrefab => heartPickupPrefab;
+        public int LastGoldGained { get; private set; }
+        public float RoomCriticalDamagePercent => IsRoomBoostActive ? roomCriticalDamagePercent : 0f;
+        public float RoomCriticalChancePercent => IsRoomBoostActive ? roomCriticalChancePercent : 0f;
+        public bool IsDamageRecoveryActive => recoveryRemainingSeconds > 0f;
+        public float DamageRecoveryRemainingSeconds => Mathf.Max(0f, recoveryRemainingSeconds);
+        public int PendingRecoveryCount => pendingRecoveries.Count;
         public bool IsRoomBoostActive => !string.IsNullOrEmpty(roomBoostRoomId);
         public string RoomBoostRoomId => roomBoostRoomId;
         public float RoomAttackDamagePercent => IsRoomBoostActive ? roomAttackDamagePercent : 0f;
@@ -64,15 +103,35 @@ namespace TrickalFanGame.Item
             roomGraph = configuredRoomGraph;
         }
 
+        public void ConfigureHeartPickup(HealthPickup configuredHeartPickupPrefab)
+        {
+            heartPickupPrefab = configuredHeartPickupPrefab;
+        }
+
+        public static void SetGoldRollProviderForTesting(Func<int, int, int> provider)
+        {
+            goldRollProvider = provider ?? throw new ArgumentNullException(nameof(provider));
+        }
+
+        public static void ResetGoldRollProvider()
+        {
+            goldRollProvider = DefaultGoldRoll;
+        }
+
+        private static int DefaultGoldRoll(int minimum, int maximum) =>
+            UnityEngine.Random.Range(minimum, maximum + 1);
+
         private void Update()
         {
             AdvanceRegeneration(Time.deltaTime);
+            AdvanceDamageRecovery(Time.deltaTime);
             RefreshRoomBoost();
         }
 
         private void OnDisable()
         {
             ClearRoomBoost();
+            StopDamageRecovery();
         }
 
         public bool CanExecute(ItemDefinition definition, out string reason)
@@ -152,6 +211,51 @@ namespace TrickalFanGame.Item
             return delivered;
         }
 
+        // Advances the 빅우드의 열매 window and its pending heals. Returns the HP healed by this step.
+        public float AdvanceDamageRecovery(float deltaSeconds)
+        {
+            if (!IsDamageRecoveryActive && pendingRecoveries.Count == 0)
+            {
+                return 0f;
+            }
+
+            EnsureReferences();
+            RunProgress progress = spellSlot != null ? spellSlot.Progress : null;
+            if (health == null || health.IsDead || progress == null || progress.IsProgressionStopped)
+            {
+                StopDamageRecovery();
+                return 0f;
+            }
+
+            if (deltaSeconds <= 0f || Time.timeScale <= 0f)
+            {
+                return 0f;
+            }
+
+            if (IsDamageRecoveryActive)
+            {
+                recoveryRemainingSeconds -= deltaSeconds;
+                if (recoveryRemainingSeconds <= TickTolerance) EndDamageRecoveryWindow();
+            }
+
+            float healed = 0f;
+            for (int index = pendingRecoveries.Count - 1; index >= 0; index--)
+            {
+                PendingRecovery pending = pendingRecoveries[index];
+                pending.RemainingSeconds -= deltaSeconds;
+                if (pending.RemainingSeconds > TickTolerance)
+                {
+                    pendingRecoveries[index] = pending;
+                    continue;
+                }
+
+                pendingRecoveries.RemoveAt(index);
+                healed += health.Heal(pending.Amount);
+            }
+
+            return healed;
+        }
+
         // Ends the room bonuses once the player is no longer in the room they were used in.
         public void RefreshRoomBoost()
         {
@@ -224,6 +328,44 @@ namespace TrickalFanGame.Item
                     return IsInUnclearedCombatRoom(true, out reason);
                 case ItemEffectType.EscapeToFloorStartRoom:
                     return CanEscape(out reason, out _, out _);
+                case ItemEffectType.ReduceAndRecoverDamageTaken:
+                case ItemEffectType.GainShield:
+                    if (health == null || health.IsDead)
+                    {
+                        reason = "The player has no HP to protect.";
+                        return false;
+                    }
+
+                    reason = string.Empty;
+                    return true;
+                case ItemEffectType.SpawnHealthPickups:
+                    if (heartPickupPrefab == null)
+                    {
+                        reason = "No heart pickup is configured.";
+                        return false;
+                    }
+
+                    reason = string.Empty;
+                    return true;
+                case ItemEffectType.GainRandomGold:
+                    // A full wallet would waste the coin.
+                    if (spellSlot == null || spellSlot.Progress == null ||
+                        !spellSlot.Progress.CanAcceptResource(RunResourceType.Gold))
+                    {
+                        reason = "Gold is already full.";
+                        return false;
+                    }
+
+                    reason = string.Empty;
+                    return true;
+                case ItemEffectType.CurrentRoomCriticalBonus:
+                    if (playerStats == null)
+                    {
+                        reason = "The player has no stats.";
+                        return false;
+                    }
+
+                    return IsInUnclearedCombatRoom(false, out reason);
                 default:
                     reason = $"{effect.EffectType} is not a connected single-use effect.";
                     return false;
@@ -249,15 +391,103 @@ namespace TrickalFanGame.Item
                               $"every {regenerationInterval}s.", this);
                     break;
                 case ItemEffectType.CurrentRoomBasicAttackDamagePercent:
-                    StartRoomBoost(effect.Magnitude, 0f, 0f);
+                    StartRoomBoost(effect.Magnitude, 0f, 0f, 0f, 0f);
                     break;
                 case ItemEffectType.CurrentBossRoomSpeedPercent:
-                    StartRoomBoost(0f, effect.Magnitude, effect.SecondaryMagnitude);
+                    StartRoomBoost(0f, effect.Magnitude, effect.SecondaryMagnitude, 0f, 0f);
+                    break;
+                case ItemEffectType.CurrentRoomCriticalBonus:
+                    StartRoomBoost(0f, 0f, 0f, effect.Magnitude, effect.SecondaryMagnitude);
+                    break;
+                case ItemEffectType.GainShield:
+                    health.AddShield(effect.Magnitude);
+                    break;
+                case ItemEffectType.SpawnHealthPickups:
+                    SpawnHeartsAroundPlayer(effect.IntegerAmount);
+                    break;
+                case ItemEffectType.GainRandomGold:
+                    int maximum = Mathf.RoundToInt(effect.Magnitude);
+                    int rolled = Mathf.Clamp(goldRollProvider(effect.IntegerAmount, maximum), effect.IntegerAmount,
+                        maximum);
+                    // The wallet limit clips the gain.
+                    LastGoldGained = spellSlot.Progress.TryAddResource(RunResourceType.Gold, rolled);
+                    Debug.Log($"[PlayerSingleUseEffects] Random coin rolled {rolled}, gained {LastGoldGained} gold.",
+                        this);
                     break;
                 case ItemEffectType.EscapeToFloorStartRoom:
                     EscapeToStartRoom();
                     break;
+                case ItemEffectType.ReduceAndRecoverDamageTaken:
+                    // Using it again while active restarts the full window; heals already pending stay.
+                    recoveryRemainingSeconds = effect.DurationSeconds;
+                    recoveryDelaySeconds = effect.IntervalSeconds;
+                    recoveryBonusUnits = effect.IntegerAmount;
+                    health.SetIncomingDamageReduction(effect.Magnitude);
+                    if (!isRecoverySubscribed)
+                    {
+                        health.DamageApplied += HandleRecoveryDamage;
+                        isRecoverySubscribed = true;
+                    }
+
+                    Debug.Log($"[PlayerSingleUseEffects] Damage recovery started for {recoveryRemainingSeconds}s.",
+                        this);
+                    break;
             }
+        }
+
+        // Hearts go to free points around the player, in the current room's content so they leave with the floor.
+        // When fewer free points exist than hearts, the rest use the blocked points in order.
+        private void SpawnHeartsAroundPlayer(int count)
+        {
+            RoomGraphController graph = ResolveRoomGraph();
+            RoomNode node = graph != null ? graph.CurrentNode : null;
+            Transform parent = node != null && node.ContentRoot != null ? node.ContentRoot.transform : null;
+            int blockMask = LayerMask.GetMask("Environment", RoomPit.LayerName, HealthPickup.LayerName);
+            Vector2 origin = transform.position;
+
+            List<Vector2> points = new();
+            List<Vector2> blocked = new();
+            foreach (Vector2 direction in HeartDropDirections)
+            {
+                Vector2 point = origin + direction * HeartDropDistance;
+                if (Physics2D.OverlapCircle(point, HeartDropClearance, blockMask) == null) points.Add(point);
+                else blocked.Add(point);
+            }
+
+            points.AddRange(blocked);
+            for (int index = 0; index < count; index++)
+            {
+                HealthPickup heart = Instantiate(heartPickupPrefab, points[index % points.Count], Quaternion.identity,
+                    parent);
+                heart.name = $"Love Letter Heart {index + 1}";
+            }
+        }
+
+        // Only HP actually lost is healed back: a hit the shield absorbed whole leaves nothing to recover.
+        private void HandleRecoveryDamage(DamageContext _, float healthDamage, float currentHealth)
+        {
+            if (!IsDamageRecoveryActive || healthDamage <= 0f || currentHealth <= 0f) return;
+            pendingRecoveries.Add(new PendingRecovery
+            {
+                RemainingSeconds = recoveryDelaySeconds,
+                Amount = healthDamage + recoveryBonusUnits,
+            });
+        }
+
+        private void EndDamageRecoveryWindow()
+        {
+            recoveryRemainingSeconds = 0f;
+            if (health == null) return;
+            health.SetIncomingDamageReduction(0f);
+            if (!isRecoverySubscribed) return;
+            health.DamageApplied -= HandleRecoveryDamage;
+            isRecoverySubscribed = false;
+        }
+
+        private void StopDamageRecovery()
+        {
+            EndDamageRecoveryWindow();
+            pendingRecoveries.Clear();
         }
 
         // 그건 내 잔상: move first, then reset the escaped room, so a refused move never leaves a reset room behind.
@@ -336,7 +566,8 @@ namespace TrickalFanGame.Item
         }
 
         // Another use in the same room adds to the bonuses; they still end when the room is left.
-        private void StartRoomBoost(float attackDamage, float attackSpeed, float moveSpeed)
+        private void StartRoomBoost(float attackDamage, float attackSpeed, float moveSpeed, float criticalDamage,
+            float criticalChance)
         {
             RunProgress progress = spellSlot.Progress;
             string roomId = CurrentRoomId(progress);
@@ -353,10 +584,15 @@ namespace TrickalFanGame.Item
             roomAttackDamagePercent += attackDamage;
             roomAttackSpeedPercent += attackSpeed;
             roomMoveSpeedPercent += moveSpeed;
+            roomCriticalDamagePercent += criticalDamage;
+            roomCriticalChancePercent += criticalChance;
             playerStats.SetSingleUseRoomAttackDamagePercent(roomAttackDamagePercent);
             playerStats.SetSingleUseRoomSpeedPercent(roomAttackSpeedPercent, roomMoveSpeedPercent);
+            playerStats.SetSingleUseRoomCritical(roomCriticalDamagePercent, roomCriticalChancePercent);
             Debug.Log($"[PlayerSingleUseEffects] Room bonus in {roomId}: basic attack +{roomAttackDamagePercent:P0}, " +
-                      $"attack speed +{roomAttackSpeedPercent:P0}, move speed +{roomMoveSpeedPercent:P0}.", this);
+                      $"attack speed +{roomAttackSpeedPercent:P0}, move speed +{roomMoveSpeedPercent:P0}, " +
+                      $"critical damage +{roomCriticalDamagePercent:P0}, critical chance " +
+                      $"+{roomCriticalChancePercent:P0}.", this);
         }
 
         private void HandleRoomChanged(int _, int __)
@@ -373,10 +609,13 @@ namespace TrickalFanGame.Item
             roomAttackDamagePercent = 0f;
             roomAttackSpeedPercent = 0f;
             roomMoveSpeedPercent = 0f;
+            roomCriticalDamagePercent = 0f;
+            roomCriticalChancePercent = 0f;
             if (playerStats != null)
             {
                 playerStats.SetSingleUseRoomAttackDamagePercent(0f);
                 playerStats.SetSingleUseRoomSpeedPercent(0f, 0f);
+                playerStats.SetSingleUseRoomCritical(0f, 0f);
             }
 
             if (wasActive) Debug.Log("[PlayerSingleUseEffects] Room bonuses ended.", this);

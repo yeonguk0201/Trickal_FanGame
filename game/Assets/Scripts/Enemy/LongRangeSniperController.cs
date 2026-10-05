@@ -90,7 +90,7 @@ namespace TrickalFanGame.Enemy
                 return;
             }
 
-            bool blocked = collision.collider.gameObject.layer == LayerMask.NameToLayer("Environment") ||
+            bool blocked = ((1 << collision.collider.gameObject.layer) & EnemyObstacleNavigator.ObstacleMask) != 0 ||
                            collision.collider.GetComponentInParent<EnemyBehaviorContext>() != null;
             if (blocked)
             {

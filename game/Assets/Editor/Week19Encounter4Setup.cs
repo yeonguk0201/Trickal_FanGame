@@ -57,6 +57,8 @@ namespace TrickalFanGame.Editor
                 ["basic-diamond-cover"] = new[] { Point(-5f, -2f), Point(5f, -2f) },
                 ["wide-twin-cover"] = new[] { Point(-7f, -2f), Point(7f, -2f) },
                 ["tall-side-pockets"] = new[] { Point(3f, 3.5f), Point(-3f, -3.5f) },
+                ["basic-central-pit"] = new[] { Point(-3f, 0f), Point(3f, 0f) },
+                ["large-pit-lanes"] = new[] { Point(-8.5f, -4f), Point(8.5f, 4f), Point(-3f, -4.5f) },
             };
 
         public readonly struct SwarmSpec

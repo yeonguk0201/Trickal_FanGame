@@ -71,7 +71,7 @@ namespace TrickalFanGame.Enemy
         private void OnCollisionEnter2D(Collision2D collision)
         {
             if (collision == null || collision.collider == null) return;
-            bool blocked = collision.collider.gameObject.layer == LayerMask.NameToLayer("Environment") ||
+            bool blocked = ((1 << collision.collider.gameObject.layer) & EnemyObstacleNavigator.ObstacleMask) != 0 ||
                            collision.collider.GetComponentInParent<EnemyBehaviorContext>() != null;
             if (blocked) NotifyBlocked();
         }

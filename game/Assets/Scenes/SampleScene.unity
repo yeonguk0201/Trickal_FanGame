@@ -2027,8 +2027,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
   - {fileID: 11400000, guid: bbbef5a18185b6e428a3c5387645e964, type: 2}
-  roomContentVersion: 8
+  roomContentVersion: 9
   roomTemplates:
+  - {fileID: 11400000, guid: 0acb0c03ac29fe741a8006a51518cf60, type: 2}
   - {fileID: 11400000, guid: cd8ea15c0b6de5949bdfe798aa38e5e3, type: 2}
   - {fileID: 11400000, guid: 684a6d37e34e4a640b4de439e8dd6680, type: 2}
   - {fileID: 11400000, guid: 386c2e1a00ff0b948a82c708cd6bb049, type: 2}
@@ -2036,6 +2037,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 807655f00c0bc124ba7aed2e8f024528, type: 2}
   - {fileID: 11400000, guid: d582d98ad188b3c41bbd94118fa04e97, type: 2}
   - {fileID: 11400000, guid: 4517121bdc108644cafcb5ad40bb93dd, type: 2}
+  - {fileID: 11400000, guid: 1753cb145b11cf145ab6b31a9b8eaabe, type: 2}
   - {fileID: 11400000, guid: a93cb28704aedfd428f780d46d039154, type: 2}
   - {fileID: 11400000, guid: 2c2a80946d5e1f448bb8048ebae64166, type: 2}
   - {fileID: 11400000, guid: 025c80049bfec5843b1f45e2c3f9a5d7, type: 2}
@@ -54051,6 +54053,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.PlayerSingleUseEffects
   roomGraph: {fileID: 1265728904}
+  heartPickupPrefab: {fileID: 7824783456288271396, guid: fe735d51964ab6243baf43f8c7221f9a, type: 3}
 --- !u!1 &2024060499
 GameObject:
   m_ObjectHideFlags: 0

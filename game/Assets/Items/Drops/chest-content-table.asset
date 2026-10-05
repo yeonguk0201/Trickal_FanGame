@@ -19,16 +19,22 @@ MonoBehaviour:
     minimumCount: 1
     countWeights: 3c0000001e0000000a000000
     spellChance: 0.05
+    specialRewardChance: 0
+    jjangsemShare: 0
   - kind: 1
     weight: 20
     minimumCount: 2
     countWeights: 010000000100000001000000
     spellChance: 0
+    specialRewardChance: 0.25
+    jjangsemShare: 0
   - kind: 2
     weight: 5
     minimumCount: 4
     countWeights: 010000000100000001000000
-    spellChance: 0
+    spellChance: 1
+    specialRewardChance: 0
+    jjangsemShare: 0.25
   consumables:
   - dropId: heart
     prefab: {fileID: 303849290133622444, guid: fe735d51964ab6243baf43f8c7221f9a, type: 3}
@@ -47,9 +53,18 @@ MonoBehaviour:
     weight: 8
   spells:
   - {fileID: 11400000, guid: 27abb698b3a5c524fb24c4959e1f9ce8, type: 2}
+  - {fileID: 11400000, guid: 4eaa6ff4288eb3544be34e8da9170537, type: 2}
+  - {fileID: 11400000, guid: d580248716ae7ae498b6a687331c3589, type: 2}
   - {fileID: 11400000, guid: 357cb4cc394bacd4dbe9310b1974f57d, type: 2}
   - {fileID: 11400000, guid: 76fcd715ffd998d4088df117e7dbfe35, type: 2}
+  - {fileID: 11400000, guid: a61d91e8539e6364b99b1f3e06e0cf26, type: 2}
   - {fileID: 11400000, guid: da4ddba585fe8c542a00cc75ee71fa89, type: 2}
   - {fileID: 11400000, guid: 374ba4fdc2ee0ed43a98a2d7f3730399, type: 2}
+  - {fileID: 11400000, guid: 3583ead3432edac4cb77c5b2ffcc761a, type: 2}
   chestPrefab: {fileID: 2912694241956306997, guid: 50f7c33047ea94743a682f09811b116d, type: 3}
   spellPickupPrefab: {fileID: 1815312715874959976, guid: c1702e67b68926b479f3c3350b823624, type: 3}
+  goldenExclusiveArtifacts:
+  - {fileID: 11400000, guid: 61cce2b7d148f694ba51702213547966, type: 2}
+  artifactPickupPrefab: {fileID: 8014471090233393603, guid: 78154cfb2dc22df4cb6bfe3343fe2ac6, type: 3}
+  jjangsemSpells:
+  - {fileID: 11400000, guid: d6a0c03f01455b449b6950eaa713ef73, type: 2}

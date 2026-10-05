@@ -23,6 +23,8 @@ namespace TrickalFanGame.Player
         private float currentRoomAttackDamagePercentBonus;
         // Single-use spells own this source, so the legacy spell refresh never overwrites it.
         private float singleUseRoomAttackDamagePercentBonus;
+        private float singleUseRoomCriticalDamageBonus;
+        private float singleUseRoomCriticalChanceBonus;
         private float singleUseRoomAttackSpeedPercentBonus;
         private float singleUseRoomMoveSpeedPercentBonus;
         private float attackSpeedPercentBonus;
@@ -64,8 +66,10 @@ namespace TrickalFanGame.Player
                              singleUseRoomAttackSpeedPercentBonus);
         public float BasicAttackRoomDamageMultiplier =>
             1f + currentRoomAttackDamagePercentBonus + singleUseRoomAttackDamagePercentBonus;
-        public float CriticalChance => Mathf.Clamp01(baseCriticalChance + criticalChanceBonus);
-        public float CriticalDamageMultiplier => Mathf.Max(1f, baseCriticalDamageMultiplier);
+        public float CriticalChance =>
+            Mathf.Clamp01(baseCriticalChance + criticalChanceBonus + singleUseRoomCriticalChanceBonus);
+        public float CriticalDamageMultiplier =>
+            Mathf.Max(1f, baseCriticalDamageMultiplier + singleUseRoomCriticalDamageBonus);
         public int ProjectileCount => 1 + additionalProjectileCount;
         public int PierceCount => pierceCount;
         public float HealOnKill => healOnKill;
@@ -137,6 +141,12 @@ namespace TrickalFanGame.Player
         public void SetSingleUseRoomAttackDamagePercent(float amount)
         {
             singleUseRoomAttackDamagePercentBonus = Mathf.Max(0f, amount);
+        }
+
+        public void SetSingleUseRoomCritical(float damage, float chance)
+        {
+            singleUseRoomCriticalDamageBonus = Mathf.Max(0f, damage);
+            singleUseRoomCriticalChanceBonus = Mathf.Max(0f, chance);
         }
 
         public void SetSingleUseRoomSpeedPercent(float attackSpeed, float moveSpeed)

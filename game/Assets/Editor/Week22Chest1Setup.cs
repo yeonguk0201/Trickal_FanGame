@@ -32,11 +32,14 @@ namespace TrickalFanGame.Editor
             ("bomb", "bomb", 8),
         };
 
+        // Chest-2 (D2, 2026-10-05) adds the golden special reward and the diamond chest's guaranteed spell.
         public static ChestKindRule[] BuildKindRules() => new[]
         {
             new ChestKindRule(ChestKind.Normal, 75, 1, new[] { 60, 30, 10 }, NormalSpellChance),
-            new ChestKindRule(ChestKind.Golden, 20, 2, new[] { 1, 1, 1 }, 0f),
-            new ChestKindRule(ChestKind.Diamond, 5, 4, new[] { 1, 1, 1 }, 0f),
+            new ChestKindRule(ChestKind.Golden, 20, 2, new[] { 1, 1, 1 }, 0f,
+                Week22Chest2Setup.GoldenSpecialRewardChance),
+            new ChestKindRule(ChestKind.Diamond, 5, 4, new[] { 1, 1, 1 }, Week22Chest2Setup.DiamondSpellChance, 0f,
+                Week22Chest2Setup.DiamondJjangsemShare),
         };
 
         [MenuItem("Trickal Fan Game/Week 22/Setup Chest-1 Clear Chests")]
@@ -84,11 +87,7 @@ namespace TrickalFanGame.Editor
                 return new ResourceDropEntry(weight.Id, old.Prefab, weight.Weight);
             }).ToArray();
 
-            ItemDefinition[] spells = AssetDatabase.FindAssets("t:ItemDefinition")
-                .Select(guid => AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid)))
-                .Where(item => item != null && item.Kind == ItemKind.SingleUseSpell && item.IsActive && item.IsValid)
-                .OrderBy(item => item.ItemId, StringComparer.Ordinal)
-                .ToArray();
+            ItemDefinition[] spells = FindSingleUseItems(ItemKind.SingleUseSpell);
 
             ChestContentTable table = AssetDatabase.LoadAssetAtPath<ChestContentTable>(ChestContentTablePath);
             if (table == null)
@@ -98,11 +97,20 @@ namespace TrickalFanGame.Editor
             }
 
             table.Configure(ChestChance, BuildKindRules(), consumables, spells, chestPrefab, spellPickup);
+            // Chest-2: implemented jjangsem spells only; none exist until Jjangsem-0.
+            table.ConfigureJjangsemSpells(FindSingleUseItems(ItemKind.JjangsemSpell));
             if (!table.TryValidate(out string error))
                 throw new InvalidOperationException($"Chest-1 built an invalid chest content table. {error}");
             EditorUtility.SetDirty(table);
             AssetDatabase.SaveAssets();
             return table;
         }
+
+        public static ItemDefinition[] FindSingleUseItems(ItemKind kind) =>
+            AssetDatabase.FindAssets("t:ItemDefinition")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(item => item != null && item.Kind == kind && item.IsActive && item.IsValid)
+                .OrderBy(item => item.ItemId, StringComparer.Ordinal)
+                .ToArray();
     }
 }

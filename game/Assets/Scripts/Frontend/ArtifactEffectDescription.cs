@@ -97,6 +97,17 @@ namespace TrickalFanGame.Frontend
                 ItemEffectType.ProjectileLifetimePercent => $"사거리 +{Percent(effect.Magnitude)}",
                 ItemEffectType.EscapeToFloorStartRoom =>
                     "전투 중 현재 층 시작방으로 탈출 (탈출한 방은 다시 들어가면 처음부터 시작)",
+                ItemEffectType.Flight => "Run이 끝날 때까지 비행 (구덩이·장애물 위 이동, 벽·문은 통과 불가)",
+                ItemEffectType.GainShield => $"방어막 {Hearts(effect.Magnitude)} 획득",
+                ItemEffectType.SpawnHealthPickups => $"주변에 하트 {effect.IntegerAmount}개 생성",
+                ItemEffectType.GainRandomGold =>
+                    $"골드 {effect.IntegerAmount}~{Number(effect.Magnitude)} 무작위 획득",
+                ItemEffectType.CurrentRoomCriticalBonus =>
+                    $"사용한 전투방에서 치명타 확률 +{PercentPoint(effect.SecondaryMagnitude)}·치명타 피해 " +
+                    $"+{PercentPoint(effect.Magnitude)} (방을 떠나면 해제)",
+                ItemEffectType.ReduceAndRecoverDamageTaken =>
+                    $"{Number(effect.DurationSeconds)}초간 받는 피해 -{Hearts(effect.Magnitude)}, HP 피해를 받으면 " +
+                    $"{Number(effect.IntervalSeconds)}초 뒤 그 피해 +{Hearts(effect.IntegerAmount)} 회복",
                 _ => effect.EffectType.ToString(),
             };
         }

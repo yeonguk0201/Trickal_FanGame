@@ -10,6 +10,9 @@ namespace TrickalFanGame.Resource
     [RequireComponent(typeof(Health), typeof(PlayerActionState))]
     public sealed class PlayerBombController : MonoBehaviour
     {
+        public const float BombPlacementClearance = 0.25f;
+        public const float BombPlacementSearchDistance = 2.5f;
+
         [SerializeField] private RunProgress runProgress;
         [SerializeField] private PlacedBomb bombPrefab;
 
@@ -46,13 +49,28 @@ namespace TrickalFanGame.Resource
 
         public bool TryPlaceBomb(float currentTime)
         {
-            if (!CanPlace || !runProgress.TrySpendResource(RunResourceType.Bomb)) return false;
+            if (!CanPlace || !TryResolvePlacement(transform.position, out Vector2 position) ||
+                !runProgress.TrySpendResource(RunResourceType.Bomb))
+            {
+                return false;
+            }
 
-            pendingBomb = Instantiate(bombPrefab, transform.position, Quaternion.identity);
+            pendingBomb = Instantiate(bombPrefab, position, Quaternion.identity);
             pendingBomb.name = "Placed Bomb";
             pendingBomb.Configure(gameObject, health, currentTime);
             pendingBomb.Exploded += OnBombExploded;
             return true;
+        }
+
+        // Flight-0 (D3): only a flying player can stand over a pit or obstacle. Over a pit the bomb cannot be placed and
+        // is not spent; over an obstacle it lands on the nearest walkable point instead.
+        public static bool TryResolvePlacement(Vector2 playerPosition, out Vector2 position)
+        {
+            position = playerPosition;
+            if (RoomMovementClass.IsOverPit(playerPosition)) return false;
+            if (!RoomMovementClass.IsOverLowObstacle(playerPosition)) return true;
+            return RoomMovementClass.TryFindNearestWalkablePoint(playerPosition, BombPlacementClearance,
+                BombPlacementSearchDistance, out position);
         }
 
         private void OnBombExploded(PlacedBomb explodedBomb)

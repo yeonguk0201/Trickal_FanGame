@@ -78,6 +78,11 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 멤버십카드 | 스펠 | `single-spell-membership-card` | Spell-4 |
 | 멜룬카드 | 짱셈스펠 | `jjangsem-melune-card` | Jjangsem-1 |
 | 시스트의 가짜 날개 | 아티팩트(황금 전용) | `artifact-sist-fake-wings` | Flight-0 |
+| 빅우드의 열매 | 짱셈스펠 | `jjangsem-bigwood-fruit` | Jjangsem-0 |
+| 갑옷축제 초대장 | 스펠 | `single-spell-armor-festival-invitation` | Spell-5 |
+| 아멜리아의 러브레터 | 스펠 | `single-spell-amelia-love-letter` | Spell-5 |
+| 랜덤코인 | 스펠 | `single-spell-random-coin` | Spell-5 |
+| 회심의 일격 | 스펠 | `single-spell-decisive-strike` | Spell-5 |
 
 ### 2.4 등급·효과·스택
 
@@ -99,6 +104,16 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
   둘 다 사거리를 늘린다. 탄속(33)은 **계약만** 열어둔 상태다. 체공 시간(34)은 같은 날 `item-15` 장난감 망원경의
   세 번째 효과(`magnitude` 0.3, 사거리 약 5.3 → 약 6.9)로 추가했고 Backend 카탈로그 `effectData`·설명에도 같은 값을 기록했다.
   기존 두 효과(공격력 +15%, 2~6m 거리 비례 피해)와 ID·등급·스택은 그대로다.
+  Flight-0(2026-10-03)에서 `Flight = 35`(수치 필드 없음)를 추가했다. `artifact-sist-fake-wings`(Epic, 최대 1스택)만 쓰며,
+  획득하면 Run이 끝날 때까지 구덩이·낮은 장애물 위를 비행한다. Backend 카탈로그에도 같은 ID·등급·효과를 기록했다.
+  Jjangsem-0(2026-10-05)에서 `ReduceAndRecoverDamageTaken = 36`(`magnitude` = 피해마다 줄이는 HP 단위, `integerAmount` =
+  HP 피해에 더해 회복하는 HP 단위, `intervalSeconds` = 회복 지연, `durationSeconds` = 지속)을 추가했다. HP 단위 1 = 하트 반 칸.
+  `jjangsem-bigwood-fruit`(Rare, 최대 1스택)만 쓰며 Backend 카탈로그에도 같은 ID·등급·효과를 기록했다.
+  Spell-5(2026-10-05)에서 `GainShield = 37`(`magnitude` = 방어막 HP 단위), `SpawnHealthPickups = 38`(`integerAmount` =
+  하트 픽업 수), `GainRandomGold = 39`(`integerAmount` = 최소, `magnitude` = 최대, 양 끝 포함),
+  `CurrentRoomCriticalBonus = 40`(`magnitude` = 사용한 방의 치명타 피해 배율 증가분, `secondaryMagnitude` = 치명타 확률
+  증가분)을 추가했다. 기존
+  `CriticalChance`(8)는 재사용하지 않았다. 네 스펠의 ID·등급·효과를 Backend 카탈로그에도 기록했다.
 - 일회용 아이템(`SingleUseSpell`, `JjangsemSpell`)은 `maxStacks = 1`이다. 보유 중에는 **효과가 적용되지
   않고**, 사용 성공 시에만 효과를 실행한다. `PlayerInventory`의 상시 효과 적용·아티팩트 HUD·일시정지
   아티팩트 목록에 들어가지 않는다.
@@ -184,8 +199,8 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | Gold-0 | §6. 값 0 유지, Prefab GUID 보존, 표시 문자열 전환, 상한 99·상점 구매 회귀 |
 | Slot-0 | `SingleUseSpell`/`JjangsemSpell` 추가, 접두사 검증, 보유 중 효과 미적용, 인스턴스 ID 기반 1회 기록(§4.1), 카드 UI 분류 표기 |
 | Spell-0~4 | §2.3 ID, Backend 카탈로그·테스트·seed 동시 반영, 레거시 `spell-*` 풀 제거·Backend 활성 유지 |
-| Chest-1·2 | §3 경로별 허용 분류, 유효 ID만 생성 |
-| Flight-0 | 가짜 날개는 `ItemKind.Artifact`, 전용 풀 소속으로만 획득 |
-| Jjangsem-0·1 | `jjangsem-` 접두사, 일회용 아이템 비복제 |
+| Chest-1·2 | §3 경로별 허용 분류, 유효 ID만 생성. Chest-2(2026-10-05): `ChestContentTable.TryValidate`가 일반·다이아몬드의 특별 보상과 일반·황금의 짱셈스펠 비율을 거부하고, 스펠·짱셈스펠·황금 전용 아티팩트 목록을 분류별로 따로 검사한다 |
+| Flight-0 | 가짜 날개는 `ItemKind.Artifact`, 전용 풀 소속으로만 획득. 풀은 `chest-content-table`의 황금 전용 아티팩트 목록이며, 전 보상 풀을 모으는 Setup(Reward-3)은 `GoldenChestExclusivePool` 목록을 제외한다 |
+| Jjangsem-0·1 | `jjangsem-` 접두사, 일회용 아이템 비복제. Jjangsem-0(2026-10-05): `jjangsem-bigwood-fruit`는 `chest-content-table`의 짱셈스펠 목록(다이아몬드 상자)으로만 획득 |
 | Verify-0 | 풀별 분류 불변조건과 Unity↔Backend 카탈로그 ID·등급 일치 검사 |
 | Range-0 | 효과 33·34는 뒤에 추가, 33은 아이템 미사용·34는 `item-15`만 사용(검증기가 확인), 아이템 추가 시 Backend 카탈로그·seed 동시 반영 |

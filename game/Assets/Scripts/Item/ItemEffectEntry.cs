@@ -153,6 +153,38 @@ namespace TrickalFanGame.Item
                     }
 
                     break;
+                case ItemEffectType.CurrentRoomCriticalBonus:
+                    if (secondaryMagnitude < 0f || secondaryMagnitude > 1f)
+                    {
+                        error = "CurrentRoomCriticalBonus requires a critical chance bonus within 0..1.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.SpawnHealthPickups:
+                    if (integerAmount <= 0)
+                    {
+                        error = "SpawnHealthPickups requires a positive pickup count.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.GainRandomGold:
+                    if (integerAmount <= 0 || magnitude < integerAmount)
+                    {
+                        error = "GainRandomGold requires a positive minimum and a maximum that is not below it.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.ReduceAndRecoverDamageTaken:
+                    if (intervalSeconds <= 0f || durationSeconds <= 0f)
+                    {
+                        error = "ReduceAndRecoverDamageTaken requires a positive recovery delay and duration.";
+                        return false;
+                    }
+
+                    break;
                 case ItemEffectType.Pierce:
                 case ItemEffectType.MaxSP:
                 case ItemEffectType.MultiShot:
@@ -178,7 +210,9 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.MultiShot &&
                    type != ItemEffectType.RestoreAllSPWithOvercharge &&
                    type != ItemEffectType.RegenerateSPHalvesOverTime &&
-                   type != ItemEffectType.EscapeToFloorStartRoom;
+                   type != ItemEffectType.EscapeToFloorStartRoom &&
+                   type != ItemEffectType.SpawnHealthPickups &&
+                   type != ItemEffectType.Flight;
         }
     }
 }

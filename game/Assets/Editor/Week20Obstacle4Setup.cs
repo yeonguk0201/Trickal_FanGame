@@ -169,7 +169,7 @@ namespace TrickalFanGame.Editor
             return table;
         }
 
-        private static void PlaceObstacles(string prefabPath, IReadOnlyList<Vector2> cells,
+        public static void PlaceObstacles(string prefabPath, IReadOnlyList<Vector2> cells,
             GameObject obstaclePrefab, ObstacleVariantTable table)
         {
             GameObject root = PrefabUtility.LoadPrefabContents(prefabPath);
