@@ -9,8 +9,13 @@ namespace TrickalFanGame.Room
     public sealed class RoomStaticObstacle : MonoBehaviour
     {
         [SerializeField] private string obstacleId;
+        [Tooltip("나무 같은 높은 장애물입니다. 켜면 비행 중인 플레이어도 지나가지 못합니다.")]
+        [SerializeField] private bool blocksFlight;
 
         public string ObstacleId => obstacleId;
+        public bool BlocksFlight => blocksFlight;
+
+        public void ConfigureHeight(bool configuredBlocksFlight) => blocksFlight = configuredBlocksFlight;
 
         public void Configure(string configuredObstacleId)
         {

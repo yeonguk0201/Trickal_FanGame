@@ -118,11 +118,13 @@ namespace TrickalFanGame.Editor
                         ? sp
                         : throw new InvalidOperationException($"Drops require the SP pickup at {SpPickupPrefabPath}.");
                 case "elif":
+                // Obstacle-5 tables name the gold pickup "gold"; older tables keep their "elif" ID.
+                case "gold":
                 case "key":
                 case "bomb":
                     if (!Week17Resource1Setup.EnsurePrefabs(out error))
                         throw new InvalidOperationException($"Drops require the Resource-1 pickups. {error}");
-                    RunResourceType type = dropId == "elif" ? RunResourceType.Gold
+                    RunResourceType type = dropId is "elif" or "gold" ? RunResourceType.Gold
                         : dropId == "key" ? RunResourceType.Key : RunResourceType.Bomb;
                     return Week17Resource1Setup.LoadPrefab(type).gameObject;
                 case "pit":

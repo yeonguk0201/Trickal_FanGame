@@ -17,3 +17,16 @@ MonoBehaviour:
   dropTable: {fileID: 11400000, guid: cb9e27c5e2824b446a7a649768351ec3, type: 2}
   intactColor: {r: 0.94, g: 0.46, b: 0.68, a: 1}
   crackedColor: {r: 0.52, g: 0.16, b: 0.3, a: 1}
+  breakRule: 0
+  dropCount: 1
+  rareItemChance: 0
+  rareArtifactShare: 0
+  rareSpells: []
+  spellPickupPrefab: {fileID: 0}
+  artifactPickupPrefab: {fileID: 0}
+  explosionChance: 0
+  explosionFuse: 0.5
+  explosionPrefab: {fileID: 0}
+  enemyChance: 0
+  enemyCount: 1
+  enemyPrefab: {fileID: 0}

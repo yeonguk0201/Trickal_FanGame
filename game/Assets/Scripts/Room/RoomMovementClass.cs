@@ -4,8 +4,9 @@ using UnityEngine;
 namespace TrickalFanGame.Room
 {
     // Flight-0: the movement block classes a walking or flying body meets.
-    // - Wall: room walls, doors, chests and any future high obstacle (tree). Nothing walks or flies through them.
-    // - Low obstacle: every obstacle in the game today (DestructibleObstacle, RoomStaticObstacle). They stay on the
+    // - Wall: room walls, doors, chests and high obstacles (a RoomStaticObstacle that blocks flight, such as a tree).
+    //   Nothing walks or flies through them.
+    // - Low obstacle: DestructibleObstacle and a RoomStaticObstacle that does not block flight. They stay on the
     //   Environment layer, so walking bodies, projectiles and lines of fire still stop at them; only a flying player
     //   passes over them.
     // - Pit: the Pit layer (Terrain-0). Walking bodies stop at it, projectiles and a flying player pass over it.
@@ -20,12 +21,12 @@ namespace TrickalFanGame.Room
         public static int EnvironmentMask => LayerMask.GetMask(EnvironmentLayerName);
         public static int PitMask => LayerMask.GetMask(RoomPit.LayerName);
 
-        // A solid obstacle collider a flying player passes over. Walls, doors and chests are not low obstacles.
+        // A solid obstacle collider a flying player passes over. Walls, doors, chests and trees are not low obstacles.
         public static bool IsLowObstacle(Collider2D collider)
         {
             return collider != null && !collider.isTrigger &&
                    (collider.TryGetComponent(out DestructibleObstacle _) ||
-                    collider.TryGetComponent(out RoomStaticObstacle _));
+                    (collider.TryGetComponent(out RoomStaticObstacle fixedObstacle) && !fixedObstacle.BlocksFlight));
         }
 
         public static bool IsOverPit(Vector2 point) => Physics2D.OverlapPoint(point, PitMask) != null;

@@ -6,6 +6,8 @@ namespace TrickalFanGame.Combat
     {
         public const int UnitsPerHeart = 2;
         public const int MinimumEnemyDamageUnits = UnitsPerHeart;
+        // Enemy-6: the only damage below the one-heart minimum, for hits that explicitly allow it (쥬비).
+        public const int HalfHeartDamageUnits = 1;
 
         private const float RoundingTolerance = 0.0001f;
 
@@ -34,14 +36,15 @@ namespace TrickalFanGame.Combat
             return new DamageContext(source, sourceType, GetEnemyDamageUnits(tier, floorNumber), multiplier);
         }
 
-        public static int ToDamageUnits(float damage)
+        public static int ToDamageUnits(float damage, bool allowsHalfHeart = false)
         {
             if (damage <= 0f)
             {
                 return 0;
             }
 
-            return Mathf.Max(MinimumEnemyDamageUnits, Mathf.CeilToInt(damage - RoundingTolerance));
+            return Mathf.Max(allowsHalfHeart ? HalfHeartDamageUnits : MinimumEnemyDamageUnits,
+                Mathf.CeilToInt(damage - RoundingTolerance));
         }
 
         public static int FloorToUnits(float amount)

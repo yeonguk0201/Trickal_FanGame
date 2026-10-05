@@ -36,7 +36,7 @@ namespace TrickalFanGame.Editor
             ValidatePlacementAndExplosion();
             Debug.Log("Special-2 verification passed: F-bound placement consumes exactly one bomb, blocks duplicate " +
                       "placement during the 0.75s fuse, applies one 30-damage enemy hit and one-heart self damage " +
-                      "inside radius 2.5, ignores targets outside, destroys each obstacle once with persisted state, " +
+                      "inside radius 2, ignores targets outside, destroys each obstacle once with persisted state, " +
                       "and rejects use while blocked, paused by action state, empty, dead, or after Run end.");
         }
 
@@ -51,7 +51,7 @@ namespace TrickalFanGame.Editor
                    prefab.GetComponents<RunResourcePickup>().Length == 0,
                 "PlacedBomb Prefab must be a single non-pickup visual without physics collisions.");
             Assert(Mathf.Approximately(bomb.FuseDuration, 0.75f) &&
-                   Mathf.Approximately(bomb.ExplosionRadius, 2.5f) &&
+                   Mathf.Approximately(bomb.ExplosionRadius, 2f) &&
                    Mathf.Approximately(bomb.EnemyDamage, 30f) &&
                    Mathf.Approximately(bomb.SelfDamage, 2f) &&
                    bomb.EnemyLayers.value == LayerMask.GetMask("Enemy"),
@@ -117,7 +117,7 @@ namespace TrickalFanGame.Editor
                     "The bomb must explode exactly at the fuse boundary and release the placement lock.");
                 Assert(Mathf.Approximately(enemyHealth.CurrentHealth, 70f) &&
                        Mathf.Approximately(farHealth.CurrentHealth, 100f),
-                    "Explosion must deal 30 once inside radius 2.5 and ignore a target outside it.");
+                    "Explosion must deal 30 once inside radius 2 and ignore a target outside it.");
                 Assert(Mathf.Approximately(playerHealth.CurrentHealth, playerBefore - 2f),
                     "Explosion self-damage must remove exactly one heart (2 health units).");
                 Assert(obstacle.IsBroken && roomState.IsObstacleDestroyed("bomb-obstacle"),

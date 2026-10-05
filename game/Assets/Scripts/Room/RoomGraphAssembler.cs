@@ -522,6 +522,7 @@ namespace TrickalFanGame.Room
                 return false;
             }
 
+            PlayerInventory inventory = graph.Player != null ? graph.Player.GetComponent<PlayerInventory>() : null;
             HashSet<string> ids = new(StringComparer.Ordinal);
             foreach (DestructibleObstacle obstacle in instance.GetComponentsInChildren<DestructibleObstacle>(true))
             {
@@ -534,6 +535,7 @@ namespace TrickalFanGame.Room
 
                 obstacle.Bind(state, node.ContentSeed, instance.Node.ContentRoot.transform, runProgress, secretLink,
                     instance.Node, instance.Controller);
+                obstacle.BindRareItems(selectionRewardPool, inventory);
             }
 
             error = null;

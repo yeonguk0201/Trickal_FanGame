@@ -82,6 +82,7 @@ namespace TrickalFanGame.Run
             DrawSpellSlotSection(assembler);
             DrawResourceSection(progress);
             DrawChestSection(assembler);
+            DrawObstacleSection(assembler);
             DrawRoomSection(assembler);
             DrawBossSection(assembler);
             DrawSecretSection(assembler);
@@ -250,6 +251,39 @@ namespace TrickalFanGame.Run
                 pickup.name = $"Item Pickup ({artifact.ItemId})";
                 pickup.Configure(artifact);
                 status = $"Dropped {artifact.DisplayName} next to the player.";
+            }
+        }
+
+        // Obstacle-5: turns the unbroken candidate obstacle nearest to the player into a chosen kind, because each
+        // special kind is rare in a normal Run (assisted Run). A rebuilt room shows its seeded kind again.
+        private void DrawObstacleSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Obstacle —");
+            RoomPrefab room = CurrentRoom(assembler);
+            Transform player = assembler.Graph?.Player != null ? assembler.Graph.Player.transform : null;
+            RoomObstacleVariantSlot nearest = room == null || player == null
+                ? null
+                : room.GetComponentsInChildren<RoomObstacleVariantSlot>(false)
+                    .Where(slot => slot.VariantTable != null && !slot.GetComponent<DestructibleObstacle>().IsBroken)
+                    .OrderBy(slot => (slot.transform.position - player.position).sqrMagnitude)
+                    .FirstOrDefault();
+            if (nearest == null)
+            {
+                GUILayout.Label("No unbroken obstacle slot in this room.");
+                return;
+            }
+
+            DestructibleObstacle obstacle = nearest.GetComponent<DestructibleObstacle>();
+            GUILayout.Label($"Nearest {obstacle.ObstacleId}: {obstacle.VariantId}");
+            // Enemy-6: the random box releases its 쥬비 on the next break instead of its seeded outcome.
+            DestructibleObstacle.DevelopmentForceNextEnemies = GUILayout.Toggle(
+                DestructibleObstacle.DevelopmentForceNextEnemies, "Next broken random box releases enemies");
+            if (DestructibleObstacle.DevelopmentForceNextEnemies) MarkAssisted("Forced enemies");
+            foreach (ObstacleVariantEntry entry in nearest.VariantTable.Entries)
+            {
+                if (entry?.Variant == null || !AssistedButton($"Make {entry.Variant.VariantId}")) continue;
+                obstacle.ApplyVariant(entry.Variant);
+                status = $"{obstacle.ObstacleId} is now {entry.Variant.VariantId}.";
             }
         }
 

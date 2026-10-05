@@ -65,8 +65,12 @@ namespace TrickalFanGame.Combat
         private bool isSplitProjectile;
         private float resolvedLifetime;
         private float remainingLifetime;
+        private bool isSpent;
 
         public DamageContext DamageContext => damageContext;
+        // True once the projectile is used up. Destroy only removes it at the end of the frame, so without this a
+        // shot touching several overlapping enemies in one physics step would hit all of them.
+        public bool IsSpent => isSpent;
         public bool IsLaunched => owner != null;
         public bool IsSplitProjectile => isSplitProjectile;
         public Vector2 LaunchPosition => launchPosition;
@@ -150,7 +154,7 @@ namespace TrickalFanGame.Combat
 
         private void Hit(Collider2D collider)
         {
-            if (collider == null)
+            if (collider == null || isSpent)
             {
                 return;
             }
@@ -262,6 +266,7 @@ namespace TrickalFanGame.Combat
 
         private void DestroyProjectile()
         {
+            isSpent = true;
             if (Application.isPlaying)
             {
                 Destroy(gameObject);
