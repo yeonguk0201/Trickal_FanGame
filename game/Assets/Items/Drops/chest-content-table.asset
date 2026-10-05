@@ -68,3 +68,4 @@ MonoBehaviour:
   artifactPickupPrefab: {fileID: 8014471090233393603, guid: 78154cfb2dc22df4cb6bfe3343fe2ac6, type: 3}
   jjangsemSpells:
   - {fileID: 11400000, guid: d6a0c03f01455b449b6950eaa713ef73, type: 2}
+  - {fileID: 11400000, guid: 5004e021b76121041a3e31621f03ba0d, type: 2}

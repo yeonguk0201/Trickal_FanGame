@@ -46,7 +46,13 @@ namespace TrickalFanGame.Room
         public const uint DevelopmentSeedSalt = 0x7A3C51E9u;
 
         public static TreasureChest Spawn(ChestContentTable table, RoomChestSite site, string chestId, ChestKind kind,
-            int contentSeed, out string error)
+            int contentSeed, out string error) =>
+            Spawn(table, site, chestId, kind, contentSeed, null, out error);
+
+        // placedLocal skips the placement search for a chest placed for the first time (Jjangsem-1 copies pick their
+        // own spot); a chest with a recorded position always returns there.
+        public static TreasureChest Spawn(ChestContentTable table, RoomChestSite site, string chestId, ChestKind kind,
+            int contentSeed, Vector2? placedLocal, out string error)
         {
             if (table == null)
             {
@@ -71,6 +77,7 @@ namespace TrickalFanGame.Room
 
             Vector2 local;
             if (existing != null && existing.HasPosition) local = existing.LocalPosition;
+            else if (placedLocal.HasValue) local = placedLocal.Value;
             else if (!ChestPlacement.TryFindSafeLocalPosition(site.Template, site.Room.gameObject, site.PreferredLocal,
                          OccupiedLocal(site), site.AvoidLocal, out local, out error))
             {
@@ -86,6 +93,7 @@ namespace TrickalFanGame.Room
                 chest.Configure(chestId, kind);
                 bool isClosed = chest.Bind(site.State, site.Progress);
                 site.State.TryRecordChestPosition(chestId, local);
+                site.State.TryRecordChestContentSeed(chestId, contentSeed);
                 if (isClosed)
                 {
                     ChestContents contents = table.RollContents(contentSeed, kind);
@@ -174,7 +182,7 @@ namespace TrickalFanGame.Room
             return spawned;
         }
 
-        private static List<Vector2> OccupiedLocal(RoomChestSite site)
+        internal static List<Vector2> OccupiedLocal(RoomChestSite site)
         {
             List<Vector2> occupied = new();
             foreach (TreasureChest other in site.Parent.GetComponentsInChildren<TreasureChest>(false))

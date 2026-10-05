@@ -54054,6 +54054,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.PlayerSingleUseEffects
   roomGraph: {fileID: 1265728904}
   heartPickupPrefab: {fileID: 7824783456288271396, guid: fe735d51964ab6243baf43f8c7221f9a, type: 3}
+  chestContentTable: {fileID: 11400000, guid: 48012de1a8d9a0d409c734fa4cf5845c, type: 2}
 --- !u!1 &2024060499
 GameObject:
   m_ObjectHideFlags: 0

@@ -374,6 +374,16 @@ export const ITEM_CATALOG = [
     ],
   },
   {
+    id: 'jjangsem-melune-card',
+    name: '멜룬카드',
+    description:
+      '사용하면 현재 방의 열지 않은 상자와 바닥의 하트·SP·골드·열쇠·폭탄을 하나씩 복제합니다. 복제한 상자는 내용물을 따로 추첨하며 같은 방법(열쇠·폭탄)으로 엽니다. 복제할 것이 없는 방에서는 사용할 수 없습니다. 다이아몬드 상자에서만 얻을 수 있습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'DuplicateRoomChestsAndPickups' }],
+  },
+  {
     id: 'item-06',
     name: '다중 투사체',
     description:

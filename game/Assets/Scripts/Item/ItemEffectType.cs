@@ -65,5 +65,8 @@ namespace TrickalFanGame.Item
         // 회심의 일격: Magnitude = critical damage and SecondaryMagnitude = critical chance bonus in the combat room
         // where the item is used. Leaving the room ends both.
         CurrentRoomCriticalBonus = 40,
+        // Jjangsem-1 (멜룬카드): copies each unopened chest and each floor consumable (heart, SP, gold, key, bomb) in
+        // the current room once. A copied chest rolls its own contents. No value fields are used.
+        DuplicateRoomChestsAndPickups = 41,
     }
 }

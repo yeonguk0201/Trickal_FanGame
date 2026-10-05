@@ -30,6 +30,8 @@ namespace TrickalFanGame.Item
 
         [SerializeField] private RoomGraphController roomGraph;
         [SerializeField] private HealthPickup heartPickupPrefab;
+        // 멜룬카드: copied chests roll their contents from this table.
+        [SerializeField] private ChestContentTable chestContentTable;
 
         private Health health;
         private PlayerSP playerSP;
@@ -71,6 +73,8 @@ namespace TrickalFanGame.Item
 
         public RoomGraphController RoomGraph => roomGraph;
         public HealthPickup HeartPickupPrefab => heartPickupPrefab;
+        public ChestContentTable ChestContentTable => chestContentTable;
+        public RoomDuplicationResult LastDuplication { get; private set; }
         public int LastGoldGained { get; private set; }
         public float RoomCriticalDamagePercent => IsRoomBoostActive ? roomCriticalDamagePercent : 0f;
         public float RoomCriticalChancePercent => IsRoomBoostActive ? roomCriticalChancePercent : 0f;
@@ -106,6 +110,11 @@ namespace TrickalFanGame.Item
         public void ConfigureHeartPickup(HealthPickup configuredHeartPickupPrefab)
         {
             heartPickupPrefab = configuredHeartPickupPrefab;
+        }
+
+        public void ConfigureChestContents(ChestContentTable configuredChestContentTable)
+        {
+            chestContentTable = configuredChestContentTable;
         }
 
         public static void SetGoldRollProviderForTesting(Func<int, int, int> provider)
@@ -366,6 +375,22 @@ namespace TrickalFanGame.Item
                     }
 
                     return IsInUnclearedCombatRoom(false, out reason);
+                case ItemEffectType.DuplicateRoomChestsAndPickups:
+                    if (!TryResolveDuplicationRoom(out Transform contentRoot, out RoomChestSite site, out _,
+                            out reason))
+                    {
+                        return false;
+                    }
+
+                    // A room with nothing to copy would waste the card.
+                    if (RoomDuplication.CollectTargets(contentRoot, site != null).Count == 0)
+                    {
+                        reason = "There is no unopened chest or floor consumable to copy in this room.";
+                        return false;
+                    }
+
+                    reason = string.Empty;
+                    return true;
                 default:
                     reason = $"{effect.EffectType} is not a connected single-use effect.";
                     return false;
@@ -417,6 +442,9 @@ namespace TrickalFanGame.Item
                 case ItemEffectType.EscapeToFloorStartRoom:
                     EscapeToStartRoom();
                     break;
+                case ItemEffectType.DuplicateRoomChestsAndPickups:
+                    DuplicateCurrentRoom();
+                    break;
                 case ItemEffectType.ReduceAndRecoverDamageTaken:
                     // Using it again while active restarts the full window; heals already pending stay.
                     recoveryRemainingSeconds = effect.DurationSeconds;
@@ -461,6 +489,54 @@ namespace TrickalFanGame.Item
                     parent);
                 heart.name = $"Love Letter Heart {index + 1}";
             }
+        }
+
+        // 멜룬카드: the original list is fixed inside RoomDuplication before the first copy is made.
+        private void DuplicateCurrentRoom()
+        {
+            if (!TryResolveDuplicationRoom(out Transform contentRoot, out RoomChestSite site, out int roomSeed,
+                    out string reason))
+                throw new InvalidOperationException("[PlayerSingleUseEffects] Duplication refused: " + reason);
+
+            LastDuplication = RoomDuplication.Duplicate(contentRoot, site != null ? chestContentTable : null, site,
+                roomSeed);
+            foreach (string error in LastDuplication.Errors)
+                Debug.LogWarning("[PlayerSingleUseEffects] " + error, this);
+            Debug.Log($"[PlayerSingleUseEffects] Melune card copied {LastDuplication.CopiedChests.Count} chest(s) " +
+                      $"and {LastDuplication.CopiedPickups.Count} pickup(s).", this);
+        }
+
+        // The room the graph shows the player in. Chests need its generated Template, Run state and the chest table;
+        // without them only the floor pickups can be copied (site is null).
+        private bool TryResolveDuplicationRoom(out Transform contentRoot, out RoomChestSite site, out int roomSeed,
+            out string reason)
+        {
+            contentRoot = null;
+            site = null;
+            roomSeed = 0;
+            RunProgress progress = spellSlot != null ? spellSlot.Progress : null;
+            RoomGraphController graph = ResolveRoomGraph();
+            RoomNode node = graph != null ? graph.CurrentNode : null;
+            if (progress == null || node == null || node.ContentRoot == null ||
+                (graph.Progress != null && graph.Progress != progress))
+            {
+                reason = "The player is not in a room.";
+                return false;
+            }
+
+            contentRoot = node.ContentRoot.transform;
+            GeneratedRoomNode generated = FindCurrentNode(progress);
+            RoomPrefab room = node.GetComponent<RoomPrefab>();
+            RoomRunState state = progress.GetRoomState(node.RoomId);
+            if (generated != null && string.Equals(generated.RoomId, node.RoomId, StringComparison.Ordinal))
+            {
+                roomSeed = generated.ContentSeed;
+                if (chestContentTable != null && generated.Template != null && room != null && state != null)
+                    site = new RoomChestSite(room, generated.Template, state, progress, transform);
+            }
+
+            reason = string.Empty;
+            return true;
         }
 
         // Only HP actually lost is healed back: a hit the shield absorbed whole leaves nothing to recover.

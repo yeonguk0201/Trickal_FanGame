@@ -114,6 +114,9 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
   `CurrentRoomCriticalBonus = 40`(`magnitude` = 사용한 방의 치명타 피해 배율 증가분, `secondaryMagnitude` = 치명타 확률
   증가분)을 추가했다. 기존
   `CriticalChance`(8)는 재사용하지 않았다. 네 스펠의 ID·등급·효과를 Backend 카탈로그에도 기록했다.
+  Jjangsem-1(2026-10-05)에서 `DuplicateRoomChestsAndPickups = 41`(수치 필드 없음)을 추가했다. `jjangsem-melune-card`
+  (Rare, 최대 1스택)만 쓰며 현재 방의 미개봉 상자와 바닥 기본 소모품을 하나씩 복제한다. Backend 카탈로그에도 같은
+  ID·등급·효과를 기록했다.
 - 일회용 아이템(`SingleUseSpell`, `JjangsemSpell`)은 `maxStacks = 1`이다. 보유 중에는 **효과가 적용되지
   않고**, 사용 성공 시에만 효과를 실행한다. `PlayerInventory`의 상시 효과 적용·아티팩트 HUD·일시정지
   아티팩트 목록에 들어가지 않는다.

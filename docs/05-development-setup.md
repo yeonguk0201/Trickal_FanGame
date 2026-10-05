@@ -836,6 +836,30 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
   줄고 회복되지 않아야 한다. `Chest Diamond`를 여러 번 열면 약 4개 중 1개에서 스펠 대신 빅우드의 열매가 나와야 한다.
   2026-10-05 사용자 화면 확인 완료.
 
+- Jjangsem-1 멜룬카드: 메뉴 `Trickal Fan Game > Week 22 > Setup Jjangsem-1 Melune Card`가
+  `Assets/Items/jjangsem-melune-card.asset`(Rare 짱셈스펠, 효과 41 `DuplicateRoomChestsAndPickups`, 수치 필드 없음)을 GUID를
+  보존하며 멱등 구성하고, 이름·설명 글리프를 추가한 뒤 Chest-1의 표 구성을 다시 실행해 `chest-content-table.jjangsemSpells`에
+  넣는다. Game Scene 플레이어의 `PlayerSingleUseEffects.chestContentTable`에 같은 표를 연결한다(이미 연결돼 있으면 Scene을
+  저장하지 않음). Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시 실행한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Jjangsem-1 Melune Card`, 배치는 Unity `-batchmode -quit -projectPath
+  <game 경로> -executeMethod TrickalFanGame.Editor.Week22Jjangsem1Verification.SetupAndVerifyBatch -logFile <로그 경로>`다
+  (글리프 추가 때문에 `-nographics` 없이 실행). Setup 2회 아이템·표·Scene GUID, 효과 41 번호와 무수치 검증, 아이템 계약·ID
+  접두사·설명·글리프, 표의 짱셈 목록 단독 소속과 다이아몬드 상자 등장·선택 보상 풀 제외·Scene 플레이어의 표 연결, 복제할
+  것이 없는 방에서 미소비, 미개봉 3종 상자의 같은 종류 복제(`melune-chest-01~03`)·열린 상자와 아이템 픽업·지갑 제외, 바닥
+  소모품(하트·SP·골드·열쇠·폭탄과 상자 드롭)의 같은 종류 복제, 상자 몸체 미겹침·도달 가능 배치, 복제 상자별 내용물 seed
+  기록·원본과 다른 seed, 황금 복제의 열쇠 1개 소비·다이아몬드 복제의 폭탄 개봉과 원본 미개봉, 복제 상자의 seed 내용물 드롭,
+  복제 골드의 개별 획득, 두 번째 사용에서 이전 복제물 포함·같은 사용의 복제물 제외(대상 고정)·다음 ID 번호, 재방문 유지,
+  층 재구성 시 모든 상자의 위치·열림 상태 복원과 미재지급, 층 이탈 시 미개봉 복제 상자 소멸, 상자의 대각선 밀기·벽을 따라
+  미끄러짐·스치는 입력 무시·벽에 붙은 상자의 벽을 따라/벽 반대 밀기·붙은 하트 밀어내기·벽에 막힌 하트 앞 정지를 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Chest-0·Chest-1·Chest-2·Jjangsem-0·Slot-0·
+  개발 패널 포함)다. 2026-10-05 두 배치(Spell-5 단독 검증 포함) 통과·종료 코드 0, Backend Jest 134개 통과.
+  수동 확인: Game Scene Play → `F1` → `+10 Key`·`+10 Bomb` → `Chest Normal`·`Chest Golden`·`Chest Diamond`로 상자를 놓고,
+  `— Spell slot —`의 `Drop 멜룬카드`로 카드를 주워 Left Shift로 사용한다. 각 상자 옆에 같은 색의 상자가 하나씩 더 생겨야 하고,
+  복제 황금상자는 열쇠 1개, 복제 다이아몬드 상자는 폭탄으로 열려야 하며 원본과 다른 내용물이 나올 수 있어야 한다. 바닥에
+  하트·SP·골드 등이 있으면 옆에 같은 픽업이 하나씩 생겨야 한다. 상자와 픽업이 없는 방에서는 사용되지 않고 슬롯에 남아야
+  한다. 상자를 비스듬히 밀면 4방향이 아니라 플레이어 반대쪽으로 밀려야 한다. 2026-10-05 사용자 화면 확인 완료. 이때 찾은
+  벽에 붙은 상자·하트에 붙은 상자가 밀리지 않던 문제를 고쳤다. 벽에 붙인 상자를 벽을 따라 밀고, 하트를 상자 앞에 두고 밀어
+  하트가 함께 밀리는지 다시 확인한다.
+
 - Spell-5 소형 스펠 4종: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-5 Small Spells`가 `Assets/Items/`에
   `single-spell-armor-festival-invitation`(Rare, 효과 37 `GainShield` `magnitude` 4), `single-spell-amelia-love-letter`
   (Uncommon, 효과 38 `SpawnHealthPickups` `integerAmount` 2), `single-spell-random-coin`(Common, 효과 39 `GainRandomGold`
@@ -856,6 +880,7 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
   갑옷축제 초대장은 방어막이 2칸 늘어야 한다. 아멜리아의 러브레터는 캐릭터 옆에 하트 2개가 생기고, HP가 가득하면 주워지지
   않고 밀려야 한다. 랜덤코인은 골드가 2~10 늘어야 한다. 회심의 일격은 시작방에서는 사용되지 않고 슬롯에 남아야 하며,
   전투 중인 방에서 사용하면 패널에 `Room CRIT +15% DMG +50%`가 보이고 방을 나가면 사라져야 한다.
+  2026-10-05 사용자 화면 확인 완료.
 
 - 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
 - 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.

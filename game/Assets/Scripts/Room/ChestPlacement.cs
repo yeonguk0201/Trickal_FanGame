@@ -36,7 +36,16 @@ namespace TrickalFanGame.Room
 
         public static bool TryFindSafeLocalPosition(RoomTemplateDefinition template, GameObject room,
             Vector2 preferredLocal, IReadOnlyList<Vector2> occupiedLocal, Vector2? avoidLocal, out Vector2 position,
-            out string error)
+            out string error) =>
+            TryFindSafeLocalPosition(template, room, preferredLocal, occupiedLocal, avoidLocal, MinimumChestSpacing,
+                out position, out error);
+
+        // minimumSpacing is the center distance kept from occupiedLocal. Jjangsem-1 copies fall back to
+        // ChestWorldSize (bodies touching but not overlapping) when the room has no room left at the full spacing;
+        // chests push freely, so the player can still separate them.
+        public static bool TryFindSafeLocalPosition(RoomTemplateDefinition template, GameObject room,
+            Vector2 preferredLocal, IReadOnlyList<Vector2> occupiedLocal, Vector2? avoidLocal, float minimumSpacing,
+            out Vector2 position, out string error)
         {
             position = default;
             if (template == null || template.Profile == null)
@@ -72,7 +81,8 @@ namespace TrickalFanGame.Room
             {
                 Vector2 candidate = new(x, y);
                 float distance = (candidate - preferredLocal).sqrMagnitude;
-                if (distance >= bestDistance || !IsSafe(candidate, isReachable, doorPassages, occupiedLocal) ||
+                if (distance >= bestDistance ||
+                    !IsSafe(candidate, isReachable, doorPassages, occupiedLocal, minimumSpacing) ||
                     (avoidLocal.HasValue &&
                      (candidate - avoidLocal.Value).sqrMagnitude < AvoidClearance * AvoidClearance))
                 {
@@ -89,14 +99,18 @@ namespace TrickalFanGame.Room
         }
 
         public static bool IsSafe(Vector2 candidate, Func<Vector2, bool> isReachable, IReadOnlyList<Rect> doorPassages,
-            IReadOnlyList<Vector2> occupiedLocal)
+            IReadOnlyList<Vector2> occupiedLocal) =>
+            IsSafe(candidate, isReachable, doorPassages, occupiedLocal, MinimumChestSpacing);
+
+        public static bool IsSafe(Vector2 candidate, Func<Vector2, bool> isReachable, IReadOnlyList<Rect> doorPassages,
+            IReadOnlyList<Vector2> occupiedLocal, float minimumSpacing)
         {
             if (!isReachable(candidate)) return false;
             foreach (Rect passage in doorPassages)
                 if (passage.Contains(candidate)) return false;
             if (occupiedLocal == null) return true;
             foreach (Vector2 occupied in occupiedLocal)
-                if ((candidate - occupied).sqrMagnitude < MinimumChestSpacing * MinimumChestSpacing) return false;
+                if ((candidate - occupied).sqrMagnitude < minimumSpacing * minimumSpacing) return false;
             return true;
         }
 

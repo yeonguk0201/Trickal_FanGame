@@ -11,10 +11,12 @@ namespace TrickalFanGame.Room
     // from a player bomb explosion. The room's RoomRunState records the open state, so repeated contacts, overlapping
     // explosions, revisits and floor rebuilds open it once. The chest is a solid kinematic body on the Environment
     // layer, so it blocks the player, enemies, projectiles and floor pickups like an obstacle, and enemy navigation
-    // steers around it (2026-10-03 decision). The player pushes it by walking into it: it slides along that axis at
-    // PushSpeed, far slower than a heart, and stops short of walls, obstacles, other chests, enemies and pickups.
-    // Physics alone cannot give that feel because the player sets its velocity every step. Contents are not generated
-    // here; Chest-1 spawns them from the Opened event.
+    // steers around it (2026-10-03 decision). The player pushes it by walking into it: like a floor heart it moves away
+    // from the player in any direction (Jjangsem-1, D4: no longer only along the four axes), at PushSpeed, far slower
+    // than a heart. It stops short of walls, obstacles, other chests and enemies, and a push into one of them at an
+    // angle slides along it; a wall it only touches never holds it. A floor pickup in the way is shoved ahead unless
+    // something holds that pickup, in which case the chest stops too. Physics alone cannot give that feel because the player sets its velocity every step.
+    // Contents are not generated here; Chest-1 spawns them from the Opened event.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider2D), typeof(Rigidbody2D))]
     public sealed class TreasureChest : MonoBehaviour
@@ -26,6 +28,7 @@ namespace TrickalFanGame.Room
         public const float MinimumPushAlignment = 0.5f;
         public const float PushSkin = 0.02f;
         private static readonly RaycastHit2D[] PushHits = new RaycastHit2D[8];
+        private static readonly RaycastHit2D[] PickupHits = new RaycastHit2D[8];
         public const string DefaultChestId = "chest-01";
 
         public static readonly Color NormalColor = new(0.66f, 0.43f, 0.22f, 1f);
@@ -173,22 +176,22 @@ namespace TrickalFanGame.Room
             StepPush(Time.fixedDeltaTime);
         }
 
-        // A pusher at pusherPosition walking along intent. The push follows the chest axis facing the pusher, and only
-        // when the intent points into it. The next StepPush applies it once.
+        // A pusher at pusherPosition walking along intent. The push follows the line from the pusher's center through
+        // the chest's, like a heart, and only when the intent points into it. The next StepPush applies it once.
         public bool RegisterPush(Vector2 pusherPosition, Vector2 intent)
         {
             if (intent.sqrMagnitude < 0.0001f) return false;
             Vector2 toChest = (Vector2)transform.position - pusherPosition;
-            Vector2 axis = Mathf.Abs(toChest.x) >= Mathf.Abs(toChest.y)
-                ? new Vector2(Mathf.Sign(toChest.x), 0f)
-                : new Vector2(0f, Mathf.Sign(toChest.y));
-            if (Vector2.Dot(intent.normalized, axis) < MinimumPushAlignment) return false;
+            if (toChest.sqrMagnitude < 0.0001f) return false;
+            Vector2 direction = toChest.normalized;
+            if (Vector2.Dot(intent.normalized, direction) < MinimumPushAlignment) return false;
             hasPendingPush = true;
-            pendingPushDirection = axis;
+            pendingPushDirection = direction;
             return true;
         }
 
-        // Moves the chest by one step of a registered push, short of anything that blocks it. Returns the distance.
+        // Moves the chest by one step of a registered push, short of anything that blocks it. A chest already against
+        // something slides along it by the part of the push that does not point into it. Returns the distance.
         public float StepPush(float deltaTime)
         {
             if (!hasPendingPush) return 0f;
@@ -196,15 +199,68 @@ namespace TrickalFanGame.Room
             if (body == null) body = GetComponent<Rigidbody2D>();
             if (body == null || deltaTime <= 0f || !isActiveAndEnabled) return 0f;
 
-            float distance = PushSpeed * deltaTime;
+            Vector2 direction = pendingPushDirection;
+            float reach = PushSpeed * deltaTime;
+            float distance = CastPush(direction, reach, out Vector2 blockNormal);
+            if (distance <= 0f && blockNormal != Vector2.zero)
+            {
+                Vector2 slide = direction - Vector2.Dot(direction, blockNormal) * blockNormal;
+                if (slide.sqrMagnitude < 0.0001f) return 0f;
+                reach *= slide.magnitude;
+                direction = slide.normalized;
+                distance = CastPush(direction, reach, out _);
+            }
+
+            if (distance <= 0f) return 0f;
+            body.MovePosition(body.position + direction * distance);
+            return distance;
+        }
+
+        // The free distance along direction up to reach, and the normal of the nearest blocker that shortened it.
+        // A surface the chest touches but does not move into (a wall it slides along, the player behind it) never
+        // blocks, and a floor pickup only blocks when it cannot move on itself: otherwise the chest shoves it.
+        private float CastPush(Vector2 direction, float reach, out Vector2 blockNormal)
+        {
+            blockNormal = Vector2.zero;
             ContactFilter2D filter = new() { useTriggers = false, useLayerMask = true };
             filter.SetLayerMask(PushBlockMask);
-            int count = body.Cast(pendingPushDirection, filter, PushHits, distance + PushSkin);
+            float distance = reach;
+            int count = body.Cast(direction, filter, PushHits, reach + PushSkin);
             for (int index = 0; index < count; index++)
-                distance = Mathf.Min(distance, Mathf.Max(0f, PushHits[index].distance - PushSkin));
-            if (distance <= 0f) return 0f;
-            body.MovePosition(body.position + pendingPushDirection * distance);
+            {
+                RaycastHit2D hit = PushHits[index];
+                if (!IsMovingInto(hit, direction)) continue;
+                float allowed = Mathf.Max(0f, hit.distance - PushSkin);
+                if (allowed >= distance || CanShove(hit, direction, reach)) continue;
+                distance = allowed;
+                blockNormal = hit.normal;
+            }
+
             return distance;
+        }
+
+        private static bool IsMovingInto(RaycastHit2D hit, Vector2 direction) =>
+            Vector2.Dot(hit.normal, direction) < -0.01f;
+
+        // A dynamic floor pickup the chest runs into moves ahead of it unless a wall, pit or enemy holds it in place.
+        private static bool CanShove(RaycastHit2D hit, Vector2 direction, float reach)
+        {
+            if (hit.collider == null || hit.collider.gameObject.layer != LayerMask.NameToLayer(HealthPickup.LayerName))
+                return false;
+            Rigidbody2D pickup = hit.rigidbody;
+            if (pickup == null || pickup.bodyType != RigidbodyType2D.Dynamic) return false;
+
+            ContactFilter2D filter = new() { useTriggers = false, useLayerMask = true };
+            filter.SetLayerMask(LayerMask.GetMask("Environment", RoomPit.LayerName, "Enemy"));
+            int count = pickup.Cast(direction, filter, PickupHits, reach + PushSkin);
+            for (int index = 0; index < count; index++)
+            {
+                // The chest sits behind the pickup, so its normal never points against the push.
+                RaycastHit2D pickupHit = PickupHits[index];
+                if (IsMovingInto(pickupHit, direction) && pickupHit.distance - PushSkin < reach) return false;
+            }
+
+            return true;
         }
 
         public bool TryOpenByTouch(PlayerMovement player)

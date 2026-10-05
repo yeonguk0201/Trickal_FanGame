@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TrickalFanGame.Resource;
 using UnityEngine;
 
@@ -77,11 +78,18 @@ namespace TrickalFanGame.Room
             LastSpawnedReward = null;
             LastSpawnedChest = null;
 
-            ChestRunState existing = runState?.GetChest(ClearChestId);
-            if (chestTable == null || existing == null || existing.IsDiscarded) return;
-            TreasureChest restored = RoomChestSpawner.Spawn(chestTable, chestSite, ClearChestId, existing.Kind,
-                chestSeed, out string error);
-            if (restored == null) Debug.LogError($"Room {runState.RoomId} could not rebuild its chest. {error}", this);
+            if (chestTable == null || runState == null) return;
+            // Jjangsem-1: chests added to the room later (멜룬카드 copies, development chests) come back with their own
+            // recorded seed, the same way as the clear chest.
+            foreach (ChestRunState existing in new List<ChestRunState>(runState.Chests))
+            {
+                bool isClearChest = existing.ChestId == ClearChestId;
+                if (existing.IsDiscarded || (!isClearChest && !existing.HasContentSeed)) continue;
+                TreasureChest restored = RoomChestSpawner.Spawn(chestTable, chestSite, existing.ChestId, existing.Kind,
+                    isClearChest ? chestSeed : existing.ContentSeed, out string error);
+                if (restored == null)
+                    Debug.LogError($"Room {runState.RoomId} could not rebuild chest {existing.ChestId}. {error}", this);
+            }
         }
 
         // Returns true only when this call spawned a drop; a roll that drops nothing still uses up the room's roll.

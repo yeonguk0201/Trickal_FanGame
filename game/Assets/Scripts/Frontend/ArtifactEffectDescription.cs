@@ -108,6 +108,8 @@ namespace TrickalFanGame.Frontend
                 ItemEffectType.ReduceAndRecoverDamageTaken =>
                     $"{Number(effect.DurationSeconds)}초간 받는 피해 -{Hearts(effect.Magnitude)}, HP 피해를 받으면 " +
                     $"{Number(effect.IntervalSeconds)}초 뒤 그 피해 +{Hearts(effect.IntegerAmount)} 회복",
+                ItemEffectType.DuplicateRoomChestsAndPickups =>
+                    "현재 방의 열지 않은 상자와 바닥 소모품을 하나씩 복제 (복제 상자는 내용물을 따로 추첨)",
                 _ => effect.EffectType.ToString(),
             };
         }

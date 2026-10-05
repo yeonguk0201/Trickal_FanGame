@@ -212,7 +212,8 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.RegenerateSPHalvesOverTime &&
                    type != ItemEffectType.EscapeToFloorStartRoom &&
                    type != ItemEffectType.SpawnHealthPickups &&
-                   type != ItemEffectType.Flight;
+                   type != ItemEffectType.Flight &&
+                   type != ItemEffectType.DuplicateRoomChestsAndPickups;
         }
     }
 }

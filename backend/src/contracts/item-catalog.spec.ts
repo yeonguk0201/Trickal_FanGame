@@ -32,6 +32,7 @@ describe('Item catalog', () => {
       'single-spell-decisive-strike',
       'artifact-sist-fake-wings',
       'jjangsem-bigwood-fruit',
+      'jjangsem-melune-card',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -61,8 +62,9 @@ describe('Item catalog', () => {
       'UNCOMMON',
       'EPIC',
       'RARE',
+      'RARE',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(27);
+    expect(new Set(active.map((item) => item.id)).size).toBe(28);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -313,6 +315,18 @@ describe('Item catalog', () => {
           durationSeconds: 10,
         },
       ],
+    });
+  });
+
+  it('adds the melune card jjangsem spell (Jjangsem-1)', () => {
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'jjangsem-melune-card'),
+    ).toMatchObject({
+      name: '멜룬카드',
+      rarity: 'RARE',
+      isActive: true,
+      maxStacks: 1,
+      effects: [{ type: 'DuplicateRoomChestsAndPickups' }],
     });
   });
 

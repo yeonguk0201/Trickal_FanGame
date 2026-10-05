@@ -17,6 +17,10 @@ namespace TrickalFanGame.Room
         // Room-local position where the chest was first placed, so a rebuilt room puts it back on the same spot.
         public bool HasPosition { get; internal set; }
         public UnityEngine.Vector2 LocalPosition { get; internal set; }
+        // Jjangsem-1: the seed its contents were rolled from, so a rebuilt room can restore any chest, not only the
+        // clear chest whose seed comes from the room.
+        public bool HasContentSeed { get; internal set; }
+        public int ContentSeed { get; internal set; }
         public bool IsClosed => !IsOpened && !IsDiscarded;
     }
 }
