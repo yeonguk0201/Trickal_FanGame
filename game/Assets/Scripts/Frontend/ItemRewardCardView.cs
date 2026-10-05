@@ -155,7 +155,7 @@ namespace TrickalFanGame.Frontend
             if (target != null) target.text = value;
         }
 
-        private static string RarityLabel(ItemRarity rarity) => rarity switch
+        public static string RarityLabel(ItemRarity rarity) => rarity switch
         {
             ItemRarity.Uncommon => "고급 / UNCOMMON",
             ItemRarity.Rare => "희귀 / RARE",

@@ -18,17 +18,20 @@ namespace TrickalFanGame.Player
         public Vector2 DashDirection { get; private set; } = Vector2.down;
         public float DashSpeedMultiplier { get; private set; } = 1f;
         public bool IsRewardSelectionBlocked { get; private set; }
+        // Shop-0: the shop UI is open. Blocks the same actions as a pending reward selection.
+        public bool IsShopBlocked { get; private set; }
+        public bool IsInputBlocked => IsRewardSelectionBlocked || IsShopBlocked;
 
         public bool IsDashing => Phase == PlayerActionPhase.UltimateDashing;
         public bool IsImpactRecovering => Phase == PlayerActionPhase.UltimateImpactRecovery;
         public bool IsCoastRecovering => Phase == PlayerActionPhase.UltimateCoastRecovery;
         public bool IsRecovering => IsImpactRecovering || IsCoastRecovering;
-        public bool CanMove => !IsRewardSelectionBlocked &&
+        public bool CanMove => !IsInputBlocked &&
                                (Phase == PlayerActionPhase.Normal || IsDashing || IsCoastRecovering);
-        public bool CanBasicAttack => !IsRewardSelectionBlocked && Phase == PlayerActionPhase.Normal;
-        public bool CanUseLowerGradeSkill => !IsRewardSelectionBlocked && Phase == PlayerActionPhase.Normal;
-        public bool CanStartUltimate => !IsRewardSelectionBlocked && Phase == PlayerActionPhase.Normal;
-        public bool CanTransition => !IsRewardSelectionBlocked && Phase == PlayerActionPhase.Normal;
+        public bool CanBasicAttack => !IsInputBlocked && Phase == PlayerActionPhase.Normal;
+        public bool CanUseLowerGradeSkill => !IsInputBlocked && Phase == PlayerActionPhase.Normal;
+        public bool CanStartUltimate => !IsInputBlocked && Phase == PlayerActionPhase.Normal;
+        public bool CanTransition => !IsInputBlocked && Phase == PlayerActionPhase.Normal;
 
         public event Action<PlayerActionPhase> Changed;
 
@@ -40,6 +43,11 @@ namespace TrickalFanGame.Player
             }
 
             IsRewardSelectionBlocked = blocked;
+        }
+
+        public void SetShopBlocked(bool blocked)
+        {
+            IsShopBlocked = blocked;
         }
 
         public bool TryBeginUltimate(Vector2 initialDirection, float speedMultiplier)

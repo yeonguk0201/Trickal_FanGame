@@ -54,7 +54,8 @@ namespace TrickalFanGame.Editor
             ValidateRuntimePurchasesAndReload(assembler, catalog, runtimeSeed);
             Debug.Log("Special-4 verification passed: floors reproduce a 60% key-locked shop end room (at most one) " +
                       "beside the start or an intermediate room without changing existing rooms or the boss route, " +
-                      "stock rolls two distinct Items at rarity prices and two distinct consumables, entry takes one " +
+                      "stock rolls three distinct Items at rarity prices and three distinct consumables, entry takes " +
+                      "one " +
                       "key, purchases spend gold exactly once, Items go to the inventory, consumables drop as floor " +
                       "pickups, and stock, sold slots, and the open lock survive floor rebuilds.");
         }
@@ -81,25 +82,22 @@ namespace TrickalFanGame.Editor
 
             GameObject prefabObject = AssetDatabase.LoadAssetAtPath<GameObject>(Week20Special4Setup.ShopRoomPrefabPath);
             ShopRoom prefab = prefabObject != null ? prefabObject.GetComponent<ShopRoom>() : null;
-            Assert(prefab != null && prefab.Stalls.Count == ShopCatalog.OfferCount &&
-                   prefabObject.GetComponentsInChildren<Rigidbody2D>(true).Length == 0,
-                "The ShopRoom Prefab needs four stalls and no physics bodies.");
-            int pickupLayer = LayerMask.NameToLayer("Pickup");
-            for (int index = 0; index < prefab.Stalls.Count; index++)
-            {
-                ShopStall stall = prefab.Stalls[index];
-                Collider2D[] colliders = stall.GetComponents<Collider2D>();
-                Assert(stall.gameObject.layer == pickupLayer && colliders.Length == 1 &&
-                       colliders[0] is BoxCollider2D && colliders[0].isTrigger &&
-                       stall.Display != null && stall.Label != null && stall.Prompt != null &&
-                       (Vector2)stall.transform.localPosition == Week20Special4Setup.StallPositions[index],
-                    $"Shop stall {index + 1} must be a Pickup-layer trigger with display, label, and prompt.");
-            }
-
-            for (int first = 0; first < prefab.Stalls.Count; first++)
-            for (int second = first + 1; second < prefab.Stalls.Count; second++)
-                Assert(!Bounds(prefab.Stalls[first]).Overlaps(Bounds(prefab.Stalls[second])),
-                    "Shop stall triggers must not overlap, so one E press buys one offer.");
+            Assert(prefab != null && prefabObject.GetComponentsInChildren<Rigidbody2D>(true).Length == 0 &&
+                   prefabObject.GetComponentsInChildren<Transform>(true).All(part =>
+                       !part.name.StartsWith("Stall ", StringComparison.Ordinal) &&
+                       GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(part.gameObject) == 0),
+                "The ShopRoom Prefab must have no physics bodies, legacy stalls, or missing scripts.");
+            ShopKeeper keeper = prefab.Keeper;
+            ShopKeeper[] keepers = prefabObject.GetComponentsInChildren<ShopKeeper>(true);
+            Collider2D[] colliders = keeper != null ? keeper.GetComponents<Collider2D>() : Array.Empty<Collider2D>();
+            Assert(keepers.Length == 1 && keepers[0] == keeper &&
+                   keeper.gameObject.layer == LayerMask.NameToLayer("Pickup") && colliders.Length == 1 &&
+                   colliders[0] is BoxCollider2D && colliders[0].isTrigger &&
+                   keeper.Portrait != null && keeper.Portrait.sprite != null && keeper.NameLabel != null &&
+                   keeper.NameLabel.text == ShopKeeper.DisplayName && keeper.Prompt != null &&
+                   keeper.Prompt.text == ShopKeeper.OpenPrompt && !keeper.Prompt.gameObject.activeSelf &&
+                   (Vector2)keeper.transform.localPosition == Week20Special4Setup.KeeperPosition,
+                "The ShopRoom Prefab needs one Pickup-layer shopkeeper trigger with portrait, name, and hidden prompt.");
 
             RoomDefinition definition =
                 AssetDatabase.LoadAssetAtPath<RoomDefinition>(Week20Special4Setup.ShopDefinitionPath);
@@ -110,13 +108,6 @@ namespace TrickalFanGame.Editor
                    definition.RoomType == RoomType.Shop && basic != null && basic.SupportsRoomType(RoomType.Shop),
                 error ?? "The shop definition and Basic template must support RoomType.Shop.");
             return (catalog, prefab, definition);
-        }
-
-        private static Rect Bounds(ShopStall stall)
-        {
-            BoxCollider2D box = stall.GetComponent<BoxCollider2D>();
-            Vector2 center = (Vector2)stall.transform.localPosition + box.offset;
-            return new Rect(center - box.size * 0.5f, box.size);
         }
 
         private static int ValidateGeneration(FloorGenerator generator)
@@ -225,22 +216,23 @@ namespace TrickalFanGame.Editor
                        stock.Offers.Select((offer, index) => offer.SlotIndex == index).All(valid => valid) &&
                        stock.Offers.Select(offer => offer.OfferId).Distinct(StringComparer.Ordinal).Count() ==
                        ShopCatalog.OfferCount,
-                    $"Shop stock seed {seed} must fill four distinct slots in order.");
+                    $"Shop stock seed {seed} must fill six distinct slots in order.");
                 ShopOffer[] items = stock.Offers.Take(ShopCatalog.ItemOfferCount).ToArray();
                 ShopOffer[] consumables = stock.Offers.Skip(ShopCatalog.ItemOfferCount).ToArray();
                 Assert(items.All(offer => offer.Kind == ShopOfferKind.Item && pool.Contains(offer.Item) &&
                                           offer.Price == catalog.GetItemPrice(offer.Item.Rarity)) &&
                        consumables.All(offer => offer.Kind == ShopOfferKind.Consumable &&
                                                 offer.Price == offer.Consumable.Price),
-                    $"Shop stock seed {seed} must sell two Items at rarity price and two consumables at list price.");
+                    $"Shop stock seed {seed} must sell three Items at rarity price and three consumables at list price.");
             }
 
             Assert(distinctStocks.Count >= 8, "Different shop seeds must roll different stocks.");
             ItemDefinition single = pool.First(definition => definition != null && definition.IsValid);
             ShopStockState thin = ShopStockBuilder.Build("floor-01-room-09", 7, catalog, new[] { single }, null);
             Assert(thin.Offers.Count(offer => offer.Kind == ShopOfferKind.Item) == 1 &&
-                   thin.Offers.Count(offer => offer.Kind == ShopOfferKind.Consumable) == 3,
-                "Missing eligible Items must be filled with the remaining consumables.");
+                   thin.Offers.Count(offer => offer.Kind == ShopOfferKind.Consumable) == catalog.Consumables.Count &&
+                   thin.Offers.Count <= ShopCatalog.OfferCount,
+                "Missing eligible Items must be filled with the remaining consumables, leaving the rest empty.");
         }
 
         private static void ValidateRuntimePurchasesAndReload(RoomGraphAssembler assembler, ShopCatalog catalog,
@@ -259,7 +251,8 @@ namespace TrickalFanGame.Editor
             ShopStockState stock = progress.GetShopStock(ShopStockBuilder.BuildShopId(shopNode.RoomId));
             Assert(shop != null && stock != null && shop.Stock == stock &&
                    shop.transform.parent == shopRoom.Node.ContentRoot.transform &&
-                   shop.Stalls.Select(stall => stall.Offer).SequenceEqual(stock.Offers) &&
+                   shop.Keeper != null && shop.Session == assembler.ShopSession &&
+                   stock.Offers.Count == ShopCatalog.OfferCount &&
                    shopRoom.Controller.State == RoomState.Cleared &&
                    (shopRoom.RewardRoom == null || !shopRoom.RewardRoom.gameObject.activeSelf),
                 "The shop room must be a safe room showing its stored stock without a treasure reward.");
@@ -297,15 +290,16 @@ namespace TrickalFanGame.Editor
             Assert(shop.TryPurchase(item.SlotIndex, inventory) == ShopPurchaseResult.Purchased &&
                    stock.IsPurchased(item.SlotIndex) && inventory.GetStackCount(item.Item.ItemId) == stacks + 1 &&
                    progress.GetResourceCount(RunResourceType.Gold) == budget - item.Price &&
-                   shop.LastDroppedPickup == null && shop.Stalls[item.SlotIndex].IsSold &&
-                   !shop.Stalls[item.SlotIndex].Display.gameObject.activeSelf,
-                "An Item purchase must spend its price once, go to the inventory, and empty the stall.");
+                   shop.LastDroppedPickup == null &&
+                   shop.GetStatus(item.SlotIndex, inventory) == ShopOfferStatus.SoldOut,
+                "An Item purchase must spend its price once, go to the inventory, and sell out its slot.");
             Assert(shop.TryPurchase(item.SlotIndex, inventory) == ShopPurchaseResult.SoldOut &&
                    inventory.GetStackCount(item.Item.ItemId) == stacks + 1 &&
                    progress.GetResourceCount(RunResourceType.Gold) == budget - item.Price,
                 "A sold slot must not be bought again.");
 
             int spent = item.Price;
+            HashSet<Vector2> dropPoints = new();
             foreach (ShopOffer consumable in stock.Offers.Where(offer => offer.Kind == ShopOfferKind.Consumable))
             {
                 Assert(shop.TryPurchase(consumable.SlotIndex, inventory) == ShopPurchaseResult.Purchased &&
@@ -322,9 +316,11 @@ namespace TrickalFanGame.Editor
                     _ => false,
                 };
                 Assert(rightPickup && drop.transform.parent == shopRoom.Node.ContentRoot.transform &&
-                       Vector2.Distance(drop.transform.position,
-                           shop.Stalls[consumable.SlotIndex].transform.position + Vector3.up * ShopRoom.DropOffsetY) < 0.01f,
-                    $"Buying {consumable.OfferId} must drop its floor pickup in front of the stall.");
+                       Vector2.Distance(drop.transform.position, shop.GetDropPosition(consumable.SlotIndex)) < 0.01f &&
+                       Mathf.Abs(drop.transform.position.y -
+                                 (shop.Keeper.transform.position.y + ShopRoom.DropOffsetY)) < 0.01f &&
+                       dropPoints.Add(drop.transform.position),
+                    $"Buying {consumable.OfferId} must drop its floor pickup at its own spot in front of the shopkeeper.");
             }
 
             Assert(progress.GetResourceCount(RunResourceType.Key) == 0 &&
@@ -337,16 +333,16 @@ namespace TrickalFanGame.Editor
             ShopRoom rebuilt = rebuiltRoom.GetComponentInChildren<ShopRoom>(true);
             Assert(rebuilt != null && rebuilt != shop && rebuilt.Stock == stock &&
                    progress.GetShopStock(stock.ShopId) == stock &&
-                   rebuilt.Stalls.All(stall => stall.IsSold == stock.IsPurchased(stall.Offer.SlotIndex)) &&
-                   rebuilt.Stalls.Count(stall => stall.IsSold) == 1 + ShopCatalog.ConsumableOfferCount &&
+                   stock.Offers.Count(offer => rebuilt.IsSold(offer)) == 1 + ShopCatalog.ConsumableOfferCount &&
                    progress.GetRoomState(shopNode.RoomId).IsKeyLockOpen &&
                    progress.GetResourceCount(RunResourceType.Gold) == goldBeforeReload &&
                    inventory.GetStackCount(item.Item.ItemId) == stacks + 1,
                 "Floor rebuilds must keep the same stock, sold slots, open lock, and spent gold.");
-            ShopOffer remaining = stock.Offers.Single(offer => !stock.IsPurchased(offer.SlotIndex));
-            Assert(rebuilt.Stalls[remaining.SlotIndex].Display.gameObject.activeSelf &&
-                   rebuilt.Stalls[remaining.SlotIndex].Label.text.Contains(remaining.Price.ToString()),
-                "An unsold stall must still show its offer and price after a rebuild.");
+            ShopOffer remaining = stock.Offers.First(offer => !stock.IsPurchased(offer.SlotIndex));
+            Assert(stock.Offers.Count(offer => !stock.IsPurchased(offer.SlotIndex)) == ShopCatalog.ItemOfferCount - 1 &&
+                   rebuilt.GetStatus(remaining.SlotIndex, inventory) == ShopOfferStatus.Available &&
+                   rebuilt.GetPrice(remaining) == remaining.Price,
+                "An unsold offer must still be on sale at its price after a rebuild.");
 
             progress.StopProgression();
             Assert(rebuilt.TryPurchase(remaining.SlotIndex, inventory) == ShopPurchaseResult.Unavailable &&
