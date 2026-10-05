@@ -11,6 +11,7 @@ namespace TrickalFanGame.Editor
         public static readonly string[] Names = { "Bulhyojason", "Sansamo", "LowBloodSugarFairy", "HighBloodSugarFairy" };
         public const string ProjectilePath = Folder + "/GreenOnion_Projectile.png";
         public const float ProjectilePixelsPerUnit = 200f;
+        public const string MinionFolder = BossMovementAnimationSetup.Folder + "/MinionAttacks";
 
         [MenuItem("Trickal Fan Game/Artwork/Setup Enemy Attack Animations")]
         public static void Setup()
@@ -51,8 +52,35 @@ namespace TrickalFanGame.Editor
                 }
             }
             finally { PrefabUtility.UnloadPrefabContents(boss); }
+            SetupMinions();
             AssetDatabase.SaveAssets();
             Debug.Log("Drawn enemy attack poses and high-blood-sugar fairy green-onion projectile configured.");
+        }
+
+        [MenuItem("Trickal Fan Game/Artwork/Setup Crayon Minion Attack Animations")]
+        public static void SetupMinions()
+        {
+            for (int i = 0; i < EnemyMovementAnimationSetup.MinionNames.Length; i++)
+            {
+                string name = EnemyMovementAnimationSetup.MinionNames[i];
+                Sprite[] frames = new Sprite[4];
+                for (int j = 0; j < frames.Length; j++) frames[j] = Import($"{MinionFolder}/{name}_Attack_{j}.png");
+                Sprite projectile = i < 2 ? Import($"{MinionFolder}/{(i == 0 ? "CrayonArrow" : "CrayonMagic")}_Projectile.png") : null;
+                string path = EnemyMovementAnimationSetup.MinionPrefabPaths[i];
+                GameObject root = PrefabUtility.LoadPrefabContents(path);
+                try
+                {
+                    if (root.GetComponent<EnemyMovementAnimator>() == null)
+                        throw new InvalidOperationException("Apply minion movement artwork first: " + path);
+                    EnemyAttackArtwork artwork = root.GetComponent<EnemyAttackArtwork>();
+                    if (artwork == null) artwork = root.AddComponent<EnemyAttackArtwork>();
+                    artwork.Configure(root.GetComponent<SpriteRenderer>().sprite, frames, projectile);
+                    if (PrefabUtility.SaveAsPrefabAsset(root, path) == null)
+                        throw new InvalidOperationException("Could not save minion attack artwork: " + path);
+                }
+                finally { PrefabUtility.UnloadPrefabContents(root); }
+            }
+            AssetDatabase.SaveAssets();
         }
 
         private static Sprite Import(string path)

@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 2268072113140059694}
   - component: {fileID: 8066473083621657749}
   - component: {fileID: 7755734025311633134}
+  - component: {fileID: 7897655199667525666}
   m_Layer: 6
   m_Name: CrayonAxeMinion
   m_TagString: Untagged
@@ -305,3 +306,22 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 3fbe8ff9ef07a9b48bf48cff407c7cd2, type: 3}
   - {fileID: 21300000, guid: a8c1c4290de693f45bf9a1f202b2017d, type: 3}
   walkReferenceSprite: {fileID: 21300000, guid: 09670323c0019094ba02e6345134ff20, type: 3}
+--- !u!114 &7897655199667525666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8344673385379417815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5554c9e758ec2345b5c930bc27aa1c9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackArtwork
+  referenceSprite: {fileID: 21300000, guid: 09670323c0019094ba02e6345134ff20, type: 3}
+  frames:
+  - {fileID: 21300000, guid: ab8f432e6df35724aac03bce76d39044, type: 3}
+  - {fileID: 21300000, guid: 8b4348b6c4935d14ab5a158aa06b3d58, type: 3}
+  - {fileID: 21300000, guid: 06e7dffd0cc49664a9b34c490b6716b4, type: 3}
+  - {fileID: 21300000, guid: d87d3b011ed9e434c89e750df8962ea3, type: 3}
+  projectileSprite: {fileID: 0}

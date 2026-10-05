@@ -992,6 +992,27 @@ BossTestScene의 크레용사용 소환 후 네 졸개가 이동할 때만 걷�
 - Next.js App Router: https://nextjs.org/docs/app
 - Supabase CLI: https://supabase.com/docs/reference/cli/getting-started
 
+### 크레용사용 소환 졸개 공격
+
+궁병은 몸을 굽히며 시위·화살을 당기고 발사, 마법사는 지팡이를 들어 시전, 도끼병은 높이 들고
+앞으로 휘두르기, 방패병은 양손으로 방패를 올리고 내린 뒤 복귀한다. 기존 준비·공격·회복 단계에
+전용 그림을 선택하며 원거리 두 졸개는 전용 화살·마법탄을 발사한다. 이동 프레임보다 공격 포즈가
+우선한다. 본체 배율·공격 시간·피해·Collider와 투사체 원형 판정 반경 0.15는 유지한다.
+
+- 적용: `Trickal Fan Game > Artwork > Setup Crayon Minion Attack Animations`
+- 검증: `Trickal Fan Game > Artwork > Verify Enemy Attack Animations` (일반 적과 졸개 8종)
+- 미리보기: `Trickal Fan Game > Artwork > Export Crayon Minion Attack Preview`
+- 배치: `-executeMethod TrickalFanGame.Editor.EnemyAttackAnimationVerification.ExportMinionPreview`
+- 에셋·프롬프트: [졸개 공격 기록](./art-prompts/crayon-minion-attack.md)
+
+2026-10-05 배치 종료 코드 0 (`game/Logs/crayon-minion-attack-retry.log`). 반복 구성, 포즈 선택,
+방향·이동 우선순위·넉백 복원, 실제 화살/마법탄 발사와 속도·판정 보존, 기존 전투 및 Boss-0~3·HUD-5
+회귀를 통과했다. Unity 렌더는 `game/Logs/CrayonMinionAttackPreview/phase-0..3.png`에 저장한다.
+GIF는 포즈 비교용이며 실제 게임의 공격 시간과 다르다. Play Mode에서 새 Run 또는 BossTestScene의
+크레용사용 소환 뒤 준비→공격→회복→걷기 연결, 양손 방패 움직임과 좌우 발사 방향을 확인한다.
+궁병 공격은 사용자 참고 영상에 맞춰 몸체 자체가 활처럼 휘는 방식으로 정정한다.
+준비 때 몸이 C자로 휘고 몸 뒤의 시위·화살이 당겨진 뒤, 발사 때 몸·시위가 복원된다.
+팔로 별도 활을 당기는 포즈는 사용하지 않는다.
 ### 에르핀 기본공격·저학년 구체
 
 두 투사체에 노란색 원형 에너지 구체를 적용한다. 기본공격은 표시·루트 배율을 0.5→0.4,

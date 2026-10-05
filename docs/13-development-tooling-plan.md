@@ -377,6 +377,10 @@ Play Mode 가독성 확인은 남아 있다. 실행 메뉴와 배치는 [개발 
 2026-10-04 일반 적 도구에 크레용사용 소환 졸개 4종의 전용 걷기 에셋 적용과 공통 검증을 추가했다.
 별도 미리보기 메뉴로 네 포즈 주기의 Unity PNG를 생성하며, 기존 보스 소환 회귀와 함께 통과했다.
 
+2026-10-05 `EnemyAttackAnimationSetup.SetupMinions`에 졸개 4종의 전용 공격 포즈와 화살·마법탄 연결을
+추가했다. 일반 적 Setup도 함께 구성한다. 검증 대상은 8종이며 졸개 고유 그림과 실제 발사 경로를
+검사한다. `Export Crayon Minion Attack Preview`는 반복 구성·전투·보스 소환 회귀와 4단계 렌더를 수행한다.
+실행 메뉴와 Play 확인은 [개발 환경](./05-development-setup.md)의 졸개 공격 항목을 따른다.
 2026-10-05 `ErpinProjectileArtworkSetup`을 추가했다. 기존 기본공격·저학년 프리팹의 GUID와 전투
 설정을 유지하면서 Sprite·tint·표시 크기와 기본공격의 축소된 충돌 배율을 구성한다. 반복 구성 뒤
 실제 SpriteRenderer 크기와 CircleCollider 크기, 공통 판정·저학년·분열탄·사거리 회귀를 검사한다.

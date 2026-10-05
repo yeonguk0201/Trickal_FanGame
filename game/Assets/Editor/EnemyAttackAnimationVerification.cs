@@ -14,10 +14,11 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Artwork/Verify Enemy Attack Animations")]
         public static void Verify()
         {
-            for (int i = 0; i < 4; i++)
+            string[] paths = EnemyMovementAnimationSetup.PrefabPaths.Concat(EnemyMovementAnimationSetup.MinionPrefabPaths).ToArray();
+            for (int i = 0; i < paths.Length; i++)
             {
                 GameObject root = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(
-                    EnemyMovementAnimationSetup.PrefabPaths[i]));
+                    paths[i]));
                 try
                 {
                     SpriteRenderer renderer = root.GetComponent<SpriteRenderer>();
@@ -72,7 +73,8 @@ namespace TrickalFanGame.Editor
                     movement.RenderPose(0f, false);
                     Invoke(movement, "OnDisable");
                     Require(renderer.sprite == original && !renderer.forceRenderingOff, "Disable must restore artwork.");
-                    Require((artwork.ProjectileSprite != null) == (i == 3), "Only high-blood-sugar fairy may use green onion.");
+                    Require((artwork.ProjectileSprite != null) == (i == 3 || i == 4 || i == 5),
+                        "Only throwing fairy and ranged minions may have projectile artwork.");
                 }
                 finally { UnityEngine.Object.DestroyImmediate(root); }
             }
@@ -82,14 +84,50 @@ namespace TrickalFanGame.Editor
                 try
                 {
                     EnemyAttackArtwork inherited = root.GetComponent<EnemyAttackArtwork>();
+                    Invoke(root.GetComponent<Health>(), "Awake");
+                    Invoke(root.GetComponent<KnockbackReceiver>(), "Awake");
                     root.GetComponent<EnemyAttackPresentation>().SetPhase(EnemyAttackPhase.Active);
-                    Require(inherited == null || (!inherited.TryRender() && inherited.ProjectileSprite == null),
-                        "Minions must not inherit fairy/ginseng poses or onions.");
+                    Require(inherited != null && inherited.TryRender() &&
+                        root.GetComponent<SpriteRenderer>().sprite == inherited.GetFrame(2) &&
+                        AssetDatabase.GetAssetPath(inherited.GetFrame(2)).StartsWith(EnemyAttackAnimationSetup.MinionFolder) &&
+                        inherited.ProjectileSprite != AssetDatabase.LoadAssetAtPath<Sprite>(EnemyAttackAnimationSetup.ProjectilePath),
+                        "Minions must use their own poses and never fairy/ginseng poses or onions.");
                 }
                 finally { UnityEngine.Object.DestroyImmediate(root); }
             }
             VerifyShot();
-            Debug.Log("Enemy attack artwork verification passed: combat phases, movement priority, physics isolation, cancellation, minion exclusion and actual onion firing.");
+            VerifyMinionShots();
+            Debug.Log("Enemy attack artwork verification passed: combat phases, movement priority, physics isolation, cancellation, minion ownership and actual onion/arrow/magic firing.");
+        }
+
+        private static void VerifyMinionShots()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                GameObject root = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(EnemyMovementAnimationSetup.MinionPrefabPaths[i]));
+                EnemyProjectile shot = null;
+                try
+                {
+                    LongRangeSniperController sniper = root.GetComponent<LongRangeSniperController>();
+                    Invoke(sniper, "Awake");
+                    typeof(LongRangeSniperController).GetField("lockedDirection", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(sniper, Vector2.left);
+                    sniper.ProjectileFired += projectile => shot = projectile;
+                    typeof(LongRangeSniperController).GetMethod("Fire", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(sniper, new object[] { 0f });
+                    SpriteRenderer renderer = shot.GetComponent<SpriteRenderer>();
+                    Require(renderer.sprite == root.GetComponent<EnemyAttackArtwork>().ProjectileSprite && renderer.color == Color.white &&
+                        renderer.sprite.name == (i == 0 ? "CrayonArrow_Projectile" : "CrayonMagic_Projectile"), "Minion firing must emit its own arrow/magic artwork.");
+                    Require(shot.Velocity == Vector2.left * sniper.ProjectileSpeed &&
+                        Mathf.Approximately(shot.GetComponent<CircleCollider2D>().bounds.extents.x, ProjectileSizing.WorldCollisionRadius(ProjectileSizing.RangedEnemyScale)),
+                        "Minion projectile artwork must preserve speed and collision size.");
+                    root.GetComponent<EnemyMovementAnimator>().RenderPose(0f, false);
+                    Require(root.GetComponent<SpriteRenderer>().sprite == root.GetComponent<EnemyAttackArtwork>().GetFrame(2), "Release/cast pose must coincide with firing.");
+                }
+                finally
+                {
+                    if (shot != null) UnityEngine.Object.DestroyImmediate(shot.gameObject);
+                    UnityEngine.Object.DestroyImmediate(root);
+                }
+            }
         }
 
         private static void VerifyShot()
@@ -152,9 +190,31 @@ namespace TrickalFanGame.Editor
 
         public static void RenderPreview()
         {
-            string folder = Path.GetFullPath(Path.Combine(Application.dataPath, "../Logs/EnemyAttackPreview"));
+            RenderPreview(false);
+        }
+
+        // Replacing artwork with the same GUID needs no prefab/configuration rewrite.
+        public static void VerifyAndRenderMinionPreview()
+        {
+            Verify();
+            RenderPreview(true);
+        }
+
+        [MenuItem("Trickal Fan Game/Artwork/Export Crayon Minion Attack Preview")]
+        public static void ExportMinionPreview()
+        {
+            SetupAndVerifyBatch();
+            BossMovementAnimationVerification.Verify();
+            UnityEditor.SceneManagement.EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath, UnityEditor.SceneManagement.OpenSceneMode.Single);
+            Week15Boss3Verification.Verify();
+            RenderPreview(true);
+        }
+
+        private static void RenderPreview(bool minions)
+        {
+            string folder = Path.GetFullPath(Path.Combine(Application.dataPath, minions ? "../Logs/CrayonMinionAttackPreview" : "../Logs/EnemyAttackPreview"));
             Directory.CreateDirectory(folder);
-            GameObject[] roots = EnemyMovementAnimationSetup.PrefabPaths.Select(path =>
+            GameObject[] roots = (minions ? EnemyMovementAnimationSetup.MinionPrefabPaths : EnemyMovementAnimationSetup.PrefabPaths).Select(path =>
                 UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path))).ToArray();
             RenderTexture target = new RenderTexture(1600, 400, 0);
             RenderTexture previous = RenderTexture.active;
@@ -179,8 +239,9 @@ namespace TrickalFanGame.Editor
                             roots[i].GetComponent<EnemyMovementAnimator>().RenderPose(0f, false);
                             Sprite sprite = roots[i].GetComponent<SpriteRenderer>().sprite;
                             Draw(sprite, new Vector3(i * 1.4f + 0.7f, 0.5f), 0.8f, material);
-                            if (i == 3 && phase == 2)
-                                Draw(roots[i].GetComponent<EnemyAttackArtwork>().ProjectileSprite, new Vector3(4.5f, 0.4f), 0.3f, material);
+                            Sprite projectile = roots[i].GetComponent<EnemyAttackArtwork>().ProjectileSprite;
+                            if (projectile != null && phase == 2)
+                                Draw(projectile, new Vector3(i * 1.4f + 0.3f, 0.4f), 0.3f, material);
                         }
                     }
                     finally { GL.PopMatrix(); }
