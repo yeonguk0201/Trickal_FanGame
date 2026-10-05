@@ -77,8 +77,9 @@ namespace TrickalFanGame.Editor
             Directory.CreateDirectory("Assets/Prefabs");
             GameObject instance = new("Homing Skill Projectile");
             SpriteRenderer renderer = instance.AddComponent<SpriteRenderer>();
-            renderer.sprite = sprite;
-            renderer.color = new Color(0.25f, 0.8f, 1f);
+            Sprite artwork = AssetDatabase.LoadAssetAtPath<Sprite>(ErpinProjectileArtworkSetup.SkillSpritePath);
+            renderer.sprite = artwork != null ? artwork : sprite;
+            renderer.color = artwork != null ? Color.white : new Color(0.25f, 0.8f, 1f);
             Rigidbody2D body = instance.AddComponent<Rigidbody2D>();
             body.gravityScale = 0f;
             body.freezeRotation = true;

@@ -57,7 +57,7 @@ namespace TrickalFanGame.Editor
                     ProjectileSizing.PlayerBasicScale > ProjectileSizing.BossScale &&
                     ProjectileSizing.BossScale > ProjectileSizing.RangedEnemyScale &&
                     ProjectileSizing.RangedEnemyScale > ProjectileSizing.PlayerSkillScale,
-                    "Projectile scale hierarchy must remain player basic > boss > ranged enemy > player skill.");
+                    "Projectile collision-scale hierarchy must remain player basic > boss > ranged enemy > player skill; artwork PPU is independent.");
             }
             finally
             {
@@ -67,7 +67,7 @@ namespace TrickalFanGame.Editor
 
             Debug.Log(
                 "Pre-Phase G projectile sizing verified: player basic, player skill, ranged-enemy, and boss " +
-                "projectiles use the shared visual-scale and collision-radius contract.");
+                "projectiles use the shared root-scale and collision-radius contract; skill artwork can be larger independently.");
         }
 
         private static void VerifyProjectile(

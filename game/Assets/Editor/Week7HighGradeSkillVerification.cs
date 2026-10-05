@@ -147,6 +147,9 @@ namespace TrickalFanGame.Editor
                     "The restored Space action must finish its four-shot interval salvo.");
                 RemoveSpawnedSkillProjectiles(projectileTemplate);
 
+                // Floor entry grants a real-time spawn window; this fixture advances only synthetic skill time.
+                // Isolate cancellation from that independent transition protection.
+                player.GetComponent<DamageInvulnerability>().ResetHitWindow();
                 float cancelStart = ultimate.NextReadyTime;
                 Assert(ultimate.TryActivate(cancelStart), "The cancellation check needs an active ultimate.");
                 Assert(ultimate.TryCancel(cancelStart + 2f) &&

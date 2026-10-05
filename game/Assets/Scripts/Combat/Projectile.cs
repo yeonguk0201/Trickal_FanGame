@@ -32,7 +32,7 @@ namespace TrickalFanGame.Combat
     public static class ProjectileSizing
     {
         public const float BaseColliderRadius = 0.5f;
-        public const float PlayerBasicScale = 0.5f;
+        public const float PlayerBasicScale = 0.4f;
         public const float PlayerSkillScale = 0.28f;
         public const float RangedEnemyScale = 0.3f;
         public const float BossScale = 0.35f;

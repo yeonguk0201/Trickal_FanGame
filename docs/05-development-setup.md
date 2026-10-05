@@ -882,3 +882,33 @@ BossTestScene의 크레용사용 소환 후 네 졸개가 이동할 때만 걷�
 - Prisma ORM: https://www.prisma.io/docs/orm
 - Next.js App Router: https://nextjs.org/docs/app
 - Supabase CLI: https://supabase.com/docs/reference/cli/getting-started
+
+### 에르핀 기본공격·저학년 구체
+
+두 투사체에 노란색 원형 에너지 구체를 적용한다. 기본공격은 표시·루트 배율을 0.5→0.4,
+히트박스 반경을 0.25→0.20으로 20% 줄였다. 저학년 그림은 기본공격보다 40% 크게 보이지만
+접촉 반경 0.14와 폭발 반경 1.25는 유지한다. 저학년 초기 Setup도 새 그림을 유지한다.
+
+- 적용: `Trickal Fan Game > Artwork > Setup Erpin Projectile Artwork`
+- 검증: `Trickal Fan Game > Artwork > Verify Erpin Projectile Artwork`
+- 배치: `-executeMethod TrickalFanGame.Editor.ErpinProjectileArtworkSetup.SetupAndVerifyBatch`
+- [에셋·프롬프트·크기 기록](./art-prompts/erpin-projectiles.md)
+
+2026-10-05 배치 종료 코드 0 (`game/Logs/erpin-projectile-artwork.log`): 반복 구성, 표시·판정 크기,
+공통 투사체 판정·저학년·아이템 투사체 효과·사거리 회귀 통과. Play Mode에서 새 Run의 방향키
+기본공격과 Space 저학년을 발사해 노란 구체의 크기 차이와 좁은 틈 통과를 확인한다.
+### 에르핀 고학년 돌격·넘어짐 모션
+
+Q 고학년 돌격에서 한 손으로 지팡이를 든 준비·달리기 그림을 재생한다. 적/보스와 충돌하면
+기존 충돌 회복 시간 안에 뒤로 반동→넘어짐→누움→일어나기를 재생한다. Q 취소·시간 종료와
+벽 충돌은 기존 전투 규칙을 따르며 충돌 넘어짐 포즈를 재생하지 않는다. 고학년이 걷기·저학년
+그림보다 우선한다. 본체/Collider·넉백·피해·무적·속도·회복 시간은 변경하지 않는다.
+
+- 적용: `Trickal Fan Game > Artwork > Setup Erpin High Grade Artwork` (Resources 가져오기, Scene 재구성 없음)
+- 검증: `Trickal Fan Game > Artwork > Verify Erpin High Grade Artwork`
+- 배치: `-executeMethod TrickalFanGame.Editor.ErpinHighGradeArtworkSetup.SetupAndVerifyBatch`
+- [에셋·프롬프트·단계 기록](./art-prompts/erpin-one-hand-high-grade.md)
+
+2026-10-05 고학년 그림 및 걷기·고학년·저학년 회귀 통과 (`game/Logs/erpin-one-hand-high-grade.log`, 종료 코드 0).
+Play Mode에서 새 Run의 Q 돌격·WASD 방향 전환·적/보스 충돌과 회복, Q 취소·시간 종료를 확인한다.
+`game/Logs/ErpinHighGradePreview/erpin-one-hand-complete.gif`는 포즈 비교용이다.
