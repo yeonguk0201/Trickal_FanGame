@@ -47,3 +47,11 @@
 - 작업은 `dev/<주차 또는 주제>` 브랜치에서 하고, `main`에는 직접 커밋하지 않고 PR로 병합한다.
 - PR 본문은 `.github/pull_request_template.md`를 따른다. 검증 항목은 실제로 실행한 것만 체크한다.
 - 관련 없는 변경은 같은 PR에 섞지 않는다. 새 Unity 에셋의 `.meta`는 같은 커밋에 포함한다.
+
+## 작업별 스킬 사용
+
+- 커밋·푸시·PR 요청에는 `.agents/skills/ship/SKILL.md`를 사용하고, 사용자가 요청한 단계까지만 수행한다.
+- 커밋 전에는 `.agents/skills/pre-commit-check/SKILL.md`로 이번 커밋 범위를 점검한다.
+- Prisma, API DTO 또는 Item·Character·Run ID 계약 변경 시 `.agents/skills/contract-drift-check/SKILL.md`를 사용한다.
+- Unity 변경 검증 시 `.agents/skills/unity-verification-runner/SKILL.md`로 관련 검증기와 실행 방법을 확인한다.
+- `.claude/hooks/protect-main.js`는 Claude 설정에 연결된 훅이다. Codex에서 자동 실행된다고 가정하지 않고, 커밋·푸시 전에 브랜치와 대상 ref를 직접 확인한다.

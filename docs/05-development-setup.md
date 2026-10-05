@@ -539,6 +539,15 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 저장소 공통 불변 규칙은 루트 `AGENTS.md`에 둔다. 기능 하나를 계획부터 검증과 체크리스트 갱신까지 진행할 때는
 `.agents/skills/trickal-feature-cycle/SKILL.md`의 저장소 전용 스킬을 사용한다.
 
+Codex용 검증·출하 스킬은 `.agents/skills/`에 있다. `$ship`은 요청 범위에 맞춰 커밋·푸시·PR까지 진행하고,
+`$pre-commit-check`는 커밋 범위의 파일·계약·검증 근거를 점검한다. `$contract-drift-check`는 Backend 카탈로그·seed,
+Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`는 현재 Editor 코드에서 관련 검증기를 찾아
+배치 실행하거나 수동 메뉴와 기대 결과를 안내한다. 예: “커밋 전 점검해줘”, “Run DTO 계약 검증해줘”, “이번 Unity 변경 검증해줘”.
+안내만 요청하면 실행하지 않는다. 각 스킬의 상세 절차는 해당 디렉터리의 `SKILL.md`를 기준으로 한다.
+
+`.claude/skills/`와 `.claude/settings.json`의 훅은 Claude용으로 유지한다. main 커밋·푸시 차단 훅이 Codex에서도
+자동 실행되는 것으로 간주하지 않으며, Codex는 `AGENTS.md`와 ship 절차에 따라 브랜치와 푸시 대상 ref를 확인한다.
+
 향후 Unity 콘텐츠 생성기·검증기, Unity ↔ Backend 계약 검사, 플레이테스트 텔레메트리와 조건부 Unity MCP는
 [개발 생산성·검증 인프라 계획](./13-development-tooling-plan.md)에 따라 도입한다.
 
@@ -860,15 +869,6 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
   벽에 붙은 상자·하트에 붙은 상자가 밀리지 않던 문제를 고쳤다. 벽에 붙인 상자를 벽을 따라 밀고, 하트를 상자 앞에 두고 밀어
   하트가 함께 밀리는지 다시 확인한다.
 
-- Spell-5 소형 스펠 4종: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-5 Small Spells`가 `Assets/Items/`에
-  `single-spell-armor-festival-invitation`(Rare, 효과 37 `GainShield` `magnitude` 4), `single-spell-amelia-love-letter`
-  (Uncommon, 효과 38 `SpawnHealthPickups` `integerAmount` 2), `single-spell-random-coin`(Common, 효과 39 `GainRandomGold`
-  `integerAmount` 2·`magnitude` 10), `single-spell-decisive-strike`(Uncommon, 효과 40 `CurrentRoomCriticalBonus`
-  `magnitude` 0.5 = 치명타 피해·`secondaryMagnitude` 0.15 = 치명타 확률)를 GUID를 보존하며 멱등 구성한다. Game Scene 플레이어의 `PlayerSingleUseEffects.heartPickupPrefab`에
-  `HealthPickup.prefab`을 연결하고(이미 연결돼 있으면 Scene을 저장하지 않음), 글리프를 추가한 뒤 Chest-1의 표 구성을 다시
-  실행해 상자 스펠 풀에 넣는다. Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시
-  실행한다.
-  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Spell-5 Small Spells`, 배치는 Unity `-batchmode -quit -projectPath
 - Spell-4 멤버십카드: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-4 Membership Card`가
   `Assets/Items/single-spell-membership-card.asset`(Rare 일회용 스펠, 효과 42 `FreeCurrentShopOffers`, 수치 필드 없음)을
   GUID를 보존하며 멱등 구성하고, 이름·설명과 상점 화면의 `무료`·`받기` 글리프를 추가한 뒤 Chest-1의 표 구성을 다시 실행해
@@ -912,6 +912,15 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
   동안 캐릭터가 움직이거나 공격하지 않아야 하고, Esc는 화면만 닫고 일시정지를 열지 않아야 한다. 글자가 칸 밖으로
   넘치거나 깨지는지, 16:9가 아닌 해상도에서 화면이 잘리지 않는지도 본다.
 
+- Spell-5 소형 스펠 4종: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-5 Small Spells`가 `Assets/Items/`에
+  `single-spell-armor-festival-invitation`(Rare, 효과 37 `GainShield` `magnitude` 4), `single-spell-amelia-love-letter`
+  (Uncommon, 효과 38 `SpawnHealthPickups` `integerAmount` 2), `single-spell-random-coin`(Common, 효과 39 `GainRandomGold`
+  `integerAmount` 2·`magnitude` 10), `single-spell-decisive-strike`(Uncommon, 효과 40 `CurrentRoomCriticalBonus`
+  `magnitude` 0.5 = 치명타 피해·`secondaryMagnitude` 0.15 = 치명타 확률)를 GUID를 보존하며 멱등 구성한다. Game Scene 플레이어의 `PlayerSingleUseEffects.heartPickupPrefab`에
+  `HealthPickup.prefab`을 연결하고(이미 연결돼 있으면 Scene을 저장하지 않음), 글리프를 추가한 뒤 Chest-1의 표 구성을 다시
+  실행해 상자 스펠 풀에 넣는다. Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시
+  실행한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Spell-5 Small Spells`, 배치는 Unity `-batchmode -quit -projectPath
   <game 경로> -executeMethod TrickalFanGame.Editor.Week22Spell5Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
   Setup 2회 GUID, 효과 37~40 번호와 필드 검증, 4종의 계약·설명·글리프, Scene 플레이어의 하트 Prefab, 상자 스펠 목록 편입과
   선택 보상 풀 제외, 방어막 2칸 획득·기존 방어막 합산·일시정지 미사용, 하트 Prefab 미설정 시 미소비·가득 찬 HP에서 사용·

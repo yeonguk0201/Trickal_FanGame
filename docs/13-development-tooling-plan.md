@@ -48,6 +48,16 @@
 
 - `.agents/skills/trickal-feature-cycle/SKILL.md`
 
+### 검증·출하 보조 스킬 (2026-10-05)
+
+- `.agents/skills/ship/SKILL.md`: 요청된 단계까지 검증·커밋·푸시·PR 처리.
+- `.agents/skills/pre-commit-check/SKILL.md`: 커밋 범위의 파일 무결성·계약·테스트 근거 확인.
+- `.agents/skills/contract-drift-check/SKILL.md`: 현재 Backend 카탈로그·seed와 Unity·Web 계약 조사.
+- `.agents/skills/unity-verification-runner/SKILL.md`: 현재 Editor 검증기 검색·배치 실행·수동 확인 안내.
+- 상태: Codex용 절차 구성과 4개 스킬의 이름·frontmatter·참조 경로, 관련 8개 파일의 strict UTF-8 및 diff 공백 검사 통과. 실제 기능의 커밋·PR 및 Unity 배치에 적용하는 운영 검증은 예정.
+- 계약 검사 스킬은 조사 절차이며 T3의 독립 자동 검사 도구 완료를 의미하지 않는다.
+- Claude 스킬·훅은 유지하며, Codex의 main 보호는 브랜치·푸시 대상 직접 확인 절차로 명시한다.
+
 ### 완료 조건
 
 - [x] 저장소에서 자동 발견 가능한 위치에 스킬이 존재한다.
