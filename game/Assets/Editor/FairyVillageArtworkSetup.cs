@@ -19,6 +19,9 @@ namespace TrickalFanGame.Editor
         public const string ClosedDoorMaskPath = Folder + "door-closed-foreground-cutout-v1.png";
         public const string ClosedBoundaryName = "Fairy Village Closed Door Boundary";
         public const float MasterScale = 16f / 1572f;
+        // The lower corner cuts also hold the foot of the side walls. Only the lower hedge, up to its top edge
+        // (source Y=783 in the 221 px tall bottom row), may cover actors; the side wall above it must not.
+        public const float CornerForegroundCutoff = (941f - 783f) / 221f;
         public static readonly string[] DoorFamilies = { "shop", "treasure", "boss", "secret" };
         public static string FamilyPath(string family, string state, int version = 2) => Folder + $"room-{family}-{state}-v{version}.png";
         public static int FamilyVersion(string family, RoomDoorDirection direction) => family switch {
@@ -112,7 +115,8 @@ namespace TrickalFanGame.Editor
                     Draw(root, content, col == 2 && row == 2 ? "Grass Floor" : $"Connected Patch {col} {row}",
                         Load("open", $"patch-{col}-{row}"), CellRect(x, y, col, row), material, nativeScale);
                     if (row == 4) DrawForeground(root, content, ForegroundName + " " + col,
-                        Load("open", $"patch-{col}-{row}"), CellRect(x, y, col, row), material, nativeScale);
+                        Load("open", $"patch-{col}-{row}"), CellRect(x, y, col, row), material, nativeScale,
+                        cutoff: IsLowerCornerCell(col, row) ? CornerForegroundCutoff : 1f);
                 }
                 foreach (string wallName in Walls)
                 {
@@ -214,13 +218,13 @@ namespace TrickalFanGame.Editor
         }
 
         private static SpriteRenderer DrawForeground(Transform parent, Transform content, string name, Sprite sprite,
-            Rect rect, Material material, float nativeScale, Texture2D mask = null)
+            Rect rect, Material material, float nativeScale, Texture2D mask = null, float cutoff = 1f)
         {
             SpriteRenderer renderer = Draw(parent, content, name, sprite, rect, material, nativeScale);
             renderer.sortingOrder = 20;
             renderer.GetComponent<ConnectedRoomPatch>().Configure(renderer,
                 new Vector2(rect.width / (sprite.rect.width * nativeScale), rect.height / (sprite.rect.height * nativeScale)),
-                1f, mask != null ? mask : AssetDatabase.LoadAssetAtPath<Texture2D>(ForegroundMaskPath));
+                cutoff, mask != null ? mask : AssetDatabase.LoadAssetAtPath<Texture2D>(ForegroundMaskPath));
             return renderer;
         }
 
@@ -269,6 +273,7 @@ namespace TrickalFanGame.Editor
             }
         }
         private static bool IsDoorCell(int col, int row) => col == 2 && (row == 0 || row == 4) || row == 2 && (col == 0 || col == 4);
+        public static bool IsLowerCornerCell(int col, int row) => row == 4 && (col == 0 || col == 4);
         private static (int, int) DoorCell(RoomDoorDirection direction) => direction switch {
             RoomDoorDirection.Up => (2, 0), RoomDoorDirection.Down => (2, 4), RoomDoorDirection.Left => (0, 2), _ => (4, 2) };
         private static string DoorName(RoomDoorDirection direction, string state) => $"{direction.ToString().ToLowerInvariant()}-{state}";

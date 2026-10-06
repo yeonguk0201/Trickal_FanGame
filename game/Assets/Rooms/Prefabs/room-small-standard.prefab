@@ -4896,7 +4896,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 6869978694230681668}
   textureRepeat: {x: 1, y: 1}
-  foregroundCutoff: 1
+  foregroundCutoff: 0.7149321
   foregroundMask: {fileID: 2800000, guid: c6ac7ca2f3a00ad4481202614bf254df, type: 3}
 --- !u!1 &4908685416188043877
 GameObject:
@@ -5894,7 +5894,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 1639970970584608564}
   textureRepeat: {x: 1, y: 1}
-  foregroundCutoff: 1
+  foregroundCutoff: 0.7149321
   foregroundMask: {fileID: 2800000, guid: c6ac7ca2f3a00ad4481202614bf254df, type: 3}
 --- !u!1 &6156872635958466774
 GameObject:
