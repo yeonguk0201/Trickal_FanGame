@@ -325,6 +325,31 @@ namespace TrickalFanGame.Room
             enemyHealth.Died += deathHandler;
         }
 
+        // Enemy-6: an enemy that appears outside the Encounter (셰이디의 랜덤박스). It scales with the floor and
+        // counts as a kill, but it never locks the doors of a cleared room or grants another clear reward. During
+        // combat the room clears only after it dies too.
+        public Health SpawnExtraEnemy(GameObject configuredPrefab, Vector3 position)
+        {
+            if (configuredPrefab == null || IsProgressionStopped) return null;
+            GameObject enemy = Instantiate(configuredPrefab, position, Quaternion.identity, transform);
+            Health enemyHealth = enemy.GetComponent<Health>();
+            if (enemyHealth == null)
+            {
+                Debug.LogError($"{name}: Enemy prefab must have a Health component.", enemy);
+                if (Application.isPlaying) Destroy(enemy);
+                else DestroyImmediate(enemy);
+                return null;
+            }
+
+            FloorDifficultyScaler.ApplyScaling(enemy, floorNumber);
+            AlertEnemy(enemyHealth);
+            // After a clear the room no longer holds the player, so the enemy finds them itself.
+            EnemyBehaviorContext behavior = enemy.GetComponent<EnemyBehaviorContext>();
+            if (behavior != null && !behavior.IsAlerted) behavior.TryAcquireOrAlert(float.PositiveInfinity);
+            RegisterEnemy(enemyHealth);
+            return enemyHealth;
+        }
+
         private void ActivatePreplacedEnemies()
         {
             foreach (Health enemy in preplacedEnemies)

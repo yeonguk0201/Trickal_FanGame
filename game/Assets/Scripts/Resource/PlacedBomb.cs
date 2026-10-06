@@ -10,7 +10,8 @@ namespace TrickalFanGame.Resource
     public sealed class PlacedBomb : MonoBehaviour
     {
         public const float DefaultFuseDuration = 0.75f;
-        public const float DefaultExplosionRadius = 2.5f;
+        // 2.5 until Obstacle-5 (2026-10-06 decision): exploding obstacles share this explosion.
+        public const float DefaultExplosionRadius = 2f;
         public const float DefaultEnemyDamage = 30f;
         public const float DefaultSelfDamage = 2f;
         public const float ExplosionVisualDuration = 0.15f;
@@ -47,6 +48,18 @@ namespace TrickalFanGame.Resource
             ownerHealth = configuredOwnerHealth;
             explodeAt = currentTime + fuseDuration;
             configured = owner != null && ownerHealth != null;
+            armedScale = transform.localScale;
+            if (visual != null) visual.color = armedColor;
+        }
+
+        // Obstacle-5: an explosion nobody placed (an exploding obstacle). It is the same explosion as a placed bomb
+        // and hurts every player in range the way a placed bomb hurts its owner.
+        public void ConfigureUnowned(float currentTime, float configuredFuseDuration)
+        {
+            owner = null;
+            ownerHealth = null;
+            explodeAt = currentTime + Mathf.Max(0f, configuredFuseDuration);
+            configured = true;
             armedScale = transform.localScale;
             if (visual != null) visual.color = armedColor;
         }
@@ -95,13 +108,22 @@ namespace TrickalFanGame.Resource
             {
                 Health target = hit != null ? hit.GetComponentInParent<Health>() : null;
                 if (target == null || target == ownerHealth || target.IsDead || !damaged.Add(target)) continue;
-                target.TakeDamage(new DamageContext(owner, DamageSourceType.PlayerBomb, enemyDamage));
+                target.TakeDamage(new DamageContext(owner != null ? owner : gameObject,
+                    DamageSourceType.PlayerBomb, enemyDamage));
             }
 
-            if (!ownerHealth.IsDead &&
-                ((Vector2)ownerHealth.transform.position - center).sqrMagnitude <= explosionRadius * explosionRadius)
+            if (ownerHealth != null)
             {
-                ownerHealth.TakeDamage(new DamageContext(gameObject, DamageSourceType.PlayerBomb, selfDamage));
+                DamagePlayer(ownerHealth, center);
+            }
+            else
+            {
+                foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, explosionRadius,
+                             LayerMask.GetMask("Player")))
+                {
+                    Health player = hit != null ? hit.GetComponentInParent<Health>() : null;
+                    if (player != null && damaged.Add(player)) DamagePlayer(player, center);
+                }
             }
 
             DestructibleObstacle.DestroyByBombInCircle(center, explosionRadius);
@@ -119,6 +141,15 @@ namespace TrickalFanGame.Resource
 
             Exploded?.Invoke(this);
             return true;
+        }
+
+        private void DamagePlayer(Health player, Vector2 center)
+        {
+            if (!player.IsDead &&
+                ((Vector2)player.transform.position - center).sqrMagnitude <= explosionRadius * explosionRadius)
+            {
+                player.TakeDamage(new DamageContext(gameObject, DamageSourceType.PlayerBomb, selfDamage));
+            }
         }
 
         private void OnDrawGizmosSelected()

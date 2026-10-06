@@ -82,8 +82,8 @@ namespace TrickalFanGame.Editor
             ValidateCatalogSelection(generator, allLayoutIds);
             Debug.Log("Obstacle-4 verification passed: setup is idempotent, four new profile-sized obstacle " +
                       "Layouts pass the room contract, all seven obstacle Layouts expose safe candidate slots, " +
-                      "the room-level seeded roll produces at most one deterministic Marie bomb box near 40%, " +
-                      "and its 20% drop table favors bombs at weight 60.");
+                      "the room-level seeded roll produces at most one deterministic special obstacle near 40%, " +
+                      "and the Marie bomb box's 20% drop table favors bombs at weight 60.");
         }
 
         [MenuItem("Trickal Fan Game/Week 20/Verify Obstacle-4 With Regressions")]
@@ -130,7 +130,7 @@ namespace TrickalFanGame.Editor
                 RoomPrefab room = instance.GetComponent<RoomPrefab>();
                 Assert(RoomObstacleVariantSlot.TryResolveForRoom(room, seed, out string error), error);
                 DestructibleObstacle[] special = instance.GetComponentsInChildren<DestructibleObstacle>(true)
-                    .Where(obstacle => obstacle.VariantId == "marie-bomb-box").ToArray();
+                    .Where(obstacle => obstacle.VariantId != "rock").ToArray();
                 specialCount = special.Length;
                 return special.Length == 1 ? special[0].ObstacleId : string.Empty;
             }

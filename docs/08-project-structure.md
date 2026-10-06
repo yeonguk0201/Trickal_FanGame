@@ -63,6 +63,11 @@ project-root/
 | `web/` | 전적 검색 웹 서비스 |
 | `docs/` | 프로젝트 설계 및 개발 문서 |
 | `.agents/skills/` | 저장소에서 반복 사용하는 Codex 작업 워크플로 |
+
+`.agents/skills/`에는 기능 구현용 `trickal-feature-cycle`, 기록용 `trickal-obsidian-journal`과
+검증·출하용 `ship`, `pre-commit-check`, `contract-drift-check`, `unity-verification-runner`가 있다.
+각 디렉터리의 `SKILL.md`가 절차를 정의하고 루트 `AGENTS.md`가 작업별 사용 조건을 연결한다.
+`.claude/skills/`와 `.claude/hooks/`는 Claude용 구성으로 별도 유지한다.
 | `AGENTS.md` | 인코딩, 계약, Unity 안전성과 검증에 관한 저장소 공통 규칙 |
 
 

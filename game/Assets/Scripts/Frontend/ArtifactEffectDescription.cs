@@ -110,6 +110,8 @@ namespace TrickalFanGame.Frontend
                     $"{Number(effect.IntervalSeconds)}초 뒤 그 피해 +{Hearts(effect.IntegerAmount)} 회복",
                 ItemEffectType.DuplicateRoomChestsAndPickups =>
                     "현재 방의 열지 않은 상자와 바닥 소모품을 하나씩 복제 (복제 상자는 내용물을 따로 추첨)",
+                ItemEffectType.FreeCurrentShopOffers =>
+                    "현재 상점의 남은 상품을 모두 무료로 변경 (상점 밖에서는 사용 불가)",
                 _ => effect.EffectType.ToString(),
             };
         }

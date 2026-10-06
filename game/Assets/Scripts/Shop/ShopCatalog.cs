@@ -34,9 +34,13 @@ namespace TrickalFanGame.Shop
     [CreateAssetMenu(menuName = "Trickal Fan Game/Shop Catalog", fileName = "ShopCatalog")]
     public sealed class ShopCatalog : ScriptableObject
     {
-        public const int ItemOfferCount = 2;
-        public const int ConsumableOfferCount = 2;
+        // Shop-0 (D5, 2026-10-06): three Items and three consumables. The shop UI shows a 3×3 grid, so the last
+        // row stays empty; grid cells are not offers.
+        public const int ItemOfferCount = 3;
+        public const int ConsumableOfferCount = 3;
         public const int OfferCount = ItemOfferCount + ConsumableOfferCount;
+        public const int GridColumns = 3;
+        public const int GridSlotCount = GridColumns * GridColumns;
 
         [SerializeField, Min(1)] private int commonPrice = 10;
         [SerializeField, Min(1)] private int uncommonPrice = 15;

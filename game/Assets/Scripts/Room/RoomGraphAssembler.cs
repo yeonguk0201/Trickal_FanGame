@@ -25,6 +25,7 @@ namespace TrickalFanGame.Room
         [SerializeField] private ItemDefinition[] selectionRewardPool = Array.Empty<ItemDefinition>();
         [SerializeField] private ShopRoom shopRoomPrefab;
         [SerializeField] private ShopCatalog shopCatalog;
+        [SerializeField] private ShopSession shopSession;
 
         private GeneratedFloorGraph generatedGraph;
         private GameObject currentFloorRoot;
@@ -48,6 +49,7 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<ItemDefinition> SelectionRewardPool => selectionRewardPool;
         public ShopRoom ShopRoomPrefab => shopRoomPrefab;
         public ShopCatalog ShopCatalog => shopCatalog;
+        public ShopSession ShopSession => shopSession;
 
         public void Configure(
             FloorGenerator configuredGenerator,
@@ -98,6 +100,11 @@ namespace TrickalFanGame.Room
         {
             shopRoomPrefab = configuredPrefab;
             shopCatalog = configuredCatalog;
+        }
+
+        public void ConfigureShopSession(ShopSession configuredSession)
+        {
+            shopSession = configuredSession;
         }
 
         public GameObject ResolveBossPrefab(int floorNumber)
@@ -389,7 +396,7 @@ namespace TrickalFanGame.Room
             wall.Bind(secretState, neighborId, () => Bind(false));
         }
 
-        // Special-4: the shop's stalls go into the room content; the stock rolls on the first build and is reused after.
+        // Special-4: the shopkeeper goes into the room content; the stock rolls on the first build and is reused after.
         private bool TryBuildShop(RoomPrefab instance, GeneratedRoomNode node, out string error)
         {
             if (shopRoomPrefab == null || shopCatalog == null || !shopCatalog.TryValidate(out error))
@@ -407,7 +414,7 @@ namespace TrickalFanGame.Room
             ShopRoom shop = Instantiate(shopRoomPrefab, content);
             shop.name = $"Shop - {node.RoomId}";
             shop.transform.localPosition = Vector3.zero;
-            shop.Configure(runProgress, stock, content);
+            shop.Configure(runProgress, stock, content, shopSession);
             error = null;
             return true;
         }
@@ -515,6 +522,7 @@ namespace TrickalFanGame.Room
                 return false;
             }
 
+            PlayerInventory inventory = graph.Player != null ? graph.Player.GetComponent<PlayerInventory>() : null;
             HashSet<string> ids = new(StringComparer.Ordinal);
             foreach (DestructibleObstacle obstacle in instance.GetComponentsInChildren<DestructibleObstacle>(true))
             {
@@ -527,6 +535,7 @@ namespace TrickalFanGame.Room
 
                 obstacle.Bind(state, node.ContentSeed, instance.Node.ContentRoot.transform, runProgress, secretLink,
                     instance.Node, instance.Controller);
+                obstacle.BindRareItems(selectionRewardPool, inventory);
             }
 
             error = null;

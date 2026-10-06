@@ -53,7 +53,22 @@ namespace TrickalFanGame.Shop
 
         public string ShopId { get; }
         public IReadOnlyList<ShopOffer> Offers => offers;
+        // Spell-4 (멤버십카드): once set, every offer still on sale costs nothing. Kept with the stock for the Run.
+        public bool IsFree { get; private set; }
         public event Action<int> Purchased;
+        public event Action PricesChanged;
+
+        // The price a purchase pays now; ShopOffer.Price stays the listed price.
+        public int GetPrice(int slotIndex) =>
+            IsFree || slotIndex < 0 || slotIndex >= offers.Length ? 0 : offers[slotIndex].Price;
+
+        public bool TryMakeFree()
+        {
+            if (IsFree) return false;
+            IsFree = true;
+            PricesChanged?.Invoke();
+            return true;
+        }
 
         public bool IsPurchased(int slotIndex) => slotIndex >= 0 && slotIndex < purchased.Length && purchased[slotIndex];
 

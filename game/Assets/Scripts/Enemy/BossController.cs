@@ -303,7 +303,7 @@ namespace TrickalFanGame.Enemy
             }
 
             currentPatternIndex = SelectWeightedPattern(candidates);
-            SetState(BossActionState.Telegraph, now + ScaleDuration(CurrentPattern.TelegraphDuration));
+            SetState(BossActionState.Telegraph, now + CurrentPattern.GetTelegraphDuration(CurrentTempoMultiplier));
         }
 
         private int SelectWeightedPattern(IReadOnlyList<int> candidates)

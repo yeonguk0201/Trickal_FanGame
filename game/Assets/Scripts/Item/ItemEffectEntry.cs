@@ -213,7 +213,8 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.EscapeToFloorStartRoom &&
                    type != ItemEffectType.SpawnHealthPickups &&
                    type != ItemEffectType.Flight &&
-                   type != ItemEffectType.DuplicateRoomChestsAndPickups;
+                   type != ItemEffectType.DuplicateRoomChestsAndPickups &&
+                   type != ItemEffectType.FreeCurrentShopOffers;
         }
     }
 }

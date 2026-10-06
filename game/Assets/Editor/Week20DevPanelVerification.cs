@@ -28,6 +28,63 @@ namespace TrickalFanGame.Editor
                       "original color, and killing the wave uses the room's death path.");
         }
 
+        // The boss jump needs the generated floors of the Game Scene, so it is kept out of the scene-free Verify.
+        public static void VerifyBossJumpBatch()
+        {
+            UnityEditor.SceneManagement.EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath);
+            VerifyBossJump();
+        }
+
+        [MenuItem("Trickal Fan Game/Week 20/Verify Development Boss Jump (Game Scene open)")]
+        public static void VerifyBossJump()
+        {
+            RoomGraphAssembler assembler = Object.FindFirstObjectByType<RoomGraphAssembler>(
+                FindObjectsInactive.Include);
+            Assert(assembler != null && assembler.Progress != null,
+                "The boss jump verification requires the Game Scene assembler.");
+            int seed = assembler.Progress.HasRunSeed ? assembler.Progress.RunSeed : 3303;
+            assembler.Progress.ResetProgress();
+            Assert(assembler.Progress.TryInitializeRunSeed(seed, out string error), error);
+            Assert(assembler.TryApplyGeneratedGraphForVerification(seed, out error), error);
+
+            // Last floor first, so the jump both skips floors and returns to an earlier one.
+            foreach (int floorNumber in new[] { 3, 1, 2 })
+            {
+                GeneratedFloor floor = assembler.GeneratedGraph.FindFloor(floorNumber);
+                Assert(floor != null, $"Generated floor {floorNumber} is missing.");
+                Assert(DevelopmentGamePanel.TryGoToBossRoom(assembler, floorNumber, out string message), message);
+                RoomNode current = assembler.Graph.CurrentNode;
+                Assert(current.RoomId == floor.BossRoomId && current.Definition.RoomType == RoomType.Boss &&
+                       assembler.Progress.CurrentFloor == floorNumber,
+                    $"The boss jump must end in the floor {floorNumber} boss room.");
+                Assert(current.GetComponent<RoomPrefab>().Controller.State != RoomState.Cleared,
+                    $"The floor {floorNumber} boss room must not be cleared by the jump.");
+                Assert(!DevelopmentGamePanel.TryGoToBossRoom(assembler, floorNumber, out _),
+                    "Jumping to the boss room the player is already in must be refused.");
+                SkipTransitionCooldown(assembler.Graph);
+            }
+
+            RoomController bossRoom = assembler.Graph.CurrentNode.GetComponent<RoomPrefab>().Controller;
+            TrickalFanGame.Enemy.BossController spawned = null;
+            bossRoom.EnemySpawned += enemy =>
+                spawned = enemy != null ? enemy.GetComponent<TrickalFanGame.Enemy.BossController>() : spawned;
+            bossRoom.BeginCombat(assembler.Graph.Player.GetComponent<Health>());
+            Assert(spawned != null, "The boss room reached by the jump must spawn its boss when combat begins.");
+            Assert(!DevelopmentGamePanel.TryGoToBossRoom(assembler, 3, out _) &&
+                   assembler.Progress.CurrentFloor == 2,
+                "A boss jump must be refused while the current room is in combat.");
+
+            Debug.Log("Development boss jump verification passed: each floor's boss room is reached through the " +
+                      "floor load and room teleport, forwards and backwards, with its boss still present.");
+        }
+
+        private static void SkipTransitionCooldown(RoomGraphController graph)
+        {
+            typeof(RoomGraphController)
+                .GetField("nextTransitionTime", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(graph, 0f);
+        }
+
         private static void ValidateSeedOverride()
         {
             GameObject root = new("DevPanel seed verification");

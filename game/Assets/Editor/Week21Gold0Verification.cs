@@ -1,11 +1,10 @@
 using System;
 using System.Linq;
-using TMPro;
+using TrickalFanGame.Frontend;
 using TrickalFanGame.Resource;
 using TrickalFanGame.Shop;
 using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace TrickalFanGame.Editor
 {
@@ -56,36 +55,16 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateShopText()
         {
-            Assert(ShopStall.NotEnoughGoldPrompt.Contains(GoldName) &&
-                   !ShopStall.NotEnoughGoldPrompt.Contains(LegacyCurrencyName),
+            Assert(ShopView.NotEnoughGoldMessage.Contains(GoldName) &&
+                   !ShopView.NotEnoughGoldMessage.Contains(LegacyCurrencyName),
                 "The shop must say gold is short, not elif.");
 
-            ShopRoom prefab = AssetDatabase.LoadAssetAtPath<ShopRoom>(Week20Special4Setup.ShopRoomPrefabPath);
             ShopCatalog catalog = AssetDatabase.LoadAssetAtPath<ShopCatalog>(Week20Special4Setup.CatalogPath);
-            Assert(prefab != null && catalog != null && catalog.Consumables.Count > 0,
-                "Gold-0 requires the Special-4 shop Prefab and catalog.");
-            ShopStall[] prefabStalls = prefab.GetComponentsInChildren<ShopStall>(true);
-            Assert(prefabStalls.Length == ShopCatalog.OfferCount &&
-                   prefabStalls.All(stall => stall.Label != null && stall.Label.text.Contains(GoldName) &&
-                                             !stall.Label.text.Contains(LegacyCurrencyName)),
-                "Every shop stall placeholder label must show a gold price.");
-
-            GameObject instance = Object.Instantiate(prefab.gameObject);
-            try
-            {
-                ShopStall stall = instance.GetComponentsInChildren<ShopStall>(true)[0];
-                ShopConsumable consumable = catalog.Consumables[0];
-                stall.Bind(null, ShopOffer.ForConsumable(0, consumable));
-                TextMeshPro label = stall.Label;
-                Assert(label.text == $"{consumable.DisplayName}\n{consumable.Price} {GoldName}",
-                    $"A bound stall must show its price in gold, got '{label.text}'.");
-                Assert(stall.Prompt.text == ShopStall.NotEnoughGoldPrompt,
-                    "A stall that cannot be afforded must show the not-enough-gold prompt.");
-            }
-            finally
-            {
-                Object.DestroyImmediate(instance);
-            }
+            Assert(catalog != null && catalog.Consumables.Count > 0, "Gold-0 requires the Special-4 shop catalog.");
+            ShopConsumable consumable = catalog.Consumables[0];
+            string price = ShopView.FormatPriceLabel(ShopOfferStatus.NotEnoughGold, consumable.Price);
+            Assert(price == $"{consumable.Price} {GoldName}" && !price.Contains(LegacyCurrencyName),
+                $"A shop cell must show its price in gold, got '{price}'.");
         }
 
         private static void Assert(bool condition, string message)

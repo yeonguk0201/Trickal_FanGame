@@ -4,6 +4,7 @@ using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
 using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
+using TrickalFanGame.Shop;
 using UnityEngine;
 
 namespace TrickalFanGame.Item
@@ -391,6 +392,9 @@ namespace TrickalFanGame.Item
 
                     reason = string.Empty;
                     return true;
+                case ItemEffectType.FreeCurrentShopOffers:
+                    // Usable in any shop, even a sold-out or already free one (D5): the card is then simply spent.
+                    return TryResolveCurrentShop(out _, out reason);
                 default:
                     reason = $"{effect.EffectType} is not a connected single-use effect.";
                     return false;
@@ -444,6 +448,14 @@ namespace TrickalFanGame.Item
                     break;
                 case ItemEffectType.DuplicateRoomChestsAndPickups:
                     DuplicateCurrentRoom();
+                    break;
+                case ItemEffectType.FreeCurrentShopOffers:
+                    if (!TryResolveCurrentShop(out ShopStockState shop, out string shopReason))
+                        throw new InvalidOperationException("[PlayerSingleUseEffects] Membership refused: " +
+                                                            shopReason);
+                    bool changed = shop.TryMakeFree();
+                    Debug.Log($"[PlayerSingleUseEffects] Membership card used in {shop.ShopId}: " +
+                              (changed ? "remaining offers are free." : "it was already free."), this);
                     break;
                 case ItemEffectType.ReduceAndRecoverDamageTaken:
                     // Using it again while active restarts the full window; heals already pending stay.
@@ -533,6 +545,29 @@ namespace TrickalFanGame.Item
                 roomSeed = generated.ContentSeed;
                 if (chestContentTable != null && generated.Template != null && room != null && state != null)
                     site = new RoomChestSite(room, generated.Template, state, progress, transform);
+            }
+
+            reason = string.Empty;
+            return true;
+        }
+
+        // 멤버십카드: the stock of the shop room the player is in. Outside a shop the card is refused and kept.
+        private bool TryResolveCurrentShop(out ShopStockState stock, out string reason)
+        {
+            stock = null;
+            RunProgress progress = spellSlot != null ? spellSlot.Progress : null;
+            GeneratedRoomNode node = FindCurrentNode(progress);
+            if (node == null || node.Role != GeneratedRoomRole.Shop)
+            {
+                reason = "It can only be used in a shop.";
+                return false;
+            }
+
+            stock = progress.GetShopStock(ShopStockBuilder.BuildShopId(node.RoomId));
+            if (stock == null)
+            {
+                reason = "This shop has no stock.";
+                return false;
             }
 
             reason = string.Empty;

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f31ad270df414de2a1f0d78528528d15, type: 3}
+  m_Name: explosive-box
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ObstacleVariantDefinition
+  variantId: explosive-box
+  requiredHits: 2
+  dropTable: {fileID: 0}
+  intactColor: {r: 0.9, g: 0.25, b: 0.2, a: 1}
+  crackedColor: {r: 0.45, g: 0.1, b: 0.08, a: 1}
+  breakRule: 0
+  dropCount: 1
+  rareItemChance: 0
+  rareArtifactShare: 0
+  rareSpells: []
+  spellPickupPrefab: {fileID: 0}
+  artifactPickupPrefab: {fileID: 0}
+  explosionChance: 1
+  explosionFuse: 0.5
+  explosionPrefab: {fileID: 1338291427342382308, guid: ab87abf1b99199c42a64c96f3e85cb49, type: 3}
+  enemyChance: 0
+  enemyCount: 1
+  enemyPrefab: {fileID: 0}

@@ -346,6 +346,16 @@ export const ITEM_CATALOG = [
     ],
   },
   {
+    id: 'single-spell-membership-card',
+    name: '멤버십카드',
+    description:
+      '상점에서 사용하면 그 상점에 남아 있는 상품이 모두 무료가 됩니다. 다시 방문해도 유지되며, 다른 상점에는 적용되지 않습니다. 상점 밖에서는 사용할 수 없습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'FreeCurrentShopOffers' }],
+  },
+  {
     id: 'artifact-sist-fake-wings',
     name: '시스트의 가짜 날개',
     description:

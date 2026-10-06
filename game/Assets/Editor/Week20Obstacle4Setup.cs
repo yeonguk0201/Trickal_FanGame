@@ -128,7 +128,8 @@ namespace TrickalFanGame.Editor
             Week19Encounter4Setup.Setup();
             AssetDatabase.SaveAssets();
             Debug.Log("Obstacle-4 ready: every obstacle room uses a room-level 40% special roll with at most one " +
-                      "Marie bomb box, and Small, Basic, Wide and Tall each add one authored obstacle Layout.");
+                      "special obstacle (Marie bomb box or an Obstacle-5 kind), and Small, Basic, Wide and Tall " +
+                      "each add one authored obstacle Layout.");
         }
 
         public static string[] CreatedAssetPaths() => Layouts
@@ -136,7 +137,8 @@ namespace TrickalFanGame.Editor
             .Concat(new[] { MarieDropTablePath, MarieVariantPath, FairyKingdomVariantTablePath })
             .ToArray();
 
-        private static ObstacleVariantTable EnsureVariantAssets()
+        // Obstacle-5 adds its resource obstacle kinds to the same table, so this always builds the full table.
+        public static ObstacleVariantTable EnsureVariantAssets()
         {
             EnsureFolder(VariantFolder);
             ResourceDropTable dropTable = Week17Resource3Setup.EnsureTable(MarieDropTablePath, MarieDropChance,
@@ -163,7 +165,7 @@ namespace TrickalFanGame.Editor
             }
 
             Undo.RecordObject(table, "Configure Fairy Kingdom obstacle variants");
-            table.Configure(SpecialRoomChance, new[] { new ObstacleVariantEntry(marie, 100) });
+            table.Configure(SpecialRoomChance, Week23Obstacle5Setup.BuildEntries(marie));
             EditorUtility.SetDirty(table);
             AssetDatabase.SaveAssets();
             return table;
