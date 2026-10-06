@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f31ad270df414de2a1f0d78528528d15, type: 3}
+  m_Name: erpin-snack-box
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ObstacleVariantDefinition
+  variantId: erpin-snack-box
+  requiredHits: 4
+  dropTable: {fileID: 11400000, guid: ffa56ca06026aed498d62f1db1f820d4, type: 2}
+  intactColor: {r: 0.6, g: 0.9, b: 0.55, a: 1}
+  crackedColor: {r: 0.25, g: 0.45, b: 0.2, a: 1}
+  breakRule: 0
+  dropCount: 1
+  rareItemChance: 0
+  rareArtifactShare: 0
+  rareSpells: []
+  spellPickupPrefab: {fileID: 0}
+  artifactPickupPrefab: {fileID: 0}
+  explosionChance: 0
+  explosionFuse: 0.5
+  explosionPrefab: {fileID: 0}
+  enemyChance: 0
+  enemyCount: 1
+  enemyPrefab: {fileID: 0}

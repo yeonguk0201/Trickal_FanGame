@@ -94,6 +94,22 @@ namespace TrickalFanGame.Resource
                 return false;
             }
 
+            return TryPick(ref state, isAvailable, out entry);
+        }
+
+        // Obstacle-5: one weighted candidate without the drop chance, for the extra pickups of a source that already
+        // passed its chance roll.
+        public bool TryPick(int seed, Predicate<ResourceDropEntry> isAvailable, out ResourceDropEntry entry)
+        {
+            entry = null;
+            if (!TryValidate(out _)) return false;
+            uint state = unchecked((uint)seed);
+            return TryPick(ref state, isAvailable, out entry);
+        }
+
+        private bool TryPick(ref uint state, Predicate<ResourceDropEntry> isAvailable, out ResourceDropEntry entry)
+        {
+            entry = null;
             int totalWeight = 0;
             foreach (ResourceDropEntry candidate in entries)
                 if (isAvailable == null || isAvailable(candidate)) totalWeight += candidate.Weight;

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f31ad270df414de2a1f0d78528528d15, type: 3}
+  m_Name: mayo-collection-box
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ObstacleVariantDefinition
+  variantId: mayo-collection-box
+  requiredHits: 4
+  dropTable: {fileID: 11400000, guid: 3a581a2a22d5aed4e87385d06500fa96, type: 2}
+  intactColor: {r: 0.2, g: 0.75, b: 0.8, a: 1}
+  crackedColor: {r: 0.08, g: 0.35, b: 0.4, a: 1}
+  breakRule: 0
+  dropCount: 2
+  rareItemChance: 0.25
+  rareArtifactShare: 1
+  rareSpells:
+  - {fileID: 11400000, guid: 27abb698b3a5c524fb24c4959e1f9ce8, type: 2}
+  - {fileID: 11400000, guid: 4eaa6ff4288eb3544be34e8da9170537, type: 2}
+  - {fileID: 11400000, guid: d580248716ae7ae498b6a687331c3589, type: 2}
+  - {fileID: 11400000, guid: 357cb4cc394bacd4dbe9310b1974f57d, type: 2}
+  - {fileID: 11400000, guid: 76fcd715ffd998d4088df117e7dbfe35, type: 2}
+  - {fileID: 11400000, guid: a61d91e8539e6364b99b1f3e06e0cf26, type: 2}
+  - {fileID: 11400000, guid: da4ddba585fe8c542a00cc75ee71fa89, type: 2}
+  - {fileID: 11400000, guid: 374ba4fdc2ee0ed43a98a2d7f3730399, type: 2}
+  - {fileID: 11400000, guid: e8ffb6626565227488dbc0703867a928, type: 2}
+  - {fileID: 11400000, guid: 3583ead3432edac4cb77c5b2ffcc761a, type: 2}
+  spellPickupPrefab: {fileID: 1815312715874959976, guid: c1702e67b68926b479f3c3350b823624, type: 3}
+  artifactPickupPrefab: {fileID: 8014471090233393603, guid: 78154cfb2dc22df4cb6bfe3343fe2ac6, type: 3}
+  explosionChance: 0
+  explosionFuse: 0.5
+  explosionPrefab: {fileID: 0}
+  enemyChance: 0
+  enemyCount: 1
+  enemyPrefab: {fileID: 0}

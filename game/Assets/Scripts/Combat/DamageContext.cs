@@ -16,8 +16,10 @@ namespace TrickalFanGame.Combat
             float distanceDamageBonus = 0f,
             float distanceDamageMinimum = 0f,
             float distanceDamageMaximum = 0f,
-            float? impactDistance = null)
+            float? impactDistance = null,
+            bool allowsHalfHeart = false)
         {
+            AllowsHalfHeart = allowsHalfHeart;
             Source = source;
             SourceType = sourceType;
             BaseDamage = Mathf.Max(0, baseDamage);
@@ -46,6 +48,8 @@ namespace TrickalFanGame.Combat
         public float DistanceDamageMinimum { get; }
         public float DistanceDamageMaximum { get; }
         public float? ImpactDistance { get; }
+        // Enemy-6: a hit that may take half a heart from the player, below the usual one-heart minimum.
+        public bool AllowsHalfHeart { get; }
         public bool CanCritical => DeliveryType == DamageDeliveryType.Direct && CriticalChance > 0f;
         public float DistanceDamageMultiplier
         {
@@ -79,7 +83,8 @@ namespace TrickalFanGame.Combat
                 DistanceDamageBonus,
                 DistanceDamageMinimum,
                 DistanceDamageMaximum,
-                distance);
+                distance,
+                AllowsHalfHeart);
         }
 
         public DamageContext ScaleMultiplier(float multiplier)

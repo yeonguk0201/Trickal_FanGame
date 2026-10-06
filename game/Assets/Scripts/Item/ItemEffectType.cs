@@ -68,5 +68,8 @@ namespace TrickalFanGame.Item
         // Jjangsem-1 (멜룬카드): copies each unopened chest and each floor consumable (heart, SP, gold, key, bomb) in
         // the current room once. A copied chest rolls its own contents. No value fields are used.
         DuplicateRoomChestsAndPickups = 41,
+        // Spell-4 (멤버십카드): every offer still on sale in the shop the player stands in becomes free. The shop keeps
+        // that across revisits; other shops are unaffected. No value fields are used.
+        FreeCurrentShopOffers = 42,
     }
 }

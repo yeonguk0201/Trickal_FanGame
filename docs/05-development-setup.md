@@ -523,10 +523,10 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 - Door-1 문 통과 판정: 메뉴 `Trickal Fan Game > Week 19 > Setup Door-1 Doorway Passage`가 `Assets/Rooms/Prefabs`의 모든 Room Prefab 문 슬롯 전환 트리거를 문 방향 길이 `RoomLayout.TransitionLength`(1.6, 입구 2.4의 66.7%)로 멱등 구성한다. Room-F5 Setup(`Week8GridFloorSetup`)도 같은 상수를 쓰므로 재실행해도 되돌아가지 않는다. 트리거에 닿아도 플레이어 중심이 트리거 폭 안에 있어야 통과하며(`RoomDoorway.ContainsPassageCenter`), 통과 뒤 무적 0.75초와 들어온 문 재통과 금지 0.4초는 `RoomGraphController`의 `doorwayInvulnerabilityDuration`·`returnDoorwayBlockDuration` 직렬화 값이다. 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week19Door1Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 GUID, 모든 Room Prefab 트리거 크기·위치, 열린 문 장벽 면이 트리거 안에 있어 밀면 닿는지, 안전 진입점이 트리거 밖인지, 좌우·상하 문의 중심 폭 판정, 폭 밖 중심 접촉 거부, 통과 무적 0.75초, 들어온 문만 차단·다른 문 허용·만료 후 허용·층 초기화 시 해제를 검사한다. 수동 확인은 `FrontendScene`에서 Play 후 문 옆 벽을 따라 미끄러질 때 넘어가지 않는지, 문 중앙으로 밀면 넘어가는지, 넘어간 직후 바로 되돌아가지 않는지, 적이 문 앞에 있을 때 진입 직후 피해를 받지 않는지 본다.
 - Encounter-4 적 수 확장: 메뉴 `Trickal Fan Game > Week 19 > Setup Encounter-4 Expanded Encounters`가 Normal Room Template 13종의 SpawnPoint를 기존 1~3번 뒤에 추가(Small 4, Basic·Wide·Tall 5, Large 6)하고 방 Prefab의 `Spawn N` Transform과 RoomController 목록을 맞추며, 난이도 표에 방 전체 2~7·웨이브당 4·후방 사격 3 제한을 넣고, 프로필별 `swarm`·`elite-pair` Encounter 10개와 Encounter 콘텐츠 버전 9를 멱등 구성한다. 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week19Encounter4Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 GUID와 `Spawn N` 개수 유지, 기존 1~3번 좌표·역할 보존, Layout 검증, 선언 위협과 규모 제한, 잘못된 규모 4종의 명시적 실패, 15가지 출입구 조합의 `swarm`·`elite-pair` 배치, 512 seed의 적 수 2~7·웨이브 4 이하·지점 중복 없음과 네 조합 선택, 64 seed 결정성, 실제 웨이브 바인딩을 검사한다. Room-3·Room-6·Obstacle-2 Setup을 다시 실행하면 해당 방의 SpawnPoint가 3개로 돌아가므로 Encounter-4 Setup을 다시 실행한다(Spawn-1·Spawn-2 Setup은 추가 지점 역할과 추가 Encounter를 보존한다).
 - Special-1 잠긴 보물방: 보물방은 독립 seed의 50% 후보로 잠기되, 보물방을 제외해도 시작방에서 보스방까지 갈 수 있는 선택 경로에서만 잠긴다. 잠긴 보물방 방향의 황금색 문에 닿으면 열쇠 1개를 자동 소비해 Run 동안 영구 해제하며, 열쇠가 없으면 통과하지 않는다. 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20Special1Verification.Verify -logFile <로그 경로>`. 512 seed 결정성·잠김/열림 노출·필수 보스 경로 우회, 열쇠 부족·정확히 1개 소비·Run 종료 후 소비 차단, 중복 소비 방지와 층 재구성 뒤 해제 상태 복원을 검사한다. 수동 확인은 `FrontendScene`에서 Play 후 열쇠 없이 황금색 보물방 문이 열리지 않는지, 열쇠를 얻고 다시 닿으면 1개만 줄며 진입하는지, 나갔다 다시 들어갈 때 추가 소비가 없는지 확인한다.
-- Special-2 플레이어 폭탄: 메뉴 `Trickal Fan Game > Week 20 > Setup Special-2 Player Bomb`이 `Assets/Prefabs/PlacedBomb.prefab`과 Game Scene 플레이어의 단일 `PlayerBombController`를 GUID를 보존하며 멱등 구성한다. `F`를 누르면 폭탄 1개를 즉시 소비해 현재 위치에 설치하고, 0.75초 뒤 반경 2.5에서 적에게 고정 30 피해, 플레이어에게 1칸(2 단위) 자해, 파괴 가능한 장애물 즉시 파괴를 한 번 적용한다. 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20Special2Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 Scene·Prefab GUID와 컴포넌트 단일성, 빈 자원·대기 중 중복·보상 선택·궁극기·사망·Run 종료 거부, 정확한 1개 소비·퓨즈 경계·범위 안팎·복수 콜라이더 단일 피해·자해·장애물 상태 보존을 검사한다. 수동 확인은 `FrontendScene`에서 Play 후 폭탄을 획득해 `F`로 설치하고, 0.75초 뒤 주황색 반경 표시와 함께 근처 적·플레이어·장애물에만 효과가 적용되는지, 설치 중 연타해도 하나만 소비되는지 확인한다.
+- Special-2 플레이어 폭탄: 메뉴 `Trickal Fan Game > Week 20 > Setup Special-2 Player Bomb`이 `Assets/Prefabs/PlacedBomb.prefab`과 Game Scene 플레이어의 단일 `PlayerBombController`를 GUID를 보존하며 멱등 구성한다. `F`를 누르면 폭탄 1개를 즉시 소비해 현재 위치에 설치하고, 0.75초 뒤 반경 2(Obstacle-6에서 2.5 → 2)에서 적에게 고정 30 피해, 플레이어에게 1칸(2 단위) 자해, 파괴 가능한 장애물 즉시 파괴를 한 번 적용한다. 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20Special2Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 Scene·Prefab GUID와 컴포넌트 단일성, 빈 자원·대기 중 중복·보상 선택·궁극기·사망·Run 종료 거부, 정확한 1개 소비·퓨즈 경계·범위 안팎·복수 콜라이더 단일 피해·자해·장애물 상태 보존을 검사한다. 수동 확인은 `FrontendScene`에서 Play 후 폭탄을 획득해 `F`로 설치하고, 0.75초 뒤 주황색 반경 표시와 함께 근처 적·플레이어·장애물에만 효과가 적용되는지, 설치 중 연타해도 하나만 소비되는지 확인한다.
 - Special-3 비밀방: 메뉴 `Trickal Fan Game > Week 20 > Setup Special-3 Secret Rooms`가 `Assets/Prefabs/SecretPit.prefab`(Pickup 레이어 트리거)을 GUID를 보존하며 멱등 구성하고, 기본 짱돌·마리 폭탄박스 드롭 표의 `pit` 후보를 이 Prefab에 연결하며, Room 콘텐츠 버전 6·Encounter 콘텐츠 버전 10으로 올린다. 층마다 독립 seed 50%로 비밀방(보물방과 같은 3택1 보상, Basic `16 × 9`)을 하나 추가하며, 시작방·보스방과 닿지 않는 빈 칸 중 인접 방이 가장 많은 칸에 두고 닿는 방 전부와 숨김 통로로 잇는다. 폭탄 폭발 반경이 닿은 벽의 통로만 열리고, 비밀방에 들어가면(문·구덩이 모두) 그 방의 모든 통로가 양쪽에서 열린다. 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20Special3Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 Prefab·Scene GUID, 드롭 표 가중치·구덩이 연결, 512 seed×3층의 결정성·최대 1개·약 50% 생성·인접 최다 칸·시작/보스 비인접·숨김 통로가 보스 거리를 줄이지 않음, 비밀방 없는 층의 구덩이 재가중, 폭탄 범위 밖 미개방·닿은 벽만 개방·양쪽 동시 개방, 문/구덩이 진입 시 전체 통로 개방, 미클리어 방·가장자리 접촉 구덩이 거부, 발견 후 구덩이 지름길, 층 재구성 뒤 통로·구덩이 복원을 검사한다. 수동 확인은 `FrontendScene`에서 여러 seed로 Play해 비밀방 인접 벽에 폭탄을 터뜨리면 갈색 통로가 열리고 미니맵에 비밀방(`H`)이 그때 나타나는지, 구덩이를 밟으면(방 클리어 후) 비밀방 중앙으로 떨어지는지, 비밀방 보상 3택1이 한 번만 지급되는지 확인한다. 비밀방 seed·폭탄·구덩이는 아래 Game Scene 개발 패널(`F1`)로 준비하되, 벽 위치 강조를 끈 상태로도 한 번 확인한다.
-- Special-4 상점: 메뉴 `Trickal Fan Game > Week 20 > Setup Special-4 Shop`이 `Assets/Rooms/Definitions/shop-standard.asset`(RoomType Shop), `Assets/Items/Shop/shop-catalog.asset`(가격표), `Assets/Prefabs/ShopRoom.prefab`(상품대 4개, Pickup 레이어 트리거)을 GUID를 보존하며 멱등 구성하고, Basic 템플릿에 Shop 타입을 허용하며, Game Scene 생성기 정의 목록·Room 콘텐츠 버전 7·Encounter 콘텐츠 버전 11과 조립기의 상점 참조를 설정한다. 층마다 독립 seed 60%로 시작방·일반 전투방 옆에 열쇠 잠금 상점을 붙이고, 아티팩트/스펠 2개(일반 10·고급 15·희귀 20·영웅 25 골드)와 하트·열쇠·폭탄 중 2개(3·5·5 골드)를 판다. 자동 검증은 Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20Special4Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 Prefab·카탈로그·정의·Scene GUID, 가격표와 픽업 연결, 상품대 트리거 비중첩, 512 seed×3층의 결정성·최대 1개·약 60% 생성·마지막 번호의 막다른 잠금 방·상점 없는 생성기와 기존 방·통로 동일, 비밀방 비연결, 재고의 결정성·서로 다른 상품·등급 가격·부족 시 소모품 보충, 열쇠 없는 진입 거부·1개 소비, 골드 부족 거부, 아이템 1회 구매·재구매 거부, 소모품 바닥 드롭, 층 재구성 뒤 재고·판매 상태·열린 문·골드 유지, Run 종료 후 구매 거부를 검사한다. 수동 확인은 `FrontendScene`에서 Play하고 개발 패널(`F1`)의 `Find shop F1`·`Restart Run with this seed`·`+10 Key/Gold`·`Go to shop door`로 상점 문 앞에 가서, 미니맵 `$`와 황금색 문, 상품 이름·가격·`[E] 구매`/`골드 부족` 표시, 구매 후 상품이 사라지고 소모품이 앞에 떨어지는지, 다시 들어와도 상태가 같은지 확인한다.
-- Game Scene 개발 패널: Editor Play 또는 Development Build의 Game Scene에서 `F1`로 연다(정식 빌드 제외, Setup 불필요). `Find secret F1`·`Find shop F1`이 입력한 seed(비어 있으면 현재 seed) 다음부터 1층에 비밀방·상점이 있는 seed를 찾고, `Restart Run with this seed`가 그 seed로 Run을 다시 시작한다(Frontend를 거치지 않고 Game Scene을 직접 Play한 경우 씬을 다시 로드). `+10 Bomb/Key/Elif`, `Full HP/SP`, `Invulnerable`, `Kill current wave`(방의 정상 사망 처리로 웨이브·클리어·보상 진행), `Show secret room and walls`(미니맵에 비밀방·숨김 통로 표시, 닫힌 비밀 벽을 분홍색으로 강조), `Next broken obstacle drops a pit`(비밀방이 있는 층에서 다음 첫 파괴 1회만 구덩이, 층 재구성 시에는 원래 드롭 결과로 복원), `Go to secret neighbor`/`Go to secret room`(전투 중이 아닐 때 방 이동, 비밀방 진입은 실제 발견으로 처리), `Go to shop door`(상점 문이 있는 방으로 이동)를 제공한다. 훅 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20DevPanelVerification.Verify -logFile <로그 경로>`.
+- Special-4 상점: 메뉴 `Trickal Fan Game > Week 20 > Setup Special-4 Shop`이 `Assets/Rooms/Definitions/shop-standard.asset`(RoomType Shop), `Assets/Items/Shop/shop-catalog.asset`(가격표), `Assets/Prefabs/ShopRoom.prefab`(Shop-0 이후 시스트 1명, Pickup 레이어 트리거. 이전에는 상품대 4개)을 GUID를 보존하며 멱등 구성하고, Basic 템플릿에 Shop 타입을 허용하며, Game Scene 생성기 정의 목록·Room 콘텐츠 버전 7·Encounter 콘텐츠 버전 11과 조립기의 상점 참조를 설정한다. 층마다 독립 seed 60%로 시작방·일반 전투방 옆에 열쇠 잠금 상점을 붙이고, 아티팩트 3개(일반 10·고급 15·희귀 20·영웅 25 골드)와 하트·열쇠·폭탄 각 1개(3·5·5 골드)를 판다(Shop-0 이전에는 2개 + 2개). 자동 검증은 Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20Special4Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 Prefab·카탈로그·정의·Scene GUID, 가격표와 픽업 연결, 시스트 트리거·이름·안내 문구와 옛 상품대 제거, 512 seed×3층의 결정성·최대 1개·약 60% 생성·마지막 번호의 막다른 잠금 방·상점 없는 생성기와 기존 방·통로 동일, 비밀방 비연결, 재고의 결정성·서로 다른 상품·등급 가격·부족 시 소모품 보충, 열쇠 없는 진입 거부·1개 소비, 골드 부족 거부, 아이템 1회 구매·재구매 거부, 소모품 바닥 드롭, 층 재구성 뒤 재고·판매 상태·열린 문·골드 유지, Run 종료 후 구매 거부를 검사한다. 수동 확인은 `FrontendScene`에서 Play하고 개발 패널(`F1`)의 `Find shop F1`·`Restart Run with this seed`·`+10 Key/Gold`·`Go to shop door`로 상점 문 앞에 가서, 미니맵 `$`와 황금색 문을 확인한다. 상점 안의 구매 화면 확인은 아래 Shop-0 항목을 따른다.
+- Game Scene 개발 패널: Editor Play 또는 Development Build의 Game Scene에서 `F1`로 연다(정식 빌드 제외, Setup 불필요). `Find secret F1`·`Find shop F1`이 입력한 seed(비어 있으면 현재 seed) 다음부터 1층에 비밀방·상점이 있는 seed를 찾고, `Restart Run with this seed`가 그 seed로 Run을 다시 시작한다(Frontend를 거치지 않고 Game Scene을 직접 Play한 경우 씬을 다시 로드). `+10 Bomb/Key/Elif`, `Full HP/SP`, `Invulnerable`, `Kill current wave`(방의 정상 사망 처리로 웨이브·클리어·보상 진행), `Show secret room and walls`(미니맵에 비밀방·숨김 통로 표시, 닫힌 비밀 벽을 분홍색으로 강조), `Next broken obstacle drops a pit`(비밀방이 있는 층에서 다음 첫 파괴 1회만 구덩이, 층 재구성 시에는 원래 드롭 결과로 복원), `Go to secret neighbor`/`Go to secret room`(전투 중이 아닐 때 방 이동, 비밀방 진입은 실제 발견으로 처리), `Go to shop door`(상점 문이 있는 방으로 이동), `Boss F1`/`Boss F2`/`Boss F3`(전투 중이 아닐 때 해당 층을 포탈과 같은 경로로 로드한 뒤 보스방으로 이동. 앞 층을 건너뛰거나 이전 층으로 돌아갈 수 있고, 아이템 없이 도착하므로 필요하면 `Invulnerable`·드롭 버튼을 함께 쓴다)를 제공한다. 훅 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20DevPanelVerification.Verify -logFile <로그 경로>`. 보스방 이동은 Game Scene의 생성 층이 필요해 별도 진입점 `Week20DevPanelVerification.VerifyBossJumpBatch`(Game Scene을 열고 3→1→2층 보스방 이동, 같은 방·전투 중 거부, 전투 시작 시 보스 소환을 검사. 저장하지 않음)로 검증한다.
 - Obstacle-4 요정왕국 장애물·Layout: 메뉴 `Trickal Fan Game > Week 20 > Setup Obstacle-4 Fairy Kingdom Obstacles and Layouts`가 기존 Large 장애물 Layout 3종과 신규 Small·Basic·Wide·Tall Layout 4종의 짱돌을 특수 장애물 후보 슬롯으로 구성한다. 장애물 방마다 seed로 40%를 추첨해 최대 한 슬롯만 분홍색 `marie-bomb-box`로 바꾸며, 상자는 20% 확률로 폭탄 가중치 60인 전용 표를 사용한다. 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20Obstacle4Verification.SetupAndVerifyBatch -logFile <로그 경로>`, 기존 장애물·난이도·Encounter·폭탄까지 포함한 회귀는 `VerifyWithRegressionsBatch`를 사용한다. 수동 확인은 `FrontendScene`에서 여러 seed로 Play해 네 크기의 신규 Layout이 실제로 나오고, 문과 필수 통로가 열려 있으며, 한 방에 분홍색 마리 상자가 두 개 이상 나오지 않고 일반 짱돌보다 폭탄을 체감상 자주 주는지 확인한다.
 - Move-1 벽 비빔 저항 제거: 메뉴 `Trickal Fan Game > Week 20 > Setup Move-1 Frictionless Actors and Player Collider`가 `Assets/Settings/FrictionlessActor.physicsMaterial2D`(마찰 0, 반발 0)를 Physics2D Default Material로 지정하고, 플레이어가 있는 4개 Scene의 플레이어 `CircleCollider2D` 반지름을 0.5로 맞춘다(0.38도 시험했으며 마찰 제거 단독 효과를 확인하는 중). 재질을 지정하지 않은 플레이어·적·장애물 콜라이더 전체에 적용된다. 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week20Move1Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 2회 재질 GUID 보존, Default Material 연결, 마찰 있는 재질로 덮어쓴 액터 Prefab 부재, 4개 Scene 플레이어 반지름, 벽 대각선 비빔 시뮬레이션에서 접선 속도 95% 이상 유지(기존 마찰 0.4 대조군 60%)를 검사한다. 수동 확인은 `FrontendScene`에서 Play 후 벽·장애물에 대각선으로 붙어 이동해도 속도가 줄지 않는지, 대각선으로 엇갈린 장애물 사이와 벽-장애물 틈을 끼지 않고 지나가는지, 적도 장애물을 따라 끼지 않고 돌아 나오는지 확인한다.
 - 보스 테스트방: `Trickal Fan Game > Debug > Open Boss Test Room`에서 Play Mode를 시작한다. 오른쪽 패널에서 보스 3종을 바꾸고, 활성 아이템·스펠 16종과 호환용 `item-06`을 각각 `+1`로 획득해 같은 보스전에서 효과를 비교할 수 있다. `HP 25% (Life Gem)`과 `Next Floor`는 생명의 보석의 층당 1회 재발동을 빠르게 확인한다. 크레용사용 선택 후 `Show Crayon Recognition Radius`를 켜면 약 `6.36`의 검격 인지 반경이 파란 원으로 표시된다. 보스는 원 안에서도 계속 접근하며 2~3회 검격해야 한다. 대시는 첫 `0.2초`와 연속 대시 사이 `0.1초` 동안 플레이어를 추적 조준한 뒤 고정 방향으로 출발하고, 전체 연계가 끝난 뒤에는 `0.3초` 동안 완전히 멈춰야 한다. 첫 소환 뒤 최대 HP 15% 피해를 줄 때마다 원거리 2+근거리 2 소환이 다시 후보가 되며, 황금 내려찍기는 세 예고선의 근거리 중첩에서 치명 등급 피해를 최대 3회(1층 기준 9칸) 줘야 한다. Edit Mode의 `Trickal Fan Game > Debug > Verify Boss Test Room`은 보스 3종 생성, 17개 개별 획득 항목과 크레용사용 인지 반경 표시 토글을 검사한다.
@@ -538,6 +538,15 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 
 저장소 공통 불변 규칙은 루트 `AGENTS.md`에 둔다. 기능 하나를 계획부터 검증과 체크리스트 갱신까지 진행할 때는
 `.agents/skills/trickal-feature-cycle/SKILL.md`의 저장소 전용 스킬을 사용한다.
+
+Codex용 검증·출하 스킬은 `.agents/skills/`에 있다. `$ship`은 요청 범위에 맞춰 커밋·푸시·PR까지 진행하고,
+`$pre-commit-check`는 커밋 범위의 파일·계약·검증 근거를 점검한다. `$contract-drift-check`는 Backend 카탈로그·seed,
+Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`는 현재 Editor 코드에서 관련 검증기를 찾아
+배치 실행하거나 수동 메뉴와 기대 결과를 안내한다. 예: “커밋 전 점검해줘”, “Run DTO 계약 검증해줘”, “이번 Unity 변경 검증해줘”.
+안내만 요청하면 실행하지 않는다. 각 스킬의 상세 절차는 해당 디렉터리의 `SKILL.md`를 기준으로 한다.
+
+`.claude/skills/`와 `.claude/settings.json`의 훅은 Claude용으로 유지한다. main 커밋·푸시 차단 훅이 Codex에서도
+자동 실행되는 것으로 간주하지 않으며, Codex는 `AGENTS.md`와 ship 절차에 따라 브랜치와 푸시 대상 ref를 확인한다.
 
 향후 Unity 콘텐츠 생성기·검증기, Unity ↔ Backend 계약 검사, 플레이테스트 텔레메트리와 조건부 Unity MCP는
 [개발 생산성·검증 인프라 계획](./13-development-tooling-plan.md)에 따라 도입한다.
@@ -860,6 +869,109 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
   벽에 붙은 상자·하트에 붙은 상자가 밀리지 않던 문제를 고쳤다. 벽에 붙인 상자를 벽을 따라 밀고, 하트를 상자 앞에 두고 밀어
   하트가 함께 밀리는지 다시 확인한다.
 
+- Spell-4 멤버십카드: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-4 Membership Card`가
+  `Assets/Items/single-spell-membership-card.asset`(Rare 일회용 스펠, 효과 42 `FreeCurrentShopOffers`, 수치 필드 없음)을
+  GUID를 보존하며 멱등 구성하고, 이름·설명과 상점 화면의 `무료`·`받기` 글리프를 추가한 뒤 Chest-1의 표 구성을 다시 실행해
+  상자 스펠 풀에 넣는다. Scene과 Prefab은 바꾸지 않는다. Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서
+  `pnpm prisma:seed`를 다시 실행한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Spell-4 Membership Card`, 배치는 Unity `-batchmode -quit -projectPath
+  <game 경로> -executeMethod TrickalFanGame.Editor.Week22Spell4Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  Setup 2회 GUID, 효과 42 번호, 계약·설명·글리프, 상자 스펠 목록 편입과 선택 보상 풀 제외, 상점 밖(시작·전투·보물·보스방)
+  미소비, 일시정지 미사용, 상점에서 소비와 전 상품 가격 0(진열 가격 기록은 유지), 다른 상점 가격 유지, `무료` 표시,
+  골드 없이 아이템 1회 수령·재수령 거부, 골드가 있어도 미차감, 이미 무료인 상점에서 재사용 시 효과 없이
+  소비, 상점 재구성 후 무료·판매 상태 유지, 전 상품 판매 완료 상점에서 효과 없이 소비, 새 Run에서 재고 초기화를 검사한다.
+  관련 회귀는 `VerifyWithRegressionsBatch`(Gold-0과 그 안의 Special-4 상점·Slot-0·Spell-5·Jjangsem-1·Chest-2·Chest-1·개발 패널
+  포함)다. 2026-10-06 두 배치 통과·종료 코드 0, Backend Jest 134개 통과.
+  수동 확인: 위 Setup 메뉴 실행 → Game Scene Play → 열쇠로 상점에 들어가기 전에 `F1` → `— Spell slot —`의
+  `Drop 멤버십카드`로 카드를 주워 Left Shift로 사용하면 사용되지 않고 슬롯에 남아야 한다. 상점 안에서 사용하면 카드가
+  사라지고, 시스트에게 `E`로 연 상점 화면의 남은 상품 가격이 모두 `무료`로 바뀌며, 골드가 0이어도 `받기`로 하나씩 받을 수
+  있고 골드가 줄지 않아야 한다. 받은 칸은 `판매 완료`가 되어야 한다. 방을 나갔다 들어와도 남은 상품이 `무료`로 남아 있어야
+  한다(Shop-0 이후 화면 기준. 이전에는 월드 진열대에서 `[E] 받기`로 받았다).
+
+- Shop-0 일반 상점 3×3 화면: 메뉴 `Trickal Fan Game > Week 22 > Setup Shop-0 Shop UI`가 Special-4의 카탈로그와
+  `Assets/Prefabs/ShopRoom.prefab`을 다시 구성해 옛 상품대(`Stall 1~4`)를 지우고 방 중앙에 `Shopkeeper`(시스트
+  플레이스홀더, Pickup 레이어 트리거, 이름표와 `[E] 상점 열기` 안내)를 두며, Game Scene HUD `ReferenceFrame` 아래에
+  `Shop Overlay`(왼쪽 시스트 초상화·보유 골드, 가운데 3×3 칸, 오른쪽 상품 설명·`구매`·`닫기`)와 `ShopSession`·`ShopView`를
+  만들고 조립기 `RoomGraphAssembler.shopSession`에 연결한다. GUID를 보존하며 멱등이고 화면 글리프를 추가한다. 시스트
+  에셋이 생기면 Prefab의 `Shopkeeper/Portrait` 스프라이트와 Scene의 `Shop Overlay/Shop Panel/Keeper Portrait` 스프라이트를
+  바꾸면 되고, Setup을 다시 실행해도 지정한 스프라이트는 유지된다. Special-4 Setup(`Week20Special4Setup`)도 같은 Prefab
+  구성 코드를 쓰므로 다시 실행해도 상품대가 돌아오지 않는다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 22 > Verify Shop-0 Shop UI`, 배치는 Unity `-batchmode -quit -projectPath
+  <game 경로> -executeMethod TrickalFanGame.Editor.Week22Shop0Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  Setup 2회 GUID, 상품 수 3+3과 9칸, 가격·무료·판매 완료 표기와 글리프, Scene의 세션·화면·9칸 참조와 숨김 저장, Prefab의
+  시스트와 누락 스크립트 없음, 시스트에서 떨어져 있으면 미개방, 열쇠 입장 뒤 개방과 이동·공격·스킬·방 이동·재개방 차단,
+  재고 그대로 표시와 아랫줄 빈 칸, 칸 이동과 가장자리 멈춤, 빈 칸 구매 불가, 골드 부족 거부, 골드 획득 즉시 반영, 아이템
+  1회 구매·재구매 거부, 소모품의 시스트 앞 드롭, 닫기 후 조작 복구와 같은 프레임 일시정지 차단, 재개방 시 판매 상태 유지,
+  열린 화면에서 무료 전환(`무료`·`받기`)과 무료 1회 수령, 층 재구성 시 화면 닫힘과 재방문 상태 유지, Run 종료 시 닫힘을
+  검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Gold-0과 그 안의 Special-4·Resource-1, Spell-4, Slot-0, Reward-3, 개발
+  패널)다. 2026-10-06 두 배치 통과·종료 코드 0.
+  수동 확인: 위 Setup 메뉴 실행 → `FrontendScene` Play → `F1`의 `Find shop F1`·`Restart Run with this seed`·`+10 Key/Gold`·
+  `Go to shop door`로 상점에 들어간다. 방 중앙의 시스트 옆에서 `[E] 상점 열기`가 보이고 `E`로 화면이 열려야 한다. 윗줄
+  아티팩트 3개, 가운뎃줄 하트·열쇠·폭탄, 아랫줄 빈 칸이 보이고, 방향키/WASD로 칸이 바뀌며 오른쪽 설명이 따라 바뀌어야
+  한다. Enter로 사면 골드가 줄고 칸이 `판매 완료`가 되며, 소모품은 화면을 닫으면 시스트 앞 바닥에 있어야 한다. 화면이 열린
+  동안 캐릭터가 움직이거나 공격하지 않아야 하고, Esc는 화면만 닫고 일시정지를 열지 않아야 한다. 글자가 칸 밖으로
+  넘치거나 깨지는지, 16:9가 아닌 해상도에서 화면이 잘리지 않는지도 본다.
+
+- Obstacle-5 자원 특화 장애물: 메뉴 `Trickal Fan Game > Week 23 > Setup Obstacle-5 Resource Obstacles`가
+  `Assets/Rooms/ObstacleVariants/`의 `gold-rock`·`mayo-key-bundle`·`erpin-snack-box`·`eshur-bread-box`·
+  `ricotta-food-box`·`sist-vault` 종류 에셋과 `Assets/Items/Drops/obstacle-<종류>-drop-table.asset` 드롭 표를 만들고,
+  `fairy-kingdom-obstacle-variants.asset`에 마리의 폭탄상자와 함께 가중치(25/25/15/15/10/5/5, Obstacle-6의 3종 15/7/3 포함)로 등록하며, Game Scene
+  생성기의 Room 콘텐츠 버전을 11로 올린다(Obstacle-6 이전에는 10). GUID를 보존하며 멱등이다. Obstacle-4 Setup(`Week20Obstacle4Setup`)도 같은
+  표 구성 코드를 쓰므로 다시 실행해도 새 종류가 빠지지 않는다. 시스트의 금고 희귀 스펠 목록은 Setup 시점의 구현된
+  일회용 스펠 전체이므로 스펠을 추가하면 Setup을 다시 실행한다(검증기가 불일치를 실패로 알린다).
+  자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Obstacle-5 Resource Obstacles`, 배치는 Unity `-batchmode
+  -nographics -quit -projectPath <game 경로> -executeMethod
+  TrickalFanGame.Editor.Week23Obstacle5Verification.SetupAndVerifyBatch -logFile <로그 경로>`다. Setup 2회와
+  Obstacle-4 표 재구성 뒤 GUID, 표 가중치와 40% 방 확률, 종류별 타수·파괴 규칙·드롭 수·드롭 확률과 주 자원 비중,
+  음식상자의 희귀도·드롭 순서, 8192 seed의 방당 최대 1개·반복 재현·종류별 등장 비율, 모든 후보 슬롯이 어떤 종류에서도
+  제자리의 낮은 장애물로 남는지, 여러 픽업의 칸 안 분산·seed 재현·재구성 시 미재드롭, 금고의 타수 무시·열쇠 1개 소비·
+  폭탄 개봉·1회 지급·희귀 아이템 5%와 스펠/아티팩트 픽업을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`
+  (Obstacle-4와 그 안의 Obstacle-1·2, Difficulty-1, Encounter-4, Special-2, 그리고 Special-3, Terrain-0)다.
+  2026-10-06 두 배치와 개발 패널 회귀 `Week20DevPanelVerification.Verify`가 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → 장애물이 있는 전투방에서 `F1` 패널 `— Obstacle —`의 `Make <종류>`로 가장 가까운
+  장애물을 바꾼다. 색이 종류별로 바뀌고, 황금돌·열쇠꾸러미·음식상자는 4타 또는 폭탄으로 부서지며 드롭이 성공하면 표의
+  개수만큼 픽업이 장애물 자리 주변에 흩어진다. `Make sist-vault`는 공격으로 부서지지 않고, 열쇠 없이 닿으면 변화가
+  없으며, `+10 Key` 뒤 닿으면 열쇠 1개가 줄고 골드·열쇠 픽업 3개가 나온다. 폭탄(F)으로도 열쇠 소비 없이 열린다. 방을
+  나갔다 돌아와도 부서진 장애물은 다시 생기지 않고 다시 드롭하지 않는다.
+
+- Obstacle-6 나머지 장애물: 메뉴 `Trickal Fan Game > Week 23 > Setup Obstacle-6 Remaining Obstacles`가 Obstacle-5 Setup을
+  먼저 실행해 `explosive-box`·`shady-random-box`·`mayo-collection-box` 종류 에셋(폭발 상자는 드롭 표 없음)을 같은 특수
+  장애물 표에 등록하고, 나무 4그루가 놓인 `Assets/Rooms/Prefabs/room-basic-tree-grove.prefab`과 템플릿
+  `basic-tree-grove`를 만들어 Game Scene 생성기 목록에 추가한 뒤 Encounter-4 Setup으로 SpawnPoint 4~5번을 붙인다. GUID를
+  보존하며 멱등이다. 폭발하는 종류는 `Assets/Prefabs/PlacedBomb.prefab`을 그대로 쓰므로 폭탄 수치를 바꾸면 함께 바뀐다.
+  새 Layout을 추가하면 `Week19Encounter4Setup.AddedSpawnPoints`와 Difficulty-1의 장애물 Layout 목록에도 등록해야 한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Obstacle-6 Remaining Obstacles`, 배치는 Unity `-batchmode
+  -nographics -quit -projectPath <game 경로> -executeMethod
+  TrickalFanGame.Editor.Week23Obstacle6Verification.SetupAndVerifyBatch -logFile <로그 경로>`다. Setup 2회 GUID, 폭탄
+  반경 2와 폭탄 Prefab 공유, 폭발 상자의 2타·도화선 0.5초·적 30 피해·플레이어 1칸 피해·반경 2 안 장애물만 파괴·금고
+  개봉·연쇄·1회 적용·재구성 시 미폭발, 랜덤박스의 seed 재현과 폭발 25%·쥬비 5마리 15%·지급 약 50%·네 결과의 배타성, 수집품 상자의 픽업
+  2개 확정·아티팩트 25%, 비행 중 금고 겹침 개봉(열쇠 1개, 열쇠 없으면 통과), 나무 Layout의 방 계약·512 seed 선택·비행
+  차단·폭탄 무시와 기존 기둥의 낮은 장애물 유지를 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-5와 그 안의
+  Obstacle-1·2·4, Difficulty-1, Encounter-4, Special-2·3, Terrain-0, 그리고 Flight-0, Chest-0, 개발 패널)다. 2026-10-06 두
+  배치가 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → 장애물이 있는 전투방에서 `F1` 패널 `— Obstacle —`의 `Make explosive-box`로 바꾼 뒤 2타로
+  부수면 잠깐 뒤 폭발해 가까운 적·플레이어가 피해를 받고 주변 장애물이 부서진다. `Make shady-random-box`는 부술 때마다
+  폭발·쥬비 5마리·픽업 3개·꽝 중 하나(방과 슬롯마다 고정), `Make mayo-collection-box`는 항상 픽업 2개가 나온다. 폭탄(F)의 폭발
+  범위가 전보다 작은지 본다. `Golden exclusive`의 가짜 날개를 얻어 비행한 뒤 `Make sist-vault`와 `+10 Key`로 금고 위를
+  지나가면 열쇠 1개가 줄고 열린다. seed를 바꿔 `basic-tree-grove` 방(초록 나무 4그루)을 찾아 걸어서도 비행으로도 나무를
+  통과하지 못하고, 공격·폭탄으로 부서지지 않으며 투사체가 막히는지 본다.
+
+- Enemy-6 쥬비: 메뉴 `Trickal Fan Game > Week 23 > Setup Enemy-6 Jyubi`가 추적형 적 Prefab을 풀어 복사한
+  `Assets/Prefabs/JyubiEnemy.prefab`을 만들고(근접 공격·이동 애니메이션 컴포넌트 제거, 크기 0.5, 체력 1, 속도 5.5, 비행
+  추적, 반 칸 접촉 피해, `EnemyFlight` 추가) Obstacle-5 Setup을 다시 실행해 셰이디의 랜덤박스 종류에 쥬비 5마리 결과를
+  연결한다. GUID를 보존하며 멱등이다. Obstacle-5 Setup도 같은 Prefab 구성 코드를 호출한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Enemy-6 Jyubi`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week23Enemy6Verification.SetupAndVerifyBatch -logFile
+  <로그 경로>`다. Setup 2회 GUID, Prefab 구성과 누락 스크립트 없음, 플레이어 기본 속도보다 빠르고 1.25배 이하인 속도,
+  1·3층에서 정확히 반 칸 피해와 접촉 쿨다운, 반 칸 옵션이 없는 접촉 피해의 1칸 유지, 1~3층 체력 배율에서 기본 공격 한
+  대 처치, 구덩이·낮은 장애물 무시와 나무·벽·플레이어 충돌 유지, 장애물 너머 대상으로의 직선 이동, 방의 추가 적 등록과
+  처치 시 방 상태 불변을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-6과 그 회귀 전체, 하트 체력
+  `Hp1HealthUnitsVerification`)다.
+  수동 확인: Game Scene Play → 장애물이 있는 전투방에서 `F1` 패널 `— Obstacle —`의 `Next broken random box releases
+  enemies`를 켜고 `Make shady-random-box`로 바꾼 장애물을 부순다. 연보라색 작은 적 5마리가 나와 장애물·구덩이 위를 지나
+  플레이어에게 곧장 날아오고, 닿으면 하트가 반 칸 줄며, 한 대 맞으면 죽는다. 클리어된 방에서 부숴도 문이 잠기지 않고
+  보상이 다시 나오지 않는지, 전투 중에 부수면 쥬비를 다 잡아야 방이 클리어되는지 본다.
+
 - Spell-5 소형 스펠 4종: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-5 Small Spells`가 `Assets/Items/`에
   `single-spell-armor-festival-invitation`(Rare, 효과 37 `GainShield` `magnitude` 4), `single-spell-amelia-love-letter`
   (Uncommon, 효과 38 `SpawnHealthPickups` `integerAmount` 2), `single-spell-random-coin`(Common, 효과 39 `GainRandomGold`
@@ -1067,3 +1179,69 @@ Q 고학년 돌격에서 한 손으로 지팡이를 든 준비·달리기 그림
 2026-10-05 고학년 그림 및 걷기·고학년·저학년 회귀 통과 (`game/Logs/erpin-one-hand-high-grade.log`, 종료 코드 0).
 Play Mode에서 새 Run의 Q 돌격·WASD 방향 전환·적/보스 충돌과 회복, Q 취소·시간 종료를 확인한다.
 `game/Logs/ErpinHighGradePreview/erpin-one-hand-complete.gif`는 포즈 비교용이다.
+
+### 새마음금고 보석 회복 모션
+
+회복 예고에서 보석을 들고 뒤돌고, 회복 중에는 등 보이는 두 씹기 포즈를 번갈아 재생한다.
+회복 종료 후 정면 복귀 포즈를 짧게 보여주고 기존 정면으로 돌아온다. 회복량·지급 타이밍은 유지한다.
+
+- 적용 프리팹: `Assets/Prefabs/SaemaeumVaultBoss.prefab` (회복 프레임 연결 완료)
+- 재구성: `Trickal Fan Game > Artwork > Setup Boss Movement Animations`
+- 검증: `Trickal Fan Game > Artwork > Verify Vault Healing Animation`
+- 배치: `-executeMethod TrickalFanGame.Editor.VaultHealingAnimationVerification.Verify`
+- [에셋·프롬프트·수동 확인](./art-prompts/vault-healing.md)
+
+2026-10-06 배치는 프로젝트 잠금과 열린 Editor가 있는 상태에서 검증 진입 전에 종료 코드 1로 끝났다
+(`game/Logs/VaultHealingVerification.log`). 자동 통과·Play 확인은 미완료다. 열린 Editor에서 검증 메뉴와
+`Trickal Fan Game > Debug > Open Boss-2 Test Room`의 1페이즈 회복을 확인한다.
+
+### 크레용사용 일반 공격·대시·내려찍기 모션
+
+2026-10-06 후속 수정: 시트에 최소 112px 셀 여백을 확보하고 해당 포즈의 픽셀만 분리하여
+이웃 조각을 제거했다. 최종 16장 모두 1024px 캔버스·8px 투명 테두리·단일 연결 영역 검사를 통과했다.
+차징은 작은 노란 아우라 → 높은 주황 아우라 → 큰 붉은 아우라로 누적되고, 마지막 단계가 타격 직전까지
+남는다. 프리팹은 14개 Sprite를 사용한다. 이번 Unity 배치는 열린 프로젝트 잠금으로 검증 진입 전에
+종료했다 (`game/Logs/CrayonHeroAuraVerification.log`). 아래 초기 발광 버전의 성공 기록은 새 아우라
+버전의 검증 결과가 아니므로 열린 Editor에서 위 검증 메뉴를 다시 실행한다.
+
+일반 공격은 머리 위에서 내려 베고, 연속 대시는 위→아래·아래→위 대각선을 번갈아 사용한다.
+내려찍기는 예고 시작부터 실제 타격 시각까지 아우라를 세 단계로 누적하고, 기존 피해 판정 틱에
+내려찍는 그림으로 바뀐다. 황금 2페이즈의 짧은 예고 시간에도 차징 세 단계를 유지한다.
+
+- 적용: `Assets/Prefabs/CrayonHeroBoss.prefab` (공격·아우라 14개 Sprite 연결 완료)
+- 재구성: `Trickal Fan Game > Artwork > Setup Boss Movement Animations`
+- 검증: `Trickal Fan Game > Artwork > Verify Crayon Hero Attack Animations`
+- 배치: `-executeMethod TrickalFanGame.Editor.CrayonHeroAttackAnimationVerification.Verify`
+- [에셋·프롬프트·타이밍·검증 기록](./art-prompts/crayon-hero-attacks.md)
+
+2026-10-06 최종 프레임 대상 검증과 기존 보스 이동 검증 통과, 배치 종료 코드 0
+(`game/Logs/CrayonHeroAttackFocusedVerification.log`). 더 넓은 Boss-3 회귀는 대상 검증 이후
+기존 Boss-2 Game Scene 조립기·프리팹 참조 검사에서 실패했다. Play 확인은
+`Trickal Fan Game > Debug > Open Boss Test Room` → `Boss 3 - Crayon Hero` 선택 후 진행한다.
+### 크레용사용 각성 본체와 2페이즈 진입 표시
+
+제공된 흰금색 보석·노란 망토·빛 날개 원본을 각성 본체로 연결했다. 기존 금색 곱하기는 제거했다.
+1.25초 전환에서 칼을 머리 위로 쭉 뻗고, 빛 날개를 펼치며 각성 모습으로 바뀐 뒤 원본 자세로 정착한다.
+본체/전환 파일과 재현 방법은 [각성 에셋 기록](./art-prompts/crayon-hero-awakening.md)을 참조한다.
+
+정적 검사는 `./scripts/verify-crayon-awakening.ps1`로 실행한다. Unity 검증 메뉴는
+`Trickal Fan Game > Artwork > Verify Crayon Hero Awakening`이다. 칼을 위로 뻗고 날개를 펼치는
+수정 후 Unity 배치 검증은 종료 코드 0과 성공 로그를 확인했으며, 실제 Play Mode 화면 확인은 별도다.
+BossTestScene 또는 새 Run에서 HP를 50% 이하로 낮춰 순간 변신과 각성 본체 유지를 확인한다.
+
+### 크레용사용 각성 공격과 금빛 차징
+
+각성 원본을 기준으로 일반 하향 베기·교차 대시·내려찍기와 3단계 금빛 검 아우라를 연결했다.
+공격 프레임은 2페이즈의 실제 공격 포즈 인덱스를 사용하며, 완료 후 원본 각성 자세로 돌아온다.
+아우라는 실제 내려찍기 시각까지 세 단계로 커지고 마지막 단계가 피해 직전까지 유지된다.
+프롬프트·에셋·재현 방법은 [각성 공격 기록](./art-prompts/crayon-hero-golden-attacks.md)을 참조한다.
+
+정적 검사: `./scripts/verify-crayon-awakening.ps1 -GoldenAttacks`.
+Unity 메뉴: `Trickal Fan Game > Artwork > Verify Crayon Hero Golden Attacks`.
+전체 `Verify Crayon Hero Attack Animations` 배치는 종료 코드 0과 성공 로그를 확인했다.
+일반/각성 피해 시점·대시 교대·3단계 충전·변신과 대기 복원·보스 이동 회귀를 검증했으며,
+실제 Play Mode에서 공격 이펙트와 날개, 3회 금빛 충전의 가독성은 별도로 확인한다.
+
+2026-10-06 내려찍기 차징 시간을 조정했다. Prefab과 Week15Boss3Setup의 예고를 1.05 → 1.30초로 맞추었고 방향 고정 후 0.2초는 유지했다. 총 차징은 일반 1.50초, 각성 1.214초이며 아우라 3단계는 실제 피해 시각까지 자동으로 분배된다. 검증기는 Prefab의 실제 패턴 시간을 읽어 검사한다. Unity 6000.3.22f1의 CrayonHeroAttackAnimationVerification.Verify 배치가 종료 코드 0으로 통과했다(로그: game/Logs/CrayonHeroChargeDurationVerification.log). 실제 화면 확인은 별도다.
+
+2026-10-06 추가 조정: 내려찍기 전체 차징에 일반·각성 모두 1.35초씩 추가했다. 일반은 1.50 → 2.85초, 각성은 1.214 → 2.564초이다. BossPatternDefinition.additionalTelegraphDuration은 페이즈 배속을 적용한 예고에 고정 시간으로 더하며, 해당 Prefab과 Setup의 내려찍기만 1.35로 설정했다. 방향 고정 0.2초와 아우라 3단계/피해 동기화는 유지한다. Unity CrayonHeroAttackAnimationVerification.Verify가 종료 코드 0으로 통과했다(로그: game/Logs/CrayonHeroChargeExtensionVerification.log). 실제 화면 확인은 별도다.

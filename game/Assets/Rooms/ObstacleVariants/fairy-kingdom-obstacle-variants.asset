@@ -15,4 +15,22 @@ MonoBehaviour:
   specialRoomChance: 0.4
   entries:
   - variant: {fileID: 11400000, guid: 1dc99cc59d6aeef4ba85ffdbc8e3f76f, type: 2}
-    weight: 100
+    weight: 25
+  - variant: {fileID: 11400000, guid: cdc4c034f07d296498f6569538d556b8, type: 2}
+    weight: 25
+  - variant: {fileID: 11400000, guid: 455da36f822c5354084f45ac6355145a, type: 2}
+    weight: 15
+  - variant: {fileID: 11400000, guid: 2e74ca9033f7d5240876fa6e40b92ed9, type: 2}
+    weight: 15
+  - variant: {fileID: 11400000, guid: 36fd9c49398ff8c49adad7a649b308e0, type: 2}
+    weight: 10
+  - variant: {fileID: 11400000, guid: 45016c195941cf745a1c28baafbbcb27, type: 2}
+    weight: 5
+  - variant: {fileID: 11400000, guid: b4ea993d8a2cb3c40a3fbaef128f9dec, type: 2}
+    weight: 5
+  - variant: {fileID: 11400000, guid: e51435f2cdec98641b6bbb4b83bb7229, type: 2}
+    weight: 15
+  - variant: {fileID: 11400000, guid: faca14e5ae0eb2b4fbbfb04390806319, type: 2}
+    weight: 7
+  - variant: {fileID: 11400000, guid: 6fd089f3288a44043b5727c426688ff6, type: 2}
+    weight: 3

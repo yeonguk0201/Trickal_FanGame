@@ -71,6 +71,8 @@ namespace TrickalFanGame.Enemy
         private Vector2 jumpDestination;
         private int healUses;
         private int appliedHealPulses;
+        private int healPoseIndex = -1;
+        private float healReturnEndsAt;
         private GameObject landingTelegraph;
 
         public int HealUses => healUses;
@@ -82,6 +84,7 @@ namespace TrickalFanGame.Enemy
         public int CurrentJump => currentJump;
         public bool IsJumping => jumping;
         public int JumpPoseIndex => jumpPoseIndex;
+        public int HealPoseIndex => healPoseIndex;
         public int PhaseTwoMinimumJumps => Mathf.Max(1, phaseTwoMinimumJumps);
         public float JumpDistance => jumpDistance;
         public EnemyDamageTier LandingDamageTier => landingDamageTier;
@@ -156,6 +159,7 @@ namespace TrickalFanGame.Enemy
             firedVolleys = 0;
             healUses = 0;
             appliedHealPulses = 0;
+            healPoseIndex = -1;
             ResolveArenaBounds();
             ResetPresentation();
         }
@@ -166,6 +170,17 @@ namespace TrickalFanGame.Enemy
         public void OnPatternStateChanged(BossActionState state, BossPatternExecution execution, float stateEndsAt)
         {
             activeEndsAt = stateEndsAt;
+            healPoseIndex = -1;
+            if (execution == BossPatternExecution.SaemaeumTreasureHeal && HealIsAvailable)
+            {
+                if (state == BossActionState.Telegraph) healPoseIndex = 0;
+                else if (state == BossActionState.Active) healPoseIndex = 1;
+                else if (state == BossActionState.Recovery)
+                {
+                    healPoseIndex = 3;
+                    healReturnEndsAt = lastTickTime + 0.18f;
+                }
+            }
             if (state != BossActionState.Active || execution != BossPatternExecution.SaemaeumJumpSequence)
                 EndJump();
             if (state == BossActionState.Telegraph && execution == BossPatternExecution.SaemaeumJumpSequence)
@@ -218,6 +233,8 @@ namespace TrickalFanGame.Enemy
             lastTickTime = now;
             if (state != BossActionState.Active)
             {
+                if (state != BossActionState.Telegraph &&
+                    (state != BossActionState.Recovery || now >= healReturnEndsAt)) healPoseIndex = -1;
                 if (state != BossActionState.Telegraph) ResetPresentation();
                 return;
             }
@@ -242,7 +259,10 @@ namespace TrickalFanGame.Enemy
         {
             if (target == null) return;
             Vector2 current = transform.position;
-            Vector2 direction = ((Vector2)target.position - current).normalized;
+            Vector2 offset = (Vector2)target.position - current;
+            Vector2 direction = offset.magnitude > BossTargetSpacing.ResolveStopDistance(gameObject, target)
+                ? offset.normalized
+                : Vector2.zero;
             Rect movementArea = ShrinkArena();
             if ((current.x <= movementArea.xMin && direction.x < 0f) ||
                 (current.x >= movementArea.xMax && direction.x > 0f)) direction.x = 0f;
@@ -379,8 +399,13 @@ namespace TrickalFanGame.Enemy
         private void TickHealing(float now)
         {
             StopMovement();
-            if (boss != null && boss.CurrentPhase >= 2) return;
+            if (boss != null && boss.CurrentPhase >= 2)
+            {
+                healPoseIndex = -1;
+                return;
+            }
             float activeStart = GetHealActiveStartedAt();
+            healPoseIndex = 1 + (Mathf.FloorToInt(Mathf.Max(0f, now - activeStart) * 8f) % 2);
             float duration = Mathf.Max(0.01f, activeEndsAt - activeStart);
             int expectedPulses = Mathf.Min(healPulses,
                 Mathf.FloorToInt(Mathf.Clamp01((now - activeStart) / duration) * healPulses) + 1);
@@ -528,6 +553,7 @@ namespace TrickalFanGame.Enemy
 
         private void OnDisable()
         {
+            healPoseIndex = -1;
             EndJump();
             ClearLandingTelegraph();
             ResetPresentation();

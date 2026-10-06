@@ -48,6 +48,16 @@
 
 - `.agents/skills/trickal-feature-cycle/SKILL.md`
 
+### 검증·출하 보조 스킬 (2026-10-05)
+
+- `.agents/skills/ship/SKILL.md`: 요청된 단계까지 검증·커밋·푸시·PR 처리.
+- `.agents/skills/pre-commit-check/SKILL.md`: 커밋 범위의 파일 무결성·계약·테스트 근거 확인.
+- `.agents/skills/contract-drift-check/SKILL.md`: 현재 Backend 카탈로그·seed와 Unity·Web 계약 조사.
+- `.agents/skills/unity-verification-runner/SKILL.md`: 현재 Editor 검증기 검색·배치 실행·수동 확인 안내.
+- 상태: Codex용 절차 구성과 4개 스킬의 이름·frontmatter·참조 경로, 관련 8개 파일의 strict UTF-8 및 diff 공백 검사 통과. 실제 기능의 커밋·PR 및 Unity 배치에 적용하는 운영 검증은 예정.
+- 계약 검사 스킬은 조사 절차이며 T3의 독립 자동 검사 도구 완료를 의미하지 않는다.
+- Claude 스킬·훅은 유지하며, Codex의 main 보호는 브랜치·푸시 대상 직접 확인 절차로 명시한다.
+
 ### 완료 조건
 
 - [x] 저장소에서 자동 발견 가능한 위치에 스킬이 존재한다.
@@ -118,6 +128,8 @@ Layout 검증을 우회하므로 Game Scene이 아닌 별도 테스트 씬(아�
 - [x] 21주차 Spell-3(2026-10-02): 보유 표시 줄에 막판 스퍼트 활성 시 `Room ASPD +N% MS +N%` 추가(저놈 잡아라 `Room ATK`와 별도 표시). Spell-2 그건 내 잔상은 `Drop` 자동 수집만 사용하며 패널 코드 변경 없음. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 표시 확인은 수동 확인 대기
 - [x] 22주차 Chest-1(2026-10-03): `— Chest —` 섹션에 `Chest Normal`·`Chest Golden`·`Chest Diamond` 버튼 추가. 현재 방의 안전 위치에 `dev-chest-NN` 상자를 실제 상자 경로(방 상태 기록·1회 개봉·층 이탈 소멸)로 놓고 보조 Run으로 표시한다. 패널 회귀 `Week20DevPanelVerification.Verify`와 생성 경로 `Week22Chest1Verification` 통과, 버튼 조작은 수동 확인 대기
 - [x] 22주차 Flight-0(2026-10-03): `— Chest —` 아래 `Golden exclusive` 줄에 비행 여부 표시와 황금 전용 아티팩트 `Drop` 버튼 추가(보조 Run, 일반 `ItemPickup` 획득 경로). Chest-2 전까지 가짜 날개를 얻는 유일한 경로다. 패널 회귀 `Week20DevPanelVerification.Verify`와 획득 경로 `Week22Flight0Verification` 통과, 버튼 조작은 수동 확인 대기
+- [x] 23주차 Obstacle-5(2026-10-06): `— Obstacle —` 섹션 추가. 현재 방에서 플레이어와 가장 가까운 부서지지 않은 후보 슬롯의 ID·종류를 표시하고 `Make <종류>` 버튼으로 특수 장애물 표의 종류로 바꾼다(보조 Run, 방을 재구성하면 seed의 종류로 돌아간다). 패널 회귀 `Week20DevPanelVerification.Verify`와 종류 동작 `Week23Obstacle5Verification` 통과, 버튼 조작은 수동 확인 대기. Obstacle-6의 폭발 상자·랜덤박스·수집품 상자도 같은 표에 있어 버튼이 자동으로 늘어난다(패널 코드 변경 없음)
+- [x] 23주차 Enemy-6(2026-10-06): `— Obstacle —`에 `Next broken random box releases enemies` 토글 추가. 켜면 적을 내보낼 수 있는 종류(셰이디의 랜덤박스)의 다음 파괴가 seed 결과 대신 쥬비 5마리를 내보내고 한 번 쓰면 꺼진다(보조 Run). 패널 회귀 `Week20DevPanelVerification.Verify`는 Enemy-6 회귀 배치에 포함, 토글 조작은 수동 확인 대기
 - [ ] 2단계: 적·장애물 배치 전용 테스트 씬
 
 - 공통 Editor 구성 유틸리티

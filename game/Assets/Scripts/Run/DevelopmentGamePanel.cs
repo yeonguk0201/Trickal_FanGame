@@ -82,7 +82,9 @@ namespace TrickalFanGame.Run
             DrawSpellSlotSection(assembler);
             DrawResourceSection(progress);
             DrawChestSection(assembler);
+            DrawObstacleSection(assembler);
             DrawRoomSection(assembler);
+            DrawBossSection(assembler);
             DrawSecretSection(assembler);
             DrawShopSection(assembler);
 
@@ -252,6 +254,39 @@ namespace TrickalFanGame.Run
             }
         }
 
+        // Obstacle-5: turns the unbroken candidate obstacle nearest to the player into a chosen kind, because each
+        // special kind is rare in a normal Run (assisted Run). A rebuilt room shows its seeded kind again.
+        private void DrawObstacleSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Obstacle —");
+            RoomPrefab room = CurrentRoom(assembler);
+            Transform player = assembler.Graph?.Player != null ? assembler.Graph.Player.transform : null;
+            RoomObstacleVariantSlot nearest = room == null || player == null
+                ? null
+                : room.GetComponentsInChildren<RoomObstacleVariantSlot>(false)
+                    .Where(slot => slot.VariantTable != null && !slot.GetComponent<DestructibleObstacle>().IsBroken)
+                    .OrderBy(slot => (slot.transform.position - player.position).sqrMagnitude)
+                    .FirstOrDefault();
+            if (nearest == null)
+            {
+                GUILayout.Label("No unbroken obstacle slot in this room.");
+                return;
+            }
+
+            DestructibleObstacle obstacle = nearest.GetComponent<DestructibleObstacle>();
+            GUILayout.Label($"Nearest {obstacle.ObstacleId}: {obstacle.VariantId}");
+            // Enemy-6: the random box releases its 쥬비 on the next break instead of its seeded outcome.
+            DestructibleObstacle.DevelopmentForceNextEnemies = GUILayout.Toggle(
+                DestructibleObstacle.DevelopmentForceNextEnemies, "Next broken random box releases enemies");
+            if (DestructibleObstacle.DevelopmentForceNextEnemies) MarkAssisted("Forced enemies");
+            foreach (ObstacleVariantEntry entry in nearest.VariantTable.Entries)
+            {
+                if (entry?.Variant == null || !AssistedButton($"Make {entry.Variant.VariantId}")) continue;
+                obstacle.ApplyVariant(entry.Variant);
+                status = $"{obstacle.ObstacleId} is now {entry.Variant.VariantId}.";
+            }
+        }
+
         private static bool TrySpawnChest(RoomGraphAssembler assembler, ChestKind kind, out string message)
         {
             RoomPrefab room = CurrentRoom(assembler);
@@ -280,6 +315,70 @@ namespace TrickalFanGame.Run
             RoomController controller = CurrentRoom(assembler)?.Controller;
             if (AssistedButton("Kill current wave") && controller != null)
                 status = $"Killed {controller.KillAliveEnemiesForDevelopment()} enemies.";
+        }
+
+        private void DrawBossSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Boss room —");
+            if (assembler.GeneratedGraph == null)
+            {
+                GUILayout.Label("No generated floors.");
+                return;
+            }
+
+            GUILayout.BeginHorizontal();
+            foreach (GeneratedFloor floor in assembler.GeneratedGraph.Floors)
+            {
+                if (AssistedButton($"Boss F{floor.FloorNumber}"))
+                    TryGoToBossRoom(assembler, floor.FloorNumber, out status);
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        // Jumps to a floor's boss room. Another floor is loaded the way its portal loads it and the room change is
+        // the normal teleport, so floor replacement, transition guards and boss spawning stay the same as in play.
+        public static bool TryGoToBossRoom(RoomGraphAssembler assembler, int floorNumber, out string message)
+        {
+            RoomGraphController graph = assembler != null ? assembler.Graph : null;
+            GeneratedFloor floor = assembler?.GeneratedGraph?.FindFloor(floorNumber);
+            RoomPrefab current = assembler != null ? CurrentRoom(assembler) : null;
+            if (graph == null || floor == null || current == null || graph.Player == null)
+            {
+                message = $"Floor {floorNumber} or the current room is missing.";
+                return false;
+            }
+
+            if (current.Controller != null && current.Controller.State == RoomState.Combat)
+            {
+                message = "Finish or kill the current wave before moving.";
+                return false;
+            }
+
+            if (current.Node.RoomId == floor.BossRoomId)
+            {
+                message = $"Already in the floor {floorNumber} boss room.";
+                return false;
+            }
+
+            if (assembler.Progress.CurrentFloor != floorNumber &&
+                !assembler.TryLoadFloor(floorNumber, graph.Player, out string error))
+            {
+                message = $"Could not load floor {floorNumber}. {error}";
+                return false;
+            }
+
+            RoomNode bossRoom = graph.Nodes.FirstOrDefault(node => node.RoomId == floor.BossRoomId);
+            if (bossRoom == null ||
+                !graph.TryTeleport(graph.CurrentNode, bossRoom, bossRoom.InitialSpawnPosition, graph.Player))
+            {
+                message = $"Loaded floor {floorNumber}, but the boss room teleport was rejected " +
+                          "(cooldown, reward selection, or action state).";
+                return false;
+            }
+
+            message = $"Moved to the floor {floorNumber} boss room {floor.BossRoomId}.";
+            return true;
         }
 
         private void DrawSecretSection(RoomGraphAssembler assembler)

@@ -9,10 +9,13 @@ namespace TrickalFanGame.Enemy
     {
         [SerializeField] private EnemyDamageTier damageTier = EnemyDamageTier.Light;
         [SerializeField, Min(0f)] private float cooldown = 1f;
+        [Tooltip("켜면 등급과 층에 관계없이 항상 반 칸 피해를 줍니다(쥬비).")]
+        [SerializeField] private bool halfHeartDamage;
 
         private float nextDamageTime;
 
         public EnemyDamageTier DamageTier => damageTier;
+        public bool HalfHeartDamage => halfHeartDamage;
         public float Cooldown => cooldown;
         public float NextDamageTime => nextDamageTime;
 
@@ -21,6 +24,9 @@ namespace TrickalFanGame.Enemy
             damageTier = configuredDamageTier;
             cooldown = Mathf.Max(0f, configuredCooldown);
         }
+
+        // Enemy-6: a fixed half heart on every floor instead of the tier table.
+        public void ConfigureHalfHeart(bool configuredHalfHeartDamage) => halfHeartDamage = configuredHalfHeartDamage;
 
         private void OnCollisionStay2D(Collision2D collision)
         {
@@ -37,7 +43,10 @@ namespace TrickalFanGame.Enemy
             }
 
             target.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
-            target.TakeDamage(HealthUnits.CreateEnemyDamageContext(gameObject, DamageSourceType.EnemyContact, damageTier));
+            target.TakeDamage(halfHeartDamage
+                ? new DamageContext(gameObject, DamageSourceType.EnemyContact, HealthUnits.HalfHeartDamageUnits,
+                    allowsHalfHeart: true)
+                : HealthUnits.CreateEnemyDamageContext(gameObject, DamageSourceType.EnemyContact, damageTier));
             nextDamageTime = currentTime + cooldown;
             return true;
         }

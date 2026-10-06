@@ -17,6 +17,7 @@ namespace TrickalFanGame.Enemy
         private EnemyBehaviorContext behavior;
         private ChargingEnemyController charger;
         private LongRangeSniperController sniper;
+        private MeleeEnemyAttack melee;
         private Health health;
         private KnockbackReceiver knockback;
 
@@ -43,6 +44,7 @@ namespace TrickalFanGame.Enemy
             behavior = GetComponent<EnemyBehaviorContext>();
             charger = GetComponent<ChargingEnemyController>();
             sniper = GetComponent<LongRangeSniperController>();
+            melee = GetComponent<MeleeEnemyAttack>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
         }
@@ -55,6 +57,7 @@ namespace TrickalFanGame.Enemy
                 (knockback != null && knockback.IsActive)) return false;
             Vector2 direction = charger != null ? charger.LockedDirection :
                 sniper != null ? sniper.LockedDirection :
+                melee != null && melee.LockedDirection != Vector2.zero ? melee.LockedDirection :
                 behavior != null && behavior.Target != null ?
                     (Vector2)(behavior.Target.position - transform.position) : Vector2.zero;
             if (Mathf.Abs(direction.x) > 0.001f) source.flipX = direction.x > 0f;

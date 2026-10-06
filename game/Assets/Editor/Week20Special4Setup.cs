@@ -40,11 +40,10 @@ namespace TrickalFanGame.Editor
             ("bomb", "폭탄", Week17Resource1Setup.BombPrefabPath, 5),
         };
 
-        public static readonly Vector2[] StallPositions =
-        {
-            new(-4.5f, 0.6f), new(-1.5f, 0.6f), new(1.5f, 0.6f), new(4.5f, 0.6f),
-        };
-        public static readonly Vector2 StallTriggerSize = new(2.4f, 2.4f);
+        // Shop-0: the shopkeeper stands in the room center and replaces the four world stalls.
+        public const string KeeperObjectName = "Shopkeeper";
+        public static readonly Vector2 KeeperPosition = new(0f, 0.6f);
+        public static readonly Vector2 KeeperTriggerSize = new(3.2f, 3.2f);
 
         [MenuItem("Trickal Fan Game/Week 20/Setup Special-4 Shop")]
         public static void Setup()
@@ -56,7 +55,8 @@ namespace TrickalFanGame.Editor
             ConfigureScene(definition, catalog, prefab);
             Selection.activeObject = catalog;
             Debug.Log("Special-4 ready: floors roll a 60% key-locked shop beside the start or an intermediate room, " +
-                      "selling two Items by rarity price and two consumables that drop as floor pickups.");
+                      "selling three Items by rarity price and three consumables that drop as floor pickups. " +
+                      "Run the Shop-0 setup to connect the shop UI.");
         }
 
         public static RoomDefinition EnsureShopDefinition()
@@ -132,10 +132,8 @@ namespace TrickalFanGame.Editor
             try
             {
                 ShopRoom shop = GetOrAdd<ShopRoom>(root);
-                ShopStall[] stalls = new ShopStall[StallPositions.Length];
-                for (int index = 0; index < stalls.Length; index++)
-                    stalls[index] = EnsureStall(root.transform, index, font, itemSprite, pickupLayer);
-                shop.ConfigureStalls(stalls);
+                RemoveLegacyStalls(root.transform);
+                shop.ConfigureKeeper(EnsureKeeper(root.transform, font, itemSprite, pickupLayer));
 
                 Directory.CreateDirectory("Assets/Prefabs");
                 if (PrefabUtility.SaveAsPrefabAsset(root, ShopRoomPrefabPath) == null)
@@ -151,38 +149,57 @@ namespace TrickalFanGame.Editor
             return AssetDatabase.LoadAssetAtPath<GameObject>(ShopRoomPrefabPath).GetComponent<ShopRoom>();
         }
 
-        private static ShopStall EnsureStall(Transform root, int index, TMP_FontAsset font, Sprite itemSprite,
+        // Special-4 built four world stalls; Shop-0 sells through the shop UI instead.
+        private static void RemoveLegacyStalls(Transform root)
+        {
+            for (int index = root.childCount - 1; index >= 0; index--)
+            {
+                GameObject child = root.GetChild(index).gameObject;
+                if (!child.name.StartsWith("Stall ", StringComparison.Ordinal)) continue;
+                foreach (Transform part in child.GetComponentsInChildren<Transform>(true))
+                    GameObjectUtility.RemoveMonoBehavioursWithMissingScript(part.gameObject);
+                Object.DestroyImmediate(child);
+            }
+        }
+
+        // The portrait is a placeholder until the 시스트 character asset exists. A sprite assigned later is kept:
+        // only a newly created shopkeeper gets the placeholder sprite, color, and scale.
+        private static ShopKeeper EnsureKeeper(Transform root, TMP_FontAsset font, Sprite placeholderSprite,
             int pickupLayer)
         {
-            GameObject stallObject = Child(root, $"Stall {index + 1}");
-            stallObject.layer = pickupLayer;
-            stallObject.transform.localPosition = StallPositions[index];
-            foreach (Collider2D collider in stallObject.GetComponents<Collider2D>())
+            GameObject keeperObject = Child(root, KeeperObjectName);
+            keeperObject.layer = pickupLayer;
+            keeperObject.transform.localPosition = KeeperPosition;
+            foreach (Collider2D collider in keeperObject.GetComponents<Collider2D>())
                 if (collider is not BoxCollider2D) Object.DestroyImmediate(collider);
-            BoxCollider2D trigger = GetOrAdd<BoxCollider2D>(stallObject);
+            BoxCollider2D trigger = GetOrAdd<BoxCollider2D>(keeperObject);
             trigger.isTrigger = true;
-            trigger.size = StallTriggerSize;
+            trigger.size = KeeperTriggerSize;
             trigger.offset = Vector2.zero;
 
-            GameObject displayObject = Child(stallObject.transform, "Display");
-            displayObject.transform.localPosition = Vector3.zero;
-            displayObject.transform.localScale = Vector3.one * 0.9f;
-            SpriteRenderer display = GetOrAdd<SpriteRenderer>(displayObject);
-            display.sprite = itemSprite;
-            display.color = Color.white;
-            display.sortingOrder = 3;
+            bool portraitExists = keeperObject.transform.Find("Portrait") != null;
+            GameObject portraitObject = Child(keeperObject.transform, "Portrait");
+            SpriteRenderer portrait = GetOrAdd<SpriteRenderer>(portraitObject);
+            if (!portraitExists || portrait.sprite == null)
+            {
+                portraitObject.transform.localPosition = Vector3.zero;
+                portraitObject.transform.localScale = Vector3.one * 1.5f;
+                portrait.sprite = placeholderSprite;
+                portrait.color = new Color(1f, 0.8f, 0.35f, 1f);
+                portrait.sortingOrder = 3;
+            }
 
-            TextMeshPro label = Text(stallObject.transform, "Label", font, new Vector2(0f, 1.3f), 2.6f,
+            TextMeshPro label = Text(keeperObject.transform, "Label", font, new Vector2(0f, 1.3f), 3f,
                 new Color(1f, 0.93f, 0.62f, 1f));
-            label.text = "상품\n0 골드";
-            TextMeshPro prompt = Text(stallObject.transform, "Prompt", font, new Vector2(0f, -0.95f), 3f,
+            label.text = ShopKeeper.DisplayName;
+            TextMeshPro prompt = Text(keeperObject.transform, "Prompt", font, new Vector2(0f, -1.05f), 3f,
                 new Color(0.9f, 0.98f, 1f, 1f));
-            prompt.text = ShopStall.BuyPrompt;
+            prompt.text = ShopKeeper.OpenPrompt;
             prompt.gameObject.SetActive(false);
 
-            ShopStall stall = GetOrAdd<ShopStall>(stallObject);
-            stall.ConfigureVisuals(display, label, prompt);
-            return stall;
+            ShopKeeper keeper = GetOrAdd<ShopKeeper>(keeperObject);
+            keeper.ConfigureVisuals(portrait, label, prompt);
+            return keeper;
         }
 
         private static TextMeshPro Text(Transform parent, string name, TMP_FontAsset font, Vector2 position,
@@ -202,14 +219,14 @@ namespace TrickalFanGame.Editor
             text.sortingOrder = 4;
             RectTransform rect = (RectTransform)textObject.transform;
             rect.localPosition = position;
-            rect.sizeDelta = new Vector2(3f, 1.4f);
+            rect.sizeDelta = new Vector2(4f, 1.4f);
             rect.localScale = Vector3.one;
             return text;
         }
 
         private static void EnsureGlyphs(TMP_FontAsset font)
         {
-            string required = "상품골드부족구매[E]0123456789" +
+            string required = "상품골드부족구매[E]0123456789" + ShopKeeper.DisplayName + ShopKeeper.OpenPrompt +
                               string.Concat(Consumables.Select(spec => spec.Name));
             if (!font.HasCharacters(required) && !font.TryAddCharacters(required, out string missing))
                 throw new InvalidOperationException("Missing Special-4 shop glyphs: " + missing);

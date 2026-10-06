@@ -284,6 +284,11 @@ MonoBehaviour:
   recoveryDuration: 0.65
   attackCooldown: 0.2
   damageTier: 3
+  lungeTriggerRange: 1.9
+  lungeDistance: 1.5
+  aimLockLeadTime: 0.12
+  lungeHitForwardOffset: 0.3
+  lungeHitRadius: 0.75
 --- !u!114 &2311666414337553906
 MonoBehaviour:
   m_ObjectHideFlags: 0

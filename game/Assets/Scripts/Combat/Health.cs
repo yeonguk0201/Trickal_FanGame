@@ -47,7 +47,8 @@ namespace TrickalFanGame.Combat
             DamageResult result = DamageCalculator.Resolve(context);
             if (useHealthUnits)
             {
-                result = new DamageResult(HealthUnits.ToDamageUnits(result.FinalDamage), result.IsCritical);
+                result = new DamageResult(HealthUnits.ToDamageUnits(result.FinalDamage, context.AllowsHalfHeart),
+                    result.IsCritical);
             }
 
             if (incomingDamageReduction > 0f)

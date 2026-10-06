@@ -30,6 +30,7 @@ describe('Item catalog', () => {
       'single-spell-amelia-love-letter',
       'single-spell-random-coin',
       'single-spell-decisive-strike',
+      'single-spell-membership-card',
       'artifact-sist-fake-wings',
       'jjangsem-bigwood-fruit',
       'jjangsem-melune-card',
@@ -60,11 +61,12 @@ describe('Item catalog', () => {
       'UNCOMMON',
       'COMMON',
       'UNCOMMON',
+      'RARE',
       'EPIC',
       'RARE',
       'RARE',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(28);
+    expect(new Set(active.map((item) => item.id)).size).toBe(29);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -282,6 +284,14 @@ describe('Item catalog', () => {
             secondaryMagnitude: 0.15,
           },
         ],
+      },
+      {
+        id: 'single-spell-membership-card',
+        name: '멤버십카드',
+        rarity: 'RARE',
+        isActive: true,
+        maxStacks: 1,
+        effects: [{ type: 'FreeCurrentShopOffers' }],
       },
     ]);
   });

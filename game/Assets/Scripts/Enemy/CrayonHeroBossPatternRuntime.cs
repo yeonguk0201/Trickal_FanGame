@@ -56,7 +56,10 @@ namespace TrickalFanGame.Enemy
         [Header("Arena and presentation")]
         [SerializeField, Min(0f)] private float arenaPadding = 0.7f;
         [SerializeField] private Vector2 fallbackHalfExtents = new Vector2(7.5f, 5.5f);
-        [SerializeField] private Color phaseTwoColor = new Color(1f, 0.78f, 0.18f, 1f);
+        [SerializeField] private Sprite awakenedSprite;
+        private Sprite normalSprite;
+        public Sprite AwakenedSprite => awakenedSprite;
+        public void ConfigureAwakenedArtwork(Sprite sprite) => awakenedSprite = sprite;
 
         private readonly List<GameObject> livingMinions = new List<GameObject>();
         private readonly List<LineRenderer> supplementalTelegraphLines = new List<LineRenderer>();
@@ -91,6 +94,32 @@ namespace TrickalFanGame.Enemy
         private LineRenderer telegraphLine;
         private GameObject recognitionDebugObject;
         private LineRenderer recognitionDebugLine;
+        private int attackPoseIndex = -1;
+        private float attackFollowThroughStartedAt = float.NegativeInfinity;
+        private float chargeStartedAt;
+        private float chargeImpactAt;
+        private bool chargingSlash;
+
+        // Pose groups: swing 0..3, dash 4..7, slam 8..11, stronger charge stages 12..13.
+        public int AttackPoseIndex => attackPoseIndex;
+        public float ChargeImpactAt => chargeImpactAt;
+        public int ChargeBeat => chargingSlash ? Mathf.Min(2,
+            Mathf.FloorToInt(Mathf.Clamp01((lastTickTime - chargeStartedAt) /
+                Mathf.Max(0.001f, chargeImpactAt - chargeStartedAt)) * 3f)) : -1;
+
+        private void UpdateChargeArtwork()
+        {
+            if (!chargingSlash) return;
+            // Keep each accumulated aura until the next charge, including the last frame before impact.
+            attackPoseIndex = ChargeBeat == 0 ? 9 : ChargeBeat == 1 ? 12 : 13;
+        }
+
+        private void ResetAttackArtwork()
+        {
+            attackPoseIndex = -1;
+            attackFollowThroughStartedAt = float.NegativeInfinity;
+            chargingSlash = false;
+        }
 
         public float SlashLength => slashLength;
         public float SlashWidth => slashWidth;
@@ -155,6 +184,7 @@ namespace TrickalFanGame.Enemy
 
         private void OnDisable()
         {
+            ResetAttackArtwork();
             StopMovement();
             ClearTelegraph();
             ClearRecognitionDebug();
@@ -216,6 +246,7 @@ namespace TrickalFanGame.Enemy
 
         public void BeginCombat(Transform configuredTarget, int seed, float now)
         {
+            ResetAttackArtwork();
             ResolveComponents();
             target = configuredTarget;
             randomState = SeedToState(seed);
@@ -261,6 +292,7 @@ namespace TrickalFanGame.Enemy
             ResolveComponents();
             if (state == BossActionState.PhaseTransition)
             {
+                ResetAttackArtwork();
                 StopMovement();
                 ClearTelegraph();
                 ResetSwingState();
@@ -275,9 +307,14 @@ namespace TrickalFanGame.Enemy
             ApplyPhasePresentation();
             if (state == BossActionState.Telegraph)
             {
+                ResetAttackArtwork();
                 ClearTelegraph();
                 if (execution == BossPatternExecution.CrayonHeroMapSlash)
                 {
+                    chargingSlash = true;
+                    chargeStartedAt = lastTickTime;
+                    chargeImpactAt = stateEndsAt + slashLockedDelay;
+                    attackPoseIndex = 8;
                     StopMovement();
                     UpdateAimDirection();
                     ShowMapSlashTelegraph();
@@ -289,6 +326,7 @@ namespace TrickalFanGame.Enemy
                 }
                 else if (execution == BossPatternExecution.CrayonHeroDashChain)
                 {
+                    attackPoseIndex = 4;
                     StopMovement();
                     UpdateAimDirection();
                     ShowDashTelegraph();
@@ -298,6 +336,9 @@ namespace TrickalFanGame.Enemy
 
             if (state == BossActionState.Recovery)
             {
+                chargingSlash = false;
+                attackPoseIndex = execution == BossPatternExecution.CrayonHeroMapSlash ? 11 : -1;
+                attackFollowThroughStartedAt = lastTickTime;
                 ClearTelegraph();
                 if (IsPressureAttack(execution)) completedPressureActions++;
                 if (execution == BossPatternExecution.CrayonHeroMapSlash)
@@ -320,6 +361,7 @@ namespace TrickalFanGame.Enemy
 
             if (state == BossActionState.Defeated)
             {
+                ResetAttackArtwork();
                 StopMovement();
                 ClearTelegraph();
             }
@@ -335,6 +377,7 @@ namespace TrickalFanGame.Enemy
                     slashPending = true;
                     slashResolved = false;
                     slashResolvesAt = lastTickTime + slashLockedDelay;
+                    chargeImpactAt = slashResolvesAt;
                     return true;
                 case BossPatternExecution.CrayonHeroSummonMinions:
                     if (!summonAvailable) return false;
@@ -368,6 +411,7 @@ namespace TrickalFanGame.Enemy
             lastTickTime = now;
             if (state == BossActionState.Telegraph)
             {
+                UpdateChargeArtwork();
                 if (execution == BossPatternExecution.CrayonHeroMapSlash)
                 {
                     UpdateAimDirection();
@@ -404,13 +448,17 @@ namespace TrickalFanGame.Enemy
 
             if (state == BossActionState.Recovery)
             {
+                if (now - attackFollowThroughStartedAt >= 0.2f) attackPoseIndex = -1;
                 if (execution == BossPatternExecution.CrayonHeroApproachSwing)
                     MoveTowardTarget(deltaTime, 1f);
                 return;
             }
 
             if (state == BossActionState.Idle || state == BossActionState.Cooldown)
+            {
+                ResetAttackArtwork();
                 MoveTowardTarget(deltaTime, 1f);
+            }
         }
 
         private void LateUpdate()
@@ -446,6 +494,9 @@ namespace TrickalFanGame.Enemy
 
         private void TickMapSlash(float now)
         {
+            UpdateChargeArtwork();
+            if (slashResolved)
+                attackPoseIndex = now - attackFollowThroughStartedAt < 0.08f ? 10 : 11;
             if (!slashPending || slashResolved || now < slashResolvesAt) return;
             int hitCount = 0;
             foreach (Vector2 direction in GetSlashDirections())
@@ -453,12 +504,18 @@ namespace TrickalFanGame.Enemy
             if (hitCount > 0) ApplyTargetDamage(slashDamageTier, DamageSourceType.EnemyMelee, hitCount);
             slashResolved = true;
             slashPending = false;
+            chargingSlash = false;
+            attackFollowThroughStartedAt = now;
+            attackPoseIndex = 10;
             SetAllTelegraphColors(new Color(1f, 0.08f, 0.02f, 0.95f),
                 new Color(1f, 0.45f, 0.02f, 0.95f));
         }
 
         private void TickApproachSwing(float now, float deltaTime)
         {
+            if (!swingPreparing)
+                attackPoseIndex = now - attackFollowThroughStartedAt < 0.08f ? 2 :
+                    now - attackFollowThroughStartedAt < 0.2f ? 3 : -1;
             if (target == null || completedSwings >= swingCountTarget) return;
             MoveTowardTarget(deltaTime, 1f);
             Vector2 offset = (Vector2)target.position - (Vector2)transform.position;
@@ -469,6 +526,7 @@ namespace TrickalFanGame.Enemy
                 swingPreparing = true;
                 swingDirectionLocked = false;
                 swingResolvesAt = now + swingWindup;
+                attackPoseIndex = 0;
                 ShowSwingTelegraph();
                 return;
             }
@@ -479,10 +537,16 @@ namespace TrickalFanGame.Enemy
                 else swingDirectionLocked = true;
             }
             UpdateSwingTelegraphPositions();
-            if (now < swingResolvesAt) return;
+            if (now < swingResolvesAt)
+            {
+                attackPoseIndex = now < swingResolvesAt - swingWindup * 0.5f ? 0 : 1;
+                return;
+            }
             ResolveDirectionalHit(SwingStartOffset, swingRange, swingWidth, swingDamageTier,
                 DamageSourceType.EnemyMelee, lockedDirection);
             completedSwings++;
+            attackPoseIndex = 2;
+            attackFollowThroughStartedAt = now;
             swingPreparing = false;
             swingDirectionLocked = false;
             nextSwingStartsAt = now + Mathf.Max(0f, swingInterval - swingWindup);
@@ -508,6 +572,7 @@ namespace TrickalFanGame.Enemy
                     return;
                 }
                 dashStateEndsAt = now + dashRetargetDuration;
+                attackPoseIndex = completedDashes % 2 == 0 ? 4 : 6;
                 UpdateAimDirection();
                 ShowDashTelegraph();
                 return;
@@ -523,6 +588,7 @@ namespace TrickalFanGame.Enemy
         {
             UpdateAimDirection();
             dashInMotion = true;
+            attackPoseIndex = completedDashes % 2 == 0 ? 5 : 7;
             dashStateEndsAt = now + dashDuration;
             ShowDashTelegraph();
             SetAllTelegraphColors(new Color(1f, 0.12f, 0.05f, 0.9f),
@@ -534,8 +600,11 @@ namespace TrickalFanGame.Enemy
             if (target == null || body == null || deltaTime <= 0f) return;
             Vector2 offset = (Vector2)target.position - (Vector2)transform.position;
             if (offset.sqrMagnitude <= 0.001f) return;
-            Vector2 destination = ClampToArena((Vector2)transform.position +
-                                               offset.normalized * CurrentApproachSpeed * speedMultiplier * deltaTime);
+            float distance = offset.magnitude;
+            float step = Mathf.Min(CurrentApproachSpeed * speedMultiplier * deltaTime,
+                distance - BossTargetSpacing.ResolveStopDistance(gameObject, target));
+            if (step <= 0f) return;
+            Vector2 destination = ClampToArena((Vector2)transform.position + offset / distance * step);
             body.MovePosition(destination);
         }
 
@@ -783,7 +852,10 @@ namespace TrickalFanGame.Enemy
         private void ApplyPhasePresentation()
         {
             if (visual == null) visual = GetComponentInChildren<SpriteRenderer>();
-            if (visual != null) visual.color = boss != null && boss.CurrentPhase >= 2 ? phaseTwoColor : Color.white;
+            if (visual == null) return;
+            if (normalSprite == null) normalSprite = visual.sprite;
+            visual.sprite = boss != null && boss.CurrentPhase >= 2 && awakenedSprite != null ? awakenedSprite : normalSprite;
+            visual.color = Color.white;
         }
 
         private void OnHealthChanged(float current, float maximum)

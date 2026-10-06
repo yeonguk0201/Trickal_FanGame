@@ -87,7 +87,21 @@ namespace TrickalFanGame.Player
                 if (!RoomMovementClass.IsLowObstacle(obstacle)) continue;
                 foreach (Collider2D own in bodyColliders)
                     if (own != null) Physics2D.IgnoreCollision(own, obstacle, true);
+                // Obstacle-5: a flying body never collides with a vault, so overlapping it is the touch that spends
+                // a key. Opening only deactivates the vault, which leaves this list intact.
+                if (obstacle.TryGetComponent(out DestructibleObstacle destructible) &&
+                    destructible.BreakRule == ObstacleBreakRule.BombOrKey && IsOverlapping(obstacle))
+                {
+                    destructible.TryOpenWithKey();
+                }
             }
+        }
+
+        private bool IsOverlapping(Collider2D obstacle)
+        {
+            foreach (Collider2D own in bodyColliders)
+                if (own != null && !own.isTrigger && own.Distance(obstacle).isOverlapped) return true;
+            return false;
         }
 
         public bool IsIgnoring(Collider2D obstacle)

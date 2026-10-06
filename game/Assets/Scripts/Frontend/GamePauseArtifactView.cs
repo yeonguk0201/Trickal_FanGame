@@ -3,6 +3,7 @@ using TMPro;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
 using TrickalFanGame.Run;
+using TrickalFanGame.Shop;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -169,7 +170,8 @@ namespace TrickalFanGame.Frontend
         public bool TryPause()
         {
             if (IsPaused || Time.timeScale <= 0f ||
-                FindFirstObjectByType<ItemRewardSelectionSession>()?.IsOpen == true) return false;
+                FindFirstObjectByType<ItemRewardSelectionSession>()?.IsOpen == true ||
+                FindFirstObjectByType<ShopSession>()?.BlocksPause == true) return false;
             previousTimeScale = Time.timeScale;
             previousSelectedObject = EventSystem.current != null
                 ? EventSystem.current.currentSelectedGameObject

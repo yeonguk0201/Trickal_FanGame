@@ -59,6 +59,7 @@ namespace TrickalFanGame.Editor
                 ["tall-side-pockets"] = new[] { Point(3f, 3.5f), Point(-3f, -3.5f) },
                 ["basic-central-pit"] = new[] { Point(-3f, 0f), Point(3f, 0f) },
                 ["large-pit-lanes"] = new[] { Point(-8.5f, -4f), Point(8.5f, 4f), Point(-3f, -4.5f) },
+                [Week23Obstacle6Setup.TemplateId] = new[] { Point(-5f, -2f), Point(5f, -2f) },
             };
 
         public readonly struct SwarmSpec

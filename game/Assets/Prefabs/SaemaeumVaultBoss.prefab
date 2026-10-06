@@ -276,6 +276,11 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 776a428bfd756ac4892c6b78830f9cd6, type: 3}
   - {fileID: 21300000, guid: afe5adb9cd269fb44b15d0a51b15da08, type: 3}
   - {fileID: 21300000, guid: 6549066feb43f5f49819e28a7f9f77f7, type: 3}
+  healFrames:
+  - {fileID: 21300000, guid: fce24f47841d43d3b51b6a8491aa33e7, type: 3}
+  - {fileID: 21300000, guid: 2a124abd324d4724b512283494980a04, type: 3}
+  - {fileID: 21300000, guid: f15204ef6bc744a89fc541e9edf8f165, type: 3}
+  - {fileID: 21300000, guid: 776fe82496ca449c8f52c2ce65e65559, type: 3}
   groundTreasures:
   - {fileID: 4528997289046137425}
   - {fileID: 8512402935366631024}

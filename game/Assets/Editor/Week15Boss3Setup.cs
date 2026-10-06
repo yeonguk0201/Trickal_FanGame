@@ -85,7 +85,7 @@ namespace TrickalFanGame.Editor
                 boss.ConfigurePatterns(new[]
                 {
                     new BossPatternDefinition("crayon-map-cleaving-slash",
-                        BossPatternExecution.CrayonHeroMapSlash, 1.05f, 0.32f, 1.05f, 0f),
+                        BossPatternExecution.CrayonHeroMapSlash, 1.30f, 0.32f, 1.05f, 0f, 1.35f),
                     new BossPatternDefinition("crayon-summon-soldiers",
                         BossPatternExecution.CrayonHeroSummonMinions, 0.425f, 0.1f, 0.4f, 0f),
                     new BossPatternDefinition("crayon-approach-sword-swing",

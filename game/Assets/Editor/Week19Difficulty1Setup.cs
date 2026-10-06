@@ -132,7 +132,8 @@ namespace TrickalFanGame.Editor
         {
             string[] obstacleLayouts = Week18Obstacle2Setup.Layouts.Select(layout => layout.TemplateId)
                 .Concat(Week20Obstacle4Setup.Layouts.Select(layout => layout.TemplateId))
-                .Concat(Week22Terrain0Setup.Layouts.Select(layout => layout.TemplateId)).ToArray();
+                .Concat(Week22Terrain0Setup.Layouts.Select(layout => layout.TemplateId))
+                .Append(Week23Obstacle6Setup.TemplateId).ToArray();
             foreach (RoomTemplateDefinition template in generator.RoomTemplates.Where(template => template != null))
             {
                 int modifier = obstacleLayouts.Contains(template.TemplateId, StringComparer.Ordinal)

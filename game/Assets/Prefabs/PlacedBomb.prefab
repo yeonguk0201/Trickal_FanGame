@@ -105,7 +105,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Resource.PlacedBomb
   fuseDuration: 0.75
-  explosionRadius: 2.5
+  explosionRadius: 2
   enemyDamage: 30
   selfDamage: 2
   enemyLayers:

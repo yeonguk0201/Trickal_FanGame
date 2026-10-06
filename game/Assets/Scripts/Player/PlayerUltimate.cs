@@ -118,6 +118,22 @@ namespace TrickalFanGame.Player
             TryImpact(collision.collider.GetComponentInParent<Health>(), Time.time);
         }
 
+        // Corner-0: a dash started while already touching an enemy never gets a new Enter event. Dashing into that
+        // enemy counts as the impact; dashing away from it does not.
+        private void OnCollisionStay2D(Collision2D collision)
+        {
+            if (!IsDashing || collision.contactCount == 0)
+            {
+                return;
+            }
+
+            Vector2 toContact = collision.GetContact(0).point - (Vector2)transform.position;
+            if (Vector2.Dot(toContact, actionState.DashDirection) > 0f)
+            {
+                TryImpact(collision.collider.GetComponentInParent<Health>(), Time.time);
+            }
+        }
+
         private void OnTriggerEnter2D(Collider2D other)
         {
             TryImpact(other.GetComponentInParent<Health>(), Time.time);
