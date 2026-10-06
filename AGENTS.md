@@ -28,6 +28,9 @@
 - Scene, Prefab, ScriptableObject와 `.meta` 파일의 GUID 참조를 보존한다.
 - 직접적인 Scene/Prefab 대규모 텍스트 편집보다 Editor 구성 코드나 작은 직렬화 변경을 우선 검토한다.
 - 검증기는 핵심 불변조건이 깨지면 명시적으로 실패하도록 작성한다.
+- 아티팩트나 스펠(일회용 스펠·짱셈스펠 포함)을 구현하면 같은 조각에서 Game Scene 개발 패널(`DevelopmentGamePanel`, `F1`)로
+  바로 얻을 수 있게 한다. `— Artifact —`·`— Spell slot —`의 `Drop` 목록은 에셋을 자동 수집하므로 목록에 나오는지 확인하고,
+  자동 수집되지 않는 종류나 확인에 필요한 상태 표시는 패널에 추가한다. 수동 확인 항목에는 패널 경로를 적는다.
 - Unity 배치 실행은 Licensing Client와 Package Manager가 프로젝트 밖의 `%LOCALAPPDATA%\Unity` 상태 및 로컬 IPC에 접근하므로, 제한된 샌드박스에서 먼저 실행하지 말고 처음부터 권한이 허용된 실행을 요청한다.
 - Unity 배치 검증시 보통 같은 프로젝트를 연 Unity 인스턴스가 있어서 실행이 차단될 때가 있음. 이는 코드 실패가 아니라 Unity의 다중 인스턴스 잠금이니 넘어가도 무방함.
 

@@ -72,7 +72,8 @@ namespace TrickalFanGame.Combat
                    sourceType == DamageSourceType.PlayerSkillExplosion ||
                    sourceType == DamageSourceType.PlayerUltimateImpact ||
                    sourceType == DamageSourceType.PlayerDamageAura ||
-                   sourceType == DamageSourceType.PlayerItemLightning;
+                   sourceType == DamageSourceType.PlayerItemLightning ||
+                   sourceType == DamageSourceType.PlayerStatusEffect;
         }
     }
 }

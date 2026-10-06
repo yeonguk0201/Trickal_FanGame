@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1425538479244399715, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: knockbackWeight
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 2079928141612301653, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: maxHealth
       value: 250
@@ -129,7 +133,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d3d4cc20b2e4f57b6928ac9170c73bc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.BossController
   displayName: "\uBD80\uC2A4\uB7EC\uAE30"
   phaseCount: 2
@@ -137,18 +141,21 @@ MonoBehaviour:
   - patternId: buseureogi-approach-volley
     execution: 2
     telegraphDuration: 0.6
+    additionalTelegraphDuration: 0
     activeDuration: 1.7
     recoveryDuration: 0.75
     reuseCooldown: 0.8
   - patternId: buseureogi-summon-crumbs
     execution: 3
     telegraphDuration: 0.9
+    additionalTelegraphDuration: 0
     activeDuration: 0.15
     recoveryDuration: 0.85
     reuseCooldown: 4.2
   - patternId: buseureogi-throw-obstacle
     execution: 4
     telegraphDuration: 0.85
+    additionalTelegraphDuration: 0
     activeDuration: 0.15
     recoveryDuration: 0.7
     reuseCooldown: 2.6
@@ -168,7 +175,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f3acf591a71fc44c93ad648f34fcd9f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.BuseureogiBossPatternRuntime
   minionPrefab: {fileID: 4637529536798824959, guid: 52a22289b4c3e874c8c7f8c09f000c9f, type: 3}
   obstaclePrefabs:
@@ -217,10 +224,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
   damageTier: 2
   cooldown: 0.8
+  halfHeartDamage: 0
 --- !u!114 &6457682146462493304
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -231,7 +239,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2448a35b34fa40a9bfe4363b9fe5c889, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackPresentation
   telegraphScale: {x: 1, y: 1}
   activeScale: {x: 1, y: 1}
@@ -246,7 +254,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9566c16f8128a1e4491afdb7c8bfdbbb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.BossMovementAnimator
   style: 0
   source: {fileID: 8232130202244265866}
@@ -257,6 +265,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 2e9f891cbfadfc04d83685655073b83b, type: 3}
   - {fileID: 21300000, guid: bb2d30ce09602de4682b1b2231c656db, type: 3}
   - {fileID: 21300000, guid: 95c7d2844dd59864cb7bd20c425806b0, type: 3}
+  healFrames: []
+  crayonAttackFrames: []
+  goldenAttackFrames: []
+  awakeningFrames: []
   groundTreasures: []
   strideLength: 1.35
   hopHeight: 0.48

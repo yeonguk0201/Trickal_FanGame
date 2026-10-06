@@ -117,7 +117,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 800
   currentShield: 0
@@ -132,7 +132,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b65f8e205289b64b91a50cb0721cb5a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.TestEnemy
   allowsSPDrop: 1
   destroyOnBossCollision: 0
@@ -146,10 +146,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
+  knockbackWeight: 4
 --- !u!114 &1317982636753869925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -160,7 +161,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa527e4c75f4de29f4975b643b25cab, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyBehaviorContext
 --- !u!114 &6987931450599381973
 MonoBehaviour:
@@ -172,7 +173,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d3d4cc20b2e4f57b6928ac9170c73bc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.BossController
   displayName: "\uC0C8\uB9C8\uC74C\uAE08\uACE0"
   phaseCount: 2
@@ -180,18 +181,21 @@ MonoBehaviour:
   - patternId: saemaeum-approach-treasure-throw
     execution: 5
     telegraphDuration: 0.55
+    additionalTelegraphDuration: 0
     activeDuration: 3
     recoveryDuration: 0.75
     reuseCooldown: 0.8
   - patternId: saemaeum-rage-jump-sequence
     execution: 6
     telegraphDuration: 0.95
+    additionalTelegraphDuration: 0
     activeDuration: 3.8
     recoveryDuration: 1.15
     reuseCooldown: 1.8
   - patternId: saemaeum-eat-treasure
     execution: 7
     telegraphDuration: 0.8
+    additionalTelegraphDuration: 0
     activeDuration: 1.8
     recoveryDuration: 1.05
     reuseCooldown: 5.5
@@ -211,7 +215,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ba88c1af5a64960bd6cb4515659a266, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.SaemaeumVaultBossPatternRuntime
   approachSpeed: 1.8
   phaseTwoSpeedMultiplier: 1.35
@@ -251,10 +255,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
   damageTier: 2
   cooldown: 0.8
+  halfHeartDamage: 0
 --- !u!114 &6273290692546761168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -265,7 +270,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9566c16f8128a1e4491afdb7c8bfdbbb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.BossMovementAnimator
   style: 1
   source: {fileID: 8351492195006903363}
@@ -281,6 +286,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 2a124abd324d4724b512283494980a04, type: 3}
   - {fileID: 21300000, guid: f15204ef6bc744a89fc541e9edf8f165, type: 3}
   - {fileID: 21300000, guid: 776fe82496ca449c8f52c2ce65e65559, type: 3}
+  crayonAttackFrames: []
+  goldenAttackFrames: []
+  awakeningFrames: []
   groundTreasures:
   - {fileID: 4528997289046137425}
   - {fileID: 8512402935366631024}

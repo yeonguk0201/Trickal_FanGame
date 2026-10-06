@@ -52,6 +52,8 @@ namespace TrickalFanGame.Player
         private ProjectileSplitSettings projectileSplitSettings;
         private float projectileSpeedPercentBonus;
         private float projectileLifetimePercentBonus;
+        private float projectileSizePercentBonus;
+        private PoisonSettings basicAttackPoison;
 
         public float MaxHealth => baseMaxHealth + maxHealthBonus;
         public float AttackDamage =>
@@ -85,6 +87,11 @@ namespace TrickalFanGame.Player
         // Range-0: basic attack travel distance = flight time × shot speed.
         public float ProjectileSpeedMultiplier => 1f + projectileSpeedPercentBonus;
         public float ProjectileLifetimeMultiplier => 1f + projectileLifetimePercentBonus;
+        // Passive-0 §4.1: scales the basic attack shot's look and collision radius together, never its damage.
+        public float ProjectileSizeMultiplier =>
+            Mathf.Min(1f + projectileSizePercentBonus, ProjectileSizing.MaximumPlayerBasicSizeMultiplier);
+        public PoisonSettings BasicAttackPoison => basicAttackPoison;
+        public ProjectileHitEffects BasicAttackHitEffects => new(true, basicAttackPoison);
         public bool IsBelowMoveSpeedHealthThreshold =>
             moveSpeedPercentBelowHealthBonus > 0f && health != null && !health.IsDead &&
             (health.CurrentHealth <= health.MaxHealth * moveSpeedHealthThreshold ||
@@ -287,6 +294,31 @@ namespace TrickalFanGame.Player
         public void AddProjectileLifetimePercent(float amount)
         {
             projectileLifetimePercentBonus = Mathf.Max(0f, projectileLifetimePercentBonus + amount);
+        }
+
+        public void AddProjectileSizePercent(float amount)
+        {
+            projectileSizePercentBonus = Mathf.Max(0f, projectileSizePercentBonus + amount);
+        }
+
+        // Sources of the same status effect add their chances (up to 100%); the other values follow the latest one.
+        public void AddBasicAttackPoison(
+            float chance,
+            float tickDamageRatio,
+            float durationSeconds,
+            float intervalSeconds,
+            int maximumStacks)
+        {
+            PoisonSettings configured = new(
+                basicAttackPoison.Chance + Mathf.Max(0f, chance),
+                tickDamageRatio,
+                durationSeconds,
+                intervalSeconds,
+                maximumStacks);
+            if (configured.IsEnabled)
+            {
+                basicAttackPoison = configured;
+            }
         }
 
         public void ConfigureProjectileSplit(

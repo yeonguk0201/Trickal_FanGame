@@ -36,6 +36,10 @@ namespace TrickalFanGame.Combat
         public const float PlayerSkillScale = 0.28f;
         public const float RangedEnemyScale = 0.3f;
         public const float BossScale = 0.35f;
+        // Passive-0 §4.1: a grown basic attack shot must still pass a one-tile corridor.
+        public const float MaximumPlayerBasicRadius = 0.45f;
+        public static float MaximumPlayerBasicSizeMultiplier =>
+            MaximumPlayerBasicRadius / WorldCollisionRadius(PlayerBasicScale);
 
         public static void Apply(Transform projectileTransform, CircleCollider2D collider, float scale)
         {
@@ -63,6 +67,7 @@ namespace TrickalFanGame.Combat
         private Vector2 launchPosition;
         private float maximumTravelDistance;
         private bool isSplitProjectile;
+        private ProjectileHitEffects hitEffects;
         private float resolvedLifetime;
         private float remainingLifetime;
         private bool isSpent;
@@ -110,11 +115,18 @@ namespace TrickalFanGame.Combat
             ProjectileSplitSettings configuredSplitSettings = default,
             bool configuredAsSplitProjectile = false,
             float configuredMaximumTravelDistance = 0f,
-            float configuredLifetime = 0f)
+            float configuredLifetime = 0f,
+            ProjectileHitEffects configuredHitEffects = default)
         {
             if (body == null)
             {
                 body = GetComponent<Rigidbody2D>();
+            }
+
+            // Passive-0 §4.6: a shot never shoves what it touches. Enemies move only by the knockback formula.
+            foreach (Collider2D projectileCollider in GetComponentsInChildren<Collider2D>())
+            {
+                projectileCollider.isTrigger = true;
             }
 
             owner = projectileOwner;
@@ -122,6 +134,7 @@ namespace TrickalFanGame.Combat
             remainingPierces = Mathf.Max(0, configuredPierces);
             splitSettings = configuredAsSplitProjectile ? default : configuredSplitSettings;
             isSplitProjectile = configuredAsSplitProjectile;
+            hitEffects = configuredHitEffects;
             maximumTravelDistance = Mathf.Max(0f, configuredMaximumTravelDistance);
             launchPosition = transform.position;
             resolvedLifetime = configuredLifetime > 0f ? configuredLifetime : lifetime;
@@ -188,7 +201,9 @@ namespace TrickalFanGame.Combat
             {
                 damagedTargets.Add(target);
                 float impactDistance = Vector2.Distance(launchPosition, transform.position);
+                float healthBeforeHit = target.CurrentHealth + target.CurrentShield;
                 target.TakeDamage(damageContext.WithImpactDistance(impactDistance));
+                ApplyHitEffects(target, healthBeforeHit - (target.CurrentHealth + target.CurrentShield));
 
                 IgnoreTargetColliders(target);
                 if (!isSplitProjectile && remainingPierces > 0 && splitSettings.IsEnabled)
@@ -206,6 +221,26 @@ namespace TrickalFanGame.Combat
             }
 
             DestroyProjectile();
+        }
+
+        // Passive-0 §3: after the direct damage a living target gets status effects, then knockback.
+        private void ApplyHitEffects(Health target, float appliedDamage)
+        {
+            if (target.IsDead)
+            {
+                return;
+            }
+
+            if (appliedDamage > 0f)
+            {
+                EnemyStatusEffects.TryApplyPoison(target, damageContext.Source, damageContext.BaseDamage,
+                    hitEffects.Poison, Random.value);
+            }
+
+            if (hitEffects.AppliesKnockback)
+            {
+                BasicAttackKnockback.TryApply(target, Velocity);
+            }
         }
 
         private void SplitAfterFirstPierce(Health firstTarget)
@@ -228,7 +263,8 @@ namespace TrickalFanGame.Combat
                     configuredSplitSettings: default,
                     configuredAsSplitProjectile: true,
                     configuredMaximumTravelDistance: splitSettings.MaximumDistance,
-                    configuredLifetime: resolvedLifetime);
+                    configuredLifetime: resolvedLifetime,
+                    configuredHitEffects: hitEffects);
                 splitProjectile.damagedTargets.Add(firstTarget);
                 splitProjectile.IgnoreTargetColliders(firstTarget);
             }

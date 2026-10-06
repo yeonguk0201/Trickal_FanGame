@@ -394,6 +394,35 @@ export const ITEM_CATALOG = [
     effects: [{ type: 'DuplicateRoomChestsAndPickups' }],
   },
   {
+    id: 'artifact-kanna-cannon',
+    name: '칸나의 대포',
+    description:
+      '기본 공격 투사체의 크기가 스택당 50% 커집니다. 피해·탄속·사거리는 그대로입니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 2,
+    effects: [{ type: 'ProjectileSizePercent', magnitude: 0.5 }],
+  },
+  {
+    id: 'artifact-bibi-snot',
+    name: '비비의 콧물',
+    description:
+      '기본 공격이 적중하면 스택당 15% 확률로 적을 중독시킵니다. 중독은 4초 동안 1초마다 공격력의 15%씩 피해를 주며 3번까지 중첩되고, 다시 걸리면 지속 시간이 갱신됩니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      {
+        type: 'BasicAttackPoison',
+        magnitude: 0.15,
+        secondaryMagnitude: 0.15,
+        integerAmount: 3,
+        intervalSeconds: 1,
+        durationSeconds: 4,
+      },
+    ],
+  },
+  {
     id: 'item-06',
     name: '다중 투사체',
     description:

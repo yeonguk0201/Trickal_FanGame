@@ -16,7 +16,7 @@ namespace TrickalFanGame.Enemy
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(EnemyChase), typeof(EnemyBehaviorContext), typeof(EnemyAttackPresentation))]
-    public sealed class MeleeEnemyAttack : MonoBehaviour
+    public sealed class MeleeEnemyAttack : MonoBehaviour, IKnockbackPushBlocker
     {
         [SerializeField, Min(0.01f)] private float attackRange = 1.15f;
         [SerializeField, Min(0.01f)] private float telegraphDuration = 0.4f;
@@ -52,6 +52,9 @@ namespace TrickalFanGame.Enemy
         private float aimLocksAt;
         private float lungeTravel;
         private bool lunging;
+
+        // A basic attack push does not move the lunge (Passive-0 §4.6).
+        public bool BlocksKnockbackPush => lunging;
 
         public MeleeEnemyAttackState State { get; private set; }
         public float AttackRange => attackRange;

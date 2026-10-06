@@ -27,6 +27,7 @@ namespace TrickalFanGame.Player
         public float CurrentDamage => stats.AttackDamage;
         public float ProjectileSpeed => baseProjectileSpeed * stats.ProjectileSpeedMultiplier;
         public float ProjectileLifetime => baseProjectileLifetime * stats.ProjectileLifetimeMultiplier;
+        public float ProjectileSizeMultiplier => stats.ProjectileSizeMultiplier;
         public int ProjectileCount => stats.ProjectileCount;
         public int PierceCount => stats.PierceCount;
         public float HealOnKill => stats.HealOnKill;
@@ -102,6 +103,7 @@ namespace TrickalFanGame.Player
                 projectilePrefab,
                 (Vector2)transform.position + direction * spawnOffset,
                 Quaternion.identity);
+            projectile.transform.localScale = projectilePrefab.transform.localScale * ProjectileSizeMultiplier;
 
             Vector2 velocity = direction * ProjectileSpeed
                 + movement.CurrentVelocity * inheritedVelocityFactor;
@@ -111,7 +113,8 @@ namespace TrickalFanGame.Player
                 CreateDamageContext(),
                 stats.PierceCount,
                 stats.ProjectileSplitSettings,
-                configuredLifetime: ProjectileLifetime);
+                configuredLifetime: ProjectileLifetime,
+                configuredHitEffects: stats.BasicAttackHitEffects);
         }
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)

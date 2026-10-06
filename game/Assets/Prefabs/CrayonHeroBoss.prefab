@@ -206,7 +206,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 1100
   currentShield: 0
@@ -221,7 +221,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b65f8e205289b64b91a50cb0721cb5a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.TestEnemy
   allowsSPDrop: 1
   destroyOnBossCollision: 0
@@ -235,10 +235,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
+  knockbackWeight: 4
 --- !u!114 &4891389902423367922
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -249,7 +250,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa527e4c75f4de29f4975b643b25cab, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyBehaviorContext
 --- !u!114 &445862013751552722
 MonoBehaviour:
@@ -261,7 +262,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d3d4cc20b2e4f57b6928ac9170c73bc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.BossController
   displayName: "\uD06C\uB808\uC6A9\uC0AC\uC6A9"
   phaseCount: 2
@@ -276,18 +277,21 @@ MonoBehaviour:
   - patternId: crayon-summon-soldiers
     execution: 9
     telegraphDuration: 0.425
+    additionalTelegraphDuration: 0
     activeDuration: 0.1
     recoveryDuration: 0.4
     reuseCooldown: 0
   - patternId: crayon-approach-sword-swing
     execution: 10
     telegraphDuration: 0.05
+    additionalTelegraphDuration: 0
     activeDuration: 2.2
     recoveryDuration: 0.2
     reuseCooldown: 0.2
   - patternId: crayon-short-dash-chain
     execution: 11
     telegraphDuration: 0.2
+    additionalTelegraphDuration: 0
     activeDuration: 0.75
     recoveryDuration: 0.3
     reuseCooldown: 0.45
@@ -307,10 +311,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
   damageTier: 2
   cooldown: 0.8
+  halfHeartDamage: 0
 --- !u!114 &1230439742369051024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -321,7 +326,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e05fe8e2f978a4340886219d86cfd00c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.CrayonHeroBossPatternRuntime
   slashLength: 18
   slashWidth: 1.15
@@ -372,7 +377,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9566c16f8128a1e4491afdb7c8bfdbbb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.BossMovementAnimator
   style: 2
   source: {fileID: 1330794017640624872}
@@ -383,6 +388,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d5c21565b092ff54c9b87eaccf39faed, type: 3}
   - {fileID: 21300000, guid: 97dcd5c743d0ea3458b32ad8e293432b, type: 3}
   hopFrames: []
+  healFrames: []
   crayonAttackFrames:
   - {fileID: 21300000, guid: 773b6efc33a4416b81c6a936cc2a8f37, type: 3}
   - {fileID: 21300000, guid: 5eb5380a709a40ad9848fbcd7a9d6e03, type: 3}

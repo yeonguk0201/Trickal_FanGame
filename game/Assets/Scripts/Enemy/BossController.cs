@@ -18,7 +18,7 @@ namespace TrickalFanGame.Enemy
     }
 
     [RequireComponent(typeof(Health), typeof(KnockbackReceiver))]
-    public sealed class BossController : MonoBehaviour
+    public sealed class BossController : MonoBehaviour, IKnockbackPushBlocker
     {
         [Header("HUD")]
         [SerializeField] private string displayName = "보스";
@@ -75,6 +75,10 @@ namespace TrickalFanGame.Enemy
             }
         }
         public IReadOnlyList<BossPatternDefinition> Patterns => patterns;
+
+        // A basic attack push does not move a boss while its pattern is running (Passive-0 §4.6).
+        public bool BlocksKnockbackPush =>
+            State == BossActionState.Active || State == BossActionState.PhaseTransition;
 
         public bool IsActionSuppressed =>
             health != null && (health.IsDead ||

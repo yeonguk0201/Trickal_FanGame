@@ -2336,7 +2336,9 @@ MonoBehaviour:
   rewardSelectionSession: {fileID: 1115359050}
   selectionRewardPool:
   - {fileID: 11400000, guid: 1ffb80362a4d97a4d8a68aaffdd8675b, type: 2}
+  - {fileID: 11400000, guid: c8d4cd892e9f4064689bfa454973f76f, type: 2}
   - {fileID: 11400000, guid: fc8088d88f829f34a854a5a37f3e5ba3, type: 2}
+  - {fileID: 11400000, guid: 4d2fd07e800870047b5eb7e10e6d304a, type: 2}
   - {fileID: 11400000, guid: c1c95cd095900d54394906e00d5e2d18, type: 2}
   - {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
   - {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
@@ -10925,6 +10927,7 @@ MonoBehaviour:
   detectionRange: 6
   stopDistance: 0.8
   target: {fileID: 0}
+  flies: 0
 --- !u!114 &302527990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10939,6 +10942,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
   damageTier: 0
   cooldown: 1
+  halfHeartDamage: 0
 --- !u!114 &302527991
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10967,6 +10971,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
+  knockbackWeight: 1
 --- !u!1 &311465632
 GameObject:
   m_ObjectHideFlags: 0
@@ -37634,6 +37639,7 @@ MonoBehaviour:
   detectionRange: 6
   stopDistance: 0.8
   target: {fileID: 0}
+  flies: 0
 --- !u!114 &1312200019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62159,6 +62165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
+  knockbackWeight: 1
 --- !u!114 &2018927178
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -12,6 +12,8 @@ namespace TrickalFanGame.Combat
         PlayerDamageAura,
         EnemyMelee,
         PlayerItemLightning,
-        PlayerBomb
+        PlayerBomb,
+        // Passive-0 §4.7: a status effect tick (poison). Player damage, so its kills count for the player.
+        PlayerStatusEffect
     }
 }

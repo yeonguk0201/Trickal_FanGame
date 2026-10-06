@@ -254,6 +254,17 @@ namespace TrickalFanGame.Item
                         }
                         lightning.Configure(effect.IntegerAmount, effect.Magnitude);
                         break;
+                    case ItemEffectType.ProjectileSizePercent:
+                        stats.AddProjectileSizePercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.BasicAttackPoison:
+                        stats.AddBasicAttackPoison(
+                            effect.Magnitude,
+                            effect.SecondaryMagnitude,
+                            effect.DurationSeconds,
+                            effect.IntervalSeconds,
+                            effect.IntegerAmount);
+                        break;
                     case ItemEffectType.Flight:
                         PlayerFlight flight = GetComponent<PlayerFlight>();
                         if (flight == null)

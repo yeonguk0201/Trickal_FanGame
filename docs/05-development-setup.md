@@ -972,6 +972,35 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   플레이어에게 곧장 날아오고, 닿으면 하트가 반 칸 줄며, 한 대 맞으면 죽는다. 클리어된 방에서 부숴도 문이 잠기지 않고
   보상이 다시 나오지 않는지, 전투 중에 부수면 쥬비를 다 잡아야 방이 클리어되는지 본다.
 
+- Passive-1 넉백 교체·칸나의 대포·비비의 콧물: 메뉴 `Trickal Fan Game > Week 23 > Setup Passive-1 Cannon and Snot`이
+  `Assets/Items/`에 `artifact-kanna-cannon`(Rare, 최대 2스택, 효과 43 `ProjectileSizePercent` `magnitude` 0.5)과
+  `artifact-bibi-snot`(Rare, 최대 2스택, 효과 44 `BasicAttackPoison` `magnitude` 0.15·`secondaryMagnitude` 0.15·
+  `durationSeconds` 4·`intervalSeconds` 1·`integerAmount` 3)을 만들고, Game Scene `selectionRewardPool`에 ID 순서로
+  추가하며, 적 Prefab 15종의 `KnockbackReceiver.knockbackWeight`를 맞춘다. GUID를 보존하며 멱등이다(이미 맞는 Prefab과
+  풀은 다시 저장하지 않는다).
+  넉백 무게(밀림 = 공식 ÷ 무게): 쥬비 0.5, 부스러기 0.8, 빠른 원거리형 0.8, 크레용 마법사 0.9, 산사모 0.9,
+  원거리형·고혈당 요정·크레용 궁수·추적형 1, 크레용 도끼병 1.3, 돌진형 1.5, 크레용 방패병 2, 보스 3종 4. 표는
+  `Week23Passive1Setup.KnockbackWeights`이며, 적 Prefab을 새로 만들면 여기에 넣어야 검증이 통과한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Passive-1 Cannon and Snot`, 배치는 Unity `-batchmode -nographics
+  -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week23Passive1Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 GUID, 효과 타입 43·44와 피해 원천 `PlayerStatusEffect` 추가, 에셋·설명·풀 소속,
+  넉백 공식(기본 0.2, 탄속 비율 0.5~2.0, 무게, 보스 25%)과 모든 적 Prefab의 무게 표 일치, 밀림이 경직·행동 억제를
+  만들지 않고 새 밀림으로 교체되며 죽은 적·명시적 넉백 중·돌진·도약·보스 패턴 중에는 거부되는지, 물리 시뮬레이션에서
+  약 0.2 이동과 탄이 적을 밀지 않는지, Kinematic 몸이 벽으로 밀리지 않는지, 분열탄의 넉백 상속, 대포의 시각·충돌 반경
+  동일 배율과 상한 0.45·피해 불변, 콧물의 확률 합산, 중독 스택·갱신·틱 일정·만료, 틱의 `Periodic` 성질과 처치 1회 귀속,
+  피해 0·처치·중독 없는 탄의 미부여를 검사한다. 2026-10-06 배치 통과(종료 코드 0)를 확인했다.
+  회귀는 `VerifyWithRegressionsBatch`(투사체 회귀 5종 `PhaseGProjectileEffectsVerification`·`Week7RangedEnemyVerification`·
+  `Week7DamageContextVerification`·`Week15Enemy4Verification`·`Week19Spawn2Verification`과 `PhaseGArtifactContractVerification`·
+  Range-0·Enemy-6·Reward-3)이며 같은 날 통과했다. 원점 주변에 물체를 두는 예전 검증은 빈 Scene에서 먼저 실행한다.
+  `Week13Hud3BVerification.Verify`는 이 조각과 무관한 `HUD-2 graphics must not intercept combat input`에서 실패해
+  회귀 묶음에 넣지 않았다(HEAD에서의 재현 여부는 확인하지 않음).
+  수동 확인: Game Scene Play → 전투방에서 적을 쏘면 탄에 맞을 때마다 살짝 밀리고(쥬비·부스러기는 더, 방패병·보스는 덜),
+  원거리형의 조준·돌진형의 준비 동작이 끊기지 않으며, 돌진 중인 적은 밀리지 않는지 본다. `F1` 패널 `— Artifact —`의
+  `Show artifact drops`를 켜고 `Drop 칸나의 대포`·`Drop 비비의 콧물`로 떨어뜨려 줍는다(보물방·보스 선택 보상에도 나온다).
+  `칸나의 대포`를 얻으면 탄이 1.5배(두 번째는 2배)로 커지고 1칸 통로를 지나가며 피해는 그대로인지, `비비의 콧물`을
+  얻으면 가끔 맞은 적이 초록빛으로 변하고 1초마다 체력이 줄다가 4초 뒤 풀리는지, 중독으로 죽은 적도 처치 회복과
+  방 클리어에 세어지는지 본다.
+
 - Spell-5 소형 스펠 4종: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-5 Small Spells`가 `Assets/Items/`에
   `single-spell-armor-festival-invitation`(Rare, 효과 37 `GainShield` `magnitude` 4), `single-spell-amelia-love-letter`
   (Uncommon, 효과 38 `SpawnHealthPickups` `integerAmount` 2), `single-spell-random-coin`(Common, 효과 39 `GainRandomGold`
