@@ -103,7 +103,7 @@ namespace TrickalFanGame.Editor
             int chestLayer = LayerMask.NameToLayer(TreasureChest.LayerName);
             Assert(chestLayer == LayerMask.NameToLayer("Environment") && prefab.gameObject.layer == chestLayer,
                 "Chests must use the Environment layer so they block like obstacles.");
-            foreach (string other in new[] { "Player", "Enemy", "PlayerProjectile", "Environment", "Pickup" })
+            foreach (string other in new[] { PlayerFeet.LayerName, "Enemy", "PlayerProjectile", "Environment", "Pickup" })
                 Assert(!Physics2D.GetIgnoreLayerCollision(chestLayer, LayerMask.NameToLayer(other)),
                     $"Chests must collide with the {other} layer.");
             return prefab;

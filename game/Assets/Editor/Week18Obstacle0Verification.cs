@@ -473,6 +473,7 @@ namespace TrickalFanGame.Editor
             player.layer = LayerMask.NameToLayer("Player");
             player.AddComponent<Rigidbody2D>().gravityScale = 0f;
             player.AddComponent<CircleCollider2D>();
+            PlayerFeet.Ensure(player, out _);
             Health health = player.AddComponent<Health>();
             player.AddComponent<PlayerStats>();
             player.AddComponent<PlayerActionState>();

@@ -14,6 +14,7 @@ namespace TrickalFanGame.Player
         private PlayerActionState actionState;
         private KnockbackReceiver knockback;
         private SpriteRenderer spriteRenderer;
+        private PlayerFeet feet;
         private Vector2 movement;
 
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
@@ -21,6 +22,28 @@ namespace TrickalFanGame.Player
         public Vector2 CurrentVelocity => body.linearVelocity;
         public float CurrentMoveSpeed => stats.MoveSpeed;
         public Vector2 MovementIntent => health != null && !health.IsDead ? movement : Vector2.zero;
+
+        // Hitbox-0: the terrain collider. A fixture built without one falls back to the root.
+        public PlayerFeet Feet
+        {
+            get
+            {
+                if (feet == null) feet = GetComponentInChildren<PlayerFeet>(true);
+                return feet;
+            }
+        }
+
+        public Vector2 FeetPosition => Feet != null ? Feet.WorldCenter : (Vector2)transform.position;
+
+        public bool FeetOverlap(Collider2D other) => Feet == null || Feet.Overlaps(other);
+
+        // Hitbox-1: where the root stands at size 1. A larger body grows upward from its feet, so its root sits
+        // above this point; ground rules (placement, pits, bombs) use it instead of the root.
+        public Vector2 StandingPosition =>
+            Feet != null ? Feet.WorldCenter - PlayerFeet.LocalPosition : (Vector2)transform.position;
+
+        public Vector2 RootPositionForStanding(Vector2 standingPosition) =>
+            standingPosition + ((Vector2)transform.position - StandingPosition);
 
         private void Awake()
         {
@@ -41,6 +64,12 @@ namespace TrickalFanGame.Player
             if (GetComponent<PlayerHitPassThrough>() == null)
             {
                 gameObject.AddComponent<PlayerHitPassThrough>();
+            }
+            // The Player layer does not collide with terrain, so a player without feet would walk through walls.
+            PlayerFeet.Ensure(gameObject, out feet);
+            if (GetComponent<PlayerBodySize>() == null)
+            {
+                gameObject.AddComponent<PlayerBodySize>();
             }
         }
 

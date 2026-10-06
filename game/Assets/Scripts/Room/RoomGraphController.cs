@@ -285,6 +285,8 @@ namespace TrickalFanGame.Room
 
         private static void MovePlayer(PlayerMovement movingPlayer, Vector2 destination)
         {
+            // Hitbox-1: entry points are where the player stands; a larger body's root sits above its feet.
+            destination = movingPlayer.RootPositionForStanding(destination);
             Rigidbody2D body = movingPlayer.GetComponent<Rigidbody2D>();
             if (body != null)
             {

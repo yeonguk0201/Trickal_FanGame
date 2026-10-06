@@ -97,8 +97,12 @@ namespace TrickalFanGame.Player
             }
         }
 
+        // Hitbox-0: the feet are what a walking player presses against a vault, so flight uses them too. A body
+        // built without feet falls back to its own colliders.
         private bool IsOverlapping(Collider2D obstacle)
         {
+            PlayerFeet feet = GetComponentInChildren<PlayerFeet>();
+            if (feet != null) return feet.Overlaps(obstacle);
             foreach (Collider2D own in bodyColliders)
                 if (own != null && !own.isTrigger && own.Distance(obstacle).isOverlapped) return true;
             return false;

@@ -257,6 +257,18 @@ namespace TrickalFanGame.Item
                     case ItemEffectType.ProjectileSizePercent:
                         stats.AddProjectileSizePercent(effect.Magnitude);
                         break;
+                    case ItemEffectType.BasicAttackDamagePercent:
+                        stats.AddBasicAttackDamagePercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.PlayerSizePercent:
+                        stats.AddPlayerSizePercent(effect.Magnitude);
+                        PlayerBodySize bodySize = GetComponent<PlayerBodySize>();
+                        if (bodySize == null)
+                        {
+                            bodySize = gameObject.AddComponent<PlayerBodySize>();
+                        }
+                        bodySize.SetSizeMultiplier(stats.PlayerSizeMultiplier);
+                        break;
                     case ItemEffectType.BasicAttackPoison:
                         stats.AddBasicAttackPoison(
                             effect.Magnitude,

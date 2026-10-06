@@ -1001,6 +1001,54 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   얻으면 가끔 맞은 적이 초록빛으로 변하고 1초마다 체력이 줄다가 4초 뒤 풀리는지, 중독으로 죽은 적도 처치 회복과
   방 클리어에 세어지는지 본다.
 
+- Hitbox-0 지형 충돌과 피격 판정 분리: 메뉴 `Trickal Fan Game > Week 23 > Setup Hitbox-0 Player Feet Collider`가
+  `PlayerFeet` 레이어를 빈 사용자 레이어에 만들고, 2D 충돌 표에서 `PlayerFeet`은 `Environment`·`Pit`과만 충돌하게,
+  `Player`는 그 둘과 충돌하지 않게 바꾼 뒤, 플레이어가 있는 4개 Scene의 플레이어에 자식 `Feet`(반지름 0.3, 위치 y −0.2)를
+  넣는다. 다시 실행해도 자식이 늘지 않고 값이 같으면 Scene을 저장하지 않는다. 구덩이 구성(`Week22Terrain0Setup`)의 충돌
+  대상도 `PlayerFeet`으로 바꿨으므로 이 Setup보다 먼저 실행하면 레이어가 없다는 오류로 멈춘다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Hitbox-0 Player Feet Collider`, 배치는 Unity `-batchmode -nographics
+  -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week23Hitbox0Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 레이어 보존, 충돌 표(발밑은 지형만, 몸통은 지형 제외·Default·Enemy·Pickup 유지),
+  4개 Scene의 몸통 원 1개와 발밑 자식 1개, 물리 시뮬레이션에서 벽·구덩이에 위·아래·옆으로 걸어가 발밑 위치에서 멈추는지,
+  0.8 틈은 지나고 0.4 틈은 막히는지, 적의 몸은 몸통 원에서 멈추는지, 몸통만 닿은 문 트리거는 진입으로 세지 않는지를
+  검사한다. 회귀는 `VerifyWithRegressionsBatch`(Move-1·Door-1·Terrain-0·Chest-0·Chest-2·Flight-0·Obstacle-0·1·5·6·
+  Enemy-6·Passive-1·`FairyVillageArtworkVerification`·Corner-0·`Week7HighGradeSkillVerification`의 `Verify`)다.
+  2026-10-06 두 배치가 종료 코드 0으로 통과했다. `Player` 레이어에 임시 플레이어를 만들던 검증기는 발밑을 붙이거나
+  `PlayerFeet` 레이어의 몸을 쓰도록 고쳤다.
+  수동 확인: `FrontendScene`에서 Play → 방의 위쪽 벽에 붙으면 몸이 벽에 조금 겹치고 아래쪽 벽은 전과 같은지, 장애물
+  사이 1칸 통로를 걸리지 않고 지나는지, 구덩이 가장자리에서 발이 멈추는지, 문은 발이 통로에 들어서야 넘어가고 잠긴 문은
+  닿으면 열쇠를 쓰는지, 적의 접촉 피해와 적 투사체가 전과 같은 거리에서 맞는지, 하트·자원 픽업이 몸에 닿으면 주워지는지,
+  상자가 밀리고 열리는지, 고등급 돌진이 장애물을 부수는지 본다. `F1` 패널 `Golden exclusive`의 `Drop 시스트의 가짜 날개`로
+  떨어뜨려 주운 뒤 낮은 장애물·구덩이 위를 지나고 나무·벽에는 막히는지도 본다.
+
+- Hitbox-1 플레이어 크기 배율: Setup은 없다. `PlayerMovement`가 시작할 때 `PlayerBodySize`를 붙인다. 자동 검증 메뉴는
+  `Trickal Fan Game > Week 23 > Verify Hitbox-1 Player Size`, 배치는 Unity `-batchmode -nographics -quit -projectPath
+  <game 경로> -executeMethod TrickalFanGame.Editor.Week23Hitbox1Verification.VerifyWithRegressionsBatch -logFile <로그 경로>`다.
+  배율 0.5·1.5·2·3에서 루트 스케일, 피격 반지름(2배 상한), 발밑 반지름 0.3과 선 자리 유지, 루트가 올라간 높이, 도착 위치
+  보정, 최소 배율 0.5, 배율 1 복원을 검사하고, 물리 시뮬레이션으로 배율 1·3에서 벽은 발밑에서 멈추고 0.8 틈은 지나는지,
+  배율 1.5·3에서 적의 몸이 커진 몸통 반지름에서 멈추는지를 본다. 회귀는 Hitbox-0 회귀 전체와 `Week20Special2Verification`·
+  `Week20Special3Verification`·`Week20DevPanelVerification`의 `Verify`다. 2026-10-06 배치가 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → `F1` 패널 `— Player —`의 `x2`·`x3`를 눌러 몸이 발에서 위로 커지고 표시의 `hurtbox r`이
+  1에서 멈추는지, 커진 채로 1칸 통로와 문을 지나고 다음 방에서 벽에 끼지 않고 서는지, 적과 적 투사체가 커진 몸에 맞는지,
+  폭탄이 발밑에 놓이는지, `x1`로 원래대로 돌아오는지, `x0.5`도 같은 자리에 서 있는지 본다.
+
+- Passive-2 거대화 물약: 메뉴 `Trickal Fan Game > Week 23 > Setup Passive-2 Giant Potion`이 `Assets/Items/`에
+  `artifact-giant-potion`(Epic, 최대 2스택, 효과 45 `PlayerSizePercent` `magnitude` 0.3·효과 46 `BasicAttackDamagePercent` 0.2·
+  효과 11 `MaxHealthFlat` 6·효과 20 `MoveSpeedPenaltyPercent` 0.2)을 GUID를 보존하며 멱등 구성하고, Game Scene의 선택 보상
+  풀에 넣고(이미 있으면 Scene을 저장하지 않음) 글리프를 추가한다. Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는
+  `backend/`에서 `pnpm prisma:seed`를 다시 실행한다. 자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Setup and Verify Passive-2
+  Giant Potion`, 배치는 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod
+  TrickalFanGame.Editor.Week23Passive2Verification.SetupAndVerifyBatch -logFile <로그 경로>`다. Setup 2회 GUID, 효과 타입 45·46
+  추가, 에셋·설명(`몸 크기 +30% · 기본 공격 피해 +20% · 최대 HP +3칸 · 이동속도 -20%`)·풀 소속, 1·2스택의 크기 1.3·1.6배와
+  피격 반지름 0.65·0.8, 발밑 고정, 기본 공격 배율 ×1.2·×1.4와 공격력 스탯·스킬 배율 불변, 최대 HP +6·+12단위와 채움,
+  이동 속도 ×0.8·×0.6, 3번째 획득 거부를 검사한다. 회귀는 `VerifyWithRegressionsBatch`(Hitbox-1·
+  `PhaseGArtifactContractVerification`·`Week16Artifact1Verification`·Passive-1·Reward-3·개발 패널)다. 2026-10-06 두 배치가
+  종료 코드 0으로 통과했고 Backend `pnpm jest src/contracts`도 통과했다.
+  수동 확인: Game Scene Play → `F1` 패널 `— Artifact —`의 `Show artifact drops`를 켜고 `Drop 거대화 물약`으로 떨어뜨려 줍는다.
+  몸이 발에서 위로 1.3배(두 번째는 1.6배) 커지고 느려지며 하트가 3칸 늘어 채워지는지, 기본 공격의 피해 숫자만 늘고 스킬
+  피해는 그대로인지, 세 번째는 주워지지 않는지, 커진 채로 1칸 통로와 문을 지나는지, 획득 알림과 일시정지 목록에 이름과
+  설명이 깨지지 않고 나오는지 본다.
+
 - Spell-5 소형 스펠 4종: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-5 Small Spells`가 `Assets/Items/`에
   `single-spell-armor-festival-invitation`(Rare, 효과 37 `GainShield` `magnitude` 4), `single-spell-amelia-love-letter`
   (Uncommon, 효과 38 `SpawnHealthPickups` `integerAmount` 2), `single-spell-random-coin`(Common, 효과 39 `GainRandomGold`

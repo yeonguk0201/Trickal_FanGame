@@ -111,6 +111,8 @@ namespace TrickalFanGame.Run
         private static void MarkAssisted(string action) =>
             FindFirstObjectByType<RunSession>()?.DevelopmentPlaytest?.MarkAssisted(action);
 
+        private static readonly float[] SizeOptions = { 0.5f, 1f, 1.5f, 2f, 3f };
+
         private static bool AssistedButton(string label)
         {
             if (!GUILayout.Button(label)) return false;
@@ -147,6 +149,22 @@ namespace TrickalFanGame.Run
                 if (invulnerable) MarkAssisted("Invulnerable");
                 if (!invulnerable) health?.SetInvulnerable(false);
             }
+
+            // Hitbox-1: the look follows the size, the hurtbox stops at its limit and the feet never change.
+            PlayerBodySize size = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<PlayerBodySize>()
+                : null;
+            if (size == null) return;
+            GUILayout.Label($"Size x{size.SizeMultiplier:0.##}   hurtbox r {size.HurtboxRadius:0.##}   " +
+                            $"feet r {PlayerFeet.Radius:0.##}");
+            GUILayout.BeginHorizontal();
+            foreach (float option in SizeOptions)
+            {
+                if (AssistedButton($"x{option:0.##}") && size.SetSizeMultiplier(option))
+                    status = $"Player size x{size.SizeMultiplier:0.##}.";
+            }
+
+            GUILayout.EndHorizontal();
         }
 
         // Drops a single-use item next to the player, so it is picked up through the normal slot path.

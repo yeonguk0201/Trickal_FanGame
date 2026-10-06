@@ -51,6 +51,8 @@ namespace TrickalFanGame.Player
         private float distanceDamageMaximum;
         private ProjectileSplitSettings projectileSplitSettings;
         private float projectileSpeedPercentBonus;
+        private float playerSizePercentBonus;
+        private float basicAttackDamagePercentBonus;
         private float projectileLifetimePercentBonus;
         private float projectileSizePercentBonus;
         private PoisonSettings basicAttackPoison;
@@ -59,6 +61,9 @@ namespace TrickalFanGame.Player
         public float AttackDamage =>
             (baseAttackDamage + flatAttackDamageBonus) * Mathf.Max(0f, 1f + attackDamagePercentBonus);
         public float SkillDamageMultiplier => 1f + skillDamagePercentBonus;
+        // Passive-2: PlayerBodySize turns this into the look, the hurtbox and the fixed feet.
+        public float PlayerSizeMultiplier => 1f + playerSizePercentBonus;
+
         public float MoveSpeed => (baseMoveSpeed + moveSpeedBonus) *
             Mathf.Max(0f, 1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent +
                 currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus +
@@ -67,7 +72,8 @@ namespace TrickalFanGame.Player
             Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus +
                              singleUseRoomAttackSpeedPercentBonus);
         public float BasicAttackRoomDamageMultiplier =>
-            1f + currentRoomAttackDamagePercentBonus + singleUseRoomAttackDamagePercentBonus;
+            1f + basicAttackDamagePercentBonus + currentRoomAttackDamagePercentBonus +
+            singleUseRoomAttackDamagePercentBonus;
         public float CriticalChance =>
             Mathf.Clamp01(baseCriticalChance + criticalChanceBonus + singleUseRoomCriticalChanceBonus);
         public float CriticalDamageMultiplier =>
@@ -299,6 +305,17 @@ namespace TrickalFanGame.Player
         public void AddProjectileSizePercent(float amount)
         {
             projectileSizePercentBonus = Mathf.Max(0f, projectileSizePercentBonus + amount);
+        }
+
+        // Passive-2: a Run-long bonus that joins the room bonuses of the basic attack multiplier.
+        public void AddBasicAttackDamagePercent(float amount)
+        {
+            basicAttackDamagePercentBonus = Mathf.Max(0f, basicAttackDamagePercentBonus + amount);
+        }
+
+        public void AddPlayerSizePercent(float amount)
+        {
+            playerSizePercentBonus = Mathf.Max(0f, playerSizePercentBonus + amount);
         }
 
         // Sources of the same status effect add their chances (up to 100%); the other values follow the latest one.

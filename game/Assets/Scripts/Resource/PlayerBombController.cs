@@ -49,7 +49,11 @@ namespace TrickalFanGame.Resource
 
         public bool TryPlaceBomb(float currentTime)
         {
-            if (!CanPlace || !TryResolvePlacement(transform.position, out Vector2 position) ||
+            // Hitbox-1: a bomb lands where the player stands, not at the raised center of a larger body.
+            Vector2 standing = TryGetComponent(out PlayerMovement movement)
+                ? movement.StandingPosition
+                : (Vector2)transform.position;
+            if (!CanPlace || !TryResolvePlacement(standing, out Vector2 position) ||
                 !runProgress.TrySpendResource(RunResourceType.Bomb))
             {
                 return false;

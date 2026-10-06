@@ -450,7 +450,8 @@ namespace TrickalFanGame.Editor
                 typeof(SpriteRenderer));
             body.transform.SetParent(parent);
             body.transform.position = position;
-            body.layer = LayerMask.NameToLayer("Player");
+            // Hitbox-0: one circle stands in for the feet, the part that meets terrain.
+            body.layer = PlayerFeet.Layer;
             body.GetComponent<CircleCollider2D>().radius = 0.3f;
             body.GetComponent<Rigidbody2D>().gravityScale = 0f;
             PlayerFlight flight = body.AddComponent<PlayerFlight>();

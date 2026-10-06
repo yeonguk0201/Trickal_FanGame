@@ -224,6 +224,7 @@ namespace TrickalFanGame.Editor
             Rigidbody2D playerBody = playerObject.AddComponent<Rigidbody2D>();
             playerBody.gravityScale = 0f;
             playerObject.AddComponent<CircleCollider2D>().radius = 0.4f;
+            PlayerFeet.Ensure(playerObject, out _);
             Health playerHealth = playerObject.AddComponent<Health>();
             playerObject.AddComponent<PlayerStats>();
             playerObject.AddComponent<PlayerActionState>();

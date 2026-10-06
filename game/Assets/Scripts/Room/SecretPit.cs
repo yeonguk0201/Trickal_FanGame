@@ -56,7 +56,7 @@ namespace TrickalFanGame.Room
             RoomNode target = link?.Target;
             if (player == null || target == null || link.Graph == null || sourceNode == null ||
                 (sourceRoom != null && sourceRoom.State != RoomState.Cleared) ||
-                ((Vector2)player.transform.position - (Vector2)transform.position).sqrMagnitude >
+                (player.StandingPosition - (Vector2)transform.position).sqrMagnitude >
                 EnterRadius * EnterRadius)
             {
                 return false;

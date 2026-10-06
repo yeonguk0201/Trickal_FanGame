@@ -247,10 +247,10 @@ namespace TrickalFanGame.Editor
                 {
                     float near = blockers[lane].bounds.min.x - Lane(lane).x;
                     float far = blockers[lane].bounds.max.x - Lane(lane).x;
-                    float walking = Drive(CreateBody(root, "Player", false), Lane(lane));
+                    float walking = Drive(CreateBody(root, PlayerFeet.LayerName, false), Lane(lane));
                     Assert(walking < near - BodyRadius + 0.05f,
                         $"A walking player crossed into the {labels[lane]} (x={walking:F2}).");
-                    float flying = Drive(CreateBody(root, "Player", true), Lane(lane));
+                    float flying = Drive(CreateBody(root, PlayerFeet.LayerName, true), Lane(lane));
                     if (passable[lane])
                         Assert(flying > far + BodyRadius, $"A flying player must pass over the {labels[lane]} " +
                                                           $"(x={flying:F2}).");
@@ -265,7 +265,7 @@ namespace TrickalFanGame.Editor
 
                 // A flying player starting inside a pit or obstacle (for example after a room rebuild) is not pushed
                 // out, and the shadow and draw order show the flight.
-                GameObject hovering = CreateBody(root, "Player", true);
+                GameObject hovering = CreateBody(root, PlayerFeet.LayerName, true);
                 hovering.transform.position = Lane(1) + Vector2.right * 2f;
                 PlayerFlight flight = hovering.GetComponent<PlayerFlight>();
                 SpriteRenderer sprite = hovering.GetComponent<SpriteRenderer>();
@@ -552,6 +552,7 @@ namespace TrickalFanGame.Editor
             player.transform.SetParent(root.transform);
             player.transform.position = position;
             player.layer = LayerMask.NameToLayer("Player");
+            PlayerFeet.Ensure(player, out _);
             player.GetComponent<Rigidbody2D>().gravityScale = 0f;
             health = player.GetComponent<Health>();
             InvokeLifecycle(health, "Awake");
