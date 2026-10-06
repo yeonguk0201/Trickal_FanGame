@@ -27,6 +27,8 @@ namespace TrickalFanGame.Run
         private float nextHighlightRefresh;
         private Vector2 scrollPosition;
         private ItemDefinition[] singleUseItems;
+        private ItemDefinition[] artifactItems;
+        private bool showArtifacts;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateForDevelopment()
@@ -80,6 +82,7 @@ namespace TrickalFanGame.Run
             DrawSeedSection(assembler);
             DrawPlayerSection(assembler);
             DrawSpellSlotSection(assembler);
+            DrawArtifactSection(assembler);
             DrawResourceSection(progress);
             DrawChestSection(assembler);
             DrawObstacleSection(assembler);
@@ -199,6 +202,50 @@ namespace TrickalFanGame.Run
             }
 #else
             GUILayout.Label("Single-use drops are editor-only.");
+#endif
+        }
+
+        // Drops an artifact next to the player as a normal floor pickup, so it is acquired through the usual path
+        // (stack limit, Run record, HUD). The list collects every active artifact asset, so a new artifact appears
+        // here without panel changes. Golden chest exclusives keep their own buttons in the chest section.
+        private void DrawArtifactSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Artifact —");
+            ChestContentTable table = assembler.ChestContentTable;
+            Transform player = assembler.Graph?.Player != null ? assembler.Graph.Player.transform : null;
+            if (table == null || table.ArtifactPickupPrefab == null || player == null)
+            {
+                GUILayout.Label("No artifact pickup Prefab or player.");
+                return;
+            }
+
+#if UNITY_EDITOR
+            artifactItems ??= UnityEditor.AssetDatabase.FindAssets("t:ItemDefinition")
+                .Select(guid => UnityEditor.AssetDatabase.LoadAssetAtPath<ItemDefinition>(
+                    UnityEditor.AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(item => item != null && item.Kind == ItemKind.Artifact && item.IsActive && item.IsValid)
+                .OrderBy(item => item.ItemId, System.StringComparer.Ordinal)
+                .ToArray();
+            showArtifacts = GUILayout.Toggle(showArtifacts, $"Show artifact drops ({artifactItems.Length})");
+            if (!showArtifacts) return;
+
+            PlayerInventory inventory = player.GetComponent<PlayerInventory>();
+            foreach (ItemDefinition item in artifactItems)
+            {
+                if (table.GoldenExclusiveArtifacts.Contains(item)) continue;
+                int stacks = inventory != null ? inventory.GetStackCount(item.ItemId) : 0;
+                string limit = item.MaxStacks > 0 ? item.MaxStacks.ToString() : "-";
+                if (!AssistedButton($"Drop {item.DisplayName} ({stacks}/{limit})")) continue;
+                RoomPrefab room = CurrentRoom(assembler);
+                ItemPickup pickup = Instantiate(table.ArtifactPickupPrefab,
+                    player.position + Vector3.right * 1.2f, Quaternion.identity,
+                    room != null ? room.transform : null);
+                pickup.name = $"Item Pickup ({item.ItemId})";
+                pickup.Configure(item);
+                status = $"Dropped {item.DisplayName} next to the player.";
+            }
+#else
+            GUILayout.Label("Artifact drops are editor-only.");
 #endif
         }
 

@@ -34,6 +34,8 @@ describe('Item catalog', () => {
       'artifact-sist-fake-wings',
       'jjangsem-bigwood-fruit',
       'jjangsem-melune-card',
+      'artifact-kanna-cannon',
+      'artifact-bibi-snot',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -65,8 +67,10 @@ describe('Item catalog', () => {
       'EPIC',
       'RARE',
       'RARE',
+      'RARE',
+      'RARE',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(29);
+    expect(new Set(active.map((item) => item.id)).size).toBe(31);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -184,6 +188,16 @@ describe('Item catalog', () => {
         id: 'artifact-sist-fake-wings',
         rarity: 'EPIC',
         maxStacks: 1,
+      },
+      {
+        id: 'artifact-kanna-cannon',
+        rarity: 'RARE',
+        maxStacks: 2,
+      },
+      {
+        id: 'artifact-bibi-snot',
+        rarity: 'RARE',
+        maxStacks: 2,
       },
     ]);
   });
@@ -337,6 +351,40 @@ describe('Item catalog', () => {
       isActive: true,
       maxStacks: 1,
       effects: [{ type: 'DuplicateRoomChestsAndPickups' }],
+    });
+  });
+
+  it('adds the cannon and the snot as attack modifier artifacts (Passive-1)', () => {
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'artifact-kanna-cannon'),
+    ).toMatchObject({
+      name: '칸나의 대포',
+      rarity: 'RARE',
+      isActive: true,
+      maxStacks: 2,
+      effects: [{ type: 'ProjectileSizePercent', magnitude: 0.5 }],
+    });
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'artifact-bibi-snot'),
+    ).toMatchObject({
+      name: '비비의 콧물',
+      rarity: 'RARE',
+      isActive: true,
+      maxStacks: 2,
+      effects: [
+        {
+          type: 'BasicAttackPoison',
+          magnitude: 0.15,
+          secondaryMagnitude: 0.15,
+          integerAmount: 3,
+          intervalSeconds: 1,
+          durationSeconds: 4,
+        },
+      ],
+    });
+    // The legacy inactive item-05 (shot size) keeps its ID; the cannon does not reuse it.
+    expect(ITEM_CATALOG.find((item) => item.id === 'item-05')).toMatchObject({
+      isActive: false,
     });
   });
 

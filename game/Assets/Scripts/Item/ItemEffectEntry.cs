@@ -185,6 +185,16 @@ namespace TrickalFanGame.Item
                     }
 
                     break;
+                case ItemEffectType.BasicAttackPoison:
+                    if (magnitude > 1f || secondaryMagnitude <= 0f || durationSeconds <= 0f ||
+                        intervalSeconds <= 0f || integerAmount <= 0)
+                    {
+                        error = "BasicAttackPoison requires a chance within (0, 1], a positive tick damage ratio, " +
+                                "duration and tick interval, and a positive maximum stack count.";
+                        return false;
+                    }
+
+                    break;
                 case ItemEffectType.Pierce:
                 case ItemEffectType.MaxSP:
                 case ItemEffectType.MultiShot:

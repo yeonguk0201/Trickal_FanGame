@@ -18,7 +18,7 @@ namespace TrickalFanGame.Enemy
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(Health), typeof(KnockbackReceiver))]
-    public sealed class ChargingEnemyController : MonoBehaviour
+    public sealed class ChargingEnemyController : MonoBehaviour, IKnockbackPushBlocker
     {
         public const float GlancingCollisionAngle = 60f;
 
@@ -58,6 +58,8 @@ namespace TrickalFanGame.Enemy
         private float bodyRadius;
 
         public ChargingEnemyState State { get; private set; }
+        // A basic attack push does not move the dash (Passive-0 §4.6).
+        public bool BlocksKnockbackPush => State == ChargingEnemyState.Dashing;
         public Vector2 LockedDirection => lockedDirection;
         public float NextChargeTime => nextChargeTime;
         public float DashSpeed => dashSpeed;

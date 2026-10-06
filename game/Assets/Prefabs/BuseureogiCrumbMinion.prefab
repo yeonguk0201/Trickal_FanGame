@@ -178,6 +178,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 30
   currentShield: 0
+  useHealthUnits: 0
 --- !u!114 &3389682093099970251
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -206,6 +207,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
   damageTier: 0
   cooldown: 1
+  halfHeartDamage: 0
 --- !u!114 &4806883202623933413
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -222,6 +224,7 @@ MonoBehaviour:
   detectionRange: 20
   stopDistance: 0.7
   target: {fileID: 0}
+  flies: 0
 --- !u!114 &3503251707020396030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -236,6 +239,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
+  knockbackWeight: 0.8
 --- !u!114 &4193192435550944461
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,3 +285,8 @@ MonoBehaviour:
   recoveryDuration: 0.55
   attackCooldown: 1
   damageTier: 0
+  lungeTriggerRange: 0
+  lungeDistance: 0
+  aimLockLeadTime: 0.12
+  lungeHitForwardOffset: 0.3
+  lungeHitRadius: 0.75
