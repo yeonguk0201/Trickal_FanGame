@@ -496,12 +496,15 @@ namespace TrickalFanGame.Enemy
             ClearLandingTelegraph();
             landingTelegraph = new GameObject("Saemaeum Jump Landing Telegraph");
             landingTelegraph.transform.position = jumpDestination;
-            landingTelegraph.transform.localScale = Vector3.one * (landingRadius * 1.35f);
             SpriteRenderer source = GetComponentInChildren<SpriteRenderer>();
             SpriteRenderer renderer = landingTelegraph.AddComponent<SpriteRenderer>();
-            renderer.sprite = source != null ? source.sprite : null;
-            renderer.color = new Color(1f, 0.72f, 0.08f, 0.28f);
+            Sprite[] shadow = CombatEffectArtwork.Frames("landing-shadow");
+            renderer.sprite = shadow.Length > 0 ? shadow[0] : null;
+            renderer.color = new Color(1f, 1f, 1f, 0.85f);
+            renderer.sortingLayerID = source != null ? source.sortingLayerID : 0;
             renderer.sortingOrder = source != null ? source.sortingOrder - 1 : -1;
+            float shadowWidth = source != null ? Mathf.Max(1f, source.bounds.size.x * 1.4f) : 3f;
+            CombatEffectArtwork.Size(renderer, shadowWidth, shadowWidth / 3f);
             boss?.RegisterOwnedObject(landingTelegraph);
         }
 

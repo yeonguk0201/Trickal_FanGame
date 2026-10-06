@@ -217,6 +217,10 @@ namespace TrickalFanGame.Enemy
                     attacks[knight.AttackPoseIndex] != null && !boss.IsActionSuppressed &&
                     boss.State != BossActionState.PhaseTransition && boss.State != BossActionState.Defeated)
                 {
+                    // Stationary windups must face their aim; travel alone cannot update facing here.
+                    if (Mathf.Abs(knight.LockedDirection.x) > 0.001f)
+                        source.flipX = knight.LockedDirection.x > 0f;
+                    artwork.flipX = source.flipX;
                     artwork.sprite = attacks[knight.AttackPoseIndex];
                     return;
                 }

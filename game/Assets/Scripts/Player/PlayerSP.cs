@@ -20,6 +20,7 @@ namespace TrickalFanGame.Player
         public bool IsOvercharged => currentSP > maxSP;
 
         public event Action<int, int> Changed;
+        public event Action Restored;
 
         private void Awake()
         {
@@ -40,6 +41,7 @@ namespace TrickalFanGame.Player
             if (currentSP >= maxSP) hasHalfSP = false;
             Changed?.Invoke(currentSP, maxSP);
             Debug.Log($"[PlayerSP] SP {currentSP}/{maxSP}", this);
+            Restored?.Invoke();
             return currentSP != previous;
         }
 
@@ -63,6 +65,7 @@ namespace TrickalFanGame.Player
 
             Changed?.Invoke(currentSP, maxSP);
             Debug.Log($"[PlayerSP] SP {currentSP}{(hasHalfSP ? ".5" : string.Empty)}/{maxSP}", this);
+            Restored?.Invoke();
             return true;
         }
 
@@ -79,6 +82,7 @@ namespace TrickalFanGame.Player
             hasHalfSP = false;
             Changed?.Invoke(currentSP, maxSP);
             Debug.Log($"[PlayerSP] SP {currentSP}/{maxSP} (filled with overcharge)", this);
+            Restored?.Invoke();
             return true;
         }
 

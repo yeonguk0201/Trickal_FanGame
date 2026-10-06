@@ -124,6 +124,18 @@ namespace TrickalFanGame.Editor
                 Require(Mathf.Abs(impact - (tempo < 1f ? 2.564f : 2.85f)) < 0.0001f,
                     "Both phases must gain the full 1.35 seconds of charge time.");
                 runtime.OnPatternStateChanged(BossActionState.Telegraph, BossPatternExecution.CrayonHeroMapSlash, telegraphEnd);
+                foreach (float aimX in new[] { -8f, 8f, -8f })
+                {
+                    target.transform.position = Vector2.right * aimX;
+                    runtime.TickPattern(BossActionState.Telegraph, BossPatternExecution.CrayonHeroMapSlash, 0.01f);
+                    animator.RenderPose(0f, false);
+                    Require(animator.Source.flipX == (aimX > 0f) && animator.Artwork.flipX == (aimX > 0f),
+                        "Stationary charging must turn toward the target in both phases.");
+                }
+                target.transform.position = Vector2.up * 8f;
+                runtime.TickPattern(BossActionState.Telegraph, BossPatternExecution.CrayonHeroMapSlash, 0.01f);
+                animator.RenderPose(0f, false);
+                Require(!animator.Artwork.flipX, "Vertical charge aim must preserve the last horizontal facing.");
                 bool active = false;
                 void Tick(float now)
                 {
