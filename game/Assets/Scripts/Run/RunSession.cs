@@ -44,6 +44,27 @@ namespace TrickalFanGame.Run
         private CreateRunRequest pendingRequest;
         private IGameApiClient apiClient;
         private static int? lastGeneratedRunSeed;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Development panel only: the next Run starts with this seed instead of a random one, then it clears.
+        public static int? DevelopmentSeedOverride { get; set; }
+        public DevelopmentPlaytestRecord DevelopmentPlaytest { get; private set; }
+        public static string LastDevelopmentPlaytestReport { get; private set; }
+
+        private void RecordDevelopmentFloor(int floor, int room)
+        { DevelopmentPlaytest?.EnterFloor(floor, Time.realtimeSinceStartupAsDouble); }
+
+        private void RecordDevelopmentItemUse(ItemDefinition item)
+        { DevelopmentPlaytest?.RecordItemUse(item != null ? item.ItemId : null); }
+
+        private PlayerSpellSlot DevelopmentSpellSlot => inventory != null ? inventory.GetComponent<PlayerSpellSlot>() : null;
+
+        private void FinishDevelopmentPlaytest(string outcome)
+        {
+            if (DevelopmentPlaytest?.Finish(outcome, Time.realtimeSinceStartupAsDouble) != true) return;
+            LastDevelopmentPlaytestReport = DevelopmentPlaytest.Format(Time.realtimeSinceStartupAsDouble);
+            Debug.Log(LastDevelopmentPlaytestReport, this);
+        }
+#endif
 
         public bool HasStarted => hasStarted;
         public bool HasEnded => hasEnded;
@@ -215,6 +236,14 @@ namespace TrickalFanGame.Run
             startedAt = DateTime.UtcNow;
             startedRealtime = Time.realtimeSinceStartup;
             hasStarted = true;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            FloorGenerator developmentGenerator = FindFirstObjectByType<FloorGenerator>();
+            DevelopmentPlaytest = new DevelopmentPlaytestRecord(RunSeed, runProgress.CurrentFloor,
+                Time.realtimeSinceStartupAsDouble, characterId, developmentGenerator?.RoomContentVersion ?? 0,
+                developmentGenerator?.EncounterContentVersion ?? 0);
+            runProgress.RoomChanged += RecordDevelopmentFloor;
+            if (DevelopmentSpellSlot != null) DevelopmentSpellSlot.ItemUsed += RecordDevelopmentItemUse;
+#endif
             statusMessage = $"Run in progress: {characterId}.";
 
             if (playerHealth != null)
@@ -249,6 +278,13 @@ namespace TrickalFanGame.Run
             }
 
             int generatedSeed = CreateRunSeed();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (DevelopmentSeedOverride.HasValue)
+            {
+                generatedSeed = DevelopmentSeedOverride.Value;
+                DevelopmentSeedOverride = null;
+            }
+#endif
             if (runProgress.TryInitializeRunSeed(generatedSeed, out string error))
             {
                 return true;
@@ -277,6 +313,9 @@ namespace TrickalFanGame.Run
 
         private void OnDestroy()
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            FinishDevelopmentPlaytest("INTERRUPTED");
+#endif
             UnbindRunEvents();
         }
 
@@ -297,6 +336,9 @@ namespace TrickalFanGame.Run
 
             hasEnded = true;
             IsCleared = isCleared;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            FinishDevelopmentPlaytest(isCleared ? "CLEARED" : $"DIED:{deathReason}");
+#endif
             runProgress?.StopProgression();
             var endedAt = DateTime.UtcNow;
             pendingRequest = new CreateRunRequest
@@ -356,6 +398,9 @@ namespace TrickalFanGame.Run
             canRetrySave = false;
             pendingRequest = null;
             statusMessage = "Run abandoned. Returning home.";
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            FinishDevelopmentPlaytest("ABANDONED");
+#endif
             runProgress?.StopProgression();
             UnbindRunEvents();
             return resultTransition.TryReturnHomeWithoutResult();
@@ -375,6 +420,9 @@ namespace TrickalFanGame.Run
             canRetrySave = false;
             pendingRequest = null;
             statusMessage = $"Restarting Run with {characterId}.";
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            FinishDevelopmentPlaytest("RESTARTED");
+#endif
             runProgress?.StopProgression();
             UnbindRunEvents();
             return resultTransition.TryRestartRun(userId, nickname, characterId, GetValidApiClient());
@@ -469,6 +517,10 @@ namespace TrickalFanGame.Run
 
         private void UnbindRunEvents()
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (runProgress != null) runProgress.RoomChanged -= RecordDevelopmentFloor;
+            if (DevelopmentSpellSlot != null) DevelopmentSpellSlot.ItemUsed -= RecordDevelopmentItemUse;
+#endif
             if (playerHealth != null) playerHealth.Died -= OnPlayerDied;
             if (boss != null) boss.Died -= OnBossDied;
             if (runProgress != null) runProgress.FinalBossCleared -= OnFinalBossCleared;

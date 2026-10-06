@@ -103,10 +103,10 @@ namespace TrickalFanGame.Editor
                 SpriteRenderer renderer = contents.GetComponent<SpriteRenderer>();
                 renderer.sprite = sprite;
                 renderer.color = Color.white;
-                SetFloat(contents.GetComponent<Health>(), "maxHealth", 3f);
+                SetFloat(contents.GetComponent<Health>(), "maxHealth", 30f);
                 contents.GetComponent<EnemyChase>()?.Configure(2.8f, 20f, 0.7f);
-                contents.GetComponent<ContactDamage>()?.Configure(1f, 1f);
-                contents.GetComponent<MeleeEnemyAttack>()?.Configure(1.05f, 0.35f, 0.1f, 0.55f, 1f, 1f);
+                contents.GetComponent<ContactDamage>()?.Configure(EnemyDamageTier.Light, 1f);
+                contents.GetComponent<MeleeEnemyAttack>()?.Configure(1.05f, 0.35f, 0.1f, 0.55f, 1f, EnemyDamageTier.Light);
                 if (PrefabUtility.SaveAsPrefabAsset(contents, MinionPrefabPath) == null)
                     throw new InvalidOperationException("Could not save crumb minion prefab.");
             }
@@ -149,7 +149,8 @@ namespace TrickalFanGame.Editor
                 collider.includeLayers = LayerMask.GetMask("Enemy");
                 collider.excludeLayers = 0;
                 collider.layerOverridePriority = 1;
-                SetFloat(contents.GetComponent<Health>(), "maxHealth", 5f);
+                // Two floor-1 hits at the base attack damage of 10.
+                SetFloat(contents.GetComponent<Health>(), "maxHealth", 20f);
                 TestEnemy obstacle = contents.GetComponent<TestEnemy>();
                 obstacle.ConfigureReward(false);
                 obstacle.ConfigureBossCollision(true);
@@ -181,10 +182,10 @@ namespace TrickalFanGame.Editor
                 body.constraints = RigidbodyConstraints2D.FreezeRotation;
                 ContactDamage contactDamage = contents.GetComponent<ContactDamage>();
                 if (contactDamage == null) contactDamage = contents.AddComponent<ContactDamage>();
-                contactDamage.Configure(2f, 0.8f);
+                contactDamage.Configure(EnemyDamageTier.Heavy, 0.8f);
                 boss.ConfigureHud("부스러기", 2);
                 boss.ConfigurePhaseTwo(1.25f, 0.72f);
-                boss.SetProjectileDamage(1.5f);
+                boss.SetProjectileDamageTier(EnemyDamageTier.Medium);
                 boss.ConfigurePatterns(new[]
                 {
                     new BossPatternDefinition("buseureogi-approach-volley",
@@ -198,7 +199,7 @@ namespace TrickalFanGame.Editor
                 if (runtime == null) runtime = contents.AddComponent<BuseureogiBossPatternRuntime>();
                 runtime.Configure(minion, obstacles, MinionOffsets, ObstacleOffsets);
                 runtime.ConfigureLimits(4, 3);
-                runtime.ConfigureObstacleImpact(1.1f, 1f, 7f, 0.2f);
+                runtime.ConfigureObstacleImpact(1.1f, EnemyDamageTier.Light, 7f, 0.2f);
                 runtime.ConfigureMovement(2.25f, 1.35f);
                 if (PrefabUtility.SaveAsPrefabAsset(contents, Week15Boss0Setup.BossPrefabPath) == null)
                     throw new InvalidOperationException("Could not save the Buseureogi boss prefab.");

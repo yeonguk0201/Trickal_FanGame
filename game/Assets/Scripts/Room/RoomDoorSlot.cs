@@ -25,15 +25,22 @@ namespace TrickalFanGame.Room
         }
 
         public void Bind(RoomGraphController graph, RoomNode source, RoomNode destination,
-            Transform destinationEntryPoint, RoomController requiredClearedRoom)
+            Transform destinationEntryPoint, RoomController requiredClearedRoom,
+            bool requiresKey = false, RoomRunState keyLockState = null, bool isSealed = false)
         {
-            bool connected = destination != null;
+            // A sealed hidden passage keeps its destination but stays a wall until it opens.
+            bool connected = destination != null && !isSealed;
             if (doorway != null)
             {
-                doorway.Configure(graph, source, destination, destinationEntryPoint, requiredClearedRoom);
+                doorway.Configure(graph, source, destination, destinationEntryPoint, requiredClearedRoom,
+                    false, requiresKey, keyLockState, blocker);
                 doorway.gameObject.SetActive(connected);
             }
-            if (blocker != null) blocker.gameObject.SetActive(connected);
+            if (blocker != null)
+            {
+                blocker.SetKeyLocked(connected && requiresKey && keyLockState?.IsKeyLockOpen != true);
+                blocker.gameObject.SetActive(connected);
+            }
             if (seal != null) seal.SetActive(!connected);
         }
     }

@@ -84,7 +84,8 @@ namespace TrickalFanGame.Editor
             foreach (string guid in assetGuids)
             {
                 ItemDefinition definition = AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid));
-                if (definition == null || !definition.IsValid) continue;
+                // Single-use spells never reach the artifact acquisition notification.
+                if (definition == null || !definition.IsValid || definition.IsSingleUse) continue;
                 string description = ArtifactEffectDescription.Build(definition);
                 Assert(!string.IsNullOrWhiteSpace(description) && !description.Contains("\n") && !description.Contains("\r"),
                     "Artifact description must be a non-empty single line for " + definition.ItemId + ".");
@@ -129,7 +130,7 @@ namespace TrickalFanGame.Editor
                 EventSystem eventSystem = EventSystem.current;
                 Assert(inventory.TryAcquire(first), "First HUD-3B artifact acquisition failed.");
                 Assert(view.IsShowing && view.CurrentName == "첫 아티팩트" &&
-                    view.CurrentDescription == "최대 HP +2 · 획득 시 최대 HP 50% 방어막" &&
+                    view.CurrentDescription == "최대 HP +1칸 · 획득 시 최대 HP 50% 방어막" &&
                     Mathf.Approximately(view.RemainingSeconds, 1.5f) && Mathf.Approximately(view.ToastCanvasGroup.alpha, 1f),
                     "First artifact acquisition must immediately show its name and one-line effect description.");
                 AssertMessageMesh(view.MessageText, view.CurrentName, view.CurrentDescription);

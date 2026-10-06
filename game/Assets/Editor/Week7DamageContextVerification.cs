@@ -29,7 +29,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                stats.AddAttackDamage(2);
+                stats.AddAttackDamage(20);
                 stats.AddProjectiles(1);
                 stats.AddPierce(2);
 
@@ -37,7 +37,7 @@ namespace TrickalFanGame.Editor
                 Assert(context.Source == player, "The player GameObject should be the projectile attack source.");
                 Assert(context.SourceType == DamageSourceType.PlayerProjectile,
                     "The damage source type should identify the player projectile attack.");
-                Assert(context.BaseDamage == stats.AttackDamage && DamageCalculator.Calculate(context) == 3,
+                Assert(context.BaseDamage == stats.AttackDamage && DamageCalculator.Calculate(context) == 30,
                     "DamageContext should carry the current PlayerStats attack damage without drift.");
                 Assert(attack.ProjectileCount == 2,
                     "Multi Shot should still expose two projectiles through PlayerStats.");
@@ -59,7 +59,7 @@ namespace TrickalFanGame.Editor
 
                 projectile.Launch(Vector2.zero, ownerHealth, context, attack.PierceCount);
                 InvokeHit(projectile, enemyCollider);
-                Assert(enemyHealth.CurrentHealth == 7 && enemyReceivedDamage == 3,
+                Assert(enemyHealth.CurrentHealth == 70 && enemyReceivedDamage == 30,
                     "The projectile should apply the calculated damage to a normal enemy.");
                 Assert(IsSameAttack(enemyReceivedContext, context),
                     "The normal enemy should receive the original source and damage values.");
@@ -67,11 +67,11 @@ namespace TrickalFanGame.Editor
                     "The first target should consume exactly one configured pierce.");
 
                 InvokeHit(projectile, enemyCollider);
-                Assert(enemyHealth.CurrentHealth == 7 && GetRemainingPierces(projectile) == 1,
+                Assert(enemyHealth.CurrentHealth == 70 && GetRemainingPierces(projectile) == 1,
                     "The same projectile must not damage or consume pierce on the same target twice.");
 
                 InvokeHit(projectile, bossCollider);
-                Assert(bossHealth.CurrentHealth == 7 && bossReceivedDamage == 3,
+                Assert(bossHealth.CurrentHealth == 70 && bossReceivedDamage == 30,
                     "The same projectile damage path should apply to a boss Health component.");
                 Assert(IsSameAttack(bossReceivedContext, context),
                     "The boss should receive the original player projectile source.");
@@ -153,6 +153,10 @@ namespace TrickalFanGame.Editor
             GameObject target = new(objectName);
             collider = target.AddComponent<CircleCollider2D>();
             health = target.AddComponent<Health>();
+            // HP-5 enemy scale: enemy HP and player attack are both 10x the original values.
+            SerializedObject serializedHealth = new(health);
+            serializedHealth.FindProperty("maxHealth").floatValue = 100f;
+            serializedHealth.ApplyModifiedPropertiesWithoutUndo();
             InvokeAwake(health);
             return target;
         }

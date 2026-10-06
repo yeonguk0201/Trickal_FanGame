@@ -68,10 +68,11 @@ namespace TrickalFanGame.Editor
                 }
 
                 ContactDamage contactDamage = contents.GetComponent<ContactDamage>();
-                if (contactDamage != null)
+                if (contactDamage == null)
                 {
-                    Object.DestroyImmediate(contactDamage);
+                    contactDamage = contents.AddComponent<ContactDamage>();
                 }
+                contactDamage.Configure(EnemyDamageTier.Light, 1f);
 
                 ChargingEnemyController charging = contents.GetComponent<ChargingEnemyController>();
                 if (charging == null)
@@ -79,8 +80,9 @@ namespace TrickalFanGame.Editor
                     charging = contents.AddComponent<ChargingEnemyController>();
                 }
 
-                SetMaxHealth(contents.GetComponent<Health>(), 7);
-                charging.Configure(7f, 0.65f, 8f, 0.8f, 0.6f, 1.5f, 3);
+                SetMaxHealth(contents.GetComponent<Health>(), 70);
+                charging.Configure(7f, 0.65f, Week19Tune1Setup.ChargingDashSpeed, 0.8f, 0.6f, 1.5f,
+                    EnemyDamageTier.Heavy);
                 Rigidbody2D body = contents.GetComponent<Rigidbody2D>();
                 if (body != null)
                 {

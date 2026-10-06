@@ -44,8 +44,16 @@ namespace TrickalFanGame.Editor
             Assert(roomCamera != null && roomCamera.orthographic &&
                    Mathf.Approximately(roomCamera.orthographicSize, RoomLayout.CameraOrthographicSize),
                 "The Basic room camera must keep its fixed orthographic framing.");
-            Assert(generator.TryGenerateForSeed(Week8RandomRoomSetup.FixedVerificationSeed,
-                out GeneratedFloorGraph generated, out error), error);
+            // Floor-1 intentionally changes the active topology. Keep this historical hash check on legacy settings.
+            FloorGenerationSettings[] activeSettings = generator.FloorSettings.ToArray();
+            GeneratedFloorGraph generated;
+            try
+            {
+                generator.ConfigureFloorSettings(null);
+                Assert(generator.TryGenerateForSeed(Week8RandomRoomSetup.FixedVerificationSeed,
+                    out generated, out error), error);
+            }
+            finally { generator.ConfigureFloorSettings(activeSettings); }
 
             string signature = BuildSignature(generated);
             string signatureHash = BuildSha256(signature);
@@ -74,7 +82,12 @@ namespace TrickalFanGame.Editor
                     .Append('[').Append(floor.StartingRoomId)
                     .Append('>').Append(floor.BossRoomId).Append("]{");
 
-                foreach (GeneratedRoomNode node in floor.Nodes.OrderBy(candidate => candidate.RoomNumber))
+                // Special-3/4 append the secret room, hidden passages, and the shop without changing existing rooms.
+                string[] appendedIds = floor.Nodes
+                    .Where(candidate => candidate.Role is GeneratedRoomRole.Secret or GeneratedRoomRole.Shop)
+                    .Select(candidate => candidate.RoomId).ToArray();
+                foreach (GeneratedRoomNode node in floor.Nodes.Where(candidate =>
+                                 !appendedIds.Contains(candidate.RoomId)).OrderBy(candidate => candidate.RoomNumber))
                 {
                     signature.Append(node.RoomId).Append('@')
                         .Append(node.GridPosition.X).Append(',').Append(node.GridPosition.Y).Append(':')
@@ -83,6 +96,7 @@ namespace TrickalFanGame.Editor
                         .Append(node.ContentSeed).Append('(');
 
                     foreach (GeneratedRoomConnection connection in node.DirectionalConnections
+                                 .Where(candidate => !appendedIds.Contains(candidate.DestinationRoomId))
                                  .OrderBy(candidate => candidate.Direction))
                     {
                         signature.Append(connection.Direction).Append('>')
@@ -139,12 +153,13 @@ namespace TrickalFanGame.Editor
             AssertWall(content, "Right Lower Wall",
                 new Vector2(RoomLayout.HorizontalWallCenter, -RoomLayout.VerticalWallSegmentCenter),
                 verticalWallSize);
-            Assert(prefab.Controller.SpawnPoints.Count == 3,
+            // Encounter-4 appends SpawnPoints; the original three must stay in place.
+            Assert(prefab.Controller.SpawnPoints.Count >= 3,
                 "The Basic room must keep its three existing SpawnPoints.");
-            for (int index = 0; index < prefab.Controller.SpawnPoints.Count; index++)
+            for (int index = 0; index < 3; index++)
             {
                 Assert(Approximately(prefab.Controller.SpawnPoints[index].localPosition,
-                        RoomLayout.SpawnPosition(index, prefab.Controller.SpawnPoints.Count)),
+                        RoomLayout.SpawnPosition(index, 3)),
                     $"Basic room SpawnPoint {index + 1} changed.");
             }
 
@@ -172,8 +187,10 @@ namespace TrickalFanGame.Editor
             }
 
             Assert(Approximately(prefab.Node.CameraAnchor.localPosition, Vector2.zero) &&
+                   prefab.Node.InitialSpawnPoint != null &&
+                   Approximately(prefab.Node.InitialSpawnPosition, prefab.transform.position) &&
                    prefab.Node.DefaultEntryPoint == prefab.FindSlot(RoomDoorDirection.Left).EntryPoint,
-                "The Basic room camera anchor or default floor entry changed.");
+                "The Basic room camera anchor, initial spawn, or default door entry changed.");
         }
 
         private static void AssertWall(

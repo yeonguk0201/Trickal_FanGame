@@ -38,8 +38,8 @@ namespace TrickalFanGame.Editor
 
         private static void VerifyStatsAndCriticalDamage(GameObject player, PlayerStats stats)
         {
-            Assert(Approximately(stats.AttackDamage, 1f) && Approximately(stats.AttackSpeed, 1f),
-                "PlayerStats must start with attack damage and attack speed of 1.");
+            Assert(Approximately(stats.AttackDamage, 10f) && Approximately(stats.AttackSpeed, 1f),
+                "PlayerStats must start with attack damage 10 (HP-5 enemy scale) and attack speed 1.");
             Assert(Approximately(stats.CriticalChance, 0.05f) &&
                    Approximately(stats.CriticalDamageMultiplier, 1.5f),
                 "PlayerStats must own the 5% critical chance and 150% critical damage defaults.");
@@ -51,7 +51,7 @@ namespace TrickalFanGame.Editor
             stats.AddCriticalChance(0.03f);
             stats.AddCriticalChance(0.03f);
 
-            Assert(Approximately(stats.AttackDamage, 1.20f),
+            Assert(Approximately(stats.AttackDamage, 12f),
                 "Attack percentages must add before multiplying base attack damage.");
             Assert(Approximately(stats.AttackSpeed, 1.20f),
                 "Attack-speed percentages must add before multiplying base attack speed.");
@@ -63,9 +63,9 @@ namespace TrickalFanGame.Editor
                 DamageSourceType.PlayerProjectile);
             DamageResult critical = DamageCalculator.Resolve(context, 0.109f);
             DamageResult normal = DamageCalculator.Resolve(context, 0.11f);
-            Assert(critical.IsCritical && Approximately(critical.FinalDamage, 1.80f),
+            Assert(critical.IsCritical && Approximately(critical.FinalDamage, 18f),
                 "A roll below critical chance must apply the 150% multiplier without rounding.");
-            Assert(!normal.IsCritical && Approximately(normal.FinalDamage, 1.20f),
+            Assert(!normal.IsCritical && Approximately(normal.FinalDamage, 12f),
                 "A roll on the critical chance boundary must remain a normal hit.");
         }
 

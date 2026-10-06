@@ -11,6 +11,8 @@ namespace TrickalFanGame.Player
         [SerializeField] private Projectile projectilePrefab;
         [SerializeField, Min(0f)] private float spawnOffset = 0.65f;
         [SerializeField, Min(0.01f)] private float baseProjectileSpeed = 8f;
+        // Range-0: travel distance = flight time × shot speed, about 5.3 units at the base values (8 ÷ 1.5).
+        [SerializeField, Min(0.01f)] private float baseProjectileLifetime = 2f / 3f;
         [SerializeField, Min(0f)] private float inheritedVelocityFactor = 0.25f;
         [SerializeField, Min(0f)] private float attackCooldown = 0.35f;
         [SerializeField, Range(0f, 45f)] private float multiShotSpreadAngle = 12f;
@@ -23,6 +25,8 @@ namespace TrickalFanGame.Player
         private float nextAttackTime;
 
         public float CurrentDamage => stats.AttackDamage;
+        public float ProjectileSpeed => baseProjectileSpeed * stats.ProjectileSpeedMultiplier;
+        public float ProjectileLifetime => baseProjectileLifetime * stats.ProjectileLifetimeMultiplier;
         public int ProjectileCount => stats.ProjectileCount;
         public int PierceCount => stats.PierceCount;
         public float HealOnKill => stats.HealOnKill;
@@ -65,7 +69,7 @@ namespace TrickalFanGame.Player
         private void Update()
         {
             if (Time.timeScale <= 0f) return;
-            if (!CanAttack || Time.time < nextAttackTime || !TryReadAttackDirection(out Vector2 direction))
+            if (!CanAttack || Time.time < nextAttackTime || !PlayerAttack.TryReadAttackDirection(out Vector2 direction))
             {
                 return;
             }
@@ -99,19 +103,20 @@ namespace TrickalFanGame.Player
                 (Vector2)transform.position + direction * spawnOffset,
                 Quaternion.identity);
 
-            Vector2 velocity = direction * baseProjectileSpeed
+            Vector2 velocity = direction * ProjectileSpeed
                 + movement.CurrentVelocity * inheritedVelocityFactor;
             projectile.Launch(
                 velocity,
                 health,
                 CreateDamageContext(),
                 stats.PierceCount,
-                stats.ProjectileSplitSettings);
+                stats.ProjectileSplitSettings,
+                configuredLifetime: ProjectileLifetime);
         }
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)
         {
-            float healedAmount = health.Heal(stats.HealOnKillAmount);
+            float healedAmount = health.Heal(stats.RegisterKillAndGetHealAmount());
             if (healedAmount > 0f)
             {
                 Debug.Log(
@@ -130,19 +135,5 @@ namespace TrickalFanGame.Player
                 direction.x * sine + direction.y * cosine);
         }
 
-        private static bool TryReadAttackDirection(out Vector2 direction)
-        {
-            Keyboard keyboard = Keyboard.current;
-            if (keyboard != null)
-            {
-                if (keyboard.leftArrowKey.isPressed) { direction = Vector2.left; return true; }
-                if (keyboard.rightArrowKey.isPressed) { direction = Vector2.right; return true; }
-                if (keyboard.downArrowKey.isPressed) { direction = Vector2.down; return true; }
-                if (keyboard.upArrowKey.isPressed) { direction = Vector2.up; return true; }
-            }
-
-            direction = Vector2.zero;
-            return false;
-        }
     }
 }

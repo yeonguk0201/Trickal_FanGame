@@ -160,7 +160,7 @@ namespace TrickalFanGame.Editor
                    runtime.ObstaclePrefabs.Count == 2 && runtime.ObstaclePrefabs.All(item => item != null) &&
                    runtime.MaximumMinions == 4 && runtime.ObstaclesPerThrowLimit == 3 &&
                    Mathf.Approximately(runtime.ObstacleImpactRadius, 1.1f) &&
-                   Mathf.Approximately(runtime.ObstacleImpactDamage, 1f) &&
+                   runtime.ObstacleImpactDamageTier == EnemyDamageTier.Light &&
                    Mathf.Approximately(runtime.ObstacleKnockbackSpeed, 7f) &&
                    runtime.MinionOffsets.Count == 12 && runtime.MinionOffsets.All(offset =>
                        Mathf.Abs(offset.magnitude - 1.8f) < 0.01f),
@@ -176,7 +176,7 @@ namespace TrickalFanGame.Editor
             Assert(body != null && body.bodyType == RigidbodyType2D.Dynamic && body.mass >= 25f &&
                    (body.constraints & RigidbodyConstraints2D.FreezeRotation) != 0,
                 "Buseureogi must retain dynamic chase motion while resisting player collision pushes.");
-            Assert(contactDamage != null && Mathf.Approximately(contactDamage.Damage, 2f) &&
+            Assert(contactDamage != null && contactDamage.DamageTier == EnemyDamageTier.Heavy &&
                    Mathf.Approximately(contactDamage.Cooldown, 0.8f) &&
                    Mathf.Approximately(runtime.ApproachSpeed, 2.25f),
                 "Buseureogi contact damage or chase speed is not configured.");
@@ -196,14 +196,14 @@ namespace TrickalFanGame.Editor
                 playerObject.AddComponent<PlayerActionState>();
                 playerObject.AddComponent<DamageInvulnerability>();
                 PlayerMovement movement = playerObject.AddComponent<PlayerMovement>();
-                PlayerSPDropper spDropper = playerObject.AddComponent<PlayerSPDropper>();
                 Invoke(health, "Awake");
                 Invoke(movement, "Awake");
 
                 float initialHealth = health.CurrentHealth;
                 ContactDamage contactDamage = bossInstance.GetComponent<ContactDamage>();
                 Assert(contactDamage.TryApplyDamage(health, 0f) &&
-                       Mathf.Approximately(health.CurrentHealth, initialHealth - contactDamage.Damage),
+                       Mathf.Approximately(health.CurrentHealth,
+                           initialHealth - HealthUnits.GetEnemyDamageUnits(contactDamage.DamageTier, 1)),
                     "Buseureogi contact must immediately damage a living player.");
 
                 SpriteRenderer renderer = playerObject.GetComponent<SpriteRenderer>();
@@ -213,11 +213,6 @@ namespace TrickalFanGame.Editor
                 Assert(!renderer.flipX, "Vertical movement must preserve Erpin's last horizontal facing.");
                 movement.SetFacingDirection(Vector2.right);
                 Assert(renderer.flipX, "Erpin's supplied art must flip when moving right.");
-                Assert(!spDropper.CanDropFrom(Load<GameObject>(Week15Boss1Setup.CreamPrefabPath)
-                           .GetComponent<Health>()) &&
-                       !spDropper.CanDropFrom(Load<GameObject>(Week15Boss1Setup.DoughPrefabPath)
-                           .GetComponent<Health>()),
-                    "Boss-created obstacles must never be eligible for an SP drop.");
             }
             finally
             {
@@ -281,7 +276,8 @@ namespace TrickalFanGame.Editor
                 Assert(runtime.CommitPendingObstacle() && !runtime.HasPendingObstacleTelegraph,
                     "Obstacle impact must replace every landing telegraph with a destructible obstacle.");
                 Assert(Mathf.Approximately(targetHealth.CurrentHealth,
-                           healthBeforeImpact - runtime.ObstacleImpactDamage) &&
+                           healthBeforeImpact -
+                           HealthUnits.GetEnemyDamageUnits(runtime.ObstacleImpactDamageTier, 1)) &&
                        targetKnockback.IsKnockedBack &&
                        Mathf.Approximately(targetKnockback.CurrentVelocity.magnitude,
                            runtime.ObstacleKnockbackSpeed),
@@ -431,7 +427,7 @@ namespace TrickalFanGame.Editor
                 Week15Boss1Setup.MinionOffsets,
                 Week15Boss1Setup.ObstacleOffsets);
             runtime.ConfigureLimits(4, 3);
-            runtime.ConfigureObstacleImpact(1.1f, 1f, 7f, 0.2f);
+            runtime.ConfigureObstacleImpact(1.1f, EnemyDamageTier.Light, 7f, 0.2f);
             runtime.ConfigureMovement(2.25f, 1.35f);
             Invoke(health, "Awake");
             Invoke(runtime, "Awake");

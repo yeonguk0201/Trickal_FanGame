@@ -4,6 +4,8 @@ using System.Reflection;
 using TrickalFanGame.Player;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 namespace TrickalFanGame.Editor
 {
@@ -64,6 +66,7 @@ namespace TrickalFanGame.Editor
                     BindingFlags.Instance | BindingFlags.NonPublic);
                 Assert(animatorAwake != null, "PlayerWalkAnimator.Awake could not be found.");
                 animatorAwake.Invoke(animator, null);
+                VerifyAttackFacing(player, movement, animator);
                 animator.PlaySkill();
                 Assert(animator.IsPlayingSkill, "PlayerWalkAnimator must start skill playback when skill frames are loaded.");
             }
@@ -73,6 +76,59 @@ namespace TrickalFanGame.Editor
             }
 
             Debug.Log("Erpin walk animation verification passed: 12 directional frames, 4 skill frames and runtime wiring are present.");
+        }
+
+        private static void VerifyAttackFacing(GameObject player, PlayerMovement movement, PlayerWalkAnimator animator)
+        {
+            Keyboard previousKeyboard = Keyboard.current;
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                keyboard.MakeCurrent();
+                PlayerProjectileAttack attack = player.AddComponent<PlayerProjectileAttack>();
+                SpriteRenderer renderer = player.GetComponent<SpriteRenderer>();
+                MethodInfo update = typeof(PlayerMovement).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic);
+                MethodInfo render = typeof(PlayerWalkAnimator).GetMethod("LateUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
+                InputState.Change(keyboard, new KeyboardState(Key.D, Key.LeftArrow));
+                update.Invoke(movement, null);
+                render.Invoke(animator, null);
+                Assert(movement.MovementIntent == Vector2.right && movement.FacingDirection == Vector2.left &&
+                       !renderer.flipX && renderer.sprite.name.StartsWith("Erpin_Walk_Side_"),
+                    "Moving right while attacking left must keep rightward movement and left-facing side artwork.");
+                InputState.Change(keyboard, new KeyboardState(Key.A, Key.RightArrow));
+                update.Invoke(movement, null);
+                Assert(movement.MovementIntent == Vector2.left && movement.FacingDirection == Vector2.right && renderer.flipX,
+                    "Moving left while attacking right must face right without reversing movement.");
+                InputState.Change(keyboard, new KeyboardState(Key.D, Key.UpArrow));
+                update.Invoke(movement, null);
+                render.Invoke(animator, null);
+                Assert(renderer.sprite.name.StartsWith("Erpin_Walk_Up_"), "Upward attacks must select the rear-facing walk frames.");
+                InputState.Change(keyboard, new KeyboardState(Key.LeftArrow));
+                update.Invoke(movement, null);
+                render.Invoke(animator, null);
+                Assert(!movement.IsMoving && movement.IsAimingAttack && !renderer.flipX &&
+                       renderer.sprite.name == "Erpin_Walk_Side_0", "Stationary attacks must also face the attack direction.");
+                InputState.Change(keyboard, new KeyboardState(Key.D));
+                update.Invoke(movement, null);
+                Assert(!movement.IsAimingAttack && renderer.flipX, "Releasing attack must restore movement facing.");
+                attack.enabled = false;
+                InputState.Change(keyboard, new KeyboardState(Key.D, Key.LeftArrow));
+                update.Invoke(movement, null);
+                Assert(!movement.IsAimingAttack && renderer.flipX, "Disabled attacks must not override movement facing.");
+                player.AddComponent<PlayerAttack>();
+                update.Invoke(movement, null);
+                Assert(movement.IsAimingAttack && !renderer.flipX, "The melee attack must share the same facing priority.");
+                PlayerActionState state = player.GetComponent<PlayerActionState>();
+                Assert(state.TryBeginUltimate(Vector2.right, 2f), "Dash setup failed.");
+                update.Invoke(movement, null);
+                Assert(!movement.IsAimingAttack && movement.FacingDirection == Vector2.right,
+                    "Ultimate dash direction must retain priority while basic attacks are blocked.");
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+                if (previousKeyboard != null) previousKeyboard.MakeCurrent();
+            }
         }
 
         private static void Assert(bool condition, string message)

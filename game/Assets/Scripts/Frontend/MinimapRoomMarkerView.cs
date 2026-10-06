@@ -102,6 +102,8 @@ namespace TrickalFanGame.Frontend
                 GeneratedRoomRole.Start => "S",
                 GeneratedRoomRole.Treasure => "T",
                 GeneratedRoomRole.Boss => "B",
+                GeneratedRoomRole.Secret => "H",
+                GeneratedRoomRole.Shop => "$",
                 _ => string.Empty,
             };
         }

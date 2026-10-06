@@ -63,8 +63,8 @@ namespace TrickalFanGame.Editor
 
             Assert(slowChase.MoveSpeed < fastChase.MoveSpeed,
                 "Bulhyojason must move slower than Sansamo.");
-            Assert(strongContact.Damage > weakContact.Damage &&
-                   strongMelee.AttackDamage > weakMelee.AttackDamage,
+            Assert(strongContact.DamageTier > weakContact.DamageTier &&
+                   strongMelee.DamageTier > weakMelee.DamageTier,
                 "Bulhyojason contact and melee damage must exceed Sansamo damage.");
             Assert(Mathf.Approximately(strongMelee.AttackRange, weakMelee.AttackRange) &&
                    Mathf.Approximately(strongMelee.TelegraphDuration, weakMelee.TelegraphDuration) &&
@@ -97,8 +97,8 @@ namespace TrickalFanGame.Editor
             try
             {
                 chase.Configure(2.25f, 6f, 0.8f);
-                contact.Configure(2f, 0f);
-                melee.Configure(1.15f, 0.4f, 0.12f, 0.65f, 0.2f, 3f);
+                contact.Configure(EnemyDamageTier.Light, 0f);
+                melee.Configure(1.15f, 0.4f, 0.12f, 0.65f, 0.2f, EnemyDamageTier.Medium);
                 chase.SetTarget(player.transform);
                 enemy.GetComponent<EnemyBehaviorContext>().BeginCombat(player.transform);
                 player.transform.position = Vector2.right;

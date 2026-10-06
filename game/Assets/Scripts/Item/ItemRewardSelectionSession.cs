@@ -136,7 +136,7 @@ namespace TrickalFanGame.Item
             else if (candidate.IsHealing)
             {
                 if (playerHealth.IsDead) return false;
-                playerHealth.Heal(playerHealth.MaxHealth * candidate.HealMaxHealthRatio);
+                playerHealth.Heal(playerHealth.GetMaxHealthRatioAmount(candidate.HealMaxHealthRatio));
             }
             else
             {

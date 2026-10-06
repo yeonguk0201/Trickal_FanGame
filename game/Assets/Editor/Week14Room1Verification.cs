@@ -72,11 +72,12 @@ namespace TrickalFanGame.Editor
             }
 
             Assert(AssetDatabase.GetAssetPath(template.RoomPrefabAsset) == Week8GridFloorSetup.PrefabPath &&
-                   template.AllowedRoomTypes.Count == 3 &&
+                   template.AllowedRoomTypes.Count == 4 &&
                    template.AllowedRoomTypes.Contains(RoomType.Normal) &&
                    template.AllowedRoomTypes.Contains(RoomType.Reward) &&
                    template.AllowedRoomTypes.Contains(RoomType.Boss) &&
-                   template.DoorSlots.Count == 4 && template.SpawnPoints.Count == 3,
+                   template.AllowedRoomTypes.Contains(RoomType.Shop) &&
+                   template.DoorSlots.Count == 4 && template.SpawnPoints.Count >= 3,
                 "The Basic template Prefab, RoomType, door, or SpawnPoint contract changed.");
         }
 

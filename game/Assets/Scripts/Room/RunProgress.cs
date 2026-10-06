@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using TrickalFanGame.Item;
+using TrickalFanGame.Resource;
+using TrickalFanGame.Shop;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -9,6 +11,8 @@ namespace TrickalFanGame.Room
     {
         private readonly Dictionary<string, RoomRunState> roomStates = new(StringComparer.Ordinal);
         private readonly Dictionary<string, ItemRewardSelectionState> rewardSelections = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, ShopStockState> shopStocks = new(StringComparer.Ordinal);
+        private readonly RunResourceWallet resources = new();
         private string activeRewardSelectionId;
 
         public int RunSeed { get; private set; }
@@ -34,6 +38,26 @@ namespace TrickalFanGame.Room
         public event Action RewardSelectionStateChanged;
 
         public event Action<int, int> RoomChanged;
+        public event Action<RunResourceType, int> ResourceChanged
+        {
+            add => resources.Changed += value;
+            remove => resources.Changed -= value;
+        }
+
+        public int GetResourceCount(RunResourceType type) => resources.GetCount(type);
+
+        // Resources are Run-only: nothing is granted after the Run ends, and ResetProgress returns them to zero.
+        public bool CanAcceptResource(RunResourceType type) => !IsProgressionStopped && resources.CanAccept(type);
+
+        public int TryAddResource(RunResourceType type, int amount)
+        {
+            return IsProgressionStopped ? 0 : resources.Add(type, amount);
+        }
+
+        public bool TrySpendResource(RunResourceType type, int amount = 1)
+        {
+            return !IsProgressionStopped && resources.TrySpend(type, amount);
+        }
 
         public bool TrySetGeneratedGraph(GeneratedFloorGraph graph, out string error)
         {
@@ -67,6 +91,25 @@ namespace TrickalFanGame.Room
         {
             return !string.IsNullOrWhiteSpace(roomId) && roomStates.TryGetValue(roomId, out RoomRunState state)
                 ? state : null;
+        }
+
+        public ShopStockState GetShopStock(string shopId)
+        {
+            return !string.IsNullOrWhiteSpace(shopId) && shopStocks.TryGetValue(shopId, out ShopStockState stock)
+                ? stock : null;
+        }
+
+        // A shop rolls its offers once per Run; later floor builds reuse the stored stock and its sold slots.
+        public ShopStockState GetOrCreateShopStock(string shopId, Func<ShopStockState> create)
+        {
+            if (string.IsNullOrWhiteSpace(shopId))
+                throw new ArgumentException("A shop stock requires a stable shop ID.", nameof(shopId));
+            if (shopStocks.TryGetValue(shopId, out ShopStockState existing)) return existing;
+            ShopStockState created = create?.Invoke();
+            if (created == null || created.ShopId != shopId)
+                throw new InvalidOperationException($"Shop stock factory must create stock '{shopId}'.");
+            shopStocks.Add(shopId, created);
+            return created;
         }
 
         public ItemRewardSelectionState GetRewardSelection(string rewardId)
@@ -172,11 +215,36 @@ namespace TrickalFanGame.Room
                 return;
             }
 
+            int previousFloor = CurrentFloor;
             CurrentFloor = Mathf.Max(1, floorNumber);
             CurrentRoom = Mathf.Max(1, roomNumber);
-            GetRoomState(FloorGenerator.BuildRoomId(CurrentFloor, CurrentRoom))?.MarkVisited();
+            if (previousFloor > 0 && previousFloor != CurrentFloor) DiscardClosedChests(previousFloor);
+            string roomId = FloorGenerator.BuildRoomId(CurrentFloor, CurrentRoom);
+            RoomRunState state = GetRoomState(roomId);
+            state?.MarkVisited();
+            OpenSecretPassagesOnEntry(roomId, state);
             RoomChanged?.Invoke(CurrentFloor, CurrentRoom);
             Debug.Log($"Run progress: Floor {CurrentFloor}, Room {CurrentRoom}.", this);
+        }
+
+        // Chest-0: unopened chests vanish with the floor, like floor pickups, and are never granted again.
+        private void DiscardClosedChests(int floorNumber)
+        {
+            GeneratedFloor floor = GeneratedGraph?.FindFloor(floorNumber);
+            if (floor == null) return;
+            foreach (GeneratedRoomNode node in floor.Nodes) GetRoomState(node.RoomId)?.DiscardClosedChests();
+        }
+
+        private void OpenSecretPassagesOnEntry(string roomId, RoomRunState state)
+        {
+            GeneratedFloor floor = GeneratedGraph?.FindFloor(CurrentFloor);
+            if (floor == null || state == null) return;
+            foreach (GeneratedRoomNode node in floor.Nodes)
+            {
+                if (node.RoomId != roomId) continue;
+                if (node.Role == GeneratedRoomRole.Secret) state.TryOpenSecretPassages(node.ConnectedRoomIds);
+                return;
+            }
         }
 
         public void StopProgression()
@@ -204,6 +272,8 @@ namespace TrickalFanGame.Room
             activeRewardSelectionId = null;
             roomStates.Clear();
             rewardSelections.Clear();
+            shopStocks.Clear();
+            resources.Clear();
             RewardSelectionStateChanged?.Invoke();
         }
     }

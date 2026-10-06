@@ -306,6 +306,42 @@ MonoBehaviour:
   playerInventory: {fileID: 2018927168}
   playerHealth: {fileID: 2018927162}
   playerStats: {fileID: 2018927169}
+  runProgress: {fileID: 0}
+  itemCatalog:
+  - item: {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 22636d545b564004ab7f9a2ea443ba45, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 7a7b1d69278e448aa7edd8b0e10ac1c0, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 2e3b460311314c30be140bb33f554042, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 7e1320d469b0d894f9da0540b73d7200, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: eb5f979e22d646bd852848ba85098dc7, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: d74271f8aaa7ee2428d026411a4e9e03, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 625e0be83fd749cb861e619dfb23d4e3, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 4c6d17c2077a6fb43bbeda89f37d557c, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 582b1a831ceded4438116781274efe64, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: d05d894249916b44fbfc8d46a8888f5e, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: c1c95cd095900d54394906e00d5e2d18, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 1ffb80362a4d97a4d8a68aaffdd8675b, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: fc8088d88f829f34a854a5a37f3e5ba3, type: 2}
+    startingStacks: 0
   bossPrefabs:
   - {fileID: 421685952657128216, guid: f991af9e6d8bc4e4f869e052eded37e0, type: 3}
   - {fileID: 2406316834951311537, guid: 6bef911f342ead54b94de8fab8306eb9, type: 3}
@@ -316,6 +352,7 @@ MonoBehaviour:
   - Boss 3 - Crayon Hero
   roomSize: {x: 16, y: 12}
   showDebugPanel: 1
+  showCrayonRecognitionRadius: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1082,7 +1119,6 @@ GameObject:
   - component: {fileID: 2018927169}
   - component: {fileID: 2018927170}
   - component: {fileID: 2018927173}
-  - component: {fileID: 2018927172}
   - component: {fileID: 2018927171}
   - component: {fileID: 2018927175}
   - component: {fileID: 2018927174}
@@ -1139,6 +1175,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 5
   currentShield: 0
+  useHealthUnits: 0
 --- !u!58 &2018927163
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -1319,8 +1356,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52f62f5ee934d13b7239afb52b78bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerStats
-  baseMaxHealth: 5
-  baseAttackDamage: 1
+  baseMaxHealth: 10
+  baseAttackDamage: 10
   baseMoveSpeed: 5
   baseAttackSpeed: 1
   baseCriticalChance: 0.05
@@ -1356,20 +1393,6 @@ MonoBehaviour:
   targetLayers:
     serializedVersion: 2
     m_Bits: 64
---- !u!114 &2018927172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2018927159}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10dc6910a9f04acc89854ebd53cdf2a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerSPDropper
-  pickupPrefab: {fileID: 6812840948383656007, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
-  dropChance: 0.25
 --- !u!114 &2018927173
 MonoBehaviour:
   m_ObjectHideFlags: 0

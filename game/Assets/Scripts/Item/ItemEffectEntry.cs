@@ -79,9 +79,18 @@ namespace TrickalFanGame.Item
 
                     break;
                 case ItemEffectType.MaxHealthDamageAura:
+                case ItemEffectType.AttackDamageAura:
                     if (radius <= 0f || intervalSeconds <= 0f)
                     {
-                        error = "MaxHealthDamageAura requires a positive radius and tick interval.";
+                        error = $"{effectType} requires a positive radius and tick interval.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.HealOnKillEveryN:
+                    if (integerAmount <= 0)
+                    {
+                        error = "HealOnKillEveryN requires a positive kill count.";
                         return false;
                     }
 
@@ -127,6 +136,55 @@ namespace TrickalFanGame.Item
                     }
 
                     break;
+                case ItemEffectType.CurrentBossRoomSpeedPercent:
+                    if (secondaryMagnitude < 0f)
+                    {
+                        error = "CurrentBossRoomSpeedPercent requires a non-negative move speed bonus.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.RegenerateSPHalvesOverTime:
+                    if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "RegenerateSPHalvesOverTime requires positive half-SP units, a positive tick " +
+                                "interval and a duration of at least one tick.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomCriticalBonus:
+                    if (secondaryMagnitude < 0f || secondaryMagnitude > 1f)
+                    {
+                        error = "CurrentRoomCriticalBonus requires a critical chance bonus within 0..1.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.SpawnHealthPickups:
+                    if (integerAmount <= 0)
+                    {
+                        error = "SpawnHealthPickups requires a positive pickup count.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.GainRandomGold:
+                    if (integerAmount <= 0 || magnitude < integerAmount)
+                    {
+                        error = "GainRandomGold requires a positive minimum and a maximum that is not below it.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.ReduceAndRecoverDamageTaken:
+                    if (intervalSeconds <= 0f || durationSeconds <= 0f)
+                    {
+                        error = "ReduceAndRecoverDamageTaken requires a positive recovery delay and duration.";
+                        return false;
+                    }
+
+                    break;
                 case ItemEffectType.Pierce:
                 case ItemEffectType.MaxSP:
                 case ItemEffectType.MultiShot:
@@ -149,7 +207,13 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.SplitAfterPierce &&
                    type != ItemEffectType.MaxSP &&
                    type != ItemEffectType.SkillProjectileBonusAtSP &&
-                   type != ItemEffectType.MultiShot;
+                   type != ItemEffectType.MultiShot &&
+                   type != ItemEffectType.RestoreAllSPWithOvercharge &&
+                   type != ItemEffectType.RegenerateSPHalvesOverTime &&
+                   type != ItemEffectType.EscapeToFloorStartRoom &&
+                   type != ItemEffectType.SpawnHealthPickups &&
+                   type != ItemEffectType.Flight &&
+                   type != ItemEffectType.DuplicateRoomChestsAndPickups;
         }
     }
 }

@@ -15,6 +15,10 @@ namespace TrickalFanGame.Editor
     public static class Week13Hud1Setup
     {
         public const string HudRootName = "Game HUD Canvas";
+        public const string HeartRowName = "HP Hearts";
+        public const string HeartTemplateName = "Heart Template";
+        public static readonly Vector2 HeartRowPosition = new(0, 34);
+        public static readonly Vector2 HeartRowSize = new(472, 40);
 
         [MenuItem("Trickal Fan Game/Week 13/Setup HUD-1 HP and SP")]
         public static void Setup()
@@ -33,7 +37,7 @@ namespace TrickalFanGame.Editor
             TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Week13FrontendSetup.FontPath);
             if (font == null)
                 throw new InvalidOperationException("Frontend TMP font is missing. Run Setup Frontend Flow first.");
-            Sprite fillSprite = Week13FrontendUiAssets.LoadPlaceholderFillSprite();
+            Sprite heartSprite = Week13FrontendUiAssets.LoadOrCreateHeartSprite();
 
             Undo.IncrementCurrentGroup();
             int group = Undo.GetCurrentGroup();
@@ -61,22 +65,38 @@ namespace TrickalFanGame.Editor
             panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
             panelImage.raycastTarget = false;
 
-            Text(panel, "HP Label", "HP", new Vector2(-214, 34), new Vector2(44, 28), 20, font);
-            RectTransform hpFrame = Rect(panel, "HP Bar", new Vector2(-20, 34), new Vector2(320, 32));
-            Image hpBackground = Component<Image>(hpFrame.gameObject);
-            hpBackground.color = new Color(0.11f, 0.14f, 0.18f, 0.95f);
-            hpBackground.raycastTarget = false;
-            Image hpFill = Component<Image>(Rect(hpFrame, "Fill", Vector2.zero, new Vector2(308, 20)).gameObject);
-            hpFill.sprite = fillSprite;
-            hpFill.type = Image.Type.Filled;
-            hpFill.fillMethod = Image.FillMethod.Horizontal;
-            hpFill.fillOrigin = 0;
-            hpFill.raycastTarget = false;
-            Image hpFeedback = Component<Image>(Rect(hpFrame, "Change Feedback", Vector2.zero, new Vector2(308, 20)).gameObject);
-            hpFeedback.raycastTarget = false;
-            hpFeedback.gameObject.SetActive(false);
-            TMP_Text hpValue = Text(hpFrame, "Value", "0 / 0", new Vector2(0, 0), new Vector2(300, 28), 20, font);
-            hpValue.alignment = TextAlignmentOptions.Right;
+            // HP-2 replaced the HP gauge with a half-heart icon row (docs/idea-implementation/01, D-4).
+            RemoveChild(panel, "HP Label");
+            RemoveChild(panel, "HP Bar");
+            // Changed hearts pop individually; a row-wide colour flash read as a red box behind the hearts.
+            RemoveChild(panel, "HP Change Feedback");
+            RectTransform heartRow = Rect(panel, HeartRowName, HeartRowPosition, HeartRowSize);
+            HorizontalLayoutGroup heartLayout = Component<HorizontalLayoutGroup>(heartRow.gameObject);
+            heartLayout.spacing = 4;
+            heartLayout.childAlignment = TextAnchor.MiddleLeft;
+            heartLayout.childControlWidth = false;
+            heartLayout.childControlHeight = false;
+            heartLayout.childForceExpandWidth = false;
+            heartLayout.childForceExpandHeight = false;
+            RectTransform heartTemplate = Rect(heartRow, HeartTemplateName, Vector2.zero, new Vector2(36, 36));
+            Image heartBackground = Component<Image>(Rect(heartTemplate, "Background", Vector2.zero,
+                Vector2.zero).gameObject);
+            Stretch(heartBackground.rectTransform);
+            heartBackground.sprite = heartSprite;
+            heartBackground.preserveAspect = true;
+            heartBackground.color = GameHudView.HeartEmptyColor;
+            heartBackground.raycastTarget = false;
+            Image heartFill = Component<Image>(Rect(heartTemplate, "Fill", Vector2.zero, Vector2.zero).gameObject);
+            Stretch(heartFill.rectTransform);
+            heartFill.sprite = heartSprite;
+            heartFill.preserveAspect = true;
+            heartFill.type = Image.Type.Filled;
+            heartFill.fillMethod = Image.FillMethod.Horizontal;
+            heartFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            heartFill.fillAmount = 1f;
+            heartFill.color = GameHudView.HeartHealthColor;
+            heartFill.raycastTarget = false;
+            heartTemplate.gameObject.SetActive(false);
 
             Text(panel, "SP Label", "SP", new Vector2(-214, -22), new Vector2(44, 40), 20, font);
             RectTransform slots = Rect(panel, "SP Slots", new Vector2(-58, -22), new Vector2(264, 40));
@@ -101,8 +121,9 @@ namespace TrickalFanGame.Editor
             skillText.alignment = TextAlignmentOptions.Center;
 
             GameHudView view = Component<GameHudView>(canvasObject);
-            view.Configure(playerHealth, playerSP, playerSkill, hpFill, hpValue, hpFeedback, slots, slotTemplate,
+            view.Configure(playerHealth, playerSP, playerSkill, null, null, null, slots, slotTemplate,
                 spValue, skillState, skillText);
+            view.ConfigureHearts(heartRow, heartTemplate);
 
             foreach (Component component in canvasObject.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);
@@ -158,6 +179,21 @@ namespace TrickalFanGame.Editor
             rect.sizeDelta = size;
             rect.localScale = Vector3.one;
             return rect;
+        }
+
+        private static void RemoveChild(Transform parent, string name)
+        {
+            Transform existing = parent.Find(name);
+            if (existing != null) Undo.DestroyObjectImmediate(existing.gameObject);
+        }
+
+        private static void Stretch(RectTransform rect)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = Vector2.zero;
         }
 
         private static TMP_Text Text(Transform parent, string name, string value, Vector2 position, Vector2 size,

@@ -18,11 +18,12 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Verify Room-8 Full Run Integration")]
         public static void Verify()
         {
-            Week14Room7Verification.Verify();
+            // Validate the current catalog below. Room-7's historical pillar-crossfire is no longer a required Encounter.
+            Week18Obstacle2Setup.OpenGameScene();
             RoomGraphAssembler assembler = UnityEngine.Object.FindFirstObjectByType<RoomGraphAssembler>();
             Assert(assembler != null && assembler.Generator != null && assembler.Graph != null &&
                    assembler.Progress != null && assembler.EnemyRoster != null &&
-                   assembler.EncounterClearRewardPrefab != null,
+                   assembler.EncounterClearDropTable != null,
                 "Run Room-7 Setup before Room-8 verification.");
             ValidateThreeFloorSeeds(assembler.Generator);
             ValidateRendererVisibilityBoundary(assembler.Generator);
@@ -57,7 +58,14 @@ namespace TrickalFanGame.Editor
 
                 foreach (GeneratedFloor floor in first.Floors)
                 {
-                    Assert(floor.Nodes.Count >= 6 && floor.Nodes.Count <= 8,
+                    int secretRooms = floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Secret);
+                    int shopRooms = floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Shop);
+                    int regularRooms = floor.Nodes.Count - secretRooms - shopRooms;
+                    bool validSize = floor.Settings != null
+                        ? floor.Nodes.Count >= floor.Settings.MinimumTotalRooms &&
+                          floor.Nodes.Count <= floor.Settings.MaximumTotalRooms
+                        : regularRooms >= generator.MinimumRoomsPerFloor && regularRooms <= generator.MaximumRoomsPerFloor;
+                    Assert(validSize && secretRooms <= 1 && shopRooms <= 1,
                         $"Seed {seed} floor {floor.FloorNumber} has an invalid room count.");
                     Assert(floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Start) == 1 &&
                            floor.Nodes.Count(node => node.Role == GeneratedRoomRole.Boss) == 1,
@@ -98,9 +106,9 @@ namespace TrickalFanGame.Editor
             };
             Assert(requiredTemplates.All(templates.Contains),
                 "The Room-8 seed range did not exercise every authored Room Template.");
-            Assert(encounters.Count == 5 && encounters.Contains(Week14Encounter3Setup.EncounterId) &&
-                   encounters.Contains(Week14Room7Setup.EncounterId),
-                "The Room-8 seed range did not exercise all five Encounter definitions.");
+            string[] requiredPatterns = { "pressure", "crossfire", "swarm", "elite-pair" };
+            Assert(requiredPatterns.All(pattern => encounters.Any(id => id.EndsWith($"-{pattern}-v1", StringComparison.Ordinal))),
+                "The Room-8 seed range did not exercise the four current Encounter patterns.");
         }
 
         private static void ValidateHorizontalMixedSizeTransitions(RoomGraphAssembler assembler)
@@ -114,6 +122,7 @@ namespace TrickalFanGame.Editor
             RoomGraphController graph = assembler.Graph;
             SerializedObject serializedGraph = new(graph);
             serializedGraph.FindProperty("transitionCooldown").floatValue = 0f;
+            serializedGraph.FindProperty("returnDoorwayBlockDuration").floatValue = 0f;
             serializedGraph.ApplyModifiedPropertiesWithoutUndo();
             RoomNode first = graph.Nodes.Single(node => node.RoomId == firstRoomId);
             RoomNode second = graph.Nodes.Single(node => node.RoomId == secondRoomId);
@@ -160,7 +169,7 @@ namespace TrickalFanGame.Editor
             Assert(seed > 0, "Could not find a three-floor Run containing the two-wave Encounter.");
             PrepareRun(assembler, seed);
             GeneratedRoomNode generated = assembler.GeneratedGraph.Nodes.First(node =>
-                node.EncounterId == Week14Encounter3Setup.EncounterId);
+                node.Encounter != null && node.ResolvedEncounterWaves.Count == 2);
             Assert(assembler.TryLoadFloor(generated.FloorNumber, assembler.Graph.Player, out string error), error);
 
             RoomPrefab room = assembler.CurrentFloorRoot.GetComponentsInChildren<RoomPrefab>(true)
@@ -172,14 +181,19 @@ namespace TrickalFanGame.Editor
             List<GameObject> spawned = new();
             room.Controller.EnemySpawned += spawned.Add;
             room.Controller.BeginCombat(playerHealth);
-            Assert(room.Controller.CurrentWaveNumber == 2 && spawned.Count == 2 &&
+            Assert(room.Controller.CurrentWaveNumber == 2 && spawned.Count == generated.ResolvedEncounterWaves[1].Length &&
                    state.CompletedWaveCount == 1 && !state.IsCleared,
                 "Revisiting a partial room did not resume at its first incomplete wave.");
             foreach (GameObject enemy in spawned.ToArray()) Kill(enemy);
             Assert(state.CompletedWaveCount == 2 && state.IsCleared && state.HasGrantedClearReward,
                 "The final required-enemy wipe did not persist clear and reward state.");
-            Assert(room.Controller.GetComponent<RoomClearRewardSpawner>()?.LastSpawnedReward != null,
-                "The completed Encounter did not create its one clear reward.");
+            RoomClearRewardSpawner clearDrop = room.Controller.GetComponent<RoomClearRewardSpawner>();
+            // Chest-1: the clear reward is a seeded chest when the assembler has a chest content table.
+            Assert(clearDrop != null && clearDrop.HasRolled &&
+                   (clearDrop.LastSpawnedReward != null) == (clearDrop.ChestTable != null
+                       ? clearDrop.ChestTable.TryRollChest(clearDrop.ChestSeed, out _)
+                       : clearDrop.DropTable.TryRoll(clearDrop.DropSeed, out _)),
+                "The completed Encounter did not roll its one seeded clear reward.");
 
             int otherFloor = generated.FloorNumber == 1 ? 2 : 1;
             Assert(assembler.TryLoadFloor(otherFloor, assembler.Graph.Player, out error), error);
@@ -213,8 +227,9 @@ namespace TrickalFanGame.Editor
                 if (!generator.TryGenerateForSeed(candidateSeed, out GeneratedFloorGraph graph, out _)) continue;
                 foreach (GeneratedRoomNode node in graph.Nodes)
                 foreach (GeneratedRoomConnection connection in node.DirectionalConnections.Where(connection =>
-                             connection.Direction == RoomDoorDirection.Left ||
-                             connection.Direction == RoomDoorDirection.Right))
+                             !connection.IsSecret &&
+                             (connection.Direction == RoomDoorDirection.Left ||
+                              connection.Direction == RoomDoorDirection.Right)))
                 {
                     GeneratedRoomNode other = graph.Nodes.First(candidate =>
                         candidate.RoomId == connection.DestinationRoomId);
@@ -238,7 +253,7 @@ namespace TrickalFanGame.Editor
         {
             for (int seed = 1; seed <= 4096; seed++)
                 if (generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out _) &&
-                    graph.Nodes.Any(node => node.EncounterId == Week14Encounter3Setup.EncounterId)) return seed;
+                    graph.Nodes.Any(node => node.Encounter != null && node.ResolvedEncounterWaves.Count == 2)) return seed;
             return -1;
         }
 

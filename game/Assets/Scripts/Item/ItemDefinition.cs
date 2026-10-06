@@ -30,10 +30,12 @@ namespace TrickalFanGame.Item
         public float EffectValue => effects != null && effects.Count > 0 ? effects[0].Magnitude : effectValue;
         public ItemStackMode StackMode => stackMode;
         public int MaxStacks => maxStacks;
+        public bool IsSingleUse => ItemKindText.IsSingleUse(kind);
 
         public bool IsValid => IsItemIdValidForKind(itemId, kind) &&
                                !string.IsNullOrWhiteSpace(displayName) &&
                                maxStacks >= 0 &&
+                               (!IsSingleUse || maxStacks == 1) &&
                                (effects != null && effects.Count > 0
                                    ? effects.All(effect => effect != null && effect.TryValidate(out _))
                                    : effectValue > 0f);
@@ -50,6 +52,8 @@ namespace TrickalFanGame.Item
                 ItemKind.Artifact => configuredItemId.StartsWith("item-", System.StringComparison.Ordinal) ||
                                      configuredItemId.StartsWith("artifact-", System.StringComparison.Ordinal),
                 ItemKind.Spell => configuredItemId.StartsWith("spell-", System.StringComparison.Ordinal),
+                ItemKind.SingleUseSpell => configuredItemId.StartsWith("single-spell-", System.StringComparison.Ordinal),
+                ItemKind.JjangsemSpell => configuredItemId.StartsWith("jjangsem-", System.StringComparison.Ordinal),
                 _ => false,
             };
         }

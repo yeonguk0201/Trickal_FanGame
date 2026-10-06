@@ -73,7 +73,7 @@ namespace TrickalFanGame.Frontend
             if (candidate.IsItem)
             {
                 ItemDefinition definition = candidate.Definition;
-                SetText(kindText, definition.Kind == ItemKind.Spell ? "스펠" : "아티팩트");
+                SetText(kindText, ItemKindText.GetDisplayName(definition.Kind));
                 SetText(nameText, definition.DisplayName);
                 SetText(rarityText, RarityLabel(definition.Rarity));
                 SetText(effectText, ArtifactEffectDescription.Build(definition));
@@ -89,7 +89,9 @@ namespace TrickalFanGame.Frontend
                 SetText(rarityText, "대체 보상");
                 SetText(effectText,
                     $"최대 HP의 {Mathf.RoundToInt(candidate.HealMaxHealthRatio * 100f)}%를 즉시 회복합니다.");
-                SetText(stackText, $"현재 HP {Number(currentHealth)} / 최대 HP {Number(maximumHealth)}");
+                SetText(stackText, playerHealth != null && playerHealth.UsesHealthUnits
+                    ? $"현재 HP {HealthUnits.FormatHearts(currentHealth)}칸 / 최대 HP {HealthUnits.FormatHearts(maximumHealth)}칸"
+                    : $"현재 HP {Number(currentHealth)} / 최대 HP {Number(maximumHealth)}");
             }
 
             ApplyState(ItemRewardCardState.Available);

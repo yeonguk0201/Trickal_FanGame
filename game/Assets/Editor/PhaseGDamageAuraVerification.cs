@@ -27,7 +27,7 @@ namespace TrickalFanGame.Editor
                 out PlayerInventory inventory);
             GameObject activeTargetObject = CreateTarget(
                 "Phase G-6 Active Multi-Collider Target",
-                10f,
+                100f,
                 new Vector2(0.5f, 0f),
                 true,
                 out Health activeTarget);
@@ -35,7 +35,7 @@ namespace TrickalFanGame.Editor
             GameObject inactiveRoom = new("Phase G-6 Inactive Room");
             GameObject inactiveTargetObject = CreateTarget(
                 "Phase G-6 Inactive Target",
-                10f,
+                100f,
                 new Vector2(0.5f, 0.5f),
                 true,
                 out Health inactiveTarget);
@@ -50,14 +50,14 @@ namespace TrickalFanGame.Editor
             deadTarget.TakeDamage(10f);
             GameObject killTargetObject = CreateTarget(
                 "Phase G-6 Aura Kill Target",
-                0.2f,
+                0.1f,
                 new Vector2(0f, 0.75f),
                 true,
                 out Health killTarget);
             GameObject farTargetObject = CreateTarget(
                 "Phase G-6 Far Target",
-                10f,
-                new Vector2(3f, 0f),
+                100f,
+                new Vector2(4f, 0f),
                 true,
                 out Health farTarget);
 
@@ -79,7 +79,7 @@ namespace TrickalFanGame.Editor
 
                 Debug.Log(
                     "Phase G-6 damage aura verification passed: dedicated Mask-only periodic damage, three-stack " +
-                    "max-HP scaling, one-second schedule, one hit per enemy per tick, radius filtering, inactive-room " +
+                    "attack-damage scaling, one-second schedule, one hit per enemy per tick, radius filtering, inactive-room " +
                     "and dead-enemy exclusion, player kill source with Pillow healing, and ended-Run shutdown are valid.");
             }
             finally
@@ -109,17 +109,22 @@ namespace TrickalFanGame.Editor
             Health killTarget,
             Health farTarget)
         {
-            Assert(inventory.TryAcquire(pillow),
-                "One Pillow stack is required to verify that aura kills use the shared player-kill route.");
+            Assert(inventory.TryAcquire(pillow) && inventory.TryAcquire(pillow),
+                "Two Pillow stacks (heal every kill) are required to verify that aura kills use the shared player-kill route.");
             Assert(inventory.TryAcquire(mask) && inventory.TryAcquire(mask) && inventory.TryAcquire(mask),
                 "All three Mask stacks should be acquirable.");
             Assert(!inventory.TryAcquire(mask),
                 "Mask must reject acquisitions beyond its three-stack cap.");
 
             PlayerDamageAura aura = playerHealth.GetComponent<PlayerDamageAura>();
-            Assert(aura != null && aura.StackCount == 3 && Approximately(aura.MaxHealthDamagePercent, 0.03f) &&
-                   Approximately(aura.Radius, 1.5f) && Approximately(aura.IntervalSeconds, 1f),
-                "Three Mask stacks must configure one dedicated aura at 3% max HP, 1.5m, and one-second ticks.");
+            Assert(aura != null && aura.StackCount == 3 && Approximately(aura.AttackDamagePercent, 0.60f) &&
+                   Approximately(aura.MaxHealthDamagePercent, 0f) &&
+                   Approximately(aura.Radius, 2.5f) && Approximately(aura.IntervalSeconds, 1f) &&
+                   aura.ShowDebugRadius,
+                "Three Mask stacks must configure one dedicated aura at 60% attack damage, 2.5m, visible debug radius, and one-second ticks.");
+            PlayerStats ownerStats = playerHealth.GetComponent<PlayerStats>();
+            Assert(ownerStats != null && Approximately(ownerStats.AttackDamage, 10f),
+                "Aura verification assumes the base attack damage of 10.");
             aura.BindRunSession(runSession);
             SetPrivateField(aura, "targetLayers", (LayerMask)(1 << VerificationEnemyLayer));
 
@@ -134,8 +139,8 @@ namespace TrickalFanGame.Editor
             };
 
             playerHealth.TakeDamage(1f);
-            Assert(Approximately(playerHealth.CurrentHealth, 9f),
-                "Pillow verification setup must leave the player missing 1 HP.");
+            Assert(playerHealth.UsesHealthUnits && Approximately(playerHealth.CurrentHealth, 8f),
+                "Pillow verification setup must leave the player missing the one-heart minimum (2 units).");
             Physics2D.SyncTransforms();
             float firstTick = aura.NextTickTime;
             Assert(!aura.Tick(firstTick - 0.001f),
@@ -143,9 +148,9 @@ namespace TrickalFanGame.Editor
             Assert(aura.Tick(firstTick),
                 "The aura must tick exactly at its scheduled boundary.");
 
-            Assert(Approximately(activeTarget.CurrentHealth, 9.7f) && activeDamageApplications == 1,
-                "A target with multiple colliders must take one 0.3 damage hit per tick at three stacks.");
-            Assert(Approximately(inactiveTarget.CurrentHealth, 10f),
+            Assert(Approximately(activeTarget.CurrentHealth, 94f) && activeDamageApplications == 1,
+                "A target with multiple colliders must take one 6 damage hit (60% of attack damage 10) per tick at three stacks.");
+            Assert(Approximately(inactiveTarget.CurrentHealth, 100f),
                 "An enemy under an inactive room root must not receive aura damage.");
             Assert(deadTarget.IsDead && Approximately(deadTarget.CurrentHealth, 0f),
                 "An enemy already dead before the tick must remain ignored.");
@@ -154,24 +159,24 @@ namespace TrickalFanGame.Editor
                    killingBlow.SourceType == DamageSourceType.PlayerDamageAura &&
                    killingBlow.DeliveryType == DamageDeliveryType.Periodic,
                 "An aura kill must preserve the player source and dedicated periodic damage context exactly once.");
-            Assert(Approximately(playerHealth.CurrentHealth, 9.5f),
-                "The shared kill event must let one Pillow stack heal 5% of maximum HP after an aura kill.");
-            Assert(Approximately(farTarget.CurrentHealth, 10f),
-                "An enemy outside the 1.5m radius must not receive aura damage.");
+            Assert(Approximately(playerHealth.CurrentHealth, 9f),
+                "The shared kill event must let two Pillow stacks heal one half-heart unit on the aura kill.");
+            Assert(Approximately(farTarget.CurrentHealth, 100f),
+                "An enemy outside the 2.5m radius must not receive aura damage.");
 
-            Assert(!aura.Tick(firstTick) && Approximately(activeTarget.CurrentHealth, 9.7f) &&
+            Assert(!aura.Tick(firstTick) && Approximately(activeTarget.CurrentHealth, 94f) &&
                    activeDamageApplications == 1 && playerKillEvents == 1,
                 "Repeating Tick at the same time must not duplicate damage or kill events.");
 
             activeTargetObject.SetActive(false);
             Physics2D.SyncTransforms();
-            Assert(aura.Tick(firstTick + 1f) && Approximately(activeTarget.CurrentHealth, 9.7f),
+            Assert(aura.Tick(firstTick + 1f) && Approximately(activeTarget.CurrentHealth, 94f),
                 "Deactivating the target room between ticks must immediately stop damage to its enemies.");
 
             activeTargetObject.SetActive(true);
             Physics2D.SyncTransforms();
             SetPrivateField(runSession, "hasEnded", true);
-            Assert(!aura.Tick(firstTick + 2f) && Approximately(activeTarget.CurrentHealth, 9.7f),
+            Assert(!aura.Tick(firstTick + 2f) && Approximately(activeTarget.CurrentHealth, 94f),
                 "An ended Run must stop future aura ticks even when enemies become active again.");
         }
 

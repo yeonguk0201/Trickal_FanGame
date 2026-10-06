@@ -32,7 +32,7 @@ namespace TrickalFanGame.Combat
     public static class ProjectileSizing
     {
         public const float BaseColliderRadius = 0.5f;
-        public const float PlayerBasicScale = 0.5f;
+        public const float PlayerBasicScale = 0.4f;
         public const float PlayerSkillScale = 0.28f;
         public const float RangedEnemyScale = 0.3f;
         public const float BossScale = 0.35f;
@@ -63,26 +63,33 @@ namespace TrickalFanGame.Combat
         private Vector2 launchPosition;
         private float maximumTravelDistance;
         private bool isSplitProjectile;
+        private float resolvedLifetime;
+        private float remainingLifetime;
 
         public DamageContext DamageContext => damageContext;
         public bool IsLaunched => owner != null;
         public bool IsSplitProjectile => isSplitProjectile;
         public Vector2 LaunchPosition => launchPosition;
         public float MaximumTravelDistance => maximumTravelDistance;
+        // Range-0: travel distance = flight time × shot speed. Launch may override the serialized lifetime.
+        public float Lifetime => resolvedLifetime;
+        public float RemainingLifetime => remainingLifetime;
         public Vector2 Velocity => body != null ? body.linearVelocity : Vector2.zero;
 
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
-        }
-
-        private void Start()
-        {
-            Destroy(gameObject, lifetime);
+            resolvedLifetime = lifetime;
+            remainingLifetime = lifetime;
         }
 
         private void FixedUpdate()
         {
+            if (TickLifetime(Time.fixedDeltaTime))
+            {
+                return;
+            }
+
             if (maximumTravelDistance > 0f &&
                 ((Vector2)transform.position - launchPosition).sqrMagnitude >=
                 maximumTravelDistance * maximumTravelDistance)
@@ -98,7 +105,8 @@ namespace TrickalFanGame.Combat
             int configuredPierces = 0,
             ProjectileSplitSettings configuredSplitSettings = default,
             bool configuredAsSplitProjectile = false,
-            float configuredMaximumTravelDistance = 0f)
+            float configuredMaximumTravelDistance = 0f,
+            float configuredLifetime = 0f)
         {
             if (body == null)
             {
@@ -112,6 +120,8 @@ namespace TrickalFanGame.Combat
             isSplitProjectile = configuredAsSplitProjectile;
             maximumTravelDistance = Mathf.Max(0f, configuredMaximumTravelDistance);
             launchPosition = transform.position;
+            resolvedLifetime = configuredLifetime > 0f ? configuredLifetime : lifetime;
+            remainingLifetime = resolvedLifetime;
             body.linearVelocity = velocity;
 
             if (owner == null)
@@ -148,6 +158,13 @@ namespace TrickalFanGame.Combat
             if (collider.GetComponentInParent<DoorController>() != null)
             {
                 StopAtBoundary();
+                return;
+            }
+
+            if (collider.GetComponentInParent<DestructibleObstacle>() != null)
+            {
+                DestructibleObstacle.TryHitCollider(collider);
+                DestroyProjectile();
                 return;
             }
 
@@ -206,10 +223,31 @@ namespace TrickalFanGame.Combat
                     configuredPierces: 0,
                     configuredSplitSettings: default,
                     configuredAsSplitProjectile: true,
-                    configuredMaximumTravelDistance: splitSettings.MaximumDistance);
+                    configuredMaximumTravelDistance: splitSettings.MaximumDistance,
+                    configuredLifetime: resolvedLifetime);
                 splitProjectile.damagedTargets.Add(firstTarget);
                 splitProjectile.IgnoreTargetColliders(firstTarget);
             }
+        }
+
+        // Returns true when the flight time ran out and the projectile expired.
+        public bool TickLifetime(float deltaTime)
+        {
+            remainingLifetime -= Mathf.Max(0f, deltaTime);
+            if (remainingLifetime > 0f)
+            {
+                return false;
+            }
+
+            Expire();
+            return true;
+        }
+
+        // Range-0: reaching the end of the range is kept apart from hit and boundary removal so an end-of-range
+        // visual asset can attach here later. For now it disappears immediately without a fade.
+        private void Expire()
+        {
+            DestroyProjectile();
         }
 
         public void StopAtBoundary()

@@ -10,6 +10,7 @@ namespace TrickalFanGame.Room
         [SerializeField, Min(1)] private int roomNumber = 1;
         [SerializeField] private GameObject contentRoot;
         [SerializeField] private Transform cameraAnchor;
+        [SerializeField] private Transform initialSpawnPoint;
         [SerializeField] private Transform defaultEntryPoint;
         [SerializeField] private RoomDoorway[] doorways = Array.Empty<RoomDoorway>();
         [SerializeField] private RoomDefinition definition;
@@ -21,6 +22,10 @@ namespace TrickalFanGame.Room
         public int RoomNumber => roomNumber;
         public GameObject ContentRoot => contentRoot;
         public Transform CameraAnchor => cameraAnchor;
+        public Transform InitialSpawnPoint => initialSpawnPoint;
+        public Vector2 InitialSpawnPosition => initialSpawnPoint != null
+            ? initialSpawnPoint.position
+            : transform.position;
         public Transform DefaultEntryPoint => defaultEntryPoint;
         public RoomDoorway[] Doorways => doorways;
         public RoomDefinition Definition => definition;
@@ -49,6 +54,11 @@ namespace TrickalFanGame.Room
         public void SetDoorways(RoomDoorway[] configuredDoorways)
         {
             doorways = configuredDoorways ?? Array.Empty<RoomDoorway>();
+        }
+
+        public void ConfigureInitialSpawnPoint(Transform configuredInitialSpawnPoint)
+        {
+            initialSpawnPoint = configuredInitialSpawnPoint;
         }
 
         public void ApplyGeneratedDefinition(RoomDefinition configuredDefinition)

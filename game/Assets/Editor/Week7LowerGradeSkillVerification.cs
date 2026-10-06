@@ -20,17 +20,16 @@ namespace TrickalFanGame.Editor
                 out PlayerStats stats,
                 out PlayerCombatEvents combatEvents,
                 out PlayerSP playerSP,
-                out PlayerSPDropper dropper,
                 out PlayerSkill skill);
             GameObject pickupTemplateObject = CreatePickup("Phase C Pickup Template", out SPPickup pickupTemplate);
             GameObject projectileTemplateObject = CreateProjectile(
                 "Phase C Projectile Template",
                 out HomingSkillProjectile projectileTemplate);
             GameObject dropParent = new("Phase C Drop Parent");
-            GameObject enemy = CreateEnemy("Phase C Explosion Enemy", new Vector2(3f, 0f), 30, out Health enemyHealth);
-            GameObject secondEnemy = CreateEnemy("Phase C Second Enemy", new Vector2(0f, 5f), 30,
+            GameObject enemy = CreateEnemy("Phase C Explosion Enemy", new Vector2(3f, 0f), 300, out Health enemyHealth);
+            GameObject secondEnemy = CreateEnemy("Phase C Second Enemy", new Vector2(0f, 5f), 300,
                 out Health secondEnemyHealth);
-            GameObject thirdEnemy = CreateEnemy("Phase C Third Enemy", new Vector2(-7f, 0f), 30,
+            GameObject thirdEnemy = CreateEnemy("Phase C Third Enemy", new Vector2(-7f, 0f), 300,
                 out Health thirdEnemyHealth);
             GameObject wall = new("Phase C Solid Wall");
             Collider2D wallCollider = wall.AddComponent<BoxCollider2D>();
@@ -42,10 +41,6 @@ namespace TrickalFanGame.Editor
                 VerifySPBoundaries(playerSP);
                 VerifyFullSPPickupDisappears(playerSP);
 
-                dropper.Configure(pickupTemplate, 0.25f);
-                Assert(dropper.ShouldDrop(0f) && dropper.ShouldDrop(0.249f) && !dropper.ShouldDrop(0.25f),
-                    "The default SP drop boundary must be exactly 25%.");
-                dropper.Configure(pickupTemplate, 1f);
                 int pickupCountBeforeKill = UnityEngine.Object.FindObjectsByType<SPPickup>(FindObjectsSortMode.None).Length;
                 GameObject dropEnemy = CreateEnemy("Phase C Drop Enemy", Vector2.zero, 1, out Health dropEnemyHealth);
                 dropEnemy.transform.SetParent(dropParent.transform);
@@ -54,12 +49,12 @@ namespace TrickalFanGame.Editor
                     DamageSourceType.PlayerProjectile,
                     1));
                 int pickupCountAfterKill = UnityEngine.Object.FindObjectsByType<SPPickup>(FindObjectsSortMode.None).Length;
-                Assert(pickupCountAfterKill == pickupCountBeforeKill + 1,
-                    "One eligible player kill at 100% chance must spawn one floor pickup.");
+                Assert(pickupCountAfterKill == pickupCountBeforeKill,
+                    "Enemy kills must not drop SP; SP only comes from room-clear drops (Resource-3).");
                 UnityEngine.Object.DestroyImmediate(dropEnemy);
                 RemoveSpawnedPickups(pickupTemplate);
 
-                stats.AddAttackDamage(4);
+                stats.AddAttackDamage(40);
                 const float firstCastTime = 100f;
                 const float shotInterval = 0.08f;
                 const float fanSpacingAngle = 12f;
@@ -119,7 +114,7 @@ namespace TrickalFanGame.Editor
                 {
                     projectile.ExplodeNow();
                 }
-                Assert(enemyHealth.CurrentHealth == 10,
+                Assert(enemyHealth.CurrentHealth == 100,
                     "Four overlapping explosions must stack to current attack damage x400% on one enemy.");
 
                 UnityEngine.Object.DestroyImmediate(enemy);
@@ -153,7 +148,7 @@ namespace TrickalFanGame.Editor
                     "A cast without SP must not launch projectiles or consume anything.");
 
                 Debug.Log(
-                    "Phase C verification passed: SP cap/spend, full-cap pickup consumption, kill-based floor drop, " +
+                    "Phase C verification passed: SP cap/spend, full-cap pickup consumption, no enemy-kill SP drop, " +
                     "four interval-fired 36-degree fan shots in 1-3-2-4 order, direction-first homing, " +
                     "multi-target round-robin, current-attack 100% " +
                     "stacked explosions, targeted wall passage, untargeted wall expiry, and zero-SP rejection are valid.");
@@ -209,7 +204,6 @@ namespace TrickalFanGame.Editor
             out PlayerStats stats,
             out PlayerCombatEvents combatEvents,
             out PlayerSP playerSP,
-            out PlayerSPDropper dropper,
             out PlayerSkill skill)
         {
             GameObject player = new("Phase C Verification Player");
@@ -220,13 +214,10 @@ namespace TrickalFanGame.Editor
             combatEvents = player.AddComponent<PlayerCombatEvents>();
             player.AddComponent<PlayerMovement>();
             playerSP = player.AddComponent<PlayerSP>();
-            dropper = player.AddComponent<PlayerSPDropper>();
             skill = player.AddComponent<PlayerSkill>();
             InvokeLifecycle(health, "Awake");
             InvokeLifecycle(stats, "Awake");
             InvokeLifecycle(playerSP, "Awake");
-            InvokeLifecycle(dropper, "Awake");
-            InvokeLifecycle(dropper, "OnEnable");
             InvokeLifecycle(skill, "Awake");
             return player;
         }

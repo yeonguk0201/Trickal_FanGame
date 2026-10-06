@@ -17,7 +17,7 @@ namespace TrickalFanGame.Enemy
         [Header("Attack")]
         [SerializeField, Min(0.01f)] private float attackInterval = 1.5f;
         [SerializeField, Min(0.01f)] private float projectileSpeed = 5f;
-        [SerializeField, Min(0.01f)] private float projectileDamage = 1f;
+        [SerializeField] private EnemyDamageTier projectileDamageTier = EnemyDamageTier.Heavy;
         [SerializeField, Min(0.01f)] private float projectileLifetime = 4f;
         [SerializeField] private Transform target;
 
@@ -26,13 +26,15 @@ namespace TrickalFanGame.Enemy
         private KnockbackReceiver knockback;
         private EnemyBehaviorContext behavior;
         private float nextAttackTime;
+        private readonly EnemyObstacleNavigator navigator = new();
+        private float bodyRadius;
 
         public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;
         public float NextAttackTime => nextAttackTime;
         public float MoveSpeed => moveSpeed;
         public float MinimumAttackDistance => minimumAttackDistance;
         public float MaximumAttackDistance => maximumAttackDistance;
-        public float ProjectileDamage => projectileDamage;
+        public EnemyDamageTier ProjectileDamageTier => projectileDamageTier;
 
         public event Action<EnemyProjectile> ProjectileFired;
 
@@ -66,7 +68,7 @@ namespace TrickalFanGame.Enemy
             float configuredMaximumAttackDistance,
             float configuredAttackInterval,
             float configuredProjectileSpeed,
-            float configuredProjectileDamage,
+            EnemyDamageTier configuredProjectileDamageTier,
             float configuredProjectileLifetime)
         {
             moveSpeed = Mathf.Max(0f, configuredMoveSpeed);
@@ -78,13 +80,13 @@ namespace TrickalFanGame.Enemy
                 detectionRange);
             attackInterval = Mathf.Max(0.01f, configuredAttackInterval);
             projectileSpeed = Mathf.Max(0.01f, configuredProjectileSpeed);
-            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+            projectileDamageTier = configuredProjectileDamageTier;
             projectileLifetime = Mathf.Max(0.01f, configuredProjectileLifetime);
         }
 
-        public void SetProjectileDamage(float configuredProjectileDamage)
+        public void SetProjectileDamageTier(EnemyDamageTier configuredProjectileDamageTier)
         {
-            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+            projectileDamageTier = configuredProjectileDamageTier;
         }
 
         public void SetTarget(Transform configuredTarget)
@@ -122,17 +124,24 @@ namespace TrickalFanGame.Enemy
             }
 
             Vector2 direction = offset / distance;
-            if (distance > maximumAttackDistance)
+            // Obstacle-0: with the line of fire blocked the enemy holds fire and walks around toward the target.
+            if (distance > maximumAttackDistance ||
+                !EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
             {
-                body.linearVelocity = direction * moveSpeed;
+                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
+                    currentTime) * moveSpeed;
                 return;
             }
 
-            if (distance < minimumAttackDistance)
+            if (distance < minimumAttackDistance &&
+                EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, -direction, bodyRadius,
+                    out Vector2 retreat))
             {
-                body.linearVelocity = -direction * moveSpeed;
+                body.linearVelocity = retreat * moveSpeed;
                 return;
             }
+
+            // Obstacle-3: backed against an obstacle or wall, the enemy holds its ground and keeps firing.
 
             body.linearVelocity = Vector2.zero;
             TryFire(direction, currentTime);
@@ -152,7 +161,7 @@ namespace TrickalFanGame.Enemy
                 transform.position,
                 direction,
                 gameObject,
-                projectileDamage,
+                projectileDamageTier,
                 projectileSpeed,
                 projectileLifetime,
                 projectileSprite);
@@ -166,6 +175,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
+            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {

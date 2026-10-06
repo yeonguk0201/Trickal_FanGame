@@ -153,7 +153,7 @@ namespace TrickalFanGame.Editor
         private static void ValidateEnemyProjectile(Collider2D pillar)
         {
             EnemyProjectile projectile = EnemyProjectile.Create(new Vector2(-6f, 0f), Vector2.right,
-                null, 1f, 5f, 2f, null);
+                null, EnemyDamageTier.Light, 5f, 2f, null);
             bool stopped = projectile.TryHit(pillar);
             Assert(stopped && projectile == null,
                 "An enemy projectile must stop when it reaches the Environment pillar.");
@@ -212,7 +212,7 @@ namespace TrickalFanGame.Editor
                 AssetDatabase.LoadAssetAtPath<GameObject>(Week14Encounter2Setup.ChargingPrefabPath),
                 new Vector2(-6f, 0f), Quaternion.identity, parent);
             ChargingEnemyController charging = enemyObject.GetComponent<ChargingEnemyController>();
-            charging.Configure(20f, 0.01f, 9f, 1f, 0.5f, 1f, 1f);
+            charging.Configure(20f, 0.01f, 9f, 1f, 0.5f, 1f, EnemyDamageTier.Light);
             charging.SetTarget(target.transform);
             charging.TickBehavior(0f);
             charging.TickBehavior(0.02f);

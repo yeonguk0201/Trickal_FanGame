@@ -91,7 +91,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                ranged.Configure(2f, 8f, 3f, 6f, 1.5f, 5f, 1, 4f);
+                ranged.Configure(2f, 8f, 3f, 6f, 1.5f, 5f, EnemyDamageTier.Light, 4f);
                 ranged.SetTarget(player.transform);
 
                 player.transform.position = Vector2.right * 7f;
@@ -123,7 +123,8 @@ namespace TrickalFanGame.Editor
 
                 float healthBeforeHit = playerHealth.CurrentHealth;
                 Assert(first.TryHit(playerCollider), "A ranged projectile must recognize the player collider.");
-                Assert(first == null && playerHealth.CurrentHealth == healthBeforeHit - 1 &&
+                Assert(first == null && playerHealth.CurrentHealth ==
+                       healthBeforeHit - HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 1) &&
                        deathReason.CurrentReason == "ENEMY",
                     "A ranged projectile must damage the player once, set ENEMY as death reason, and disappear.");
 
@@ -132,9 +133,12 @@ namespace TrickalFanGame.Editor
                 wall.layer = LayerMask.NameToLayer("Environment");
                 Collider2D wallCollider = wall.AddComponent<BoxCollider2D>();
                 EnemyProjectile wallShot = EnemyProjectile.Create(
-                    Vector2.zero, Vector2.right, enemy, 1, 5f, 4f, null);
+                    Vector2.zero, Vector2.right, enemy, EnemyDamageTier.Light, 5f, 4f, null);
                 Assert(wallShot.TryHit(wallCollider) && wallShot == null,
                     "Enemy projectiles must be consumed by solid environment boundaries.");
+                // The wall sits on the enemy for this hit check only; left in place it would block the line of fire.
+                UnityEngine.Object.DestroyImmediate(wall);
+                Physics2D.SyncTransforms();
 
                 GameObject doorObject = new("Phase E-2 Portal Door");
                 doorObject.transform.SetParent(root.transform);
@@ -142,7 +146,7 @@ namespace TrickalFanGame.Editor
                 DoorController door = doorObject.AddComponent<DoorController>();
                 door.ConfigurePortalBarrier(true);
                 EnemyProjectile doorShot = EnemyProjectile.Create(
-                    Vector2.zero, Vector2.right, enemy, 1, 5f, 4f, null);
+                    Vector2.zero, Vector2.right, enemy, EnemyDamageTier.Light, 5f, 4f, null);
                 Assert(doorShot.TryHit(doorCollider) && doorShot == null,
                     "Enemy projectiles must be consumed by green portal barriers.");
 
@@ -180,7 +184,7 @@ namespace TrickalFanGame.Editor
                     "Defeating the ranged enemy must use the shared player kill-event route exactly once.");
 
                 EnemyProjectile leakedShot = EnemyProjectile.Create(
-                    Vector2.zero, Vector2.right, enemy, 1, 5f, 4f, null);
+                    Vector2.zero, Vector2.right, enemy, EnemyDamageTier.Light, 5f, 4f, null);
                 InvokeStatic(typeof(RoomGraphController), "ClearTransientProjectiles");
                 Assert(leakedShot == null,
                     "A room transition must clear launched ranged-enemy projectiles.");

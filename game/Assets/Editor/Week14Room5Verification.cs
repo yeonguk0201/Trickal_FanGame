@@ -29,6 +29,7 @@ namespace TrickalFanGame.Editor
             RoomGraphController graph = assembler.Graph;
             SerializedObject serializedGraph = new(graph);
             serializedGraph.FindProperty("transitionCooldown").floatValue = 0f;
+            serializedGraph.FindProperty("returnDoorwayBlockDuration").floatValue = 0f;
             serializedGraph.ApplyModifiedPropertiesWithoutUndo();
             RoomNode source = graph.CurrentNode;
             RoomDoorway forward = source.Doorways.First(doorway =>

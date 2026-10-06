@@ -7,6 +7,7 @@ namespace TrickalFanGame.Room
 {
     public static class RoomTemplateSelector
     {
+        public const string StartingRoomTemplateId = "small-standard";
         private const uint TemplateSalt = 0xB5297A4Du;
         private const float OverlapTolerance = 0.0001f;
 
@@ -65,8 +66,24 @@ namespace TrickalFanGame.Room
                                            template.SupportsFloor(node.FloorNumber) &&
                                            template.SupportsConnections(node.DirectionalConnections))
                         .ToArray();
+                    if (node.Role == GeneratedRoomRole.Start)
+                    {
+                        candidates = candidates
+                            .Where(template => string.Equals(
+                                template.TemplateId,
+                                StartingRoomTemplateId,
+                                StringComparison.Ordinal))
+                            .ToArray();
+                    }
                     if (candidates.Length == 0)
                     {
+                        if (node.Role == GeneratedRoomRole.Start)
+                        {
+                            error = $"Starting room {node.RoomId} requires compatible template " +
+                                    $"'{StartingRoomTemplateId}'.";
+                            return false;
+                        }
+
                         error = $"Room {node.RoomId} has no template compatible with RoomType {node.RoomType} " +
                                 "and its connection directions.";
                         return false;

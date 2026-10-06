@@ -20,6 +20,8 @@ GameObject:
   - component: {fileID: 1581259518379177213}
   - component: {fileID: 3873071872432734107}
   - component: {fileID: 4511758983444437158}
+  - component: {fileID: 2311666414337553906}
+  - component: {fileID: 6354528119158790540}
   m_Layer: 6
   m_Name: TestEnemy
   m_TagString: Untagged
@@ -174,10 +176,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
-  maxHealth: 6
+  maxHealth: 60
   currentShield: 0
+  useHealthUnits: 0
 --- !u!114 &5840264429905698585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,7 +191,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b65f8e205289b64b91a50cb0721cb5a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.TestEnemy
   allowsSPDrop: 1
   destroyOnBossCollision: 0
@@ -202,9 +205,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damage: 2
+  damageTier: 2
   cooldown: 1
 --- !u!114 &8647675937649764220
 MonoBehaviour:
@@ -216,7 +219,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f54127202aaa284d837f6e0e8434051, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyChase
   moveSpeed: 2.25
   detectionRange: 6
@@ -232,7 +235,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
@@ -246,7 +249,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa527e4c75f4de29f4975b643b25cab, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyBehaviorContext
 --- !u!114 &3873071872432734107
 MonoBehaviour:
@@ -258,11 +261,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2448a35b34fa40a9bfe4363b9fe5c889, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackPresentation
-  telegraphScale: {x: 1.25, y: 0.75}
-  activeScale: {x: 0.8, y: 1.3}
-  recoveryScale: {x: 1.15, y: 0.85}
+  telegraphScale: {x: 1, y: 1}
+  activeScale: {x: 1, y: 1}
+  recoveryScale: {x: 1, y: 1}
 --- !u!114 &4511758983444437158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -273,11 +276,48 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a5d48cde2f894e368eb80c129624af0e, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.MeleeEnemyAttack
   attackRange: 1.15
   telegraphDuration: 0.4
   activeDuration: 0.12
   recoveryDuration: 0.65
   attackCooldown: 0.2
-  attackDamage: 3
+  damageTier: 3
+--- !u!114 &2311666414337553906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5213069529628479123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d246f996c0c688b41a3753dd434e55fa, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyMovementAnimator
+  motion: 1
+  motionMaterial: {fileID: 2100000, guid: ab8ab0ec49b0edf469edf1ab0b4d55d7, type: 2}
+  strideLength: 1
+  amplitude: 0.075
+  walkFrames: []
+  walkReferenceSprite: {fileID: 21300000, guid: bfcc03dd03fa881439a030200827ec91, type: 3}
+--- !u!114 &6354528119158790540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5213069529628479123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5554c9e758ec2345b5c930bc27aa1c9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyAttackArtwork
+  referenceSprite: {fileID: 21300000, guid: bfcc03dd03fa881439a030200827ec91, type: 3}
+  frames:
+  - {fileID: 21300000, guid: fe31200d0b61cd242a284254db11057d, type: 3}
+  - {fileID: 21300000, guid: 4da9f80309bec9044b41894eb9c555f4, type: 3}
+  - {fileID: 21300000, guid: d82ec4d98662a9141a16f561fee8311f, type: 3}
+  - {fileID: 21300000, guid: 69d30dda2db55d84ea054c94a2255c3d, type: 3}
+  projectileSprite: {fileID: 0}

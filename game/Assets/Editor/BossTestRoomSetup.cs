@@ -29,8 +29,12 @@ namespace TrickalFanGame.Editor
             if (EditorApplication.isPlaying) return;
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null) Create();
-            else EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
-            Debug.Log("Boss Test Room: press Play to test bosses. Use the Boss Selection panel to spawn different bosses.");
+            else
+            {
+                Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                Repair(scene);
+            }
+            Debug.Log("Boss Test Room: press Play to test bosses, then use Boss Selection and item/spell +1 controls.");
         }
 
         private static void Create()
@@ -62,6 +66,7 @@ namespace TrickalFanGame.Editor
                 player.GetComponent<PlayerInventory>(),
                 player.GetComponent<Health>(),
                 player.GetComponent<PlayerStats>(),
+                BuildItemCatalog(),
                 bossPrefabs,
                 bossNames,
                 new Vector2(16f, 12f));
@@ -89,6 +94,37 @@ namespace TrickalFanGame.Editor
             if (!EditorSceneManager.SaveScene(scene)) throw new InvalidOperationException("Could not save Boss test scene.");
         }
 
+        private static void Repair(Scene scene)
+        {
+            BossTestRoomController controller = Find<BossTestRoomController>(scene);
+            PlayerMovement player = Find<PlayerMovement>(scene);
+            GameObject[] bossPrefabs = BossDefinitions
+                .Select(def => AssetDatabase.LoadAssetAtPath<GameObject>(def.PrefabPath))
+                .Where(prefab => prefab != null)
+                .ToArray();
+            string[] bossNames = BossDefinitions
+                .Where(def => AssetDatabase.LoadAssetAtPath<GameObject>(def.PrefabPath) != null)
+                .Select(def => def.Name)
+                .ToArray();
+
+            controller.Configure(
+                player.GetComponent<PlayerInventory>(),
+                player.GetComponent<Health>(),
+                player.GetComponent<PlayerStats>(),
+                BuildItemCatalog(),
+                bossPrefabs,
+                bossNames,
+                new Vector2(16f, 12f));
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene, ScenePath))
+                throw new InvalidOperationException("Could not synchronize the Boss test scene.");
+        }
+
+        private static ItemTestRoomController.ItemLoadoutEntry[] BuildItemCatalog() =>
+            ItemTestRoomSetup.BuildDefaultLoadout()
+                .Select(entry => new ItemTestRoomController.ItemLoadoutEntry(entry.Item, 0))
+                .ToArray();
+
         [MenuItem("Trickal Fan Game/Debug/Verify Boss Test Room", priority = 4)]
         public static void Verify()
         {
@@ -101,6 +137,10 @@ namespace TrickalFanGame.Editor
                 throw new InvalidOperationException($"Boss test scene configuration is invalid: {error}");
             if (controller.BossPrefabCount == 0)
                 throw new InvalidOperationException("Boss test scene has no boss prefabs configured.");
+            if (controller.ItemCatalog.Count != 17 ||
+                controller.ItemCatalog.Count(entry => entry.Item.IsActive) != 16)
+                throw new InvalidOperationException(
+                    "Boss test scene must expose all 16 active items/spells and legacy item-06.");
 
             // Test spawning each boss
             for (int i = 0; i < controller.BossPrefabCount; i++)
@@ -120,7 +160,8 @@ namespace TrickalFanGame.Editor
                 UnityEngine.Object.DestroyImmediate(controller.ActiveBoss.gameObject);
             }
 
-            Debug.Log($"Boss test room verification passed: {controller.BossPrefabCount} bosses available.");
+            Debug.Log($"Boss test room verification passed: {controller.BossPrefabCount} bosses and " +
+                      $"{controller.ItemCatalog.Count} individually acquirable item entries are available.");
         }
 
         private static T Find<T>(Scene scene) where T : Component => scene.GetRootGameObjects()

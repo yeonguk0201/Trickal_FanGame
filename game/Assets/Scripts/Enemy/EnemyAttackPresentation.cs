@@ -17,9 +17,9 @@ namespace TrickalFanGame.Enemy
     [DisallowMultipleComponent]
     public sealed class EnemyAttackPresentation : MonoBehaviour
     {
-        [SerializeField] private Vector2 telegraphScale = new(1.25f, 0.75f);
-        [SerializeField] private Vector2 activeScale = new(0.8f, 1.3f);
-        [SerializeField] private Vector2 recoveryScale = new(1.15f, 0.85f);
+        [SerializeField] private Vector2 telegraphScale = Vector2.one;
+        [SerializeField] private Vector2 activeScale = Vector2.one;
+        [SerializeField] private Vector2 recoveryScale = Vector2.one;
 
         private Vector3 idleScale;
 

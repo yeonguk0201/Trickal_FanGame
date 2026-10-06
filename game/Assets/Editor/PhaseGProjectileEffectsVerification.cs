@@ -25,8 +25,8 @@ namespace TrickalFanGame.Editor
             GameObject homingObject = CreateHomingProjectile(out HomingSkillProjectile homing);
             GameObject distanceTargetObject = CreateTarget(
                 "Phase G-5 Distance Target",
-                10f,
-                new Vector2(8f, 0f),
+                100f,
+                new Vector2(6f, 0f),
                 out Health distanceTarget);
             GameObject firstTargetObject = CreateTarget(
                 "Phase G-5 First Pierce Target",
@@ -58,7 +58,7 @@ namespace TrickalFanGame.Editor
 
                 Debug.Log(
                     "Phase G-5 projectile effects verification passed: Telescope additive attack and clamped " +
-                    "3-8m straight-line damage, homing impact distance, Diamond Cutter first-pierce three-way split, " +
+                    "2-6m straight-line damage, homing impact distance, Diamond Cutter first-pierce three-way split, " +
                     "60% scale, 30% damage, 3m range, no repeat hit/re-pierce/re-split, and wall cleanup are valid.");
             }
             finally
@@ -84,19 +84,19 @@ namespace TrickalFanGame.Editor
         {
             Assert(inventory.TryAcquire(telescope) && !inventory.TryAcquire(telescope),
                 "Telescope must be acquirable once and enforce its epic one-stack cap.");
-            Assert(Approximately(stats.AttackDamage, 1.15f),
+            Assert(Approximately(stats.AttackDamage, 11.5f),
                 "Telescope must always add 15% attack damage.");
 
             DamageContext context = stats.CreateDirectDamageContext(
                 playerHealth.gameObject,
                 DamageSourceType.PlayerProjectile);
-            Assert(Approximately(DamageCalculator.Calculate(context.WithImpactDistance(3f), 1f), 1.15f),
-                "Telescope must add no distance damage at 3m.");
-            Assert(Approximately(DamageCalculator.Calculate(context.WithImpactDistance(5.5f), 1f), 1.38f),
-                "Telescope must linearly add 20% damage at the midpoint between 3m and 8m.");
-            Assert(Approximately(DamageCalculator.Calculate(context.WithImpactDistance(8f), 1f), 1.61f) &&
-                   Approximately(DamageCalculator.Calculate(context.WithImpactDistance(20f), 1f), 1.61f),
-                "Telescope distance damage must reach and remain capped at 40% from 8m onward.");
+            Assert(Approximately(DamageCalculator.Calculate(context.WithImpactDistance(2f), 1f), 11.5f),
+                "Telescope must add no distance damage at 2m.");
+            Assert(Approximately(DamageCalculator.Calculate(context.WithImpactDistance(4f), 1f), 13.8f),
+                "Telescope must linearly add 20% damage at the midpoint between 2m and 6m.");
+            Assert(Approximately(DamageCalculator.Calculate(context.WithImpactDistance(6f), 1f), 16.1f) &&
+                   Approximately(DamageCalculator.Calculate(context.WithImpactDistance(20f), 1f), 16.1f),
+                "Telescope distance damage must reach and remain capped at 40% from 6m onward.");
 
             homing.transform.position = Vector2.zero;
             homing.Launch(
@@ -110,7 +110,7 @@ namespace TrickalFanGame.Editor
             homing.transform.position = distanceTarget.transform.position;
             Physics2D.SyncTransforms();
             homing.ExplodeNow();
-            Assert(Approximately(distanceTarget.CurrentHealth, 8.39f),
+            Assert(Approximately(distanceTarget.CurrentHealth, 83.9f),
                 "A homing projectile must use launch-to-impact displacement, not accumulated curved path length.");
         }
 

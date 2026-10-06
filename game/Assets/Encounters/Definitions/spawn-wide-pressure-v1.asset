@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a73bdf2426d4a0ebd2e2432b8f10f75, type: 3}
+  m_Name: spawn-wide-pressure-v1
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.EncounterDefinition
+  encounterId: spawn-wide-pressure-v1
+  allowedProfiles:
+  - {fileID: 11400000, guid: cacd1b9601f488d4b9659bd51e1ca96c, type: 2}
+  minimumFloor: 1
+  maximumFloor: 3
+  minimumPlayerDistance: 1.5
+  minimumDoorDistance: 2
+  waves:
+  - waveNumber: 1
+    startCondition: 0
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 0
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 0
+        weight: 70
+      - enemyRole: 4
+        weight: 30
+    - enemyRole: 1
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 1
+        weight: 50
+      - enemyRole: 5
+        weight: 50
+  - waveNumber: 2
+    startCondition: 1
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 0
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 0
+        weight: 70
+      - enemyRole: 4
+        weight: 30
+    - enemyRole: 1
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 1
+        weight: 50
+      - enemyRole: 5
+        weight: 50
+  clearCondition: 0
+  declaredMinimumThreat: 10
+  declaredMaximumThreat: 14

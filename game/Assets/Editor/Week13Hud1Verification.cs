@@ -51,15 +51,13 @@ namespace TrickalFanGame.Editor
             Assert(view.PlayerHealth.gameObject == view.PlayerSP.gameObject &&
                 view.PlayerSP.gameObject == view.LowerGradeSkill.gameObject,
                 "HUD-1 state references must point to the same player.");
-            Assert(view.HpFill != null && view.HpValueText != null && view.HealthFeedback != null &&
+            Assert(view.HeartRowRoot != null && view.HeartTemplate != null &&
                 view.SpSlotsRoot != null && view.SpSlotTemplate != null && view.SpValueText != null &&
                 view.LowerGradeSkillState != null && view.LowerGradeSkillText != null,
                 "GameHudView visual references are missing.");
             Assert(!view.SpSlotTemplate.gameObject.activeSelf && view.SpSlotTemplate.rectTransform.sizeDelta == new Vector2(40, 40),
                 "HUD-1 must use one inactive 40x40 SP slot template.");
-            Assert(view.HpFill.sprite != null && view.HpFill.type == Image.Type.Filled &&
-                view.HpFill.fillMethod == Image.FillMethod.Horizontal,
-                "HP fill must have a Sprite so Unity renders its horizontal fill amount.");
+            ValidateHeartRow(view);
             Assert(!view.GetComponentsInChildren<Graphic>(true).Any(graphic => graphic.raycastTarget &&
                 graphic.GetComponentInParent<GamePauseArtifactView>() == null &&
                 graphic.GetComponentInParent<ItemRewardSelectionView>() == null),
@@ -105,22 +103,43 @@ namespace TrickalFanGame.Editor
 
                 Assert(view.SlotCount == 3 && view.ActiveSlotCount == 0 && view.SpValueText.text == "SP 0 / 3",
                     "Initial SP slots do not match current and maximum SP.");
-                Assert(Mathf.Approximately(view.HpFill.fillAmount, 1f) && view.HpValueText.text == "10 / 10",
-                    "Initial HP HUD does not match player Health.");
+                // Values are half-heart units: 10 units = 5 hearts.
+                AssertHearts(view, "initial 10/10", 0, 1f, 1f, 1f, 1f, 1f);
 
                 health.TakeDamage(3f);
-                Assert(Mathf.Approximately(view.HpFill.fillAmount, 0.7f) && view.HpValueText.text == "7 / 10" &&
-                    Mathf.Approximately(view.LastHealthDelta, -3f) && view.HealthFeedback.gameObject.activeSelf,
-                    "Damage did not immediately update HP and damage feedback.");
+                AssertHearts(view, "damage to 7/10", 0, 1f, 1f, 1f, 0.5f, 0f);
+                Assert(Mathf.Approximately(view.LastHealthDelta, -3f) && view.PulsingHeartCount == 2 &&
+                    !view.IsHeartPulsing(2) && view.IsHeartPulsing(3) && view.IsHeartPulsing(4),
+                    "Damage must pop only the hearts whose fill changed.");
                 health.Heal(2f);
-                Assert(Mathf.Approximately(view.HpFill.fillAmount, 0.9f) && view.HpValueText.text == "9 / 10" &&
-                    Mathf.Approximately(view.LastHealthDelta, 2f),
-                    "Healing did not immediately update HP and healing feedback.");
-                typeof(Health).GetMethod("SetMaxHealth", BindingFlags.Instance | BindingFlags.NonPublic)
-                    ?.Invoke(health, new object[] { 12f, true });
-                Assert(Mathf.Approximately(view.HpFill.fillAmount, 11f / 12f) &&
-                    view.HpValueText.text == "11 / 12" && Mathf.Approximately(view.LastHealthDelta, 2f),
-                    "Maximum HP growth did not immediately update the HP value and fill.");
+                AssertHearts(view, "heal to 9/10", 0, 1f, 1f, 1f, 1f, 0.5f);
+                Assert(Mathf.Approximately(view.LastHealthDelta, 2f),
+                    "Healing did not immediately update healing feedback.");
+                SetMaxHealth(health, 12f);
+                AssertHearts(view, "max growth to 11/12", 0, 1f, 1f, 1f, 1f, 1f, 0.5f);
+                Assert(Mathf.Approximately(view.LastHealthDelta, 2f),
+                    "Maximum HP growth did not immediately update the heart row.");
+
+                health.EnableHealthUnits();
+                health.TakeDamage(1f);
+                Assert(health.UsesHealthUnits && Mathf.Approximately(health.CurrentHealth, 9f),
+                    "Unit-mode setup must apply the one-heart minimum damage.");
+                AssertHearts(view, "unit-mode 9/12", 0, 1f, 1f, 1f, 1f, 0.5f, 0f);
+
+                health.SetShield(3f);
+                AssertHearts(view, "shield 3 units", 2, 1f, 1f, 1f, 1f, 0.5f, 0f, 1f, 0.5f);
+                Assert(!view.IsShieldHeart(5) && view.IsShieldHeart(6) && view.IsShieldHeart(7),
+                    "Shield hearts must follow the health hearts.");
+
+                SetMaxHealth(health, 40f);
+                Assert(view.HeartCount == 22 && view.HeartSize < 36f &&
+                    view.HeartSize * view.HeartCount + 4f * (view.HeartCount - 1) <=
+                    view.HeartRowRoot.rect.width + 0.01f,
+                    "Many hearts must shrink to stay inside the HP row.");
+                SetMaxHealth(health, 12f);
+                health.SetShield(0f);
+                Assert(view.HeartCount == 6 && view.ShieldHeartCount == 0 && Mathf.Approximately(view.HeartSize, 36f),
+                    "Removing shield and extra max HP must remove surplus hearts and restore the icon size.");
 
                 Assert(sp.TryAdd(2) && view.ActiveSlotCount == 2 && view.LastSPDelta == 2,
                     "SP gain did not activate repeated slots.");
@@ -169,6 +188,51 @@ namespace TrickalFanGame.Editor
             {
                 Object.DestroyImmediate(hudClone);
             }
+        }
+
+        private static void ValidateHeartRow(GameHudView view)
+        {
+            RectTransform template = view.HeartTemplate;
+            Assert(view.HeartRowRoot.name == Week13Hud1Setup.HeartRowName &&
+                view.HeartRowRoot.sizeDelta == Week13Hud1Setup.HeartRowSize &&
+                view.HeartRowRoot.anchoredPosition == Week13Hud1Setup.HeartRowPosition &&
+                view.HeartRowRoot.GetComponent<HorizontalLayoutGroup>() != null,
+                "HP hearts must use the configured top row of the Survival HUD.");
+            Assert(template.parent == view.HeartRowRoot && !template.gameObject.activeSelf &&
+                template.name == Week13Hud1Setup.HeartTemplateName,
+                "HP-2 must keep one inactive heart template inside the heart row.");
+            Image background = template.Find("Background")?.GetComponent<Image>();
+            Image fill = template.Find("Fill")?.GetComponent<Image>();
+            Sprite heart = AssetDatabase.LoadAssetAtPath<Sprite>(Week13FrontendUiAssets.HeartSpritePath);
+            Assert(heart != null && background != null && fill != null &&
+                background.sprite == heart && fill.sprite == heart &&
+                fill.type == Image.Type.Filled && fill.fillMethod == Image.FillMethod.Horizontal &&
+                fill.fillOrigin == (int)Image.OriginHorizontal.Left,
+                "Heart template must layer an empty heart and a left-origin horizontal fill using the heart sprite.");
+            Transform panel = view.HeartRowRoot.parent;
+            Assert(panel.Find("HP Bar") == null && panel.Find("HP Label") == null,
+                "The legacy HP gauge must be removed.");
+            Assert(view.HealthFeedback == null && panel.Find("HP Change Feedback") == null,
+                "HP changes must not flash a row-wide rectangle behind the hearts.");
+        }
+
+        private static void AssertHearts(GameHudView view, string label, int shieldHearts, params float[] fills)
+        {
+            Assert(view.HeartCount == fills.Length && view.ShieldHeartCount == shieldHearts &&
+                view.HealthHeartCount == fills.Length - shieldHearts,
+                $"{label}: expected {fills.Length} hearts ({shieldHearts} shield), got {view.HeartCount} " +
+                $"({view.ShieldHeartCount} shield).");
+            for (int i = 0; i < fills.Length; i++)
+            {
+                Assert(Mathf.Approximately(view.GetHeartFill(i), fills[i]),
+                    $"{label}: heart {i + 1} fill must be {fills[i]}, got {view.GetHeartFill(i)}.");
+            }
+        }
+
+        private static void SetMaxHealth(Health health, float value)
+        {
+            typeof(Health).GetMethod("SetMaxHealth", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.Invoke(health, new object[] { value, true });
         }
 
         private static void InvokeLifecycle(object target, string methodName)

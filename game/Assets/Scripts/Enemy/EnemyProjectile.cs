@@ -28,10 +28,11 @@ namespace TrickalFanGame.Enemy
             Vector2 position,
             Vector2 direction,
             GameObject source,
-            float attackDamage,
+            EnemyDamageTier damageTier,
             float speed,
             float lifetime,
-            Sprite sprite)
+            Sprite sprite,
+            bool authoredArtwork = false)
         {
             GameObject projectileObject = new("Enemy Projectile");
             if (source != null && source.transform.parent != null)
@@ -42,7 +43,11 @@ namespace TrickalFanGame.Enemy
             projectileObject.transform.position = position;
             SpriteRenderer renderer = projectileObject.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
-            renderer.color = new Color(0.2f, 0.8f, 1f);
+            renderer.color = authoredArtwork ? Color.white : new Color(0.2f, 0.8f, 1f);
+            // Authored projectile points left; only rotate the artwork, leaving the circular hitbox unchanged.
+            if (authoredArtwork && direction.sqrMagnitude > 0.001f)
+                renderer.transform.rotation = Quaternion.Euler(0f, 0f,
+                    Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 180f);
 
             Rigidbody2D projectileBody = projectileObject.AddComponent<Rigidbody2D>();
             projectileBody.bodyType = RigidbodyType2D.Kinematic;
@@ -52,14 +57,14 @@ namespace TrickalFanGame.Enemy
             ProjectileSizing.Apply(projectileObject.transform, collider, ProjectileSizing.RangedEnemyScale);
 
             EnemyProjectile projectile = projectileObject.AddComponent<EnemyProjectile>();
-            projectile.Launch(direction, source, attackDamage, speed, lifetime);
+            projectile.Launch(direction, source, damageTier, speed, lifetime);
             return projectile;
         }
 
         public void Launch(
             Vector2 direction,
             GameObject source,
-            float attackDamage,
+            EnemyDamageTier damageTier,
             float speed,
             float lifetime)
         {
@@ -69,7 +74,7 @@ namespace TrickalFanGame.Enemy
             }
 
             owner = source;
-            damageContext = new DamageContext(source, DamageSourceType.EnemyProjectile, Mathf.Max(0.01f, attackDamage));
+            damageContext = HealthUnits.CreateEnemyDamageContext(source, DamageSourceType.EnemyProjectile, damageTier);
             body.linearVelocity = direction.sqrMagnitude > 0.001f
                 ? direction.normalized * Mathf.Max(0f, speed)
                 : Vector2.zero;
@@ -91,8 +96,15 @@ namespace TrickalFanGame.Enemy
         {
             if (IsLaunched && currentTime >= expiresAt)
             {
-                StopAtBoundary();
+                Expire();
             }
+        }
+
+        // Range-0: travel distance = lifetime × speed per enemy. Reaching the end of the range is kept apart from
+        // hits so an end-of-range visual asset can attach here later. For now it disappears immediately.
+        private void Expire()
+        {
+            StopAtBoundary();
         }
 
         public bool TryHit(Collider2D other)

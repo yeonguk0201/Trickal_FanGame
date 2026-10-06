@@ -23,17 +23,22 @@ namespace TrickalFanGame.Editor
             ItemDefinition[] pool = AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" })
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(AssetDatabase.LoadAssetAtPath<ItemDefinition>)
-                .Where(definition => definition != null && definition.IsActive && definition.IsValid)
+                // Single-use spells, retired legacy spells and golden chest exclusive artifacts never join the
+                // selection reward pool (Contract-0 §2.1, §2.2, §3).
+                .Where(definition => definition != null && definition.IsActive && definition.IsValid &&
+                                     !definition.IsSingleUse && !LegacySpellRetirement.IsRetired(definition) &&
+                                     !GoldenChestExclusivePool.IsExclusive(definition))
                 .OrderBy(definition => definition.ItemId, StringComparer.Ordinal)
                 .ToArray();
 
             if (pool.Length < ArtifactRewardSelector.MaximumCandidateCount ||
                 pool.Select(definition => definition.ItemId).Distinct(StringComparer.Ordinal).Count() != pool.Length ||
                 !pool.Any(definition => definition.Kind == ItemKind.Artifact) ||
-                !pool.Any(definition => definition.Kind == ItemKind.Spell))
+                pool.Any(definition => definition.Kind == ItemKind.Spell))
             {
+                // Spell-3 retired the last legacy spell, so the pool now holds Artifacts only (Contract-0 §3).
                 throw new InvalidOperationException(
-                    "Reward-3 requires at least three unique active Items containing both Artifact and Spell kinds.");
+                    "Reward-3 requires at least three unique active Artifacts and no legacy Spell.");
             }
 
             Undo.RecordObject(assembler, "Configure Reward-3 Room Integration");

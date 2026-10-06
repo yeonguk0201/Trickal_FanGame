@@ -39,3 +39,11 @@
 - Unity 자동 검증을 실행할 수 없으면 가능한 정적 검사를 수행하고, 정확한 메뉴 경로와 기대 결과를 수동 검증 항목으로 남긴다.
 - 자동 검증 또는 사용자가 제공한 수동 확인 증거가 있는 항목만 계획 문서에서 완료 처리한다.
 - 새 개발 도구의 계획과 상태는 `docs/13-development-tooling-plan.md`, 실제 실행 방법은 구현 후 `docs/05-development-setup.md`에 기록한다.
+
+## 커밋과 PR
+
+- 커밋 제목은 `type(scope): 영어 요약 (조각 ID)` 형식을 쓴다. 예: `feat(item): melune card duplication (Jjangsem-1)`.
+  type은 `feat`, `fix`, `tune`, `docs`, `refactor`, `test`, `chore` 중에서 고른다. scope와 조각 ID는 해당할 때만 붙인다.
+- 작업은 `dev/<주차 또는 주제>` 브랜치에서 하고, `main`에는 직접 커밋하지 않고 PR로 병합한다.
+- PR 본문은 `.github/pull_request_template.md`를 따른다. 검증 항목은 실제로 실행한 것만 체크한다.
+- 관련 없는 변경은 같은 PR에 섞지 않는다. 새 Unity 에셋의 `.meta`는 같은 커밋에 포함한다.

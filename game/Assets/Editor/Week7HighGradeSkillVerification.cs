@@ -38,7 +38,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                stats.AddAttackDamage(4);
+                stats.AddAttackDamage(40);
                 lowerGradeSkill.Configure(projectileTemplate, LayerMask.GetMask("Enemy"), 0.08f);
                 Assert(playerSP.TryAdd(), "The Space blocking check needs one SP.");
                 int launchedCount = 0;
@@ -84,7 +84,7 @@ namespace TrickalFanGame.Editor
                     "First enemy contact must apply impact and end the dash.");
                 Assert(!ultimate.TryImpact(normalHealth, firstStart + 1f),
                     "The same dash must reject repeated impact processing.");
-                Assert(normalHealth.CurrentHealth == 20 && bossHealth.CurrentHealth == 20,
+                Assert(normalHealth.CurrentHealth == 200 && bossHealth.CurrentHealth == 200,
                     "The area impact must deal current attack damage x200% once to each target.");
                 Assert(normalKnockback.IsActive && bossKnockback.IsActive,
                     "Both normal and boss targets must receive knockback.");
@@ -147,8 +147,24 @@ namespace TrickalFanGame.Editor
                     "The restored Space action must finish its four-shot interval salvo.");
                 RemoveSpawnedSkillProjectiles(projectileTemplate);
 
+                // Floor entry grants a real-time spawn window; this fixture advances only synthetic skill time.
+                // Isolate cancellation from that independent transition protection.
+                player.GetComponent<DamageInvulnerability>().ResetHitWindow();
+                float cancelStart = ultimate.NextReadyTime;
+                Assert(ultimate.TryActivate(cancelStart), "The cancellation check needs an active ultimate.");
+                Assert(ultimate.TryCancel(cancelStart + 2f) &&
+                       ultimate.LastEndReason == UltimateEndReason.Cancelled &&
+                       actionState.IsCoastRecovering && !playerHealth.IsInvulnerable &&
+                       Mathf.Approximately(ultimate.NextReadyTime, cancelStart + 2f + 24f),
+                    "Pressing Q during the dash must cancel it and apply 80% of the 30-second cooldown.");
+                Assert(!ultimate.TryCancel(cancelStart + 2.01f),
+                    "Cancellation must not be accepted again during recovery.");
+                ultimate.Tick(cancelStart + 2f + ultimate.CoastRecoveryDuration);
+                Assert(actionState.Phase == PlayerActionPhase.Normal,
+                    "Cancelled ultimate coast recovery must return to normal state.");
+
                 float secondStart = ultimate.NextReadyTime;
-                Assert(ultimate.TryActivate(secondStart), "The ultimate must reactivate at the cooldown boundary.");
+                Assert(ultimate.TryActivate(secondStart), "The ultimate must reactivate after the reduced cooldown.");
                 ultimate.Tick(secondStart + 9.99f);
                 Assert(actionState.IsDashing, "The dash must remain active just before maximum duration.");
                 ultimate.Tick(secondStart + 10f);
@@ -174,7 +190,8 @@ namespace TrickalFanGame.Editor
                 Debug.Log(
                     "Phase D verification passed: state re-entry, Q cooldown, steerable invulnerable dash, " +
                     "basic/Space/transition gates, 200% area impact, normal/boss knockback, wall handling, " +
-                    "post-knockback stun, invulnerable impact recovery, timeout deceleration, cooldown origin, " +
+                    "post-knockback stun, invulnerable impact recovery, Q cancellation with 80% cooldown, " +
+                    "timeout deceleration, cooldown origin, " +
                     "and death cleanup are valid.");
             }
             finally
@@ -260,7 +277,7 @@ namespace TrickalFanGame.Editor
 
             health = enemy.AddComponent<Health>();
             SerializedObject serializedHealth = new(health);
-            serializedHealth.FindProperty("maxHealth").floatValue = 30f;
+            serializedHealth.FindProperty("maxHealth").floatValue = 300f;
             serializedHealth.ApplyModifiedPropertiesWithoutUndo();
             knockback = enemy.AddComponent<KnockbackReceiver>();
             BossController bossController = null;

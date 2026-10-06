@@ -29,7 +29,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private int encounterSeed = 1;
         [SerializeField, Min(0.1f)] private float attackInterval = 1.2f;
         [SerializeField, Min(0.1f)] private float projectileSpeed = 4f;
-        [SerializeField, Min(0.01f)] private float projectileDamage = 2f;
+        [SerializeField] private EnemyDamageTier projectileDamageTier = EnemyDamageTier.Medium;
 
         [Header("Phase transition")]
         [SerializeField, Min(0f)] private float phaseTransitionDuration;
@@ -54,7 +54,7 @@ namespace TrickalFanGame.Enemy
         public event Action<int, int> PhaseChanged;
         public event Action<BossActionState, string> PatternStateChanged;
 
-        public float ProjectileDamage => projectileDamage;
+        public EnemyDamageTier ProjectileDamageTier => projectileDamageTier;
         public Health Health => health != null ? health : GetComponent<Health>();
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? "보스" : displayName.Trim();
         public int CurrentPhase => currentPhase;
@@ -85,8 +85,8 @@ namespace TrickalFanGame.Enemy
                 ? patterns[currentPatternIndex]
                 : null;
 
-        public void SetProjectileDamage(float configuredProjectileDamage) =>
-            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+        public void SetProjectileDamageTier(EnemyDamageTier configuredProjectileDamageTier) =>
+            projectileDamageTier = configuredProjectileDamageTier;
 
         public void ConfigureHud(string configuredDisplayName, int configuredPhaseCount)
         {
@@ -341,7 +341,7 @@ namespace TrickalFanGame.Enemy
                 if (runtime.TryExecute(CurrentPattern.Execution)) return;
             if (CurrentPattern.Execution != BossPatternExecution.AimedProjectile) return;
             Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
-            BossProjectile.Create(transform.position, direction * projectileSpeed, gameObject, projectileDamage,
+            BossProjectile.Create(transform.position, direction * projectileSpeed, gameObject, projectileDamageTier,
                 GetComponentInChildren<SpriteRenderer>()?.sprite);
         }
 

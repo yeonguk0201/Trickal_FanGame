@@ -382,7 +382,8 @@ namespace TrickalFanGame.Editor
                 runtime.TickPattern(BossActionState.Active,
                     BossPatternExecution.CrayonHeroMapSlash, 0.2f);
                 Assert(runtime.ActiveSlashDirectionCount == 3 &&
-                       Mathf.Approximately(before - target.GetComponent<Health>().CurrentHealth, 9f),
+                       Mathf.Approximately(before - target.GetComponent<Health>().CurrentHealth,
+                           3 * HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Critical, 1)),
                     "Golden slash must expose three lines at -15/0/+15 degrees and stack all three hits nearby.");
             }
             finally
@@ -438,9 +439,9 @@ namespace TrickalFanGame.Editor
             health.ResetHealth();
             boss.ConfigureHud("크레용사용", 2);
             boss.ConfigurePhaseTwo(0.5f, 0.78f);
-            runtime.ConfigureSlash(18f, 1.15f, 0.2f, 3f);
-            runtime.ConfigureSwing(2.5f, 1.35f, 2.4f, 3.2f, 0.15f, 0.3f, 0.7f, 0.12f, 2f);
-            runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, 2f);
+            runtime.ConfigureSlash(18f, 1.15f, 0.2f, EnemyDamageTier.Critical);
+            runtime.ConfigureSwing(2.5f, 1.35f, 2.4f, 3.2f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Heavy);
+            runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, EnemyDamageTier.Heavy);
             runtime.ConfigureSelection(3, 9f, 7.5f, 45, 30, 10, 15);
 
             target = new GameObject("Crayon Hero Player Target");

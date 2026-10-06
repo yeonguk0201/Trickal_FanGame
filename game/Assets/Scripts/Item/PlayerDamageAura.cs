@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Player;
 using TrickalFanGame.Run;
 using UnityEngine;
 
@@ -10,20 +11,25 @@ namespace TrickalFanGame.Item
     public sealed class PlayerDamageAura : MonoBehaviour
     {
         [SerializeField] private LayerMask targetLayers = 1 << 6;
+        [SerializeField] private bool showDebugRadius = true;
 
         private readonly HashSet<Health> tickTargets = new();
         private Health ownerHealth;
+        private PlayerStats ownerStats;
         private RunSession runSession;
         private float maxHealthDamagePercent;
+        private float attackDamagePercent;
         private float radius;
         private float intervalSeconds;
         private float nextTickTime;
 
         public int StackCount { get; private set; }
         public float MaxHealthDamagePercent => maxHealthDamagePercent;
+        public float AttackDamagePercent => attackDamagePercent;
         public float Radius => radius;
         public float IntervalSeconds => intervalSeconds;
         public float NextTickTime => nextTickTime;
+        public bool ShowDebugRadius => showDebugRadius;
 
         private void Awake()
         {
@@ -37,13 +43,28 @@ namespace TrickalFanGame.Item
 
         public bool AddStack(float damagePercent, float configuredRadius, float configuredIntervalSeconds)
         {
-            if (damagePercent <= 0f || configuredRadius <= 0f || configuredIntervalSeconds <= 0f)
+            return AddStack(damagePercent, 0f, configuredRadius, configuredIntervalSeconds);
+        }
+
+        public bool AddAttackDamageStack(float damagePercent, float configuredRadius, float configuredIntervalSeconds)
+        {
+            return AddStack(0f, damagePercent, configuredRadius, configuredIntervalSeconds);
+        }
+
+        private bool AddStack(
+            float maxHealthPercent,
+            float attackPercent,
+            float configuredRadius,
+            float configuredIntervalSeconds)
+        {
+            if (maxHealthPercent + attackPercent <= 0f || configuredRadius <= 0f || configuredIntervalSeconds <= 0f)
             {
                 return false;
             }
 
             EnsureReferences();
-            maxHealthDamagePercent += damagePercent;
+            maxHealthDamagePercent += Mathf.Max(0f, maxHealthPercent);
+            attackDamagePercent += Mathf.Max(0f, attackPercent);
             radius = Mathf.Max(radius, configuredRadius);
             intervalSeconds = intervalSeconds > 0f
                 ? Mathf.Min(intervalSeconds, configuredIntervalSeconds)
@@ -73,7 +94,8 @@ namespace TrickalFanGame.Item
             }
 
             nextTickTime = currentTime + intervalSeconds;
-            float damage = ownerHealth.MaxHealth * maxHealthDamagePercent;
+            float damage = ownerHealth.MaxHealthHearts * maxHealthDamagePercent +
+                (ownerStats != null ? ownerStats.AttackDamage * attackDamagePercent : 0f);
             if (damage <= 0f)
             {
                 return true;
@@ -108,15 +130,25 @@ namespace TrickalFanGame.Item
                 ownerHealth = GetComponent<Health>();
             }
 
+            if (ownerStats == null)
+            {
+                ownerStats = GetComponent<PlayerStats>();
+            }
+
             if (runSession == null)
             {
                 runSession = FindFirstObjectByType<RunSession>();
             }
         }
 
-        private void OnDrawGizmosSelected()
+        public void SetDebugRadiusVisible(bool visible)
         {
-            if (radius <= 0f)
+            showDebugRadius = visible;
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (!showDebugRadius || radius <= 0f)
             {
                 return;
             }

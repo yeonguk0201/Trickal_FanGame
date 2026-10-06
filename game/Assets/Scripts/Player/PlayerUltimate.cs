@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
+using TrickalFanGame.Room;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,6 +13,7 @@ namespace TrickalFanGame.Player
         None,
         Impact,
         Timeout,
+        Cancelled,
     }
 
     [DisallowMultipleComponent]
@@ -36,6 +38,7 @@ namespace TrickalFanGame.Player
         [SerializeField] private LayerMask targetLayers = 1 << 6;
 
         private readonly HashSet<Health> impactedTargets = new();
+        private readonly HashSet<DestructibleObstacle> impactedObstacles = new();
         private Health health;
         private PlayerStats stats;
         private PlayerMovement movement;
@@ -96,7 +99,10 @@ namespace TrickalFanGame.Player
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.qKey.wasPressedThisFrame)
             {
-                TryActivate(Time.time);
+                if (!TryCancel(Time.time))
+                {
+                    TryActivate(Time.time);
+                }
             }
 
             Tick(Time.time);
@@ -104,6 +110,11 @@ namespace TrickalFanGame.Player
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
+            if (IsDashing)
+            {
+                DestructibleObstacle.TryHitCollider(collision.collider, impactedObstacles);
+            }
+
             TryImpact(collision.collider.GetComponentInParent<Health>(), Time.time);
         }
 
@@ -167,6 +178,7 @@ namespace TrickalFanGame.Player
             }
 
             hasImpacted = false;
+            impactedObstacles.Clear();
             LastEndReason = UltimateEndReason.None;
             dashEndTime = currentTime + maximumDuration;
             health.SetInvulnerable(true);
@@ -215,6 +227,17 @@ namespace TrickalFanGame.Player
             return true;
         }
 
+        public bool TryCancel(float currentTime)
+        {
+            if (!IsDashing)
+            {
+                return false;
+            }
+
+            EndDash(currentTime, UltimateEndReason.Cancelled);
+            return LastEndReason == UltimateEndReason.Cancelled;
+        }
+
         private void ApplyImpact(Health contactedTarget)
         {
             impactedTargets.Clear();
@@ -223,6 +246,8 @@ namespace TrickalFanGame.Player
             {
                 ApplyToTarget(hit.GetComponentInParent<Health>());
             }
+
+            DestructibleObstacle.HitInCircle(transform.position, impactRadius, impactedObstacles);
         }
 
         private void ApplyToTarget(Health target)
@@ -281,7 +306,8 @@ namespace TrickalFanGame.Player
                 ? impactRecoveryDuration
                 : coastRecoveryDuration;
             recoveryEndTime = currentTime + duration;
-            nextReadyTime = currentTime + cooldown;
+            float cooldownMultiplier = reason == UltimateEndReason.Cancelled ? 0.8f : 1f;
+            nextReadyTime = currentTime + cooldown * cooldownMultiplier;
             if (reason == UltimateEndReason.Impact)
             {
                 movement.StopImmediately();

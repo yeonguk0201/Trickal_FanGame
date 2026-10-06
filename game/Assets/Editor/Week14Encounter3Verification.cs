@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TrickalFanGame.Combat;
-using TrickalFanGame.Player;
+using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
 using UnityEditor;
 using UnityEngine;
@@ -18,7 +18,7 @@ namespace TrickalFanGame.Editor
                 ?.GetComponent<FloorGenerator>();
             RoomGraphAssembler assembler = UnityEngine.Object.FindFirstObjectByType<RoomGraphAssembler>();
             Assert(generator != null && assembler != null && assembler.EnemyRoster != null &&
-                   assembler.EncounterClearRewardPrefab != null,
+                   assembler.EncounterClearDropTable != null,
                 "Run Encounter-3 Setup before verification.");
             string[] baselineEncounterIds =
             {
@@ -39,7 +39,7 @@ namespace TrickalFanGame.Editor
             Week14Room5Verification.Verify();
             Debug.Log("Week 14 Encounter-3 verification passed: two waves wait for every required enemy, " +
                       "start and complete once, persist completed-wave and clear-reward state, restore safely, " +
-                      "grant one SP pickup, and preserve Room-0~5 regressions.");
+                      "roll one clear drop, and preserve Room-0~5 regressions.");
         }
 
         public static void SetupAndVerifyBatch()
@@ -123,7 +123,7 @@ namespace TrickalFanGame.Editor
                 };
                 RoomRunState state = new("runtime-two-wave-room");
                 RoomController controller = CreateController(root.transform, "Primary Controller", state,
-                    waves, assembler.EncounterClearRewardPrefab, out RoomClearRewardSpawner reward);
+                    waves, AlwaysDropTable(assembler), out RoomClearRewardSpawner reward);
                 List<GameObject> spawned = new();
                 List<int> started = new();
                 List<int> completed = new();
@@ -158,7 +158,7 @@ namespace TrickalFanGame.Editor
                     "Re-entering the live cleared controller created enemies or rewards.");
 
                 RoomController revisit = CreateController(root.transform, "Revisited Controller", state,
-                    waves, assembler.EncounterClearRewardPrefab, out RoomClearRewardSpawner revisitReward);
+                    waves, AlwaysDropTable(assembler), out RoomClearRewardSpawner revisitReward);
                 int revisitSpawnCount = 0;
                 revisit.EnemySpawned += _ => revisitSpawnCount++;
                 revisit.BeginCombat(playerHealth);
@@ -169,7 +169,7 @@ namespace TrickalFanGame.Editor
                 RoomRunState partialState = new("partial-wave-room");
                 partialState.TryMarkWaveCompleted(1);
                 RoomController partial = CreateController(root.transform, "Partial Controller", partialState,
-                    waves, assembler.EncounterClearRewardPrefab, out _);
+                    waves, AlwaysDropTable(assembler), out _);
                 int partialSpawnCount = 0;
                 partial.EnemySpawned += _ => partialSpawnCount++;
                 partial.BeginCombat(playerHealth);
@@ -196,12 +196,21 @@ namespace TrickalFanGame.Editor
             RoomClearRewardSpawner reward = instance.Controller.GetComponent<RoomClearRewardSpawner>();
             Assert(instance.Controller.WaveCount == 2 &&
                    instance.Controller.EncounterWaves.All(wave => wave.EnemyPrefabs.Count == 2) &&
-                   reward != null && reward.PickupPrefab == assembler.EncounterClearRewardPrefab,
+                   reward != null && reward.DropTable == assembler.EncounterClearDropTable &&
+                   reward.DropSeed == RoomClearRewardSpawner.DeriveDropSeed(generated.ContentSeed),
                 "RoomGraphAssembler did not bind both waves and the clear reward Prefab.");
         }
 
+        // The configured table only drops 33% of the time; a 100% copy keeps the "rewards exactly once" check stable.
+        private static ResourceDropTable AlwaysDropTable(RoomGraphAssembler assembler)
+        {
+            ResourceDropTable table = UnityEngine.Object.Instantiate(assembler.EncounterClearDropTable);
+            table.Configure(1f, assembler.EncounterClearDropTable.Entries.ToArray());
+            return table;
+        }
+
         private static RoomController CreateController(Transform parent, string name, RoomRunState state,
-            EncounterRuntimeWave[] waves, SPPickup rewardPrefab, out RoomClearRewardSpawner reward)
+            EncounterRuntimeWave[] waves, ResourceDropTable dropTable, out RoomClearRewardSpawner reward)
         {
             GameObject room = new(name);
             room.transform.SetParent(parent);
@@ -210,7 +219,7 @@ namespace TrickalFanGame.Editor
             controller.Configure(2, 2, null, null, Array.Empty<Transform>(), Array.Empty<DoorController>());
             controller.ConfigureEncounterWaves(waves);
             reward = room.AddComponent<RoomClearRewardSpawner>();
-            reward.Configure(rewardPrefab, room.transform, parent, state);
+            reward.Configure(dropTable, room.transform, parent, state, 0);
             controller.ConfigureClearReward(reward);
             controller.BindRunState(state, false);
             Assert(controller.TryValidateEncounterConfiguration(out string error), error);

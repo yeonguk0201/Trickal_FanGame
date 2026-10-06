@@ -22,6 +22,7 @@ namespace TrickalFanGame.Editor
             RunProgress progress = root.AddComponent<RunProgress>();
             RoomGraphController graph = root.AddComponent<RoomGraphController>();
             SetPrivateField(graph, "transitionCooldown", 0f);
+            SetPrivateField(graph, "returnDoorwayBlockDuration", 0f);
 
             TestRoom first = CreateRoom(root.transform, graph, "room-a", 1, Vector2.zero);
             TestRoom second = CreateRoom(root.transform, graph, "room-b", 2, Vector2.right * 20f);
@@ -300,7 +301,8 @@ namespace TrickalFanGame.Editor
 
         private static BossProjectile CreateBossProjectile(Health owner)
         {
-            return BossProjectile.Create(Vector2.zero, Vector2.right, owner.gameObject, 1, null);
+            return BossProjectile.Create(Vector2.zero, Vector2.right, owner.gameObject,
+                EnemyDamageTier.Light, null);
         }
 
         private static int CountVisible(RoomNode[] nodes)

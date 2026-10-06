@@ -76,6 +76,9 @@ namespace TrickalFanGame.Editor
         {
             AssertInvalid(new ItemEffectEntry(ItemEffectType.MoveSpeedPercentBelowHealth, 0.25f), "health threshold");
             AssertInvalid(new ItemEffectEntry(ItemEffectType.MaxHealthDamageAura, 0.01f), "radius and interval");
+            AssertInvalid(new ItemEffectEntry(ItemEffectType.AttackDamageAura, 0.20f), "attack aura radius and interval");
+            AssertInvalid(new ItemEffectEntry(ItemEffectType.HealOnKillEveryN, 1f), "kill count");
+            AssertInvalid(new ItemEffectEntry(ItemEffectType.HealOnKillEveryN, configuredIntegerAmount: 2), "heal amount");
             AssertInvalid(new ItemEffectEntry(ItemEffectType.DistanceDamage, 0.40f, configuredMinimumDistance: 3f),
                 "maximum distance");
             AssertInvalid(new ItemEffectEntry(ItemEffectType.SplitAfterPierce, configuredIntegerAmount: 3),

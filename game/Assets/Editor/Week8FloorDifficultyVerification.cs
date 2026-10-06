@@ -33,7 +33,7 @@ namespace TrickalFanGame.Editor
 
             Debug.Log(
                 "Phase E-8 floor difficulty scaling verification passed: " +
-                "all normal enemies and bosses gain health and damage on every floor, " +
+                "all normal enemies and bosses gain health on every floor and resolve tiered heart damage, " +
                 "RoomController applies scaling without replacing pattern tuning, and a selected character " +
                 "can clear all nine rooms from floor 1 through the floor 3 final boss.");
         }
@@ -47,49 +47,58 @@ namespace TrickalFanGame.Editor
             Assert(Mathf.Approximately(FloorDifficultyScaler.GetHealthMultiplier(3), 2.0f),
                 "Floor 3 health multiplier must be 2.0.");
 
-            Assert(Mathf.Approximately(FloorDifficultyScaler.GetDamageMultiplier(1), 1.0f),
-                "Floor 1 damage multiplier must be 1.0.");
-            Assert(Mathf.Approximately(FloorDifficultyScaler.GetDamageMultiplier(2), 1.3f),
-                "Floor 2 damage multiplier must be 1.3.");
-            Assert(Mathf.Approximately(FloorDifficultyScaler.GetDamageMultiplier(3), 1.6f),
-                "Floor 3 damage multiplier must be 1.6.");
-
-            foreach (float baseDamage in new[] { 1f, 2f, 3f })
+            // Half-heart units per tier and floor (docs/idea-implementation/01-player-heart-health.md, section 5).
+            int[,] expectedUnits =
             {
-                float floorOne = FloorDifficultyScaler.GetScaledDamage(baseDamage, 1);
-                float floorTwo = FloorDifficultyScaler.GetScaledDamage(baseDamage, 2);
-                float floorThree = FloorDifficultyScaler.GetScaledDamage(baseDamage, 3);
-                Assert(floorOne < floorTwo && floorTwo < floorThree,
-                    $"Base damage {baseDamage} must increase on every floor, got " +
-                    $"{floorOne}, {floorTwo}, {floorThree}.");
+                { 2, 2, 3 },
+                { 3, 4, 5 },
+                { 4, 6, 7 },
+                { 6, 7, 8 },
+            };
+            foreach (EnemyDamageTier tier in Enum.GetValues(typeof(EnemyDamageTier)))
+            {
+                int previousUnits = 0;
+                for (int floor = 1; floor <= 3; floor++)
+                {
+                    int units = HealthUnits.GetEnemyDamageUnits(tier, floor);
+                    int expected = expectedUnits[(int)tier, floor - 1];
+                    Assert(units == expected, $"{tier} floor {floor} must deal {expected} units, got {units}.");
+                    Assert(units >= HealthUnits.MinimumEnemyDamageUnits,
+                        $"{tier} floor {floor} must deal at least one heart.");
+                    Assert(units >= previousUnits, $"{tier} damage must not decrease on floor {floor}.");
+                    previousUnits = units;
+                }
             }
+
+            Assert(HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Critical, 4) ==
+                   HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Critical, 3),
+                "Floors beyond the table must reuse the floor 3 row.");
         }
 
         private static void VerifyChaserScaling()
         {
-            GameObject prefab = LoadPrefab(ChaserPrefabPath);
-            float baseHealth = prefab.GetComponent<Health>().MaxHealth;
-            float baseDamage = prefab.GetComponent<ContactDamage>().Damage;
+            VerifyPrefabScaling(ChaserPrefabPath, "Chaser",
+                prefab => prefab.GetComponent<ContactDamage>().DamageTier, EnemyDamageTier.Heavy);
 
+            GameObject prefab = LoadPrefab(ChaserPrefabPath);
             for (int floor = 1; floor <= 3; floor++)
             {
                 GameObject instance = Object.Instantiate(prefab);
+                GameObject playerObject = CreateUnitPlayer(out Health playerHealth);
                 try
                 {
                     FloorDifficultyScaler.ApplyScaling(instance, floor);
-                    Health health = instance.GetComponent<Health>();
-                    ContactDamage contact = instance.GetComponent<ContactDamage>();
-
-                    float expectedHealth = baseHealth * FloorDifficultyScaler.GetHealthMultiplier(floor);
-                    float expectedDamage = FloorDifficultyScaler.GetScaledDamage(baseDamage, floor);
-
-                    Assert(Mathf.Approximately(health.MaxHealth, expectedHealth),
-                        $"Chaser floor {floor} health must be {expectedHealth}, got {health.MaxHealth}.");
-                    Assert(Mathf.Approximately(contact.Damage, expectedDamage),
-                        $"Chaser floor {floor} damage must be {expectedDamage}, got {contact.Damage}.");
+                    float before = playerHealth.CurrentHealth;
+                    Assert(instance.GetComponent<ContactDamage>().TryApplyDamage(playerHealth, 0f),
+                        $"Chaser floor {floor} contact must hit a living player.");
+                    int expectedUnits = HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Heavy, floor);
+                    Assert(Mathf.Approximately(before - playerHealth.CurrentHealth, expectedUnits),
+                        $"Chaser floor {floor} contact must remove {expectedUnits} units, " +
+                        $"removed {before - playerHealth.CurrentHealth}.");
                 }
                 finally
                 {
+                    Object.DestroyImmediate(playerObject);
                     Object.DestroyImmediate(instance);
                 }
             }
@@ -97,39 +106,35 @@ namespace TrickalFanGame.Editor
 
         private static void VerifyRangedScaling()
         {
-            GameObject prefab = LoadPrefab(RangedPrefabPath);
-            float baseHealth = prefab.GetComponent<Health>().MaxHealth;
-            float baseDamage = prefab.GetComponent<RangedEnemyController>().ProjectileDamage;
-
-            for (int floor = 1; floor <= 3; floor++)
-            {
-                GameObject instance = Object.Instantiate(prefab);
-                try
-                {
-                    FloorDifficultyScaler.ApplyScaling(instance, floor);
-                    Health health = instance.GetComponent<Health>();
-                    RangedEnemyController ranged = instance.GetComponent<RangedEnemyController>();
-
-                    float expectedHealth = baseHealth * FloorDifficultyScaler.GetHealthMultiplier(floor);
-                    float expectedDamage = FloorDifficultyScaler.GetScaledDamage(baseDamage, floor);
-
-                    Assert(Mathf.Approximately(health.MaxHealth, expectedHealth),
-                        $"Ranged floor {floor} health must be {expectedHealth}, got {health.MaxHealth}.");
-                    Assert(Mathf.Approximately(ranged.ProjectileDamage, expectedDamage),
-                        $"Ranged floor {floor} damage must be {expectedDamage}, got {ranged.ProjectileDamage}.");
-                }
-                finally
-                {
-                    Object.DestroyImmediate(instance);
-                }
-            }
+            VerifyPrefabScaling(RangedPrefabPath, "Ranged",
+                prefab => prefab.GetComponent<RangedEnemyController>().ProjectileDamageTier,
+                EnemyDamageTier.Heavy);
         }
 
         private static void VerifyChargingScaling()
         {
-            GameObject prefab = LoadPrefab(ChargingPrefabPath);
+            VerifyPrefabScaling(ChargingPrefabPath, "Charging",
+                prefab => prefab.GetComponent<ChargingEnemyController>().ChargeDamageTier,
+                EnemyDamageTier.Heavy);
+        }
+
+        private static void VerifyBossScaling()
+        {
+            VerifyPrefabScaling(BossPrefabPath, "Boss",
+                prefab => prefab.GetComponent<BossController>().ProjectileDamageTier,
+                EnemyDamageTier.Medium);
+        }
+
+        private static void VerifyPrefabScaling(
+            string path,
+            string label,
+            Func<GameObject, EnemyDamageTier> readTier,
+            EnemyDamageTier expectedTier)
+        {
+            GameObject prefab = LoadPrefab(path);
             float baseHealth = prefab.GetComponent<Health>().MaxHealth;
-            float baseDamage = prefab.GetComponent<ChargingEnemyController>().ChargeDamage;
+            Assert(readTier(prefab) == expectedTier,
+                $"{label} must use the {expectedTier} damage tier, got {readTier(prefab)}.");
 
             for (int floor = 1; floor <= 3; floor++)
             {
@@ -138,15 +143,17 @@ namespace TrickalFanGame.Editor
                 {
                     FloorDifficultyScaler.ApplyScaling(instance, floor);
                     Health health = instance.GetComponent<Health>();
-                    ChargingEnemyController charging = instance.GetComponent<ChargingEnemyController>();
-
                     float expectedHealth = baseHealth * FloorDifficultyScaler.GetHealthMultiplier(floor);
-                    float expectedDamage = FloorDifficultyScaler.GetScaledDamage(baseDamage, floor);
 
                     Assert(Mathf.Approximately(health.MaxHealth, expectedHealth),
-                        $"Charging floor {floor} health must be {expectedHealth}, got {health.MaxHealth}.");
-                    Assert(Mathf.Approximately(charging.ChargeDamage, expectedDamage),
-                        $"Charging floor {floor} damage must be {expectedDamage}, got {charging.ChargeDamage}.");
+                        $"{label} floor {floor} health must be {expectedHealth}, got {health.MaxHealth}.");
+                    Assert(EnemyFloorLevel.Resolve(instance) == floor && readTier(instance) == expectedTier,
+                        $"{label} floor {floor} must record its floor and keep the {expectedTier} tier.");
+                    DamageContext context = HealthUnits.CreateEnemyDamageContext(
+                        instance, DamageSourceType.EnemyContact, expectedTier);
+                    Assert(Mathf.Approximately(context.BaseDamage,
+                               HealthUnits.GetEnemyDamageUnits(expectedTier, floor)),
+                        $"{label} floor {floor} damage context must carry the floor {floor} tier units.");
                 }
                 finally
                 {
@@ -155,33 +162,18 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        private static void VerifyBossScaling()
+        private static GameObject CreateUnitPlayer(out Health health)
         {
-            GameObject prefab = LoadPrefab(BossPrefabPath);
-            float baseHealth = prefab.GetComponent<Health>().MaxHealth;
-            float baseDamage = prefab.GetComponent<BossController>().ProjectileDamage;
-
-            for (int floor = 1; floor <= 3; floor++)
-            {
-                GameObject instance = Object.Instantiate(prefab);
-                try
-                {
-                    FloorDifficultyScaler.ApplyScaling(instance, floor);
-                    Health health = instance.GetComponent<Health>();
-                    BossController boss = instance.GetComponent<BossController>();
-                    float expectedHealth = baseHealth * FloorDifficultyScaler.GetHealthMultiplier(floor);
-                    float expectedDamage = FloorDifficultyScaler.GetScaledDamage(baseDamage, floor);
-
-                    Assert(Mathf.Approximately(health.MaxHealth, expectedHealth),
-                        $"Boss floor {floor} health must be {expectedHealth}, got {health.MaxHealth}.");
-                    Assert(Mathf.Approximately(boss.ProjectileDamage, expectedDamage),
-                        $"Boss floor {floor} damage must be {expectedDamage}, got {boss.ProjectileDamage}.");
-                }
-                finally
-                {
-                    Object.DestroyImmediate(instance);
-                }
-            }
+            GameObject playerObject = new("Floor Difficulty Unit Player");
+            playerObject.AddComponent<Rigidbody2D>().gravityScale = 0f;
+            health = playerObject.AddComponent<Health>();
+            PlayerStats stats = playerObject.AddComponent<PlayerStats>();
+            playerObject.AddComponent<PlayerMovement>();
+            InvokeLifecycle(health, "Awake");
+            InvokeLifecycle(stats, "Awake");
+            Assert(health.UsesHealthUnits && Mathf.Approximately(health.CurrentHealth, 10f),
+                "PlayerStats must switch the player to half-heart units with 10 starting units.");
+            return playerObject;
         }
 
         private static void VerifyRoomControllerIntegration()

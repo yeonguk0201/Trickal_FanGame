@@ -105,6 +105,21 @@
 `userId`와 닉네임만 삭제하고 멱등 재등록에 필요한 `clientProfileId`와 다른 로컬 설정은 보존한다.
 정식 빌드에는 런타임 초기화 버튼을 포함하지 않는다.
 
+20주차 추가 도구(2026-10-01): Special-3 수동 확인에서 비밀방 위치와 폭탄·구덩이 드롭이 플레이 중
+보이지 않아, Game Scene에 개발용 패널(`DevelopmentGamePanel`, `F1`)을 추가했다. Editor와 Development
+Build에서만 자동 생성되고 정식 빌드에는 포함하지 않는다. 1단계 범위는 seed 지정 재시작(1층 비밀방 seed 찾기),
+폭탄·열쇠·엘리프 지급, HP·SP 회복, 무적 토글, 현재 웨이브 처치, 비밀방·숨김 통로 미니맵 표시와 벽 강조,
+다음 장애물 구덩이 드롭 고정, 비밀방·인접 방 이동이다. 모든 조작은 자원 지갑·Health·방 사망 처리·방 이동의
+기존 경로를 거쳐 저장·중복 지급 규칙을 우회하지 않는다. 적·장애물 배치 같은 2단계 도구는 방 상태 저장과
+Layout 검증을 우회하므로 Game Scene이 아닌 별도 테스트 씬(아이템 테스트 룸 방식)에서 진행한다(사용자 결정).
+- [x] 1단계 개발 패널 훅 자동 검증 (`Week20DevPanelVerification.Verify`, 2026-10-01; 패널 UI 조작은 수동 확인 대기)
+- [x] 21주차 Spell-0(2026-10-02): `— Spell slot —` 섹션 추가. 보유 아이템·명상 남은 시간 표시와 일회용 아이템 `Drop` 버튼(Editor 전용, 보조 Run 표시). 픽업은 일반 슬롯 획득 경로로 줍는다. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 버튼 조작은 수동 확인 대기
+- [x] 21주차 Spell-1(2026-10-02): `— Spell slot —` 보유 표시 줄에 저놈 잡아라 활성 시 `Room ATK +N%` 추가. `Drop` 목록은 일회용 에셋을 자동 수집하므로 새 버튼 코드는 없다. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 표시 확인은 수동 확인 대기
+- [x] 21주차 Spell-3(2026-10-02): 보유 표시 줄에 막판 스퍼트 활성 시 `Room ASPD +N% MS +N%` 추가(저놈 잡아라 `Room ATK`와 별도 표시). Spell-2 그건 내 잔상은 `Drop` 자동 수집만 사용하며 패널 코드 변경 없음. 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 표시 확인은 수동 확인 대기
+- [x] 22주차 Chest-1(2026-10-03): `— Chest —` 섹션에 `Chest Normal`·`Chest Golden`·`Chest Diamond` 버튼 추가. 현재 방의 안전 위치에 `dev-chest-NN` 상자를 실제 상자 경로(방 상태 기록·1회 개봉·층 이탈 소멸)로 놓고 보조 Run으로 표시한다. 패널 회귀 `Week20DevPanelVerification.Verify`와 생성 경로 `Week22Chest1Verification` 통과, 버튼 조작은 수동 확인 대기
+- [x] 22주차 Flight-0(2026-10-03): `— Chest —` 아래 `Golden exclusive` 줄에 비행 여부 표시와 황금 전용 아티팩트 `Drop` 버튼 추가(보조 Run, 일반 `ItemPickup` 획득 경로). Chest-2 전까지 가짜 날개를 얻는 유일한 경로다. 패널 회귀 `Week20DevPanelVerification.Verify`와 획득 경로 `Week22Flight0Verification` 통과, 버튼 조작은 수동 확인 대기
+- [ ] 2단계: 적·장애물 배치 전용 테스트 씬
+
 - 공통 Editor 구성 유틸리티
 - 방·몬스터 콘텐츠 Setup
 - 콘텐츠 참조 및 상태 불변조건 검증기
@@ -286,9 +301,92 @@ ItemTestScene에서 독립된 Boss2TestScene을 생성하며, Play 시작 시 �
 빌드 Scene 목록은 변경하지 않는다. 구성·생성 검증 메뉴를 제공하며 현재 열린 Unity의 프로젝트 잠금으로
 배치 검증은 미실행 상태다. 실행 방법은 `docs/05-development-setup.md`의 Boss-2 즉시 전투 항목을 따른다.
 
+### Unity 검증기 정리 후보 — 2026-09-29
+
+- Play-1(2026-10-01): 개발용 층별 실시간 측정·종료 기록·보조 도구 사용 표시와 `F1` 기록 복사를 추가했다.
+  `Week20Play1Verification.VerifyBatch`는 시간 누적·종료 후 동결과 현재 Room-8·자원·장애물·특수방·보상
+  검증을 Scene별로 분리 실행하며 수동 seed 후보를 출력한다. 실제 전체 Run 자동 플레이는 후속 후보로
+  유지한다. Unity 배치 검증 통과·종료 코드 0을 확인했다. 측정·회귀 검증만으로 Play-1을 완료 처리하지 않는다.
+
+- Floor-1(2026-10-01): `Week20Floor1Verification`에 층별 규모 검증과 관련 회귀를 묶는
+  `VerifyWithRegressionsBatch`를 추가했다. Room-0의 이전 seed 해시는 활성 층별 설정을 잠시 분리한
+  이전 생성 경로에서 확인하고 원래 설정을 복원한다. Special-4의 상점 추가 전후 동일성도 이전 생성
+  경로에서 검사하며, Floor-1에서는 총 방 수 예약 때문에 상점 유무에 따라 일반 방 수가 달라진다.
+  Difficulty-1 검증의 거리 계산은 숨김 통로를 제외하도록 현재 계약에 맞췄다. 전체 구형 검증기 정리는
+  별도 후보로 유지하며 이 회귀 묶음이 전체 검증기 실행을 대체하지 않는다.
+
+`game/Assets/Editor`에 `*Verification.cs`가 96개 쌓였다. 개수 자체는 빌드·런타임 비용이 없어 문제가 아니지만,
+원래 실패하는 검증이 섞이면 새 회귀를 놓치고, 예전 Setup을 다시 실행하면 최신 카탈로그를 되돌린다.
+아래는 전체 배치를 돌리지 않은 **정적 1차 분류**이며, 실제 정리 전에 전체 실행으로 확인한다.
+
+| 분류 | 대상 | 근거 | 후속 조치 후보 |
+| ---- | ---- | ---- | -------------- |
+| 실패 확인 | Week14 Room-7 | 카탈로그에 `pillar-crossfire` Encounter가 없어 조회 실패 (2026-09-29 실행) | Encounter 포함 여부 결정 후 검증 갱신 |
+| 실패 확인 | Week15 Enemy-0·2·3·5 | 프리팹·추적 기본값 변경으로 실패 (Obstacle-0 작업 중 확인) | 현재 값 기준으로 기대값 갱신 또는 폐기 |
+| 갱신·실행 통과 | Week14 Room-8 | 예전 6~8방·폐기된 pillar-crossfire·스폰 2개 고정 기대값 | Floor-1 층별 총 방 수·현재 Encounter 네 패턴·실제 두 번째 웨이브 규모로 갱신, Play-1 준비 배치에서 통과 (2026-10-01) |
+| 오래된 가정 | Week14 Encounter-1·2 | Encounter 수 `== 3` 고정 | 필수 현재 ID 포함 조건으로 갱신 검토 |
+| 오래된 가정 | Week14 Encounter-3 | 웨이브·스폰 수 고정 기대값 | 실행해 확인 |
+| 최신 계약 | Week16~18 (Artifact·Content·Item·Reward·Spell·Test, Resource-0·1·3, Obstacle-0·1·2·3), Hp1~5 | 이번 달 작업에서 통과 | 유지 |
+| 확인 필요 | Week6~8, Phase G·H, Week13 Frontend·HUD·Setting·Flow, Week14 Room-0~6·Artwork, Week15 Boss·Enemy-1·4·RoleColor, ItemTestRoom, ErpinWalkAnimation | 최근 실행 기록 없음. Week7·8 초기 방·층 검증은 이후 Room·Encounter 계약이 대체했을 가능성이 높음 | 전체 실행 후 유지·갱신·폐기 결정 |
+
+카탈로그를 통째로 다시 쓰는 Setup(`ConfigureTemplates`·`ConfigureEncounters`·Roster 호출):
+Week14 Encounter-1·2·3, Room-4·6·7, Week15 Enemy-5, Week18 Obstacle-2. 이 중 Room-6·7과 Obstacle-2는 기존 등록을
+보존하고 버전을 낮추지 않게 수정됐다(2026-09-29). 나머지는 재실행하면 이후 콘텐츠가 빠질 수 있으므로
+기존 등록 보존으로 고치거나 `[MenuItem]`을 제거해 실수 실행을 막는다.
+
+정리 시점 후보: Obstacle-3 전후 또는 20주차 Floor-1·Play-1 전. 유효한 검증만 한 번에 돌리고 통과/실패 목록을
+출력하는 회귀 실행기 배치 메서드를 함께 검토한다.
+
 - T2: 첫 7주차 방 또는 몬스터 콘텐츠 구현 직후
 - T3: 아이템 등급이나 `clientRunId` 계약 구현 직전
 - T4: 8주차 반복 플레이 테스트 시작 전
 - T5: 8주차 회고 또는 Unity 수동 검증 시간이 누적될 때
 
 각 점검에서는 도구를 만들었는지가 아니라 실제 개발 시간, 누락 위험 또는 재현성이 개선됐는지를 기준으로 다음 투자를 결정한다.
+
+## 요정마을 Artwork 적용 도구 (2026-10-01)
+
+사용자가 제공한 네 장의 타일·벽·문 이미지를 기존 방 계약에 맞춰 적용하는 Editor Setup과 검증기를 추가한다.
+`FairyVillageArtworkSetup`은 모든 RoomPrefab의 시각 구성만 갱신한다. 2026-10-02 사용자 미감 피드백에 따라
+공통 전경을 분리한 연결 구간으로 교체하며, 문·모서리 비율을 보존하고 긴 벽·잔디 구간을 함께 늘린다.
+바닥의 반복·반전 배치를 제거하고, 방향별 문과 봉인 벽을 같은 좌표의 상태 에셋으로 구성한다.
+`FairyVillageArtworkVerification`은 두 번 적용하여 중복·참조 변동과 Collider·GUID 변경을 검사하고 문 상태를 검증한다.
+별도 렌더 진입점은 시각 검토용 PNG를 만든다. 세부 범위와 수동 확인은
+[22-fairy-village-artwork.md](./22-fairy-village-artwork.md), 실행 메뉴는
+[05-development-setup.md](./05-development-setup.md)를 따른다. 기존 콘텐츠 Setup 이후에는 Artwork 적용을 다시 실행한다.
+
+## 일반 적 공격 Artwork 도구 (2026-10-04)
+
+`EnemyAttackAnimationSetup`은 일반 적 4종의 준비·공격·회복 포즈와 고혈당 요정의 파 투사체를
+프리팹에 연결한다. 반복 적용하며 기존 GUID와 전투 수치를 유지한다. 원본 일치 조건과 보스 경계
+제거로 소환 졸개/보스가 일반 적 공격 그림을 상속하는 것을 막는다.
+`EnemyAttackAnimationVerification`은 실제 전투 단계와 이동 표시의 우선순위, 물리 Transform·Collider
+고정, 넉백/비활성화 복원, 졸개 제외와 실제 발사 경로의 파 Sprite·색상·방향·속도·판정 크기를 검사한다.
+`ExportPreview`는 네 단계의 Unity 렌더를 `game/Logs/EnemyAttackPreview/`에 저장한다.
+메뉴와 Play 확인 항목은 [개발 환경](./05-development-setup.md)의 일반 적 공격 모션을 따른다.
+
+## 적·보스 이동 Artwork 도구 (2026-10-03)
+
+`EnemyMovementAnimationSetup`과 `BossMovementAnimationSetup`은 기존 프리팹의 표시용 컴포넌트와
+프레임·분리 레이어만 구성한다. 각각의 Verification은 반복 적용·GUID·물리 판정 보존·정지와 공격 억제·
+재활성화를 검사한다. 보스 검증은 실제 새마음금고 점프의 바닥 보물 고정·착지 반동과 Boss-0~3 회귀도
+확인한다. 두 렌더 진입점으로 Unity에서 주기별 PNG를 내보낸다. 자동 검증과 렌더는 통과했으며 실제
+Play Mode 가독성 확인은 남아 있다. 실행 메뉴와 배치는 [개발 환경 안내](./05-development-setup.md),
+범위와 체크리스트는 [요정왕국 적·보스 계획](./18-fairy-kingdom-enemy-boss-plan.md)을 따른다.
+
+2026-10-04 일반 적 도구에 크레용사용 소환 졸개 4종의 전용 걷기 에셋 적용과 공통 검증을 추가했다.
+별도 미리보기 메뉴로 네 포즈 주기의 Unity PNG를 생성하며, 기존 보스 소환 회귀와 함께 통과했다.
+
+2026-10-05 `EnemyAttackAnimationSetup.SetupMinions`에 졸개 4종의 전용 공격 포즈와 화살·마법탄 연결을
+추가했다. 일반 적 Setup도 함께 구성한다. 검증 대상은 8종이며 졸개 고유 그림과 실제 발사 경로를
+검사한다. `Export Crayon Minion Attack Preview`는 반복 구성·전투·보스 소환 회귀와 4단계 렌더를 수행한다.
+실행 메뉴와 Play 확인은 [개발 환경](./05-development-setup.md)의 졸개 공격 항목을 따른다.
+2026-10-05 `ErpinProjectileArtworkSetup`을 추가했다. 기존 기본공격·저학년 프리팹의 GUID와 전투
+설정을 유지하면서 Sprite·tint·표시 크기와 기본공격의 축소된 충돌 배율을 구성한다. 반복 구성 뒤
+실제 SpriteRenderer 크기와 CircleCollider 크기, 공통 판정·저학년·분열탄·사거리 회귀를 검사한다.
+실행 메뉴는 [개발 환경](./05-development-setup.md)의 에르핀 구체 항목을 따른다.
+2026-10-05 `ErpinHighGradeArtworkSetup`은 Resources의 돌격·충돌 8포즈를 반복 가져오고
+실제 `PlayerActionState` 단계에 따른 포즈 선택·좌우 전환·일시정지·회복·비활성화 복원과
+본체/히트박스 보존을 검사한다. 배치는 기존 걷기·고학년·저학년 회귀를 포함한다.
+고학년 테스트의 층 진입 보호창과 합성 시간 취소 검사를 분리했다. 실행 메뉴는
+[개발 환경](./05-development-setup.md)의 에르핀 고학년 모션 항목을 따른다.

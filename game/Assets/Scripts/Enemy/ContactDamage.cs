@@ -7,18 +7,18 @@ namespace TrickalFanGame.Enemy
 {
     public sealed class ContactDamage : MonoBehaviour
     {
-        [SerializeField, Min(0.01f)] private float damage = 1f;
+        [SerializeField] private EnemyDamageTier damageTier = EnemyDamageTier.Light;
         [SerializeField, Min(0f)] private float cooldown = 1f;
 
         private float nextDamageTime;
 
-        public float Damage => damage;
+        public EnemyDamageTier DamageTier => damageTier;
         public float Cooldown => cooldown;
         public float NextDamageTime => nextDamageTime;
 
-        public void Configure(float configuredDamage, float configuredCooldown)
+        public void Configure(EnemyDamageTier configuredDamageTier, float configuredCooldown)
         {
-            damage = Mathf.Max(0.01f, configuredDamage);
+            damageTier = configuredDamageTier;
             cooldown = Mathf.Max(0f, configuredCooldown);
         }
 
@@ -37,7 +37,7 @@ namespace TrickalFanGame.Enemy
             }
 
             target.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
-            target.TakeDamage(new DamageContext(gameObject, DamageSourceType.EnemyContact, damage));
+            target.TakeDamage(HealthUnits.CreateEnemyDamageContext(gameObject, DamageSourceType.EnemyContact, damageTier));
             nextDamageTime = currentTime + cooldown;
             return true;
         }

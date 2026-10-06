@@ -16,7 +16,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.1f)] private float slashWidth = 1.15f;
         [SerializeField, Min(0.1f)] private float goldenSlashWidth = 0.57f;
         [SerializeField, Min(0.05f)] private float slashLockedDelay = 0.2f;
-        [SerializeField, Min(0.01f)] private float slashDamage = 3f;
+        [SerializeField] private EnemyDamageTier slashDamageTier = EnemyDamageTier.Critical;
         [SerializeField, Min(0f)] private float goldenSlashSpreadDegrees = 15f;
 
         [Header("Summons")]
@@ -34,7 +34,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.05f)] private float swingWindup = 0.3f;
         [SerializeField, Min(0.05f)] private float swingInterval = 0.7f;
         [SerializeField, Min(0.01f)] private float swingDirectionLockDuration = 0.12f;
-        [SerializeField, Min(0.01f)] private float swingDamage = 2f;
+        [SerializeField] private EnemyDamageTier swingDamageTier = EnemyDamageTier.Heavy;
         [SerializeField, Min(1f)] private float swingRecognitionMultiplier = 1.625f;
 
         [Header("Dash chain")]
@@ -42,7 +42,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float dashDuration = 0.17f;
         [SerializeField, Min(0.01f)] private float dashRetargetDuration = 0.1f;
         [SerializeField, Min(0.1f)] private float dashWidth = 1.8f;
-        [SerializeField, Min(0.01f)] private float dashDamage = 2f;
+        [SerializeField] private EnemyDamageTier dashDamageTier = EnemyDamageTier.Heavy;
 
         [Header("Pattern selection")]
         [SerializeField, Min(1)] private int pressureActionsBeforeSlash = 3;
@@ -95,7 +95,9 @@ namespace TrickalFanGame.Enemy
         public float SlashLength => slashLength;
         public float SlashWidth => slashWidth;
         public float SlashLockedDelay => slashLockedDelay;
-        public float SlashDamage => slashDamage;
+        public EnemyDamageTier SlashDamageTier => slashDamageTier;
+        public EnemyDamageTier SwingDamageTier => swingDamageTier;
+        public EnemyDamageTier DashDamageTier => dashDamageTier;
         public float GoldenSlashSpreadDegrees => goldenSlashSpreadDegrees;
         public int ActiveSlashDirectionCount => boss != null && boss.CurrentPhase >= 2 ? 3 : 1;
         public float ActiveSlashWidth => boss != null && boss.CurrentPhase >= 2 ? goldenSlashWidth : slashWidth;
@@ -159,12 +161,12 @@ namespace TrickalFanGame.Enemy
             if (health != null) health.SetInvulnerable(false);
         }
 
-        public void ConfigureSlash(float length, float width, float lockedDelay, float damage)
+        public void ConfigureSlash(float length, float width, float lockedDelay, EnemyDamageTier damageTier)
         {
             slashLength = Mathf.Max(1f, length);
             slashWidth = Mathf.Max(0.1f, width);
             slashLockedDelay = Mathf.Max(0.05f, lockedDelay);
-            slashDamage = Mathf.Max(0.01f, damage);
+            slashDamageTier = damageTier;
         }
 
         public void ConfigureSummons(GameObject[] prefabs, int countPerPattern, float radius,
@@ -177,7 +179,7 @@ namespace TrickalFanGame.Enemy
         }
 
         public void ConfigureSwing(float speed, float phaseTwoMultiplier, float range, float width,
-            float startGap, float windup, float interval, float directionLockDuration, float damage)
+            float startGap, float windup, float interval, float directionLockDuration, EnemyDamageTier damageTier)
         {
             approachSpeed = Mathf.Max(0f, speed);
             phaseTwoSpeedMultiplier = Mathf.Max(1f, phaseTwoMultiplier);
@@ -187,16 +189,17 @@ namespace TrickalFanGame.Enemy
             swingWindup = Mathf.Max(0.05f, windup);
             swingInterval = Mathf.Max(swingWindup, interval);
             swingDirectionLockDuration = Mathf.Clamp(directionLockDuration, 0.01f, swingWindup);
-            swingDamage = Mathf.Max(0.01f, damage);
+            swingDamageTier = damageTier;
         }
 
-        public void ConfigureDash(float speed, float duration, float retargetDuration, float width, float damage)
+        public void ConfigureDash(float speed, float duration, float retargetDuration, float width,
+            EnemyDamageTier damageTier)
         {
             dashSpeed = Mathf.Max(0.1f, speed);
             dashDuration = Mathf.Max(0.01f, duration);
             dashRetargetDuration = Mathf.Max(0.01f, retargetDuration);
             dashWidth = Mathf.Max(0.1f, width);
-            dashDamage = Mathf.Max(0.01f, damage);
+            dashDamageTier = damageTier;
         }
 
         public void ConfigureSelection(int pressureBeforeSlash, float phaseOneCooldown, float goldenCooldown,
@@ -447,7 +450,7 @@ namespace TrickalFanGame.Enemy
             int hitCount = 0;
             foreach (Vector2 direction in GetSlashDirections())
                 if (IsTargetInsideDirectionalBox(0f, slashLength, ActiveSlashWidth, direction)) hitCount++;
-            if (hitCount > 0) ApplyTargetDamage(slashDamage * hitCount, DamageSourceType.EnemyMelee);
+            if (hitCount > 0) ApplyTargetDamage(slashDamageTier, DamageSourceType.EnemyMelee, hitCount);
             slashResolved = true;
             slashPending = false;
             SetAllTelegraphColors(new Color(1f, 0.08f, 0.02f, 0.95f),
@@ -477,7 +480,7 @@ namespace TrickalFanGame.Enemy
             }
             UpdateSwingTelegraphPositions();
             if (now < swingResolvesAt) return;
-            ResolveDirectionalHit(SwingStartOffset, swingRange, swingWidth, swingDamage,
+            ResolveDirectionalHit(SwingStartOffset, swingRange, swingWidth, swingDamageTier,
                 DamageSourceType.EnemyMelee, lockedDirection);
             completedSwings++;
             swingPreparing = false;
@@ -493,7 +496,7 @@ namespace TrickalFanGame.Enemy
             {
                 float travel = dashSpeed * deltaTime;
                 if (!dashChainHitApplied && ResolveDirectionalHit(0f, ResolveBodyRadius() + travel, dashWidth,
-                        dashDamage, DamageSourceType.EnemyContact, lockedDirection))
+                        dashDamageTier, DamageSourceType.EnemyContact, lockedDirection))
                     dashChainHitApplied = true;
                 body.MovePosition(ClampToArena((Vector2)transform.position + lockedDirection * travel));
                 if (now < dashStateEndsAt) return;
@@ -536,11 +539,11 @@ namespace TrickalFanGame.Enemy
             body.MovePosition(destination);
         }
 
-        private bool ResolveDirectionalHit(float startOffset, float length, float width, float damage,
+        private bool ResolveDirectionalHit(float startOffset, float length, float width, EnemyDamageTier damageTier,
             DamageSourceType sourceType, Vector2 direction)
         {
             if (!IsTargetInsideDirectionalBox(startOffset, length, width, direction)) return false;
-            ApplyTargetDamage(damage, sourceType);
+            ApplyTargetDamage(damageTier, sourceType);
             return true;
         }
 
@@ -558,12 +561,12 @@ namespace TrickalFanGame.Enemy
             return forward >= startOffset && forward <= startOffset + length && sideways <= width * 0.5f;
         }
 
-        private void ApplyTargetDamage(float damage, DamageSourceType sourceType)
+        private void ApplyTargetDamage(EnemyDamageTier damageTier, DamageSourceType sourceType, int hitCount = 1)
         {
             Health targetHealth = target != null ? target.GetComponentInParent<Health>() : null;
             if (targetHealth == null || targetHealth.IsDead) return;
             targetHealth.GetComponent<PlayerDeathReason>()?.SetReason("BOSS");
-            targetHealth.TakeDamage(new DamageContext(gameObject, sourceType, damage));
+            targetHealth.TakeDamage(HealthUnits.CreateEnemyDamageContext(gameObject, sourceType, damageTier, hitCount));
         }
 
         private void SummonMinions()

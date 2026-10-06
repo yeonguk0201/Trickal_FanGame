@@ -16,6 +16,8 @@ namespace TrickalFanGame.Enemy
         private Health health;
         private KnockbackReceiver knockback;
         private EnemyBehaviorContext behavior;
+        private readonly EnemyObstacleNavigator navigator = new();
+        private float bodyRadius;
 
         public float MoveSpeed => moveSpeed;
         public float DetectionRange => detectionRange;
@@ -86,7 +88,8 @@ namespace TrickalFanGame.Enemy
                 return;
             }
 
-            body.linearVelocity = offset / distance * moveSpeed;
+            body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
+                Time.time) * moveSpeed;
         }
 
         private void CacheComponents()
@@ -94,6 +97,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
+            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {

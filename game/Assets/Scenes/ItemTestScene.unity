@@ -289,6 +289,7 @@ MonoBehaviour:
   playerInventory: {fileID: 2018927168}
   playerHealth: {fileID: 2018927162}
   playerStats: {fileID: 2018927169}
+  runProgress: {fileID: 0}
   itemLoadout:
   - item: {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
     startingStacks: 1
@@ -311,6 +312,18 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 625e0be83fd749cb861e619dfb23d4e3, type: 2}
     startingStacks: 0
   - item: {fileID: 11400000, guid: 972dee487825bc044993a8354c4accd2, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 4c6d17c2077a6fb43bbeda89f37d557c, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 582b1a831ceded4438116781274efe64, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: d05d894249916b44fbfc8d46a8888f5e, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: c1c95cd095900d54394906e00d5e2d18, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: 1ffb80362a4d97a4d8a68aaffdd8675b, type: 2}
+    startingStacks: 0
+  - item: {fileID: 11400000, guid: fc8088d88f829f34a854a5a37f3e5ba3, type: 2}
     startingStacks: 0
   enemyPlacements:
   - enabled: 1
@@ -337,6 +350,11 @@ MonoBehaviour:
   applyLoadoutOnStart: 1
   spawnEnemiesOnStart: 1
   showDebugPanel: 1
+  healthPickupPrefab: {fileID: 7824783456288271396, guid: fe735d51964ab6243baf43f8c7221f9a, type: 3}
+  resourcePickupPrefabs:
+  - {fileID: 5832021185536105091, guid: 615b40b3d6223ad4a9363c3e586e6072, type: 3}
+  - {fileID: 8862331865661293077, guid: 0488521fa1d47a84d95253f53e50f9d7, type: 3}
+  - {fileID: 3169978882097705138, guid: 523aa0bd7b8a129418565809a9f40126, type: 3}
 --- !u!4 &249022118
 Transform:
   m_ObjectHideFlags: 0
@@ -1120,11 +1138,11 @@ GameObject:
   - component: {fileID: 2018927169}
   - component: {fileID: 2018927170}
   - component: {fileID: 2018927173}
-  - component: {fileID: 2018927172}
   - component: {fileID: 2018927171}
   - component: {fileID: 2018927175}
   - component: {fileID: 2018927174}
   - component: {fileID: 2018927176}
+  - component: {fileID: 2018927177}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -1176,6 +1194,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 5
   currentShield: 0
+  useHealthUnits: 0
 --- !u!58 &2018927163
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -1356,8 +1375,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52f62f5ee934d13b7239afb52b78bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerStats
-  baseMaxHealth: 5
-  baseAttackDamage: 1
+  baseMaxHealth: 10
+  baseAttackDamage: 10
   baseMoveSpeed: 5
   baseAttackSpeed: 1
   baseCriticalChance: 0.05
@@ -1393,20 +1412,6 @@ MonoBehaviour:
   targetLayers:
     serializedVersion: 2
     m_Bits: 64
---- !u!114 &2018927172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2018927159}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10dc6910a9f04acc89854ebd53cdf2a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Player.PlayerSPDropper
-  pickupPrefab: {fileID: 6812840948383656007, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
-  dropChance: 0.25
 --- !u!114 &2018927173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1469,9 +1474,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4cd40aeb89be4c2786376575d9b92ab1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.DamageInvulnerability
   hitDuration: 0.35
+--- !u!114 &2018927177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018927159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
+  defaultDuration: 0.2
+  defaultStunDuration: 0.4
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

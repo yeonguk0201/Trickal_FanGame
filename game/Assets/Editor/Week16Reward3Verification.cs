@@ -51,8 +51,8 @@ namespace TrickalFanGame.Editor
                        .Distinct(StringComparer.Ordinal).Count() == assembler.SelectionRewardPool.Count,
                 "Reward-3 selection pool must contain only unique active valid Items.");
             Assert(assembler.SelectionRewardPool.Any(definition => definition.Kind == ItemKind.Artifact) &&
-                   assembler.SelectionRewardPool.Any(definition => definition.Kind == ItemKind.Spell),
-                "Reward-3 must integrate Artifact and Spell definitions in one pool.");
+                   assembler.SelectionRewardPool.All(definition => definition.Kind != ItemKind.Spell),
+                "Reward-3 must hold Artifacts and no retired legacy Spell in one pool (Contract-0 §3).");
             string[] roomPrefabPaths = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Rooms/Prefabs" })
                 .Select(AssetDatabase.GUIDToAssetPath).ToArray();
             Assert(roomPrefabPaths.Length > 0 && roomPrefabPaths.All(path =>
@@ -195,9 +195,12 @@ namespace TrickalFanGame.Editor
         private static int CountRuntimePickups(RoomGraphAssembler assembler) =>
             assembler.CurrentFloorRoot.GetComponentsInChildren<ItemPickup>(true).Length;
 
+        // Special-3 secret rooms are also Reward rooms; this verifier checks the floor's treasure room.
         private static RoomPrefab FindRoom(RoomGraphAssembler assembler, RoomType type) =>
             assembler.CurrentFloorRoot.GetComponentsInChildren<RoomPrefab>(true)
-                .Single(room => room.Node.Definition.RoomType == type);
+                .Single(room => room.Node.Definition.RoomType == type &&
+                                assembler.GeneratedGraph.Nodes.Single(node => node.RoomId == room.Node.RoomId).Role !=
+                                GeneratedRoomRole.Secret);
 
         private static T FindSingle<T>(Scene scene, string label) where T : Component
         {

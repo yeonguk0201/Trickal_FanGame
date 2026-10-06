@@ -16,12 +16,40 @@ namespace TrickalFanGame.Combat
         public DamageContext KillingBlow { get; }
     }
 
+    public readonly struct PlayerBasicAttackHitEvent
+    {
+        public PlayerBasicAttackHitEvent(Health target, DamageContext damage, float appliedDamage)
+        {
+            Target = target;
+            Damage = damage;
+            AppliedDamage = appliedDamage;
+        }
+
+        public Health Target { get; }
+        public DamageContext Damage { get; }
+        public float AppliedDamage { get; }
+    }
+
     [DisallowMultipleComponent]
     public sealed class PlayerCombatEvents : MonoBehaviour
     {
         private readonly HashSet<int> reportedTargetIds = new();
 
         public event Action<PlayerEnemyKilledEvent> EnemyKilled;
+        public event Action<PlayerBasicAttackHitEvent> BasicAttackHit;
+
+        internal bool TryReportBasicAttackHit(Health target, DamageContext damage, float appliedDamage)
+        {
+            if (target == null || target.gameObject == gameObject || appliedDamage <= 0f ||
+                damage.Source != gameObject ||
+                damage.SourceType is not (DamageSourceType.PlayerAttack or DamageSourceType.PlayerProjectile))
+            {
+                return false;
+            }
+
+            BasicAttackHit?.Invoke(new PlayerBasicAttackHitEvent(target, damage, appliedDamage));
+            return true;
+        }
 
         internal bool TryReportEnemyKilled(Health target, DamageContext killingBlow)
         {
@@ -43,7 +71,8 @@ namespace TrickalFanGame.Combat
                    sourceType == DamageSourceType.PlayerAttack ||
                    sourceType == DamageSourceType.PlayerSkillExplosion ||
                    sourceType == DamageSourceType.PlayerUltimateImpact ||
-                   sourceType == DamageSourceType.PlayerDamageAura;
+                   sourceType == DamageSourceType.PlayerDamageAura ||
+                   sourceType == DamageSourceType.PlayerItemLightning;
         }
     }
 }

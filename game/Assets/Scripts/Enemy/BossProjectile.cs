@@ -19,7 +19,7 @@ namespace TrickalFanGame.Enemy
             Vector2 position,
             Vector2 initialVelocity,
             GameObject source,
-            float attackDamage,
+            EnemyDamageTier damageTier,
             Sprite sprite)
         {
             GameObject projectile = new GameObject("Boss Projectile");
@@ -36,10 +36,10 @@ namespace TrickalFanGame.Enemy
             ProjectileSizing.Apply(projectile.transform, collider, ProjectileSizing.BossScale);
             BossProjectile controller = projectile.AddComponent<BossProjectile>();
             controller.velocity = initialVelocity;
-            controller.damageContext = new DamageContext(
+            controller.damageContext = HealthUnits.CreateEnemyDamageContext(
                 source,
                 DamageSourceType.EnemyProjectile,
-                attackDamage);
+                damageTier);
             controller.expiresAt = Time.time + 4f;
             controller.isLaunched = true;
             source?.GetComponent<BossController>()?.RegisterOwnedObject(projectile);

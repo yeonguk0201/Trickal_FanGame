@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a73bdf2426d4a0ebd2e2432b8f10f75, type: 3}
+  m_Name: spawn-tall-swarm-v1
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.EncounterDefinition
+  encounterId: spawn-tall-swarm-v1
+  allowedProfiles:
+  - {fileID: 11400000, guid: 90d790e5b5de53c4580db588ccac9c58, type: 2}
+  minimumFloor: 1
+  maximumFloor: 3
+  minimumPlayerDistance: 1.5
+  minimumDoorDistance: 2
+  waves:
+  - waveNumber: 1
+    startCondition: 0
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 0
+      count: 4
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 0
+        weight: 70
+      - enemyRole: 4
+        weight: 30
+  - waveNumber: 2
+    startCondition: 1
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 0
+      count: 3
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 0
+        weight: 70
+      - enemyRole: 4
+        weight: 30
+  clearCondition: 0
+  declaredMinimumThreat: 14
+  declaredMaximumThreat: 21

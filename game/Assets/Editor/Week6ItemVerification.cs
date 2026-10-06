@@ -51,7 +51,7 @@ namespace TrickalFanGame.Editor
             {
                 Assert(firstStats.MaxHealth == 10 && firstHealth.MaxHealth == firstStats.MaxHealth,
                     "PlayerStats should own the base max HP synchronized to Health.");
-                Assert(firstStats.AttackDamage == 1 && firstAttack.CurrentDamage == firstStats.AttackDamage,
+                Assert(firstStats.AttackDamage == 10 && firstAttack.CurrentDamage == firstStats.AttackDamage,
                     "PlayerProjectileAttack should read base damage from PlayerStats.");
                 Assert(Mathf.Approximately(firstStats.MoveSpeed, 5f) &&
                        Mathf.Approximately(firstMovement.CurrentMoveSpeed, firstStats.MoveSpeed),
@@ -59,7 +59,7 @@ namespace TrickalFanGame.Editor
 
                 Assert(firstInventory.TryAcquire(attackDamage), "Attack Boost should be acquirable.");
                 Assert(firstInventory.TryAcquire(attackDamage), "Attack Boost should stack without a cap.");
-                Assert(firstStats.AttackDamage == 3 && firstAttack.CurrentDamage == 3,
+                Assert(firstStats.AttackDamage == 12 && firstAttack.CurrentDamage == 12,
                     "Stacked attack items should update PlayerStats and projectile damage.");
 
                 Assert(firstInventory.TryAcquire(attackPercent), "Attack +70% should be acquirable.");

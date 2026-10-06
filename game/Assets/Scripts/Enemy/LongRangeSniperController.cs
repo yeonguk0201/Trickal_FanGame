@@ -31,7 +31,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float firingDuration = 0.08f;
         [SerializeField, Min(0f)] private float recoveryDuration = 0.65f;
         [SerializeField, Min(0.01f)] private float projectileSpeed = 7f;
-        [SerializeField, Min(0.01f)] private float projectileDamage = 2f;
+        [SerializeField] private EnemyDamageTier projectileDamageTier = EnemyDamageTier.Heavy;
         [SerializeField, Min(0.01f)] private float projectileLifetime = 5f;
         [SerializeField] private Transform target;
 
@@ -48,13 +48,19 @@ namespace TrickalFanGame.Enemy
         private int strafeDirection = 1;
         private int relocationSequence;
         private bool strafeThisCycle;
+        private readonly EnemyObstacleNavigator navigator = new();
+        private float bodyRadius;
 
         public LongRangeSniperState State { get; private set; }
         public Vector2 LockedDirection => lockedDirection;
         public float MoveSpeed => moveSpeed;
         public float DetectionRange => detectionRange;
         public float PreferredDistance => preferredDistance;
-        public float ProjectileDamage => projectileDamage;
+        public float RelocationDuration => relocationDuration;
+        public float AimDuration => aimDuration;
+        public float RecoveryDuration => recoveryDuration;
+        public float ProjectileSpeed => projectileSpeed;
+        public EnemyDamageTier ProjectileDamageTier => projectileDamageTier;
         public int StrafeDirection => strafeDirection;
         public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;
 
@@ -84,7 +90,7 @@ namespace TrickalFanGame.Enemy
                 return;
             }
 
-            bool blocked = collision.collider.gameObject.layer == LayerMask.NameToLayer("Environment") ||
+            bool blocked = ((1 << collision.collider.gameObject.layer) & EnemyObstacleNavigator.ObstacleMask) != 0 ||
                            collision.collider.GetComponentInParent<EnemyBehaviorContext>() != null;
             if (blocked)
             {
@@ -108,7 +114,7 @@ namespace TrickalFanGame.Enemy
             float configuredFiringDuration,
             float configuredRecoveryDuration,
             float configuredProjectileSpeed,
-            float configuredProjectileDamage,
+            EnemyDamageTier configuredProjectileDamageTier,
             float configuredProjectileLifetime)
         {
             moveSpeed = Mathf.Max(0f, configuredMoveSpeed);
@@ -121,7 +127,7 @@ namespace TrickalFanGame.Enemy
             firingDuration = Mathf.Max(0.01f, configuredFiringDuration);
             recoveryDuration = Mathf.Max(0f, configuredRecoveryDuration);
             projectileSpeed = Mathf.Max(0.01f, configuredProjectileSpeed);
-            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+            projectileDamageTier = configuredProjectileDamageTier;
             projectileLifetime = Mathf.Max(0.01f, configuredProjectileLifetime);
             relocationSequence = 0;
             strafeDirection = 1;
@@ -134,9 +140,9 @@ namespace TrickalFanGame.Enemy
             behavior?.SetTarget(configuredTarget);
         }
 
-        public void SetProjectileDamage(float configuredProjectileDamage)
+        public void SetProjectileDamageTier(EnemyDamageTier configuredProjectileDamageTier)
         {
-            projectileDamage = Mathf.Max(0.01f, configuredProjectileDamage);
+            projectileDamageTier = configuredProjectileDamageTier;
         }
 
         public void TickBehavior(float currentTime)
@@ -172,7 +178,13 @@ namespace TrickalFanGame.Enemy
                     behavior.SetControllerMovementSuppressed(true);
                     body.linearVelocity = Vector2.zero;
                     TrackTargetDuringAim();
-                    if (currentTime >= stateEndsAt)
+                    if (currentTime >= stateEndsAt &&
+                        !EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
+                    {
+                        // Obstacle-0: never fire into an obstacle; go back to finding a clear line.
+                        EnterRelocating(currentTime);
+                    }
+                    else if (currentTime >= stateEndsAt)
                     {
                         Fire(currentTime);
                     }
@@ -226,6 +238,14 @@ namespace TrickalFanGame.Enemy
         private void TickRelocating(float currentTime)
         {
             behavior.SetControllerMovementSuppressed(false);
+            if (!EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
+            {
+                // Obstacle-0: hold the aim and walk around the obstacle until the line of fire opens.
+                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
+                    currentTime) * moveSpeed;
+                return;
+            }
+
             Vector2 offset = target.position - transform.position;
             float distance = offset.magnitude;
             Vector2 direction = distance > 0.001f ? offset / distance : Vector2.right;
@@ -272,15 +292,16 @@ namespace TrickalFanGame.Enemy
 
         private void Fire(float currentTime)
         {
-            Sprite projectileSprite = spriteRenderer != null ? spriteRenderer.sprite : null;
+            Sprite drawnProjectile = GetComponent<EnemyAttackArtwork>()?.ProjectileSprite;
+            Sprite projectileSprite = drawnProjectile != null ? drawnProjectile : spriteRenderer != null ? spriteRenderer.sprite : null;
             EnemyProjectile projectile = EnemyProjectile.Create(
                 transform.position,
                 lockedDirection,
                 gameObject,
-                projectileDamage,
+                projectileDamageTier,
                 projectileSpeed,
                 projectileLifetime,
-                projectileSprite);
+                projectileSprite, drawnProjectile != null);
             ProjectileFired?.Invoke(projectile);
             stateEndsAt = currentTime + firingDuration;
             SetState(LongRangeSniperState.Firing);
@@ -355,6 +376,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
+            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {

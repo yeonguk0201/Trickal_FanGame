@@ -1,4 +1,5 @@
 using System;
+using TrickalFanGame.Combat;
 using UnityEngine;
 
 namespace TrickalFanGame.Player
@@ -11,6 +12,14 @@ namespace TrickalFanGame.Player
         private const string SkillResourcePath = "Characters/Erpin_lowGrade_skill";
         private const int FrameCount = 4;
         private const int SkillFrameCount = 4;
+        private const string HighGradeResourcePath = "Characters/Erpin_HighGrade";
+        private readonly Sprite[] highGradeFrames = new Sprite[8];
+        private PlayerActionState actionState;
+        private PlayerUltimate ultimate;
+        private Health health;
+        private PlayerActionPhase artworkPhase;
+        private float highGradeElapsed;
+        private bool hasHighGradeFrames;
 
         [SerializeField, Min(1f)] private float framesPerSecond = 8f;
         [SerializeField, Min(1f)] private float skillFramesPerSecond = 12f;
@@ -40,6 +49,16 @@ namespace TrickalFanGame.Player
             idleSprite = spriteRenderer.sprite;
             hasFrames = LoadFrames();
             hasSkillFrames = LoadSkillFrames();
+            actionState = GetComponent<PlayerActionState>();
+            ultimate = GetComponent<PlayerUltimate>();
+            health = GetComponent<Health>();
+            Sprite[] highGradeSprites = Resources.LoadAll<Sprite>(HighGradeResourcePath);
+            hasHighGradeFrames = true;
+            for (int i = 0; i < highGradeFrames.Length; i++)
+            {
+                highGradeFrames[i] = FindSprite(highGradeSprites, $"Erpin_HighGrade_{i}");
+                hasHighGradeFrames &= highGradeFrames[i] != null;
+            }
         }
 
         private void Start()
@@ -77,6 +96,8 @@ namespace TrickalFanGame.Player
                 return;
             }
 
+            if (TickHighGrade(Time.deltaTime)) return;
+
             if (isPlayingSkill && TickSkill(Time.deltaTime))
             {
                 return;
@@ -91,7 +112,7 @@ namespace TrickalFanGame.Player
             {
                 elapsed = 0f;
                 frameIndex = 0;
-                spriteRenderer.sprite = idleSprite;
+                spriteRenderer.sprite = movement.IsAimingAttack ? SelectFrames(movement.FacingDirection)[0] : idleSprite;
                 return;
             }
 
@@ -109,6 +130,8 @@ namespace TrickalFanGame.Player
         private void OnDisable()
         {
             isPlayingSkill = false;
+            highGradeElapsed = 0f;
+            artworkPhase = PlayerActionPhase.Normal;
             if (spriteRenderer != null && idleSprite != null)
             {
                 spriteRenderer.sprite = idleSprite;
@@ -128,6 +151,34 @@ namespace TrickalFanGame.Player
 
             // 발사가 애니메이션보다 길면 마지막 프레임을 유지한다.
             spriteRenderer.sprite = skillFrames[Mathf.Min(skillFrame, SkillFrameCount - 1)];
+            return true;
+        }
+
+        private bool TickHighGrade(float deltaTime)
+        {
+            PlayerActionPhase phase = actionState != null ? actionState.Phase : PlayerActionPhase.Normal;
+            if (phase != artworkPhase)
+            {
+                artworkPhase = phase;
+                highGradeElapsed = 0f;
+            }
+            if (!hasHighGradeFrames || (health != null && health.IsDead) ||
+                (phase != PlayerActionPhase.UltimateDashing && phase != PlayerActionPhase.UltimateImpactRecovery))
+                return false;
+
+            isPlayingSkill = false;
+            highGradeElapsed += Mathf.Max(0f, deltaTime);
+            if (Mathf.Abs(actionState.DashDirection.x) > 0.001f)
+                spriteRenderer.flipX = actionState.DashDirection.x > 0f;
+            int index;
+            if (phase == PlayerActionPhase.UltimateDashing)
+                index = highGradeElapsed < 0.08f ? 0 : 1 + Mathf.FloorToInt((highGradeElapsed - 0.08f) * 10f) % 3;
+            else
+            {
+                float duration = ultimate != null ? ultimate.ImpactRecoveryDuration : 0.4f;
+                index = 4 + Mathf.Clamp(Mathf.FloorToInt(highGradeElapsed / Mathf.Max(0.01f, duration) * 4f), 0, 3);
+            }
+            spriteRenderer.sprite = highGradeFrames[index];
             return true;
         }
 

@@ -62,7 +62,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                charging.ConfigurePursuitCharge(10f, 3f, 1f, 0.5f, 8f, 0.75f, 0.7f, 2f);
+                charging.ConfigurePursuitCharge(10f, 3f, 1f, 0.5f, 8f, 0.75f, 0.7f, EnemyDamageTier.Heavy);
                 player.transform.position = Vector2.right * 5f;
                 charging.SetTarget(player.transform);
 
@@ -100,6 +100,9 @@ namespace TrickalFanGame.Editor
                        charging.State == ChargingEnemyState.Recovering && body.linearVelocity == Vector2.zero &&
                        presentation.Phase == EnemyAttackPhase.Recovery,
                     "A wall collision must end the dash in a stationary, readable recovery.");
+                // The wall sits on the enemy for this collision check only; left in place it would block pursuit.
+                UnityEngine.Object.DestroyImmediate(wall);
+                Physics2D.SyncTransforms();
 
                 charging.TickBehavior(2.3f);
                 Assert(charging.State == ChargingEnemyState.Pursuing && body.linearVelocity.x < 0f,
@@ -122,7 +125,7 @@ namespace TrickalFanGame.Editor
 
             try
             {
-                charging.ConfigurePursuitCharge(10f, 3f, 0.2f, 0.5f, 8f, 0.75f, 0.7f, 2f);
+                charging.ConfigurePursuitCharge(10f, 3f, 0.2f, 0.5f, 8f, 0.75f, 0.7f, EnemyDamageTier.Heavy);
                 player.transform.position = Vector2.right * 5f;
                 charging.SetTarget(player.transform);
                 charging.TickBehavior(0f);

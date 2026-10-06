@@ -237,7 +237,8 @@ namespace TrickalFanGame.Editor
             source.Configure(pickup, active.ToArray(), sourceObject.transform, dropParent);
             source.ConfigureRewardContext(progress, "floor-03-room-07:treasure");
             Assert(source.TryDrop(inventory) && source.HasDropped && source.LastDroppedDefinition == null &&
-                   Approximately(source.LastFallbackHealAmount, health.MaxHealth * ItemDropSource.FallbackHealMaxHealthRatio) &&
+                   Approximately(source.LastFallbackHealAmount,
+                       HealthUnits.FromMaxHealthRatio(health.MaxHealth, ItemDropSource.FallbackHealMaxHealthRatio)) &&
                    Approximately(health.CurrentHealth, beforeHeal + source.LastFallbackHealAmount),
                 "When all active artifacts are capped, a living player must receive the 25% maximum-health fallback.");
         }

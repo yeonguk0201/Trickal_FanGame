@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using TrickalFanGame.Player;
+using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -14,7 +14,6 @@ namespace TrickalFanGame.Editor
         public const int ContentVersion = 3;
         public const string EncounterId = "reinforcement-pressure";
         public const string EncounterPath = Week14Encounter1Setup.EncounterFolder + "/" + EncounterId + ".asset";
-        public const string ClearRewardPrefabPath = "Assets/Prefabs/SPPickup.prefab";
 
         [MenuItem("Trickal Fan Game/Week 14/Setup Encounter-3 Waves and Revisit State")]
         public static void Setup()
@@ -26,10 +25,10 @@ namespace TrickalFanGame.Editor
                 AssetDatabase.LoadAssetAtPath<RoomProfile>(Week14Room1Setup.BasicProfilePath),
                 AssetDatabase.LoadAssetAtPath<RoomProfile>(Week14Room3Setup.WideProfilePath),
             };
-            SPPickup clearReward = AssetDatabase.LoadAssetAtPath<GameObject>(ClearRewardPrefabPath)
-                ?.GetComponent<SPPickup>();
-            if (profiles.Any(profile => profile == null) || clearReward == null)
-                throw new InvalidOperationException("Encounter-3 requires all Room Profiles and the SP pickup Prefab.");
+            if (profiles.Any(profile => profile == null))
+                throw new InvalidOperationException("Encounter-3 requires all Room Profiles.");
+            // Resource-3 replaced the guaranteed SP clear reward with one seeded room clear drop roll.
+            ResourceDropTable clearDrop = Week17Resource3Setup.EnsureDropTable();
 
             EncounterDefinition twoWave = AssetDatabase.LoadAssetAtPath<EncounterDefinition>(EncounterPath);
             if (twoWave == null)
@@ -78,7 +77,7 @@ namespace TrickalFanGame.Editor
                 throw new InvalidOperationException("Encounter-3 requires the configured generator and assembler.");
             Undo.RecordObjects(new UnityEngine.Object[] { generator, assembler }, "Configure Encounter-3 runtime");
             generator.ConfigureEncounters(ContentVersion, definitions);
-            assembler.ConfigureEncounterClearReward(clearReward);
+            assembler.ConfigureEncounterClearDrop(clearDrop);
             EditorUtility.SetDirty(generator);
             EditorUtility.SetDirty(assembler);
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
@@ -86,7 +85,7 @@ namespace TrickalFanGame.Editor
                 throw new InvalidOperationException("Game Scene save failed during Encounter-3 setup.");
             AssetDatabase.SaveAssets();
             Debug.Log("Week 14 Encounter-3 ready: the reinforcement Encounter runs two required-enemy waves, " +
-                      "persists wave and clear-reward state, and grants one SP pickup on clear.");
+                      "persists wave and clear-reward state, and rolls the room clear drop once on clear.");
         }
     }
 }

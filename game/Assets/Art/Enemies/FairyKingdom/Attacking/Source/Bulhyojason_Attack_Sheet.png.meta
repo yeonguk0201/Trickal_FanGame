@@ -1,0 +1,585 @@
+fileFormatVersion: 2
+guid: 9d88a69acbd2734448aaa869ccbc7014
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2352142196312502983
+    second: Bulhyojason_Attack_Sheet_0
+  - first:
+      213: 5518013719896379803
+    second: Bulhyojason_Attack_Sheet_1
+  - first:
+      213: 2973414612906265991
+    second: Bulhyojason_Attack_Sheet_2
+  - first:
+      213: 2735432990652977764
+    second: Bulhyojason_Attack_Sheet_3
+  - first:
+      213: -2529671729370367278
+    second: Bulhyojason_Attack_Sheet_4
+  - first:
+      213: -8553621931723891807
+    second: Bulhyojason_Attack_Sheet_5
+  - first:
+      213: 4926549020901030677
+    second: Bulhyojason_Attack_Sheet_6
+  - first:
+      213: -2502640040124881307
+    second: Bulhyojason_Attack_Sheet_7
+  - first:
+      213: -2563355724892615067
+    second: Bulhyojason_Attack_Sheet_8
+  - first:
+      213: 2184624746345153082
+    second: Bulhyojason_Attack_Sheet_9
+  - first:
+      213: -62948527520877389
+    second: Bulhyojason_Attack_Sheet_10
+  - first:
+      213: -6661522652392171187
+    second: Bulhyojason_Attack_Sheet_11
+  - first:
+      213: -4715981776119425528
+    second: Bulhyojason_Attack_Sheet_12
+  - first:
+      213: 6777300275019301056
+    second: Bulhyojason_Attack_Sheet_13
+  - first:
+      213: 6970339809338243638
+    second: Bulhyojason_Attack_Sheet_14
+  - first:
+      213: -2126058363204628104
+    second: Bulhyojason_Attack_Sheet_15
+  - first:
+      213: -8117469639376735905
+    second: Bulhyojason_Attack_Sheet_16
+  - first:
+      213: 5755366527797518780
+    second: Bulhyojason_Attack_Sheet_17
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 311
+        width: 865
+        height: 693
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93d069772238b5fd0800000000000000
+      internalID: -2352142196312502983
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 890
+        y: 925
+        width: 43
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b91d7281e3ce39c40800000000000000
+      internalID: 5518013719896379803
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 403
+        width: 601
+        height: 611
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78dcb3c26d0b34920800000000000000
+      internalID: 2973414612906265991
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 855
+        width: 41
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46251c2efc536f520800000000000000
+      internalID: 2735432990652977764
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 804
+        y: 845
+        width: 27
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2daf78407fcc4ecd0800000000000000
+      internalID: -2529671729370367278
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 463
+        width: 31
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ab5b901c2e6b4980800000000000000
+      internalID: -8553621931723891807
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 1096
+        y: 407
+        width: 39
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51bba578b3e9e5440800000000000000
+      internalID: 4926549020901030677
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 445
+        width: 25
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 566efaf9426d44dd0800000000000000
+      internalID: -2502640040124881307
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 399
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56ecfc8ac812d6cd0800000000000000
+      internalID: -2563355724892615067
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 804
+        y: 20
+        width: 715
+        height: 385
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a324e65d1a8515e10800000000000000
+      internalID: 2184624746345153082
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 1134
+        y: 383
+        width: 17
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b4fbf1d5ac502ff0800000000000000
+      internalID: -62948527520877389
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 375
+        width: 15
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4952f021748d83a0800000000000000
+      internalID: -6661522652392171187
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 331
+        width: 11
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8069f2b9f877d8eb0800000000000000
+      internalID: -4715981776119425528
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 536
+        y: 342
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c0cea441becd0e50800000000000000
+      internalID: 6777300275019301056
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 536
+        y: 327
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63abe5b402f9bb060800000000000000
+      internalID: 6970339809338243638
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 31
+        width: 729
+        height: 284
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8719079de29be72e0800000000000000
+      internalID: -2126058363204628104
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 304
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f517ee50f54f85f80800000000000000
+      internalID: -8117469639376735905
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bulhyojason_Attack_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 303
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb16b812d5b2fdf40800000000000000
+      internalID: 5755366527797518780
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    outline: []
+    customData:
+    physicsShape: []
+    bones: []
+    spriteID:
+    internalID: 0
+    vertices: []
+    indices:
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Bulhyojason_Attack_Sheet_0: -2352142196312502983
+      Bulhyojason_Attack_Sheet_1: 5518013719896379803
+      Bulhyojason_Attack_Sheet_10: -62948527520877389
+      Bulhyojason_Attack_Sheet_11: -6661522652392171187
+      Bulhyojason_Attack_Sheet_12: -4715981776119425528
+      Bulhyojason_Attack_Sheet_13: 6777300275019301056
+      Bulhyojason_Attack_Sheet_14: 6970339809338243638
+      Bulhyojason_Attack_Sheet_15: -2126058363204628104
+      Bulhyojason_Attack_Sheet_16: -8117469639376735905
+      Bulhyojason_Attack_Sheet_17: 5755366527797518780
+      Bulhyojason_Attack_Sheet_2: 2973414612906265991
+      Bulhyojason_Attack_Sheet_3: 2735432990652977764
+      Bulhyojason_Attack_Sheet_4: -2529671729370367278
+      Bulhyojason_Attack_Sheet_5: -8553621931723891807
+      Bulhyojason_Attack_Sheet_6: 4926549020901030677
+      Bulhyojason_Attack_Sheet_7: -2502640040124881307
+      Bulhyojason_Attack_Sheet_8: -2563355724892615067
+      Bulhyojason_Attack_Sheet_9: 2184624746345153082
+  mipmapLimitGroupName:
+  pSDRemoveMatte: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

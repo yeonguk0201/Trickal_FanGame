@@ -18,19 +18,19 @@ MonoBehaviour:
   rarity: 1
   isActive: 1
   effects:
-  - effectType: 10
-    magnitude: 0.01
+  - effectType: 27
+    magnitude: 0.2
     healthThreshold: 0
     secondaryMagnitude: 0
     integerAmount: 0
     minimumDistance: 0
     maximumDistance: 0
-    radius: 1.5
+    radius: 2.5
     intervalSeconds: 1
     spreadAngleDegrees: 0
     scaleMultiplier: 0
     durationSeconds: 0
-  effectType: 10
-  effectValue: 0.01
+  effectType: 27
+  effectValue: 0.2
   stackMode: 0
   maxStacks: 3

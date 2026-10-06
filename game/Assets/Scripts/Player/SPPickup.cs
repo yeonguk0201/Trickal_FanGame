@@ -8,6 +8,8 @@ namespace TrickalFanGame.Player
     {
         private bool isCollected;
 
+        public bool IsCollected => isCollected;
+
         private void Awake()
         {
             GetComponent<Collider2D>().isTrigger = true;

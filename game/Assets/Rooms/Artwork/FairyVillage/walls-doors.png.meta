@@ -1,0 +1,361 @@
+fileFormatVersion: 2
+guid: 27f3ba47cc5f77f43946b111ec338f17
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6757419689330774335
+    second: walls-doors_0
+  - first:
+      213: 3757607722903348716
+    second: walls-doors_1
+  - first:
+      213: -8492766547262197751
+    second: walls-doors_2
+  - first:
+      213: 4847572932394243337
+    second: walls-doors_3
+  - first:
+      213: 6757984744453847097
+    second: walls-doors_4
+  - first:
+      213: -8198515189507512426
+    second: walls-doors_5
+  - first:
+      213: -5221894095770230365
+    second: walls-doors_6
+  - first:
+      213: 6026182780474271721
+    second: walls-doors_7
+  - first:
+      213: 8510846692175206773
+    second: walls-doors_8
+  - first:
+      213: -5605168262910185893
+    second: walls-doors_9
+  - first:
+      213: -5380292496836594754
+    second: walls-doors_10
+  - first:
+      213: -6555882557666972278
+    second: walls-doors_11
+  - first:
+      213: -8105653703884003680
+    second: walls-doors_12
+  - first:
+      213: -9064109176427274542
+    second: walls-doors_13
+  - first:
+      213: -778301555267143318
+    second: walls-doors_14
+  - first:
+      213: 8713567921929775610
+    second: walls-doors_15
+  - first:
+      213: -1932070920789035015
+    second: walls-doors_16
+  - first:
+      213: -8339161492500212565
+    second: walls-doors_17
+  - first:
+      213: -146661478627680573
+    second: walls-doors_18
+  - first:
+      213: 1513966066799306804
+    second: walls-doors_19
+  - first:
+      213: -6237700741800574954
+    second: walls-doors_20
+  - first:
+      213: 8302443257852075510
+    second: walls-doors_21
+  - first:
+      213: 7428100525373238533
+    second: walls-doors_22
+  - first:
+      213: 1376573790738441079
+    second: walls-doors_23
+  - first:
+      213: -2832557018408201284
+    second: walls-doors_24
+  - first:
+      213: 2182360483317283036
+    second: walls-doors_25
+  - first:
+      213: -7973384614224032733
+    second: walls-doors_26
+  - first:
+      213: 7977119222428542346
+    second: walls-doors_27
+  - first:
+      213: -7035476187082838772
+    second: walls-doors_28
+  - first:
+      213: -4194564382808342503
+    second: walls-doors_29
+  - first:
+      213: -2839936821261326762
+    second: walls-doors_30
+  - first:
+      213: -5151395366739344744
+    second: walls-doors_31
+  - first:
+      213: -452226700248108402
+    second: walls-doors_32
+  - first:
+      213: -972277783954202705
+    second: walls-doors_33
+  - first:
+      213: 4333249132244430192
+    second: walls-doors_34
+  - first:
+      213: 2535077307327378650
+    second: wall
+  - first:
+      213: -5558716868325149508
+    second: door-open
+  - first:
+      213: 1038314691434339590
+    second: door-closed
+  - first:
+      213: -8876919850815536326
+    second: door-locked
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: wall
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 1084
+        width: 175
+        height: 105
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad4f66d21676e2320800000000000000
+      internalID: 2535077307327378650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: door-open
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 338
+        width: 375
+        height: 179
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb4f188a5787bd2b0800000000000000
+      internalID: -5558716868325149508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: door-closed
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 338
+        width: 375
+        height: 179
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60d530ce5b5d86e00800000000000000
+      internalID: 1038314691434339590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: door-locked
+      rect:
+        serializedVersion: 2
+        x: 833
+        y: 338
+        width: 375
+        height: 179
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a33c6887d68dec480800000000000000
+      internalID: -8876919850815536326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      door-closed: 1038314691434339590
+      door-locked: -8876919850815536326
+      door-open: -5558716868325149508
+      wall: 2535077307327378650
+      walls-doors_0: 6757419689330774335
+      walls-doors_1: 3757607722903348716
+      walls-doors_10: -5380292496836594754
+      walls-doors_11: -6555882557666972278
+      walls-doors_12: -8105653703884003680
+      walls-doors_13: -9064109176427274542
+      walls-doors_14: -778301555267143318
+      walls-doors_15: 8713567921929775610
+      walls-doors_16: -1932070920789035015
+      walls-doors_17: -8339161492500212565
+      walls-doors_18: -146661478627680573
+      walls-doors_19: 1513966066799306804
+      walls-doors_2: -8492766547262197751
+      walls-doors_20: -6237700741800574954
+      walls-doors_21: 8302443257852075510
+      walls-doors_22: 7428100525373238533
+      walls-doors_23: 1376573790738441079
+      walls-doors_24: -2832557018408201284
+      walls-doors_25: 2182360483317283036
+      walls-doors_26: -7973384614224032733
+      walls-doors_27: 7977119222428542346
+      walls-doors_28: -7035476187082838772
+      walls-doors_29: -4194564382808342503
+      walls-doors_3: 4847572932394243337
+      walls-doors_30: -2839936821261326762
+      walls-doors_31: -5151395366739344744
+      walls-doors_32: -452226700248108402
+      walls-doors_33: -972277783954202705
+      walls-doors_34: 4333249132244430192
+      walls-doors_4: 6757984744453847097
+      walls-doors_5: -8198515189507512426
+      walls-doors_6: -5221894095770230365
+      walls-doors_7: 6026182780474271721
+      walls-doors_8: 8510846692175206773
+      walls-doors_9: -5605168262910185893
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
