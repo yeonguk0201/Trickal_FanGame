@@ -133,6 +133,9 @@ namespace TrickalFanGame.Combat
             DidExplode = true;
             body.linearVelocity = Vector2.zero;
             damagedTargets.Clear();
+            CombatSpriteEffect.Play("circular-explosion", transform.position,
+                explosionRadius * 2.2f, explosionRadius * 2.2f, 0.4f,
+                owner != null ? owner.transform : transform, GetComponent<SpriteRenderer>());
             foreach (Collider2D hit in Physics2D.OverlapCircleAll(
                          transform.position,
                          explosionRadius,

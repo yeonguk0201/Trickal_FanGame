@@ -30,11 +30,18 @@ namespace TrickalFanGame.Combat
         public event Action<DamageContext, DamageResult> DamageResolved;
         public event Action<float> ShieldChanged;
         public event Action Died;
+        public event Action<float> Healed;
         public static event Action<Health, DamageContext, DamageResult> AnyDamageResolved;
 
         private void Awake()
         {
             ResetHealth();
+            if (Application.isPlaying &&
+                (GetComponent<TrickalFanGame.Player.PlayerSP>() != null ||
+                 GetComponent<TrickalFanGame.Enemy.TestEnemy>() != null ||
+                 GetComponent<TrickalFanGame.Enemy.BossController>() != null) &&
+                GetComponent<CombatVisualFeedback>() == null)
+                gameObject.AddComponent<CombatVisualFeedback>();
         }
 
         public void TakeDamage(float amount)
@@ -213,6 +220,7 @@ namespace TrickalFanGame.Combat
             if (healedAmount > 0f)
             {
                 Changed?.Invoke(CurrentHealth, MaxHealth);
+                Healed?.Invoke(healedAmount);
             }
 
             return healedAmount;

@@ -615,6 +615,7 @@ namespace TrickalFanGame.Enemy
                 chargePath.sharedMaterial = spriteRenderer.sharedMaterial;
             }
             chargePath.enabled = false;
+            ChargeWarningVisual.Bind(chargePath, bodyRadius * 2f, true);
             attackPresentation = GetComponent<EnemyAttackPresentation>();
             if (attackPresentation == null)
             {
