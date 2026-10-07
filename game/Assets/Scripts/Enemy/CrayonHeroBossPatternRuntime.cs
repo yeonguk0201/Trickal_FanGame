@@ -665,7 +665,8 @@ namespace TrickalFanGame.Enemy
             Vector2 offset = (Vector2)target.position - (Vector2)transform.position;
             if (offset.sqrMagnitude <= 0.001f) return;
             float distance = offset.magnitude;
-            float step = Mathf.Min(CurrentApproachSpeed * speedMultiplier * deltaTime,
+            float step = Mathf.Min(
+                CurrentApproachSpeed * speedMultiplier * EnemyStatusEffects.MoveSpeedMultiplierOf(this) * deltaTime,
                 distance - BossTargetSpacing.ResolveStopDistance(gameObject, target));
             if (step <= 0f) return;
             Vector2 destination = ClampToArena((Vector2)transform.position + offset / distance * step);

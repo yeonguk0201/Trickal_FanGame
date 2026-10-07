@@ -19,7 +19,9 @@ namespace TrickalFanGame.Combat
             return BaseSpeed * speedRatio * Mathf.Max(0f, 1f + knockbackBonus) / Mathf.Max(0.01f, knockbackWeight);
         }
 
-        public static bool TryApply(Health target, Vector2 projectileVelocity)
+        // scale: the water stream pushes with only a share of the formula (Passive-0 §4.6).
+        public static bool TryApply(Health target, Vector2 projectileVelocity, float knockbackBonus = 0f,
+            float scale = 1f)
         {
             if (target == null || target.IsDead)
             {
@@ -28,7 +30,8 @@ namespace TrickalFanGame.Combat
 
             KnockbackReceiver receiver = target.GetComponent<KnockbackReceiver>();
             return receiver != null && receiver.ApplyPush(projectileVelocity,
-                ResolveSpeed(projectileVelocity.magnitude, receiver.KnockbackWeight), Duration);
+                ResolveSpeed(projectileVelocity.magnitude, receiver.KnockbackWeight, knockbackBonus) *
+                Mathf.Max(0f, scale), Duration);
         }
     }
 }

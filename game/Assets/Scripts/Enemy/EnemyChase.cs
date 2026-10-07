@@ -98,7 +98,8 @@ namespace TrickalFanGame.Enemy
             Vector2 direction = flies
                 ? offset / distance
                 : navigator.GetMoveDirection(transform.position, target.position, bodyRadius, Time.time);
-            body.linearVelocity = direction * moveSpeed;
+            // Shock (Passive-0 §4.8) slows ordinary movement only.
+            body.linearVelocity = direction * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
         }
 
         private void CacheComponents()

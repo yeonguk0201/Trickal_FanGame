@@ -232,6 +232,7 @@ namespace TrickalFanGame.Run
             GUILayout.Label("— Artifact —");
             ChestContentTable table = assembler.ChestContentTable;
             Transform player = assembler.Graph?.Player != null ? assembler.Graph.Player.transform : null;
+            DrawArtifactStateRows(player);
             if (table == null || table.ArtifactPickupPrefab == null || player == null)
             {
                 GUILayout.Label("No artifact pickup Prefab or player.");
@@ -266,6 +267,43 @@ namespace TrickalFanGame.Run
 #else
             GUILayout.Label("Artifact drops are editor-only.");
 #endif
+        }
+
+        // Artifact-2: the state of artifacts whose effect is not visible on the HUD, and the status effects on
+        // the enemy nearest to the player.
+        private static void DrawArtifactStateRows(Transform player)
+        {
+            if (player == null) return;
+            Health health = player.GetComponent<Health>();
+            PlayerKillFrenzy frenzy = player.GetComponent<PlayerKillFrenzy>();
+            PlayerDeathWard ward = player.GetComponent<PlayerDeathWard>();
+            PlayerBasicAttackExplosion explosion = player.GetComponent<PlayerBasicAttackExplosion>();
+            PlayerSkillCastHeal castHeal = player.GetComponent<PlayerSkillCastHeal>();
+            if (health != null)
+                GUILayout.Label($"HP {HealthUnits.FormatHearts(health.CurrentHealth)}  shield " +
+                                $"{HealthUnits.FormatHearts(health.CurrentShield)}" +
+                                (health.IsInvulnerable ? "  INVULNERABLE" : string.Empty));
+            if (frenzy != null)
+                GUILayout.Label($"Glove stacks {frenzy.Stacks}  " +
+                                (frenzy.Stacks > 0
+                                    ? $"ends in {Mathf.Max(0f, frenzy.EndTime - Time.time):F1}s"
+                                    : $"cooldown {Mathf.Max(0f, frenzy.CooldownEndTime - Time.time):F1}s"));
+            if (ward != null) GUILayout.Label($"Dagger ward {(ward.IsSpent ? "spent" : "ready")}");
+            if (explosion != null) GUILayout.Label($"Muffin hits {explosion.HitProgress}  explosions {explosion.TriggerCount}");
+            if (castHeal != null)
+                GUILayout.Label($"Flag casts {castHeal.CastProgress}/{castHeal.RequiredCastCount}");
+
+            EnemyStatusEffects nearest = FindObjectsByType<EnemyStatusEffects>(FindObjectsSortMode.None)
+                .Where(status => status.IsBurning || status.IsPoisoned || status.IsShocked)
+                .OrderBy(status => (status.transform.position - player.position).sqrMagnitude)
+                .FirstOrDefault();
+            if (nearest != null)
+                GUILayout.Label($"Nearest status: {nearest.name}" +
+                                (nearest.IsBurning ? "  burn" : string.Empty) +
+                                (nearest.IsPoisoned ? $"  poison x{nearest.PoisonStacks}" : string.Empty) +
+                                (nearest.IsShocked
+                                    ? $"  shock x{nearest.ShockStacks} (speed x{nearest.MoveSpeedMultiplier:F2})"
+                                    : string.Empty));
         }
 
         private void DrawResourceSection(RunProgress progress)
@@ -354,7 +392,7 @@ namespace TrickalFanGame.Run
             }
         }
 
-        // Obstacle-7: no burn artifact exists yet, so the toggle stands in for holding one (assisted Run).
+        // Obstacle-7: the toggle stands in for holding a burn artifact (활활 불타활, 불타는 가지) (assisted Run).
         private static void DrawTreeBurnRows(RoomGraphAssembler assembler, RoomPrefab room, Transform player)
         {
             PlayerStats.DevelopmentForceBurnSource = GUILayout.Toggle(

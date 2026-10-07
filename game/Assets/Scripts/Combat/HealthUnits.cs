@@ -8,6 +8,8 @@ namespace TrickalFanGame.Combat
         public const int MinimumEnemyDamageUnits = UnitsPerHeart;
         // Enemy-6: the only damage below the one-heart minimum, for hits that explicitly allow it (쥬비).
         public const int HalfHeartDamageUnits = 1;
+        // The player's current health and shield together stop at 15 hearts (사용자 결정, 2026-10-06).
+        public const int MaximumHealthAndShieldUnits = 15 * UnitsPerHeart;
 
         private const float RoundingTolerance = 0.0001f;
 

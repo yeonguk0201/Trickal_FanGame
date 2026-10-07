@@ -18,15 +18,37 @@ namespace TrickalFanGame.Combat
             MaximumDistance = Mathf.Max(0f, maximumDistance);
             SpreadAngleDegrees = Mathf.Max(0f, spreadAngleDegrees);
             ScaleMultiplier = Mathf.Max(0f, scaleMultiplier);
+            SplitsOnHit = false;
         }
+
+        private ProjectileSplitSettings(float damageMultiplier, float maximumDistance, float scaleMultiplier)
+        {
+            ProjectileCount = OnHitDirections.Length;
+            DamageMultiplier = Mathf.Max(0f, damageMultiplier);
+            MaximumDistance = Mathf.Max(0f, maximumDistance);
+            SpreadAngleDegrees = 0f;
+            ScaleMultiplier = Mathf.Max(0f, scaleMultiplier);
+            SplitsOnHit = true;
+        }
+
+        // Passive-5 (다야의 다이아몬드 커터): split shots leave the enemy that was hit toward the screen's up, down,
+        // left and right.
+        public static readonly Vector2[] OnHitDirections = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
+
+        // Every hit of the shot on an enemy splits, without a pierce. The scale is a share of the base basic
+        // attack shot, whatever the shot's own size is.
+        public static ProjectileSplitSettings OnHit(float damageMultiplier, float maximumDistance,
+            float scaleMultiplier) => new(damageMultiplier, maximumDistance, scaleMultiplier);
 
         public int ProjectileCount { get; }
         public float DamageMultiplier { get; }
         public float MaximumDistance { get; }
         public float SpreadAngleDegrees { get; }
         public float ScaleMultiplier { get; }
+        // False = the legacy split of effect 16: once, after the first pierce, as a fan behind the enemy.
+        public bool SplitsOnHit { get; }
         public bool IsEnabled => ProjectileCount > 0 && DamageMultiplier > 0f && MaximumDistance > 0f &&
-                                 SpreadAngleDegrees > 0f && ScaleMultiplier > 0f;
+                                 (SplitsOnHit || SpreadAngleDegrees > 0f) && ScaleMultiplier > 0f;
     }
 
     public static class ProjectileSizing
@@ -61,8 +83,21 @@ namespace TrickalFanGame.Combat
         private Rigidbody2D body;
         private Health owner;
         private DamageContext damageContext;
-        private readonly HashSet<Health> damagedTargets = new();
+        private const int EnemyLayerMask = 1 << 6;
+        private const float BounceContactDistance = 0.02f;
+
+        // How often this shot has hit each enemy. Only a bounce (Passive-0 §4.4) hits the same enemy again.
+        private readonly Dictionary<Health, int> hitCounts = new();
         private int remainingPierces;
+        private ProjectileBounceSettings bounceSettings;
+        private int remainingBounces;
+        // The enemy the shot flies to after a bounce.
+        private Health bounceTarget;
+        // With no other enemy near, the shot waits on the enemy it just hit and hits it again.
+        private Health repeatTarget;
+        private float repeatHitDelay;
+        private Vector2 flightVelocity;
+        private Vector2 travelOrigin;
         private ProjectileSplitSettings splitSettings;
         private Vector2 launchPosition;
         private float maximumTravelDistance;
@@ -83,6 +118,9 @@ namespace TrickalFanGame.Combat
         // Range-0: travel distance = flight time × shot speed. Launch may override the serialized lifetime.
         public float Lifetime => resolvedLifetime;
         public float RemainingLifetime => remainingLifetime;
+        public int RemainingBounces => remainingBounces;
+        public Health BounceTarget => bounceTarget;
+        public Health RepeatTarget => repeatTarget;
         public Vector2 Velocity => body != null ? body.linearVelocity : Vector2.zero;
 
         private void Awake()
@@ -94,17 +132,69 @@ namespace TrickalFanGame.Combat
 
         private void FixedUpdate()
         {
-            if (TickLifetime(Time.fixedDeltaTime))
+            if (TickLifetime(Time.fixedDeltaTime) || TickBounce(Time.fixedDeltaTime))
             {
                 return;
             }
 
             if (maximumTravelDistance > 0f &&
-                ((Vector2)transform.position - launchPosition).sqrMagnitude >=
+                ((Vector2)transform.position - travelOrigin).sqrMagnitude >=
                 maximumTravelDistance * maximumTravelDistance)
             {
                 StopAtBoundary();
             }
+        }
+
+        // Returns true when the shot is waiting on an enemy or was used up by the hit it just made.
+        public bool TickBounce(float deltaTime)
+        {
+            if (repeatTarget != null)
+            {
+                if (repeatTarget.IsDead || !repeatTarget.gameObject.activeInHierarchy)
+                {
+                    repeatTarget = null;
+                    body.linearVelocity = flightVelocity;
+                    return false;
+                }
+
+                repeatHitDelay -= Mathf.Max(0f, deltaTime);
+                if (repeatHitDelay <= 0f)
+                {
+                    Health target = repeatTarget;
+                    body.linearVelocity = flightVelocity;
+                    HitTarget(target);
+                }
+
+                return true;
+            }
+
+            if (bounceTarget == null)
+            {
+                return false;
+            }
+
+            if (bounceTarget.IsDead || !bounceTarget.gameObject.activeInHierarchy)
+            {
+                bounceTarget = null;
+                return false;
+            }
+
+            Vector2 offset = bounceTarget.transform.position - transform.position;
+            if (offset.sqrMagnitude > 0.0001f)
+            {
+                SetFlightVelocity(offset.normalized * flightVelocity.magnitude);
+            }
+
+            Collider2D ownCollider = GetComponent<Collider2D>();
+            Collider2D targetCollider = bounceTarget.GetComponentInChildren<Collider2D>();
+            if (offset.sqrMagnitude <= BounceContactDistance * BounceContactDistance ||
+                (ownCollider != null && targetCollider != null &&
+                 ownCollider.Distance(targetCollider).distance <= BounceContactDistance))
+            {
+                HitTarget(bounceTarget);
+            }
+
+            return isSpent;
         }
 
         public void Launch(
@@ -116,7 +206,8 @@ namespace TrickalFanGame.Combat
             bool configuredAsSplitProjectile = false,
             float configuredMaximumTravelDistance = 0f,
             float configuredLifetime = 0f,
-            ProjectileHitEffects configuredHitEffects = default)
+            ProjectileHitEffects configuredHitEffects = default,
+            ProjectileBounceSettings configuredBounce = default)
         {
             if (body == null)
             {
@@ -135,8 +226,14 @@ namespace TrickalFanGame.Combat
             splitSettings = configuredAsSplitProjectile ? default : configuredSplitSettings;
             isSplitProjectile = configuredAsSplitProjectile;
             hitEffects = configuredHitEffects;
+            bounceSettings = configuredBounce;
+            remainingBounces = configuredBounce.IsEnabled ? configuredBounce.BounceCount : 0;
+            bounceTarget = null;
+            repeatTarget = null;
+            flightVelocity = velocity;
             maximumTravelDistance = Mathf.Max(0f, configuredMaximumTravelDistance);
             launchPosition = transform.position;
+            travelOrigin = launchPosition;
             resolvedLifetime = configuredLifetime > 0f ? configuredLifetime : lifetime;
             remainingLifetime = resolvedLifetime;
             body.linearVelocity = velocity;
@@ -186,7 +283,7 @@ namespace TrickalFanGame.Combat
             }
 
             Health target = collider.GetComponentInParent<Health>();
-            if (target == owner || (target != null && damagedTargets.Contains(target)))
+            if (target == owner || (target != null && target != bounceTarget && hitCounts.ContainsKey(target)))
             {
                 return;
             }
@@ -199,28 +296,137 @@ namespace TrickalFanGame.Combat
 
             if (target != null)
             {
-                damagedTargets.Add(target);
-                float impactDistance = Vector2.Distance(launchPosition, transform.position);
-                float healthBeforeHit = target.CurrentHealth + target.CurrentShield;
-                target.TakeDamage(damageContext.WithImpactDistance(impactDistance));
-                ApplyHitEffects(target, healthBeforeHit - (target.CurrentHealth + target.CurrentShield));
+                HitTarget(target);
+                return;
+            }
 
-                IgnoreTargetColliders(target);
-                if (!isSplitProjectile && remainingPierces > 0 && splitSettings.IsEnabled)
+            DestroyProjectile();
+        }
+
+        // One hit on an enemy (Passive-0 §3): damage, hit effects, then the first course that applies of
+        // split → bounce → pierce → vanish.
+        private void HitTarget(Health target)
+        {
+            bounceTarget = null;
+            repeatTarget = null;
+            hitCounts.TryGetValue(target, out int earlierHits);
+            hitCounts[target] = earlierHits + 1;
+            // A bounce that returns to an enemy deals less each time; a first hit is always whole.
+            DamageContext context = earlierHits > 0
+                ? damageContext.ScaleMultiplier(Mathf.Pow(bounceSettings.RepeatDamageRatio, earlierHits))
+                : damageContext;
+            float impactDistance = Vector2.Distance(launchPosition, transform.position);
+            float healthBeforeHit = target.CurrentHealth + target.CurrentShield;
+            target.TakeDamage(context.WithImpactDistance(impactDistance));
+            ApplyHitEffects(target, healthBeforeHit - (target.CurrentHealth + target.CurrentShield));
+
+            IgnoreTargetColliders(target);
+            if (!isSplitProjectile && splitSettings.IsEnabled)
+            {
+                if (splitSettings.SplitsOnHit)
+                {
+                    // The split does not use up the shot: it goes on to bounce, pierce or vanish.
+                    SplitOnHit(target);
+                }
+                else if (remainingPierces > 0)
                 {
                     SplitAfterFirstPierce(target);
                     DestroyProjectile();
                     return;
                 }
+            }
 
-                if (remainingPierces > 0)
-                {
-                    remainingPierces--;
-                    return;
-                }
+            if (TryBounce(target))
+            {
+                return;
+            }
+
+            if (remainingPierces > 0)
+            {
+                remainingPierces--;
+                return;
             }
 
             DestroyProjectile();
+        }
+
+        private bool TryBounce(Health from)
+        {
+            if (remainingBounces <= 0 || !bounceSettings.IsEnabled || flightVelocity.sqrMagnitude <= 0.0001f)
+            {
+                return false;
+            }
+
+            Health next = FindBounceTarget(from);
+            if (next == null)
+            {
+                // No other enemy: the shot hits the same enemy again, unless this hit killed it.
+                if (from.IsDead)
+                {
+                    return false;
+                }
+
+                remainingBounces--;
+                repeatTarget = from;
+                repeatHitDelay = bounceSettings.SameTargetDelaySeconds;
+                remainingLifetime = Mathf.Max(remainingLifetime, repeatHitDelay + Time.fixedDeltaTime);
+                body.linearVelocity = Vector2.zero;
+                return true;
+            }
+
+            remainingBounces--;
+            bounceTarget = next;
+            IgnoreTargetColliders(next, false);
+            Vector2 offset = next.transform.position - transform.position;
+            float distance = offset.magnitude;
+            float speed = flightVelocity.magnitude;
+            if (distance > 0.0001f)
+            {
+                SetFlightVelocity(offset / distance * speed);
+            }
+
+            // The shot must reach the enemy it bounces to.
+            remainingLifetime = Mathf.Max(remainingLifetime, distance / speed + Time.fixedDeltaTime);
+            travelOrigin = transform.position;
+            if (maximumTravelDistance > 0f)
+            {
+                maximumTravelDistance = Mathf.Max(maximumTravelDistance, distance + 1f);
+            }
+
+            return true;
+        }
+
+        private Health FindBounceTarget(Health from)
+        {
+            Vector2 center = from.transform.position;
+            Health nearest = null;
+            float nearestDistance = float.PositiveInfinity;
+            foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, bounceSettings.SearchRadius,
+                         EnemyLayerMask))
+            {
+                Health candidate = hit.GetComponentInParent<Health>();
+                if (candidate == null || candidate == from || candidate == owner || candidate.IsDead ||
+                    !candidate.gameObject.activeInHierarchy ||
+                    candidate.GetComponent<PlayerCombatEvents>() != null)
+                {
+                    continue;
+                }
+
+                float distance = ((Vector2)candidate.transform.position - center).sqrMagnitude;
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearest = candidate;
+                }
+            }
+
+            return nearest;
+        }
+
+        private void SetFlightVelocity(Vector2 velocity)
+        {
+            flightVelocity = velocity;
+            body.linearVelocity = velocity;
         }
 
         // Passive-0 §3: after the direct damage a living target gets status effects, then knockback.
@@ -233,13 +439,17 @@ namespace TrickalFanGame.Combat
 
             if (appliedDamage > 0f)
             {
+                // Poison, burn and shock are rolled independently, in that order.
                 EnemyStatusEffects.TryApplyPoison(target, damageContext.Source, damageContext.BaseDamage,
-                    hitEffects.Poison, Random.value);
+                    hitEffects.Poison, Random.value, hitEffects.StatusTickDamageMultiplier);
+                EnemyStatusEffects.TryApplyBurn(target, damageContext.Source, damageContext.BaseDamage,
+                    hitEffects.Burn, Random.value, hitEffects.StatusTickDamageMultiplier);
+                EnemyStatusEffects.TryApplyShock(target, hitEffects.Shock, Random.value);
             }
 
             if (hitEffects.AppliesKnockback)
             {
-                BasicAttackKnockback.TryApply(target, Velocity);
+                BasicAttackKnockback.TryApply(target, flightVelocity, hitEffects.KnockbackBonus);
             }
         }
 
@@ -264,9 +474,45 @@ namespace TrickalFanGame.Combat
                     configuredAsSplitProjectile: true,
                     configuredMaximumTravelDistance: splitSettings.MaximumDistance,
                     configuredLifetime: resolvedLifetime,
-                    configuredHitEffects: hitEffects);
-                splitProjectile.damagedTargets.Add(firstTarget);
+                    configuredHitEffects: hitEffects,
+                    // Passive-0 §4.4: a split shot inherits one bounce.
+                    configuredBounce: bounceSettings.IsEnabled ? bounceSettings.WithBounceCount(1) : default);
+                splitProjectile.hitCounts[firstTarget] = 1;
                 splitProjectile.IgnoreTargetColliders(firstTarget);
+            }
+        }
+
+        // 다야의 다이아몬드 커터: four small shots leave the enemy that was hit. They inherit the shot's remaining
+        // pierces. Without a pierce they cannot hit that enemy; with one they start inside it and hit it again.
+        private void SplitOnHit(Health hitTarget)
+        {
+            float speed = flightVelocity.magnitude;
+            if (speed <= 0.0001f)
+            {
+                return;
+            }
+
+            foreach (Vector2 direction in ProjectileSplitSettings.OnHitDirections)
+            {
+                Projectile splitProjectile = Instantiate(this, hitTarget.transform.position, Quaternion.identity);
+                splitProjectile.transform.localScale =
+                    Vector3.one * (ProjectileSizing.PlayerBasicScale * splitSettings.ScaleMultiplier);
+                splitProjectile.Launch(
+                    direction * speed,
+                    owner,
+                    damageContext.ScaleMultiplier(splitSettings.DamageMultiplier),
+                    configuredPierces: remainingPierces,
+                    configuredSplitSettings: default,
+                    configuredAsSplitProjectile: true,
+                    configuredMaximumTravelDistance: splitSettings.MaximumDistance,
+                    configuredLifetime: resolvedLifetime,
+                    configuredHitEffects: hitEffects,
+                    configuredBounce: bounceSettings.IsEnabled ? bounceSettings.WithBounceCount(1) : default);
+                if (remainingPierces <= 0)
+                {
+                    splitProjectile.hitCounts[hitTarget] = 1;
+                    splitProjectile.IgnoreTargetColliders(hitTarget);
+                }
             }
         }
 
@@ -313,13 +559,13 @@ namespace TrickalFanGame.Combat
             }
         }
 
-        private void IgnoreTargetColliders(Health target)
+        private void IgnoreTargetColliders(Health target, bool ignore = true)
         {
             foreach (Collider2D targetCollider in target.GetComponentsInChildren<Collider2D>())
             {
                 foreach (Collider2D projectileCollider in GetComponentsInChildren<Collider2D>())
                 {
-                    Physics2D.IgnoreCollision(projectileCollider, targetCollider);
+                    Physics2D.IgnoreCollision(projectileCollider, targetCollider, ignore);
                 }
             }
         }

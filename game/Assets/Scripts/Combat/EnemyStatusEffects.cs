@@ -4,18 +4,29 @@ namespace TrickalFanGame.Combat
 {
     // Passive-0 §4.7·§4.8: status effects on an enemy. Added to the enemy the first time one is applied.
     // Poison stacks up; each application adds a stack and renews the duration, and every stack ends together.
+    // Burn never stacks and only renews. Shock stacks like poison but slows movement instead of dealing damage.
+    // The three are independent and can be on one enemy together.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Health))]
     public sealed class EnemyStatusEffects : MonoBehaviour
     {
         private const float TickTimeTolerance = 0.0001f;
+        // Passive-0 §4.7: a boss takes half of the shock slow.
+        private const float BossShockSlowScale = 0.5f;
 
-        // Placeholder look until status effects have artwork: a green copy of the sprite drawn over the enemy.
+        // Placeholder look until status effects have artwork: a tinted copy of the sprite drawn over the enemy.
+        // With several effects only one shows, in the order burn, poison, shock.
         private static readonly Color PoisonTint = new(0.3f, 1f, 0.25f, 0.5f);
+        private static readonly Color BurnTint = new(1f, 0.5f, 0.1f, 0.5f);
+        private static readonly Color ShockTint = new(1f, 0.95f, 0.2f, 0.5f);
 
         private Health health;
         private GameObject poisonSource;
         private float poisonInterval;
+        private GameObject burnSource;
+        private float burnInterval;
+        private float shockSlowPerStack;
+        private bool isBoss;
         private SpriteRenderer tintedRenderer;
         private SpriteRenderer tintRenderer;
 
@@ -26,9 +37,25 @@ namespace TrickalFanGame.Combat
         public float PoisonEndTime { get; private set; }
         public float NextPoisonTickTime { get; private set; }
 
+        public bool IsBurning { get; private set; }
+        // Damage each burn tick deals, fixed from the attack damage when burn was last applied.
+        public float BurnTickDamage { get; private set; }
+        public float BurnEndTime { get; private set; }
+        public float NextBurnTickTime { get; private set; }
+
+        public int ShockStacks { get; private set; }
+        public bool IsShocked => ShockStacks > 0;
+        public float ShockEndTime { get; private set; }
+        // Ordinary movement (chasing, approaching, retreating) is multiplied by this. Dashes, lunges, boss
+        // patterns, shot speed and attack timing ignore it.
+        public float MoveSpeedMultiplier => IsShocked
+            ? Mathf.Clamp01(1f - shockSlowPerStack * ShockStacks * (isBoss ? BossShockSlowScale : 1f))
+            : 1f;
+
         private void Awake()
         {
             health = GetComponent<Health>();
+            isBoss = GetComponent<TrickalFanGame.Enemy.BossController>() != null;
         }
 
         private void Update()
@@ -46,6 +73,13 @@ namespace TrickalFanGame.Combat
             Clear();
         }
 
+        public static float MoveSpeedMultiplierOf(Component enemy)
+        {
+            return enemy != null && enemy.TryGetComponent(out EnemyStatusEffects effects)
+                ? effects.MoveSpeedMultiplier
+                : 1f;
+        }
+
         public static bool RollsPoison(PoisonSettings settings, float roll)
         {
             return settings.IsEnabled && roll < settings.Chance;
@@ -56,30 +90,55 @@ namespace TrickalFanGame.Combat
             GameObject source,
             float attackDamage,
             PoisonSettings settings,
-            float roll)
+            float roll,
+            float tickDamageMultiplier = 1f)
         {
             if (target == null || target.IsDead || attackDamage <= 0f || !RollsPoison(settings, roll))
             {
                 return false;
             }
 
-            EnemyStatusEffects effects = target.GetComponent<EnemyStatusEffects>();
-            if (effects == null)
-            {
-                effects = target.gameObject.AddComponent<EnemyStatusEffects>();
-            }
-
-            effects.ApplyPoison(source, attackDamage, settings, Time.time);
+            GetOrAdd(target).ApplyPoison(source, attackDamage, settings, Time.time, tickDamageMultiplier);
             return true;
         }
 
-        public void ApplyPoison(GameObject source, float attackDamage, PoisonSettings settings, float currentTime)
+        public static bool TryApplyBurn(
+            Health target,
+            GameObject source,
+            float attackDamage,
+            BurnSettings settings,
+            float roll,
+            float tickDamageMultiplier = 1f)
         {
-            if (health == null)
+            if (target == null || target.IsDead || attackDamage <= 0f || !settings.IsEnabled ||
+                roll >= settings.Chance)
             {
-                Awake();
+                return false;
             }
 
+            GetOrAdd(target).ApplyBurn(source, attackDamage, settings, Time.time, tickDamageMultiplier);
+            return true;
+        }
+
+        public static bool TryApplyShock(Health target, ShockSettings settings, float roll)
+        {
+            if (target == null || target.IsDead || !settings.IsEnabled || roll >= settings.Chance)
+            {
+                return false;
+            }
+
+            GetOrAdd(target).ApplyShock(settings, Time.time);
+            return true;
+        }
+
+        public void ApplyPoison(
+            GameObject source,
+            float attackDamage,
+            PoisonSettings settings,
+            float currentTime,
+            float tickDamageMultiplier = 1f)
+        {
+            EnsureReferences();
             if (health.IsDead || !settings.IsEnabled)
             {
                 return;
@@ -94,24 +153,64 @@ namespace TrickalFanGame.Combat
             poisonSource = source;
             poisonInterval = settings.IntervalSeconds;
             PoisonStacks = Mathf.Min(settings.MaximumStacks, PoisonStacks + 1);
-            PoisonTickDamagePerStack = attackDamage * settings.TickDamageRatio;
+            PoisonTickDamagePerStack = attackDamage * settings.TickDamageRatio * Mathf.Max(0f, tickDamageMultiplier);
             PoisonEndTime = currentTime + settings.DurationSeconds;
-            ShowTint();
+            RefreshTint();
         }
 
-        public void Tick(float currentTime)
+        public void ApplyBurn(
+            GameObject source,
+            float attackDamage,
+            BurnSettings settings,
+            float currentTime,
+            float tickDamageMultiplier = 1f)
         {
-            if (!IsPoisoned)
+            EnsureReferences();
+            if (health.IsDead || !settings.IsEnabled)
             {
                 return;
             }
 
+            if (!IsBurning)
+            {
+                NextBurnTickTime = currentTime + settings.IntervalSeconds;
+            }
+
+            burnSource = source;
+            burnInterval = settings.IntervalSeconds;
+            IsBurning = true;
+            BurnTickDamage = attackDamage * settings.TickDamageRatio * Mathf.Max(0f, tickDamageMultiplier);
+            BurnEndTime = currentTime + settings.DurationSeconds;
+            RefreshTint();
+        }
+
+        public void ApplyShock(ShockSettings settings, float currentTime)
+        {
+            EnsureReferences();
+            if (health.IsDead || !settings.IsEnabled)
+            {
+                return;
+            }
+
+            shockSlowPerStack = settings.SlowPerStack;
+            ShockStacks = Mathf.Min(settings.MaximumStacks, ShockStacks + 1);
+            ShockEndTime = currentTime + settings.DurationSeconds;
+            RefreshTint();
+        }
+
+        public void Tick(float currentTime)
+        {
+            if (!IsPoisoned && !IsBurning && !IsShocked)
+            {
+                return;
+            }
+
+            // Periodic damage: no critical hit, distance damage, knockback, basic attack hit event or new
+            // status effect. The player source keeps the kill credited to the player.
             while (IsPoisoned && !health.IsDead && currentTime >= NextPoisonTickTime &&
                    NextPoisonTickTime <= PoisonEndTime + TickTimeTolerance)
             {
                 NextPoisonTickTime += poisonInterval;
-                // Periodic damage: no critical hit, distance damage, knockback, basic attack hit event or new
-                // status effect. The player source keeps the kill credited to the player.
                 health.TakeDamage(new DamageContext(
                     poisonSource,
                     DamageSourceType.PlayerStatusEffect,
@@ -119,25 +218,77 @@ namespace TrickalFanGame.Combat
                     deliveryType: DamageDeliveryType.Periodic));
             }
 
-            if (health.IsDead || currentTime >= PoisonEndTime)
+            while (IsBurning && !health.IsDead && currentTime >= NextBurnTickTime &&
+                   NextBurnTickTime <= BurnEndTime + TickTimeTolerance)
+            {
+                NextBurnTickTime += burnInterval;
+                health.TakeDamage(new DamageContext(
+                    burnSource,
+                    DamageSourceType.PlayerStatusEffect,
+                    BurnTickDamage,
+                    deliveryType: DamageDeliveryType.Periodic));
+            }
+
+            if (health.IsDead)
             {
                 Clear();
+                return;
             }
+
+            if (IsPoisoned && currentTime >= PoisonEndTime) ClearPoison();
+            if (IsBurning && currentTime >= BurnEndTime) ClearBurn();
+            if (IsShocked && currentTime >= ShockEndTime) ShockStacks = 0;
+            RefreshTint();
         }
 
         public void Clear()
         {
+            ClearPoison();
+            ClearBurn();
+            ShockStacks = 0;
+            RefreshTint();
+        }
+
+        private void ClearPoison()
+        {
             PoisonStacks = 0;
             PoisonTickDamagePerStack = 0f;
             poisonSource = null;
-            if (tintRenderer != null)
+        }
+
+        private void ClearBurn()
+        {
+            IsBurning = false;
+            BurnTickDamage = 0f;
+            burnSource = null;
+        }
+
+        private static EnemyStatusEffects GetOrAdd(Health target)
+        {
+            EnemyStatusEffects effects = target.GetComponent<EnemyStatusEffects>();
+            return effects != null ? effects : target.gameObject.AddComponent<EnemyStatusEffects>();
+        }
+
+        private void EnsureReferences()
+        {
+            if (health == null)
             {
-                tintRenderer.enabled = false;
+                Awake();
             }
         }
 
-        private void ShowTint()
+        private void RefreshTint()
         {
+            if (!IsPoisoned && !IsBurning && !IsShocked)
+            {
+                if (tintRenderer != null)
+                {
+                    tintRenderer.enabled = false;
+                }
+
+                return;
+            }
+
             if (tintRenderer == null)
             {
                 tintedRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -146,12 +297,12 @@ namespace TrickalFanGame.Combat
                     return;
                 }
 
-                GameObject tint = new("Poison Tint");
+                GameObject tint = new("Status Tint");
                 tint.transform.SetParent(tintedRenderer.transform, false);
                 tintRenderer = tint.AddComponent<SpriteRenderer>();
-                tintRenderer.color = PoisonTint;
             }
 
+            tintRenderer.color = IsBurning ? BurnTint : IsPoisoned ? PoisonTint : ShockTint;
             tintRenderer.enabled = true;
             SyncTint();
         }

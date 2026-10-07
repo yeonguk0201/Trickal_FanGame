@@ -268,8 +268,9 @@ namespace TrickalFanGame.Enemy
                 (current.x >= movementArea.xMax && direction.x > 0f)) direction.x = 0f;
             if ((current.y <= movementArea.yMin && direction.y < 0f) ||
                 (current.y >= movementArea.yMax && direction.y > 0f)) direction.y = 0f;
-            Vector2 next = ClampToArena(current + direction.normalized * (CurrentApproachSpeed * deltaTime));
-            if (body != null) body.linearVelocity = direction.normalized * CurrentApproachSpeed;
+            float approachSpeed = CurrentApproachSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this);
+            Vector2 next = ClampToArena(current + direction.normalized * (approachSpeed * deltaTime));
+            if (body != null) body.linearVelocity = direction.normalized * approachSpeed;
             else transform.position = next;
             float bounce = 0.5f + 0.5f * Mathf.Sin(now * 9f);
             ApplyScale(GetComponent<BossMovementAnimator>() != null

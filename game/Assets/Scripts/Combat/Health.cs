@@ -12,6 +12,9 @@ namespace TrickalFanGame.Combat
         // Flat amount taken off every hit before the shield (빅우드의 열매). Health units when the owner uses them.
         private float incomingDamageReduction;
         private bool explicitInvulnerability;
+        private Func<bool> lethalDamageGuard;
+        // Current health + shield never exceeds this (the player's 15 hearts). 0 = no limit.
+        private float healthAndShieldLimit;
         private DamageInvulnerability damageInvulnerability;
 
         public float CurrentHealth { get; private set; }
@@ -21,6 +24,13 @@ namespace TrickalFanGame.Combat
         public float IncomingDamageReduction => incomingDamageReduction;
         public float MaxHealthHearts => useHealthUnits ? HealthUnits.ToHearts(maxHealth) : maxHealth;
         public bool IsDead { get; private set; }
+        public float HealthAndShieldLimit => healthAndShieldLimit;
+        // The highest current health a heal can reach: the maximum health, or less when the shield already
+        // fills part of the health + shield limit.
+        public float HealthCeiling => healthAndShieldLimit > 0f
+            ? Mathf.Max(0f, Mathf.Min(maxHealth, healthAndShieldLimit - currentShield))
+            : maxHealth;
+        public float MissingHealth => Mathf.Max(0f, HealthCeiling - CurrentHealth);
         public bool IsInvulnerable => explicitInvulnerability ||
                                       ResolveDamageInvulnerability()?.IsHitInvulnerableAt(Time.time) == true;
 
@@ -51,6 +61,15 @@ namespace TrickalFanGame.Combat
 
         public void TakeDamage(DamageContext context)
         {
+            // Artifact-2: the attacking player's bonuses against this target's state (burning, shocked).
+            TrickalFanGame.Player.PlayerStats attacker = context.Source != null && context.Source != gameObject
+                ? context.Source.GetComponent<TrickalFanGame.Player.PlayerStats>()
+                : null;
+            if (attacker != null)
+            {
+                context = attacker.ApplyTargetBonuses(this, context);
+            }
+
             DamageResult result = DamageCalculator.Resolve(context);
             if (useHealthUnits)
             {
@@ -70,6 +89,12 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
+            // 레비의 단도: a hit that would kill is cancelled whole, so health and shield stay as they were.
+            if (lethalDamageGuard != null && amount - currentShield >= CurrentHealth && lethalDamageGuard())
+            {
+                return;
+            }
+
             float absorbedDamage = Mathf.Min(currentShield, amount);
             if (absorbedDamage > 0f)
             {
@@ -80,6 +105,11 @@ namespace TrickalFanGame.Combat
 
             float previousHealth = CurrentHealth;
             CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
+            // 림의 낫: the same hit finishes a weakened enemy, so the kill is credited through this context.
+            if (CurrentHealth > 0f && attacker != null && attacker.Executes(this, context))
+            {
+                CurrentHealth = 0f;
+            }
             if (CurrentHealth > 0f)
             {
                 ResolveDamageInvulnerability()?.BeginHitWindow(Time.time);
@@ -112,8 +142,8 @@ namespace TrickalFanGame.Combat
 
         public void ResetHealth()
         {
-            CurrentHealth = maxHealth;
             SetShield(0f);
+            CurrentHealth = HealthCeiling;
             IsDead = false;
             incomingDamageReduction = 0f;
             explicitInvulnerability = false;
@@ -129,6 +159,30 @@ namespace TrickalFanGame.Combat
         public void SetInvulnerable(bool invulnerable)
         {
             explicitInvulnerability = invulnerable && !IsDead;
+        }
+
+        // Gains beyond the limit are dropped: a heal never removes shield and a shield gain never removes health.
+        public void SetHealthAndShieldLimit(float limit)
+        {
+            healthAndShieldLimit = Mathf.Max(0f, limit);
+            if (healthAndShieldLimit <= 0f)
+            {
+                return;
+            }
+
+            if (CurrentHealth > healthAndShieldLimit)
+            {
+                CurrentHealth = healthAndShieldLimit;
+                Changed?.Invoke(CurrentHealth, MaxHealth);
+            }
+
+            SetShield(currentShield);
+        }
+
+        // The guard is asked only about a hit that would kill. Returning true cancels that hit.
+        public void SetLethalDamageGuard(Func<bool> guard)
+        {
+            lethalDamageGuard = guard;
         }
 
         private DamageInvulnerability ResolveDamageInvulnerability()
@@ -164,6 +218,11 @@ namespace TrickalFanGame.Combat
 
         public bool SetShield(float value)
         {
+            if (healthAndShieldLimit > 0f)
+            {
+                value = Mathf.Min(value, healthAndShieldLimit - CurrentHealth);
+            }
+
             float nextShield = Mathf.Max(0f, useHealthUnits ? HealthUnits.FloorToUnits(value) : value);
             if (Mathf.Approximately(currentShield, nextShield))
             {
@@ -180,6 +239,13 @@ namespace TrickalFanGame.Combat
             return amount > 0f && SetShield(currentShield + amount);
         }
 
+        // Returns the shield actually gained; the part beyond the health + shield limit is dropped.
+        public float GainShield(float amount)
+        {
+            float previousShield = currentShield;
+            return !IsDead && AddShield(amount) ? currentShield - previousShield : 0f;
+        }
+
         internal void SetMaxHealth(float value, bool healAddedAmount)
         {
             float nextMaxHealth = useHealthUnits ? Mathf.Max(1f, Mathf.Round(value)) : Mathf.Max(0.1f, value);
@@ -192,7 +258,7 @@ namespace TrickalFanGame.Combat
             maxHealth = nextMaxHealth;
             if (healAddedAmount && addedAmount > 0 && !IsDead)
             {
-                CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + addedAmount);
+                CurrentHealth = Mathf.Max(CurrentHealth, Mathf.Min(HealthCeiling, CurrentHealth + addedAmount));
             }
             else
             {
@@ -209,13 +275,14 @@ namespace TrickalFanGame.Combat
                 amount = HealthUnits.FloorToUnits(amount);
             }
 
-            if (IsDead || amount <= 0 || CurrentHealth >= maxHealth)
+            float ceiling = HealthCeiling;
+            if (IsDead || amount <= 0 || CurrentHealth >= ceiling)
             {
                 return 0;
             }
 
             float previousHealth = CurrentHealth;
-            CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
+            CurrentHealth = Mathf.Min(ceiling, CurrentHealth + amount);
             float healedAmount = CurrentHealth - previousHealth;
             if (healedAmount > 0f)
             {

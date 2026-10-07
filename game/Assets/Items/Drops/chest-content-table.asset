@@ -66,6 +66,7 @@ MonoBehaviour:
   spellPickupPrefab: {fileID: 1815312715874959976, guid: c1702e67b68926b479f3c3350b823624, type: 3}
   goldenExclusiveArtifacts:
   - {fileID: 11400000, guid: 61cce2b7d148f694ba51702213547966, type: 2}
+  - {fileID: 11400000, guid: f869cd32a12991f4e8a008c0cd7c909f, type: 2}
   artifactPickupPrefab: {fileID: 8014471090233393603, guid: 78154cfb2dc22df4cb6bfe3343fe2ac6, type: 3}
   jjangsemSpells:
   - {fileID: 11400000, guid: d6a0c03f01455b449b6950eaa713ef73, type: 2}

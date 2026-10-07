@@ -19,7 +19,7 @@ namespace TrickalFanGame.Editor
         public const string FakeWingsId = "artifact-sist-fake-wings";
         public const string FakeWingsName = "시스트의 가짜 날개";
         public const string FakeWingsPath = "Assets/Items/" + FakeWingsId + ".asset";
-        public const string ArtifactPickupPrefabPath = "Assets/Prefabs/ItemPickup.prefab";
+        public const string ArtifactPickupPrefabPath = GoldenChestExclusivePool.ArtifactPickupPrefabPath;
 
         [MenuItem("Trickal Fan Game/Week 22/Setup Flight-0 Fake Wings")]
         public static void Setup()
@@ -66,22 +66,11 @@ namespace TrickalFanGame.Editor
             return definition;
         }
 
+        // The pool holds every golden exclusive artifact that exists (Artifact-3 added 아이시아의 지갑), not only
+        // the wings, so re-running this setup does not drop the others.
         private static void ConfigureGoldenPool(ItemDefinition wings)
         {
-            ChestContentTable table =
-                AssetDatabase.LoadAssetAtPath<ChestContentTable>(Week22Chest1Setup.ChestContentTablePath);
-            if (table == null)
-                throw new InvalidOperationException($"Run Chest-1 setup first: {Week22Chest1Setup.ChestContentTablePath}.");
-            ItemPickup pickup = AssetDatabase.LoadAssetAtPath<GameObject>(ArtifactPickupPrefabPath)
-                ?.GetComponent<ItemPickup>();
-            if (pickup == null)
-                throw new InvalidOperationException($"The artifact pickup Prefab is missing: {ArtifactPickupPrefabPath}.");
-
-            Undo.RecordObject(table, "Configure golden exclusive pool");
-            table.ConfigureGoldenExclusivePool(new[] { wings }, pickup);
-            if (!table.TryValidate(out string error))
-                throw new InvalidOperationException($"Flight-0 built an invalid chest content table. {error}");
-            EditorUtility.SetDirty(table);
+            GoldenChestExclusivePool.ConfigureTable("Flight-0");
         }
 
         private static void RemoveExclusivesFromSelectionPool()

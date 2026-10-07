@@ -1051,6 +1051,74 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   1에서 멈추는지, 커진 채로 1칸 통로와 문을 지나고 다음 방에서 벽에 끼지 않고 서는지, 적과 적 투사체가 커진 몸에 맞는지,
   폭탄이 발밑에 놓이는지, `x1`로 원래대로 돌아오는지, `x0.5`도 같은 자리에 서 있는지 본다.
 
+- Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
+  14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
+  `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,
+  `artifact-amelia-epad-classic`, `artifact-greed-ring`, `artifact-sylla-wind-arrow`, `artifact-levi-dagger`,
+  `artifact-shushushushuk-glove`)을 GUID를 보존하며 멱등 구성하고, Game Scene의 선택 보상 풀에 넣고(이미 있으면 Scene을
+  저장하지 않음) 글리프를 추가한다. 등급·스택·효과 타입(47~60)은 [21번 Artifact-2](./21-sixth-month-plan.md) 표에 있다.
+  Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시 실행한다. 자동 검증 메뉴는
+  `Trickal Fan Game > Week 23 > Setup and Verify Artifact-2 Confirmed Artifacts`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week23Artifact2Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  Setup 2회 GUID, 효과 타입 47~60과 피해 원천 `PlayerItemExplosion` 추가, 14종의 에셋·설명·풀 소속, 스탯 아티팩트의 스택,
+  화상(3초·0.5초 틱·갱신만)·감전(최대 4스택 -40%, 보스 절반)과 틱 피해 증가, 화상·감전 대상 보너스의 적용 범위, 림의 낫
+  처형(20%, 보스·폭탄 제외, 처치 귀속 1회), 머핀의 8타 폭발, 깃발의 3회(2회) 시전 회복, 벨트의 15칸 상한, 단도의 사망 무효
+  1회와 무적, 글러브의 3중첩·동시 소멸·쿨타임을 검사한다. 회귀는 `VerifyWithRegressionsBatch`(Passive-1 회귀 묶음·Passive-2·
+  Obstacle-7·`PhaseGCombatFoundationVerification`·`PhaseGConditionalEffectsVerification`·`Week7PlayerCombatEventsVerification`·
+  HP-4·Artifact-1·Jjangsem-0·Spell-5·개발 패널)다. 2026-10-07 두 배치가 종료 코드 0으로 통과했고 Backend
+  `pnpm jest src/contracts src/domain`도 통과했다. PowerShell에서 `Start-Process -Wait`는 Unity가 끝난 뒤에도 라이선스 보조
+  프로세스를 기다리며 멈추므로 `-PassThru`로 받은 프로세스에 `WaitForExit()`를 쓴다.
+  수동 확인: Game Scene Play → `F1` 패널 `— Artifact —`의 `Show artifact drops`를 켜고 각 `Drop <이름>`으로 떨어뜨려 줍는다.
+  같은 섹션 위쪽에 HP·방어막·무적, 글러브 중첩과 남은 시간, 단도 사용 여부, 머핀 타수, 깃발 시전 수, 가장 가까운 상태이상
+  적의 화상/중독/감전 스택이 표시된다.
+  - 활활 불타활·불타는 가지: 맞은 적이 주황빛이 되고 0.5초마다 체력이 주는지, 나무가 2타째에 불타는지(개발 패널 토글 없이).
+  - 앗땃따건: 맞은 적이 노랗게 되고 스택이 쌓일수록 느려지는지(최대 4스택), 돌진·보스 패턴 속도는 그대로인지.
+  - 앗따검·탐욕의 반지: 얻은 뒤 새로 건 화상·중독의 틱 피해 숫자가 커지는지. 반지는 치명타 피해 숫자도 커지는지.
+  - 림의 낫: 일반 적이 체력 20% 이하에서 바로 죽고 보스는 죽지 않는지.
+  - 폭발 머핀: 8번째 적중마다 폭발이 나고 주변 적도 피해를 받는지(패널의 `Muffin hits`).
+  - 네르의 엘드르 깃발: 저학년 스킬(Space) 3회마다 반 칸 회복되는지(패널의 `Flag casts`).
+  - 긴급 보호 벨트: 새 전투방·보스방에 들어갈 때마다 방어막이 반 칸씩 쌓이고 시작방·보물방·클리어한 방에서는 안 쌓이는지.
+  - 아멜리아의 E-Pad 클래식: 앗땃따건으로 감전시킨 적에게 스킬 피해와 치명타가 눈에 띄게 늘어나는지.
+  - 레비의 단도: 죽을 피해를 한 번 버티고(패널 `Dagger ward spent`, `INVULNERABLE`) 5초 뒤 다시 피해를 받는지.
+  - 슈슈슈슉 글러브: 처치마다 `Glove stacks`가 3까지 오르고 5초 뒤 0이 되며 10초 쿨타임이 표시되는지.
+  - 14종 모두 획득 알림·선택 보상 카드·일시정지 목록에 이름과 설명이 깨지지 않고 나오는지.
+
+- Artifact-3·Passive-3·Passive-4(지갑·팽이·항아리): Setup 메뉴는 `Trickal Fan Game > Week 23 >` 아래 `Setup Artifact-3 Aisia
+  Wallet`(`artifact-aisia-wallet`을 만들고 `chest-content-table`의 황금 전용 풀을 `GoldenChestExclusivePool` 목록의 모든 에셋으로
+  구성), `Setup Passive-3 Kanta Top`(`artifact-kanta-top`, 선택 보상 풀), `Setup Passive-4 Shasha Jar`(`artifact-shasha-jar`, 선택
+  보상 풀)다. 모두 GUID를 보존하는 멱등 구성이며 공통 단계는 `ArtifactSetupUtility`에 있다. Backend `ITEM_CATALOG`에도 추가했으므로
+  로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시 실행한다. 자동 검증 메뉴는 각 `Setup and Verify ...`이고, 세 조각을 한 번에
+  돌리는 배치는 `-executeMethod TrickalFanGame.Editor.Week23Passive4Verification.SetupAndVerifyWalletTopAndJarBatch`, 회귀는
+  `...Week23Passive4Verification.VerifyWalletTopAndJarWithRegressionsBatch`(세 검증·Artifact-2 회귀 묶음·Flight-0·Chest-2·
+  Jjangsem-1·HP-1 회귀 묶음)다. 2026-10-07 첫 배치는 종료 코드 0으로 통과했다. 회귀 배치는 HP-1 회귀 묶음 앞까지 모두
+  통과했고, HP-1 묶음 안에서 `Week15Enemy3`(돌진 적 Prefab의 추적 시간 설정), `Week15Boss1~3`·`Week13Hud1`·`Week13Hud3B`(HUD
+  그래픽 raycast), `Week16Reward2`(보상 카드 이름 폭)가 실패했다. 모두 이 조각이 건드리지 않은 Prefab·HUD·카드 레이아웃 검사다.
+  `Week16Reward2`는 아트워크가 있는 카드의 이름 폭(264)에서 `아멜리아의 E-Pad 클래식`과 기존 `다야의 다이아몬드 커터`가 세 줄이
+  되어 실패한다(`ArtifactVerificationFixtures.LogRewardCardOverflowsBatch`로 전체 목록 확인, 효과 설명은 모두 들어감).
+  수동 확인(Game Scene Play → `F1`):
+  - 지갑: `— Chest —`의 `Drop 아이시아의 지갑`으로 주워 골드가 99에서 멈추는지, `Chest Golden`을 여러 번 열면 특별 보상으로
+    가짜 날개와 지갑이 나오는지, 상점·선택 보상에는 안 나오는지.
+  - 15칸 상한: `Drop 갑옷축제 초대장`을 여러 번 써서 HP+방어막이 15칸에서 멈추는지(패널 `— Artifact —`의 HP·shield 줄),
+    그 상태에서 하트 픽업이 주워지지 않고 밀리기만 하는지, 방어막이 깎이면 다시 주워지는지.
+  - 팽이: `— Artifact —`의 `Drop 칸타의 팽이`. 적 2명이면 탄이 번갈아 맞히고, 1명이면 잠깐 멈췄다 다시 맞히며 피해 숫자가
+    절반씩 줄어드는지, 벽·장애물에 닿으면 사라지는지.
+  - 항아리: `Drop 샤샤의 항아리`. 방향키를 누르는 동안 파란 줄기가 벽까지 나가고 줄 위의 적이 모두 맞는지, 장애물·나무를
+    넘어가며 부수는지, 문에서 끊기는지. `Drop 칸나의 대포`(굵어짐), `Drop 다야의 다이아몬드 커터`(맞은 적에서 4방향 짧은 줄기),
+    `Drop 칸타의 팽이`(가까운 적으로 튕김), `Drop 실라의 바람살`·`장난감 망원경`(길이·넉백 변화 없음)을 차례로 확인한다.
+
+- Passive-5 다이아몬드 커터 4방향 분열·물줄기 발사 주기: 메뉴 `Trickal Fan Game > Week 23 > Setup and Verify Passive-5 Cutter
+  Four-Way Split`(배치 `-executeMethod TrickalFanGame.Editor.Week23Passive4Verification.SetupAndVerifyCutterAndStreamBatch`)이
+  `PhaseGArtifactContractSetup`으로 `item-11`을 효과 64 `SplitOnHit` 하나로 다시 구성하고(GUID 보존) Passive-1 회귀 묶음
+  (`PhaseGProjectileEffectsVerification`의 커터 검사 포함)·Passive-3·Passive-4·Content-0을 돌린다. 2026-10-07 배치에서 이 검증은
+  모두 통과했다. 그 실행은 끝에 붙였던 `UserArtworkVerification`의 미리보기 렌더링이 `-nographics`에서 Unity를 종료시켜 종료
+  코드가 0이 아니었고, 그 호출을 뺀 뒤로는 다시 돌리지 않았다. `UserArtworkVerification`은 Editor 메뉴나 `-nographics` 없는
+  배치로 실행한다. Backend `pnpm jest src/contracts src/domain` 통과.
+  수동 확인(Game Scene Play → `F1` → `— Artifact —`): `Drop 다야의 다이아몬드 커터`를 줍고 적을 맞히면 그 적에서 상하좌우로 작은
+  탄 4개가 나가는지, 본탄이 더는 관통하지 않는지, 분열탄이 맞은 적을 다시 맞히지 않는지. `Drop 샤샤의 항아리`를 줍고 방향키를
+  누르고 있으면 줄기가 공격 속도에 맞춰 끊어서 나가는지, `Drop 낡은 화살`로 공격속도를 올리면 더 자주 나가는지.
+  아트워크: 바닥에 떨어진 아티팩트·스펠 그림이 0.75칸, 하트·SP 캡슐이 0.5칸으로 같은 크기로 보이고 흰 테두리가 뚜렷한지(크기는 `UserArtwork.PickupWorldSize`·`ResourcePickupWorldSize`, 실제 그려지는 크기 검사는 배치 `ArtifactVerificationFixtures.VerifyPickupArtworkSizesBatch`,
+  테두리 두께는 `Resources/UserArtwork/ItemArtwork.shader`의 0.03·0.04 값).
+
 - Passive-2 거대화 물약: 메뉴 `Trickal Fan Game > Week 23 > Setup Passive-2 Giant Potion`이 `Assets/Items/`에
   `artifact-giant-potion`(Epic, 최대 2스택, 효과 45 `PlayerSizePercent` `magnitude` 0.3·효과 46 `BasicAttackDamagePercent` 0.2·
   효과 11 `MaxHealthFlat` 6·효과 20 `MoveSpeedPenaltyPercent` 0.2)을 GUID를 보존하며 멱등 구성하고, Game Scene의 선택 보상

@@ -129,7 +129,7 @@ namespace TrickalFanGame.Enemy
                 !EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
             {
                 body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
-                    currentTime) * moveSpeed;
+                    currentTime) * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
                 return;
             }
 
@@ -137,7 +137,7 @@ namespace TrickalFanGame.Enemy
                 EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, -direction, bodyRadius,
                     out Vector2 retreat))
             {
-                body.linearVelocity = retreat * moveSpeed;
+                body.linearVelocity = retreat * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
                 return;
             }
 
