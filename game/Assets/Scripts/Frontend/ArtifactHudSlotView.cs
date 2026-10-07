@@ -40,6 +40,7 @@ namespace TrickalFanGame.Frontend
             StackCount = Mathf.Max(1, stackCount);
             if (icon != null) icon.color = GetRarityColor(definition != null ? definition.Rarity : ItemRarity.Common);
             if (iconText != null) iconText.text = GetShortStableId(definition != null ? definition.ItemId : string.Empty);
+            UserArtwork.Apply(icon, definition, iconText);
             if (stackText != null) stackText.text = StackCount.ToString();
             if (stackBadge != null) stackBadge.gameObject.SetActive(true);
         }

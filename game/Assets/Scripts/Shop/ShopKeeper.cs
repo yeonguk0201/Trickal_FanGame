@@ -52,6 +52,7 @@ namespace TrickalFanGame.Shop
         private void Awake()
         {
             GetComponent<Collider2D>().isTrigger = true;
+            TrickalFanGame.Frontend.UserArtwork.ApplyPickup(portrait, "sist");
         }
 
         private void OnTriggerEnter2D(Collider2D other)

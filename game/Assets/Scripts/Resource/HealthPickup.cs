@@ -28,6 +28,7 @@ namespace TrickalFanGame.Resource
             Rigidbody2D body = GetComponent<Rigidbody2D>();
             body.gravityScale = 0f;
             body.freezeRotation = true;
+            TrickalFanGame.Frontend.UserArtwork.ApplyResourcePickup(GetComponentInChildren<SpriteRenderer>(), "hp-pickup");
         }
 
         private void OnCollisionEnter2D(Collision2D collision)

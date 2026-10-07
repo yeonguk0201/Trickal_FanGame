@@ -13,6 +13,7 @@ namespace TrickalFanGame.Player
         private void Awake()
         {
             GetComponent<Collider2D>().isTrigger = true;
+            TrickalFanGame.Frontend.UserArtwork.ApplyResourcePickup(GetComponentInChildren<SpriteRenderer>(), "sp-pickup");
         }
 
         private void OnTriggerEnter2D(Collider2D other)

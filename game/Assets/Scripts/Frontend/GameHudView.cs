@@ -173,6 +173,7 @@ namespace TrickalFanGame.Frontend
 
         public void RefreshNow()
         {
+            ApplyHudArtwork();
             if (playerHealth != null)
             {
                 previousHealth = playerHealth.CurrentHealth;
@@ -187,6 +188,18 @@ namespace TrickalFanGame.Frontend
             }
 
             RefreshSkillStateAt(Time.time);
+        }
+
+        private void ApplyHudArtwork()
+        {
+            if (heartTemplate != null)
+            {
+                UserArtwork.Apply(heartTemplate.Find(HeartBackgroundName)?.GetComponent<Image>(), UserArtwork.HudIcon(0));
+                UserArtwork.Apply(heartTemplate.Find(HeartFillName)?.GetComponent<Image>(), UserArtwork.HudIcon(0));
+            }
+            UserArtwork.Apply(spSlotTemplate, UserArtwork.HudIcon(1));
+            UserArtwork.Apply(lowerGradeSkillState, UserArtwork.HudIcon(2));
+            UserArtwork.Apply(highGradeSkillState, UserArtwork.HudIcon(3));
         }
 
         private void Subscribe()
@@ -267,7 +280,7 @@ namespace TrickalFanGame.Frontend
             for (int i = 0; i < spSlots.Count; i++)
             {
                 spSlots[i].color = i < ActiveSlotCount
-                    ? i >= maximum ? SpOverchargeColor : SpActiveColor
+                    ? i >= maximum ? SpOverchargeColor : Color.white
                     : i == ActiveSlotCount && IsShowingHalfSlot ? SpHalfColor : SpInactiveColor;
             }
             if (spValueText != null)
@@ -304,11 +317,11 @@ namespace TrickalFanGame.Frontend
                     : currentUnits - i * HealthUnits.UnitsPerHeart;
                 HeartIcon heart = hearts[i];
                 float fill = Mathf.Clamp(units, 0, HealthUnits.UnitsPerHeart) / (float)HealthUnits.UnitsPerHeart;
-                bool changed = heart.Fill.color != (isShield ? HeartShieldColor : HeartHealthColor) ||
+                bool changed = heart.Fill.color != (isShield ? HeartShieldColor : Color.white) ||
                                !Mathf.Approximately(heart.Fill.fillAmount, fill);
                 heart.Root.sizeDelta = new Vector2(HeartSize, HeartSize);
                 heart.Background.color = isShield ? Color.clear : HeartEmptyColor;
-                heart.Fill.color = isShield ? HeartShieldColor : HeartHealthColor;
+                heart.Fill.color = isShield ? HeartShieldColor : Color.white;
                 heart.Fill.fillAmount = fill;
                 // Only the hearts whose fill changed pop briefly, instead of flashing the whole row.
                 if (pulseChanges && changed)
@@ -385,7 +398,7 @@ namespace TrickalFanGame.Frontend
         {
             IsLowerGradeSkillAvailable = lowerGradeSkill != null && lowerGradeSkill.CanCast;
             if (lowerGradeSkillState != null)
-                lowerGradeSkillState.color = IsLowerGradeSkillAvailable ? SkillReadyColor : SkillUnavailableColor;
+                lowerGradeSkillState.color = IsLowerGradeSkillAvailable ? Color.white : SkillUnavailableColor;
             if (lowerGradeSkillText != null)
                 lowerGradeSkillText.text = lowerGradeSkill != null && lowerGradeSkill.IsFiring
                     ? "발사 중"
@@ -397,7 +410,7 @@ namespace TrickalFanGame.Frontend
                 : 0f;
             IsHighGradeSkillAvailable = highGradeSkill != null && highGradeSkill.IsReadyAt(currentTime);
             if (highGradeSkillState != null)
-                highGradeSkillState.color = IsHighGradeSkillAvailable ? SkillReadyColor : SkillUnavailableColor;
+                highGradeSkillState.color = IsHighGradeSkillAvailable ? Color.white : SkillUnavailableColor;
             if (highGradeCooldownFill != null)
             {
                 float duration = highGradeSkill != null ? Mathf.Max(0.01f, highGradeSkill.Cooldown) : 1f;

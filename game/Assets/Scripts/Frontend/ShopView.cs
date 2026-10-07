@@ -95,6 +95,7 @@ namespace TrickalFanGame.Frontend
             buyButtonLabel = configuredBuyButtonLabel;
             closeButton = configuredCloseButton;
             Subscribe();
+            UserArtwork.Apply(keeperPortrait, UserArtwork.Load("sist"));
             ApplyVisibility(false);
         }
 
