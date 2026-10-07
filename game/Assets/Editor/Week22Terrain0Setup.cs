@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TrickalFanGame.Player;
 using TrickalFanGame.Room;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -29,7 +30,8 @@ namespace TrickalFanGame.Editor
 
         public static readonly Color RimColor = new(0.34f, 0.25f, 0.2f);
         public static readonly Color HoleColor = new(0.05f, 0.04f, 0.06f);
-        public static readonly string[] PitCollisionLayers = { "Player", "Enemy", "Pickup" };
+        // Hitbox-0: the player meets terrain with its feet layer, not the body.
+        public static readonly string[] PitCollisionLayers = { PlayerFeet.LayerName, "Enemy", "Pickup" };
 
         public readonly struct PitSpec
         {
@@ -186,7 +188,7 @@ namespace TrickalFanGame.Editor
         {
             HashSet<int> colliding = new(PitCollisionLayers.Select(LayerMask.NameToLayer));
             if (colliding.Contains(-1))
-                throw new InvalidOperationException("Terrain-0 needs the Player, Enemy and Pickup layers.");
+                throw new InvalidOperationException("Terrain-0 needs the PlayerFeet, Enemy and Pickup layers.");
 
             SerializedObject settings = new(AssetDatabase.LoadAllAssetsAtPath(Physics2DSettingsPath)[0]);
             SerializedProperty matrix = settings.FindProperty("m_LayerCollisionMatrix");

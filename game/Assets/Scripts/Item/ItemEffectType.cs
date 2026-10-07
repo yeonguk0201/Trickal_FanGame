@@ -78,5 +78,11 @@ namespace TrickalFanGame.Item
         // SecondaryMagnitude = share of attack damage each poison stack deals per tick, DurationSeconds,
         // IntervalSeconds = tick interval, IntegerAmount = maximum poison stacks on one enemy.
         BasicAttackPoison = 44,
+        // Passive-2 (거대화 물약): Magnitude = body size bonus. The look follows it without a limit, the hurtbox
+        // stops at twice the base size and the feet (terrain collision) do not change (Hitbox-1).
+        PlayerSizePercent = 45,
+        // Passive-2 (거대화 물약): Magnitude = basic attack damage bonus, kept for the whole Run. Only basic attack
+        // hits and shots gain it; skills, auras and the attack stat itself do not change.
+        BasicAttackDamagePercent = 46,
     }
 }

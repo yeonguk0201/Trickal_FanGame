@@ -787,6 +787,7 @@ namespace TrickalFanGame.Editor
             player.transform.SetParent(parent);
             player.transform.position = position;
             player.layer = LayerMask.NameToLayer("Player");
+            PlayerFeet.Ensure(player, out _);
             player.GetComponent<Rigidbody2D>().gravityScale = 0f;
             Health health = player.GetComponent<Health>();
             Invoke(health, "Awake");

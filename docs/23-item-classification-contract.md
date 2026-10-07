@@ -85,6 +85,7 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 회심의 일격 | 스펠 | `single-spell-decisive-strike` | Spell-5 |
 | 칸나의 대포 | 아티팩트 | `artifact-kanna-cannon` | Passive-1 |
 | 비비의 콧물 | 아티팩트 | `artifact-bibi-snot` | Passive-1 |
+| 거대화 물약 | 아티팩트 | `artifact-giant-potion` | Passive-2 |
 
 ### 2.4 등급·효과·스택
 
@@ -128,6 +129,11 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
   `artifact-kanna-cannon`(Rare, 최대 2스택, 43 `magnitude` 0.5)과 `artifact-bibi-snot`(Rare, 최대 2스택, 44
   `magnitude` 0.15·`secondaryMagnitude` 0.15·4초·1초·3스택)만 쓰며 Backend 카탈로그에도 같은 값을 기록했다.
   레거시 비활성 ID `item-05`(투사체 크기 강화)는 재사용하지 않았다.
+  Passive-2(2026-10-06)에서 `PlayerSizePercent = 45`(`magnitude` = 몸 크기 증가율)와 `BasicAttackDamagePercent = 46`
+  (`magnitude` = Run 동안 유지되는 기본 공격 피해 증가율, 스킬·오라·공격력 스탯 제외)을 추가했다. `artifact-giant-potion`
+  (Epic, 최대 2스택)만 쓰며 45 `magnitude` 0.3·46 `magnitude` 0.2에 기존 효과 11 `MaxHealthFlat` 6(3칸)과 20
+  `MoveSpeedPenaltyPercent` 0.2를 함께 가진다. Backend 카탈로그에도 같은 값을 기록했다. 전설 등급의 최대 1스택 관례와 다른
+  2스택은 시험값이며 스탯 상한 방식을 검토 중이다.
 - 일회용 아이템(`SingleUseSpell`, `JjangsemSpell`)은 `maxStacks = 1`이다. 보유 중에는 **효과가 적용되지
   않고**, 사용 성공 시에만 효과를 실행한다. `PlayerInventory`의 상시 효과 적용·아티팩트 HUD·일시정지
   아티팩트 목록에 들어가지 않는다.
@@ -219,3 +225,4 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | Verify-0 | 풀별 분류 불변조건과 Unity↔Backend 카탈로그 ID·등급 일치 검사 |
 | Range-0 | 효과 33·34는 뒤에 추가, 33은 아이템 미사용·34는 `item-15`만 사용(검증기가 확인), 아이템 추가 시 Backend 카탈로그·seed 동시 반영 |
 | Passive-1 | 효과 43·44는 뒤에 추가, 43은 `artifact-kanna-cannon`·44는 `artifact-bibi-snot`만 사용(검증기가 확인), 둘 다 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |
+| Passive-2 | 효과 45·46은 뒤에 추가, 둘 다 `artifact-giant-potion`만 사용(검증기가 확인), 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |

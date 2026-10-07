@@ -36,6 +36,7 @@ describe('Item catalog', () => {
       'jjangsem-melune-card',
       'artifact-kanna-cannon',
       'artifact-bibi-snot',
+      'artifact-giant-potion',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -69,8 +70,9 @@ describe('Item catalog', () => {
       'RARE',
       'RARE',
       'RARE',
+      'EPIC',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(31);
+    expect(new Set(active.map((item) => item.id)).size).toBe(32);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -197,6 +199,11 @@ describe('Item catalog', () => {
       {
         id: 'artifact-bibi-snot',
         rarity: 'RARE',
+        maxStacks: 2,
+      },
+      {
+        id: 'artifact-giant-potion',
+        rarity: 'EPIC',
         maxStacks: 2,
       },
     ]);
@@ -385,6 +392,23 @@ describe('Item catalog', () => {
     // The legacy inactive item-05 (shot size) keeps its ID; the cannon does not reuse it.
     expect(ITEM_CATALOG.find((item) => item.id === 'item-05')).toMatchObject({
       isActive: false,
+    });
+  });
+
+  it('adds the giant potion as a body size artifact (Passive-2)', () => {
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'artifact-giant-potion'),
+    ).toMatchObject({
+      name: '거대화 물약',
+      rarity: 'EPIC',
+      isActive: true,
+      maxStacks: 2,
+      effects: [
+        { type: 'PlayerSizePercent', magnitude: 0.3 },
+        { type: 'BasicAttackDamagePercent', magnitude: 0.2 },
+        { type: 'MaxHealthFlat', magnitude: 6 },
+        { type: 'MoveSpeedPenaltyPercent', magnitude: 0.2 },
+      ],
     });
   });
 

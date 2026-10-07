@@ -423,6 +423,21 @@ export const ITEM_CATALOG = [
     ],
   },
   {
+    id: 'artifact-giant-potion',
+    name: '거대화 물약',
+    description:
+      '몸이 스택당 30% 커지고 기본 공격 피해가 20%, 최대 HP가 3칸 증가하지만 이동속도가 20% 감소합니다. 스킬 피해는 그대로입니다. 피격 판정은 기본의 2배까지만 커지며, 벽·문·장애물에 닿는 발밑 판정은 그대로입니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      { type: 'PlayerSizePercent', magnitude: 0.3 },
+      { type: 'BasicAttackDamagePercent', magnitude: 0.2 },
+      { type: 'MaxHealthFlat', magnitude: 6 },
+      { type: 'MoveSpeedPenaltyPercent', magnitude: 0.2 },
+    ],
+  },
+  {
     id: 'item-06',
     name: '다중 투사체',
     description:

@@ -79,15 +79,17 @@ namespace TrickalFanGame.Room
                 return false;
             }
 
+            // Hitbox-1: the destination is where the player stands; a larger body's root sits above its feet.
+            Vector2 rootPosition = player.RootPositionForStanding(destination.position);
             Rigidbody2D body = player.GetComponent<Rigidbody2D>();
             if (body != null)
             {
                 body.linearVelocity = Vector2.zero;
-                body.position = destination.position;
+                body.position = rootPosition;
             }
             else
             {
-                player.transform.position = destination.position;
+                player.transform.position = rootPosition;
             }
 
             runProgress?.RecordRoomEntry(destinationFloor, 1);

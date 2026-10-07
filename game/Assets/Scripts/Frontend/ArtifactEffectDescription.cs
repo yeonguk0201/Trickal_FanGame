@@ -99,6 +99,8 @@ namespace TrickalFanGame.Frontend
                     "전투 중 현재 층 시작방으로 탈출 (탈출한 방은 다시 들어가면 처음부터 시작)",
                 ItemEffectType.Flight => "Run이 끝날 때까지 비행 (구덩이·장애물 위 이동, 벽·문은 통과 불가)",
                 ItemEffectType.ProjectileSizePercent => $"투사체 크기 +{Percent(effect.Magnitude)}",
+                ItemEffectType.PlayerSizePercent => $"몸 크기 +{Percent(effect.Magnitude)}",
+                ItemEffectType.BasicAttackDamagePercent => $"기본 공격 피해 +{Percent(effect.Magnitude)}",
                 ItemEffectType.BasicAttackPoison =>
                     $"기본 공격 적중 시 {Percent(effect.Magnitude)} 확률로 중독 ({Number(effect.DurationSeconds)}초간 " +
                     $"{Number(effect.IntervalSeconds)}초마다 공격력의 {Percent(effect.SecondaryMagnitude)} 피해, " +

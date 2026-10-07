@@ -59,18 +59,26 @@ namespace TrickalFanGame.Room
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            TryEnterFromContact(other.GetComponentInParent<PlayerMovement>());
+            TryEnterFromTrigger(other);
         }
 
         // Stay keeps checking so a player who first grazes the trigger edge passes once centered.
         private void OnTriggerStay2D(Collider2D other)
         {
-            TryEnterFromContact(other.GetComponentInParent<PlayerMovement>());
+            TryEnterFromTrigger(other);
+        }
+
+        // Hitbox-0: the body circle reaches the trigger before the feet do, and further ahead the larger the body
+        // is. Only feet standing in the trigger count as passing through.
+        private void TryEnterFromTrigger(Collider2D other)
+        {
+            PlayerMovement player = other.GetComponentInParent<PlayerMovement>();
+            if (player != null && player.FeetOverlap(GetComponent<Collider2D>())) TryEnterFromContact(player);
         }
 
         public bool TryEnterFromContact(PlayerMovement player)
         {
-            return player != null && ContainsPassageCenter(player.transform.position) &&
+            return player != null && ContainsPassageCenter(player.FeetPosition) &&
                    IsMovingIntoPassage(player.MovementIntent) && TryEnter(player);
         }
 

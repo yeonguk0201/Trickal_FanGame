@@ -20,7 +20,7 @@ namespace TrickalFanGame.Room
         {
             return player != null && doorway != null && doorway.RequiresKey && !doorway.IsKeyLockOpen &&
                 (doorway.RequiredClearedRoom == null || doorway.RequiredClearedRoom.State == RoomState.Cleared) &&
-                doorway.ContainsPassageCenter(player.transform.position) &&
+                doorway.ContainsPassageCenter(player.FeetPosition) &&
                 doorway.IsMovingIntoPassage(player.MovementIntent) && doorway.TryUnlockWithKey();
         }
     }

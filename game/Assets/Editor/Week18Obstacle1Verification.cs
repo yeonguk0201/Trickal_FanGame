@@ -85,7 +85,7 @@ namespace TrickalFanGame.Editor
         private static void ValidateLayerBlocking()
         {
             int environment = LayerMask.NameToLayer("Environment");
-            foreach (string layerName in new[] { "Player", "Enemy", "PlayerProjectile", HealthPickup.LayerName })
+            foreach (string layerName in new[] { PlayerFeet.LayerName, "Enemy", "PlayerProjectile", HealthPickup.LayerName })
             {
                 int layer = LayerMask.NameToLayer(layerName);
                 Assert(layer >= 0 && !Physics2D.GetIgnoreLayerCollision(environment, layer),
@@ -409,6 +409,7 @@ namespace TrickalFanGame.Editor
             player.layer = LayerMask.NameToLayer("Player");
             player.AddComponent<Rigidbody2D>().gravityScale = 0f;
             player.AddComponent<CircleCollider2D>();
+            PlayerFeet.Ensure(player, out _);
             Health health = player.AddComponent<Health>();
             PlayerStats stats = player.AddComponent<PlayerStats>();
             player.AddComponent<PlayerActionState>();
