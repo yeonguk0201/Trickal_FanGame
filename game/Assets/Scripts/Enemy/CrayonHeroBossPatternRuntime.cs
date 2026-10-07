@@ -507,6 +507,12 @@ namespace TrickalFanGame.Enemy
             foreach (Vector2 direction in GetSlashDirections())
                 if (IsTargetInsideDirectionalBox(0f, slashLength, ActiveSlashWidth, direction)) hitCount++;
             if (hitCount > 0) ApplyTargetDamage(slashDamageTier, DamageSourceType.EnemyMelee, hitCount);
+            for (int index = 0; index < GetSlashDirections().Count; index++)
+            {
+                LineRenderer warning = index == 0 ? telegraphLine : supplementalTelegraphLines[index - 1];
+                float lightHeight = Mathf.Clamp(ResolveEffectBodyWidth() * 1.6f, 5f, 9f);
+                SlamLightEffect.PlayPath(warning, lightHeight, transform, visual, arenaBounds);
+            }
             slashResolved = true;
             slashPending = false;
             chargingSlash = false;
@@ -549,6 +555,10 @@ namespace TrickalFanGame.Enemy
             }
             ResolveDirectionalHit(SwingStartOffset, swingRange, swingWidth, swingDamageTier,
                 DamageSourceType.EnemyMelee, lockedDirection);
+            CombatSpriteEffect.Play("sword-slash", (Vector2)transform.position +
+                lockedDirection * (SwingStartOffset + swingRange * 0.5f),
+                swingRange * 2f, Mathf.Max(swingWidth * 2f, ResolveEffectBodyWidth() * 1.2f), 0.35f, transform, visual,
+                angle: Mathf.Atan2(lockedDirection.y, lockedDirection.x) * Mathf.Rad2Deg);
             completedSwings++;
             attackPoseIndex = 2;
             attackFollowThroughStartedAt = now;
@@ -749,6 +759,7 @@ namespace TrickalFanGame.Enemy
                     : EnsureSupplementalLine(index - 1);
                 ConfigureLine(line, 6, ActiveSlashWidth, new Color(1f, 0.28f, 0.02f, 0.62f),
                     new Color(1f, 0.78f, 0.05f, 0.78f));
+                ChargeWarningVisual.Bind(line, ActiveSlashWidth, false);
                 line.SetPosition(0, transform.position);
                 line.SetPosition(1, (Vector2)transform.position + directions[index] * slashLength);
             }
@@ -757,6 +768,7 @@ namespace TrickalFanGame.Enemy
         private void ShowSwingTelegraph()
         {
             LineRenderer line = EnsurePrimaryLine("Crayon Hero Sword Swing Hitbox");
+            ChargeWarningVisual.Bind(line, swingWidth, false);
             ConfigureLine(line, 0, swingWidth, new Color(1f, 0.05f, 0.05f, 0.82f),
                 new Color(1f, 0.2f, 0.05f, 0.9f));
             UpdateSwingTelegraphPositions();
@@ -772,11 +784,8 @@ namespace TrickalFanGame.Enemy
 
         private void ShowDashTelegraph()
         {
-            LineRenderer line = EnsurePrimaryLine("Crayon Hero Dash Path");
-            ConfigureLine(line, 2, dashWidth, new Color(1f, 0.55f, 0.05f, 0.55f),
-                new Color(1f, 0.12f, 0.05f, 0.8f));
-            line.SetPosition(0, transform.position);
-            line.SetPosition(1, (Vector2)transform.position + lockedDirection * dashSpeed * dashDuration);
+            // The knight's short dash is readable from its attack pose; no floor path is displayed.
+            ClearTelegraph();
         }
 
         private void ShowSummonTelegraph()
@@ -975,6 +984,43 @@ namespace TrickalFanGame.Enemy
         {
             if (body != null) body.linearVelocity = Vector2.zero;
         }
+
+        public static float ResolveSlamVisualAngle(Vector2 direction, out bool flipX)
+        {
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            flipX = true;
+            // Leftward attacks mirror the ground artwork rather than turning it upside down.
+            if (angle > 90f) { angle -= 180f; flipX = false; }
+            else if (angle < -90f) { angle += 180f; flipX = false; }
+            return angle;
+        }
+
+        public static bool TryGetSlamVisualLayout(Rect arena, Vector2 origin, Vector2 direction,
+            float bodyWidth, float radius, out Vector2 center, out float size)
+        {
+            center = origin;
+            size = 0f;
+            if (direction.sqrMagnitude < 0.001f || !arena.Contains(origin)) return false;
+            direction.Normalize();
+            // Artwork bounds include the registered transparent canvas: start at the sword side,
+            // rather than leaving half that canvas plus another gap in front of the character.
+            float startOffset = Mathf.Max(bodyWidth * 0.2f, radius * 0.8f);
+            Vector2 start = origin + direction * startOffset;
+            if (!arena.Contains(start)) return false;
+            float distance = float.PositiveInfinity;
+            if (Mathf.Abs(direction.x) > 0.001f)
+                distance = Mathf.Min(distance, ((direction.x > 0 ? arena.xMax : arena.xMin) - start.x) / direction.x);
+            if (Mathf.Abs(direction.y) > 0.001f)
+                distance = Mathf.Min(distance, ((direction.y > 0 ? arena.yMax : arena.yMin) - start.y) / direction.y);
+            // Scale uniformly to the room edge rather than stretching or imposing an artwork size cap.
+            size = Mathf.Max(0f, distance - 0.15f);
+            if (size < 0.6f) return false;
+            center = start + direction * size * 0.5f;
+            return true;
+        }
+
+        private float ResolveEffectBodyWidth() => Mathf.Max(ResolveBodyRadius() * 2f,
+            visual != null ? visual.bounds.size.x : 0f);
 
         private float ResolveBodyRadius()
         {

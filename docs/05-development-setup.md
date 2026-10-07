@@ -1322,3 +1322,73 @@ Unity 메뉴: `Trickal Fan Game > Artwork > Verify Crayon Hero Golden Attacks`.
 2026-10-06 내려찍기 차징 시간을 조정했다. Prefab과 Week15Boss3Setup의 예고를 1.05 → 1.30초로 맞추었고 방향 고정 후 0.2초는 유지했다. 총 차징은 일반 1.50초, 각성 1.214초이며 아우라 3단계는 실제 피해 시각까지 자동으로 분배된다. 검증기는 Prefab의 실제 패턴 시간을 읽어 검사한다. Unity 6000.3.22f1의 CrayonHeroAttackAnimationVerification.Verify 배치가 종료 코드 0으로 통과했다(로그: game/Logs/CrayonHeroChargeDurationVerification.log). 실제 화면 확인은 별도다.
 
 2026-10-06 추가 조정: 내려찍기 전체 차징에 일반·각성 모두 1.35초씩 추가했다. 일반은 1.50 → 2.85초, 각성은 1.214 → 2.564초이다. BossPatternDefinition.additionalTelegraphDuration은 페이즈 배속을 적용한 예고에 고정 시간으로 더하며, 해당 Prefab과 Setup의 내려찍기만 1.35로 설정했다. 방향 고정 0.2초와 아우라 3단계/피해 동기화는 유지한다. Unity CrayonHeroAttackAnimationVerification.Verify가 종료 코드 0으로 통과했다(로그: game/Logs/CrayonHeroChargeExtensionVerification.log). 실제 화면 확인은 별도다.
+
+### 검수한 공통 전투 이펙트
+
+2026-10-07 v14: 전체 축소를 제거하고 검광 높이를 유지한다. 경로 길이만 벽 앞까지 맞추며,
+끝부분과 실제 픽셀의 방 경계 근처 0.8유닛 구간을 서서히 투명하게 표시한다.
+아래로 0.25유닛 이동과 최대 프레임 0.7초 유지는 유지한다. 현재 적용은 v14다.
+Boss Test Room에서 일반·각성 내려찍기가 벽 근처에서도 높이를 유지하며 자연스럽게 사라지는지 확인한다.
+최신 로그: `output/vfx-review-v1/unity-slam-independent-height.log`.
+
+2026-10-07 v13: 검광을 0.25유닛 아래로 이동하고, 방 안에 전체 이미지가 들어가도록
+비율을 보존해 최대 크기를 맞춘다. 셰이더로 맵 경계에서 잘라내던 처리를 제거했다.
+Boss Test Room에서 중앙·벽 근처, 일반·각성 내려찍기의 끝과 윗부분이 잘리지 않는지 확인한다.
+최신 로그: `output/vfx-review-v1/unity-slam-full-room-fit.log`. 현재 적용은 v13이다.
+
+2026-10-07 v12: 검광의 지면 기준선을 실제 경고 LineRenderer의 시작·끝 좌표에 직접 연결했다.
+본체 간격으로 별도 경로를 만드는 대신 일반·각성 각 경고의 고정된 위치·방향을 그대로 사용한다.
+Boss Test Room에서 경고 선을 본 뒤 타겟을 이동해도 내려찍기가 예고된 경로에 표시되는지 확인한다.
+최신 로그: `output/vfx-review-v1/unity-slam-path-alignment.log`. 현재 적용은 v12다.
+
+2026-10-07 v11: 용사용 지면 충격을 제거하고 검광을 좌우 반전했다. 시작점을 본체 쪽으로 당겼으며
+공격 포즈는 정지 중에도 조준 방향을 바라본다. 현재 적용은 v11이며 아래 v10·v9는 이전 이력이다.
+`Trickal Fan Game > Debug > Open Boss Test Room`에서 일반·각성 용사용 차징 중 타겟을
+좌우로 이동하여 바라보기, 내려찍기 좌우 방향과 본체에 가까워진 시작점을 확인한다.
+최신 자동 검증 로그: `output/vfx-review-v1/unity-slam-facing-verification.log`.
+
+2026-10-06 v10: v9의 검광 도형·지면 충격 반복이 검수 반려되어 두 스프라이트 시트를 새로 제작했다.
+현재는 `slam-light.png`의 최대 프레임을 0.7초 고정하고 `slam-ground.png`를 몸 앞에 한 번 표시한다.
+지면 파편을 방 길이에 따라 반복하거나 확대하지 않는다. 웹 검수 v10에서 두 레이어를 개별 확인한다.
+새 시트·셰이더·전투 회귀 검증이 통과했다(종료 코드 0).
+최신 로그: `output/vfx-review-v1/unity-painted-slam-verification.log`.
+아래 v9 기록은 이전 구현 이력이며 현재 적용은 v10이다.
+
+2026-10-06 v9: 용사용 내려찍기의 검광과 지면 충격을 별도 레이어로 합성했다.
+검광은 0.1초 내려온 뒤 최대 크기를 0.7초 유지하며 0.22초 동안 사라진다.
+지면 파편은 작은 조각을 이어 표시해 방 길이에 따라 커지지 않는다. 다음 Play부터 적용된다.
+검수 페이지의 `07 용사용 · 검광 + 지면 충격`에서 두 표시를 각각 켜고 끌 수 있다.
+자동 검증 및 회귀가 통과했다(종료 코드 0). 로그는
+`output/vfx-review-v1/unity-layered-slam-verification.log`다.
+`Trickal Fan Game > Debug > Open Boss Test Room`에서 크레용사용을 선택하고 Play하여
+일반·각성 내려찍기의 높이, 최대 크기 유지, 파편 크기와 왼쪽·대각선 방향을 검수한다.
+
+2026-10-06 검수본 v4를 런타임에 연결했다. 프리팹·씬 Setup을 다시 실행할 필요 없이 다음 Play부터 적용된다.
+[선택 에셋·적용·검증 기록](./art-prompts/reviewed-combat-effects.md)을 참조한다.
+
+- 자동 검사: `Trickal Fan Game > Effects > Verify Reviewed Combat Effects`.
+- 관련 전투 회귀 포함: `Trickal Fan Game > Effects > Verify Reviewed Effects With Combat Regressions`.
+- 배치: `-executeMethod TrickalFanGame.Editor.ReviewedCombatEffectsVerification.VerifyWithRegressionsBatch`.
+  Unity 6000.3.22f1에서 종료 코드 0 및 `Reviewed effects combat regressions passed.`를 확인했다.
+  로컬 로그는 `output/vfx-review-v1/unity-effects-verification.log`이다.
+
+Play 화면 검수:
+
+1. Game Scene(`Assets/Scenes/SampleScene.unity`)을 Play한다. 피해를 받은 뒤 `F1 > — Player — > Full HP`로
+   발 위치의 초록빛·상승 하트를 확인한다. 만피에서는 효과가 나오지 않는다.
+2. SP를 소비한 뒤 `F1 > — Player — > Full SP` 또는 실제 SP 획득으로 파란 입자의 몸 중심 흡수와
+   가까워질수록 옅어지는 표시를 확인한다. 회복이 연속되어도 회오리가 중복되지 않는다.
+3. 저학년 스킬 투사체가 적에게 닿으면 금빛 원형 폭발이 나오고, 벽·수명 종료에는 나오지 않는지 확인한다.
+4. 일반 적을 공격하면 빨간 윤곽과 반투명 빨간 점멸이 보이고, 플레이어 피격의 기존 무적 점멸은 유지되는지 확인한다.
+5. 돌진 적 예고에 주황 반투명 바탕과 넓은 빨간 화살표 3개가 같은 속도로 순환하는지 확인한다.
+6. `Trickal Fan Game > Debug > Open Boss Test Room`에서 새마음금고 점프의 평평한 착지 그림자를 확인한다.
+   크레용사용을 선택하면 근접 검격과 지면 내려찍기를 확인할 수 있다. 용사용 대시는 경로 예고를 표시하지 않는다.
+7. 캐릭터를 가리는 정도, 방 이동·전투 취소 후 잔여 효과, 일시정지 시 정지를 확인한다.
+
+자동 검사는 통과했으며, 위 Play 화면의 가독성 검수는 사용자 확인 전까지 완료로 표시하지 않는다.
+
+2026-10-06 v5: 크레용사용 근접 검격을 약 1.43배 확대했고 내려찍기는 별도 직선 검광 시트로
+분리했다. 경로 예고는 높이를 채우는 굵은 빨간 화살표이며, 보스 본체 크기에 맞춰 더 넓어진다.
+동일한 관련 전투 회귀 배치가 성공했고 종료 코드 0을 확인했다.
+로그: `output/vfx-review-v1/unity-effects-v5-verification.log`. 로컬 검수 페이지
+`http://127.0.0.1:8765/review.html`의 앞 세 카드와 `검수 프레임`에서 수정본을 비교한다.
