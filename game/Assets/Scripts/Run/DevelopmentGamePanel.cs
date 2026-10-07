@@ -47,6 +47,7 @@ namespace TrickalFanGame.Run
             if (invulnerable) MarkAssisted("Invulnerable");
             if (revealSecrets) MarkAssisted("Reveal secrets");
             if (DestructibleObstacle.DevelopmentForceNextSecretPit) MarkAssisted("Forced pit");
+            if (PlayerStats.DevelopmentForceBurnSource) MarkAssisted("Forced burn source");
 
             // Other systems clear explicit invulnerability (reset, ultimate end), so the toggle is re-applied.
             if (invulnerable) PlayerHealth(assembler)?.SetInvulnerable(true);
@@ -326,6 +327,7 @@ namespace TrickalFanGame.Run
             GUILayout.Label("— Obstacle —");
             RoomPrefab room = CurrentRoom(assembler);
             Transform player = assembler.Graph?.Player != null ? assembler.Graph.Player.transform : null;
+            DrawTreeBurnRows(assembler, room, player);
             RoomObstacleVariantSlot nearest = room == null || player == null
                 ? null
                 : room.GetComponentsInChildren<RoomObstacleVariantSlot>(false)
@@ -350,6 +352,24 @@ namespace TrickalFanGame.Run
                 obstacle.ApplyVariant(entry.Variant);
                 status = $"{obstacle.ObstacleId} is now {entry.Variant.VariantId}.";
             }
+        }
+
+        // Obstacle-7: no burn artifact exists yet, so the toggle stands in for holding one (assisted Run).
+        private static void DrawTreeBurnRows(RoomGraphAssembler assembler, RoomPrefab room, Transform player)
+        {
+            PlayerStats.DevelopmentForceBurnSource = GUILayout.Toggle(
+                PlayerStats.DevelopmentForceBurnSource, "Hold a burn artifact (trees catch fire)");
+            DestructibleObstacle tree = room == null || player == null
+                ? null
+                : room.GetComponentsInChildren<DestructibleObstacle>(false)
+                    .Where(obstacle => obstacle.BurnHits > 0 && !obstacle.IsBroken)
+                    .OrderBy(obstacle => (obstacle.transform.position - player.position).sqrMagnitude)
+                    .FirstOrDefault();
+            GUILayout.Label((tree != null
+                                ? $"Nearest tree {tree.ObstacleId}: {tree.HitsTaken}/{tree.RequiredHits} hits" +
+                                  (tree.IsBurning ? " BURNING" : string.Empty)
+                                : "No unbroken tree in this room.") +
+                            $"   burned this Run {assembler.Progress.BurnedObstacleCount}");
         }
 
         private static bool TrySpawnChest(RoomGraphAssembler assembler, ChestKind kind, out string message)

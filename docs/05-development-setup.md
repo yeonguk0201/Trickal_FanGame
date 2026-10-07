@@ -945,8 +945,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   TrickalFanGame.Editor.Week23Obstacle6Verification.SetupAndVerifyBatch -logFile <로그 경로>`다. Setup 2회 GUID, 폭탄
   반경 2와 폭탄 Prefab 공유, 폭발 상자의 2타·도화선 0.5초·적 30 피해·플레이어 1칸 피해·반경 2 안 장애물만 파괴·금고
   개봉·연쇄·1회 적용·재구성 시 미폭발, 랜덤박스의 seed 재현과 폭발 25%·쥬비 5마리 15%·지급 약 50%·네 결과의 배타성, 수집품 상자의 픽업
-  2개 확정·아티팩트 25%, 비행 중 금고 겹침 개봉(열쇠 1개, 열쇠 없으면 통과), 나무 Layout의 방 계약·512 seed 선택·비행
-  차단·폭탄 무시와 기존 기둥의 낮은 장애물 유지를 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-5와 그 안의
+  2개 확정·아티팩트 25%, 비행 중 금고 겹침 개봉(열쇠 1개, 열쇠 없으면 통과), 나무 Layout의 방 계약·512 seed 선택·높은
+  장애물 구성과 기존 기둥의 낮은 장애물 유지를 검사한다(나무의 파괴·비행 차단 규칙은 Obstacle-7 검증기). 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-5와 그 안의
   Obstacle-1·2·4, Difficulty-1, Encounter-4, Special-2·3, Terrain-0, 그리고 Flight-0, Chest-0, 개발 패널)다. 2026-10-06 두
   배치가 종료 코드 0으로 통과했다.
   수동 확인: Game Scene Play → 장애물이 있는 전투방에서 `F1` 패널 `— Obstacle —`의 `Make explosive-box`로 바꾼 뒤 2타로
@@ -954,7 +954,26 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   폭발·쥬비 5마리·픽업 3개·꽝 중 하나(방과 슬롯마다 고정), `Make mayo-collection-box`는 항상 픽업 2개가 나온다. 폭탄(F)의 폭발
   범위가 전보다 작은지 본다. `Golden exclusive`의 가짜 날개를 얻어 비행한 뒤 `Make sist-vault`와 `+10 Key`로 금고 위를
   지나가면 열쇠 1개가 줄고 열린다. seed를 바꿔 `basic-tree-grove` 방(초록 나무 4그루)을 찾아 걸어서도 비행으로도 나무를
-  통과하지 못하고, 공격·폭탄으로 부서지지 않으며 투사체가 막히는지 본다.
+  통과하지 못하고 투사체가 막히는지 본다. 나무의 파괴 규칙은 Obstacle-7에서 바뀌었다(아래).
+
+- Obstacle-7 나무 파괴·화상 발화: 별도 Setup 메뉴는 없고 Obstacle-6 Setup(`Week23Obstacle6Setup`)이 나무를 종류가 고정된
+  `DestructibleObstacle`(`tree`, 4타, 드롭 표 없음, 비행 차단, 발화 2타)로 만든다. 이전의 `RoomStaticObstacle`은 같은
+  오브젝트에서 제거한다. 이 Setup은 Layout Prefab을 원본에서 다시 만들기 때문에 실행할 때마다
+  `room-basic-tree-grove.prefab` 내부 fileID가 바뀐다(Prefab GUID와 내용은 유지).
+  자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Obstacle-7 Tree Breaking`, 배치는 Unity `-batchmode -nographics
+  -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week23Obstacle7Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 GUID, Layout 방 계약과 나무 4그루의 구성(고정 장애물·후보 슬롯 없음), 512 seed에서
+  드롭·폭발·적·희귀 아이템 없음, 1~3타 동안 비행 차단 유지와 4타 파괴, 폭탄 파괴, 재구성 시 부서진 상태 복원, 화상
+  아티팩트 보유 시 2타 발화(1타에는 미발화)·불타는 중 비행 차단·불탄 채 파괴의 Run 기록 1회, 3타 뒤 보유 시 미발화,
+  폭탄의 불탄 나무/불붙지 않은 나무 구분, 일반 장애물 미발화, 재구성 시 중복 기록 없음, 새 Run 초기화, 개발 패널 토글,
+  Game Scene 조립 경로에서 방 상태·플레이어 스탯 연결을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-6과
+  그 회귀 전체, Enemy-6, Special-3)다. 2026-10-06 두 배치가 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → seed를 바꿔 `basic-tree-grove` 방(초록 나무 4그루)에 들어간다. `F1` 패널 `— Obstacle —`의
+  `Nearest tree … n/4 hits` 줄로 타수를 본다. (1) 토글을 끈 채 나무를 4번 때리면 점점 어두워지다 부서지고 아무것도 나오지
+  않는다. 부서지기 전에는 걸어서도 `Golden exclusive`의 가짜 날개로 비행해서도 통과하지 못하고, 부서진 칸은 지나갈 수
+  있다. (2) 다른 나무 옆에 폭탄(F)을 놓으면 한 번에 부서진다. (3) `Hold a burn artifact (trees catch fire)`를 켜고 나무를
+  2번 때리면 주황색으로 불타고 줄에 `BURNING`이 뜨며, 2번 더 때리면 부서지고 `burned this Run`이 1 늘어난다. (4) 방을
+  나갔다 돌아와도 부서진 나무는 다시 생기지 않고 `burned this Run`이 다시 늘지 않는다.
 
 - Enemy-6 쥬비: 메뉴 `Trickal Fan Game > Week 23 > Setup Enemy-6 Jyubi`가 추적형 적 Prefab을 풀어 복사한
   `Assets/Prefabs/JyubiEnemy.prefab`을 만들고(근접 공격·이동 애니메이션 컴포넌트 제거, 크기 0.5, 체력 1, 속도 5.5, 비행
@@ -1011,7 +1030,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   -logFile <로그 경로>`다. Setup 2회 레이어 보존, 충돌 표(발밑은 지형만, 몸통은 지형 제외·Default·Enemy·Pickup 유지),
   4개 Scene의 몸통 원 1개와 발밑 자식 1개, 물리 시뮬레이션에서 벽·구덩이에 위·아래·옆으로 걸어가 발밑 위치에서 멈추는지,
   0.8 틈은 지나고 0.4 틈은 막히는지, 적의 몸은 몸통 원에서 멈추는지, 몸통만 닿은 문 트리거는 진입으로 세지 않는지를
-  검사한다. 회귀는 `VerifyWithRegressionsBatch`(Move-1·Door-1·Terrain-0·Chest-0·Chest-2·Flight-0·Obstacle-0·1·5·6·
+  검사한다. 회귀는 `VerifyWithRegressionsBatch`(Move-1·Door-1·Terrain-0·Chest-0·Chest-2·Flight-0·Obstacle-0·1·5·6·7·
   Enemy-6·Passive-1·`FairyVillageArtworkVerification`·Corner-0·`Week7HighGradeSkillVerification`의 `Verify`)다.
   2026-10-06 두 배치가 종료 코드 0으로 통과했다. `Player` 레이어에 임시 플레이어를 만들던 검증기는 발밑을 붙이거나
   `PlayerFeet` 레이어의 몸을 쓰도록 고쳤다.
@@ -1324,6 +1343,8 @@ Unity 메뉴: `Trickal Fan Game > Artwork > Verify Crayon Hero Golden Attacks`.
 2026-10-06 추가 조정: 내려찍기 전체 차징에 일반·각성 모두 1.35초씩 추가했다. 일반은 1.50 → 2.85초, 각성은 1.214 → 2.564초이다. BossPatternDefinition.additionalTelegraphDuration은 페이즈 배속을 적용한 예고에 고정 시간으로 더하며, 해당 Prefab과 Setup의 내려찍기만 1.35로 설정했다. 방향 고정 0.2초와 아우라 3단계/피해 동기화는 유지한다. Unity CrayonHeroAttackAnimationVerification.Verify가 종료 코드 0으로 통과했다(로그: game/Logs/CrayonHeroChargeExtensionVerification.log). 실제 화면 확인은 별도다.
 
 ### 검수한 공통 전투 이펙트
+
+앞으로의 제작·검수 기준은 [전투 이펙트 제작 가이드](./25-combat-effects-guide.md)를 따른다.
 
 2026-10-07 v14: 전체 축소를 제거하고 검광 높이를 유지한다. 경로 길이만 벽 앞까지 맞추며,
 끝부분과 실제 픽셀의 방 경계 근처 0.8유닛 구간을 서서히 투명하게 표시한다.

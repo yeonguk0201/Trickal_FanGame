@@ -131,6 +131,7 @@ Layout 검증을 우회하므로 Game Scene이 아닌 별도 테스트 씬(아�
 - [x] 23주차 Obstacle-5(2026-10-06): `— Obstacle —` 섹션 추가. 현재 방에서 플레이어와 가장 가까운 부서지지 않은 후보 슬롯의 ID·종류를 표시하고 `Make <종류>` 버튼으로 특수 장애물 표의 종류로 바꾼다(보조 Run, 방을 재구성하면 seed의 종류로 돌아간다). 패널 회귀 `Week20DevPanelVerification.Verify`와 종류 동작 `Week23Obstacle5Verification` 통과, 버튼 조작은 수동 확인 대기. Obstacle-6의 폭발 상자·랜덤박스·수집품 상자도 같은 표에 있어 버튼이 자동으로 늘어난다(패널 코드 변경 없음)
 - [x] 23주차 Enemy-6(2026-10-06): `— Obstacle —`에 `Next broken random box releases enemies` 토글 추가. 켜면 적을 내보낼 수 있는 종류(셰이디의 랜덤박스)의 다음 파괴가 seed 결과 대신 쥬비 5마리를 내보내고 한 번 쓰면 꺼진다(보조 Run). 패널 회귀 `Week20DevPanelVerification.Verify`는 Enemy-6 회귀 배치에 포함, 토글 조작은 수동 확인 대기
 - [x] 23주차 Passive-1(2026-10-06): `— Artifact —` 섹션 추가. `Show artifact drops (N)`을 켜면 활성 아티팩트 에셋 전체(황금 전용 제외, Editor 전용 자동 수집)의 `Drop <이름> (보유/최대)` 버튼이 나오고, 일반 `ItemPickup` 획득 경로로 줍는다(보조 Run). 새 아티팩트는 패널 코드 변경 없이 목록에 나온다. 앞으로 아티팩트·스펠 구현 조각은 개발 패널 획득 경로를 함께 넣는다(`AGENTS.md`). 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 버튼 조작은 수동 확인 대기
+- [x] 23주차 Obstacle-7(2026-10-06): `— Obstacle —` 맨 위에 `Hold a burn artifact (trees catch fire)` 토글과 `Nearest tree <ID>: n/4 hits [BURNING]   burned this Run N` 줄 추가. 화상 아티팩트가 아직 없어 토글이 보유를 대신한다(보조 Run, `PlayerStats.DevelopmentForceBurnSource`). 화상 아티팩트가 구현되면 `— Artifact —`의 `Drop`으로 얻어 같은 줄로 확인한다. 패널 회귀 `Week20DevPanelVerification.Verify`(플래그 기본값 꺼짐)와 `Week23Obstacle7Verification` 통과, 토글 조작은 수동 확인 대기
 - [ ] 2단계: 적·장애물 배치 전용 테스트 씬
 
 - 공통 Editor 구성 유틸리티

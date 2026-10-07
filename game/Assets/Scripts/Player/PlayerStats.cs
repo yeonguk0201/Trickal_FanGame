@@ -56,6 +56,7 @@ namespace TrickalFanGame.Player
         private float projectileLifetimePercentBonus;
         private float projectileSizePercentBonus;
         private PoisonSettings basicAttackPoison;
+        private int burnSourceCount;
 
         public float MaxHealth => baseMaxHealth + maxHealthBonus;
         public float AttackDamage =>
@@ -98,6 +99,22 @@ namespace TrickalFanGame.Player
             Mathf.Min(1f + projectileSizePercentBonus, ProjectileSizing.MaximumPlayerBasicSizeMultiplier);
         public PoisonSettings BasicAttackPoison => basicAttackPoison;
         public ProjectileHitEffects BasicAttackHitEffects => new(true, basicAttackPoison);
+        // Obstacle-7: whether the player holds a burn artifact. No burn artifact exists yet; the piece that adds
+        // one calls AddBurnSource from its effect.
+        public bool HasBurnSource
+        {
+            get
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                if (DevelopmentForceBurnSource) return true;
+#endif
+                return burnSourceCount > 0;
+            }
+        }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Development panel only: the player counts as holding a burn artifact.
+        public static bool DevelopmentForceBurnSource { get; set; }
+#endif
         public bool IsBelowMoveSpeedHealthThreshold =>
             moveSpeedPercentBelowHealthBonus > 0f && health != null && !health.IsDead &&
             (health.CurrentHealth <= health.MaxHealth * moveSpeedHealthThreshold ||
@@ -317,6 +334,8 @@ namespace TrickalFanGame.Player
         {
             playerSizePercentBonus = Mathf.Max(0f, playerSizePercentBonus + amount);
         }
+
+        public void AddBurnSource() => burnSourceCount++;
 
         // Sources of the same status effect add their chances (up to 100%); the other values follow the latest one.
         public void AddBasicAttackPoison(

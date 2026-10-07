@@ -20,6 +20,8 @@ namespace TrickalFanGame.Room
         public int CurrentFloor { get; private set; }
         public int CurrentRoom { get; private set; }
         public int KillCount { get; private set; }
+        // Obstacle-7: obstacles (trees) broken while burning in this Run, for a later character unlock.
+        public int BurnedObstacleCount { get; private set; }
         public bool IsProgressionStopped { get; private set; }
         public bool HasClearedFinalBoss { get; private set; }
         public GeneratedFloorGraph GeneratedGraph { get; private set; }
@@ -261,11 +263,20 @@ namespace TrickalFanGame.Room
             }
         }
 
+        public void RecordBurnedObstacle()
+        {
+            if (!IsProgressionStopped)
+            {
+                BurnedObstacleCount++;
+            }
+        }
+
         public void ResetProgress()
         {
             CurrentFloor = 0;
             CurrentRoom = 0;
             KillCount = 0;
+            BurnedObstacleCount = 0;
             IsProgressionStopped = false;
             HasClearedFinalBoss = false;
             GeneratedGraph = null;

@@ -57,7 +57,6 @@ namespace TrickalFanGame.Editor
             ValidateCollectionBox(collection, assembler);
             ValidateFlyingVault(vault);
             ValidateTreeLayout(generator);
-            ValidateTreeBlocksFlight();
             Debug.Log("Obstacle-6 verification passed: setup is idempotent, the player bomb and exploding obstacles " +
                       "share one radius-2 explosion, the exploding box arms a 0.5-second fuse on its 2nd hit or a " +
                       "bomb, hurts enemies and the player, breaks obstacles, chains to the next box and opens a " +
@@ -65,7 +64,7 @@ namespace TrickalFanGame.Editor
                       "replays an explosion, five Jyubi, three pickups or nothing per seed, Mayo's collection box always " +
                       "leaves two pickups with an artifact a quarter of the time, a flying player opens a vault " +
                       "by overlapping it with a key, and basic-tree-grove passes the room contract with four " +
-                      "trees that nothing breaks and a flying player cannot pass.");
+                      "trees while the central pillar stays a low obstacle. Obstacle-7 verifies the trees.");
         }
 
         [MenuItem("Trickal Fan Game/Week 23/Verify Obstacle-6 With Regressions")]
@@ -377,19 +376,20 @@ namespace TrickalFanGame.Editor
                    template.LayoutDifficultyModifier == Week19Difficulty1Setup.ObstacleLayoutModifier,
                 "The basic-tree-grove Layout must use the Basic profile and the obstacle Layout modifier.");
 
-            RoomStaticObstacle[] trees = template.RoomPrefabAsset.GetComponentsInChildren<RoomStaticObstacle>(true);
+            // Obstacle-7 turned the trees into breakable high obstacles; its verification checks their rules.
+            DestructibleObstacle[] trees =
+                template.RoomPrefabAsset.GetComponentsInChildren<DestructibleObstacle>(true);
             Assert(trees.Length == Week23Obstacle6Setup.TreeCells.Length &&
                    trees.Select(tree => tree.ObstacleId).Distinct().Count() == trees.Length,
                 "The basic-tree-grove Layout must hold its four trees once each.");
-            foreach (RoomStaticObstacle tree in trees)
+            foreach (DestructibleObstacle tree in trees)
             {
                 BoxCollider2D box = tree.GetComponent<BoxCollider2D>();
                 Assert(tree.TryValidate(out error) && tree.BlocksFlight && box != null && box.size == Vector2.one &&
-                       !RoomMovementClass.IsLowObstacle(box) && tree.GetComponent<DestructibleObstacle>() == null &&
-                       tree.GetComponent<RoomObstacleVariantSlot>() == null &&
+                       !RoomMovementClass.IsLowObstacle(box) &&
                        Week23Obstacle6Setup.TreeCells.Any(cell =>
                            Vector2.Distance(cell, tree.transform.localPosition) < 0.001f),
-                    $"Tree '{tree.ObstacleId}' must be a fixed 1x1 high obstacle on its authored cell. {error}");
+                    $"Tree '{tree.ObstacleId}' must be a 1x1 high obstacle on its authored cell. {error}");
             }
 
             RoomTemplateDefinition pillar = generator.RoomTemplates.Single(candidate =>
@@ -408,40 +408,6 @@ namespace TrickalFanGame.Editor
             }
 
             Assert(selected, "The basic-tree-grove Layout was never selected across 512 generated seeds.");
-        }
-
-        private static void ValidateTreeBlocksFlight()
-        {
-            GameObject root = new("Obstacle-6 Tree Verification");
-            try
-            {
-                GameObject tree = new("Tree", typeof(BoxCollider2D), typeof(RoomStaticObstacle));
-                tree.transform.SetParent(root.transform);
-                tree.transform.position = Origin + Vector2.right;
-                tree.layer = LayerMask.NameToLayer(RoomMovementClass.EnvironmentLayerName);
-                tree.GetComponent<RoomStaticObstacle>().Configure("tree-01");
-                tree.GetComponent<RoomStaticObstacle>().ConfigureHeight(true);
-
-                GameObject stone = new("Low Obstacle", typeof(BoxCollider2D), typeof(RoomStaticObstacle));
-                stone.transform.SetParent(root.transform);
-                stone.transform.position = Origin + Vector2.left;
-                stone.layer = tree.layer;
-                stone.GetComponent<RoomStaticObstacle>().Configure("stone-01");
-
-                PlayerFlight flight = CreateFlyingBody(root.transform, Origin);
-                Physics2D.SyncTransforms();
-                flight.IgnoreNearbyLowObstacles();
-                Assert(flight.IsIgnoring(stone.GetComponent<Collider2D>()) &&
-                       !flight.IsIgnoring(tree.GetComponent<Collider2D>()),
-                    "A flying player must pass a low obstacle and still collide with a tree.");
-                Assert(DestructibleObstacle.DestroyByBombInCircle(Origin, 3f) == 0 && tree.activeSelf,
-                    "A bomb must not break a tree.");
-            }
-            finally
-            {
-                Object.DestroyImmediate(root);
-                Physics2D.SyncTransforms();
-            }
         }
 
         private static PlayerFlight CreateFlyingBody(Transform parent, Vector2 position)

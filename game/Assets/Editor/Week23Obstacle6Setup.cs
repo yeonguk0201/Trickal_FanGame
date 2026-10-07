@@ -11,8 +11,9 @@ using Object = UnityEngine.Object;
 namespace TrickalFanGame.Editor
 {
     // Obstacle-6: the rest of the §6.1 obstacles. The exploding box, 셰이디의 랜덤박스 and 마요의 수집품 상자 are kinds
-    // of the special obstacle table that Obstacle-5 setup builds; this adds the high obstacle (a tree, which nothing
-    // breaks and not even a flying player passes) with one authored Basic Layout under a new template ID.
+    // of the special obstacle table that Obstacle-5 setup builds; this adds the high obstacle (a tree, which not even
+    // a flying player passes) with one authored Basic Layout under a new template ID.
+    // Obstacle-7: a tree is a fixed-kind DestructibleObstacle that breaks from 4 hits or a bomb and drops nothing.
     // Re-running updates the same assets and keeps their GUIDs.
     public static class Week23Obstacle6Setup
     {
@@ -23,7 +24,11 @@ namespace TrickalFanGame.Editor
         public const string TemplatePath = Week14Room1Setup.TemplateFolder + "/" + TemplateId + ".asset";
         public const string PrefabPath = Week8GridFloorSetup.PrefabFolder + "/room-" + TemplateId + ".prefab";
 
+        public const int TreeHits = DestructibleObstacle.DefaultRequiredHits;
+
         public static readonly Color TreeColor = new(0.13f, 0.4f, 0.2f);
+        public static readonly Color TreeCrackedColor = new(0.2f, 0.16f, 0.1f);
+        public static readonly Color TreeBurningColor = new(0.95f, 0.45f, 0.1f);
 
         // Four single trees around the middle; both door axes and the room center stay open.
         public static readonly Vector2[] TreeCells =
@@ -70,8 +75,8 @@ namespace TrickalFanGame.Editor
             Week19Encounter4Setup.Setup();
             AssetDatabase.SaveAssets();
             Debug.Log("Obstacle-6 ready: the exploding box, Shady's random box and Mayo's collection box join the " +
-                      "special obstacle table, and basic-tree-grove adds four trees that block flight to the Normal " +
-                      "room catalog on every floor.");
+                      "special obstacle table, and basic-tree-grove adds four breakable trees that block flight to " +
+                      "the Normal room catalog on every floor.");
         }
 
         public static string[] CreatedAssetPaths() => new[] { TemplatePath, PrefabPath };
@@ -125,9 +130,13 @@ namespace TrickalFanGame.Editor
                     Vector2 spriteSize = sprite.bounds.size;
                     visual.transform.localScale = new Vector3(1f / spriteSize.x, 1f / spriteSize.y, 1f);
 
-                    RoomStaticObstacle obstacle = GetOrAdd<RoomStaticObstacle>(tree);
-                    obstacle.Configure(id);
-                    obstacle.ConfigureHeight(true);
+                    // Before Obstacle-7 a tree was a fixed RoomStaticObstacle.
+                    if (tree.TryGetComponent(out RoomStaticObstacle fixedObstacle))
+                        Object.DestroyImmediate(fixedObstacle);
+                    DestructibleObstacle obstacle = GetOrAdd<DestructibleObstacle>(tree);
+                    obstacle.Configure(id, TreeHits, null, renderer);
+                    obstacle.ConfigureFixedKind(DestructibleObstacle.TreeVariantId, TreeColor, TreeCrackedColor, true,
+                        DestructibleObstacle.TreeBurnHits, TreeBurningColor);
                     if (!obstacle.TryValidate(out string error)) throw new InvalidOperationException(error);
                     kept.Add(tree);
                 }

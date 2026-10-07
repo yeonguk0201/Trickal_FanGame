@@ -14,11 +14,16 @@ namespace TrickalFanGame.Room
     // state keeps it broken across revisits and floor reloads.
     // Obstacle-5: a resource variant may leave several pickups from one successful drop roll, and a vault variant
     // ignores hits and opens only from a player bomb or one key spent on touch, with a rare extra spell or artifact.
+    // Obstacle-7: a tree is a fixed kind that still blocks a flying player until it breaks, drops nothing, and
+    // catches fire on its 2nd hit while the player holds a burn artifact. Breaking a burning one is recorded on the
+    // Run for a later character unlock.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider2D))]
     public sealed class DestructibleObstacle : MonoBehaviour
     {
         public const int DefaultRequiredHits = 4;
+        public const int TreeBurnHits = 2;
+        public const string TreeVariantId = "tree";
         public const uint DropSeedSalt = 0x27D4EB2Fu;
         public const uint ExtraDropSeedSalt = 0x51ED270Bu;
         public const uint RareItemSeedSalt = 0x6A09E667u;
@@ -34,6 +39,11 @@ namespace TrickalFanGame.Room
         [SerializeField] private SpriteRenderer visual;
         [SerializeField] private Color intactColor = new(0.62f, 0.45f, 0.3f);
         [SerializeField] private Color crackedColor = new(0.3f, 0.2f, 0.14f);
+        [Tooltip("나무 같은 높은 장애물입니다. 켜면 부서지기 전까지 비행 중인 플레이어도 지나가지 못합니다.")]
+        [SerializeField] private bool blocksFlight;
+        [Tooltip("화상 아티팩트를 가진 플레이어가 이만큼 때리면 불이 붙습니다. 0이면 불타지 않습니다.")]
+        [SerializeField, Min(0)] private int burnHits;
+        [SerializeField] private Color burningColor = new(0.95f, 0.45f, 0.1f);
 
         private RoomRunState runState;
         private RunProgress runProgress;
@@ -44,17 +54,25 @@ namespace TrickalFanGame.Room
         private ObstacleVariantDefinition variant;
         private IReadOnlyList<ItemDefinition> rareArtifactPool;
         private PlayerInventory rareItemInventory;
+        private PlayerStats burnSource;
         private readonly List<GameObject> lastDrops = new();
         private readonly List<GameObject> lastEnemies = new();
         private int dropSeed;
         private int hitsTaken;
         private bool isBroken;
+        private bool isBurning;
 
         public string ObstacleId => obstacleId;
         public string VariantId => variantId;
         public int RequiredHits => Mathf.Max(1, requiredHits);
         public int HitsTaken => hitsTaken;
         public bool IsBroken => isBroken;
+        public bool BlocksFlight => blocksFlight;
+        public int BurnHits => burnHits;
+        // Burning is not kept across a room rebuild, like the hit count; only a broken obstacle is.
+        public bool IsBurning => isBurning;
+        // Whether the obstacle was burning when it broke.
+        public bool BrokeWhileBurning => isBroken && isBurning;
         public ResourceDropTable DropTable => dropTable;
         public int DropSeed => dropSeed;
         public ObstacleBreakRule BreakRule => variant != null ? variant.BreakRule : ObstacleBreakRule.Hits;
@@ -86,6 +104,20 @@ namespace TrickalFanGame.Room
             visual = configuredVisual;
         }
 
+        // A fixed kind authored in a Layout instead of resolved from a variant table.
+        public void ConfigureFixedKind(string configuredVariantId, Color configuredIntactColor,
+            Color configuredCrackedColor, bool configuredBlocksFlight, int configuredBurnHits,
+            Color configuredBurningColor)
+        {
+            variantId = configuredVariantId;
+            intactColor = configuredIntactColor;
+            crackedColor = configuredCrackedColor;
+            blocksFlight = configuredBlocksFlight;
+            burnHits = Mathf.Max(0, configuredBurnHits);
+            burningColor = configuredBurningColor;
+            if (visual != null) visual.color = intactColor;
+        }
+
         public void ApplyVariant(ObstacleVariantDefinition variant)
         {
             if (variant == null) throw new ArgumentNullException(nameof(variant));
@@ -104,6 +136,9 @@ namespace TrickalFanGame.Room
             rareArtifactPool = artifactPool;
             rareItemInventory = inventory;
         }
+
+        // The player whose burn artifacts set this obstacle on fire.
+        public void BindBurnSource(PlayerStats stats) => burnSource = stats;
 
         // Called when the room is built. A broken state from an earlier visit removes the obstacle immediately, and a
         // secret pit it left is restored because the pit is part of the room, not a one-time pickup. Without a
@@ -225,9 +260,19 @@ namespace TrickalFanGame.Room
         {
             if (isBroken || !isActiveAndEnabled || BreakRule != ObstacleBreakRule.Hits) return false;
             hitsTaken++;
+            // Holding a burn artifact is enough; its burn chance is not rolled. The hit that breaks the obstacle
+            // does not light it.
+            if (!isBurning && burnHits > 0 && hitsTaken >= burnHits && hitsTaken < RequiredHits &&
+                burnSource != null && burnSource.HasBurnSource)
+            {
+                isBurning = true;
+            }
+
             if (visual != null)
             {
-                visual.color = Color.Lerp(intactColor, crackedColor, hitsTaken / (float)RequiredHits);
+                visual.color = isBurning
+                    ? burningColor
+                    : Color.Lerp(intactColor, crackedColor, hitsTaken / (float)RequiredHits);
             }
 
             if (hitsTaken >= RequiredHits) Break();
@@ -326,6 +371,7 @@ namespace TrickalFanGame.Room
         {
             isBroken = true;
             bool firstBreak = runState == null || runState.TryMarkObstacleDestroyed(obstacleId);
+            if (firstBreak && isBurning && runProgress != null) runProgress.RecordBurnedObstacle();
             if (firstBreak && TryRollDevelopmentPit(out ResourceDropEntry forcedPit)) SpawnDrop(forcedPit);
             else if (firstBreak && TryForceDevelopmentEnemies()) SpawnEnemies();
             else if (firstBreak && TryRollExplosion()) SpawnExplosion();
