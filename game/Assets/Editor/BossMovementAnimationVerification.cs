@@ -38,15 +38,15 @@ namespace TrickalFanGame.Editor
                         "The original sprite must have exactly one visible presentation.");
                     if (i == 2)
                     {
-                        Require(animator.WalkFrameCount == 4, "Crayon Hero needs four drawn walking poses.");
-                        for (int frame = 0; frame < 4; frame++)
+                        Require(animator.WalkFrameCount == 8, "Crayon Hero needs eight drawn walking poses.");
+                        for (int frame = 0; frame < 8; frame++)
                         {
                             Sprite sprite = animator.GetWalkFrame(frame);
                             Require(sprite != null && sprite.rect.size == new Vector2(512f, 512f) &&
                                     sprite.pivot == new Vector2(256f, 256f) && Mathf.Approximately(sprite.pixelsPerUnit, 400f),
                                 "Crayon frames must share scale and registration.");
                             for (int other = 0; other < frame; other++) Require(sprite != animator.GetWalkFrame(other), "Crayon walk poses must be distinct.");
-                            animator.RenderPose((frame + 0.1f) / 4f, true);
+                            animator.RenderPose((frame + 0.1f) / 8f, true);
                             Require(animator.Artwork.sprite == sprite && animator.Artwork.transform.localScale == Vector3.one,
                                 "Crayon walking must play poses without elastic deformation.");
                         }

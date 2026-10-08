@@ -1256,7 +1256,7 @@ Play Mode에서 새 Run의 네 적을 만나 준비→공격→회복→이동 �
 
 ### 보스 이동 모션
 
-기존 부스러기·새마음금고는 띠용띠용 이동, 크레용사용은 망토·팔이 조금씩 움직이는 4포즈 걷기를 사용한다.
+기존 부스러기·새마음금고는 띠용띠용 이동, 크레용사용은 망토·다리·칼·방패가 움직이는 8포즈 걷기를 사용한다.
 새마음금고의 바닥 보물은 본체의 작은 도약과 공격 점프 중 바닥에 남고 착지 때 압축·반동한다.
 
 - 적용: `Trickal Fan Game > Artwork > Setup Boss Movement Animations`
@@ -1454,6 +1454,26 @@ Unity 메뉴: `Trickal Fan Game > Artwork > Verify Crayon Hero Golden Attacks`.
 ### 검수한 공통 전투 이펙트
 
 앞으로의 제작·검수 기준은 [전투 이펙트 제작 가이드](./25-combat-effects-guide.md)를 따른다.
+
+2026-10-08 v21: 웹 검수한 분리 검광 3개·뾰족한 지면 충격파·흙과 돌 입자 시트를 Unity에 연결했다.
+현재 내려찍기는 `SlamLightEffect.PlayPath` → `LayeredSlamEffect`로 표시한다.
+Resources 원화를 런타임에 불러오므로 Scene/Prefab Setup 재실행 없이 다음 Play부터 적용된다.
+검광은 0.14초 내려온 뒤 최대 형태를 0.7초 유지하고 0.28초 소멸한다.
+피해 시점·범위는 기존 공격 로직을 유지한다. 지면 충격파는 접지 후 0.58초 이내, 파편은 접지 후 0.90초 이내 제거한다.
+기존 0.8유닛의 넓은 경계 감쇠 대신 0.035유닛의 좁은 경계 처리로 변경했다.
+극히 짧은 경로는 원화 전체를 압축하지 않고 오른쪽 원화 창을 표시하므로 전체 실루엣과는 차이가 있다.
+
+- 자동 검사: `Trickal Fan Game > Effects > Verify Reviewed Effects With Combat Regressions`.
+- 배치: `TrickalFanGame.Editor.ReviewedCombatEffectsVerification.VerifyWithRegressionsBatch`.
+- 로그: `game/Logs/LayeredSlamV21Verification.log`.
+- 2026-10-08 위 배치 실행 종료 코드 0, `Layered slam v21 passed`·`Reviewed effects combat regressions passed.` 확인.
+- 수동 미술 검수: `Trickal Fan Game > Debug > Open Boss Test Room` → Play →
+  `Boss 3 - Crayon Hero` 선택. 일반·각성 내려찍기를 중앙·벽 근처와 좌우·대각선으로 확인한다.
+  경고 경로보다 0.25유닛 낮은 접지선, 0.7초 최대 유지, 바닥의 앞뒤 확산, 작은 파편의 낙하·소멸을 확인한다.
+  특히 벽 상단의 잘림, 극단적으로 짧은 경로의 잘린 실루엣과 각성 3중 합성 가독성은 실제 Play 검수 전이다.
+  자동 검증 통과를 미술 검수 완료로 처리하지 않는다.
+
+아래 v14 이하의 현재 적용 문구는 당시 기록이다. 최신 적용은 v21이다.
 
 2026-10-07 v14: 전체 축소를 제거하고 검광 높이를 유지한다. 경로 길이만 벽 앞까지 맞추며,
 끝부분과 실제 픽셀의 방 경계 근처 0.8유닛 구간을 서서히 투명하게 표시한다.

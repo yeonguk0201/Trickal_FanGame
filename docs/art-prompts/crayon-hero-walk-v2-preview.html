@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>용사용 걷기 모션 v3</title>
+<style>body{margin:0;background:#202833;color:#edf2f5;font:16px system-ui;text-align:center}main{max-width:900px;margin:32px auto;padding:20px}h1{font-size:26px}canvas{display:block;margin:24px auto;width:min(80vw,440px);height:auto;background:radial-gradient(ellipse,#586153,#303c36);border-radius:16px}button,input{margin:8px;font:inherit}button{padding:8px 18px;border:0;border-radius:8px}p{color:#bdc8ce}img{width:100%;background:#384339;border-radius:10px}details{margin-top:30px}label{display:inline-block}</style>
+<main><h1>용사용 · 걷기 모션 v3</h1><p>8프레임 반복 · 망토 펄럭임 · 다리 교차 · 칼과 방패의 작은 흔들림</p>
+<canvas id="stage" width="512" height="512" aria-label="용사용 걷기 반복 애니메이션"></canvas>
+<button id="toggle">일시 정지</button><button id="next">다음 프레임</button>
+<label>초당 프레임 <input id="fps" type="range" min="4" max="16" value="10"><output id="rate">10</output></label>
+<p id="counter"></p><p>제작 초안 미리보기입니다. 게임 연결과 Play 검수는 별도입니다.</p>
+<details><summary>전체 프레임 시트</summary><img id="sheet" alt="4열 2행의 걷기 8프레임"></details></main>
+<script>
+const source=new Image();source.src="crayon-hero-walk-v3-spaced-sheet.png";
+const ctx=document.getElementById("stage").getContext("2d");
+let frame=0,playing=true,last=0;
+const fps=document.getElementById("fps"),counter=document.getElementById("counter");
+function draw(){ctx.clearRect(0,0,512,512);const w=source.naturalWidth/4,h=source.naturalHeight/2;const scale=Math.min(480/w,480/h),dw=w*scale,dh=h*scale;ctx.drawImage(source,(frame%4)*w,Math.floor(frame/4)*h,w,h,(512-dw)/2,(512-dh)/2,dw,dh);counter.textContent=(frame+1)+" / 8";}
+source.onload=()=>{document.getElementById("sheet").src=source.src;draw();};
+source.onerror=()=>{counter.textContent="이미지를 불러오지 못했습니다.";};
+document.getElementById("toggle").onclick=()=>{playing=!playing;document.getElementById("toggle").textContent=playing?"일시 정지":"재생";};
+document.getElementById("next").onclick=()=>{playing=false;document.getElementById("toggle").textContent="재생";frame=(frame+1)%8;draw();};
+fps.oninput=()=>{document.getElementById("rate").textContent=fps.value;};
+function tick(now){if(playing&&source.complete&&source.naturalWidth&&now-last>=1000/Number(fps.value)){frame=(frame+1)%8;draw();last=now;}requestAnimationFrame(tick);}requestAnimationFrame(tick);
+</script></html>

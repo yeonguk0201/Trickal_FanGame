@@ -29,7 +29,7 @@ namespace TrickalFanGame.Editor
             }
             foreach (string name in new[] { "sp-mote", "warning-chevron", "landing-shadow" })
                 Assert(CombatEffectArtwork.Frames(name).Length == 1, name + " is missing.");
-            foreach (string name in new[] { "EnemyHitOverlay", "ChargeWarning", "GroundSlam", "SlamLight" })
+            foreach (string name in new[] { "EnemyHitOverlay", "ChargeWarning", "GroundSlam", "SlamLight", "LayeredSlam" })
             {
                 Material material = CombatEffectArtwork.Material(name);
                 Assert(material != null && !ShaderUtil.ShaderHasError(material.shader), name + " shader failed to import.");
@@ -43,22 +43,77 @@ namespace TrickalFanGame.Editor
             ValidateWarningPathAlignment();
             ValidateIndependentSlamHeight();
             ValidateSlamLightTiming();
-            Debug.Log("Reviewed combat effects verification passed: nine alpha textures, eight-frame sheets, " +
-                      "five shaders, bounded slam layout, independent light with sustained peak, actual HP/SP recovery events, and no recovery VFX for resets, overheal or spending.");
+            ValidateLayeredSlam();
+            Debug.Log("Reviewed combat effects verification passed: legacy alpha sheets and five layered slam textures, " +
+                      "six shaders, bounded slam layout, independent light with sustained peak, actual HP/SP recovery events, and no recovery VFX for resets, overheal or spending.");
         }
 
         private static void ValidateSlamLightTiming()
         {
             Assert(SlamLightEffect.StrengthAt(-0.1f) == 0f && SlamLightEffect.StrengthAt(0f) == 0f,
                 "Slam light must begin without a premature flash.");
-            Assert(Mathf.Approximately(SlamLightEffect.StrengthAt(0.05f), 0.5f),
+            Assert(Mathf.Approximately(SlamLightEffect.StrengthAt(SlamLightEffect.FallSeconds*0.5f), 0.5f),
                 "The descending light must build up before reaching the ground.");
-            foreach (float time in new[] { 0.1f, 0.45f, 0.79f })
-                Assert(SlamLightEffect.StrengthAt(time) == 1f && SlamLightEffect.FrameAt(time) == 3,
+            foreach (float time in new[] { SlamLightEffect.FallSeconds, 0.45f,
+                SlamLightEffect.FallSeconds+SlamLightEffect.PeakHoldSeconds-0.001f })
+                Assert(SlamLightEffect.StrengthAt(time) == 1f,
                     "The light must hold its largest form for 0.7 seconds, including after the ground impact.");
-            Assert(Mathf.Abs(SlamLightEffect.StrengthAt(0.91f) - 0.5f) < 0.001f &&
-                   SlamLightEffect.StrengthAt(1.02f) == 0f,
+            Assert(Mathf.Abs(SlamLightEffect.StrengthAt(SlamLightEffect.Duration-SlamLightEffect.FadeSeconds*0.5f) - 0.5f) < 0.001f &&
+                   SlamLightEffect.StrengthAt(SlamLightEffect.Duration) == 0f,
                 "The sustained light must fade and finish without leaving a residual glow.");
+        }
+
+        private static void ValidateLayeredSlam()
+        {
+            foreach(string name in new[] {LayeredSlamEffect.MainArtwork,LayeredSlamEffect.MiddleArtwork,
+                LayeredSlamEffect.EndArtwork,LayeredSlamEffect.GroundArtwork,LayeredSlamEffect.DebrisArtwork})
+            {
+                Texture2D texture=Resources.Load<Texture2D>("CombatEffects/"+name);
+                var importer=AssetImporter.GetAtPath("Assets/Resources/CombatEffects/"+name+".png") as TextureImporter;
+                Assert(texture!=null&&importer!=null&&!importer.mipmapEnabled&&importer.alphaIsTransparency&&
+                    importer.npotScale==TextureImporterNPOTScale.None&&
+                    importer.textureCompression==TextureImporterCompression.Uncompressed&&importer.maxTextureSize>=4096,
+                    name+" must preserve reviewed single-image/particle artwork without sheet slicing or resizing.");
+            }
+            Assert(LayeredSlamEffect.GroundOpacityAt(-0.01f)==0&&
+                LayeredSlamEffect.GroundOpacityAt(LayeredSlamEffect.GroundSeconds)==0&&
+                LayeredSlamEffect.GroundScaleAt(0.3f)>LayeredSlamEffect.GroundScaleAt(0),
+                "The floor shock must expand and then clear.");
+            foreach(float length in new[] {14f,9.2f,2f})
+            foreach(float sign in new[] {1f,-1f})
+            {
+                var owner=new GameObject("Layered slam verification");
+                try
+                {
+                    var effect=owner.AddComponent<LayeredSlamEffect>();
+                    Type type=typeof(LayeredSlamEffect);
+                    const BindingFlags flags=BindingFlags.NonPublic|BindingFlags.Instance;
+                    type.GetField("length",flags).SetValue(effect,length);
+                    type.GetField("sign",flags).SetValue(effect,sign);
+                    type.GetField("room",flags).SetValue(effect,Rect.MinMaxRect(-50,-50,50,50));
+                    type.GetField("material",flags).SetValue(effect,CombatEffectArtwork.Material("LayeredSlam"));
+                    type.GetMethod("Build",flags).Invoke(effect,new object[] {9f});
+                    effect.RenderAt(0.7f);
+                    MeshRenderer main=owner.transform.Find("Slam Main").GetComponent<MeshRenderer>();
+                    MeshRenderer ground=owner.transform.Find("Slam Ground").GetComponent<MeshRenderer>();
+                    MeshRenderer debris=owner.transform.Find("Slam Debris").GetComponent<MeshRenderer>();
+                    Assert(Mathf.Approximately(main.bounds.size.y,9f)&&main.bounds.size.x<=length+0.001f,
+                        "Long, short and cropped narrow paths must preserve main height without horizontal stretching.");
+                    var block=new MaterialPropertyBlock();main.GetPropertyBlock(block);
+                    Vector4 uv=block.GetVector("_UVRect");
+                    Assert(Mathf.Abs(main.bounds.size.x/uv.z-9f)<0.001f,
+                        "A narrow main must crop original texels instead of compressing the whole artwork.");
+                    Assert(ground.sortingOrder<main.sortingOrder&&debris.sortingOrder>main.sortingOrder,
+                        "Floor shock, blade and airborne debris must have independent sorting.");
+                    Assert(Mathf.Abs(ground.bounds.size.x-5.184f)<0.001f||length<5f,
+                        "Ground size must be independent of the main light and path length.");
+                    effect.RenderAt(LayeredSlamEffect.Duration);
+                    foreach(MeshRenderer renderer in owner.GetComponentsInChildren<MeshRenderer>())
+                        Assert(!renderer.enabled,"All independent layers must clear after their lifetime.");
+                }
+                finally {Object.DestroyImmediate(owner);}
+            }
+            Debug.Log("Layered slam v21 passed: five artwork imports, independent height/ground/debris, mirrored UV windows, lifetime and sorting.");
         }
 
         private static void ValidateSlamLayout()

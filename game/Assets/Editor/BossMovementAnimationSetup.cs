@@ -15,7 +15,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Artwork/Setup Boss Movement Animations")]
         public static void Setup()
         {
-            Sprite[] frames = new Sprite[4];
+            Sprite[] frames = new Sprite[8];
             Sprite[][] hopFrames = { new Sprite[4], new Sprite[4] };
             for (int i = 0; i < frames.Length; i++) frames[i] = Import($"{Folder}/CrayonHero_Walk_{i}.png");
             for (int i = 0; i < 4; i++)

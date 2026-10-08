@@ -387,6 +387,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: af83a46ff6d184d40b8a0d892e2a28c2, type: 3}
   - {fileID: 21300000, guid: d5c21565b092ff54c9b87eaccf39faed, type: 3}
   - {fileID: 21300000, guid: 97dcd5c743d0ea3458b32ad8e293432b, type: 3}
+  - {fileID: 21300000, guid: ec526f44ae074b32ab708d854f5ba12d, type: 3}
+  - {fileID: 21300000, guid: 40e43fde543745eb94dec69f133b68cb, type: 3}
+  - {fileID: 21300000, guid: ca62324b8e0141d7b0e6e8c097eccbcf, type: 3}
+  - {fileID: 21300000, guid: 6710e6cd20944909b11ec198aa338821, type: 3}
   hopFrames: []
   healFrames: []
   crayonAttackFrames:
