@@ -244,7 +244,10 @@ namespace TrickalFanGame.Room
             foreach (GeneratedRoomNode node in floor.Nodes)
             {
                 if (node.RoomId != roomId) continue;
-                if (node.Role == GeneratedRoomRole.Secret) state.TryOpenSecretPassages(node.ConnectedRoomIds);
+                // Walking in through a bombed wall keeps the other walls sealed. Only an entry that left no way
+                // out (a pit) opens them all.
+                if (node.Role == GeneratedRoomRole.Secret && state.OpenedSecretPassages.Count == 0)
+                    state.TryOpenSecretPassages(node.ConnectedRoomIds);
                 return;
             }
         }

@@ -102,7 +102,8 @@ namespace TrickalFanGame.Room
             return true;
         }
 
-        // Entering the secret room opens every hidden passage it has, so the player can walk out either way.
+        // Entering the secret room with no passage open (by pit) opens every hidden passage it has, so the player
+        // is never trapped inside.
         public bool TryOpenSecretPassages(IEnumerable<string> neighborRoomIds)
         {
             bool opened = false;

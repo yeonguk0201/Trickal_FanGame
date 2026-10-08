@@ -11,8 +11,9 @@ namespace TrickalFanGame.Room
         public RoomNode Target { get; set; }
     }
 
-    // Special-3: left where a broken obstacle rolled the secret-passage drop. After the room is cleared, stepping in
-    // drops the player into the floor's secret room however far away it is. It stays as a shortcut after discovery.
+    // Special-3: left where a broken obstacle rolled the secret-passage drop. Stepping in drops the player into the
+    // floor's secret room however far away it is, even mid-fight; the room left behind then resets like any escaped
+    // fight. It stays as a shortcut after discovery.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider2D))]
     public sealed class SecretPit : MonoBehaviour
@@ -45,7 +46,7 @@ namespace TrickalFanGame.Room
             TryEnter(other.GetComponentInParent<PlayerMovement>());
         }
 
-        // Stay retries once the room clears or the transition cooldown ends while the player stands on the pit.
+        // Stay retries once the transition cooldown ends while the player stands on the pit.
         private void OnTriggerStay2D(Collider2D other)
         {
             TryEnter(other.GetComponentInParent<PlayerMovement>());
@@ -55,14 +56,18 @@ namespace TrickalFanGame.Room
         {
             RoomNode target = link?.Target;
             if (player == null || target == null || link.Graph == null || sourceNode == null ||
-                (sourceRoom != null && sourceRoom.State != RoomState.Cleared) ||
+                (sourceRoom != null && sourceRoom.IsProgressionStopped) ||
                 (player.StandingPosition - (Vector2)transform.position).sqrMagnitude >
                 EnterRadius * EnterRadius)
             {
                 return false;
             }
 
-            return link.Graph.TryTeleport(sourceNode, target, target.InitialSpawnPosition, player);
+            if (!link.Graph.TryTeleport(sourceNode, target, target.InitialSpawnPosition, player)) return false;
+
+            // Move first, then reset the room, so a refused teleport never leaves a reset room behind.
+            if (sourceRoom != null && sourceRoom.State == RoomState.Combat) sourceRoom.TryAbandonCombat();
+            return true;
         }
     }
 }

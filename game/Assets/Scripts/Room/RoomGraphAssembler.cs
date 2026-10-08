@@ -376,7 +376,9 @@ namespace TrickalFanGame.Room
         }
 
         // Special-3: a hidden passage stays a sealed wall until the secret room state opens it, from a bomb on either
-        // wall or from entering the secret room. The same state drives both sides, and it survives floor rebuilds.
+        // wall or from dropping into the secret room by pit. The same state drives both sides, and it survives floor
+        // rebuilds.
+        // Once open it ignores the room's combat lock, so a wall bombed mid-fight can be walked through right away.
         private void BindSecretPassage(RoomDoorSlot slot, RoomPrefab instance, GeneratedRoomNode generatedNode,
             RoomNode destination, Transform entry, GeneratedRoomNode destinationGenerated)
         {
@@ -390,7 +392,7 @@ namespace TrickalFanGame.Room
             RoomNode source = instance.Node;
             RoomController sourceRoom = instance.Controller;
             void Bind(bool isSealed) => slot.Bind(graphController, source, destination, entry, sourceRoom,
-                requiresKey, keyLockState, isSealed);
+                requiresKey, keyLockState, isSealed, true);
 
             Bind(secretState?.IsSecretPassageOpen(neighborId) != true);
             SecretPassageWall wall = slot.Seal.GetComponent<SecretPassageWall>();
