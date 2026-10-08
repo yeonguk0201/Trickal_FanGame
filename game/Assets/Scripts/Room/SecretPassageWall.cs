@@ -5,8 +5,9 @@ using UnityEngine;
 namespace TrickalFanGame.Room
 {
     // Special-3: attached to the boundary seal of a door slot that hides a passage to the floor's secret room.
-    // The seal is an ordinary Environment wall until a player bomb explodes within reach of it. The opened
-    // passage is stored in the secret room's run state, so both sides reopen together and stay open on revisit.
+    // The seal is an ordinary Environment wall until a player bomb explodes within reach of it, during a fight or
+    // after it. The opened passage is stored in the secret room's run state, so both sides reopen together and stay
+    // open on revisit.
     [DisallowMultipleComponent]
     public sealed class SecretPassageWall : MonoBehaviour
     {

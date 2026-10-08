@@ -51,9 +51,11 @@ namespace TrickalFanGame.Editor
             ValidatePitEntry(assembler, runtimeSeed, pitPrefab);
             Debug.Log("Special-3 verification passed: floors reproduce a 50% secret room (at most one) in the empty " +
                       "cell touching the most rooms but never the start or boss room, hidden passages never shorten " +
-                      "the required route, a bomb opens only the wall it reaches, entering by door or pit opens " +
-                      "every passage, the secret reward room is safe, pit drops re-weight away without a secret " +
-                      "room, pits need a cleared room and a centered player, and walls, pits, and room state " +
+                      "the required route, a bomb opens only the wall it reaches even mid-fight and that passage " +
+                      "ignores the combat lock while the left room resets, entering by door keeps the other walls " +
+                      "sealed and entering by pit opens every passage, the secret reward room is safe, pit drops " +
+                      "re-weight away without a secret room, pits need a centered player and work mid-fight while " +
+                      "the left room resets, and walls, pits, and room state " +
                       "survive revisits and floor rebuilds.");
         }
 
@@ -130,7 +132,8 @@ namespace TrickalFanGame.Editor
                         $"Seed {seed} floor {floor.FloorNumber} boss distance must ignore hidden passages.");
 
                     multiNeighbor += expectedNeighbors >= 2 ? 1 : 0;
-                    if (runtimeSeed == 0 && floor.FloorNumber == 1 && expectedNeighbors >= 2 &&
+                    // Shop-1: a 골디 shop secret room has no treasure-style reward; the runtime checks use a plain one.
+                    if (runtimeSeed == 0 && floor.FloorNumber == 1 && expectedNeighbors >= 2 && !secret.IsGoldiShop &&
                         FindObstacleRoom(floor) != null &&
                         secret.ConnectedRoomIds.Any(id => floor.Nodes.Single(node => node.RoomId == id).Role ==
                                                           GeneratedRoomRole.Intermediate))
@@ -300,7 +303,7 @@ namespace TrickalFanGame.Editor
                    secretRoom.Controller.State == RoomState.Cleared,
                 "The secret room must be a safe room with the treasure-style selection reward.");
 
-            EnterRoomDirectly(assembler, neighborRoom);
+            EnterRoomDirectly(assembler, neighborRoom, false);
             GameObject owner = CreateBombOwner();
             try
             {
@@ -308,8 +311,12 @@ namespace TrickalFanGame.Editor
                 Assert(IsSealed(wallSlot) && secretState.OpenedSecretPassages.Count == 0,
                     "A bomb out of reach must not open the hidden wall.");
 
+                // The wall is bombed mid-fight; this bomb damages no enemy, so the fight keeps running.
+                neighborRoom.Controller.BeginCombat(assembler.Graph.Player.GetComponent<Health>());
+                Assert(neighborRoom.Controller.State == RoomState.Combat && neighborRoom.Controller.AliveEnemyCount > 0,
+                    "The room next to the hidden wall must be fighting before the wall is bombed.");
                 Vector2 inward = -RoomLayout.Direction(wallDirection);
-                ExplodeAt(owner, (Vector2)wallSlot.Seal.transform.position + inward * 1.5f);
+                ExplodeAt(owner, (Vector2)wallSlot.Seal.transform.position + inward * 1.5f, 0);
             }
             finally
             {
@@ -326,21 +333,43 @@ namespace TrickalFanGame.Editor
                             .Direction)))),
                 "A bomb must open only the wall it reached.");
 
+            Assert(neighborRoom.Controller.State == RoomState.Combat && !wallSlot.Blocker.IsLocked &&
+                   wallSlot.Doorway.IsOpen &&
+                   neighborRoom.DoorSlots.Where(slot => slot != wallSlot && slot.IsConnected).All(slot =>
+                       slot.Blocker.IsLocked && !slot.Doorway.IsOpen),
+                "A hidden passage bombed mid-fight must open at once while the room's other doors stay locked.");
+
             ResetTransitionCooldown(assembler.Graph);
             Assert(wallSlot.Doorway.TryEnter(assembler.Graph.Player) &&
                    assembler.Graph.CurrentNode == secretRoom.Node && secretState.HasVisited &&
-                   secret.ConnectedRoomIds.All(secretState.IsSecretPassageOpen) &&
-                   secret.DirectionalConnections.All(connection => IsOpen(secretRoom.FindSlot(connection.Direction))),
-                "Entering the secret room through the opened wall must open every hidden passage.");
+                   secret.DirectionalConnections.All(connection =>
+                       secretState.IsSecretPassageOpen(connection.DestinationRoomId) ==
+                       (connection.DestinationRoomId == neighborId) &&
+                       IsOpen(secretRoom.FindSlot(connection.Direction)) ==
+                       (connection.DestinationRoomId == neighborId) &&
+                       IsSealed(secretRoom.FindSlot(connection.Direction)) ==
+                       (connection.DestinationRoomId != neighborId)),
+                "Entering the secret room through the opened wall must keep every other hidden wall sealed.");
+            Assert(neighborRoom.Controller.State == RoomState.Waiting && !neighborRoom.Controller.HasStarted &&
+                   neighborRoom.Controller.AliveEnemyCount == 0 &&
+                   !progress.GetRoomState(neighborId).IsCleared &&
+                   neighborRoom.DoorSlots.Where(slot => slot.IsConnected && !slot.Doorway.RequiresKey)
+                       .All(slot => !slot.Blocker.IsLocked),
+                "Leaving a fight through the hidden passage must reset that room without clearing it.");
 
             Assert(assembler.TryLoadFloor(2, null, out error) && assembler.TryLoadFloor(1, null, out error), error);
             RoomPrefab rebuiltSecret = FindRuntimeRoom(assembler, secret.RoomId);
             Assert(secret.DirectionalConnections.All(connection =>
-                       IsOpen(rebuiltSecret.FindSlot(connection.Direction)) &&
-                       IsOpen(FindRuntimeRoom(assembler, connection.DestinationRoomId)
-                           .FindSlot(GeneratedFloorGraph.Opposite(connection.Direction)))) &&
+                   {
+                       RoomDoorSlot inside = rebuiltSecret.FindSlot(connection.Direction);
+                       RoomDoorSlot outside = FindRuntimeRoom(assembler, connection.DestinationRoomId)
+                           .FindSlot(GeneratedFloorGraph.Opposite(connection.Direction));
+                       return connection.DestinationRoomId == neighborId
+                           ? IsOpen(inside) && IsOpen(outside)
+                           : IsSealed(inside) && IsSealed(outside);
+                   }) &&
                    rebuiltSecret.Controller.State == RoomState.Cleared,
-                "Opened hidden passages and the secret room state must survive a floor rebuild.");
+                "Opened and still-sealed hidden passages and the secret room state must survive a floor rebuild.");
         }
 
         private static void ValidatePitEntry(RoomGraphAssembler assembler, int seed, SecretPit pitPrefab)
@@ -369,22 +398,23 @@ namespace TrickalFanGame.Editor
                 Assert(pit != null && pit.Target == secretRoom.Node && pit.SourceNode == sourceRoom.Node,
                     "A pit must lead from its own room to the floor's secret room.");
 
-                PlayerMovementAt(assembler, pit.transform.position);
+                sourceRoom.Controller.BeginCombat(assembler.Graph.Player.GetComponent<Health>());
+                Assert(sourceRoom.Controller.State == RoomState.Combat && sourceRoom.Controller.AliveEnemyCount > 0,
+                    "The pit's room must be fighting before the player steps in.");
                 ResetTransitionCooldown(assembler.Graph);
-                Assert(sourceRoom.Controller.State != RoomState.Cleared && !pit.TryEnter(assembler.Graph.Player) &&
-                       assembler.Graph.CurrentNode == sourceRoom.Node,
-                    "A pit must not work before its room is cleared.");
-
-                sourceRoom.Controller.BindRunState(progress.GetRoomState(source.RoomId), true);
                 PlayerMovementAt(assembler, (Vector2)pit.transform.position + Vector2.right * 0.8f);
-                Assert(!pit.TryEnter(assembler.Graph.Player), "Brushing the pit rim must not drop the player in.");
+                Assert(!pit.TryEnter(assembler.Graph.Player) && assembler.Graph.CurrentNode == sourceRoom.Node,
+                    "Brushing the pit rim must not drop the player in.");
 
                 PlayerMovementAt(assembler, pit.transform.position);
                 Assert(pit.TryEnter(assembler.Graph.Player) && assembler.Graph.CurrentNode == secretRoom.Node &&
                        secretState.HasVisited && secret.ConnectedRoomIds.All(secretState.IsSecretPassageOpen) &&
                        ((Vector2)assembler.Graph.Player.transform.position - secretRoom.Node.InitialSpawnPosition)
                        .sqrMagnitude < 0.0001f,
-                    "A cleared room's pit must drop the player into the secret room and open every passage.");
+                    "A pit must drop the player into the secret room mid-fight and open every passage.");
+                Assert(sourceRoom.Controller.State == RoomState.Waiting && !sourceRoom.Controller.HasStarted &&
+                       sourceRoom.Controller.AliveEnemyCount == 0 && !progress.GetRoomState(source.RoomId).IsCleared,
+                    "Leaving a fight through a pit must reset that room without clearing it.");
 
                 EnterRoomDirectly(assembler, sourceRoom, false);
                 PlayerMovementAt(assembler, pit.transform.position);
@@ -425,7 +455,7 @@ namespace TrickalFanGame.Editor
             return owner;
         }
 
-        private static void ExplodeAt(GameObject owner, Vector2 position)
+        private static void ExplodeAt(GameObject owner, Vector2 position, int enemyMask = -1)
         {
             GameObject bombObject = new("Special-3 bomb", typeof(PlacedBomb));
             try
@@ -433,7 +463,8 @@ namespace TrickalFanGame.Editor
                 bombObject.transform.position = position;
                 PlacedBomb bomb = bombObject.GetComponent<PlacedBomb>();
                 bomb.ConfigureValues(PlacedBomb.DefaultFuseDuration, PlacedBomb.DefaultExplosionRadius,
-                    PlacedBomb.DefaultEnemyDamage, PlacedBomb.DefaultSelfDamage, LayerMask.GetMask("Enemy"), null);
+                    PlacedBomb.DefaultEnemyDamage, PlacedBomb.DefaultSelfDamage,
+                    enemyMask < 0 ? LayerMask.GetMask("Enemy") : enemyMask, null);
                 bomb.Configure(owner, owner.GetComponent<Health>(), 0f);
                 Physics2D.SyncTransforms();
                 Assert(bomb.ApplyExplosion(), "The verification bomb must explode once.");

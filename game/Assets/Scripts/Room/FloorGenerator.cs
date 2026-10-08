@@ -87,6 +87,9 @@ namespace TrickalFanGame.Room
         public bool HasDifficulty { get; private set; }
         public GeneratedRoomDifficulty Difficulty { get; private set; }
         public bool RequiresKey { get; private set; }
+        // Shop-1: this secret room holds the 골디 shop instead of the treasure-style reward. Its role, definition,
+        // position and hidden passages stay those of a secret room.
+        public bool IsGoldiShop { get; private set; }
         public RoomType RoomType => Definition != null ? Definition.RoomType : RoomType.Normal;
         public IReadOnlyList<GeneratedRoomConnection> DirectionalConnections => connections;
         public IReadOnlyList<string> ConnectedRoomIds
@@ -121,6 +124,13 @@ namespace TrickalFanGame.Room
             if (requiresKey && Role is not (GeneratedRoomRole.Treasure or GeneratedRoomRole.Shop))
                 throw new InvalidOperationException($"Only treasure and shop rooms can require a key: {RoomId}.");
             RequiresKey = requiresKey;
+        }
+
+        internal void AssignGoldiShop()
+        {
+            if (Role != GeneratedRoomRole.Secret)
+                throw new InvalidOperationException($"Only a secret room can hold the Goldi shop: {RoomId}.");
+            IsGoldiShop = true;
         }
 
         internal void AssignEncounter(EncounterDefinition encounter,
@@ -240,6 +250,8 @@ namespace TrickalFanGame.Room
                 { error = $"Room {node.RoomId} role {node.Role} does not match definition type {node.RoomType}."; return false; }
                 if (node.RequiresKey && node.Role is not (GeneratedRoomRole.Treasure or GeneratedRoomRole.Shop))
                 { error = $"Room {node.RoomId} requires a key but is not a treasure or shop room."; return false; }
+                if (node.IsGoldiShop && node.Role != GeneratedRoomRole.Secret)
+                { error = $"Room {node.RoomId} holds the Goldi shop but is not a secret room."; return false; }
                 if (node.Template != null &&
                     (!node.Template.SupportsRoomType(node.RoomType) ||
                      !node.Template.SupportsConnections(node.DirectionalConnections)))
@@ -364,10 +376,13 @@ namespace TrickalFanGame.Room
     {
         private const uint FloorSalt = 0xA341316Cu, TopologySalt = 0xC8013EA4u,
             ContentSalt = 0xAD90777Du, AttemptSalt = 0x7E95761Eu, TreasureLockSalt = 0x4B455931u,
-            SecretRoomSalt = 0x53435254u, ShopRoomSalt = 0x53484F50u, FloorSizeSalt = 0x53495A45u;
+            SecretRoomSalt = 0x53435254u, ShopRoomSalt = 0x53484F50u, FloorSizeSalt = 0x53495A45u,
+            GoldiShopSalt = 0x474F4C44u;
         public const int TreasureLockPercent = 50;
         public const int SecretRoomPercent = 50;
         public const int ShopRoomPercent = 60;
+        // Shop-1: how often a generated secret room holds the 골디 shop.
+        public const int GoldiShopPercent = 20;
         [SerializeField, Min(1)] private int floorCount = 3;
         [SerializeField, Min(3)] private int minimumRoomsPerFloor = 6;
         [SerializeField, Min(3)] private int maximumRoomsPerFloor = 8;
@@ -547,7 +562,7 @@ namespace TrickalFanGame.Room
                     nodes[0].RoomId, nodes[bossIndex].RoomId, treasure.RoomId, byId);
                 uint lockRoll = unchecked((uint)DeriveSeed(contentSeed, treasure.RoomNumber, TreasureLockSalt));
                 treasure.AssignKeyRequirement(optionalRoute && lockRoll % 100u < TreasureLockPercent);
-                nodes = AppendSecretRoom(floorNumber, contentSeed, nodes, reward);
+                nodes = AppendSecretRoom(floorNumber, contentSeed, nodes, reward, shop.Count > 0);
                 nodes = AppendShopRoom(floorNumber, contentSeed, nodes, shop);
                 // Retry topology if a reserved special room had no valid cell; never change the size or special rolls.
                 if (settings != null && nodes.Length != totalRooms) continue;
@@ -568,8 +583,10 @@ namespace TrickalFanGame.Room
         // most rooms (ties by seed) that is not next to the start or boss room, and links every touching room through
         // a hidden passage. A Basic 16x9 room fits beside every profile on the 20x13 grid, so template selection
         // cannot run out of space for it.
+        // Shop-1: a separate roll then decides whether the room holds the 골디 shop, so it changes no secret room's
+        // existence, position, seed, or passages. Without a shop Room Definition no secret room becomes one.
         private static GeneratedRoomNode[] AppendSecretRoom(int floorNumber, int contentSeed, GeneratedRoomNode[] nodes,
-            IReadOnlyList<RoomDefinition> reward)
+            IReadOnlyList<RoomDefinition> reward, bool allowGoldiShop)
         {
             StableRandom random = new(unchecked((uint)DeriveSeed(contentSeed, 0, SecretRoomSalt)));
             if (random.NextIndex(100) >= SecretRoomPercent) return nodes;
@@ -614,6 +631,7 @@ namespace TrickalFanGame.Room
                 secret.ConnectTo(direction, neighbor.RoomId, true);
                 neighbor.ConnectTo(GeneratedFloorGraph.Opposite(direction), secret.RoomId, true);
             }
+            if (allowGoldiShop && RollSpecialRoom(contentSeed, GoldiShopSalt, GoldiShopPercent)) secret.AssignGoldiShop();
 
             GeneratedRoomNode[] result = new GeneratedRoomNode[nodes.Length + 1];
             Array.Copy(nodes, result, nodes.Length);

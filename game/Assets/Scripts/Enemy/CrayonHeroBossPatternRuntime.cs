@@ -61,6 +61,11 @@ namespace TrickalFanGame.Enemy
         public Sprite AwakenedSprite => awakenedSprite;
         public void ConfigureAwakenedArtwork(Sprite sprite) => awakenedSprite = sprite;
 
+        private const float DashPushSkin = 0.02f;
+
+        private static readonly List<RaycastHit2D> DashHits = new List<RaycastHit2D>();
+        private static readonly List<RaycastHit2D> FeetHits = new List<RaycastHit2D>();
+
         private readonly List<GameObject> livingMinions = new List<GameObject>();
         private readonly List<LineRenderer> supplementalTelegraphLines = new List<LineRenderer>();
         private BossController boss;
@@ -572,7 +577,8 @@ namespace TrickalFanGame.Enemy
                 if (!dashChainHitApplied && ResolveDirectionalHit(0f, ResolveBodyRadius() + travel, dashWidth,
                         dashDamageTier, DamageSourceType.EnemyContact, lockedDirection))
                     dashChainHitApplied = true;
-                body.MovePosition(ClampToArena((Vector2)transform.position + lockedDirection * travel));
+                body.MovePosition(ClampToArena((Vector2)transform.position +
+                    lockedDirection * LimitDashTravelByPinnedTarget(travel)));
                 if (now < dashStateEndsAt) return;
                 completedDashes++;
                 dashInMotion = false;
@@ -605,13 +611,62 @@ namespace TrickalFanGame.Enemy
                 new Color(1f, 0.45f, 0.05f, 0.95f));
         }
 
+        // A Kinematic body is not stopped by the player it shoves, so a dash that pins the player against terrain
+        // would squeeze the feet through the wall and out of the room. The dash stops short of that instead.
+        private float LimitDashTravelByPinnedTarget(float travel)
+        {
+            PlayerMovement player = target != null ? target.GetComponentInParent<PlayerMovement>() : null;
+            PlayerFeet feet = player != null ? player.Feet : null;
+            Rigidbody2D targetBody = player != null ? player.GetComponent<Rigidbody2D>() : null;
+            // A player passing through enemy bodies (post-hit recovery) is not pushed at all.
+            if (feet == null || targetBody == null || travel <= 0f ||
+                (targetBody.excludeLayers.value & (1 << gameObject.layer)) != 0) return travel;
+
+            DashHits.Clear();
+            body.Cast(lockedDirection, DashHits, travel + DashPushSkin);
+            foreach (RaycastHit2D hit in DashHits)
+            {
+                if (hit.collider == null || hit.collider.isTrigger || hit.collider.attachedRigidbody != targetBody)
+                    continue;
+                Vector2 pushDirection = -hit.normal;
+                if (Vector2.Dot(pushDirection, lockedDirection) <= 0f) continue;
+                float contactDistance = Mathf.Max(0f, hit.distance - DashPushSkin);
+                float pushDistance = travel - contactDistance;
+                if (pushDistance <= 0f) continue;
+                travel = Mathf.Min(travel,
+                    contactDistance + ResolveFreeFeetDistance(feet, targetBody, pushDirection, pushDistance));
+            }
+            return travel;
+        }
+
+        // How far the player's feet can be pushed along the direction before solid terrain stops them.
+        private static float ResolveFreeFeetDistance(PlayerFeet feet, Rigidbody2D targetBody, Vector2 direction,
+            float distance)
+        {
+            ContactFilter2D filter = new ContactFilter2D { useTriggers = false };
+            // Flight removes the Pit bit from the body, so a flying player is not treated as pinned by a pit.
+            filter.SetLayerMask(Physics2D.GetLayerCollisionMask(feet.gameObject.layer) &
+                                ~targetBody.excludeLayers.value);
+            FeetHits.Clear();
+            feet.Collider.Cast(direction, filter, FeetHits, distance + DashPushSkin);
+            float free = distance;
+            foreach (RaycastHit2D hit in FeetHits)
+            {
+                if (hit.collider == null || Physics2D.GetIgnoreCollision(feet.Collider, hit.collider) ||
+                    Vector2.Dot(hit.normal, direction) >= 0f) continue;
+                free = Mathf.Min(free, Mathf.Max(0f, hit.distance - DashPushSkin));
+            }
+            return free;
+        }
+
         private void MoveTowardTarget(float deltaTime, float speedMultiplier)
         {
             if (target == null || body == null || deltaTime <= 0f) return;
             Vector2 offset = (Vector2)target.position - (Vector2)transform.position;
             if (offset.sqrMagnitude <= 0.001f) return;
             float distance = offset.magnitude;
-            float step = Mathf.Min(CurrentApproachSpeed * speedMultiplier * deltaTime,
+            float step = Mathf.Min(
+                CurrentApproachSpeed * speedMultiplier * EnemyStatusEffects.MoveSpeedMultiplierOf(this) * deltaTime,
                 distance - BossTargetSpacing.ResolveStopDistance(gameObject, target));
             if (step <= 0f) return;
             Vector2 destination = ClampToArena((Vector2)transform.position + offset / distance * step);

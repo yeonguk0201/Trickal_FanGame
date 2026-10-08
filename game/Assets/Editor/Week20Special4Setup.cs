@@ -44,6 +44,7 @@ namespace TrickalFanGame.Editor
         public const string KeeperObjectName = "Shopkeeper";
         public static readonly Vector2 KeeperPosition = new(0f, 0.6f);
         public static readonly Vector2 KeeperTriggerSize = new(3.2f, 3.2f);
+        public static readonly Vector2 KeeperBubbleTailTip = new(0f, 1.3f);
 
         [MenuItem("Trickal Fan Game/Week 20/Setup Special-4 Shop")]
         public static void Setup()
@@ -177,28 +178,47 @@ namespace TrickalFanGame.Editor
             trigger.size = KeeperTriggerSize;
             trigger.offset = Vector2.zero;
 
+            // The keeper blocks the player like an NPC: the player's feet collide with the Environment layer.
+            int bodyLayer = LayerMask.NameToLayer(ShopKeeper.BodyLayerName);
+            if (bodyLayer < 0) throw new InvalidOperationException("The shopkeeper body requires the Environment layer.");
+            GameObject bodyObject = Child(keeperObject.transform, ShopKeeper.BodyObjectName);
+            bodyObject.layer = bodyLayer;
+            bodyObject.transform.localPosition = Vector3.zero;
+            bodyObject.transform.localScale = Vector3.one;
+            CircleCollider2D body = GetOrAdd<CircleCollider2D>(bodyObject);
+            body.isTrigger = false;
+            body.radius = ShopKeeper.BodyRadius;
+            body.offset = Vector2.zero;
+
             bool portraitExists = keeperObject.transform.Find("Portrait") != null;
             GameObject portraitObject = Child(keeperObject.transform, "Portrait");
             SpriteRenderer portrait = GetOrAdd<SpriteRenderer>(portraitObject);
             if (!portraitExists || portrait.sprite == null)
             {
                 portraitObject.transform.localPosition = Vector3.zero;
-                portraitObject.transform.localScale = Vector3.one * 1.5f;
                 portrait.sprite = placeholderSprite;
                 portrait.color = new Color(1f, 0.8f, 0.35f, 1f);
-                portrait.sortingOrder = 3;
             }
+            // NPCs are drawn below the player, so the player is never hidden behind one.
+            portrait.sortingOrder = TrickalFanGame.Character.NpcPresentation.BodySortingOrder;
+            // The keeper is drawn at the player's size; ShopKeeper fits the supplied artwork the same way at runtime.
+            float longerSide = Mathf.Max(portrait.sprite.bounds.size.x, portrait.sprite.bounds.size.y);
+            portraitObject.transform.localScale = Vector3.one * (ShopKeeper.PortraitWorldSize / longerSide);
 
-            TextMeshPro label = Text(keeperObject.transform, "Label", font, new Vector2(0f, 1.3f), 3f,
+            TextMeshPro label = Text(keeperObject.transform, "Label", font, new Vector2(0f, 1f), 3f,
                 new Color(1f, 0.93f, 0.62f, 1f));
             label.text = ShopKeeper.DisplayName;
-            TextMeshPro prompt = Text(keeperObject.transform, "Prompt", font, new Vector2(0f, -1.05f), 3f,
+            TextMeshPro prompt = Text(keeperObject.transform, "Prompt", font, new Vector2(0f, -1f), 3f,
                 new Color(0.9f, 0.98f, 1f, 1f));
             prompt.text = ShopKeeper.OpenPrompt;
             prompt.gameObject.SetActive(false);
 
+            // The greeting bubble sits above the name label.
+            TrickalFanGame.Character.NpcSpeechBubble bubble = NpcSpeechBubbleSetup.Ensure(keeperObject.transform, font,
+                KeeperBubbleTailTip, ShopKeeper.GreetingLine);
+
             ShopKeeper keeper = GetOrAdd<ShopKeeper>(keeperObject);
-            keeper.ConfigureVisuals(portrait, label, prompt);
+            keeper.ConfigureVisuals(portrait, label, prompt, bubble);
             return keeper;
         }
 
@@ -227,6 +247,7 @@ namespace TrickalFanGame.Editor
         private static void EnsureGlyphs(TMP_FontAsset font)
         {
             string required = "상품골드부족구매[E]0123456789" + ShopKeeper.DisplayName + ShopKeeper.OpenPrompt +
+                              ShopKeeper.GoldiDisplayName + ShopKeeper.GreetingLine + ShopKeeper.GoldiGreetingLine +
                               string.Concat(Consumables.Select(spec => spec.Name));
             if (!font.HasCharacters(required) && !font.TryAddCharacters(required, out string missing))
                 throw new InvalidOperationException("Missing Special-4 shop glyphs: " + missing);

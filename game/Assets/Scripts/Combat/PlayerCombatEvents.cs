@@ -65,7 +65,7 @@ namespace TrickalFanGame.Combat
             return true;
         }
 
-        private static bool IsPlayerDamage(DamageSourceType sourceType)
+        public static bool IsPlayerDamage(DamageSourceType sourceType)
         {
             return sourceType == DamageSourceType.PlayerProjectile ||
                    sourceType == DamageSourceType.PlayerAttack ||
@@ -73,7 +73,8 @@ namespace TrickalFanGame.Combat
                    sourceType == DamageSourceType.PlayerUltimateImpact ||
                    sourceType == DamageSourceType.PlayerDamageAura ||
                    sourceType == DamageSourceType.PlayerItemLightning ||
-                   sourceType == DamageSourceType.PlayerStatusEffect;
+                   sourceType == DamageSourceType.PlayerStatusEffect ||
+                   sourceType == DamageSourceType.PlayerItemExplosion;
         }
     }
 }

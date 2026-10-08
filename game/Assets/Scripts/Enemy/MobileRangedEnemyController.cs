@@ -210,7 +210,7 @@ namespace TrickalFanGame.Enemy
             if (!hasLineOfFire)
             {
                 body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
-                    currentTime) * moveSpeed;
+                    currentTime) * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
                 return false;
             }
 
@@ -229,7 +229,7 @@ namespace TrickalFanGame.Enemy
                 ? tangent
                 : radial + tangent * radialOrbitWeight;
             body.linearVelocity = movement.sqrMagnitude > 0.001f
-                ? movement.normalized * moveSpeed
+                ? movement.normalized * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this))
                 : Vector2.zero;
             return true;
         }

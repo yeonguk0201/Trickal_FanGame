@@ -47,9 +47,11 @@ namespace TrickalFanGame.Editor
                 Assert(prefab.GetComponentsInChildren<SpriteRenderer>(true)
                     .Where(r => r.transform.IsChildOf(tiles)).All(r => r.sprite != null &&
                         (r.name.StartsWith(FairyVillageArtworkSetup.ForegroundName) ? r.sortingOrder == 20 &&
-                            r.GetComponent<ConnectedRoomPatch>().ForegroundCutoff == 1f &&
+                            Mathf.Approximately(r.GetComponent<ConnectedRoomPatch>().ForegroundCutoff,
+                                r.name.EndsWith(" 0") || r.name.EndsWith(" 4")
+                                    ? FairyVillageArtworkSetup.CornerForegroundCutoff : 1f) &&
                             r.GetComponent<ConnectedRoomPatch>().ForegroundMask != null : r.sortingOrder < 0)),
-                    path + " artwork has missing sprites or covers gameplay objects.");
+                    path + " artwork has missing sprites, covers gameplay objects or draws a side wall foot over actors.");
                 Assert(tiles.GetComponentsInChildren<SpriteRenderer>().Count(r =>
                     r.name.StartsWith(FairyVillageArtworkSetup.ForegroundName)) == 4, "Missing lower wall foreground spans.");
                 GameObject instance = UnityEngine.Object.Instantiate(prefab);

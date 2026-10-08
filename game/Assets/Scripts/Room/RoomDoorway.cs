@@ -17,6 +17,7 @@ namespace TrickalFanGame.Room
         private bool requiresKey;
         private RoomRunState keyLockState;
         private DoorController doorVisual;
+        private bool allowsCombatExit;
 
         public RoomNode Source => source;
         public RoomNode Destination => destination;
@@ -25,9 +26,13 @@ namespace TrickalFanGame.Room
         public RoomController RequiredClearedRoom => requiredClearedRoom;
         public bool RequiresKey => requiresKey;
         public bool IsKeyLockOpen => !requiresKey || keyLockState?.IsKeyLockOpen == true;
-        public bool IsOpen => (requiredClearedRoom == null || requiredClearedRoom.State == RoomState.Cleared) &&
-                              IsKeyLockOpen;
+        public bool IsOpen => IsRoomLockOpen && IsKeyLockOpen;
         public bool AllowsOneWay => allowsOneWay;
+        public bool AllowsCombatExit => allowsCombatExit;
+
+        private bool IsRoomLockOpen =>
+            requiredClearedRoom == null || requiredClearedRoom.State == RoomState.Cleared ||
+            (allowsCombatExit && !requiredClearedRoom.IsProgressionStopped);
 
         public void Configure(
             RoomGraphController configuredGraph,
@@ -50,6 +55,13 @@ namespace TrickalFanGame.Room
             keyLockState = configuredKeyLockState;
             doorVisual = configuredDoorVisual;
             doorVisual?.SetKeyLocked(requiresKey && keyLockState?.IsKeyLockOpen != true);
+        }
+
+        // An opened hidden passage lets the player leave mid-fight. The room left behind resets like any escaped
+        // fight: its enemies leave and the next entry restarts the Encounter from the first wave.
+        public void ConfigureCombatExit(bool configuredAllowsCombatExit)
+        {
+            allowsCombatExit = configuredAllowsCombatExit;
         }
 
         private void Awake()
@@ -114,8 +126,7 @@ namespace TrickalFanGame.Room
 
         public bool TryEnter(PlayerMovement player)
         {
-            if (player == null || graph == null ||
-                (requiredClearedRoom != null && requiredClearedRoom.State != RoomState.Cleared))
+            if (player == null || graph == null || !IsRoomLockOpen)
             {
                 return false;
             }
@@ -125,8 +136,18 @@ namespace TrickalFanGame.Room
                 return false;
             }
 
-            return IsOpen &&
-                   graph.TryTransition(source, destination, destinationEntryPoint, player);
+            if (!IsOpen || !graph.TryTransition(source, destination, destinationEntryPoint, player))
+            {
+                return false;
+            }
+
+            // Move first, then reset the room, so a refused transition never leaves a reset room behind.
+            if (requiredClearedRoom != null && requiredClearedRoom.State == RoomState.Combat)
+            {
+                requiredClearedRoom.TryAbandonCombat();
+            }
+
+            return true;
         }
 
         public bool TryUnlockWithKey()

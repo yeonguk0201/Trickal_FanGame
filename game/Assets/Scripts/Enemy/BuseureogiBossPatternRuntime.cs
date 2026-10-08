@@ -219,7 +219,7 @@ namespace TrickalFanGame.Enemy
                 (current.x >= movementArea.xMax && direction.x > 0f)) direction.x = 0f;
             if ((current.y <= movementArea.yMin && direction.y < 0f) ||
                 (current.y >= movementArea.yMax && direction.y > 0f)) direction.y = 0f;
-            float movementSpeed = CurrentApproachSpeed;
+            float movementSpeed = CurrentApproachSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this);
             if (body != null) body.linearVelocity = direction.normalized * movementSpeed;
             else transform.position = current + direction.normalized * (movementSpeed * deltaTime);
 

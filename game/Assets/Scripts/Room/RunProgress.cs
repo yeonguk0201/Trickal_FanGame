@@ -20,6 +20,8 @@ namespace TrickalFanGame.Room
         public int CurrentFloor { get; private set; }
         public int CurrentRoom { get; private set; }
         public int KillCount { get; private set; }
+        // Obstacle-7: obstacles (trees) broken while burning in this Run, for a later character unlock.
+        public int BurnedObstacleCount { get; private set; }
         public bool IsProgressionStopped { get; private set; }
         public bool HasClearedFinalBoss { get; private set; }
         public GeneratedFloorGraph GeneratedGraph { get; private set; }
@@ -242,7 +244,10 @@ namespace TrickalFanGame.Room
             foreach (GeneratedRoomNode node in floor.Nodes)
             {
                 if (node.RoomId != roomId) continue;
-                if (node.Role == GeneratedRoomRole.Secret) state.TryOpenSecretPassages(node.ConnectedRoomIds);
+                // Walking in through a bombed wall keeps the other walls sealed. Only an entry that left no way
+                // out (a pit) opens them all.
+                if (node.Role == GeneratedRoomRole.Secret && state.OpenedSecretPassages.Count == 0)
+                    state.TryOpenSecretPassages(node.ConnectedRoomIds);
                 return;
             }
         }
@@ -261,11 +266,20 @@ namespace TrickalFanGame.Room
             }
         }
 
+        public void RecordBurnedObstacle()
+        {
+            if (!IsProgressionStopped)
+            {
+                BurnedObstacleCount++;
+            }
+        }
+
         public void ResetProgress()
         {
             CurrentFloor = 0;
             CurrentRoom = 0;
             KillCount = 0;
+            BurnedObstacleCount = 0;
             IsProgressionStopped = false;
             HasClearedFinalBoss = false;
             GeneratedGraph = null;

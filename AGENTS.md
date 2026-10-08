@@ -26,6 +26,8 @@
 - 런타임 규칙을 Editor Setup 코드에 넣지 않는다. Setup 코드는 Scene, Prefab, ScriptableObject와 직렬화 참조 구성에 집중한다.
 - Editor Setup은 재실행 시 중복 오브젝트나 에셋을 만들지 않도록 작성하고, 가능한 경우 Undo와 dirty/save 처리를 제공한다.
 - Scene, Prefab, ScriptableObject와 `.meta` 파일의 GUID 참조를 보존한다.
+- UI 글꼴은 `Week13FrontendSetup.FontPath`의 TMP 글꼴 에셋(원본 글꼴 ONE Mobile POP, `DefaultFontSetup`)을 쓴다. 다른 글꼴
+  에셋을 새로 만들지 않는다.
 - 직접적인 Scene/Prefab 대규모 텍스트 편집보다 Editor 구성 코드나 작은 직렬화 변경을 우선 검토한다.
 - 검증기는 핵심 불변조건이 깨지면 명시적으로 실패하도록 작성한다.
 - 아티팩트나 스펠(일회용 스펠·짱셈스펠 포함)을 구현하면 같은 조각에서 Game Scene 개발 패널(`DevelopmentGamePanel`, `F1`)로
@@ -36,6 +38,7 @@
 
 ## 이펙트 제작
 
+- 새 이펙트 제작과 기존 이펙트 개선은 `docs/25-combat-effects-guide.md`를 따른다. 대표 원화 → 움직임 → 보조 효과 → Unity 연결 순서로 검수하고, 자동 검증과 실제 Play 미술 검수를 구분해 기록한다.
 - 이펙트는 여러 독립된 효과를 겹쳐 구성해도 된다. 하나의 이미지나 스프라이트 시트에 모든 요소를 합칠 필요가 없다.
 - 크기·방향·타이밍·투명도를 다르게 조절해야 하는 요소는 별도 에셋·표시 레이어로 제작하고 Unity에서 합성한다.
 - 검광과 지면 충격은 분리한다. 검광의 높이·두께와 지면 균열·돌 파편의 크기는 각각 독립적으로 조절한다. 검광을 키우려고 돌 파편까지 함께 확대하지 않는다.

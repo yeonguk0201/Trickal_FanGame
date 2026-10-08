@@ -29,6 +29,7 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Text stackText;
 
         private bool buttonBound;
+        private Image artwork;
 
         public ItemRewardCandidate Candidate { get; private set; }
         public ItemRewardCardState State { get; private set; } = ItemRewardCardState.Unavailable;
@@ -64,6 +65,7 @@ namespace TrickalFanGame.Frontend
         public void Bind(ItemRewardCandidate candidate, Health playerHealth)
         {
             Candidate = candidate;
+            RefreshArtwork(candidate != null && candidate.IsItem ? candidate.Definition : null);
             if (candidate == null)
             {
                 ApplyState(ItemRewardCardState.Unavailable);
@@ -100,6 +102,27 @@ namespace TrickalFanGame.Frontend
         public void ShowOutcome(bool acquired)
         {
             ApplyState(acquired ? ItemRewardCardState.Acquired : ItemRewardCardState.Unavailable);
+        }
+
+        private void RefreshArtwork(ItemDefinition definition)
+        {
+            if (artwork == null)
+            {
+                GameObject child = new("Item Artwork", typeof(RectTransform), typeof(Image));
+                RectTransform rect = (RectTransform)child.transform;
+                rect.SetParent(transform, false);
+                rect.sizeDelta = new Vector2(76f, 76f);
+                rect.anchoredPosition = new Vector2(-142f, 124f);
+                artwork = child.GetComponent<Image>();
+                artwork.raycastTarget = false;
+            }
+            bool hasArtwork = UserArtwork.Apply(artwork, definition);
+            artwork.gameObject.SetActive(hasArtwork);
+            if (nameText != null)
+            {
+                nameText.rectTransform.anchoredPosition = new Vector2(hasArtwork ? 42f : 0f, 126f);
+                nameText.rectTransform.sizeDelta = new Vector2(hasArtwork ? 264f : 360f, 70f);
+            }
         }
 
         public void OnSelect(BaseEventData eventData)

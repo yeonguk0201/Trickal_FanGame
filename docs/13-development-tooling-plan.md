@@ -37,6 +37,7 @@
 | T4 | 플레이테스트 텔레메트리 | 예정 | 전투·방 이벤트 안정 후, 8주차 밸런싱 전 | 밸런싱에는 권장 |
 | T5 | Unity MCP | 조건부 | 수동 Editor 조작이 측정 가능한 병목이 된 뒤 | 아니오 |
 | T6 | Web UI 상태 테스트 | 완료 — Vitest·Testing Library 6개 테스트 통과, 2026-09-04 | 12주차 통계·랭킹 마감 | 아니오 |
+| T7 | 방 Layout 대량 제작 도구(맵 에디터) | 제안 — 미착수, 2026-10-07 ([아래 절](#방-layout-대량-제작-도구-제안-2026-10-07)) | 방 종류 확장을 콘텐츠 범위에 넣을 때 | 아니오 |
 
 ## 4. T0 — 저장소 전용 기능 개발 스킬
 
@@ -131,6 +132,7 @@ Layout 검증을 우회하므로 Game Scene이 아닌 별도 테스트 씬(아�
 - [x] 23주차 Obstacle-5(2026-10-06): `— Obstacle —` 섹션 추가. 현재 방에서 플레이어와 가장 가까운 부서지지 않은 후보 슬롯의 ID·종류를 표시하고 `Make <종류>` 버튼으로 특수 장애물 표의 종류로 바꾼다(보조 Run, 방을 재구성하면 seed의 종류로 돌아간다). 패널 회귀 `Week20DevPanelVerification.Verify`와 종류 동작 `Week23Obstacle5Verification` 통과, 버튼 조작은 수동 확인 대기. Obstacle-6의 폭발 상자·랜덤박스·수집품 상자도 같은 표에 있어 버튼이 자동으로 늘어난다(패널 코드 변경 없음)
 - [x] 23주차 Enemy-6(2026-10-06): `— Obstacle —`에 `Next broken random box releases enemies` 토글 추가. 켜면 적을 내보낼 수 있는 종류(셰이디의 랜덤박스)의 다음 파괴가 seed 결과 대신 쥬비 5마리를 내보내고 한 번 쓰면 꺼진다(보조 Run). 패널 회귀 `Week20DevPanelVerification.Verify`는 Enemy-6 회귀 배치에 포함, 토글 조작은 수동 확인 대기
 - [x] 23주차 Passive-1(2026-10-06): `— Artifact —` 섹션 추가. `Show artifact drops (N)`을 켜면 활성 아티팩트 에셋 전체(황금 전용 제외, Editor 전용 자동 수집)의 `Drop <이름> (보유/최대)` 버튼이 나오고, 일반 `ItemPickup` 획득 경로로 줍는다(보조 Run). 새 아티팩트는 패널 코드 변경 없이 목록에 나온다. 앞으로 아티팩트·스펠 구현 조각은 개발 패널 획득 경로를 함께 넣는다(`AGENTS.md`). 패널 회귀 `Week20DevPanelVerification.Verify` 통과, 버튼 조작은 수동 확인 대기
+- [x] 23주차 Obstacle-7(2026-10-06): `— Obstacle —` 맨 위에 `Hold a burn artifact (trees catch fire)` 토글과 `Nearest tree <ID>: n/4 hits [BURNING]   burned this Run N` 줄 추가. 화상 아티팩트가 아직 없어 토글이 보유를 대신한다(보조 Run, `PlayerStats.DevelopmentForceBurnSource`). 화상 아티팩트가 구현되면 `— Artifact —`의 `Drop`으로 얻어 같은 줄로 확인한다. 패널 회귀 `Week20DevPanelVerification.Verify`(플래그 기본값 꺼짐)와 `Week23Obstacle7Verification` 통과, 토글 조작은 수동 확인 대기
 - [ ] 2단계: 적·장애물 배치 전용 테스트 씬
 
 - 공통 Editor 구성 유틸리티
@@ -412,3 +414,52 @@ Play Mode 가독성 확인은 남아 있다. 실행 메뉴와 배치는 [개발 
 Unity 6000.3.22f1 배치 종료 코드 0과 성공 로그를 확인했다. Play 화면 검수는 남아 있다.
 선택 에셋과 적용 범위는 [이펙트 기록](./art-prompts/reviewed-combat-effects.md),
 실행 메뉴와 수동 확인은 [개발 환경](./05-development-setup.md)을 따른다.
+
+## 방 Layout 대량 제작 도구 제안 (2026-10-07)
+
+상태: **제안 — 미착수**. 아래 포맷·임포터·에디터 창은 아직 구현되지 않았으며 확정된 사용법이 아니다.
+착수 시점과 범위는 사용자가 정한다.
+
+### 사용자가 원하는 것 (2026-10-07)
+
+- 장애물·구덩이 같은 방 안 배치를 아이작(The Binding of Isaac)처럼 여러 종류로 만들고 싶다.
+- 이 게임에도 맵 에디터 같은 도구를 둘 수 있는지 확인하고 싶다.
+- 작업 방식은 **에이전트가 맵을 한꺼번에 많이 만들고, 사용자가 그중에서 고르고 손보는 것**이다. 이렇게 하면 맵 종류를
+  빠르게 늘릴 수 있다고 본다.
+- 지금 바로 만들지는 않고 나중에 진행한다.
+
+### 현재 기반과 병목
+
+- 방 템플릿(`RoomTemplateDefinition`)과 방 Prefab이 분리되어 있고 프로필별 후보에서 seed로 선택한다. 현재 템플릿은
+  19개다(`game/Assets/Rooms/Templates`).
+- 부서지는 장애물은 0.5 격자 위 1×1, 구덩이는 격자 정렬 직사각형이라 격자 기반 작성과 맞는다.
+- `RoomObstacleLayout.TryValidate`가 문 통로 미차단, 문 사이 연결, SpawnPoint 도달 가능, 원거리 사선 확보(35% 이상)를
+  검사하므로 대량 생성한 Layout 중 깨진 것을 자동으로 걸러낼 수 있다.
+- 장애물 슬롯은 위치만 고정이고 종류는 `ObstacleVariantTable`이 seed로 정한다.
+- 병목: Layout 하나마다 좌표를 C# Setup 코드에 직접 적고 있다(`Week22Terrain0Setup`, `Week23Obstacle6Setup` 등,
+  파일당 180~350줄). 이 방식으로는 수십 개를 만들기 어렵고 사용자가 직접 고치기도 불편하다.
+
+### 제안한 구성
+
+1. **텍스트 Layout 포맷**: 방 하나를 글자 격자로 적는 파일. 장애물·구덩이·나무·SpawnPoint를 글자로 표시한다.
+   에이전트가 한 번에 여러 개를 쓸 수 있고 사용자가 텍스트 편집기로 고칠 수 있다.
+2. **임포터**: 파일을 읽어 방 Prefab과 템플릿 에셋을 생성·갱신하고 `RoomObstacleLayout` 검증을 실행한다. 실패한
+   Layout은 이유와 함께 거부한다. 재실행 시 ID 기준으로 갱신하여 중복 에셋을 만들지 않는다.
+3. **Unity 에디터 창**: 격자를 클릭해 배치를 칠하고 검증 결과를 바로 표시한다. 저장 결과는 1번 포맷이다.
+
+권장 순서는 1·2번과 시범 Layout 10개 안팎으로 흐름을 먼저 확인한 뒤 3번을 붙이는 것이다. 1·2번만으로도
+"대량 생성 후 사용자가 손보는" 흐름은 성립한다.
+
+### 착수 전에 정할 것
+
+- 스폰 지점의 역할(`SpawnPointPlacementRole`) 지정 방식: 위치 기반 자동 추정 후 수동 수정안을 제안했다.
+- Layout 난이도 보정: 현재 장애물 Layout은 모두 +1이다. 수가 늘면 장애물 밀도 기반 산정 규칙이 필요하다.
+- ID 계약: 템플릿 ID와 장애물 ID는 Run 저장·seed 재현에 쓰이는 안정 키다. 이미 사용된 Layout을 고치면 새 ID로
+  추가하거나 Room 콘텐츠 버전을 올려야 한다.
+- 프로필(basic/small/wide/tall/large)별 격자 크기와 문 위치를 포맷에서 어떻게 고정할지.
+- 현재 달 필수 작업과의 우선순위.
+
+### 한계
+
+검증기는 Layout이 깨지지 않았는지만 확인하고 재미는 판단하지 못한다. 대량 생성한 Layout의 선별과 조정은
+실제 Play 확인이 필요하다.

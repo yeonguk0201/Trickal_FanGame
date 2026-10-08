@@ -4,9 +4,9 @@ using UnityEngine;
 namespace TrickalFanGame.Room
 {
     // Flight-0: the movement block classes a walking or flying body meets.
-    // - Wall: room walls, doors, chests and high obstacles (a RoomStaticObstacle that blocks flight, such as a tree).
+    // - Wall: room walls, doors, chests and high obstacles (an obstacle that blocks flight, such as a tree).
     //   Nothing walks or flies through them.
-    // - Low obstacle: DestructibleObstacle and a RoomStaticObstacle that does not block flight. They stay on the
+    // - Low obstacle: a DestructibleObstacle or RoomStaticObstacle that does not block flight. They stay on the
     //   Environment layer, so walking bodies, projectiles and lines of fire still stop at them; only a flying player
     //   passes over them.
     // - Pit: the Pit layer (Terrain-0). Walking bodies stop at it, projectiles and a flying player pass over it.
@@ -25,7 +25,7 @@ namespace TrickalFanGame.Room
         public static bool IsLowObstacle(Collider2D collider)
         {
             return collider != null && !collider.isTrigger &&
-                   (collider.TryGetComponent(out DestructibleObstacle _) ||
+                   ((collider.TryGetComponent(out DestructibleObstacle obstacle) && !obstacle.BlocksFlight) ||
                     (collider.TryGetComponent(out RoomStaticObstacle fixedObstacle) && !fixedObstacle.BlocksFlight));
         }
 

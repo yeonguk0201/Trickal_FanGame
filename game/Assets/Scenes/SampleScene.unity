@@ -2336,11 +2336,27 @@ MonoBehaviour:
   rewardSelectionSession: {fileID: 1115359050}
   selectionRewardPool:
   - {fileID: 11400000, guid: 1ffb80362a4d97a4d8a68aaffdd8675b, type: 2}
+  - {fileID: 11400000, guid: 745a978c312f41d48af07c8e4b9752a4, type: 2}
+  - {fileID: 11400000, guid: 65b1cb264f13a144487ded55c26d7d53, type: 2}
+  - {fileID: 11400000, guid: 7562be45a2ee37844bf2edbc63cc6e18, type: 2}
   - {fileID: 11400000, guid: c8d4cd892e9f4064689bfa454973f76f, type: 2}
+  - {fileID: 11400000, guid: a2c8d7f2091283a46b500f3fa7539a3f, type: 2}
+  - {fileID: 11400000, guid: 1b6f54df47fd49b4c92f7bc251ae9566, type: 2}
   - {fileID: 11400000, guid: fc8088d88f829f34a854a5a37f3e5ba3, type: 2}
+  - {fileID: 11400000, guid: beff617d251661c4084b4192e47d0164, type: 2}
+  - {fileID: 11400000, guid: b263d174f249ca7498c371234c9c2b6d, type: 2}
   - {fileID: 11400000, guid: 505181bdbb2725f44ae74ee6271e0c45, type: 2}
+  - {fileID: 11400000, guid: 40e89d32fe2244443931c169f704a16e, type: 2}
   - {fileID: 11400000, guid: 4d2fd07e800870047b5eb7e10e6d304a, type: 2}
+  - {fileID: 11400000, guid: ffa8ab4fabf5c7d4dbda734dba045e66, type: 2}
+  - {fileID: 11400000, guid: 07848408607db844ab33daff9f4b078f, type: 2}
   - {fileID: 11400000, guid: c1c95cd095900d54394906e00d5e2d18, type: 2}
+  - {fileID: 11400000, guid: f8d443dd9d8cb07469c9dc1828d19abb, type: 2}
+  - {fileID: 11400000, guid: 80505191eec4210469230e8ff9de7d6e, type: 2}
+  - {fileID: 11400000, guid: edabd20959fdd2349bbba3396fbb3d96, type: 2}
+  - {fileID: 11400000, guid: 91026894ea676ef4592438025fc8a507, type: 2}
+  - {fileID: 11400000, guid: 00348c50fbe23b74d83b32e34e67ca70, type: 2}
+  - {fileID: 11400000, guid: 93f58dee80893e640b71ef9550d9cd8e, type: 2}
   - {fileID: 11400000, guid: ac79e8b83023a554ebcd11d515c47831, type: 2}
   - {fileID: 11400000, guid: 0c46be7212dc2dd42bb7cfffe8d4687f, type: 2}
   - {fileID: 11400000, guid: 7da1ef0b0601aeb41bcaa48da4dc4816, type: 2}
@@ -21698,14 +21714,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.8, b: 0.35, a: 0.9}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: ce74ac363d304cccb1fba127e29bb49d, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -26149,6 +26165,11 @@ MonoBehaviour:
   buyButton: {fileID: 275403693}
   buyButtonLabel: {fileID: 1563315393}
   closeButton: {fileID: 1045013909}
+  titleText: {fileID: 1604258122}
+  keeperNameText: {fileID: 1327366257}
+  keeperLineText: {fileID: 1442848033}
+  panelImage: {fileID: 161550148}
+  panelOutline: {fileID: 161550147}
 --- !u!114 &906197861
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41709,7 +41730,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uCC9C\uCC9C\uD788 \uACE8\uB77C \uBD10."
+  m_text: "\uB9C8\uC74C\uC5D0 \uB4DC\uC2E0 \uC0C1\uD488\uC774\u2026 \uC788\uC744\uAE5D\uC1FC?"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: aad6b9102e560694c818823312ad2582, type: 2}
   m_sharedMaterial: {fileID: -4200542294600229185, guid: aad6b9102e560694c818823312ad2582, type: 2}

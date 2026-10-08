@@ -1,4 +1,5 @@
 using TrickalFanGame.Combat;
+using TrickalFanGame.Enemy;
 using UnityEngine;
 
 namespace TrickalFanGame.Player
@@ -56,6 +57,21 @@ namespace TrickalFanGame.Player
         private float projectileLifetimePercentBonus;
         private float projectileSizePercentBonus;
         private PoisonSettings basicAttackPoison;
+        private ProjectileBounceSettings projectileBounce;
+        private BurnSettings basicAttackBurn;
+        private ShockSettings basicAttackShock;
+        private int burnSourceCount;
+        private float criticalDamageBonus;
+        private float statusTickDamagePercentBonus;
+        private float executeHealthThreshold;
+        private float burningTargetDirectDamagePercent;
+        private float shockedTargetSkillDamagePercent;
+        private float shockedTargetCriticalDamageBonus;
+        private float shockedTargetCriticalChanceBonus;
+        // 슈슈슈슉 글러브: bonuses that last only while its kill stacks are up.
+        private float killFrenzyBasicAttackDamagePercent;
+        private float killFrenzyAttackSpeedPercent;
+        private float killFrenzyKnockbackPercent;
 
         public float MaxHealth => baseMaxHealth + maxHealthBonus;
         public float AttackDamage =>
@@ -70,14 +86,14 @@ namespace TrickalFanGame.Player
                 (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f));
         public float AttackSpeed => baseAttackSpeed *
             Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus +
-                             singleUseRoomAttackSpeedPercentBonus);
+                             singleUseRoomAttackSpeedPercentBonus + killFrenzyAttackSpeedPercent);
         public float BasicAttackRoomDamageMultiplier =>
             1f + basicAttackDamagePercentBonus + currentRoomAttackDamagePercentBonus +
-            singleUseRoomAttackDamagePercentBonus;
+            singleUseRoomAttackDamagePercentBonus + killFrenzyBasicAttackDamagePercent;
         public float CriticalChance =>
             Mathf.Clamp01(baseCriticalChance + criticalChanceBonus + singleUseRoomCriticalChanceBonus);
         public float CriticalDamageMultiplier =>
-            Mathf.Max(1f, baseCriticalDamageMultiplier + singleUseRoomCriticalDamageBonus);
+            Mathf.Max(1f, baseCriticalDamageMultiplier + criticalDamageBonus + singleUseRoomCriticalDamageBonus);
         public int ProjectileCount => 1 + additionalProjectileCount;
         public int PierceCount => pierceCount;
         public float HealOnKill => healOnKill;
@@ -97,7 +113,33 @@ namespace TrickalFanGame.Player
         public float ProjectileSizeMultiplier =>
             Mathf.Min(1f + projectileSizePercentBonus, ProjectileSizing.MaximumPlayerBasicSizeMultiplier);
         public PoisonSettings BasicAttackPoison => basicAttackPoison;
-        public ProjectileHitEffects BasicAttackHitEffects => new(true, basicAttackPoison);
+        // Passive-3 (칸타의 팽이): basic attack shots bounce between enemies.
+        public ProjectileBounceSettings ProjectileBounce => projectileBounce;
+        // Passive-4 (샤샤의 항아리): the basic attack is a water stream instead of shots. PlayerWaterStream fires it.
+        public bool HasWaterStream { get; private set; }
+        public BurnSettings BasicAttackBurn => basicAttackBurn;
+        public ShockSettings BasicAttackShock => basicAttackShock;
+        // Added to the tick damage of every status effect the player applies (앗따검, 탐욕의 반지).
+        public float StatusTickDamagePercentBonus => statusTickDamagePercentBonus;
+        public float ExecuteHealthThreshold => executeHealthThreshold;
+        public ProjectileHitEffects BasicAttackHitEffects => new(true, basicAttackPoison, basicAttackBurn,
+            basicAttackShock, statusTickDamagePercentBonus, killFrenzyKnockbackPercent);
+        // Obstacle-7: whether the player holds a burn artifact (활활 불타활, 불타는 가지). Their burn effect calls
+        // AddBurnSource.
+        public bool HasBurnSource
+        {
+            get
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                if (DevelopmentForceBurnSource) return true;
+#endif
+                return burnSourceCount > 0;
+            }
+        }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Development panel only: the player counts as holding a burn artifact.
+        public static bool DevelopmentForceBurnSource { get; set; }
+#endif
         public bool IsBelowMoveSpeedHealthThreshold =>
             moveSpeedPercentBelowHealthBonus > 0f && health != null && !health.IsDead &&
             (health.CurrentHealth <= health.MaxHealth * moveSpeedHealthThreshold ||
@@ -107,6 +149,8 @@ namespace TrickalFanGame.Player
         {
             health = GetComponent<Health>();
             health.EnableHealthUnits();
+            // Game rule: the player's current health and shield together stop at 15 hearts.
+            health.SetHealthAndShieldLimit(HealthUnits.MaximumHealthAndShieldUnits);
             health.SetMaxHealth(MaxHealth, true);
         }
 
@@ -318,6 +362,153 @@ namespace TrickalFanGame.Player
             playerSizePercentBonus = Mathf.Max(0f, playerSizePercentBonus + amount);
         }
 
+        public void AddBurnSource() => burnSourceCount++;
+
+        public void EnableWaterStream() => HasWaterStream = true;
+
+        // The first stack sets the bounce; each later stack adds one bounce.
+        public void AddProjectileBounce(
+            int bounceCount,
+            float searchRadius,
+            float repeatDamageRatio,
+            float sameTargetDelaySeconds)
+        {
+            ProjectileBounceSettings configured = projectileBounce.IsEnabled
+                ? projectileBounce.WithBounceCount(projectileBounce.BounceCount + 1)
+                : new ProjectileBounceSettings(bounceCount, searchRadius, repeatDamageRatio,
+                    sameTargetDelaySeconds);
+            if (configured.IsEnabled)
+            {
+                projectileBounce = configured;
+            }
+        }
+
+        public void AddCriticalDamage(float amount)
+        {
+            criticalDamageBonus = Mathf.Max(0f, criticalDamageBonus + amount);
+        }
+
+        public void AddStatusTickDamagePercent(float amount)
+        {
+            statusTickDamagePercentBonus = Mathf.Max(0f, statusTickDamagePercentBonus + amount);
+        }
+
+        public void AddExecuteHealthThreshold(float healthRatio)
+        {
+            executeHealthThreshold = Mathf.Clamp01(Mathf.Max(executeHealthThreshold, healthRatio));
+        }
+
+        public void AddBurningTargetDirectDamagePercent(float amount)
+        {
+            burningTargetDirectDamagePercent = Mathf.Max(0f, burningTargetDirectDamagePercent + amount);
+        }
+
+        public void AddShockedTargetSkillDamagePercent(float amount)
+        {
+            shockedTargetSkillDamagePercent = Mathf.Max(0f, shockedTargetSkillDamagePercent + amount);
+        }
+
+        public void AddShockedTargetCriticalBonus(float damage, float chance)
+        {
+            shockedTargetCriticalDamageBonus = Mathf.Max(0f, shockedTargetCriticalDamageBonus + damage);
+            shockedTargetCriticalChanceBonus = Mathf.Max(0f, shockedTargetCriticalChanceBonus + chance);
+        }
+
+        public void SetKillFrenzyBonus(float basicAttackDamage, float attackSpeed, float knockback)
+        {
+            killFrenzyBasicAttackDamagePercent = Mathf.Max(0f, basicAttackDamage);
+            killFrenzyAttackSpeedPercent = Mathf.Max(0f, attackSpeed);
+            killFrenzyKnockbackPercent = Mathf.Max(0f, knockback);
+        }
+
+        // Sources of the same status effect add their chances (up to 100%); the other values follow the latest one.
+        public void AddBasicAttackBurn(
+            float chance,
+            float tickDamageRatio,
+            float durationSeconds,
+            float intervalSeconds)
+        {
+            BurnSettings configured = new(
+                basicAttackBurn.Chance + Mathf.Max(0f, chance),
+                tickDamageRatio,
+                durationSeconds,
+                intervalSeconds);
+            if (configured.IsEnabled)
+            {
+                basicAttackBurn = configured;
+            }
+        }
+
+        public void AddBasicAttackShock(float chance, float slowPerStack, float durationSeconds, int maximumStacks)
+        {
+            ShockSettings configured = new(
+                basicAttackShock.Chance + Mathf.Max(0f, chance),
+                slowPerStack,
+                durationSeconds,
+                maximumStacks);
+            if (configured.IsEnabled)
+            {
+                basicAttackShock = configured;
+            }
+        }
+
+        // Bonuses that depend on the target's status when the hit lands. Only direct player hits gain them;
+        // status ticks, auras and bombs do not.
+        public DamageContext ApplyTargetBonuses(Health target, DamageContext context)
+        {
+            if (target == null || context.DeliveryType != DamageDeliveryType.Direct ||
+                (burningTargetDirectDamagePercent <= 0f && shockedTargetSkillDamagePercent <= 0f &&
+                 shockedTargetCriticalDamageBonus <= 0f && shockedTargetCriticalChanceBonus <= 0f) ||
+                !target.TryGetComponent(out EnemyStatusEffects status))
+            {
+                return context;
+            }
+
+            bool isBasicAttack = context.SourceType is DamageSourceType.PlayerProjectile or
+                DamageSourceType.PlayerAttack;
+            bool isSkill = context.SourceType is DamageSourceType.PlayerSkillExplosion or
+                DamageSourceType.PlayerUltimateImpact;
+            if (!isBasicAttack && !isSkill && context.SourceType is not (DamageSourceType.PlayerItemLightning or
+                    DamageSourceType.PlayerItemExplosion))
+            {
+                return context;
+            }
+
+            float multiplier = 1f;
+            float criticalChance = 0f;
+            float criticalDamage = 0f;
+            if (status.IsBurning)
+            {
+                multiplier *= 1f + burningTargetDirectDamagePercent;
+            }
+
+            if (status.IsShocked && (isBasicAttack || isSkill))
+            {
+                if (isSkill)
+                {
+                    // The same stat adds: the cast already holds the skill damage bonus.
+                    multiplier *= (SkillDamageMultiplier + shockedTargetSkillDamagePercent) / SkillDamageMultiplier;
+                }
+
+                criticalChance = shockedTargetCriticalChanceBonus;
+                criticalDamage = shockedTargetCriticalDamageBonus;
+            }
+
+            return Mathf.Approximately(multiplier, 1f) && criticalChance <= 0f && criticalDamage <= 0f
+                ? context
+                : context.WithTargetBonuses(multiplier, criticalChance, criticalDamage);
+        }
+
+        // 림의 낫: right after player damage, an enemy left at or below the threshold dies. Bosses are exempt;
+        // what a boss summons is an ordinary enemy.
+        public bool Executes(Health target, DamageContext context)
+        {
+            return executeHealthThreshold > 0f && target != null &&
+                   PlayerCombatEvents.IsPlayerDamage(context.SourceType) &&
+                   target.CurrentHealth <= target.MaxHealth * executeHealthThreshold + 0.0001f &&
+                   target.GetComponent<BossController>() == null;
+        }
+
         // Sources of the same status effect add their chances (up to 100%); the other values follow the latest one.
         public void AddBasicAttackPoison(
             float chance,
@@ -350,6 +541,17 @@ namespace TrickalFanGame.Player
                 damageMultiplier,
                 maximumDistance,
                 spreadAngleDegrees,
+                scaleMultiplier);
+            if (configured.IsEnabled)
+            {
+                projectileSplitSettings = configured;
+            }
+        }
+
+        // Passive-5 (다야의 다이아몬드 커터): every hit splits into four small shots around the enemy.
+        public void ConfigureProjectileSplitOnHit(float damageMultiplier, float maximumDistance, float scaleMultiplier)
+        {
+            ProjectileSplitSettings configured = ProjectileSplitSettings.OnHit(damageMultiplier, maximumDistance,
                 scaleMultiplier);
             if (configured.IsEnabled)
             {

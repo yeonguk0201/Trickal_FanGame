@@ -87,6 +87,28 @@ namespace TrickalFanGame.Combat
                 AllowsHalfHeart);
         }
 
+        // Artifact-2: bonuses that depend on the target's state (burning, shocked), judged when the hit lands.
+        public DamageContext WithTargetBonuses(
+            float multiplierScale,
+            float criticalChanceBonus,
+            float criticalDamageBonus)
+        {
+            return new DamageContext(
+                Source,
+                SourceType,
+                BaseDamage,
+                Multiplier * Mathf.Max(0f, multiplierScale),
+                DeliveryType,
+                CriticalChance + Mathf.Max(0f, criticalChanceBonus),
+                CriticalDamageMultiplier + Mathf.Max(0f, criticalDamageBonus),
+                CriticalRollOverride,
+                DistanceDamageBonus,
+                DistanceDamageMinimum,
+                DistanceDamageMaximum,
+                ImpactDistance,
+                AllowsHalfHeart);
+        }
+
         public DamageContext ScaleMultiplier(float multiplier)
         {
             return new DamageContext(

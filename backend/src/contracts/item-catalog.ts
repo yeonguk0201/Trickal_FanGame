@@ -130,19 +130,18 @@ export const ITEM_CATALOG = [
   {
     id: 'item-11',
     name: '다야의 다이아몬드 커터',
-    description: '관통이 1 증가하고 첫 관통 후 소형 투사체 3개로 분열합니다.',
+    description:
+      '기본 공격이 적을 맞히면 그 적의 위치에서 상하좌우 4방향으로 소형 투사체가 분열합니다. 분열탄은 피해가 50%, 크기가 기본 탄의 50%이고 사거리가 짧으며 다시 분열하지 않습니다. 다른 아이템의 관통이 있으면 본탄은 계속 날아가며 맞힐 때마다 분열하고, 분열탄도 관통을 물려받아 방금 맞힌 적을 다시 맞힙니다.',
     rarity: 'EPIC',
     isActive: true,
     maxStacks: 1,
     effects: [
-      { type: 'Pierce', integerAmount: 1 },
       {
-        type: 'SplitAfterPierce',
-        secondaryMagnitude: 0.3,
-        integerAmount: 3,
+        type: 'SplitOnHit',
+        secondaryMagnitude: 0.5,
+        integerAmount: 4,
         maximumDistance: 3,
-        spreadAngleDegrees: 15,
-        scaleMultiplier: 0.6,
+        scaleMultiplier: 0.5,
       },
     ],
   },
@@ -435,6 +434,260 @@ export const ITEM_CATALOG = [
       { type: 'BasicAttackDamagePercent', magnitude: 0.2 },
       { type: 'MaxHealthFlat', magnitude: 6 },
       { type: 'MoveSpeedPenaltyPercent', magnitude: 0.2 },
+    ],
+  },
+  {
+    id: 'artifact-ner-eldr-flag',
+    name: '네르의 엘드르 깃발',
+    description:
+      '최대 HP가 스택당 1칸 증가합니다. 저학년 스킬을 3회 시전할 때마다 HP를 반 칸 회복하며, 스택마다 필요한 시전 횟수가 1회 줄어듭니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      { type: 'MaxHealthFlat', magnitude: 2 },
+      { type: 'HealOnLowerGradeSkillEveryN', magnitude: 1, integerAmount: 3 },
+    ],
+  },
+  {
+    id: 'artifact-emergency-protection-belt',
+    name: '긴급 보호 벨트',
+    description:
+      '새 전투가 시작되는 방에 들어갈 때마다 방어막을 반 칸 얻습니다. 방어막은 방마다 누적되며 현재 HP와 방어막의 합이 15칸이 되면 더 얻지 않습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'ShieldOnCombatRoomEntry', magnitude: 1 }],
+  },
+  {
+    id: 'artifact-pork-cutlet-hairpin',
+    name: '돈까스 모양 머리핀',
+    description: '최대 HP가 스택당 1칸 증가하고 그 1칸을 회복합니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 3,
+    effects: [{ type: 'MaxHealthFlat', magnitude: 2 }],
+  },
+  {
+    id: 'artifact-rim-scythe',
+    name: '림의 낫',
+    description:
+      '공격력이 8% 증가합니다. 피해를 준 직후 적의 남은 HP가 최대 HP의 20% 이하면 즉시 처치합니다. 보스에게는 적용되지 않습니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'AttackDamagePercent', magnitude: 0.08 },
+      { type: 'ExecuteBelowHealth', magnitude: 0.2 },
+    ],
+  },
+  {
+    id: 'artifact-explosive-muffin',
+    name: '폭발 머핀',
+    description:
+      '치명타 확률이 5%p 증가합니다. 기본 공격이 8회 적중할 때마다 적중한 적의 위치에서 반경 1.5m에 공격력의 100% 피해를 주는 폭발이 일어납니다. 폭발은 적중 횟수에 포함되지 않습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'CriticalChance', magnitude: 0.05 },
+      {
+        type: 'BasicAttackHitExplosion',
+        magnitude: 1,
+        integerAmount: 8,
+        radius: 1.5,
+      },
+    ],
+  },
+  {
+    id: 'artifact-blazing-bow',
+    name: '활활 불타활',
+    description:
+      '공격력이 스택당 3% 증가합니다. 기본 공격이 적중하면 스택당 20% 확률로 적에게 화상을 입힙니다. 화상은 3초 동안 0.5초마다 공격력의 20%씩 피해를 주며 중첩되지 않고 지속 시간만 갱신됩니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      { type: 'AttackDamagePercent', magnitude: 0.03 },
+      {
+        type: 'BasicAttackBurn',
+        magnitude: 0.2,
+        secondaryMagnitude: 0.2,
+        intervalSeconds: 0.5,
+        durationSeconds: 3,
+      },
+    ],
+  },
+  {
+    id: 'artifact-attatta-gun',
+    name: '앗땃따건',
+    description:
+      '공격력이 스택당 3% 증가합니다. 기본 공격이 적중하면 스택당 20% 확률로 적을 감전시킵니다. 감전은 2.5초 동안 이동속도를 10%씩 낮추며 4번까지 중첩되고, 보스에게는 절반만 적용됩니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      { type: 'AttackDamagePercent', magnitude: 0.03 },
+      {
+        type: 'BasicAttackShock',
+        magnitude: 0.2,
+        secondaryMagnitude: 0.1,
+        integerAmount: 4,
+        durationSeconds: 2.5,
+      },
+    ],
+  },
+  {
+    id: 'artifact-atta-sword',
+    name: '앗따검',
+    description:
+      '상태이상(중독·화상)의 틱 피해가 스택당 10%, 공격력이 스택당 5% 증가합니다. 스스로 상태이상을 부여하지는 않습니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      { type: 'StatusTickDamagePercent', magnitude: 0.1 },
+      { type: 'AttackDamagePercent', magnitude: 0.05 },
+    ],
+  },
+  {
+    id: 'artifact-burning-branch',
+    name: '불타는 가지',
+    description:
+      '공격력이 3% 증가합니다. 화상에 걸린 적에게 주는 직접 피해가 25% 증가하고, 기본 공격이 적중하면 10% 확률로 화상(3초, 0.5초마다 공격력의 20%)을 입힙니다. 화상의 틱 피해에는 적용되지 않습니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'AttackDamagePercent', magnitude: 0.03 },
+      { type: 'DirectDamagePercentVsBurning', magnitude: 0.25 },
+      {
+        type: 'BasicAttackBurn',
+        magnitude: 0.1,
+        secondaryMagnitude: 0.2,
+        intervalSeconds: 0.5,
+        durationSeconds: 3,
+      },
+    ],
+  },
+  {
+    id: 'artifact-amelia-epad-classic',
+    name: '아멜리아의 E-Pad 클래식',
+    description:
+      '스킬 피해가 8% 증가합니다. 감전된 적에게는 스킬 피해가 60% 더 증가하고, 기본 공격과 스킬의 치명타 확률과 치명타 피해가 33.61%p씩 증가합니다. 스스로 감전을 부여하지는 않습니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'SkillDamagePercent', magnitude: 0.08 },
+      { type: 'SkillDamagePercentVsShocked', magnitude: 0.6 },
+      {
+        type: 'CriticalBonusVsShocked',
+        magnitude: 0.3361,
+        secondaryMagnitude: 0.3361,
+      },
+    ],
+  },
+  {
+    id: 'artifact-greed-ring',
+    name: '탐욕의 반지',
+    description:
+      '치명타 피해가 스택당 30%p, 상태이상(중독·화상)의 틱 피해가 스택당 30% 증가합니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      { type: 'CriticalDamage', magnitude: 0.3 },
+      { type: 'StatusTickDamagePercent', magnitude: 0.3 },
+    ],
+  },
+  {
+    id: 'artifact-sylla-wind-arrow',
+    name: '실라의 바람살',
+    description:
+      '공격속도가 스택당 15%, 이동속도가 5%, 기본 공격 탄속이 15% 증가합니다. 탄속이 늘면 사거리와 넉백도 함께 늘어납니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      { type: 'AttackSpeedPercent', magnitude: 0.15 },
+      { type: 'MoveSpeedPercent', magnitude: 0.05 },
+      { type: 'ProjectileSpeedPercent', magnitude: 0.15 },
+    ],
+  },
+  {
+    id: 'artifact-levi-dagger',
+    name: '레비의 단도',
+    description:
+      '공격력이 8%, 이동속도가 3% 증가합니다. Run당 1회, 사망에 이르는 피해를 무효화하고 5초 동안 무적이 됩니다. HP와 방어막은 피격 전 그대로이며, 효과를 쓴 뒤에도 능력치는 유지됩니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'AttackDamagePercent', magnitude: 0.08 },
+      { type: 'MoveSpeedPercent', magnitude: 0.03 },
+      { type: 'NegateLethalDamageOnce', durationSeconds: 5 },
+    ],
+  },
+  {
+    id: 'artifact-shushushushuk-glove',
+    name: '슈슈슈슉 글러브',
+    description:
+      '공격력이 8% 증가합니다. 적을 처치하면 5초 동안 중첩당 기본 공격 피해 5%, 공격속도 8%, 넉백 15%가 증가하며 3번까지 중첩되고 처치할 때마다 5초로 갱신됩니다. 5초가 지나면 모든 중첩이 사라지고 10초 동안은 다시 발동하지 않습니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'AttackDamagePercent', magnitude: 0.08 },
+      {
+        type: 'KillFrenzy',
+        magnitude: 0.05,
+        secondaryMagnitude: 0.08,
+        integerAmount: 3,
+        intervalSeconds: 10,
+        durationSeconds: 5,
+      },
+      { type: 'KillFrenzyKnockbackPercent', magnitude: 0.15 },
+    ],
+  },
+  {
+    id: 'artifact-aisia-wallet',
+    name: '아이시아의 지갑',
+    description:
+      '획득하면 골드를 100 얻습니다. 보유 한도 99를 넘는 골드는 버려집니다. 황금상자에서만 얻을 수 있습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'GainGoldOnAcquire', magnitude: 100 }],
+  },
+  {
+    id: 'artifact-kanta-top',
+    name: '칸타의 팽이',
+    description:
+      '기본 공격 투사체가 적을 맞히면 반경 3.5m 안의 가장 가까운 다른 적에게 2회 튕깁니다. 스택마다 튕김이 1회 늘어납니다. 다른 적이 없으면 0.15초 뒤 같은 적을 다시 맞히며, 같은 적을 다시 맞힐 때마다 피해가 절반이 됩니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 2,
+    effects: [
+      {
+        type: 'BounceBetweenEnemies',
+        secondaryMagnitude: 0.5,
+        integerAmount: 2,
+        radius: 3.5,
+        intervalSeconds: 0.15,
+      },
+    ],
+  },
+  {
+    id: 'artifact-shasha-jar',
+    name: '샤샤의 항아리',
+    description:
+      '기본 공격이 투사체 대신 물줄기가 됩니다. 물줄기는 공격 키를 누르고 있으면 공격 쿨다운마다 한 번씩 발사되어 벽이나 문까지 일직선으로 뻗고, 장애물을 타격하며 넘어가고, 줄기 위의 모든 적을 맞힙니다. 넉백은 투사체의 30%이며 사거리와 탄속 효과는 적용되지 않습니다.',
+    rarity: 'EPIC',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'WaterStreamAttack', magnitude: 0.2, secondaryMagnitude: 0.3 },
     ],
   },
   {

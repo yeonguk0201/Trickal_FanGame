@@ -109,6 +109,7 @@ namespace TrickalFanGame.Frontend
 
         private void OnEnable()
         {
+            ApplyHomeArtwork();
             if (gameStartButton != null) gameStartButton.onClick.AddListener(RequestCharacterSelection);
             if (skillUpgradeButton != null) skillUpgradeButton.onClick.AddListener(RequestSkillUpgrade);
             if (settingsButton != null) settingsButton.onClick.AddListener(RequestSettings);
@@ -122,6 +123,26 @@ namespace TrickalFanGame.Frontend
                 characterSelectionView.OnUpgradeCharacterConfirmed += ShowSkillUpgrade;
             }
             if (skillUpgradeView != null) skillUpgradeView.OnBackRequested += ReturnToSkillCharacterSelection;
+        }
+
+        private void ApplyHomeArtwork()
+        {
+            if (homePanel == null || homePanel.transform.Find("Home Artwork") != null) return;
+            Sprite sprite = UserArtwork.Load("home-background");
+            if (sprite == null) return;
+            GameObject background = new("Home Artwork", typeof(RectTransform), typeof(Image), typeof(AspectRatioFitter));
+            RectTransform rect = (RectTransform)background.transform;
+            rect.SetParent(homePanel.transform, false);
+            rect.SetAsFirstSibling();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.sizeDelta = Vector2.zero;
+            Image image = background.GetComponent<Image>();
+            image.sprite = sprite;
+            image.raycastTarget = false;
+            AspectRatioFitter fit = background.GetComponent<AspectRatioFitter>();
+            fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fit.aspectRatio = sprite.rect.width / sprite.rect.height;
         }
 
         private void OnDisable()

@@ -80,6 +80,7 @@ namespace TrickalFanGame.Frontend
                         ? SingleUseItemPickup.JjangsemSpellColor
                         : SingleUseItemPickup.SpellColor;
             }
+            UserArtwork.Apply(icon, held);
             if (nameText != null) nameText.text = held != null ? held.DisplayName : EmptyText;
             if (kindText != null) kindText.text = held != null ? ItemKindText.GetDisplayName(held.Kind) : string.Empty;
             if (keyText != null)

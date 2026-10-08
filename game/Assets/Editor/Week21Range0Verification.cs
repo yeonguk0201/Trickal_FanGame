@@ -92,9 +92,12 @@ namespace TrickalFanGame.Editor
                 .Select(guid => AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid)))
                 .Where(definition => definition != null)
                 .ToArray();
-            Assert(assets.All(definition => definition.Effects.All(effect =>
-                    effect.EffectType != ItemEffectType.ProjectileSpeedPercent)),
-                "The shot speed effect is only a contract; no item asset may use it yet.");
+            // Artifact-2: 실라의 바람살 is the first item that uses the shot speed effect.
+            Assert(assets.Where(definition => definition.Effects.Any(effect =>
+                        effect.EffectType == ItemEffectType.ProjectileSpeedPercent))
+                    .Select(definition => definition.ItemId)
+                    .All(itemId => itemId == Week23Artifact2Setup.WindArrowId),
+                "Only 실라의 바람살 may use the shot speed effect.");
             Assert(assets.Where(definition => definition.Effects.Any(effect =>
                         effect.EffectType == ItemEffectType.ProjectileLifetimePercent))
                     .Select(definition => definition.ItemId).SequenceEqual(new[] { TelescopeId }),

@@ -127,9 +127,11 @@ namespace TrickalFanGame.Editor
             ChestContentTable table =
                 AssetDatabase.LoadAssetAtPath<ChestContentTable>(Week22Chest1Setup.ChestContentTablePath);
             Assert(table != null && table.TryValidate(out string error), "The chest content table is missing or invalid.");
-            Assert(table.GoldenExclusiveArtifacts.SequenceEqual(new[] { wings }) && table.IsGoldenExclusive(wings) &&
-                   table.ArtifactPickupPrefab != null,
-                "The golden exclusive pool must hold exactly the fake wings with the artifact pickup Prefab.");
+            // Artifact-3 added 아이시아의 지갑 to the pool; every member must still be a golden exclusive.
+            Assert(table.GoldenExclusiveArtifacts.Count(artifact => artifact == wings) == 1 &&
+                   table.GoldenExclusiveArtifacts.All(GoldenChestExclusivePool.IsExclusive) &&
+                   table.IsGoldenExclusive(wings) && table.ArtifactPickupPrefab != null,
+                "The golden exclusive pool must hold the fake wings once, only exclusives, and the artifact pickup Prefab.");
             Assert(!table.Spells.Contains(wings), "The fake wings must not be a chest spell.");
             Assert(GoldenChestExclusivePool.IsExclusive(wings), "Reward pool setups must treat the fake wings as exclusive.");
 

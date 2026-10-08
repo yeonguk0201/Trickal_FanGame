@@ -99,6 +99,7 @@ namespace TrickalFanGame.Item
         {
             if (display == null || definition == null) return;
             display.color = definition.Kind == ItemKind.JjangsemSpell ? JjangsemSpellColor : SpellColor;
+            TrickalFanGame.Frontend.UserArtwork.Apply(display, definition);
         }
     }
 }

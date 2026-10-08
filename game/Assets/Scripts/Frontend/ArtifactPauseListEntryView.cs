@@ -40,6 +40,7 @@ namespace TrickalFanGame.Frontend
                 definition != null ? definition.Rarity : ItemRarity.Common);
             if (stableIdText != null) stableIdText.text = ArtifactHudSlotView.GetShortStableId(
                 definition != null ? definition.ItemId : string.Empty);
+            UserArtwork.Apply(icon, definition, stableIdText);
             if (nameText != null) nameText.text = definition != null ? definition.DisplayName : string.Empty;
             if (stackText != null) stackText.text = $"×{StackCount}";
             if (descriptionText != null) descriptionText.text = ArtifactEffectDescription.Build(definition);

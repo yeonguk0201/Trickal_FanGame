@@ -195,6 +195,104 @@ namespace TrickalFanGame.Item
                     }
 
                     break;
+                case ItemEffectType.HealOnLowerGradeSkillEveryN:
+                    if (integerAmount <= 0)
+                    {
+                        error = "HealOnLowerGradeSkillEveryN requires a positive cast count.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.ExecuteBelowHealth:
+                    if (magnitude >= 1f)
+                    {
+                        error = "ExecuteBelowHealth requires a health ratio within (0, 1).";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.BasicAttackHitExplosion:
+                    if (integerAmount <= 0 || radius <= 0f)
+                    {
+                        error = "BasicAttackHitExplosion requires a positive hit count and radius.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.BasicAttackBurn:
+                    if (magnitude > 1f || secondaryMagnitude <= 0f || durationSeconds <= 0f ||
+                        intervalSeconds <= 0f)
+                    {
+                        error = "BasicAttackBurn requires a chance within (0, 1] and a positive tick damage ratio, " +
+                                "duration and tick interval.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.BasicAttackShock:
+                    if (magnitude > 1f || secondaryMagnitude <= 0f || secondaryMagnitude > 1f ||
+                        durationSeconds <= 0f || integerAmount <= 0)
+                    {
+                        error = "BasicAttackShock requires a chance and a slow per stack within (0, 1], a positive " +
+                                "duration and a positive maximum stack count.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CriticalBonusVsShocked:
+                    if (secondaryMagnitude < 0f || secondaryMagnitude > 1f)
+                    {
+                        error = "CriticalBonusVsShocked requires a critical chance bonus within 0..1.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.NegateLethalDamageOnce:
+                    if (durationSeconds <= 0f)
+                    {
+                        error = "NegateLethalDamageOnce requires a positive invulnerability duration.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.KillFrenzy:
+                    if (secondaryMagnitude < 0f || integerAmount <= 0 || durationSeconds <= 0f ||
+                        intervalSeconds < 0f)
+                    {
+                        error = "KillFrenzy requires a non-negative attack speed bonus, a positive maximum stack " +
+                                "count and duration, and a non-negative cooldown.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.BounceBetweenEnemies:
+                    if (integerAmount <= 0 || radius <= 0f || secondaryMagnitude <= 0f || secondaryMagnitude > 1f ||
+                        intervalSeconds <= 0f)
+                    {
+                        error = "BounceBetweenEnemies requires a positive bounce count, search radius and same-enemy " +
+                                "delay, and a repeat damage ratio within (0, 1].";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.SplitOnHit:
+                    if (integerAmount != 4 || secondaryMagnitude <= 0f || maximumDistance <= 0f ||
+                        scaleMultiplier <= 0f)
+                    {
+                        error = "SplitOnHit requires four directions, a damage multiplier, a maximum distance and a " +
+                                "scale multiplier.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.WaterStreamAttack:
+                    if (secondaryMagnitude < 0f || secondaryMagnitude > 1f)
+                    {
+                        error = "WaterStreamAttack requires a knockback share within 0..1.";
+                        return false;
+                    }
+
+                    break;
                 case ItemEffectType.Pierce:
                 case ItemEffectType.MaxSP:
                 case ItemEffectType.MultiShot:
@@ -224,6 +322,9 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.SpawnHealthPickups &&
                    type != ItemEffectType.Flight &&
                    type != ItemEffectType.DuplicateRoomChestsAndPickups &&
+                   type != ItemEffectType.NegateLethalDamageOnce &&
+                   type != ItemEffectType.BounceBetweenEnemies &&
+                   type != ItemEffectType.SplitOnHit &&
                    type != ItemEffectType.FreeCurrentShopOffers;
         }
     }

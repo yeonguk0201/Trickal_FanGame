@@ -21,7 +21,8 @@ namespace TrickalFanGame.Editor
             ValidateForcedPit();
             ValidateWallHighlight();
             ValidateKillCurrentWave();
-            Assert(!GameMinimapView.DevelopmentRevealSecrets && !DestructibleObstacle.DevelopmentForceNextSecretPit,
+            Assert(!GameMinimapView.DevelopmentRevealSecrets && !DestructibleObstacle.DevelopmentForceNextSecretPit &&
+                   !TrickalFanGame.Player.PlayerStats.DevelopmentForceBurnSource,
                 "Development panel flags must default to off.");
             Debug.Log("Development panel verification passed: the seed override starts exactly one Run and clears, " +
                       "a forced pit needs a secret-room floor and is consumed once, wall highlight restores the " +

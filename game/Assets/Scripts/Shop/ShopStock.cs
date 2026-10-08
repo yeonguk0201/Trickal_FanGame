@@ -11,6 +11,13 @@ namespace TrickalFanGame.Shop
         Consumable,
     }
 
+    // Shop-1: who runs the shop. 골디 sells better Items from a secret room; rules and prices are the same.
+    public enum ShopKind
+    {
+        General,
+        Goldi,
+    }
+
     public sealed class ShopOffer
     {
         private ShopOffer(int slotIndex, ShopOfferKind kind, ItemDefinition item, ShopConsumable consumable, int price)
@@ -44,14 +51,16 @@ namespace TrickalFanGame.Shop
         private readonly ShopOffer[] offers;
         private readonly bool[] purchased;
 
-        public ShopStockState(string shopId, ShopOffer[] configuredOffers)
+        public ShopStockState(string shopId, ShopOffer[] configuredOffers, ShopKind kind = ShopKind.General)
         {
             ShopId = shopId;
+            Kind = kind;
             offers = configuredOffers ?? Array.Empty<ShopOffer>();
             purchased = new bool[offers.Length];
         }
 
         public string ShopId { get; }
+        public ShopKind Kind { get; }
         public IReadOnlyList<ShopOffer> Offers => offers;
         // Spell-4 (멤버십카드): once set, every offer still on sale costs nothing. Kept with the stock for the Run.
         public bool IsFree { get; private set; }
@@ -84,24 +93,32 @@ namespace TrickalFanGame.Shop
     public static class ShopStockBuilder
     {
         public const uint StockSalt = 0x53544F4Bu;
+        // Shop-1: 골디 sells Items of this rarity or better.
+        public const ItemRarity GoldiMinimumRarity = ItemRarity.Rare;
 
         public static string BuildShopId(string roomId) => $"{roomId}:shop";
 
         // Items use the treasure-room rarity weights (distinct, skipping maxed stacks at roll time); consumables are
         // distinct picks from the catalog. If too few Items are eligible, extra consumables fill the empty slots.
+        // The 골디 shop rolls among Items of GoldiMinimumRarity or better first and fills what is left from the rest.
         public static ShopStockState Build(string roomId, int roomContentSeed, ShopCatalog catalog,
-            IReadOnlyList<ItemDefinition> itemPool, PlayerInventory inventory)
+            IReadOnlyList<ItemDefinition> itemPool, PlayerInventory inventory, ShopKind kind = ShopKind.General)
         {
             string shopId = BuildShopId(roomId);
             int stockSeed = FloorGenerator.DeriveSeed(roomContentSeed, 0, StockSalt);
             List<ShopOffer> offers = new(ShopCatalog.OfferCount);
-            foreach (ItemRewardCandidate candidate in ArtifactRewardSelector.BuildCandidates(
-                         itemPool, inventory, stockSeed, shopId))
+            if (kind == ShopKind.Goldi)
             {
-                if (offers.Count >= ShopCatalog.ItemOfferCount) break;
-                if (candidate.IsItem)
-                    offers.Add(ShopOffer.ForItem(offers.Count, candidate.Definition,
-                        catalog.GetItemPrice(candidate.Definition.Rarity)));
+                List<ItemDefinition> better = new(), rest = new();
+                if (itemPool != null)
+                    foreach (ItemDefinition item in itemPool)
+                        if (item != null) (item.Rarity >= GoldiMinimumRarity ? better : rest).Add(item);
+                AddItemOffers(offers, better, inventory, stockSeed, shopId, catalog);
+                AddItemOffers(offers, rest, inventory, stockSeed, shopId + ":fill", catalog);
+            }
+            else
+            {
+                AddItemOffers(offers, itemPool, inventory, stockSeed, shopId, catalog);
             }
 
             List<ShopConsumable> consumables = new(catalog.Consumables);
@@ -116,7 +133,21 @@ namespace TrickalFanGame.Shop
                 consumables.RemoveAt(index);
             }
 
-            return new ShopStockState(shopId, offers.ToArray());
+            return new ShopStockState(shopId, offers.ToArray(), kind);
+        }
+
+        private static void AddItemOffers(List<ShopOffer> offers, IReadOnlyList<ItemDefinition> itemPool,
+            PlayerInventory inventory, int stockSeed, string rewardId, ShopCatalog catalog)
+        {
+            if (offers.Count >= ShopCatalog.ItemOfferCount) return;
+            foreach (ItemRewardCandidate candidate in ArtifactRewardSelector.BuildCandidates(
+                         itemPool, inventory, stockSeed, rewardId))
+            {
+                if (offers.Count >= ShopCatalog.ItemOfferCount) break;
+                if (candidate.IsItem)
+                    offers.Add(ShopOffer.ForItem(offers.Count, candidate.Definition,
+                        catalog.GetItemPrice(candidate.Definition.Rarity)));
+            }
         }
     }
 }

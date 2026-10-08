@@ -86,6 +86,23 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 칸나의 대포 | 아티팩트 | `artifact-kanna-cannon` | Passive-1 |
 | 비비의 콧물 | 아티팩트 | `artifact-bibi-snot` | Passive-1 |
 | 거대화 물약 | 아티팩트 | `artifact-giant-potion` | Passive-2 |
+| 네르의 엘드르 깃발 | 아티팩트 | `artifact-ner-eldr-flag` | Artifact-2 |
+| 긴급 보호 벨트 | 아티팩트 | `artifact-emergency-protection-belt` | Artifact-2 |
+| 돈까스 모양 머리핀 | 아티팩트 | `artifact-pork-cutlet-hairpin` | Artifact-2 |
+| 림의 낫 | 아티팩트 | `artifact-rim-scythe` | Artifact-2 |
+| 폭발 머핀 | 아티팩트 | `artifact-explosive-muffin` | Artifact-2 |
+| 활활 불타활 | 아티팩트 | `artifact-blazing-bow` | Artifact-2 |
+| 앗땃따건 | 아티팩트 | `artifact-attatta-gun` | Artifact-2 |
+| 앗따검 | 아티팩트 | `artifact-atta-sword` | Artifact-2 |
+| 불타는 가지 | 아티팩트 | `artifact-burning-branch` | Artifact-2 |
+| 아멜리아의 E-Pad 클래식 | 아티팩트 | `artifact-amelia-epad-classic` | Artifact-2 |
+| 탐욕의 반지 | 아티팩트 | `artifact-greed-ring` | Artifact-2 |
+| 실라의 바람살 | 아티팩트 | `artifact-sylla-wind-arrow` | Artifact-2 |
+| 레비의 단도 | 아티팩트 | `artifact-levi-dagger` | Artifact-2 |
+| 슈슈슈슉 글러브 | 아티팩트 | `artifact-shushushushuk-glove` | Artifact-2 |
+| 아이시아의 지갑 | 아티팩트(황금 전용) | `artifact-aisia-wallet` | Artifact-3 |
+| 칸타의 팽이 | 아티팩트 | `artifact-kanta-top` | Passive-3 |
+| 샤샤의 항아리 | 아티팩트 | `artifact-shasha-jar` | Passive-4 |
 
 ### 2.4 등급·효과·스택
 
@@ -134,6 +151,30 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
   (Epic, 최대 2스택)만 쓰며 45 `magnitude` 0.3·46 `magnitude` 0.2에 기존 효과 11 `MaxHealthFlat` 6(3칸)과 20
   `MoveSpeedPenaltyPercent` 0.2를 함께 가진다. Backend 카탈로그에도 같은 값을 기록했다. 전설 등급의 최대 1스택 관례와 다른
   2스택은 시험값이며 스탯 상한 방식을 검토 중이다.
+  Artifact-2(2026-10-07)에서 확정 아티팩트 14종을 위해 47~60을 추가했다. `HealOnLowerGradeSkillEveryN = 47`(`magnitude` =
+  회복 HP 단위, `integerAmount` = 필요 시전 수), `ShieldOnCombatRoomEntry = 48`(`magnitude` = 방어막 HP 단위),
+  `ExecuteBelowHealth = 49`(`magnitude` = 최대 HP 대비 비율), `BasicAttackHitExplosion = 50`(`integerAmount` = 적중 수,
+  `magnitude` = 공격력 비율, `radius`), `BasicAttackBurn = 51`(`magnitude` = 확률, `secondaryMagnitude` = 틱 피해의 공격력
+  비율, `durationSeconds`, `intervalSeconds`), `BasicAttackShock = 52`(`magnitude` = 확률, `secondaryMagnitude` = 스택당 둔화,
+  `durationSeconds`, `integerAmount` = 최대 스택), `StatusTickDamagePercent = 53`, `DirectDamagePercentVsBurning = 54`,
+  `SkillDamagePercentVsShocked = 55`, `CriticalBonusVsShocked = 56`(`magnitude` = 치명타 피해, `secondaryMagnitude` = 치명타
+  확률, 40번과 같은 배치), `CriticalDamage = 57`, `NegateLethalDamageOnce = 58`(`durationSeconds` = 무적 시간, `magnitude` 없음),
+  `KillFrenzy = 59`(`magnitude` = 스택당 기본 공격 피해, `secondaryMagnitude` = 스택당 공격속도, `integerAmount` = 최대 스택,
+  `durationSeconds`, `intervalSeconds` = 쿨타임), `KillFrenzyKnockbackPercent = 60`(`magnitude` = 스택당 넉백). 값이 셋 필요한
+  E-Pad와 글러브는 `effectData` 필드 형태를 바꾸지 않으려고 효과를 둘로 나눴다. 탄속(33)은 `artifact-sylla-wind-arrow`가
+  처음 쓴다. 14종의 ID·등급·스택·효과는 Backend 카탈로그에도 같은 값으로 기록했다(목록은 [21번 Artifact-2](./21-sixth-month-plan.md)).
+  Artifact-3·Passive-3·Passive-4(2026-10-07)에서 `GainGoldOnAcquire = 61`(`magnitude` = 획득 시 골드, 지갑 상한 99에서 잘림),
+  `BounceBetweenEnemies = 62`(`integerAmount` = 첫 스택의 튕김 횟수이며 이후 스택마다 +1, `radius` = 탐색 반경,
+  `secondaryMagnitude` = 같은 적 재적중마다 남는 피해 비율, `intervalSeconds` = 같은 적 재적중 지연, `magnitude` 없음),
+  `WaterStreamAttack = 63`(`magnitude` = 줄기 폭, `secondaryMagnitude` = 탄 넉백 대비 비율)을 추가했다.
+  `artifact-aisia-wallet`(Rare, 1스택, 61 `magnitude` 100), `artifact-kanta-top`(Rare, 2스택, 62 `integerAmount` 2·`radius` 3.5·
+  `secondaryMagnitude` 0.5·`intervalSeconds` 0.15), `artifact-shasha-jar`(Epic, 1스택, 63 `magnitude` 0.2·`secondaryMagnitude` 0.3)만
+  쓰며 Backend 카탈로그에도 같은 값을 기록했다.
+  Passive-5(2026-10-07)에서 `SplitOnHit = 64`(`integerAmount` = 방향 수 4, `secondaryMagnitude` = 분열탄 피해 비율,
+  `maximumDistance` = 분열탄 사거리, `scaleMultiplier` = 기본 탄 대비 크기, `magnitude` 없음)를 추가하고 `item-11`의 효과를
+  `Pierce` 1 + `SplitAfterPierce`(16)에서 64 하나(`secondaryMagnitude` 0.5·`maximumDistance` 3·`scaleMultiplier` 0.5)로 바꿨다.
+  **기존 ID의 효과를 바꾼 계약 마이그레이션**이며 Unity 에셋·Backend 카탈로그·검증기·문서를 함께 갱신했다. 16번은 번호와
+  의미를 그대로 둔 레거시 효과이고 쓰는 아이템이 없다.
 - 일회용 아이템(`SingleUseSpell`, `JjangsemSpell`)은 `maxStacks = 1`이다. 보유 중에는 **효과가 적용되지
   않고**, 사용 성공 시에만 효과를 실행한다. `PlayerInventory`의 상시 효과 적용·아티팩트 HUD·일시정지
   아티팩트 목록에 들어가지 않는다.
@@ -223,6 +264,9 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | Flight-0 | 가짜 날개는 `ItemKind.Artifact`, 전용 풀 소속으로만 획득. 풀은 `chest-content-table`의 황금 전용 아티팩트 목록이며, 전 보상 풀을 모으는 Setup(Reward-3)은 `GoldenChestExclusivePool` 목록을 제외한다 |
 | Jjangsem-0·1 | `jjangsem-` 접두사, 일회용 아이템 비복제. Jjangsem-0(2026-10-05): `jjangsem-bigwood-fruit`는 `chest-content-table`의 짱셈스펠 목록(다이아몬드 상자)으로만 획득 |
 | Verify-0 | 풀별 분류 불변조건과 Unity↔Backend 카탈로그 ID·등급 일치 검사 |
-| Range-0 | 효과 33·34는 뒤에 추가, 33은 아이템 미사용·34는 `item-15`만 사용(검증기가 확인), 아이템 추가 시 Backend 카탈로그·seed 동시 반영 |
+| Range-0 | 효과 33·34는 뒤에 추가, 33은 `artifact-sylla-wind-arrow`만(Artifact-2부터)·34는 `item-15`만 사용(검증기가 확인), 아이템 추가 시 Backend 카탈로그·seed 동시 반영 |
 | Passive-1 | 효과 43·44는 뒤에 추가, 43은 `artifact-kanna-cannon`·44는 `artifact-bibi-snot`만 사용(검증기가 확인), 둘 다 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |
 | Passive-2 | 효과 45·46은 뒤에 추가, 둘 다 `artifact-giant-potion`만 사용(검증기가 확인), 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |
+| Artifact-3 | 효과 61은 뒤에 추가, `artifact-aisia-wallet`은 `GoldenChestExclusivePool` 목록과 `chest-content-table`의 황금 전용 풀에만 소속(선택 보상·상점 풀 금지, 검증기가 확인). 전용 풀은 목록의 모든 에셋으로 구성하므로 Flight-0 Setup을 다시 실행해도 지갑이 빠지지 않는다 |
+| Passive-3·4 | 효과 62·63은 뒤에 추가, 각각 `artifact-kanta-top`·`artifact-shasha-jar`만 사용, 둘 다 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |
+| Artifact-2 | 효과 47~60은 뒤에 추가, 14종 모두 `artifact-` 접두사·선택 보상 풀 소속, 화상(51)은 불타활·가지만·감전(52)은 앗땃따건만 사용(검증기가 확인), Backend 카탈로그·seed 동시 반영 |

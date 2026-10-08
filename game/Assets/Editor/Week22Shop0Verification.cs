@@ -175,6 +175,8 @@ namespace TrickalFanGame.Editor
             Health health = player.GetComponent<Health>();
             PlayerActionState actionState = player.GetComponent<PlayerActionState>();
             InvokeLifecycle(health, "Awake");
+            // A bought Item can change the player's stats (max health, for one).
+            InvokeLifecycle(player.GetComponent<PlayerStats>(), "Awake");
             InvokeLifecycle(inventory, "Awake");
             ShopKeeper keeper = shop.Keeper;
 
@@ -222,11 +224,14 @@ namespace TrickalFanGame.Editor
                        cell.PriceText.text == $"{offer.Price} 골드" && cell.IsFocused == (index == 0) &&
                        cell.FocusFrame.enabled == (index == 0),
                     $"Shop cell {index + 1} must show {offer.OfferId} at its gold price.");
+                // An Item shows its supplied artwork when there is one, and the short-ID placeholder otherwise.
+                Sprite artwork = offer.Kind == ShopOfferKind.Item ? UserArtwork.Load(offer.Item.ItemId) : null;
                 Assert(offer.Kind == ShopOfferKind.Item
-                        ? cell.Icon.sprite == null && cell.IconText.text ==
-                          ArtifactHudSlotView.GetShortStableId(offer.Item.ItemId)
+                        ? cell.Icon.sprite == artwork && cell.IconText.gameObject.activeSelf == (artwork == null) &&
+                          cell.IconText.text == ArtifactHudSlotView.GetShortStableId(offer.Item.ItemId)
                         : cell.Icon.sprite != null && cell.IconText.text == string.Empty,
-                    $"Shop cell {index + 1} must show the Item placeholder or the consumable's pickup sprite.");
+                    $"Shop cell {index + 1} must show the Item artwork or placeholder, or the consumable's pickup " +
+                    "sprite.");
             }
 
             // Focus moves one cell at a time and stops at the edges.

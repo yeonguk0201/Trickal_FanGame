@@ -1,0 +1,212 @@
+[
+  {
+    "source": "골디.png",
+    "resource": "goldi",
+    "connected": true
+  },
+  {
+    "source": "에르핀 고학년.png",
+    "resource": "erpin-high-grade",
+    "connected": true
+  },
+  {
+    "source": "실라의 바람살.png",
+    "resource": "artifact-sylla-wind-arrow",
+    "connected": true
+  },
+  {
+    "source": "랜덤 코인.png",
+    "resource": "single-spell-random-coin",
+    "connected": true
+  },
+  {
+    "source": "그건 내 잔상.png",
+    "resource": "single-spell-afterimage",
+    "connected": true
+  },
+  {
+    "source": "회심의 일격.png",
+    "resource": "single-spell-decisive-strike",
+    "connected": true
+  },
+  {
+    "source": "저놈잡아라.png",
+    "resource": "single-spell-catch-that-one",
+    "connected": true
+  },
+  {
+    "source": "이성의 끈.png",
+    "resource": "reserved-5",
+    "connected": false
+  },
+  {
+    "source": "깜짝 상자.png",
+    "resource": "reserved-6",
+    "connected": false
+  },
+  {
+    "source": "수상한 물약.png",
+    "resource": "reserved-7",
+    "connected": false
+  },
+  {
+    "source": "거대화 물약.png",
+    "resource": "artifact-giant-potion",
+    "connected": true
+  },
+  {
+    "source": "슈슈슈슉 글러브.png",
+    "resource": "artifact-shushushushuk-glove",
+    "connected": true
+  },
+  {
+    "source": "도깨비 감투.png",
+    "resource": "item-03",
+    "connected": true
+  },
+  {
+    "source": "풍선갑옷.png",
+    "resource": "item-02",
+    "connected": true
+  },
+  {
+    "source": "폭발 머핀.png",
+    "resource": "artifact-explosive-muffin",
+    "connected": true
+  },
+  {
+    "source": "앗땃따건.png",
+    "resource": "artifact-attatta-gun",
+    "connected": true
+  },
+  {
+    "source": "장난감 망원경.png",
+    "resource": "item-15",
+    "connected": true
+  },
+  {
+    "source": "생명의 보석.png",
+    "resource": "artifact-life-gem",
+    "connected": true
+  },
+  {
+    "source": "레비의 단도.png",
+    "resource": "artifact-levi-dagger",
+    "connected": true
+  },
+  {
+    "source": "블랑셰의 유리 파랑새.png",
+    "resource": "reserved-17",
+    "connected": false
+  },
+  {
+    "source": "네르의 엘드르 깃발.png",
+    "resource": "artifact-ner-eldr-flag",
+    "connected": true
+  },
+  {
+    "source": "다야의 다이아몬드 커터.png",
+    "resource": "item-11",
+    "connected": true
+  },
+  {
+    "source": "시스트.png",
+    "resource": "sist",
+    "connected": true
+  },
+  {
+    "source": "HP.png",
+    "resource": "hp-pickup",
+    "connected": true
+  },
+  {
+    "source": "SP.png",
+    "resource": "sp-pickup",
+    "connected": true
+  },
+  {
+    "source": "탐욕의 반지.png",
+    "resource": "artifact-greed-ring",
+    "connected": true
+  },
+  {
+    "source": "긴급 보호 벨트.png",
+    "resource": "artifact-emergency-protection-belt",
+    "connected": true
+  },
+  {
+    "source": "에르핀의 지팡이.png",
+    "resource": "item-13",
+    "connected": true
+  },
+  {
+    "source": "암살자의 비급.png",
+    "resource": "reserved-26",
+    "connected": false
+  },
+  {
+    "source": "리스티의 게임 컨트롤러.png",
+    "resource": "reserved-27",
+    "connected": false
+  },
+  {
+    "source": "코미의 베개.png",
+    "resource": "item-08",
+    "connected": true
+  },
+  {
+    "source": "불타는 가지.png",
+    "resource": "artifact-burning-branch",
+    "connected": true
+  },
+  {
+    "source": "광기의 가면.png",
+    "resource": "item-14",
+    "connected": true
+  },
+  {
+    "source": "돈까스 모양 머리핀.png",
+    "resource": "artifact-pork-cutlet-hairpin",
+    "connected": true
+  },
+  {
+    "source": "활활 불타활.png",
+    "resource": "artifact-blazing-bow",
+    "connected": true
+  },
+  {
+    "source": "날씨는 맑음 카드.png",
+    "resource": "artifact-clear-weather-card",
+    "connected": true
+  },
+  {
+    "source": "아멜리아의 E-Pad 클래식.png",
+    "resource": "artifact-amelia-epad-classic",
+    "connected": true
+  },
+  {
+    "source": "림의 낫.png",
+    "resource": "artifact-rim-scythe",
+    "connected": true
+  },
+  {
+    "source": "멤버십 카드.png",
+    "resource": "single-spell-membership-card",
+    "connected": true
+  },
+  {
+    "source": "아로마 테라피.png",
+    "resource": "single-spell-aroma-therapy",
+    "connected": true
+  },
+  {
+    "source": "파스텔빛 소풍.png",
+    "resource": "reserved-38",
+    "connected": false
+  },
+  {
+    "source": "명상의 시간.png",
+    "resource": "single-spell-meditation-time",
+    "connected": true
+  }
+]

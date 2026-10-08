@@ -33,6 +33,7 @@ namespace TrickalFanGame.Room
 
         private bool encounterLocked;
         private bool keyLocked;
+        private bool ignoresEncounterLock;
 
         public bool IsLocked { get; private set; }
         public DoorVisualKind VisualKind => visualKind;
@@ -62,7 +63,7 @@ namespace TrickalFanGame.Room
         private void RefreshLockState()
         {
             EnsureReferences();
-            IsLocked = encounterLocked || keyLocked;
+            IsLocked = (encounterLocked && !ignoresEncounterLock) || keyLocked;
             blocker.enabled = IsLocked || IsPortalBarrier;
             blocker.isTrigger = false;
             if (interiorBlocker != null) interiorBlocker.enabled = IsLocked;
@@ -71,6 +72,13 @@ namespace TrickalFanGame.Room
             {
                 visual.color = IsLocked ? lockedColor : openColor;
             }
+        }
+
+        // An opened hidden passage stays passable while its room's fight is running.
+        public void ConfigureEncounterLock(bool shouldIgnoreEncounterLock)
+        {
+            ignoresEncounterLock = shouldIgnoreEncounterLock;
+            RefreshLockState();
         }
 
         public void ConfigurePortalBarrier(bool shouldRemainBlockingWhenOpen)

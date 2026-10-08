@@ -26,7 +26,8 @@ namespace TrickalFanGame.Room
 
         public void Bind(RoomGraphController graph, RoomNode source, RoomNode destination,
             Transform destinationEntryPoint, RoomController requiredClearedRoom,
-            bool requiresKey = false, RoomRunState keyLockState = null, bool isSealed = false)
+            bool requiresKey = false, RoomRunState keyLockState = null, bool isSealed = false,
+            bool allowsCombatExit = false)
         {
             // A sealed hidden passage keeps its destination but stays a wall until it opens.
             bool connected = destination != null && !isSealed;
@@ -34,10 +35,12 @@ namespace TrickalFanGame.Room
             {
                 doorway.Configure(graph, source, destination, destinationEntryPoint, requiredClearedRoom,
                     false, requiresKey, keyLockState, blocker);
+                doorway.ConfigureCombatExit(allowsCombatExit);
                 doorway.gameObject.SetActive(connected);
             }
             if (blocker != null)
             {
+                blocker.ConfigureEncounterLock(allowsCombatExit);
                 blocker.SetKeyLocked(connected && requiresKey && keyLockState?.IsKeyLockOpen != true);
                 blocker.gameObject.SetActive(connected);
             }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
+using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
 using UnityEngine;
 
@@ -285,6 +286,89 @@ namespace TrickalFanGame.Item
                         }
                         flight.TryStartFlying();
                         break;
+                    case ItemEffectType.HealOnLowerGradeSkillEveryN:
+                        GetOrAdd<PlayerSkillCastHeal>().AddStack(effect.Magnitude, effect.IntegerAmount);
+                        break;
+                    case ItemEffectType.ShieldOnCombatRoomEntry:
+                        PlayerCombatRoomShield roomShield = GetOrAdd<PlayerCombatRoomShield>();
+                        roomShield.BindRunProgress(runProgress);
+                        roomShield.AddShieldPerRoom(effect.Magnitude);
+                        break;
+                    case ItemEffectType.ExecuteBelowHealth:
+                        stats.AddExecuteHealthThreshold(effect.Magnitude);
+                        break;
+                    case ItemEffectType.BasicAttackHitExplosion:
+                        GetOrAdd<PlayerBasicAttackExplosion>().Configure(
+                            effect.IntegerAmount,
+                            effect.Magnitude,
+                            effect.Radius);
+                        break;
+                    case ItemEffectType.BasicAttackBurn:
+                        stats.AddBasicAttackBurn(
+                            effect.Magnitude,
+                            effect.SecondaryMagnitude,
+                            effect.DurationSeconds,
+                            effect.IntervalSeconds);
+                        // Obstacle-7: holding a burn artifact sets trees on fire.
+                        stats.AddBurnSource();
+                        break;
+                    case ItemEffectType.BasicAttackShock:
+                        stats.AddBasicAttackShock(
+                            effect.Magnitude,
+                            effect.SecondaryMagnitude,
+                            effect.DurationSeconds,
+                            effect.IntegerAmount);
+                        break;
+                    case ItemEffectType.StatusTickDamagePercent:
+                        stats.AddStatusTickDamagePercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.DirectDamagePercentVsBurning:
+                        stats.AddBurningTargetDirectDamagePercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.SkillDamagePercentVsShocked:
+                        stats.AddShockedTargetSkillDamagePercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.CriticalBonusVsShocked:
+                        stats.AddShockedTargetCriticalBonus(effect.Magnitude, effect.SecondaryMagnitude);
+                        break;
+                    case ItemEffectType.CriticalDamage:
+                        stats.AddCriticalDamage(effect.Magnitude);
+                        break;
+                    case ItemEffectType.NegateLethalDamageOnce:
+                        GetOrAdd<PlayerDeathWard>().Configure(effect.DurationSeconds);
+                        break;
+                    case ItemEffectType.KillFrenzy:
+                        GetOrAdd<PlayerKillFrenzy>().Configure(
+                            effect.Magnitude,
+                            effect.SecondaryMagnitude,
+                            effect.IntegerAmount,
+                            effect.DurationSeconds,
+                            effect.IntervalSeconds);
+                        break;
+                    case ItemEffectType.KillFrenzyKnockbackPercent:
+                        GetOrAdd<PlayerKillFrenzy>().AddKnockbackPerStack(effect.Magnitude);
+                        break;
+                    case ItemEffectType.GainGoldOnAcquire:
+                        // The wallet drops what does not fit under its limit.
+                        runProgress?.TryAddResource(RunResourceType.Gold, Mathf.RoundToInt(effect.Magnitude));
+                        break;
+                    case ItemEffectType.BounceBetweenEnemies:
+                        stats.AddProjectileBounce(
+                            effect.IntegerAmount,
+                            effect.Radius,
+                            effect.SecondaryMagnitude,
+                            effect.IntervalSeconds);
+                        break;
+                    case ItemEffectType.SplitOnHit:
+                        stats.ConfigureProjectileSplitOnHit(
+                            effect.SecondaryMagnitude,
+                            effect.MaximumDistance,
+                            effect.ScaleMultiplier);
+                        break;
+                    case ItemEffectType.WaterStreamAttack:
+                        stats.EnableWaterStream();
+                        GetOrAdd<PlayerWaterStream>().Configure(effect.Magnitude, effect.SecondaryMagnitude);
+                        break;
                     default:
                         // G-2 through G-6 connect the remaining validated contract types to runtime systems.
                         break;
@@ -323,6 +407,12 @@ namespace TrickalFanGame.Item
                 default:
                     throw new ArgumentOutOfRangeException(nameof(effectType), effectType, null);
             }
+        }
+
+        private T GetOrAdd<T>() where T : Component
+        {
+            T component = GetComponent<T>();
+            return component != null ? component : gameObject.AddComponent<T>();
         }
 
         private PlayerSpellEffects GetOrCreateSpellEffects()

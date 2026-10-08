@@ -85,8 +85,7 @@ namespace TrickalFanGame.Frontend
             };
         }
 
-        // A consumable shows its floor pickup's sprite; an Item has no artwork yet and shows the HUD placeholder
-        // (rarity color and short stable ID).
+        // Consumables use pickup artwork; items use the same illustration as the HUD and floor drop.
         private void ApplyIcon(ShopOffer offer)
         {
             SpriteRenderer source = offer.Kind == ShopOfferKind.Consumable && offer.Consumable.PickupPrefab != null
@@ -100,6 +99,9 @@ namespace TrickalFanGame.Frontend
                     : offer.Kind == ShopOfferKind.Item ? ArtifactHudSlotView.GetRarityColor(offer.Item.Rarity)
                     : Color.white;
             }
+
+            if (offer.Kind == ShopOfferKind.Item) UserArtwork.Apply(icon, offer.Item, iconText);
+            else if (iconText != null) iconText.gameObject.SetActive(false);
 
             if (iconText != null)
                 iconText.text = offer.Kind == ShopOfferKind.Item

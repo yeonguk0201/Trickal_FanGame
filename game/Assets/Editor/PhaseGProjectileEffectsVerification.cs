@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Item;
@@ -58,8 +59,9 @@ namespace TrickalFanGame.Editor
 
                 Debug.Log(
                     "Phase G-5 projectile effects verification passed: Telescope additive attack and clamped " +
-                    "2-6m straight-line damage, homing impact distance, Diamond Cutter first-pierce three-way split, " +
-                    "60% scale, 30% damage, 3m range, no repeat hit/re-pierce/re-split, and wall cleanup are valid.");
+                    "2-6m straight-line damage, homing impact distance, Diamond Cutter four-way split on every hit " +
+                    "(50% of the base shot scale, 50% damage, 3m range, no re-split, the hit enemy spared unless a " +
+                    "pierce is inherited, a piercing parent splitting on each enemy), and wall cleanup are valid.");
             }
             finally
             {
@@ -127,47 +129,57 @@ namespace TrickalFanGame.Editor
         {
             Assert(inventory.TryAcquire(cutter) && !inventory.TryAcquire(cutter),
                 "Diamond Cutter must be acquirable once and enforce its epic one-stack cap.");
-            Assert(stats.PierceCount == 1 && stats.ProjectileSplitSettings.IsEnabled,
-                "Diamond Cutter must grant one pierce and a valid runtime split configuration.");
+            // Passive-5: no pierce of its own; every hit splits toward the screen's up, down, left and right.
+            Assert(stats.PierceCount == 0 && stats.ProjectileSplitSettings.IsEnabled &&
+                   stats.ProjectileSplitSettings.SplitsOnHit && stats.ProjectileSplitSettings.ProjectileCount == 4,
+                "Diamond Cutter must grant no pierce and a four-way split on every hit.");
 
             Projectile parent = CreateBasicProjectile("Phase G-5 Parent Projectile");
-            parent.transform.localScale = Vector3.one * 0.5f;
+            // A grown shot (칸나의 대포): the split shots still use half of the base shot size.
+            parent.transform.localScale = Vector3.one * 0.8f;
             parent.Launch(
                 Vector2.right * 8f,
                 playerHealth,
                 new DamageContext(playerHealth.gameObject, DamageSourceType.PlayerProjectile, 10f),
                 stats.PierceCount,
                 stats.ProjectileSplitSettings);
-            parent.transform.position = firstTarget.transform.position;
+            parent.transform.position = firstTarget.transform.position + Vector3.left * 0.4f;
             InvokePrivate(parent, "OnTriggerEnter2D", firstTargetCollider);
             Assert(parent == null && Approximately(firstTarget.CurrentHealth, 10f),
-                "The parent projectile must deal normal damage, then disappear immediately after its first pierce.");
+                "Without a pierce the parent projectile must deal normal damage and disappear on its hit.");
 
             List<Projectile> splits = new(UnityEngine.Object.FindObjectsByType<Projectile>(FindObjectsSortMode.None));
-            splits.Sort((left, right) => SignedAngle(left.Velocity).CompareTo(SignedAngle(right.Velocity)));
-            Assert(splits.Count == 3, "Diamond Cutter must create exactly three split projectiles.");
-            float[] expectedAngles = { -15f, 0f, 15f };
-            foreach ((Projectile split, int index) in WithIndex(splits))
+            Assert(splits.Count == 4, $"Diamond Cutter must create exactly four split projectiles, not {splits.Count}.");
+            foreach (Vector2 direction in ProjectileSplitSettings.OnHitDirections)
             {
-                Assert(split.IsSplitProjectile && Approximately(split.transform.localScale.x, 0.3f),
-                    "Every split projectile must be marked as split and use 60% of the parent scale.");
-                Assert(Approximately(split.DamageContext.Multiplier, 0.3f) &&
+                Assert(splits.Count(split => Vector2.Dot(split.Velocity.normalized, direction) > 0.999f) == 1,
+                    $"One split projectile must fly toward {direction}.");
+            }
+
+            foreach (Projectile split in splits)
+            {
+                Assert(split.IsSplitProjectile &&
+                       Approximately(split.transform.localScale.x, ProjectileSizing.PlayerBasicScale * 0.5f) &&
+                       Approximately(split.Velocity.magnitude, 8f),
+                    "Every split projectile must be marked as split, use 50% of the base shot scale and keep the speed.");
+                Assert(Approximately(split.DamageContext.Multiplier, 0.5f) &&
                        split.DamageContext.Source == playerHealth.gameObject,
-                    "Every split projectile must preserve player source and deal 30% of parent base damage.");
+                    "Every split projectile must preserve player source and deal 50% of the shot's damage.");
                 Assert(Approximately(split.MaximumTravelDistance, 3f) &&
-                       Approximately(SignedAngle(split.Velocity), expectedAngles[index]),
-                    "Split projectiles must use -15/0/+15 degree directions and a 3m travel cap.");
+                       ((Vector2)split.transform.position - (Vector2)firstTarget.transform.position).sqrMagnitude <
+                       0.0001f,
+                    "Split projectiles must start at the enemy that was hit and keep a 3m travel cap.");
             }
 
             Projectile damageSplit = splits[0];
             InvokePrivate(damageSplit, "OnTriggerEnter2D", firstTargetCollider);
             Assert(damageSplit != null && Approximately(firstTarget.CurrentHealth, 10f),
-                "Split projectiles must not hit the enemy that caused the split again.");
+                "Without a pierce, split projectiles must not hit the enemy that caused the split.");
             damageSplit.transform.position = splitTarget.transform.position;
             InvokePrivate(damageSplit, "OnTriggerEnter2D", splitTargetCollider);
-            Assert(damageSplit == null && Approximately(splitTarget.CurrentHealth, 7f),
-                "A split projectile must deal 30% damage once, then disappear without piercing or re-splitting.");
-            Assert(UnityEngine.Object.FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length == 2,
+            Assert(damageSplit == null && Approximately(splitTarget.CurrentHealth, 5f),
+                "A split projectile must deal 50% damage once, then disappear without piercing or re-splitting.");
+            Assert(UnityEngine.Object.FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length == 3,
                 "A split hit must not create another generation of projectiles.");
 
             Projectile wallSplit = splits[1];
@@ -180,8 +192,49 @@ namespace TrickalFanGame.Editor
             InvokePrivate(rangeSplit, "FixedUpdate");
             Assert(rangeSplit == null,
                 "A split projectile must be destroyed once it reaches its 3m travel limit.");
-        }
+            RemoveProjectiles();
 
+            // With a pierce from another item the parent flies on and splits on every hit, and the split shots
+            // inherit the pierce, so they also hit the enemy they start inside.
+            stats.AddPierce(1);
+            GameObject piercedObject = CreateTarget("Phase G-5 Pierced Target", 100f, new Vector2(1f, 20f),
+                out Health pierced);
+            GameObject secondObject = CreateTarget("Phase G-5 Second Pierced Target", 100f, new Vector2(3f, 20f),
+                out Health second);
+            try
+            {
+                Projectile piercing = CreateBasicProjectile("Phase G-5 Piercing Parent Projectile");
+                piercing.Launch(
+                    Vector2.right * 8f,
+                    playerHealth,
+                    new DamageContext(playerHealth.gameObject, DamageSourceType.PlayerProjectile, 10f),
+                    stats.PierceCount,
+                    stats.ProjectileSplitSettings);
+                piercing.transform.position = pierced.transform.position;
+                InvokePrivate(piercing, "OnTriggerEnter2D", piercedObject.GetComponent<Collider2D>());
+                Projectile[] piercingSplits = UnityEngine.Object
+                    .FindObjectsByType<Projectile>(FindObjectsSortMode.None)
+                    .Where(shot => shot.IsSplitProjectile).ToArray();
+                Assert(piercing != null && !piercing.IsSpent && Approximately(pierced.CurrentHealth, 90f) &&
+                       piercingSplits.Length == 4,
+                    "With a pierce the parent projectile must split and fly on.");
+                InvokePrivate(piercingSplits[0], "OnTriggerEnter2D", piercedObject.GetComponent<Collider2D>());
+                Assert(Approximately(pierced.CurrentHealth, 85f) && piercingSplits[0] != null,
+                    "A split projectile that inherited a pierce must hit the enemy it started inside and fly on.");
+
+                piercing.transform.position = second.transform.position;
+                InvokePrivate(piercing, "OnTriggerEnter2D", secondObject.GetComponent<Collider2D>());
+                Assert(piercing == null && Approximately(second.CurrentHealth, 90f) &&
+                       UnityEngine.Object.FindObjectsByType<Projectile>(FindObjectsSortMode.None)
+                           .Count(shot => shot.IsSplitProjectile) == 8,
+                    "A piercing parent must split again on its next enemy and vanish once its pierce is used.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(piercedObject);
+                UnityEngine.Object.DestroyImmediate(secondObject);
+            }
+        }
         private static IEnumerable<(Projectile Projectile, int Index)> WithIndex(List<Projectile> projectiles)
         {
             for (int index = 0; index < projectiles.Count; index++)

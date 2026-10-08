@@ -13,7 +13,13 @@ namespace TrickalFanGame.Item
         public void Configure(ItemDefinition configuredDefinition)
         {
             definition = configuredDefinition;
+            ApplyArtwork();
         }
+
+        private void Awake() => ApplyArtwork();
+
+        private void ApplyArtwork() => TrickalFanGame.Frontend.UserArtwork.Apply(
+            GetComponentInChildren<SpriteRenderer>(), definition);
 
         private void Reset()
         {

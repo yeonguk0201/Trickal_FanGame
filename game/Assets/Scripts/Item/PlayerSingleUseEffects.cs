@@ -557,7 +557,7 @@ namespace TrickalFanGame.Item
             stock = null;
             RunProgress progress = spellSlot != null ? spellSlot.Progress : null;
             GeneratedRoomNode node = FindCurrentNode(progress);
-            if (node == null || node.Role != GeneratedRoomRole.Shop)
+            if (node == null || (node.Role != GeneratedRoomRole.Shop && !node.IsGoldiShop))
             {
                 reason = "It can only be used in a shop.";
                 return false;

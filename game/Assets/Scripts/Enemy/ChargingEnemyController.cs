@@ -420,7 +420,7 @@ namespace TrickalFanGame.Enemy
         {
             body.linearVelocity = target != null
                 ? navigator.GetMoveDirection(transform.position, target.position, bodyRadius, currentTime) *
-                  pursuitSpeed
+                  (pursuitSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this))
                 : Vector2.zero;
         }
 

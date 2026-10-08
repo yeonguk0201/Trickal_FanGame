@@ -57,10 +57,11 @@ namespace TrickalFanGame.Editor
                 Effect(ItemEffectType.DistanceDamage, magnitude: 0.40f, minimumDistance: 2f, maximumDistance: 6f),
                 // Range-0 (2026-10-02): flight time +30%, so the basic attack range grows from about 5.3 to about 6.9.
                 Effect(ItemEffectType.ProjectileLifetimePercent, magnitude: 0.30f)),
+            // Passive-5 (2026-10-07): the pierce and the three-way split behind the enemy (effect 16) became a
+            // four-way split around the enemy on every hit, at 50% damage and 50% of the base shot size.
             Spec("item-11", "다야의 다이아몬드 커터", ItemRarity.Epic, true, 1,
-                Effect(ItemEffectType.Pierce, integerAmount: 1),
-                Effect(ItemEffectType.SplitAfterPierce, secondaryMagnitude: 0.30f, integerAmount: 3,
-                    maximumDistance: 3f, spreadAngleDegrees: 15f, scaleMultiplier: 0.60f)),
+                Effect(ItemEffectType.SplitOnHit, secondaryMagnitude: 0.50f, integerAmount: 4,
+                    maximumDistance: 3f, scaleMultiplier: 0.50f)),
             Spec("item-13", "에르핀의 지팡이", ItemRarity.Epic, true, 1,
                 Effect(ItemEffectType.MaxSP, integerAmount: 1),
                 Effect(ItemEffectType.SkillProjectileBonusAtSP, healthThreshold: 1f, integerAmount: 2)),

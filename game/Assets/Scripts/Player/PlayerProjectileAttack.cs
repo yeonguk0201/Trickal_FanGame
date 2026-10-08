@@ -33,6 +33,7 @@ namespace TrickalFanGame.Player
         public float HealOnKill => stats.HealOnKill;
         public float CurrentHealOnKillAmount => stats.HealOnKillAmount;
         public bool CanAttack => !health.IsDead && actionState.CanBasicAttack;
+        public float AttackInterval => attackCooldown / stats.AttackSpeed;
 
         public DamageContext CreateDamageContext()
         {
@@ -70,6 +71,8 @@ namespace TrickalFanGame.Player
         private void Update()
         {
             if (Time.timeScale <= 0f) return;
+            // Passive-4: with 샤샤의 항아리 the basic attack is the water stream, fired by PlayerWaterStream.
+            if (stats.HasWaterStream) return;
             if (!CanAttack || Time.time < nextAttackTime || !PlayerAttack.TryReadAttackDirection(out Vector2 direction))
             {
                 return;
@@ -114,7 +117,8 @@ namespace TrickalFanGame.Player
                 stats.PierceCount,
                 stats.ProjectileSplitSettings,
                 configuredLifetime: ProjectileLifetime,
-                configuredHitEffects: stats.BasicAttackHitEffects);
+                configuredHitEffects: stats.BasicAttackHitEffects,
+                configuredBounce: stats.ProjectileBounce);
         }
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)

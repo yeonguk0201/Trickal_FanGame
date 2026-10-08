@@ -18,31 +18,19 @@ MonoBehaviour:
   rarity: 3
   isActive: 1
   effects:
-  - effectType: 4
+  - effectType: 64
     magnitude: 0
     healthThreshold: 0
-    secondaryMagnitude: 0
-    integerAmount: 1
-    minimumDistance: 0
-    maximumDistance: 0
-    radius: 0
-    intervalSeconds: 0
-    spreadAngleDegrees: 0
-    scaleMultiplier: 0
-    durationSeconds: 0
-  - effectType: 16
-    magnitude: 0
-    healthThreshold: 0
-    secondaryMagnitude: 0.3
-    integerAmount: 3
+    secondaryMagnitude: 0.5
+    integerAmount: 4
     minimumDistance: 0
     maximumDistance: 3
     radius: 0
     intervalSeconds: 0
-    spreadAngleDegrees: 15
-    scaleMultiplier: 0.6
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0.5
     durationSeconds: 0
-  effectType: 4
-  effectValue: 1
+  effectType: 64
+  effectValue: 4
   stackMode: 0
   maxStacks: 1

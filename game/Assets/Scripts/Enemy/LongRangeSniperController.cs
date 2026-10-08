@@ -242,7 +242,7 @@ namespace TrickalFanGame.Enemy
             {
                 // Obstacle-0: hold the aim and walk around the obstacle until the line of fire opens.
                 body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
-                    currentTime) * moveSpeed;
+                    currentTime) * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
                 return;
             }
 
@@ -273,7 +273,7 @@ namespace TrickalFanGame.Enemy
                 : Vector2.zero;
             Vector2 movement = radial + tangent;
             body.linearVelocity = movement.sqrMagnitude > 0.001f
-                ? movement.normalized * moveSpeed
+                ? movement.normalized * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this))
                 : Vector2.zero;
 
             if (currentTime >= stateEndsAt)

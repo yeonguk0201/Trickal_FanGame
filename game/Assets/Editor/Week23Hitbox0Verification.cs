@@ -39,7 +39,7 @@ namespace TrickalFanGame.Editor
                 Week22Terrain0Verification.Verify, Week22Chest0Verification.Verify, Week22Chest2Verification.Verify,
                 Week22Flight0Verification.Verify, Week18Obstacle1Verification.Verify,
                 Week23Obstacle5Verification.Verify, Week23Obstacle6Verification.Verify,
-                Week23Enemy6Verification.Verify,
+                Week23Obstacle7Verification.Verify, Week23Enemy6Verification.Verify,
                 Week23Passive1Verification.Verify, FairyVillageArtworkVerification.Verify,
                 Week18Obstacle0Verification.Verify,
             };

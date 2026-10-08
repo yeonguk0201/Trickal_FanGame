@@ -297,7 +297,8 @@ namespace TrickalFanGame.Room
                     DestroyFloor(nextRoot);
                     return false;
                 }
-                if (generatedNode.Role == GeneratedRoomRole.Shop && !TryBuildShop(instance, generatedNode, out error))
+                if ((generatedNode.Role == GeneratedRoomRole.Shop || generatedNode.IsGoldiShop) &&
+                    !TryBuildShop(instance, generatedNode, out error))
                 {
                     DestroyFloor(nextRoot);
                     return false;
@@ -312,8 +313,9 @@ namespace TrickalFanGame.Room
                         selectionRewardPool);
                 if (instance.RewardRoom != null)
                 {
-                    instance.RewardRoom.gameObject.SetActive(generatedNode.Role is GeneratedRoomRole.Treasure or
-                        GeneratedRoomRole.Secret);
+                    // Shop-1: a secret room holding the 골디 shop has no treasure-style reward.
+                    instance.RewardRoom.gameObject.SetActive(!generatedNode.IsGoldiShop &&
+                        generatedNode.Role is GeneratedRoomRole.Treasure or GeneratedRoomRole.Secret);
                     instance.RewardRoom.Configure(generatedNode.FloorNumber, generatedNode.RoomNumber,
                         runProgress, instance.RewardRoom.GetComponent<ItemDropSource>(), instance.Controller,
                         rewardSelectionSession, selectionRewardPool);
@@ -374,7 +376,9 @@ namespace TrickalFanGame.Room
         }
 
         // Special-3: a hidden passage stays a sealed wall until the secret room state opens it, from a bomb on either
-        // wall or from entering the secret room. The same state drives both sides, and it survives floor rebuilds.
+        // wall or from dropping into the secret room by pit. The same state drives both sides, and it survives floor
+        // rebuilds.
+        // Once open it ignores the room's combat lock, so a wall bombed mid-fight can be walked through right away.
         private void BindSecretPassage(RoomDoorSlot slot, RoomPrefab instance, GeneratedRoomNode generatedNode,
             RoomNode destination, Transform entry, GeneratedRoomNode destinationGenerated)
         {
@@ -388,7 +392,7 @@ namespace TrickalFanGame.Room
             RoomNode source = instance.Node;
             RoomController sourceRoom = instance.Controller;
             void Bind(bool isSealed) => slot.Bind(graphController, source, destination, entry, sourceRoom,
-                requiresKey, keyLockState, isSealed);
+                requiresKey, keyLockState, isSealed, true);
 
             Bind(secretState?.IsSecretPassageOpen(neighborId) != true);
             SecretPassageWall wall = slot.Seal.GetComponent<SecretPassageWall>();
@@ -397,6 +401,7 @@ namespace TrickalFanGame.Room
         }
 
         // Special-4: the shopkeeper goes into the room content; the stock rolls on the first build and is reused after.
+        // Shop-1: a 골디 secret room gets the same shop with the 골디 stock.
         private bool TryBuildShop(RoomPrefab instance, GeneratedRoomNode node, out string error)
         {
             if (shopRoomPrefab == null || shopCatalog == null || !shopCatalog.TryValidate(out error))
@@ -406,10 +411,12 @@ namespace TrickalFanGame.Room
             }
 
             PlayerInventory inventory = graph.Player != null ? graph.Player.GetComponent<PlayerInventory>() : null;
+            ShopKind kind = node.IsGoldiShop ? ShopKind.Goldi : ShopKind.General;
+            ShopStockState Build() => ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog,
+                selectionRewardPool, inventory, kind);
             ShopStockState stock = runProgress != null
-                ? runProgress.GetOrCreateShopStock(ShopStockBuilder.BuildShopId(node.RoomId), () =>
-                    ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog, selectionRewardPool, inventory))
-                : ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog, selectionRewardPool, inventory);
+                ? runProgress.GetOrCreateShopStock(ShopStockBuilder.BuildShopId(node.RoomId), Build)
+                : Build();
             Transform content = instance.Node.ContentRoot.transform;
             ShopRoom shop = Instantiate(shopRoomPrefab, content);
             shop.name = $"Shop - {node.RoomId}";
@@ -523,6 +530,7 @@ namespace TrickalFanGame.Room
             }
 
             PlayerInventory inventory = graph.Player != null ? graph.Player.GetComponent<PlayerInventory>() : null;
+            PlayerStats stats = graph.Player != null ? graph.Player.GetComponent<PlayerStats>() : null;
             HashSet<string> ids = new(StringComparer.Ordinal);
             foreach (DestructibleObstacle obstacle in instance.GetComponentsInChildren<DestructibleObstacle>(true))
             {
@@ -536,6 +544,7 @@ namespace TrickalFanGame.Room
                 obstacle.Bind(state, node.ContentSeed, instance.Node.ContentRoot.transform, runProgress, secretLink,
                     instance.Node, instance.Controller);
                 obstacle.BindRareItems(selectionRewardPool, inventory);
+                obstacle.BindBurnSource(stats);
             }
 
             error = null;
