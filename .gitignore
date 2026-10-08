@@ -45,3 +45,7 @@ Thumbs.db
 /.claude/settings.local.json
 /output/
 /nul
+
+# ONE Mobile POP: its license forbids redistributing the font file. Keep it local (see game/Assets/Fonts/README.md).
+/game/Assets/Fonts/ONE Mobile POP.ttf
+/game/Assets/Fonts/ONE Mobile POP.ttf.meta

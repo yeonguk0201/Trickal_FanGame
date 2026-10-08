@@ -145,8 +145,9 @@ namespace TrickalFanGame.Editor
             TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
             if (font == null)
             {
-                Font source = AssetDatabase.LoadAssetAtPath<Font>("Assets/Fonts/NotoSansKR-Regular.otf");
-                if (source == null) throw new InvalidOperationException("Noto Sans KR font is missing.");
+                // The asset keeps its first name; its source font is the default font (DefaultFontSetup).
+                Font source = AssetDatabase.LoadAssetAtPath<Font>(DefaultFontSetup.SourceFontPath);
+                if (source == null) throw new InvalidOperationException("The default font ONE Mobile POP is missing.");
                 font = TMP_FontAsset.CreateFontAsset(source, 90, 9, GlyphRenderMode.SDFAA, 1024, 1024);
                 font.name = "Frontend Noto Sans KR";
                 AssetDatabase.CreateAsset(font, FontPath);
