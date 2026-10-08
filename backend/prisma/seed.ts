@@ -24,57 +24,63 @@ const testUserId = '00000000-0000-4000-8000-000000000001';
 const testClientProfileId = '10000000-0000-4000-8000-000000000001';
 
 async function main() {
-  await prisma.$transaction([
-    prisma.user.upsert({
-      where: { nickname: 'test-player' },
-      update: {},
-      create: {
-        id: testUserId,
-        clientProfileId: testClientProfileId,
-        nickname: 'test-player',
-      },
-    }),
-    prisma.character.upsert({
-      where: { id: character.id },
-      update: character,
-      create: character,
-    }),
-    prisma.userCharacterProgress.upsert({
-      where: {
-        userId_characterId: {
+  await prisma.$transaction(
+    [
+      prisma.user.upsert({
+        where: { nickname: 'test-player' },
+        update: {},
+        create: {
+          id: testUserId,
+          clientProfileId: testClientProfileId,
+          nickname: 'test-player',
+        },
+      }),
+      prisma.character.upsert({
+        where: { id: character.id },
+        update: character,
+        create: character,
+      }),
+      prisma.userCharacterProgress.upsert({
+        where: {
+          userId_characterId: {
+            userId: testUserId,
+            characterId: character.id,
+          },
+        },
+        update: {},
+        create: {
           userId: testUserId,
           characterId: character.id,
         },
-      },
-      update: {},
-      create: {
-        userId: testUserId,
-        characterId: character.id,
-      },
-    }),
-    ...ITEM_CATALOG.map((item) =>
-      prisma.item.upsert({
-        where: { id: item.id },
-        update: {
-          name: item.name,
-          description: item.description,
-          rarity: item.rarity,
-          isActive: item.isActive,
-          maxStacks: item.maxStacks,
-          effectData: [...item.effects],
-        },
-        create: {
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          rarity: item.rarity,
-          isActive: item.isActive,
-          maxStacks: item.maxStacks,
-          effectData: [...item.effects],
-        },
       }),
-    ),
-  ]);
+      ...ITEM_CATALOG.map((item) =>
+        prisma.item.upsert({
+          where: { id: item.id },
+          update: {
+            name: item.name,
+            description: item.description,
+            rarity: item.rarity,
+            isActive: item.isActive,
+            maxStacks: item.maxStacks,
+            effectData: [...item.effects],
+          },
+          create: {
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            rarity: item.rarity,
+            isActive: item.isActive,
+            maxStacks: item.maxStacks,
+            effectData: [...item.effects],
+          },
+        }),
+      ),
+    ],
+    {
+      maxWait: 10000,
+      timeout: 30000,
+    },
+  );
 }
 
 main()
