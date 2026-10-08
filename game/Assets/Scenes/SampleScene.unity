@@ -21714,14 +21714,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.8, b: 0.35, a: 0.9}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: ce74ac363d304cccb1fba127e29bb49d, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -26165,6 +26165,11 @@ MonoBehaviour:
   buyButton: {fileID: 275403693}
   buyButtonLabel: {fileID: 1563315393}
   closeButton: {fileID: 1045013909}
+  titleText: {fileID: 1604258122}
+  keeperNameText: {fileID: 1327366257}
+  keeperLineText: {fileID: 1442848033}
+  panelImage: {fileID: 161550148}
+  panelOutline: {fileID: 161550147}
 --- !u!114 &906197861
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41725,7 +41730,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uCC9C\uCC9C\uD788 \uACE8\uB77C \uBD10."
+  m_text: "\uB9C8\uC74C\uC5D0 \uB4DC\uC2E0 \uC0C1\uD488\uC774\u2026 \uC788\uC744\uAE5D\uC1FC?"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: aad6b9102e560694c818823312ad2582, type: 2}
   m_sharedMaterial: {fileID: -4200542294600229185, guid: aad6b9102e560694c818823312ad2582, type: 2}

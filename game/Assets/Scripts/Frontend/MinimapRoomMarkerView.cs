@@ -97,6 +97,7 @@ namespace TrickalFanGame.Frontend
         {
             if (isCurrent) return "P";
             if (!hasVisited && node?.Role == GeneratedRoomRole.Intermediate) return "?";
+            if (node?.IsGoldiShop == true) return "G";
             return node?.Role switch
             {
                 GeneratedRoomRole.Start => "S",

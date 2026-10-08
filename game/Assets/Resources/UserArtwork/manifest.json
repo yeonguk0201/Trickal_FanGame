@@ -1,5 +1,15 @@
 [
   {
+    "source": "골디.png",
+    "resource": "goldi",
+    "connected": true
+  },
+  {
+    "source": "에르핀 고학년.png",
+    "resource": "erpin-high-grade",
+    "connected": true
+  },
+  {
     "source": "실라의 바람살.png",
     "resource": "artifact-sylla-wind-arrow",
     "connected": true

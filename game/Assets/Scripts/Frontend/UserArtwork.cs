@@ -24,6 +24,7 @@ namespace TrickalFanGame.Frontend
 
         public static Sprite HudIcon(int index)
         {
+            if (index == 3) return Load("erpin-high-grade");
             string key = "hud-" + index;
             if (sprites.TryGetValue(key, out Sprite cached)) return cached;
             Sprite sheet = Load("hud-icons");

@@ -126,9 +126,12 @@ namespace TrickalFanGame.Run
             GUILayout.Label("— Seed —");
             GUILayout.BeginHorizontal();
             seedText = GUILayout.TextField(seedText, GUILayout.Width(150f));
-            if (GUILayout.Button("Find secret F1")) FindSeed(assembler, GeneratedRoomRole.Secret);
-            if (GUILayout.Button("Find shop F1")) FindSeed(assembler, GeneratedRoomRole.Shop);
+            if (GUILayout.Button("Find secret F1"))
+                FindSeed(assembler, node => node.Role == GeneratedRoomRole.Secret, "Secret room");
+            if (GUILayout.Button("Find shop F1"))
+                FindSeed(assembler, node => node.Role == GeneratedRoomRole.Shop, "Shop room");
             GUILayout.EndHorizontal();
+            if (GUILayout.Button("Find Goldi shop F1")) FindSeed(assembler, node => node.IsGoldiShop, "Goldi shop");
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -517,7 +520,8 @@ namespace TrickalFanGame.Run
             {
                 RoomRunState state = assembler.Progress.GetRoomState(secret.RoomId);
                 GUILayout.Label($"{secret.RoomId} at {secret.GridPosition}, " +
-                                $"{(state?.IsSecretDiscovered == true ? "discovered" : "hidden")}");
+                                $"{(state?.IsSecretDiscovered == true ? "discovered" : "hidden")}" +
+                                (secret.IsGoldiShop ? ", Goldi shop" : string.Empty));
                 GUILayout.Label($"Walls in: {string.Join(", ", secret.ConnectedRoomIds)}");
             }
 
@@ -548,6 +552,18 @@ namespace TrickalFanGame.Run
             GUILayout.Label("— Shop —");
             GeneratedFloor floor = assembler.GeneratedGraph?.FindFloor(assembler.Progress.CurrentFloor);
             GeneratedRoomNode shop = floor?.Nodes.FirstOrDefault(node => node.Role == GeneratedRoomRole.Shop);
+            // Shop-1: the 골디 shop is the floor's secret room; reach it with the secret room buttons above too.
+            GeneratedRoomNode goldi = floor?.Nodes.FirstOrDefault(node => node.IsGoldiShop);
+            if (goldi == null)
+            {
+                GUILayout.Label($"This floor has no Goldi shop ({FloorGenerator.GoldiShopPercent}% of secret rooms).");
+            }
+            else
+            {
+                GUILayout.Label($"Goldi shop in secret room {goldi.RoomId}");
+                if (AssistedButton("Go to Goldi shop")) Teleport(assembler, goldi.RoomId);
+            }
+
             if (shop == null)
             {
                 GUILayout.Label("This floor has no shop.");
@@ -560,7 +576,7 @@ namespace TrickalFanGame.Run
                 Teleport(assembler, shop.DirectionalConnections[0].DestinationRoomId);
         }
 
-        private void FindSeed(RoomGraphAssembler assembler, GeneratedRoomRole role)
+        private void FindSeed(RoomGraphAssembler assembler, System.Func<GeneratedRoomNode, bool> match, string label)
         {
             if (assembler.Generator == null) return;
             int start = int.TryParse(seedText, out int typed) ? typed + 1 :
@@ -569,13 +585,13 @@ namespace TrickalFanGame.Run
             {
                 int seed = unchecked(start + offset);
                 if (!assembler.Generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out _)) continue;
-                if (graph.FindFloor(1)?.Nodes.Any(node => node.Role == role) != true) continue;
+                if (graph.FindFloor(1)?.Nodes.Any(match) != true) continue;
                 seedText = seed.ToString();
-                status = $"Seed {seed} has a floor-1 {role} room.";
+                status = $"Seed {seed} has a floor-1 {label}.";
                 return;
             }
 
-            status = $"No {role} room seed found nearby.";
+            status = $"No {label} seed found nearby.";
         }
 
         private void RestartWithSeed()

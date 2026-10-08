@@ -69,17 +69,18 @@ namespace TrickalFanGame.Editor
 
             RectTransform panel = Rect(overlayRect, "Shop Panel", Vector2.zero, PanelSize);
             Image panelImage = Component<Image>(panel.gameObject);
-            panelImage.color = new Color(0.055f, 0.075f, 0.12f, 1f);
+            panelImage.color = ShopView.PanelColor;
             panelImage.raycastTarget = false;
             Outline panelOutline = Component<Outline>(panel.gameObject);
-            panelOutline.effectColor = new Color(0.95f, 0.78f, 0.38f, 0.9f);
-            panelOutline.effectDistance = new Vector2(2f, -2f);
+            panelOutline.effectColor = ShopView.PanelOutlineColor;
+            panelOutline.effectDistance = ShopView.PanelOutlineDistance;
 
             TMP_Text title = Text(panel, "Title", ShopView.Title, new Vector2(0f, 384f), new Vector2(900f, 58f), 38f,
                 font, TextAlignmentOptions.Center, false);
             title.fontStyle = FontStyles.Bold;
 
-            Image keeperPortrait = SetupKeeperColumn(panel, font, out TMP_Text goldText);
+            Image keeperPortrait = SetupKeeperColumn(panel, font, out TMP_Text goldText, out TMP_Text keeperName,
+                out TMP_Text keeperLine);
             ShopOfferCellView[] cells = new ShopOfferCellView[ShopCatalog.GridSlotCount];
             for (int index = 0; index < cells.Length; index++) cells[index] = SetupCell(panel, index, font);
 
@@ -118,6 +119,8 @@ namespace TrickalFanGame.Editor
             ShopView view = Component<ShopView>(overlayRect.gameObject);
             view.Configure(session, overlay, raycaster, eventSystem, keeperPortrait, goldText, cells, detailName,
                 detailKind, detailEffect, detailPrice, feedback, buyButton, buyLabel, closeButton);
+            // Shop-1: the view switches these between the general shop and the 골디 shop when it opens.
+            view.ConfigureTheme(title, keeperName, keeperLine, panelImage, panelOutline);
             EnsureGlyphs(font, catalog);
 
             Undo.RecordObject(assembler, "Connect Shop-0 shop session");
@@ -138,7 +141,8 @@ namespace TrickalFanGame.Editor
         }
 
         // The portrait is a placeholder until the 시스트 character asset exists; a sprite assigned later is kept.
-        private static Image SetupKeeperColumn(Transform panel, TMP_FontAsset font, out TMP_Text goldText)
+        private static Image SetupKeeperColumn(Transform panel, TMP_FontAsset font, out TMP_Text goldText,
+            out TMP_Text name, out TMP_Text line)
         {
             const float keeperX = -560f;
             bool portraitExists = panel.Find("Keeper Portrait") != null;
@@ -149,10 +153,10 @@ namespace TrickalFanGame.Editor
             portrait.preserveAspect = true;
             if (!portraitExists || portrait.sprite == null) portrait.color = new Color(1f, 0.8f, 0.35f, 0.9f);
 
-            TMP_Text name = Text(panel, "Keeper Name", ShopKeeper.DisplayName, new Vector2(keeperX, -176f),
+            name = Text(panel, "Keeper Name", ShopKeeper.DisplayName, new Vector2(keeperX, -176f),
                 new Vector2(380f, 48f), 32f, font, TextAlignmentOptions.Center, false);
             name.fontStyle = FontStyles.Bold;
-            TMP_Text line = Text(panel, "Keeper Line", ShopView.KeeperLine, new Vector2(keeperX, -226f),
+            line = Text(panel, "Keeper Line", ShopView.KeeperLine, new Vector2(keeperX, -226f),
                 new Vector2(380f, 36f), 21f, font, TextAlignmentOptions.Center, false);
             line.color = new Color(0.7f, 0.78f, 0.86f, 1f);
             goldText = Text(panel, "Gold", $"보유 0 {ShopView.GoldSuffix}", new Vector2(keeperX, -296f),
@@ -229,6 +233,8 @@ namespace TrickalFanGame.Editor
             ShopView.NotEnoughGoldMessage + ShopView.PurchasedMessage + ShopView.SoldOutMessage +
             ShopView.ItemUnavailableMessage + ShopView.EmptyCellMessage + ShopView.ConsumableKind +
             ShopView.ConsumableEffect + ShopView.InputHint + ShopKeeper.DisplayName + ShopKeeper.OpenPrompt +
+            ShopView.GoldiTitle + ShopView.GoldiKeeperLine + ShopView.GoldiConsumableEffect +
+            ShopKeeper.GoldiDisplayName + ShopKeeper.GreetingLine + ShopKeeper.GoldiGreetingLine +
             "보유현재스택제한없음상품이름효과설명0123456789/·" +
             string.Concat(catalog.Consumables.Select(consumable => consumable.DisplayName));
 

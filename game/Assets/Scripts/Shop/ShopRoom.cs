@@ -45,6 +45,7 @@ namespace TrickalFanGame.Shop
         public ShopKeeper Keeper => keeper;
         public RunProgress Progress => runProgress;
         public ShopStockState Stock => stock;
+        public ShopKind Kind => stock != null ? stock.Kind : ShopKind.General;
         public ShopSession Session => session;
         public GameObject LastDroppedPickup { get; private set; }
         public event Action<ShopOffer> Purchased;

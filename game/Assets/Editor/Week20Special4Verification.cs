@@ -275,6 +275,10 @@ namespace TrickalFanGame.Editor
             PlayerInventory inventory = assembler.Graph.Player.GetComponent<PlayerInventory>();
             Assert(inventory != null, "Runtime shop verification requires the player inventory.");
             // Edit mode skips Awake; an Artifact purchase applies its effect through the inventory's PlayerStats.
+            Component stats = inventory.GetComponent("PlayerStats");
+            stats?.GetType().GetMethod("Awake",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.Invoke(stats, null);
             typeof(PlayerInventory).GetMethod("Awake",
                     System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                 ?.Invoke(inventory, null);

@@ -15,7 +15,7 @@ namespace TrickalFanGame.Editor
         {
             string[] paths = AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets/Resources/UserArtwork" })
                 .Select(AssetDatabase.GUIDToAssetPath).ToArray();
-            Require(paths.Length == 42, "Expected all 42 supplied PNGs.");
+            Require(paths.Length == 44, "Expected all 44 supplied PNGs, including the Goldi shop artwork.");
             foreach (string path in paths)
             {
                 Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
@@ -27,7 +27,10 @@ namespace TrickalFanGame.Editor
             }
             Shader shader = Resources.Load<Shader>("UserArtwork/ItemArtwork");
             Require(shader != null && !ShaderUtil.ShaderHasError(shader), "Artwork shader failed compilation.");
-            for (int i = 0; i < 4; i++)
+            Require(UserArtwork.Load("goldi") != null, "Goldi artwork must be available for the Goldi shop (Shop-1).");
+            Require(UserArtwork.HudIcon(3) != null && UserArtwork.HudIcon(3) == UserArtwork.Load("erpin-high-grade"),
+                "High-grade HUD icon must use the supplied Erpin artwork.");
+            for (int i = 0; i < 3; i++)
             {
                 Sprite icon = UserArtwork.HudIcon(i);
                 Sprite sheet = UserArtwork.Load("hud-icons");
@@ -60,7 +63,7 @@ namespace TrickalFanGame.Editor
                     Require(display.sprite == UserArtwork.Load(key) && display.color == Color.white,
                         name + " must use the supplied capsule, including in the shop.");
                 }
-                Debug.Log("User artwork verification passed: 42 PNGs, 30 item illustrations, four HUD icons, capsule prefabs and frame shader.");
+                Debug.Log("User artwork verification passed: 44 PNGs, Goldi shopkeeper, 30 item illustrations, four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
                 CapturePreview();
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }

@@ -13,11 +13,14 @@ namespace TrickalFanGame.Frontend
     // Shop-0: the shop screen. The shopkeeper stands on the left and the 3×3 offer grid on the right; the detail
     // column describes the focused cell. Arrow keys or WASD move the focus, Enter/Space/E buys, Escape closes.
     // It reads ShopRoom/ShopStockState every frame, so price changes (멤버십카드) and gold changes show at once.
+    // Shop-1: the same screen shows the 골디 shop with 골디's portrait, texts, and a gold panel.
     [DisallowMultipleComponent]
     public sealed class ShopView : MonoBehaviour
     {
         public const string Title = "시스트의 상점";
-        public const string KeeperLine = "천천히 골라 봐.";
+        public const string KeeperLine = "마음에 드신 상품이… 있을깝쇼?";
+        public const string GoldiTitle = "골디의 상점";
+        public const string GoldiKeeperLine = "부담스럽게 생각마시고 천천히 둘러보세요";
         public const string GoldSuffix = "골드";
         public const string FreeLabel = "무료";
         public const string SoldOutLabel = "판매 완료";
@@ -32,7 +35,17 @@ namespace TrickalFanGame.Frontend
         public const string EmptyCellMessage = "빈 칸입니다";
         public const string ConsumableKind = "소모품";
         public const string ConsumableEffect = "구매하면 시스트 앞에 떨어집니다. 주워서 사용합니다.";
+        public const string GoldiConsumableEffect = "구매하면 골디 앞에 떨어집니다. 주워서 사용합니다.";
         public const string InputHint = "방향키 이동  ·  Enter 구매  ·  Esc 닫기";
+
+        public static readonly Color PanelColor = new(0.055f, 0.075f, 0.12f, 1f);
+        public static readonly Color PanelOutlineColor = new(0.95f, 0.78f, 0.38f, 0.9f);
+        public static readonly Vector2 PanelOutlineDistance = new(2f, -2f);
+        public static readonly Color TitleColor = new(0.92f, 0.96f, 1f, 1f);
+        public static readonly Color GoldiPanelColor = new(0.17f, 0.115f, 0.035f, 1f);
+        public static readonly Color GoldiPanelOutlineColor = new(1f, 0.87f, 0.3f, 1f);
+        public static readonly Vector2 GoldiPanelOutlineDistance = new(5f, -5f);
+        public static readonly Color GoldiTitleColor = new(1f, 0.87f, 0.3f, 1f);
 
         [SerializeField] private ShopSession session;
         [SerializeField] private CanvasGroup overlay;
@@ -49,6 +62,11 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private Button buyButton;
         [SerializeField] private TMP_Text buyButtonLabel;
         [SerializeField] private Button closeButton;
+        [SerializeField] private TMP_Text titleText;
+        [SerializeField] private TMP_Text keeperNameText;
+        [SerializeField] private TMP_Text keeperLineText;
+        [SerializeField] private Image panelImage;
+        [SerializeField] private Outline panelOutline;
 
         private bool subscribed;
         private int shownFrame = -1;
@@ -68,6 +86,12 @@ namespace TrickalFanGame.Frontend
         public Button BuyButton => buyButton;
         public TMP_Text BuyButtonLabel => buyButtonLabel;
         public Button CloseButton => closeButton;
+        public TMP_Text TitleText => titleText;
+        public TMP_Text KeeperNameText => keeperNameText;
+        public TMP_Text KeeperLineText => keeperLineText;
+        public Image PanelImage => panelImage;
+        public Outline PanelOutline => panelOutline;
+        public ShopKind ShownKind { get; private set; }
         public bool IsVisible { get; private set; }
         public int FocusedIndex { get; private set; }
 
@@ -95,8 +119,42 @@ namespace TrickalFanGame.Frontend
             buyButtonLabel = configuredBuyButtonLabel;
             closeButton = configuredCloseButton;
             Subscribe();
-            UserArtwork.Apply(keeperPortrait, UserArtwork.Load("sist"));
+            UserArtwork.Apply(keeperPortrait, UserArtwork.Load(ShopKeeper.ArtworkKey));
             ApplyVisibility(false);
+        }
+
+        // Shop-1: the parts that differ between the general shop and the 골디 shop.
+        public void ConfigureTheme(TMP_Text configuredTitle, TMP_Text configuredKeeperName,
+            TMP_Text configuredKeeperLine, Image configuredPanelImage, Outline configuredPanelOutline)
+        {
+            titleText = configuredTitle;
+            keeperNameText = configuredKeeperName;
+            keeperLineText = configuredKeeperLine;
+            panelImage = configuredPanelImage;
+            panelOutline = configuredPanelOutline;
+            ApplyTheme(ShopKind.General);
+        }
+
+        public static string GetTitle(ShopKind kind) => kind == ShopKind.Goldi ? GoldiTitle : Title;
+        public static string GetKeeperLine(ShopKind kind) => kind == ShopKind.Goldi ? GoldiKeeperLine : KeeperLine;
+        public static string GetConsumableEffect(ShopKind kind) =>
+            kind == ShopKind.Goldi ? GoldiConsumableEffect : ConsumableEffect;
+
+        private void ApplyTheme(ShopKind kind)
+        {
+            bool goldi = kind == ShopKind.Goldi;
+            ShownKind = kind;
+            SetText(titleText, GetTitle(kind));
+            if (titleText != null) titleText.color = goldi ? GoldiTitleColor : TitleColor;
+            SetText(keeperNameText, ShopKeeper.GetDisplayName(kind));
+            SetText(keeperLineText, GetKeeperLine(kind));
+            UserArtwork.Apply(keeperPortrait, UserArtwork.Load(ShopKeeper.GetArtworkKey(kind)));
+            if (panelImage != null) panelImage.color = goldi ? GoldiPanelColor : PanelColor;
+            if (panelOutline != null)
+            {
+                panelOutline.effectColor = goldi ? GoldiPanelOutlineColor : PanelOutlineColor;
+                panelOutline.effectDistance = goldi ? GoldiPanelOutlineDistance : PanelOutlineDistance;
+            }
         }
 
         public static string FormatPrice(int price) => price > 0 ? $"{price} {GoldSuffix}" : FreeLabel;
@@ -240,7 +298,7 @@ namespace TrickalFanGame.Frontend
             else
             {
                 SetText(detailKindText, ConsumableKind);
-                SetText(detailEffectText, ConsumableEffect);
+                SetText(detailEffectText, GetConsumableEffect(shop.Kind));
             }
 
             SetText(detailPriceText, FormatPriceLabel(status, shop.GetPrice(offer)));
@@ -255,6 +313,7 @@ namespace TrickalFanGame.Frontend
             if (activeEventSystem != null) activeEventSystem.SetSelectedGameObject(null);
             shownFrame = Time.frameCount;
             FocusedIndex = FirstOfferOnSale();
+            ApplyTheme(session.Shop != null ? session.Shop.Kind : ShopKind.General);
             SetFeedback(string.Empty);
             ApplyVisibility(true);
             Refresh();

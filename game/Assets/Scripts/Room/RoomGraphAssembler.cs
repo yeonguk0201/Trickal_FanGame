@@ -297,7 +297,8 @@ namespace TrickalFanGame.Room
                     DestroyFloor(nextRoot);
                     return false;
                 }
-                if (generatedNode.Role == GeneratedRoomRole.Shop && !TryBuildShop(instance, generatedNode, out error))
+                if ((generatedNode.Role == GeneratedRoomRole.Shop || generatedNode.IsGoldiShop) &&
+                    !TryBuildShop(instance, generatedNode, out error))
                 {
                     DestroyFloor(nextRoot);
                     return false;
@@ -312,8 +313,9 @@ namespace TrickalFanGame.Room
                         selectionRewardPool);
                 if (instance.RewardRoom != null)
                 {
-                    instance.RewardRoom.gameObject.SetActive(generatedNode.Role is GeneratedRoomRole.Treasure or
-                        GeneratedRoomRole.Secret);
+                    // Shop-1: a secret room holding the 골디 shop has no treasure-style reward.
+                    instance.RewardRoom.gameObject.SetActive(!generatedNode.IsGoldiShop &&
+                        generatedNode.Role is GeneratedRoomRole.Treasure or GeneratedRoomRole.Secret);
                     instance.RewardRoom.Configure(generatedNode.FloorNumber, generatedNode.RoomNumber,
                         runProgress, instance.RewardRoom.GetComponent<ItemDropSource>(), instance.Controller,
                         rewardSelectionSession, selectionRewardPool);
@@ -397,6 +399,7 @@ namespace TrickalFanGame.Room
         }
 
         // Special-4: the shopkeeper goes into the room content; the stock rolls on the first build and is reused after.
+        // Shop-1: a 골디 secret room gets the same shop with the 골디 stock.
         private bool TryBuildShop(RoomPrefab instance, GeneratedRoomNode node, out string error)
         {
             if (shopRoomPrefab == null || shopCatalog == null || !shopCatalog.TryValidate(out error))
@@ -406,10 +409,12 @@ namespace TrickalFanGame.Room
             }
 
             PlayerInventory inventory = graph.Player != null ? graph.Player.GetComponent<PlayerInventory>() : null;
+            ShopKind kind = node.IsGoldiShop ? ShopKind.Goldi : ShopKind.General;
+            ShopStockState Build() => ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog,
+                selectionRewardPool, inventory, kind);
             ShopStockState stock = runProgress != null
-                ? runProgress.GetOrCreateShopStock(ShopStockBuilder.BuildShopId(node.RoomId), () =>
-                    ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog, selectionRewardPool, inventory))
-                : ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog, selectionRewardPool, inventory);
+                ? runProgress.GetOrCreateShopStock(ShopStockBuilder.BuildShopId(node.RoomId), Build)
+                : Build();
             Transform content = instance.Node.ContentRoot.transform;
             ShopRoom shop = Instantiate(shopRoomPrefab, content);
             shop.name = $"Shop - {node.RoomId}";

@@ -130,7 +130,8 @@ namespace TrickalFanGame.Editor
                         $"Seed {seed} floor {floor.FloorNumber} boss distance must ignore hidden passages.");
 
                     multiNeighbor += expectedNeighbors >= 2 ? 1 : 0;
-                    if (runtimeSeed == 0 && floor.FloorNumber == 1 && expectedNeighbors >= 2 &&
+                    // Shop-1: a 골디 shop secret room has no treasure-style reward; the runtime checks use a plain one.
+                    if (runtimeSeed == 0 && floor.FloorNumber == 1 && expectedNeighbors >= 2 && !secret.IsGoldiShop &&
                         FindObstacleRoom(floor) != null &&
                         secret.ConnectedRoomIds.Any(id => floor.Nodes.Single(node => node.RoomId == id).Role ==
                                                           GeneratedRoomRole.Intermediate))
