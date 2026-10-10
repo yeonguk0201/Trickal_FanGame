@@ -1721,6 +1721,10 @@ Play 화면 검수:
 
 - 후속 `GroundShadowPlayVerification.RunBatch`에서도 15종 생성·재활성화 및 구덩이 2종 제외 검증 성공 로그를 확인했다 (`output/ground-shadow-profile-play.log`).
 
+### 그림자·2칸 나무의 공용 원화 연결
+
+그림자 미리보기와 상태별 선택에 필요한 요정왕국 원화 45장, Resources 카탈로그, 공용 표시 코드와 기존 게임 프리팹 연결을 포함한다. 표시용 프리팹은 `Assets/Prefabs/FairyKingdomArtwork/`, 별도 미리보기 씬은 `Assets/Scenes/FairyKingdomArtworkPreview.unity`다. `Trickal Fan Game/Artwork/Verify Fairy Kingdom 45 Sprites`로 원화 참조와 나무 1×2 표시·하단 1×1 충돌을 확인한다. 재구성 메뉴 `Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites`는 씬·프리팹을 저장하므로 기존 변경을 확인한 뒤 사용한다. 구덩이는 기존 연결 윤곽 렌더를 우선하며 원화 표시로 덮어쓰지 않는다. 방 Layout·상태이상 프레임 구현은 이 커밋에 포함하지 않는다.
+
 ### 그림자 재조정·스펠 공통 설정 (2026-10-11)
 
 - 사용자 수정 수치 14종을 반영했다. 에르핀 너비 배율은 1.71, 진하기는 0.58이며 나머지 지정 대상도 전달한 값으로 갱신했다.
