@@ -44,6 +44,7 @@ namespace TrickalFanGame.Room
     {
         public const string DevelopmentChestPrefix = "dev-chest-";
         public const uint DevelopmentSeedSalt = 0x7A3C51E9u;
+        public const uint AuthoredSeedSalt = 0x3C6EF372u;
 
         public static TreasureChest Spawn(ChestContentTable table, RoomChestSite site, string chestId, ChestKind kind,
             int contentSeed, out string error) =>
@@ -109,6 +110,48 @@ namespace TrickalFanGame.Room
 
             error = null;
             return chest;
+        }
+
+        // T7: the chests a Layout authors stand on their cell from the room's first build. Only a chest the Run has
+        // not recorded yet is placed here; a recorded one (closed, opened or gone with its floor) is the clear reward
+        // spawner's to rebuild, the same as every other chest of the room.
+        public static bool TrySpawnAuthoredChests(ChestContentTable table, RoomChestSite site, int roomContentSeed,
+            out List<TreasureChest> spawned, out string error)
+        {
+            spawned = new List<TreasureChest>();
+            if (site == null)
+            {
+                error = "Authored chests require a room site.";
+                return false;
+            }
+
+            IReadOnlyList<RoomTemplateChest> authored = site.Template.AuthoredChests;
+            for (int index = 0; index < authored.Count; index++)
+            {
+                RoomTemplateChest chest = authored[index];
+                if (site.State.GetChest(chest.ChestId) != null) continue;
+                TreasureChest placed = Spawn(table, site, chest.ChestId, chest.Kind,
+                    DeriveAuthoredSeed(roomContentSeed, chest.ChestId), chest.LocalPosition, out error);
+                if (placed == null)
+                {
+                    error = $"Authored chest '{chest.ChestId}' could not be placed. {error}";
+                    return false;
+                }
+
+                spawned.Add(placed);
+            }
+
+            error = null;
+            return true;
+        }
+
+        // Keyed by the stable chest ID, so editing another cell of the Layout never changes this chest's contents.
+        public static int DeriveAuthoredSeed(int roomContentSeed, string chestId)
+        {
+            uint hash = 2166136261u;
+            foreach (char character in chestId ?? string.Empty)
+                hash = unchecked((hash ^ character) * 16777619u);
+            return FloorGenerator.DeriveSeed(roomContentSeed, unchecked((int)hash), AuthoredSeedSalt);
         }
 
         // Development panel: an extra chest of a chosen kind in the current room, recorded in the room state like

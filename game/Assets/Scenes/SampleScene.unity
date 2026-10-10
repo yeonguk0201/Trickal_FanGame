@@ -2240,25 +2240,36 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
   - {fileID: 11400000, guid: bbbef5a18185b6e428a3c5387645e964, type: 2}
-  roomContentVersion: 11
+  roomContentVersion: 12
   roomTemplates:
   - {fileID: 11400000, guid: 0acb0c03ac29fe741a8006a51518cf60, type: 2}
   - {fileID: 11400000, guid: cd8ea15c0b6de5949bdfe798aa38e5e3, type: 2}
+  - {fileID: 11400000, guid: ebc732a907dde864a89e4e51e00fd192, type: 2}
+  - {fileID: 11400000, guid: 3c2e3ef06b0dcaa4d93b30ed9f97616e, type: 2}
+  - {fileID: 11400000, guid: df06b46fec3bdeb4ba7615ea726ba289, type: 2}
   - {fileID: 11400000, guid: 684a6d37e34e4a640b4de439e8dd6680, type: 2}
+  - {fileID: 11400000, guid: 0b1f2725e46883140bddc30622c1fbac, type: 2}
   - {fileID: 11400000, guid: 15fb0d600fe1da54892fbf0c53e1eb32, type: 2}
   - {fileID: 11400000, guid: 386c2e1a00ff0b948a82c708cd6bb049, type: 2}
   - {fileID: 11400000, guid: 4ac878bf9faf92e498255aa1ba52cbe7, type: 2}
   - {fileID: 11400000, guid: 807655f00c0bc124ba7aed2e8f024528, type: 2}
   - {fileID: 11400000, guid: d582d98ad188b3c41bbd94118fa04e97, type: 2}
   - {fileID: 11400000, guid: 4517121bdc108644cafcb5ad40bb93dd, type: 2}
+  - {fileID: 11400000, guid: 779d04a3dcce9a14aa1b7316a4da4950, type: 2}
   - {fileID: 11400000, guid: 1753cb145b11cf145ab6b31a9b8eaabe, type: 2}
+  - {fileID: 11400000, guid: 8c694db6d84facc47a5deaebc827e508, type: 2}
   - {fileID: 11400000, guid: a93cb28704aedfd428f780d46d039154, type: 2}
   - {fileID: 11400000, guid: 2c2a80946d5e1f448bb8048ebae64166, type: 2}
   - {fileID: 11400000, guid: 025c80049bfec5843b1f45e2c3f9a5d7, type: 2}
   - {fileID: 11400000, guid: 2f432c532142ad049914402d66bfbf27, type: 2}
+  - {fileID: 11400000, guid: 644045cdac5987c478eff8c892a7155d, type: 2}
   - {fileID: 11400000, guid: 7e42edc154314df4aa56be0401028675, type: 2}
+  - {fileID: 11400000, guid: e25cf6cd0e952a6458f38917406a893e, type: 2}
   - {fileID: 11400000, guid: 6db8706b343978240be992cbbca5f3b7, type: 2}
   - {fileID: 11400000, guid: 9c4ef623dfcfad048ae2af84d0410cef, type: 2}
+  - {fileID: 11400000, guid: e034ec40cf372ef40902bde3b871ac3a, type: 2}
+  - {fileID: 11400000, guid: cd4ee4c6a7187354a9a77810e0e0ce14, type: 2}
+  - {fileID: 11400000, guid: f49e8a2b7fd0c66418e08e30ef81e565, type: 2}
   - {fileID: 11400000, guid: 96c440fa91f28a342ae804f9000e9e6a, type: 2}
   - {fileID: 11400000, guid: 3f45984d4d128684284b91641a67ae79, type: 2}
   encounterDefinitions:

@@ -36,6 +36,26 @@ namespace TrickalFanGame.Room
         public Vector2 SafeEntryPosition => safeEntryPosition;
     }
 
+    // A chest authored into a Layout (T7). It stands in the room from the first build instead of rolling on clear.
+    [Serializable]
+    public struct RoomTemplateChest
+    {
+        [SerializeField] private string chestId;
+        [SerializeField] private ChestKind kind;
+        [SerializeField] private Vector2 localPosition;
+
+        public RoomTemplateChest(string configuredChestId, ChestKind configuredKind, Vector2 configuredLocalPosition)
+        {
+            chestId = configuredChestId;
+            kind = configuredKind;
+            localPosition = configuredLocalPosition;
+        }
+
+        public string ChestId => chestId;
+        public ChestKind Kind => kind;
+        public Vector2 LocalPosition => localPosition;
+    }
+
     [CreateAssetMenu(fileName = "RoomTemplate", menuName = "Trickal Fan Game/Room Template")]
     public sealed class RoomTemplateDefinition : ScriptableObject
     {
@@ -51,6 +71,12 @@ namespace TrickalFanGame.Room
             Array.Empty<SpawnPointPlacementRole>();
         // Added to the resolved Encounter threat to form the room difficulty score (obstacles, later traps).
         [SerializeField] private int layoutDifficultyModifier;
+        // Relative chance among the compatible candidates of a room. Rooms that give more than an ordinary room
+        // (authored chests, many resource obstacles) use a lower weight.
+        [SerializeField, Min(1)] private int selectionWeight = DefaultSelectionWeight;
+        [SerializeField] private RoomTemplateChest[] authoredChests = Array.Empty<RoomTemplateChest>();
+
+        public const int DefaultSelectionWeight = 100;
 
         public string TemplateId => templateId;
         public RoomProfile Profile => profile;
@@ -62,10 +88,22 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<Vector2> SpawnPoints => spawnPoints;
         public IReadOnlyList<SpawnPointPlacementRole> SpawnPointRoles => spawnPointRoles;
         public int LayoutDifficultyModifier => layoutDifficultyModifier;
+        public int SelectionWeight => Mathf.Max(1, selectionWeight);
+        public IReadOnlyList<RoomTemplateChest> AuthoredChests => authoredChests ?? Array.Empty<RoomTemplateChest>();
 
         public void ConfigureLayoutDifficultyModifier(int modifier)
         {
             layoutDifficultyModifier = modifier;
+        }
+
+        public void ConfigureSelectionWeight(int weight)
+        {
+            selectionWeight = Mathf.Max(1, weight);
+        }
+
+        public void ConfigureAuthoredChests(RoomTemplateChest[] chests)
+        {
+            authoredChests = chests != null ? (RoomTemplateChest[])chests.Clone() : Array.Empty<RoomTemplateChest>();
         }
 
         public static string SpawnPointId(int index) => $"spawn-{index + 1:00}";
@@ -362,6 +400,30 @@ namespace TrickalFanGame.Room
             {
                 error = $"Room template '{templateId}' needs melee-pressure, rear-firing, and charge-lane SpawnPoints.";
                 return false;
+            }
+
+            if (selectionWeight < 1)
+            {
+                error = $"Room template '{templateId}' needs a positive selection weight.";
+                return false;
+            }
+
+            HashSet<string> chestIds = new(StringComparer.Ordinal);
+            foreach (RoomTemplateChest chest in AuthoredChests)
+            {
+                if (!StableRoomId.TryValidate(chest.ChestId, "Authored chest", out error))
+                {
+                    error = $"Room template '{templateId}' has an invalid authored chest. {error}";
+                    return false;
+                }
+
+                if (!chestIds.Add(chest.ChestId) || !Enum.IsDefined(typeof(ChestKind), chest.Kind) ||
+                    !profile.MovementBounds.Contains(chest.LocalPosition))
+                {
+                    error = $"Room template '{templateId}' authored chest '{chest.ChestId}' is duplicated, has an " +
+                            "undefined kind, or sits outside the movement bounds.";
+                    return false;
+                }
             }
 
             BoxCollider2D encounter = prefab.Controller.GetComponent<BoxCollider2D>();

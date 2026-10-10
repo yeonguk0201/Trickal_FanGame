@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9b7443fb6f37ef4584b47f3ca3ca88a, type: 3}
+  m_Name: small-snack-corner
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomTemplateDefinition
+  templateId: small-snack-corner
+  profile: {fileID: 11400000, guid: 1ff92c9396d895b4a88f5ddfd322caef, type: 2}
+  roomPrefab: {fileID: 4810174573067026617, guid: f01e78cc90f34ad4c88d062f3d04800b, type: 3}
+  allowedRoomTypes: 00000000
+  minimumFloor: 1
+  maximumFloor: 99
+  doorSlots:
+  - direction: 0
+    slotPosition: {x: -5.55, y: 0}
+    safeEntryPosition: {x: -3.8500001, y: 0}
+  - direction: 1
+    slotPosition: {x: 5.55, y: 0}
+    safeEntryPosition: {x: 3.8500001, y: 0}
+  - direction: 2
+    slotPosition: {x: 0, y: 2.925}
+    safeEntryPosition: {x: 0, y: 1.2249999}
+  - direction: 3
+    slotPosition: {x: 0, y: -2.925}
+    safeEntryPosition: {x: 0, y: -1.2249999}
+  spawnPoints:
+  - {x: -2.5, y: 1}
+  - {x: 2.5, y: -1}
+  - {x: -1.5, y: 0}
+  - {x: 2.5, y: 1}
+  spawnPointRoles: 03000000030000000600000007000000
+  layoutDifficultyModifier: 1
+  selectionWeight: 60
+  authoredChests: []

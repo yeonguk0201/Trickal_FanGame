@@ -1,0 +1,10 @@
+id: small-snack-corner
+profile: small
+weight: 60
+note: 간식상자와 빵상자가 가운데와 구석에 놓인 작은 방
+grid:
+..........
+..1....4..
+...3.SB...
+.......2..
+..B.......

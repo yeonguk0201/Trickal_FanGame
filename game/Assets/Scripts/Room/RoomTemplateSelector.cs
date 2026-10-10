@@ -9,6 +9,12 @@ namespace TrickalFanGame.Room
     {
         public const string StartingRoomTemplateId = "small-standard";
         private const uint TemplateSalt = 0xB5297A4Du;
+        private const uint DrawSalt = 0x68E31DA4u;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Development panel only: every room that can use this template gets it, so a new Layout is reachable
+        // without searching seeds. Rooms it does not fit keep their seeded template.
+        public static string DevelopmentForcedTemplateId { get; set; }
+#endif
         private const float OverlapTolerance = 0.0001f;
 
         public static bool TryAssign(
@@ -89,16 +95,17 @@ namespace TrickalFanGame.Room
                         return false;
                     }
 
-                    int firstIndex = StableIndex(node.ContentSeed, contentVersion, candidates.Length);
-                    RoomTemplateDefinition selected = null;
-                    for (int offset = 0; offset < candidates.Length; offset++)
+                    // A weighted draw without replacement: a candidate that would overlap an assigned room leaves
+                    // the draw and the rest keep their relative weights.
+                    List<RoomTemplateDefinition> remaining = new(candidates);
+                    RoomTemplateDefinition selected = TakeDevelopmentForced(node, remaining);
+                    if (selected != null && OverlapsAnyAssigned(node, selected, assigned, gridSpacing)) selected = null;
+                    for (int draw = 0; selected == null && remaining.Count > 0; draw++)
                     {
-                        RoomTemplateDefinition candidate = candidates[(firstIndex + offset) % candidates.Length];
-                        if (!OverlapsAnyAssigned(node, candidate, assigned, gridSpacing))
-                        {
-                            selected = candidate;
-                            break;
-                        }
+                        int index = PickWeighted(remaining, StableSeed(node.ContentSeed, contentVersion, draw));
+                        RoomTemplateDefinition candidate = remaining[index];
+                        remaining.RemoveAt(index);
+                        if (!OverlapsAnyAssigned(node, candidate, assigned, gridSpacing)) selected = candidate;
                     }
 
                     if (selected == null)
@@ -156,10 +163,40 @@ namespace TrickalFanGame.Room
             return false;
         }
 
-        private static int StableIndex(int contentSeed, int contentVersion, int count)
+        // The index a seed picks among candidates, each with a chance proportional to its selection weight.
+        public static int PickWeighted(IReadOnlyList<RoomTemplateDefinition> candidates, int seed)
         {
-            int seed = FloorGenerator.DeriveSeed(contentSeed, contentVersion, TemplateSalt);
-            return (int)(unchecked((uint)seed) % (uint)count);
+            long total = 0;
+            foreach (RoomTemplateDefinition candidate in candidates) total += candidate.SelectionWeight;
+            long pick = unchecked((uint)seed) % total;
+            for (int index = 0; index < candidates.Count; index++)
+            {
+                if (pick < candidates[index].SelectionWeight) return index;
+                pick -= candidates[index].SelectionWeight;
+            }
+
+            return candidates.Count - 1;
+        }
+
+        private static int StableSeed(int contentSeed, int contentVersion, int draw) =>
+            FloorGenerator.DeriveSeed(FloorGenerator.DeriveSeed(contentSeed, contentVersion, TemplateSalt), draw,
+                DrawSalt);
+
+        private static RoomTemplateDefinition TakeDevelopmentForced(GeneratedRoomNode node,
+            List<RoomTemplateDefinition> remaining)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (string.IsNullOrEmpty(DevelopmentForcedTemplateId) || node.Role == GeneratedRoomRole.Start) return null;
+            for (int index = 0; index < remaining.Count; index++)
+            {
+                if (!string.Equals(remaining[index].TemplateId, DevelopmentForcedTemplateId, StringComparison.Ordinal))
+                    continue;
+                RoomTemplateDefinition forced = remaining[index];
+                remaining.RemoveAt(index);
+                return forced;
+            }
+#endif
+            return null;
         }
     }
 }

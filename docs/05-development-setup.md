@@ -1199,6 +1199,104 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   전투 중인 방에서 사용하면 패널에 `Room CRIT +15% DMG +50%`가 보이고 방을 나가면 사라져야 한다.
   2026-10-05 사용자 화면 확인 완료.
 
+- T7 방 Layout 임포터(1단계): 방 하나를 `game/RoomLayouts/<방 ID>.room.txt` 텍스트 파일 하나로 적고, 메뉴
+  `Trickal Fan Game > Tools > Import Room Layouts`가 파일마다 방 Prefab(`Assets/Rooms/Prefabs/Layouts/room-<ID>.prefab`)과
+  템플릿(`Assets/Rooms/Templates/Layouts/<ID>.asset`)을 만들어 Game Scene 생성기 목록에 등록한다. Room 콘텐츠 버전은
+  12다. 임포터 이전에 만든 템플릿 19개는 건드리지 않는다.
+  - **파일 형식**: 위쪽은 `키: 값` 머리말, `grid:` 줄 아래는 격자다. `//`로 시작하는 줄은 머리말에서만 주석이다.
+
+    ```text
+    id: basic-gold-mine
+    profile: basic
+    weight: 40
+    note: 황금돌이 네 모서리에 몰려 있는 금광 방
+    grid:
+    GG#.........#GG
+    G.............G
+    ...1.......5...
+    .......3.......
+    ...............
+    ...4.......2...
+    G.............G
+    GG#.........#GG
+    ```
+
+    | 키 | 필수 | 뜻 |
+    | --- | --- | --- |
+    | `id` | 예 | 방 ID. 파일 이름과 같고 `<프로필>-`로 시작한다. 소문자·숫자·하이픈만 쓴다 |
+    | `profile` | 예 | `small`·`basic`·`wide`·`tall`·`large` |
+    | `weight` | 아니오 | 등장 가중치 1~1000. 기본 100(기존 방과 같은 확률). 드롭이나 상자가 많은 방은 낮춘다 |
+    | `difficulty` | 아니오 | Layout 난이도 보정 0~5. 적지 않으면 장애물·구덩이가 있으면 +1, 없으면 0 |
+    | `floors` | 아니오 | 나오는 층. `2` 또는 `1-3`. 기본은 모든 층 |
+    | `note` | 아니오 | 사람이 읽는 설명. 게임에 쓰이지 않는다 |
+
+  - **격자**: 한 글자가 1×1 한 칸이고 위에서 아래로 적는다. 칸 수는 프로필마다 고정이다.
+
+    | 프로필 | 가로 × 세로 | SpawnPoint 수 |
+    | --- | --- | --- |
+    | `small` | 10 × 5 | 4 |
+    | `basic` | 13 × 7 | 5 |
+    | `wide` | 21 × 7 | 5 |
+    | `tall` | 13 × 11 | 5 |
+    | `large` | 21 × 11 | 6 |
+
+    한 칸은 1×1이고 격자는 방 중심에 맞춘다. 격자 크기는 벽 콜라이더 안쪽이 아니라 **실제로 걸을 수 있는 바닥**
+    (`FairyVillageArtworkSetup.WalkableFloor`, 벽 그림 위에 서 보이지 않게 넓힌 경계 안쪽)에 들어가는 가장 큰
+    크기다. 바닥 크기가 정수가 아니라서 격자 바깥에 한 칸보다 좁은 여백이 남는다(Basic은 좌우 0.36, 위 0.36).
+    벽 경계 폭을 바꾸면 검증기가 격자와 맞지 않는다고 알려 준다.
+
+  - **글자**(`RoomLayoutFormat.Symbols`):
+
+    | 글자 | 뜻 |
+    | --- | --- |
+    | `.` | 바닥 |
+    | `#` | 짱돌. 지금처럼 방마다 최대 1개가 seed로 특수 장애물이 된다 |
+    | `T` | 나무(비행도 막음) |
+    | `o` | 구덩이. 붙어 있는 칸은 직사각형으로 합쳐진다 |
+    | `1`~`6` | SpawnPoint. 프로필의 개수만큼 각각 한 번씩 적는다 |
+    | `c` `g` `d` | 일반·황금·다이아몬드 상자. 방에 처음 들어갈 때부터 놓여 있다 |
+    | `M` `G` `K` | 종류 고정: 마리의 폭탄상자·황금돌·마요의 열쇠꾸러미 |
+    | `S` `B` `F` | 종류 고정: 에르핀의 간식상자·에슈르의 빵상자·리코타의 음식상자 |
+    | `V` `X` `R` `Q` | 종류 고정: 시스트의 금고·폭발 상자·셰이디의 랜덤박스·마요의 수집품 상자 |
+
+    종류 고정 장애물은 방당 특수 장애물 1개 규칙에 세지 않는다. 같은 방의 `#`는 그대로 40% 확률로 1개가 특수
+    장애물이 된다.
+  - **SpawnPoint 역할**: `1`·`2`는 근접 압박, `3`은 돌진 통로, `4` 이후는 근접·후방 사격이다(Small의 `4`는 모든 역할).
+    전부 후방 사격 지점으로도 쓰인다.
+  - **배치할 때 지킬 것**(어기면 임포터가 이유와 함께 거부한다):
+    - 문 앞 통로에는 장애물·구덩이·상자를 둘 수 없다. Basic은 좌우 2열의 가운데 5행, 가운데 5열의 위아래 2행이다.
+    - 통로는 2칸 이상이어야 지나갈 수 있는 것으로 본다. 장애물 사이 1칸 틈은 막힌 것으로 판정한다.
+    - SpawnPoint와 상자는 장애물·구덩이의 **바로 왼쪽 칸과 바로 아래 칸**에 둘 수 없다(도달 판정 격자가 점을
+      오른쪽 위 칸으로 보기 때문이다).
+    - SpawnPoint마다 전투 구역의 35% 이상이 보여야 한다.
+    - 상자끼리는 1.5 이상 떨어져야 한다(사이에 한 칸 이상).
+    - 문이 어떤 조합으로 열려도 그 프로필의 모든 Encounter가 배치되어야 한다. SpawnPoint를 문 안전 진입점에서 1.5,
+      문에서 2 이상 떨어뜨려 두면 된다.
+  - **메뉴**(`Trickal Fan Game > Tools`): `Validate Room Layouts`는 에셋을 쓰지 않고 검사만 한다. `Import Room Layouts`는
+    글이 바뀐 방만 다시 만들고(바뀌지 않은 방의 Prefab은 그대로다), 거부된 방은 이전에 통과한 버전을 그대로 둔다.
+    파일을 지운 방은 목록에서 빠지고 그 방의 Prefab·템플릿이 삭제된다. `Reimport All Room Layouts`는 전부 다시
+    만든다. 결과는 Console과 `game/Logs/room-layout-import-report.txt`에 방별 가중치·장애물 수·밀도, 서로 대칭인 방
+    경고, 거부 사유로 남는다. 거부된 방이 하나라도 있으면 예외로 끝난다(배치에서는 종료 코드 1).
+  - **배치 실행**(Unity 에디터를 닫은 상태): `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod
+    TrickalFanGame.Editor.RoomLayoutImporter.Import -logFile <로그 경로>`. 검사만 하려면 `RoomLayoutImporter.Validate`.
+  - **이미 Run에 쓰인 방을 고칠 때**: 방 ID와 칸 위치로 만든 장애물 ID(`obstacle-c03-r05`)는 seed 재현에 쓰이는 안정
+    키다. 방을 추가·삭제하거나 배치를 바꾼 묶음을 내보낼 때 `RoomLayoutImporter.RoomContentVersion`을 한 번 올린다.
+    Prefab 구성 방식을 바꾸면 `BuildRevision`도 올려 모든 방을 다시 만들게 한다.
+  - **글자 추가**: `RoomLayoutFormat.BuildSymbols`에 한 줄, `RoomLayoutImporter.PlaceContent`에 배치 분기 하나를 넣는다.
+  - 자동 검증 메뉴는 `Trickal Fan Game > Tools > Verify Room Layouts`, 배치는 Unity `-batchmode -nographics -quit
+    -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.RoomLayoutImporterVerification.ImportAndVerifyBatch
+    -logFile <로그 경로>`다. 형식·배치 거부 22가지와 사유, 임포트 2회의 GUID·Prefab 내용 불변, 강제 재임포트의 GUID,
+    임시 방의 추가·잘못된 수정 거부 시 이전 버전 보존·파일 삭제 시 그 방 에셋만 제거, 파일과 Prefab·템플릿의 일치
+    (짱돌 슬롯·종류 고정·나무·합쳐진 구덩이·SpawnPoint 역할·상자·가중치·난이도), 모든 문 조합의 Encounter 배치,
+    seed 변형 추첨 뒤에도 유지되는 고정 종류, Layout 상자의 1회 배치·재구성 복원·층 이탈 뒤 미복원, 가중치 추첨 분포,
+    400 seed 생성과 결정성, 강제 Layout을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Encounter-4, Spawn-2,
+    Difficulty-1, Terrain-0, Chest-1, Jjangsem-1, Obstacle-6과 그 회귀, Obstacle-7)다.
+  - 수동 확인: Game Scene Play → `F1` 패널 `— Layout —`의 `Show layouts`에서 `Force <방 ID>`를 누르면 같은 seed로 Run이
+    다시 시작되고 그 방이 들어갈 수 있는 전투방이 모두 그 방으로 바뀐다(보조 Run). `This room`에 현재 방의 ID와
+    가중치가 보인다. 끝나면 `Clear forced layout and restart`를 누른다. 확인할 것: 격자대로 놓인 장애물·구덩이·나무,
+    종류 고정 장애물의 색과 드롭, 처음부터 놓여 있는 상자(일반은 닿으면, 황금은 열쇠, 다이아몬드는 폭탄·폭발 상자로
+    열림), 방을 나갔다 돌아와도 상자가 한 번만 있는지, 적이 끼이지 않고 방이 클리어되는지.
+
 - 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
 - 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.
 - 개발 도구의 실행 실패가 게임 진행을 멈추는지 여부와 실패 종료 코드를 명확히 기록한다.

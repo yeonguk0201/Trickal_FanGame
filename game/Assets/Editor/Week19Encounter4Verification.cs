@@ -100,11 +100,27 @@ namespace TrickalFanGame.Editor
                 [Week14Room6Setup.TallProfileId] = 5,
                 [Week14Room6Setup.LargeProfileId] = 6,
             };
+            // T7: a room from the Layout importer authors all of its SpawnPoints in its text file, so it has no
+            // entry in the expansion table. Its count and roles are checked here and by the importer verification.
+            RoomTemplateDefinition[] imported = generator.RoomTemplates
+                .Where(RoomLayoutImporter.IsImportedTemplate).ToArray();
+            foreach (RoomTemplateDefinition template in imported)
+            {
+                Assert(template.TryValidate(out string error), error);
+                Assert(template.TryValidateLayout(out error), error);
+                Assert(template.SpawnPoints.Count == expectedCounts[template.Profile.ProfileId] &&
+                       template.SpawnPointRoles.SequenceEqual(RoomLayoutImporter.BuildSpawnPointRoles(
+                           RoomLayoutFormat.FindProfile(template.Profile.ProfileId), template.SpawnPoints)),
+                    $"Imported template '{template.TemplateId}' must have " +
+                    $"{expectedCounts[template.Profile.ProfileId]} SpawnPoints with the importer's roles.");
+            }
+
             RoomTemplateDefinition[] normal = generator.RoomTemplates
-                .Where(template => template != null && template.SupportsRoomType(RoomType.Normal)).ToArray();
+                .Where(template => template != null && template.SupportsRoomType(RoomType.Normal))
+                .Except(imported).ToArray();
             Assert(normal.Select(template => template.TemplateId).OrderBy(id => id, StringComparer.Ordinal)
                     .SequenceEqual(Week19Encounter4Setup.AddedSpawnPoints.Keys.OrderBy(id => id, StringComparer.Ordinal)),
-                "Every Normal Room Template must have an Encounter-4 SpawnPoint expansion.");
+                "Every authored Normal Room Template must have an Encounter-4 SpawnPoint expansion.");
             foreach (RoomTemplateDefinition template in normal)
             {
                 Week19Encounter4Setup.AddedSpawnPoint[] added =

@@ -29,6 +29,7 @@ namespace TrickalFanGame.Run
         private ItemDefinition[] singleUseItems;
         private ItemDefinition[] artifactItems;
         private bool showArtifacts;
+        private bool showLayouts;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateForDevelopment()
@@ -48,6 +49,7 @@ namespace TrickalFanGame.Run
             if (revealSecrets) MarkAssisted("Reveal secrets");
             if (DestructibleObstacle.DevelopmentForceNextSecretPit) MarkAssisted("Forced pit");
             if (PlayerStats.DevelopmentForceBurnSource) MarkAssisted("Forced burn source");
+            if (!string.IsNullOrEmpty(RoomTemplateSelector.DevelopmentForcedTemplateId)) MarkAssisted("Forced layout");
 
             // Other systems clear explicit invulnerability (reset, ultimate end), so the toggle is re-applied.
             if (invulnerable) PlayerHealth(assembler)?.SetInvulnerable(true);
@@ -88,6 +90,7 @@ namespace TrickalFanGame.Run
             DrawChestSection(assembler);
             DrawObstacleSection(assembler);
             DrawRoomSection(assembler);
+            DrawLayoutSection(assembler);
             DrawBossSection(assembler);
             DrawSecretSection(assembler);
             DrawShopSection(assembler);
@@ -443,6 +446,43 @@ namespace TrickalFanGame.Run
                 status = $"Killed {controller.KillAliveEnemiesForDevelopment()} enemies.";
         }
 
+        // T7: restarts the Run on its seed with one Layout forced into every combat room it fits, so a new room is
+        // seen without searching seeds (assisted Run). The force stays until it is cleared here.
+        private void DrawLayoutSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Layout —");
+            RoomPrefab room = CurrentRoom(assembler);
+            GeneratedRoomNode node = room != null
+                ? assembler.GeneratedGraph?.FindFloor(room.Node.FloorNumber)?.Nodes
+                    .FirstOrDefault(candidate => candidate.RoomId == room.Node.RoomId)
+                : null;
+            string forced = RoomTemplateSelector.DevelopmentForcedTemplateId;
+            GUILayout.Label($"This room: {node?.TemplateId ?? "-"}" +
+                            (node?.Template != null ? $"  weight {node.Template.SelectionWeight}" : string.Empty));
+            GUILayout.Label($"Forced: {(string.IsNullOrEmpty(forced) ? "-" : forced)}");
+            if (!string.IsNullOrEmpty(forced) && GUILayout.Button("Clear forced layout and restart"))
+            {
+                RoomTemplateSelector.DevelopmentForcedTemplateId = null;
+                RestartWithSeed(assembler.Progress.RunSeed);
+                return;
+            }
+
+            if (assembler.Generator == null) return;
+            RoomTemplateDefinition[] layouts = assembler.Generator.RoomTemplates
+                .Where(template => template != null && template.SupportsRoomType(RoomType.Normal))
+                .OrderBy(template => template.TemplateId, System.StringComparer.Ordinal)
+                .ToArray();
+            showLayouts = GUILayout.Toggle(showLayouts, $"Show layouts ({layouts.Length})");
+            if (!showLayouts) return;
+            foreach (RoomTemplateDefinition layout in layouts)
+            {
+                if (!AssistedButton($"Force {layout.TemplateId}")) continue;
+                RoomTemplateSelector.DevelopmentForcedTemplateId = layout.TemplateId;
+                RestartWithSeed(assembler.Progress.RunSeed);
+                return;
+            }
+        }
+
         private void DrawBossSection(RoomGraphAssembler assembler)
         {
             GUILayout.Label("— Boss room —");
@@ -602,6 +642,11 @@ namespace TrickalFanGame.Run
                 return;
             }
 
+            RestartWithSeed(seed);
+        }
+
+        private static void RestartWithSeed(int seed)
+        {
             RunSession.DevelopmentSeedOverride = seed;
             RunSession session = FindFirstObjectByType<RunSession>();
             if (session != null && session.TryRestartRun()) return;
