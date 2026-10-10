@@ -193,6 +193,7 @@ GameObject:
   - component: {fileID: 5680562915372019051}
   - component: {fileID: 4892683333826283238}
   - component: {fileID: 3048538163251122073}
+  - component: {fileID: 5467326362105572614}
   m_Layer: 10
   m_Name: RoomPit
   m_TagString: Untagged
@@ -273,6 +274,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69fbed06269468644a68875fa6e1cad2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomPit
   pitId: pit-01
+--- !u!114 &5467326362105572614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5836268903052216722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcf7d0dc5ce54dba9a442e8cc0c7fda8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.PitTileArtwork

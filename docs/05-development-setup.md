@@ -1550,3 +1550,13 @@ Play 화면 검수:
 - 정적 확인: 두 이미지의 SHA-256이 제공된 원본과 일치하고, PNG 44개와 신규 `.meta`, JSON 매니페스트 및 HUD 참조를 확인했다. 이번 변경 파일의 `git diff --check`도 통과했다.
 - 자동 검증: Unity 6000.3.22f1의 `TrickalFanGame.Editor.UserArtworkVerification.Verify` 배치를 시도했으나, 종료 코드 1 및 성공 로그 부재로 검증 완료로 처리하지 않았다.
 - 수동 확인: Edit Mode에서 `Trickal Fan Game > Artwork > Verify User Artwork` 실행 시 `User artwork verification passed: 44 PNGs` 로그와 미리보기의 새 에르핀 아이콘을 확인한다. Game Scene Play에서 우하단 Q 스킬 아이콘이 제공 이미지로 표시되고, 사용 가능·쿨타임 상태 표시가 유지되는지 확인한다. 골디는 골디 상점(위 Shop-1 수동 확인)에서 확인한다.
+
+### 구덩이 v2 — ㄹ·3×3 이음새 검수
+
+현재 RoomPit 표시는 v1 사분면 Atlas 대신 연결된 Collider 윤곽 전체를 단일 Sprite로 합성한다. 경계 원화는 `Resources/PitTiles/BoundaryRibbon.png`, 내부 원화는 `CavernDepth.png`다.
+
+- 전체 10개 모양: `Trickal Fan Game/Artwork/Open Connected Pit Tile Preview`.
+- ㄹ·꽉 찬 3×3 확대: `Trickal Fan Game/Artwork/Open Pit Lieul and 3x3 Review` → `Assets/Scenes/PitContourFocusPreview.unity`의 Game 뷰.
+- 검증: 기존 `Trickal Fan Game/Artwork/Verify Connected Pit Tiles`. 배치 메서드는 `TrickalFanGame.Editor.PitTileArtworkVerification.ApplyAndVerifyBatch`, 기대 로그는 `Continuous pit contour verification passed`.
+- 기준: 여러 Collider로 나누거나 합쳐도 같은 모양의 픽셀이 같아야 한다. 테두리는 칸마다 끊기지 않고 안쪽·바깥 모서리를 돌아야 하며, 3×3 내부에 암벽 질감이 남아야 한다. ㅁ 중앙은 투명한 걸을 수 있는 땅이다.
+- 실제 렌더·원화·설정·검수 기록: [구덩이 v2](./art-prompts/pit-tiles-v2/README.md).
