@@ -18,8 +18,6 @@ namespace TrickalFanGame.Editor
         private const int GeneratedSeedCount = 400;
         private const int DeterminismSeedCount = 32;
         private const int WeightSampleCount = 140000;
-        // How far the 0.5 grid may push an outer cell past the walkable floor edge.
-        private const float GridOverhang = 0.05f;
 
         [MenuItem("Trickal Fan Game/Tools/Import and Verify Room Layouts")]
         public static void ImportAndVerifyBatch()
@@ -184,17 +182,14 @@ namespace TrickalFanGame.Editor
         {
             const string id = "basic-verification";
             string file = id + RoomLayoutFormat.FileSuffix;
-            // The grid is the largest unit grid on the walkable floor: no outer cell stands on a wall and no further
-            // whole cell would fit.
+            // The grid is exactly the walkable floor, so outer cells meet the wall boundaries with no gap.
             foreach (RoomLayoutProfile profile in RoomLayoutFormat.Profiles)
             {
                 Rect floor = FairyVillageArtworkSetup.WalkableFloor(profile.RoomSize);
                 Rect grid = profile.GridRect;
                 Assert(Same(profile.Floor, floor) && Same(profile.CellRect(0, 0, profile.Columns, profile.Rows), grid) &&
-                       profile.Columns == Mathf.FloorToInt(floor.width) && profile.Rows == Mathf.FloorToInt(floor.height) &&
-                       grid.xMin >= floor.xMin - GridOverhang && grid.xMax <= floor.xMax + GridOverhang &&
-                       grid.yMin >= floor.yMin - GridOverhang && grid.yMax <= floor.yMax + GridOverhang,
-                    $"Profile '{profile.ProfileId}' grid {profile.Columns}x{profile.Rows} does not fit its walkable " +
+                       Same(grid, floor),
+                    $"Profile '{profile.ProfileId}' grid {profile.Columns}x{profile.Rows} is not its walkable " +
                     $"floor {floor.xMin:0.###}..{floor.xMax:0.###} x {floor.yMin:0.###}..{floor.yMax:0.###}.");
             }
 
@@ -283,6 +278,23 @@ namespace TrickalFanGame.Editor
             Assert(generator.RoomTemplates.Select(template => template.TemplateId).Distinct().Count() ==
                    generator.RoomTemplates.Count,
                 "The room catalog duplicates a template ID.");
+            // No obstacle or pit of any catalog room may stand on a wall boundary.
+            foreach (RoomTemplateDefinition template in generator.RoomTemplates)
+            {
+                Rect floor = FairyVillageArtworkSetup.WalkableFloor(
+                    template.Profile.MovementBounds.size + Vector2.one * RoomLayout.WallThickness * 2f);
+                Assert(RoomObstacleLayout.TryCollectFootprints(template.RoomPrefabAsset,
+                    out List<RoomObstacleFootprint> footprints, out string footprintError), footprintError);
+                foreach (RoomObstacleFootprint footprint in footprints)
+                {
+                    Rect bounds = footprint.Bounds;
+                    Assert(bounds.xMin >= floor.xMin - 0.001f && bounds.xMax <= floor.xMax + 0.001f &&
+                           bounds.yMin >= floor.yMin - 0.001f && bounds.yMax <= floor.yMax + 0.001f,
+                        $"Room '{template.TemplateId}' {footprint.Kind} '{footprint.ObstacleId}' at {bounds} leaves " +
+                        $"the walkable floor {floor}.");
+                }
+            }
+
             foreach (RoomTemplateDefinition authored in generator.RoomTemplates.Except(imported))
             {
                 Assert(authored.SelectionWeight == RoomTemplateDefinition.DefaultSelectionWeight &&

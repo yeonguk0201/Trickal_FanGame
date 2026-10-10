@@ -170,7 +170,17 @@ namespace TrickalFanGame.Editor
         }
 
         private static Rect CellRect(float[] x, float[] y, int col, int row) => new Rect(x[col], y[row + 1], x[col + 1] - x[col], y[row] - y[row + 1]);
+        // The floor actors can stand on: the largest whole-unit rectangle, centered on the room, that fits inside the
+        // painted floor. Its edges are on the 0.5 Layout grid, so 1x1 obstacles and pits meet the walls with no gap,
+        // and the room Layout grid (RoomLayoutFormat) is exactly this rectangle.
         public static Rect WalkableFloor(Vector2 size) {
+            Rect painted = PaintedFloor(size);
+            float width = Mathf.Floor(painted.width), height = Mathf.Floor(painted.height);
+            return new Rect(-width / 2, -height / 2, width, height);
+        }
+
+        // Where the painting itself would let actors stand, from the registered wall and hedge edges.
+        public static Rect PaintedFloor(Vector2 size) {
             float scale = NativeScale(size);
             // Actors do not shrink with Small's artwork. Keep their penetration below the
             // painted hedge edge constant in world units, using Small's approved 80% setting.

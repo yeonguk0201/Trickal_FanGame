@@ -41,6 +41,6 @@ MonoBehaviour:
   layoutDifficultyModifier: 1
   selectionWeight: 30
   authoredChests:
-  - chestId: chest-layout-c01-r00
+  - chestId: chest-layout-c02-r01
     kind: 0
-    localPosition: {x: -5, y: 3}
+    localPosition: {x: -4, y: 2}

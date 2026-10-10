@@ -45,8 +45,8 @@ namespace TrickalFanGame.Editor
     }
 
     // The fixed grid of a Room Profile. One symbol is one 1x1 cell and the grid is centered on the room, so cell
-    // centers land on the 0.5 Layout grid. The grid is the largest one that fits the walkable floor (the room inside
-    // the widened wall boundaries, which is narrower than the wall colliders' inner edge).
+    // centers land on the 0.5 Layout grid. The grid is exactly the walkable floor inside the wall boundaries, which
+    // is narrower than the wall colliders' inner edge.
     public sealed class RoomLayoutProfile
     {
         public RoomLayoutProfile(string profileId, string profilePath, Vector2 roomSize, string sourcePrefabPath,
@@ -70,13 +70,9 @@ namespace TrickalFanGame.Editor
         public int Rows { get; }
         // The Encounter-4 SpawnPoint count of the profile.
         public int SpawnPointCount { get; }
-        // Where the player can actually stand.
+        // Where actors can stand; the wall boundaries are built on its edges.
         public Rect Floor { get; }
         public Rect GridRect => new(-Columns * 0.5f, -Rows * 0.5f, Columns, Rows);
-        // The floor grown to the grid: the 0.5 grid can put the outer cells a few hundredths past the floor edge.
-        public Rect ValidationBounds => Rect.MinMaxRect(Mathf.Min(Floor.xMin, GridRect.xMin),
-            Mathf.Min(Floor.yMin, GridRect.yMin), Mathf.Max(Floor.xMax, GridRect.xMax),
-            Mathf.Max(Floor.yMax, GridRect.yMax));
 
         public Vector2 CellCenter(int column, int row) =>
             new(column - (Columns - 1) * 0.5f, (Rows - 1) * 0.5f - row);
@@ -192,7 +188,7 @@ namespace TrickalFanGame.Editor
 
         public static readonly RoomLayoutProfile[] Profiles =
         {
-            // floor(walkable floor size) per axis.
+            // The whole-unit size of FairyVillageArtworkSetup.WalkableFloor per profile.
             new(Week14Room3Setup.SmallProfileId, Week14Room3Setup.SmallProfilePath, Week14Room3Setup.SmallSize,
                 Week14Room3Setup.SmallPrefabPath, 10, 5, 4),
             new(Week14Room1Setup.BasicProfileId, Week14Room1Setup.BasicProfilePath, RoomLayout.RoomSize,

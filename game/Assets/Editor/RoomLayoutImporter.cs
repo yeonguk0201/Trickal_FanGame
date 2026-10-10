@@ -31,7 +31,7 @@ namespace TrickalFanGame.Editor
         public const string TreeIdPrefix = "tree";
         public const string ChestIdPrefix = "chest-layout";
         // Part of each room's content hash. Raise it when the importer builds a different Prefab from the same text.
-        public const int BuildRevision = 2;
+        public const int BuildRevision = 3;
 
         private const string StagingId = "staging";
         private const SpawnPointPlacementRole MeleeRear =
@@ -220,7 +220,7 @@ namespace TrickalFanGame.Editor
             RoomLayoutProfile profile = document.Profile;
             // The walkable floor is narrower than the profile's movement bounds, so reachability is judged on the
             // floor the player can actually stand on. The built template is validated against the profile again.
-            Rect movementBounds = profile.ValidationBounds;
+            Rect movementBounds = profile.Floor;
             Rect encounterBounds = Week14Room3Setup.EncounterBounds(profile.RoomSize);
             RoomTemplateDoor[] doors = Week14Room3Setup.BuildDoorContracts(profile.RoomSize);
             Vector2[] spawnPoints = document.SpawnPoints;
