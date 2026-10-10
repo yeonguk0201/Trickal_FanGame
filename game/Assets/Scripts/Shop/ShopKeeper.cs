@@ -16,6 +16,8 @@ namespace TrickalFanGame.Shop
     [RequireComponent(typeof(Collider2D))]
     public sealed class ShopKeeper : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         public const string DisplayName = "시스트";
         public const string GoldiDisplayName = "골디";
         public const string ArtworkKey = "sist";

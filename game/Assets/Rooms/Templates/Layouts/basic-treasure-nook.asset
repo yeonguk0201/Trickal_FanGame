@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9b7443fb6f37ef4584b47f3ca3ca88a, type: 3}
+  m_Name: basic-treasure-nook
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomTemplateDefinition
+  templateId: basic-treasure-nook
+  profile: {fileID: 11400000, guid: 3023cd9bb6e97db488bb4618fb6fe3c2, type: 2}
+  roomPrefab: {fileID: 7329685922623168464, guid: 8137cbb53d9036c4ba12b344502f7c03, type: 3}
+  allowedRoomTypes: 00000000
+  minimumFloor: 1
+  maximumFloor: 99
+  doorSlots:
+  - direction: 0
+    slotPosition: {x: -7.55, y: 0}
+    safeEntryPosition: {x: -5.8500004, y: 0}
+  - direction: 1
+    slotPosition: {x: 7.55, y: 0}
+    safeEntryPosition: {x: 5.8500004, y: 0}
+  - direction: 2
+    slotPosition: {x: 0, y: 4.05}
+    safeEntryPosition: {x: 0, y: 2.3500001}
+  - direction: 3
+    slotPosition: {x: 0, y: -4.05}
+    safeEntryPosition: {x: 0, y: -2.3500001}
+  spawnPoints:
+  - {x: -2, y: 1}
+  - {x: 4, y: -2}
+  - {x: 0, y: 0}
+  - {x: -4, y: -2}
+  - {x: 2, y: 1}
+  spawnPointRoles: 0300000003000000060000000300000003000000
+  layoutDifficultyModifier: 1
+  selectionWeight: 30
+  authoredChests:
+  - chestId: chest-layout-c02-r01
+    kind: 0
+    localPosition: {x: -4, y: 2}

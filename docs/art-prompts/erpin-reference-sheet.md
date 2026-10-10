@@ -1,6 +1,6 @@
 # 에르핀 기준 레퍼런스 시트
 
-결과: `docs/art-references/erpin-reference-sheet.png`.
+결과: `docs/art-references/erpin-user-reference.png`.
 내장 `image_gen` 사용. 최종 생성 ID: `b845329f-14d5-4750-88d5-c0a72581182f`.
 디자인 검토용이며 게임 모션에는 적용하지 않았다.
 

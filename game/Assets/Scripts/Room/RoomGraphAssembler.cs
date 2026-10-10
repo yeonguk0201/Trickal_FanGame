@@ -594,11 +594,14 @@ namespace TrickalFanGame.Room
                     RoomClearRewardSpawner rewardSpawner = controller.GetComponent<RoomClearRewardSpawner>();
                     if (rewardSpawner == null)
                         rewardSpawner = controller.gameObject.AddComponent<RoomClearRewardSpawner>();
-                    rewardSpawner.ConfigureChest(chestContentTable,
-                        new RoomChestSite(instance, node.Template, state, runProgress,
-                            graph != null && graph.Player != null ? graph.Player.transform : null),
+                    RoomChestSite chestSite = new(instance, node.Template, state, runProgress,
+                        graph != null && graph.Player != null ? graph.Player.transform : null);
+                    rewardSpawner.ConfigureChest(chestContentTable, chestSite,
                         RoomClearRewardSpawner.DeriveChestSeed(node.ContentSeed));
                     controller.ConfigureClearReward(rewardSpawner);
+                    if (!RoomChestSpawner.TrySpawnAuthoredChests(chestContentTable, chestSite, node.ContentSeed,
+                            out _, out error))
+                    { error = $"Room {node.RoomId} could not place its Layout chests. {error}"; return false; }
                 }
                 else if (encounterClearDropTable != null)
                 {

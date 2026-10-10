@@ -2,7 +2,8 @@ using UnityEngine;
 
 namespace TrickalFanGame.Combat
 {
-    // Passive-0 §4.7·§4.8: status effects on an enemy. Added to the enemy the first time one is applied.
+    // Passive-0 §4.7·§4.8: shared Health-target status state. Added when a status first applies;
+    // its artwork works on players, enemies and bosses without changing damage/stack rules.
     // Poison stacks up; each application adds a stack and renews the duration, and every stack ends together.
     // Burn never stacks and only renews. Shock stacks like poison but slows movement instead of dealing damage.
     // The three are independent and can be on one enemy together.
@@ -14,12 +15,6 @@ namespace TrickalFanGame.Combat
         // Passive-0 §4.7: a boss takes half of the shock slow.
         private const float BossShockSlowScale = 0.5f;
 
-        // Placeholder look until status effects have artwork: a tinted copy of the sprite drawn over the enemy.
-        // With several effects only one shows, in the order burn, poison, shock.
-        private static readonly Color PoisonTint = new(0.3f, 1f, 0.25f, 0.5f);
-        private static readonly Color BurnTint = new(1f, 0.5f, 0.1f, 0.5f);
-        private static readonly Color ShockTint = new(1f, 0.95f, 0.2f, 0.5f);
-
         private Health health;
         private GameObject poisonSource;
         private float poisonInterval;
@@ -27,8 +22,6 @@ namespace TrickalFanGame.Combat
         private float burnInterval;
         private float shockSlowPerStack;
         private bool isBoss;
-        private SpriteRenderer tintedRenderer;
-        private SpriteRenderer tintRenderer;
 
         public int PoisonStacks { get; private set; }
         public bool IsPoisoned => PoisonStacks > 0;
@@ -56,16 +49,13 @@ namespace TrickalFanGame.Combat
         {
             health = GetComponent<Health>();
             isBoss = GetComponent<TrickalFanGame.Enemy.BossController>() != null;
+            if (GetComponent<TrickalFanGame.Frontend.FairyKingdomStatusArtwork>() == null)
+                gameObject.AddComponent<TrickalFanGame.Frontend.FairyKingdomStatusArtwork>();
         }
 
         private void Update()
         {
             Tick(Time.time);
-        }
-
-        private void LateUpdate()
-        {
-            SyncTint();
         }
 
         private void OnDisable()
@@ -155,7 +145,7 @@ namespace TrickalFanGame.Combat
             PoisonStacks = Mathf.Min(settings.MaximumStacks, PoisonStacks + 1);
             PoisonTickDamagePerStack = attackDamage * settings.TickDamageRatio * Mathf.Max(0f, tickDamageMultiplier);
             PoisonEndTime = currentTime + settings.DurationSeconds;
-            RefreshTint();
+            RefreshArtwork();
         }
 
         public void ApplyBurn(
@@ -181,7 +171,7 @@ namespace TrickalFanGame.Combat
             IsBurning = true;
             BurnTickDamage = attackDamage * settings.TickDamageRatio * Mathf.Max(0f, tickDamageMultiplier);
             BurnEndTime = currentTime + settings.DurationSeconds;
-            RefreshTint();
+            RefreshArtwork();
         }
 
         public void ApplyShock(ShockSettings settings, float currentTime)
@@ -195,7 +185,7 @@ namespace TrickalFanGame.Combat
             shockSlowPerStack = settings.SlowPerStack;
             ShockStacks = Mathf.Min(settings.MaximumStacks, ShockStacks + 1);
             ShockEndTime = currentTime + settings.DurationSeconds;
-            RefreshTint();
+            RefreshArtwork();
         }
 
         public void Tick(float currentTime)
@@ -238,7 +228,7 @@ namespace TrickalFanGame.Combat
             if (IsPoisoned && currentTime >= PoisonEndTime) ClearPoison();
             if (IsBurning && currentTime >= BurnEndTime) ClearBurn();
             if (IsShocked && currentTime >= ShockEndTime) ShockStacks = 0;
-            RefreshTint();
+            RefreshArtwork();
         }
 
         public void Clear()
@@ -246,7 +236,7 @@ namespace TrickalFanGame.Combat
             ClearPoison();
             ClearBurn();
             ShockStacks = 0;
-            RefreshTint();
+            RefreshArtwork();
         }
 
         private void ClearPoison()
@@ -277,48 +267,10 @@ namespace TrickalFanGame.Combat
             }
         }
 
-        private void RefreshTint()
+        private void RefreshArtwork()
         {
-            if (!IsPoisoned && !IsBurning && !IsShocked)
-            {
-                if (tintRenderer != null)
-                {
-                    tintRenderer.enabled = false;
-                }
-
-                return;
-            }
-
-            if (tintRenderer == null)
-            {
-                tintedRenderer = GetComponentInChildren<SpriteRenderer>();
-                if (tintedRenderer == null)
-                {
-                    return;
-                }
-
-                GameObject tint = new("Status Tint");
-                tint.transform.SetParent(tintedRenderer.transform, false);
-                tintRenderer = tint.AddComponent<SpriteRenderer>();
-            }
-
-            tintRenderer.color = IsBurning ? BurnTint : IsPoisoned ? PoisonTint : ShockTint;
-            tintRenderer.enabled = true;
-            SyncTint();
-        }
-
-        private void SyncTint()
-        {
-            if (tintRenderer == null || !tintRenderer.enabled || tintedRenderer == null)
-            {
-                return;
-            }
-
-            tintRenderer.sprite = tintedRenderer.sprite;
-            tintRenderer.flipX = tintedRenderer.flipX;
-            tintRenderer.flipY = tintedRenderer.flipY;
-            tintRenderer.sortingLayerID = tintedRenderer.sortingLayerID;
-            tintRenderer.sortingOrder = tintedRenderer.sortingOrder + 1;
+            var artwork = GetComponent<TrickalFanGame.Frontend.FairyKingdomStatusArtwork>();
+            if (artwork != null) artwork.RefreshAt(Time.time);
         }
     }
 }

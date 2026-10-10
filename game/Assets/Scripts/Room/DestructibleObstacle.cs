@@ -21,6 +21,8 @@ namespace TrickalFanGame.Room
     [RequireComponent(typeof(Collider2D))]
     public sealed class DestructibleObstacle : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         public const int DefaultRequiredHits = 4;
         public const int TreeBurnHits = 2;
         public const string TreeVariantId = "tree";
@@ -44,6 +46,8 @@ namespace TrickalFanGame.Room
         [Tooltip("화상 아티팩트를 가진 플레이어가 이만큼 때리면 불이 붙습니다. 0이면 불타지 않습니다.")]
         [SerializeField, Min(0)] private int burnHits;
         [SerializeField] private Color burningColor = new(0.95f, 0.45f, 0.1f);
+        [Tooltip("Layout에 종류를 고정한 장애물입니다. 비어 있으면 종류는 방의 변형 표가 seed로 정합니다.")]
+        [SerializeField] private ObstacleVariantDefinition fixedVariant;
 
         private RoomRunState runState;
         private RunProgress runProgress;
@@ -64,6 +68,7 @@ namespace TrickalFanGame.Room
 
         public string ObstacleId => obstacleId;
         public string VariantId => variantId;
+        public ObstacleVariantDefinition FixedVariant => fixedVariant;
         public int RequiredHits => Mathf.Max(1, requiredHits);
         public int HitsTaken => hitsTaken;
         public bool IsBroken => isBroken;
@@ -118,6 +123,14 @@ namespace TrickalFanGame.Room
             if (visual != null) visual.color = intactColor;
         }
 
+        // A kind authored into a Layout cell (T7). Unlike a seeded variant slot it is the same in every Run, and it
+        // does not count toward the one seeded special obstacle of a room.
+        public void ConfigureFixedVariant(ObstacleVariantDefinition configuredVariant)
+        {
+            fixedVariant = configuredVariant;
+            if (configuredVariant != null) ApplyVariant(configuredVariant);
+        }
+
         public void ApplyVariant(ObstacleVariantDefinition variant)
         {
             if (variant == null) throw new ArgumentNullException(nameof(variant));
@@ -147,6 +160,8 @@ namespace TrickalFanGame.Room
             RunProgress configuredProgress, SecretRoomLink configuredSecretLink = null,
             RoomNode configuredSourceNode = null, RoomController configuredSourceRoom = null)
         {
+            // The break rule, drop count and rare rolls live on the variant, which is not serialized on its own.
+            if (fixedVariant != null) ApplyVariant(fixedVariant);
             runState = configuredState;
             dropSeed = DeriveDropSeed(roomContentSeed, obstacleId);
             dropParent = configuredDropParent;
@@ -251,6 +266,16 @@ namespace TrickalFanGame.Room
             }
 
             if (dropTable != null && !dropTable.TryValidate(out error)) return false;
+            if (fixedVariant != null)
+            {
+                if (!fixedVariant.TryValidate(out error)) return false;
+                if (GetComponent<RoomObstacleVariantSlot>() != null)
+                {
+                    error = $"Destructible obstacle '{obstacleId}' cannot be both a fixed kind and a seeded slot.";
+                    return false;
+                }
+            }
+
             error = null;
             return true;
         }

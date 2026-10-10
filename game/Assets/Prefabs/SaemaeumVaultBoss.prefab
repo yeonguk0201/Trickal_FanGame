@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 1920493134593096256}
   - component: {fileID: 3719322455293178396}
   - component: {fileID: 6273290692546761168}
+  - component: {fileID: 8251726036317173873}
   m_Layer: 6
   m_Name: SaemaeumVaultBoss
   m_TagString: Untagged
@@ -294,6 +295,24 @@ MonoBehaviour:
   - {fileID: 8512402935366631024}
   strideLength: 1.35
   hopHeight: 0.42
+--- !u!114 &8251726036317173873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2406316834951311537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: SaemaeumVaultBoss
+  useSharedProfile: 1
 --- !u!1 &3403650608797451574
 GameObject:
   m_ObjectHideFlags: 0

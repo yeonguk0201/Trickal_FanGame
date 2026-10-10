@@ -153,3 +153,32 @@ Small의 승인된 47% 설정은 그대로 보존한다. 다른 크기는 등록
 생성 캔버스의 1~2픽셀 차이를 정규화된 슬라이스와 원래 문 패치의 월드 크기 보존으로 처리한다. 특수 문 패치의 가장자리에는 기존 문 주변 색을 섞어 사각형 잔디 색 이음새를 완화한다. 외곽의 왕관·뿔이 흐려지지 않도록 외측 혼합 폭은 2픽셀로 제한한다. 이동 경계는 승인된 Small 기준 80%를 유지하며 런타임 잠금·열쇠·폭탄 규칙과 Backend·Web 계약은 변경하지 않았다.
 
 `output/artwork-side-doors-v2.log` 및 `output/artwork-side-doors-v2-final.log`: Unity 컴파일, 16개 템플릿 반복 적용과 기존 충돌·GUID 보존, 방 크기별 가림 깊이, 열린/닫힌 문 전경 투명도, 비밀문 상단 alpha, Door-1, Room-0 및 Fixed Room Graph 검증을 종료 코드 0으로 완료했다. `output/fairy-village-{shop,treasure,boss}-{left,right}-{open,closed}-v2-preview.png`의 12개 확대 렌더링과 비밀방 하단 전경 화면을 확인했다. 실제 조작 확인은 새 Run에서 특수 방 연결 문과 폭탄 발견 후 아래 비밀문을 확인한다.
+
+## 벽 경계를 방 격자에 맞춤 (2026-10-11)
+
+사용자 결정으로 벽 안쪽 경계를 그림 비율이 아니라 방 격자에 맞췄다. `FairyVillageArtworkSetup.WalkableFloor`는 그림에서 계산한 바닥(`PaintedFloor`, 이전 값)에 들어가는 가장 큰 정수 크기 사각형을 방 중심에 두어 돌려준다. Small 10×5, Basic 13×7, Wide 21×7, Tall 13×11, Large 21×11이며 방 Layout 임포터(T7)의 격자와 같다.
+
+- Basic 기준 경계가 좌우 0.36, 위 0.36 안쪽으로 들어왔고 아래는 0.04 내려갔다. 좌우는 그림 속 풀밭이 경계 밖으로 0.18 남는다.
+- 방 높이가 정수가 아니어서 아래 덤불 뒤로 가려지는 깊이가 프로필마다 최대 0.25 다르다. 검증기의 "모든 방이 같은 깊이" 조건은 이 범위와 "몸 중심은 덤불 위"로 바꿨다.
+- 검증: Unity 6000.3.22f1 배치에서 `FairyVillageArtworkVerification.SetupAndVerifyBatch`(30개 템플릿, Door-1 회귀 포함)와 `RoomLayoutImporterVerification.ImportAndVerifyBatch`가 종료 코드 0으로 통과했다. 사용자가 2026-10-11 Play 화면에서 벽 위치와 벽 옆 장애물을 확인했다.
+
+수동 확인: 새 Run에서 네 벽에 붙어 걸을 때 멈추는 위치, 벽 옆 칸의 장애물이 벽에 빈틈없이 붙는지, Small·Tall·Large에서 아래 덤불에 가려지는 정도가 어색하지 않은지 확인한다.
+
+## 그리기 순서 정리 (2026-10-11)
+
+플레이어와 바위의 순서 값이 둘 다 0이라 걷는 그림으로 바뀔 때마다 앞뒤가 뒤집혔고, 나무(1)는 항상 플레이어를 가렸다. 사용자 결정으로 아래 순서를 정했다.
+
+| 순서 값 | 대상 |
+| --- | --- |
+| 0 | 장애물, 적 |
+| 1 | 나무 아래 절반(충돌 칸), 상자 |
+| 2 | 플레이어(`PlayerMovement.BodySortingOrder`), 비행 중 4 |
+| 3·4 | 보상 상호작용 표시·안내 글자 |
+| 10 | 픽업 전부와 설치 폭탄(`PlayerMovement.AboveBodySortingOrder`) |
+| 15 | 나무 위 절반(`FairyKingdomArtworkView.TreeCanopySortingOrder`) |
+| 20 | 아래쪽 덤불 전경 |
+
+- 나무 위 절반은 Play 중에 `FairyKingdomArtworkView`가 같은 그림의 위쪽 절반을 한 번 더 그린다. 방 Prefab에는 나무 렌더러가 하나만 저장된다.
+- 비행 중 플레이어(4)와 보상 안내 글자(4)는 값이 같다. 날면서 보상 위에 있을 때만 겹치므로 그대로 뒀다.
+- 적은 0 그대로라 바위와 겹치면 앞뒤가 일정하지 않을 수 있다.
+- 검증: Unity 배치에서 `Week22Flight0Verification`, `Week20Special2Verification`, `Week23Shop1Verification`, `Week23Obstacle7Verification`, `FairyKingdomArtworkVerification`, `ErpinWalkAnimationVerification`, `GroundShadowVerification`이 종료 코드 0으로 통과했다. 나무 위 절반은 Play 전용이라 자동 검증이 없고, 사용자가 2026-10-11 Play 화면에서 확인했다.

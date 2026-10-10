@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 277188141620814843}
   - component: {fileID: 5604521502686222026}
   - component: {fileID: 1338291427342382308}
+  - component: {fileID: 5547138974132463935}
   m_Layer: 0
   m_Name: PlacedBomb
   m_TagString: Untagged
@@ -80,10 +81,10 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.18, g: 0.18, b: 0.22, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 67a4ded62aa44f4ab28f1802043f5139, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -102,7 +103,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7d49e1f350c4d01a8927eebcb541426, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Resource.PlacedBomb
   fuseDuration: 0.75
   explosionRadius: 2
@@ -114,3 +115,19 @@ MonoBehaviour:
   visual: {fileID: 5604521502686222026}
   armedColor: {r: 0.18, g: 0.18, b: 0.22, a: 1}
   explosionColor: {r: 1, g: 0.48, b: 0.08, a: 0.7}
+--- !u!114 &5547138974132463935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8785179022054749784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
+  artworkId: pickup-bomb
+  mode: 3
+  visual: {fileID: 5604521502686222026}
+  localWidth: 0.2

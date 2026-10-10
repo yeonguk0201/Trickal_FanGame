@@ -22,6 +22,7 @@ namespace TrickalFanGame.Enemy
         private KnockbackReceiver knockback;
 
         public int FrameCount => frames.Length;
+        public Sprite ReferenceSprite => referenceSprite;
         public Sprite GetFrame(int index) => frames[index];
         public Sprite ProjectileSprite => MatchesArtwork ? projectileSprite : null;
         private bool MatchesArtwork { get { Cache(); return original == referenceSprite; } }

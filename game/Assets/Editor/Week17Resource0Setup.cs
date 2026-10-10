@@ -85,7 +85,7 @@ namespace TrickalFanGame.Editor
             SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(root);
             renderer.sprite = sprite;
             renderer.color = Color.white;
-            renderer.sortingOrder = 1;
+            renderer.sortingOrder = TrickalFanGame.Player.PlayerMovement.AboveBodySortingOrder;
 
             Rigidbody2D body = GetOrAdd<Rigidbody2D>(root);
             body.bodyType = RigidbodyType2D.Dynamic;

@@ -101,7 +101,8 @@ namespace TrickalFanGame.Editor
             GameObject basicPrefab,
             RoomType[] allowedRoomTypes = null,
             int minimumFloor = 1,
-            int maximumFloor = 99)
+            int maximumFloor = 99,
+            bool configureProfile = true)
         {
             if (!RoomCameraFraming.TryCalculate(
                     roomSize,
@@ -114,17 +115,29 @@ namespace TrickalFanGame.Editor
                 return;
             }
 
-            RoomProfile profile = LoadOrCreate<RoomProfile>(profilePath);
-            profile.Configure(
-                profileId,
-                roomSize,
-                MovementBounds(roomSize),
-                EncounterBounds(roomSize),
-                RoomLayout.CameraOrthographicSize,
-                frame.CenterBounds,
-                BuildSilhouette(roomSize));
-            EditorUtility.SetDirty(profile);
-            AssetDatabase.SaveAssetIfDirty(profile);
+            // The room Layout importer (T7) builds rooms on profiles it does not own, so it leaves them as they are.
+            RoomProfile profile = configureProfile
+                ? LoadOrCreate<RoomProfile>(profilePath)
+                : AssetDatabase.LoadAssetAtPath<RoomProfile>(profilePath);
+            if (profile == null)
+            {
+                Debug.LogError($"Room-3 is missing Room Profile {profilePath}.");
+                return;
+            }
+
+            if (configureProfile)
+            {
+                profile.Configure(
+                    profileId,
+                    roomSize,
+                    MovementBounds(roomSize),
+                    EncounterBounds(roomSize),
+                    RoomLayout.CameraOrthographicSize,
+                    frame.CenterBounds,
+                    BuildSilhouette(roomSize));
+                EditorUtility.SetDirty(profile);
+                AssetDatabase.SaveAssetIfDirty(profile);
+            }
 
             GameObject prefab = CreateOrUpdatePrefab(
                 basicPrefab,

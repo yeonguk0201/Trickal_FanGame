@@ -127,6 +127,7 @@ namespace TrickalFanGame.Item
             {
                 beamVisuals[index].enabled = false;
             }
+            for (int index = beamCount; index < artworkBeams.Count; index++) artworkBeams[index].enabled = false;
 
             return true;
         }
@@ -314,6 +315,7 @@ namespace TrickalFanGame.Item
 
         private void HideBeams()
         {
+            foreach (SpriteRenderer sprite in artworkBeams) if (sprite != null) sprite.enabled = false;
             foreach (LineRenderer visual in beamVisuals)
             {
                 if (visual != null) visual.enabled = false;
@@ -328,10 +330,18 @@ namespace TrickalFanGame.Item
             if (projectileAttack == null) projectileAttack = GetComponent<PlayerProjectileAttack>();
         }
 
-        // Placeholder look until the stream has artwork: a plain blue line.
+        private readonly List<SpriteRenderer> artworkBeams = new();
+
         private void ShowBeam(int beam, Vector2 start, Vector2 end, float lineWidth)
         {
             if (!Application.isPlaying) return;
+            if (TrickalFanGame.Frontend.FairyKingdomArtwork.Catalog != null)
+            {
+                while (artworkBeams.Count <= beam)
+                    artworkBeams.Add(CreateArtworkBeam(transform));
+                SetArtworkBeam(artworkBeams[beam], start, end, lineWidth);
+                return;
+            }
             while (beamVisuals.Count <= beam)
             {
                 beamVisuals.Add(CreateLine($"Water Stream {beamVisuals.Count}", transform));
@@ -343,9 +353,43 @@ namespace TrickalFanGame.Item
         private void ShowFlash(Vector2 start, Vector2 end, float lineWidth)
         {
             if (!Application.isPlaying) return;
+            if (TrickalFanGame.Frontend.FairyKingdomArtwork.Catalog != null)
+            {
+                SpriteRenderer flashArtwork = CreateArtworkBeam(null);
+                SetArtworkBeam(flashArtwork, start, end, lineWidth);
+                Destroy(flashArtwork.gameObject, FlashSeconds);
+                return;
+            }
             LineRenderer flash = CreateLine("Water Stream Flash", null);
             SetLine(flash, start, end, lineWidth);
             Destroy(flash.gameObject, FlashSeconds);
+        }
+
+        private SpriteRenderer CreateArtworkBeam(Transform parent)
+        {
+            GameObject owner = new("Water Stream Artwork");
+            owner.transform.SetParent(parent, false);
+            SpriteRenderer renderer = owner.AddComponent<SpriteRenderer>();
+            renderer.sprite = TrickalFanGame.Frontend.FairyKingdomArtwork.Fit("effect-water-stream", 1f);
+            SpriteRenderer body = GetComponent<SpriteRenderer>();
+            if (body != null) renderer.sortingLayerID = body.sortingLayerID;
+            renderer.sortingOrder = (body != null ? body.sortingOrder : 0) - 1;
+            return renderer;
+        }
+
+        private static void SetArtworkBeam(SpriteRenderer renderer, Vector2 start, Vector2 end, float width)
+        {
+            if (renderer == null || renderer.sprite == null) return;
+            Vector2 direction = end - start;
+            renderer.enabled = direction.sqrMagnitude > 0.0001f;
+            renderer.transform.SetPositionAndRotation((start + end) * 0.5f,
+                Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg));
+            // Set world dimensions independently of the player's current transform scale.
+            renderer.transform.localScale = Vector3.one;
+            Vector3 inherited = renderer.transform.lossyScale;
+            Vector2 size = renderer.sprite.bounds.size;
+            renderer.transform.localScale = new Vector3(direction.magnitude / size.x / Mathf.Abs(inherited.x),
+                width / size.y / Mathf.Abs(inherited.y), 1f);
         }
 
         private LineRenderer CreateLine(string lineName, Transform parent)

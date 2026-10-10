@@ -10,6 +10,8 @@ namespace TrickalFanGame.Resource
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public sealed class RunResourcePickup : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         [SerializeField] private RunResourceType resourceType;
         [SerializeField, Min(1)] private int amount = 1;
         [SerializeField] private RunProgress runProgress;

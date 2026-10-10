@@ -55,7 +55,7 @@ namespace TrickalFanGame.Editor
                 SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(root);
                 renderer.sprite = sprite;
                 renderer.color = ArmedColor;
-                renderer.sortingOrder = 2;
+                renderer.sortingOrder = TrickalFanGame.Player.PlayerMovement.AboveBodySortingOrder;
                 PlacedBomb bomb = GetOrAdd<PlacedBomb>(root);
                 bomb.ConfigureValues(PlacedBomb.DefaultFuseDuration, PlacedBomb.DefaultExplosionRadius,
                     PlacedBomb.DefaultEnemyDamage, PlacedBomb.DefaultSelfDamage, 1 << enemyLayer, renderer);

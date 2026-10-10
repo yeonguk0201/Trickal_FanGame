@@ -181,6 +181,8 @@ namespace TrickalFanGame.Editor
                 .Append(Week23Obstacle6Setup.TemplateId).ToArray();
             foreach (RoomTemplateDefinition template in generator.RoomTemplates)
             {
+                // T7: an imported room takes its modifier from its text file; the importer verification checks it.
+                if (RoomLayoutImporter.IsImportedTemplate(template)) continue;
                 int expected = obstacleLayouts.Contains(template.TemplateId, StringComparer.Ordinal)
                     ? Week19Difficulty1Setup.ObstacleLayoutModifier
                     : 0;

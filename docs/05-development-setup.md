@@ -1199,6 +1199,104 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   전투 중인 방에서 사용하면 패널에 `Room CRIT +15% DMG +50%`가 보이고 방을 나가면 사라져야 한다.
   2026-10-05 사용자 화면 확인 완료.
 
+- T7 방 Layout 임포터(1단계): 방 하나를 `game/RoomLayouts/<방 ID>.room.txt` 텍스트 파일 하나로 적고, 메뉴
+  `Trickal Fan Game > Tools > Import Room Layouts`가 파일마다 방 Prefab(`Assets/Rooms/Prefabs/Layouts/room-<ID>.prefab`)과
+  템플릿(`Assets/Rooms/Templates/Layouts/<ID>.asset`)을 만들어 Game Scene 생성기 목록에 등록한다. Room 콘텐츠 버전은
+  12다. 임포터 이전에 만든 템플릿 19개는 건드리지 않는다.
+  - **파일 형식**: 위쪽은 `키: 값` 머리말, `grid:` 줄 아래는 격자다. `//`로 시작하는 줄은 머리말에서만 주석이다.
+
+    ```text
+    id: basic-gold-mine
+    profile: basic
+    weight: 40
+    note: 황금돌이 네 모서리에 몰려 있는 금광 방
+    grid:
+    GG#.........#GG
+    G.............G
+    ...1.......5...
+    .......3.......
+    ...............
+    ...4.......2...
+    G.............G
+    GG#.........#GG
+    ```
+
+    | 키 | 필수 | 뜻 |
+    | --- | --- | --- |
+    | `id` | 예 | 방 ID. 파일 이름과 같고 `<프로필>-`로 시작한다. 소문자·숫자·하이픈만 쓴다 |
+    | `profile` | 예 | `small`·`basic`·`wide`·`tall`·`large` |
+    | `weight` | 아니오 | 등장 가중치 1~1000. 기본 100(기존 방과 같은 확률). 드롭이나 상자가 많은 방은 낮춘다 |
+    | `difficulty` | 아니오 | Layout 난이도 보정 0~5. 적지 않으면 장애물·구덩이가 있으면 +1, 없으면 0 |
+    | `floors` | 아니오 | 나오는 층. `2` 또는 `1-3`. 기본은 모든 층 |
+    | `note` | 아니오 | 사람이 읽는 설명. 게임에 쓰이지 않는다 |
+
+  - **격자**: 한 글자가 1×1 한 칸이고 위에서 아래로 적는다. 칸 수는 프로필마다 고정이다.
+
+    | 프로필 | 가로 × 세로 | SpawnPoint 수 |
+    | --- | --- | --- |
+    | `small` | 10 × 5 | 4 |
+    | `basic` | 13 × 7 | 5 |
+    | `wide` | 21 × 7 | 5 |
+    | `tall` | 13 × 11 | 5 |
+    | `large` | 21 × 11 | 6 |
+
+    한 칸은 1×1이고 격자는 방 중심에 맞춘다. 격자는 **실제로 걸을 수 있는 바닥**
+    (`FairyVillageArtworkSetup.WalkableFloor`)과 정확히 같다. 벽 경계 콜라이더가 이 사각형의 변에 놓이므로 바깥 줄
+    장애물·구덩이는 벽에 빈틈없이 붙는다. 바닥은 그림에서 계산한 영역(`PaintedFloor`)에 들어가는 가장 큰 정수 크기
+    사각형이며, 벽 경계를 다시 만들려면 `Trickal Fan Game/Artwork/Apply Fairy Village Tiles and Walls`를 실행한다.
+
+  - **글자**(`RoomLayoutFormat.Symbols`):
+
+    | 글자 | 뜻 |
+    | --- | --- |
+    | `.` | 바닥 |
+    | `#` | 짱돌. 지금처럼 방마다 최대 1개가 seed로 특수 장애물이 된다 |
+    | `T` | 나무(비행도 막음) |
+    | `o` | 구덩이. 붙어 있는 칸은 직사각형으로 합쳐진다 |
+    | `1`~`6` | SpawnPoint. 프로필의 개수만큼 각각 한 번씩 적는다 |
+    | `c` `g` `d` | 일반·황금·다이아몬드 상자. 방에 처음 들어갈 때부터 놓여 있다 |
+    | `M` `G` `K` | 종류 고정: 마리의 폭탄상자·황금돌·마요의 열쇠꾸러미 |
+    | `S` `B` `F` | 종류 고정: 에르핀의 간식상자·에슈르의 빵상자·리코타의 음식상자 |
+    | `V` `X` `R` `Q` | 종류 고정: 시스트의 금고·폭발 상자·셰이디의 랜덤박스·마요의 수집품 상자 |
+
+    종류 고정 장애물은 방당 특수 장애물 1개 규칙에 세지 않는다. 같은 방의 `#`는 그대로 40% 확률로 1개가 특수
+    장애물이 된다.
+  - **SpawnPoint 역할**: `1`·`2`는 근접 압박, `3`은 돌진 통로, `4` 이후는 근접·후방 사격이다(Small의 `4`는 모든 역할).
+    전부 후방 사격 지점으로도 쓰인다.
+  - **배치할 때 지킬 것**(어기면 임포터가 이유와 함께 거부한다):
+    - 문 앞 통로에는 장애물·구덩이·상자를 둘 수 없다. Basic은 좌우 2열의 가운데 5행, 가운데 5열의 위아래 2행이다.
+    - 통로는 2칸 이상이어야 지나갈 수 있는 것으로 본다. 장애물 사이 1칸 틈은 막힌 것으로 판정한다.
+    - SpawnPoint와 상자는 장애물·구덩이의 **바로 왼쪽 칸과 바로 아래 칸**, 격자의 **맨 윗줄과 맨 오른쪽 열**에 둘
+      수 없다(도달 판정 격자가 점을 오른쪽 위 칸으로 보기 때문이다).
+    - SpawnPoint마다 전투 구역의 35% 이상이 보여야 한다.
+    - 상자끼리는 1.5 이상 떨어져야 한다(사이에 한 칸 이상).
+    - 문이 어떤 조합으로 열려도 그 프로필의 모든 Encounter가 배치되어야 한다. SpawnPoint를 문 안전 진입점에서 1.5,
+      문에서 2 이상 떨어뜨려 두면 된다.
+  - **메뉴**(`Trickal Fan Game > Tools`): `Validate Room Layouts`는 에셋을 쓰지 않고 검사만 한다. `Import Room Layouts`는
+    글이 바뀐 방만 다시 만들고(바뀌지 않은 방의 Prefab은 그대로다), 거부된 방은 이전에 통과한 버전을 그대로 둔다.
+    파일을 지운 방은 목록에서 빠지고 그 방의 Prefab·템플릿이 삭제된다. `Reimport All Room Layouts`는 전부 다시
+    만든다. 결과는 Console과 `game/Logs/room-layout-import-report.txt`에 방별 가중치·장애물 수·밀도, 서로 대칭인 방
+    경고, 거부 사유로 남는다. 거부된 방이 하나라도 있으면 예외로 끝난다(배치에서는 종료 코드 1).
+  - **배치 실행**(Unity 에디터를 닫은 상태): `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod
+    TrickalFanGame.Editor.RoomLayoutImporter.Import -logFile <로그 경로>`. 검사만 하려면 `RoomLayoutImporter.Validate`.
+  - **이미 Run에 쓰인 방을 고칠 때**: 방 ID와 칸 위치로 만든 장애물 ID(`obstacle-c03-r05`)는 seed 재현에 쓰이는 안정
+    키다. 방을 추가·삭제하거나 배치를 바꾼 묶음을 내보낼 때 `RoomLayoutImporter.RoomContentVersion`을 한 번 올린다.
+    Prefab 구성 방식을 바꾸면 `BuildRevision`도 올려 모든 방을 다시 만들게 한다.
+  - **글자 추가**: `RoomLayoutFormat.BuildSymbols`에 한 줄, `RoomLayoutImporter.PlaceContent`에 배치 분기 하나를 넣는다.
+  - 자동 검증 메뉴는 `Trickal Fan Game > Tools > Verify Room Layouts`, 배치는 Unity `-batchmode -nographics -quit
+    -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.RoomLayoutImporterVerification.ImportAndVerifyBatch
+    -logFile <로그 경로>`다. 형식·배치 거부 22가지와 사유, 임포트 2회의 GUID·Prefab 내용 불변, 강제 재임포트의 GUID,
+    임시 방의 추가·잘못된 수정 거부 시 이전 버전 보존·파일 삭제 시 그 방 에셋만 제거, 파일과 Prefab·템플릿의 일치
+    (짱돌 슬롯·종류 고정·나무·합쳐진 구덩이·SpawnPoint 역할·상자·가중치·난이도), 모든 문 조합의 Encounter 배치,
+    seed 변형 추첨 뒤에도 유지되는 고정 종류, Layout 상자의 1회 배치·재구성 복원·층 이탈 뒤 미복원, 가중치 추첨 분포,
+    400 seed 생성과 결정성, 강제 Layout을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Encounter-4, Spawn-2,
+    Difficulty-1, Terrain-0, Chest-1, Jjangsem-1, Obstacle-6과 그 회귀, Obstacle-7)다.
+  - 수동 확인: Game Scene Play → `F1` 패널 `— Layout —`의 `Show layouts`에서 `Force <방 ID>`를 누르면 같은 seed로 Run이
+    다시 시작되고 그 방이 들어갈 수 있는 전투방이 모두 그 방으로 바뀐다(보조 Run). `This room`에 현재 방의 ID와
+    가중치가 보인다. 끝나면 `Clear forced layout and restart`를 누른다. 확인할 것: 격자대로 놓인 장애물·구덩이·나무,
+    종류 고정 장애물의 색과 드롭, 처음부터 놓여 있는 상자(일반은 닿으면, 황금은 열쇠, 다이아몬드는 폭탄·폭발 상자로
+    열림), 방을 나갔다 돌아와도 상자가 한 번만 있는지, 적이 끼이지 않고 방이 클리어되는지.
+
 - 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
 - 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.
 - 개발 도구의 실행 실패가 게임 진행을 멈추는지 여부와 실패 종료 코드를 명확히 기록한다.
@@ -1550,3 +1648,86 @@ Play 화면 검수:
 - 정적 확인: 두 이미지의 SHA-256이 제공된 원본과 일치하고, PNG 44개와 신규 `.meta`, JSON 매니페스트 및 HUD 참조를 확인했다. 이번 변경 파일의 `git diff --check`도 통과했다.
 - 자동 검증: Unity 6000.3.22f1의 `TrickalFanGame.Editor.UserArtworkVerification.Verify` 배치를 시도했으나, 종료 코드 1 및 성공 로그 부재로 검증 완료로 처리하지 않았다.
 - 수동 확인: Edit Mode에서 `Trickal Fan Game > Artwork > Verify User Artwork` 실행 시 `User artwork verification passed: 44 PNGs` 로그와 미리보기의 새 에르핀 아이콘을 확인한다. Game Scene Play에서 우하단 Q 스킬 아이콘이 제공 이미지로 표시되고, 사용 가능·쿨타임 상태 표시가 유지되는지 확인한다. 골디는 골디 상점(위 Shop-1 수동 확인)에서 확인한다.
+
+## 요정왕국 신규 에셋 45장 연결 (2026-10-10)
+
+- 나무는 새 세로형 원화를 사용하며 표시 1×2칸, 충돌은 아래 1×1칸 하나다. Layout 가져오기와 Setup 재실행에도 유지한다. [원화 프롬프트·검증 기록](./art-prompts/two-cell-tree.md). 위 검증 메뉴는 나무의 표시 크기·바닥 정렬·상단 통과도 검사한다. 이번 나무 변경의 배치 검증은 기존 Editor 실행 상태에서 종료 코드 1로 미실행되어 Edit Mode 메뉴 실행과 Play 화면 확인이 남아 있다.
+
+- 원본 PNG: `game/Assets/Art/Drafts/FairyKingdom/`. 빌드 포함 참조 카탈로그: `Assets/Resources/FairyKingdomArtwork/Catalog.asset`.
+- 구성/재적용: Edit Mode에서 `Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites`. 기존 프리팹·Game Scene의 표시 참조를 갱신하고 45개 표시용 프리팹과 미리보기 씬을 구성한다. 미저장 Untitled Scene은 먼저 저장한다. 기존 동작 Setup을 다시 실행해 임시 그림으로 돌아갔다면 이 메뉴를 마지막에 실행한다.
+- 전용 검증: `Trickal Fan Game/Artwork/Verify Fairy Kingdom 45 Sprites`. 45개 스프라이트·프리팹, 동적 장애물·상자 상태·폭탄 전환과 표시 갱신 전후 충돌 영역·root scale을 검사한다.
+- 실제 게임 확인: `Assets/Scenes/SampleScene.unity`를 열고 Play. 기존 F1 개발 패널의 상자·장애물 생성과 아티팩트 Drop으로 상자 열기, 파괴·불타는 나무, 물줄기·번개·독·화상·감전을 확인한다. 해당 기능의 피해 규칙과 충돌 크기는 이번 에셋 연결에서 바꾸지 않았다.
+- 전체 미술 보기: `Assets/Scenes/FairyKingdomArtworkPreview.unity`. 45장을 한 화면에서 확인하는 별도 씬이며 실제 플레이 씬이나 빌드 시작 씬이 아니다.
+- 표시용 프리팹: `Assets/Prefabs/FairyKingdomArtwork/`. 누루링, 함정 7종, 독가스는 대응 게임 로직이 아직 없어 이 폴더의 표시용 프리팹으로만 제공된다. 임의의 공격·피해·생성 규칙은 추가하지 않았다.
+- 현재 단일 프레임 연결이다. 부스러기 쫄따구는 3가지 그림을 소환 순서에 따라 사용하고 사망 시 그림 효과만 표시한다. 사망 폭발 피해 규칙은 새로 구현하지 않았다. 새 프레임 추가 전까지 해당 적의 기존 다른 그림용 이동·공격 프레임 컴포넌트는 보존하되 비활성화한다.
+- 돌진형(`ChargingEnemy`)과 원거리·저격형(`RangedEnemy`, `QuickRangedFairy`, `HighBloodSugarFairy`)은 초안 그림을 연결하지 않고 기존 Idle·걷기·공격 에셋을 유지한다. `RangedEnemy`에 표시 컴포넌트를 붙이면 variant인 저격형까지 덮어쓰므로 베이스에도 붙이지 않으며, 전용 검증이 이를 검사한다.
+- 자동 실행: `TrickalFanGame.Editor.FairyKingdomArtworkSetup.ApplyAndVerifyBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkVerification.VerifyWithCombatRegressionsBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkPlayVerification.RunBatch` (`-batchmode`, **`-quit` 제외**). Play 검증은 전용 미리보기 씬과 격리된 probe만 사용하고 종료 코드를 반환한다.
+- 상세 결과와 Unity 렌더: `output/asset-integration/`. 자동 검증은 사용자 Play 미술 승인을 대신하지 않는다.
+
+### 플레이어·적·보스 공통 상태이상 애니메이션 (2026-10-10)
+
+- 독·화상·감전의 색상 오버레이를 `FairyKingdomStatusArtwork`의 개별 조각 프레임으로 교체했다. `Resources/StatusEffects/`의 투명 시트 3장과 `animation.json`이 빌드에 포함된다. `EnemyStatusEffects`는 Health 대상에 공통 부착되며 플레이어도 동일하게 표시한다. 기존 피해·중첩·감속 규칙은 유지한다.
+- 각 캐릭터 SpriteRenderer의 월드 높이·폭·발 위치로 효과 크기와 위치를 계산하고 부모 배율을 보정한다. 큰 보스와 크기가 변하는 플레이어도 같은 비율을 유지한다. 세 상태는 위치를 엇갈리게 하고 독은 기포 상승, 감전은 점멸 후 완전한 휴지기를 둔다.
+- Edit Mode 검증: `Trickal Fan Game/Artwork/Verify Shared Status Animations`. 기대 로그 `Shared status animation verification passed`. 24프레임의 72개 조각, 아홉 위치, 독 상승·감전 휴지기, 캐릭터 배율·자식 표시·상태 해제·원본 색상 보존을 검사한다.
+- 배치 진입점: `TrickalFanGame.Editor.StatusEffectAnimationVerification.VerifyWithRegressionsBatch` (`-batchmode -quit`). 새 검증과 기존 Passive-1·Artifact-2 검증을 실행한다. 이번 실행은 기존 Unity 인스턴스의 프로젝트 잠금으로 미실행했다. 런타임과 Editor 전체 정적 컴파일은 각각 종료 코드 0으로 통과했다. Play 미술 검수는 남아 있다.
+- Play 수동 확인: SampleScene에서 플레이어·일반 적·보스의 Hierarchy 오브젝트를 선택한 뒤 `Trickal Fan Game/Artwork/Apply Status Preview To Selected Characters (Play)`. 선택 대상에 10초간 실제 세 상태를 적용한다(검수용 독/화상 피해 비율 0.0001, 감전 감속 10%). 크기 비례와 동시에 표시되는 위치, 기포 상승, 감전이 완전히 사라졌다 다시 나타나는지, 만료 후 사라지는지 확인한다.
+- 상세 기록과 실행 로그: `output/status-effects/2026-10-10/README.md`.
+- 공격 모션 확대 수정: 이펙트 크기는 현재 공격 그림 대신 평상시 몸체를 기준으로 하고 공격 연출 배율을 제외한다. 실제 캐릭터 크기 변경은 반영한다. 후속 `StatusEffectAnimationVerification.Verify` 배치에서 공격 중 첫 적용·공격 종료·실제 2배 성장 회귀를 포함해 통과했다(`output/status-effects/2026-10-10/attack-size-verification.log`, 성공 종료 로그 0). 실제 Play 미술 확인은 별도다.
+
+### 공용 바닥 그림자 (2026-10-10)
+
+- 다음 Play부터 `GroundShadow`가 플레이어·적·보스·파괴/고정 장애물·상자·자원/HP/SP/아이템 픽업·설치 폭탄·상점 NPC에 자동으로 붙는다. 신규 생성과 방 재활성화에도 적용되며 별도 Setup 실행은 필요 없다. 구덩이·바닥 효과·발사체·UI에는 자동 부착하지 않는다.
+- 64×64 부드러운 타원 마스크 하나를 공유한다. 기본 진하기 0.28, 두께/너비 비율 0.28. `GroundShadow` Inspector의 `Width Multiplier`, `Thickness`, `Opacity`, `Offset`으로 조절한다. 개별 설정을 저장하려면 해당 프리팹 root에 컴포넌트를 추가해 값을 지정한다. 자동 부착은 이미 있는 설정을 보존한다.
+- 그림자는 원화 자식과 분리하여 바닥(-100) 위·몸체 아래(-50)에 표시한다. 나무는 높이 2칸과 별개로 하단 충돌 칸을 기준으로 맞춘다. 이동·크기 변화와 획득·파괴·비활성화를 따라가며, 피격 색상과 몸체 애니메이션에 영향받지 않는다. 비행 플레이어는 기존 비행 그림자만 표시하고 같은 마스크를 공유한다.
+- Edit Mode 메뉴: `Trickal Fan Game/Artwork/Verify Common Ground Shadows`. 배치: `TrickalFanGame.Editor.GroundShadowVerification.Verify` (`-batchmode -quit`). 공유 마스크·중복 방지·나무 하단 정렬·정렬 순서·충돌 보존·이동/배율·사망·비행 중 중복 방지를 검사한다.
+- Play 배치: `TrickalFanGame.Editor.GroundShadowPlayVerification.RunBatch` (`-batchmode`, **`-quit` 제외**). 실제 게임 프리팹 15종의 자동 연결·재활성화와 구덩이 2종 제외를 검사하고 종료한다. 사용자 씬을 저장하지 않는 배치 전용 진입점이다.
+- Unity 6000.3.22f1에서 새 Edit/Play 검증 및 `TrickalFanGame.Editor.Week22Flight0Verification.Verify` 회귀가 모두 통과했다. Play와 비행 배치의 실제 종료 코드 0, Edit 배치 로그의 성공 메시지와 return code 0을 확인했다. 로그: `output/ground-shadow-verification.log`, `output/ground-shadow-play-verification.log`, `output/ground-shadow-flight-regression.log`. 관련 소스의 `git diff --check`, UTF-8 및 새 스크립트 `.meta` 검사도 통과했다.
+- 실제 미술 검수는 남아 있다. `Assets/Scenes/SampleScene.unity` Play에서 플레이어 발밑, 나무/돌/상자, 떨어진 픽업, 상점 NPC를 확인한다. F1 개발 패널에서 상자·장애물 생성 및 `— Artifact —`의 `Drop`으로 `시스트의 가짜 날개`를 얻어 그림자가 겹치지 않는지 확인한다. 방 이동 후 그림자 중복 여부, 나무 위 칸 통과, 파괴/획득 뒤 사라짐, 큰 보스·플레이어 크기 변화 시 접지 위치와 진하기를 확인한다.
+
+### 연결형 구덩이 타일 확인
+
+- 적용 에셋: `Assets/Resources/PitTiles/Atlas.png`. `RoomPit`는 Collider 범위와 이웃 구덩이를 기준으로 `PitTileArtwork`가 타일을 표시한다. SecretPit는 별도다.
+- 미리보기: Edit Mode에서 `Trickal Fan Game/Artwork/Open Connected Pit Tile Preview`. `Assets/Scenes/PitTileArtworkPreview.unity`를 생성·열고 1칸·ㄱ·ㄷ·ㅁ·ㄹ·ㅡ·ㅣ·ㅏ 모양을 Game 뷰에서 확인한다. 열기 전에 변경된 Scene 저장 여부를 묻는다.
+- 자동 검증: `Trickal Fan Game/Artwork/Verify Connected Pit Tiles`, 배치 메서드 `TrickalFanGame.Editor.PitTileArtworkVerification.ApplyAndVerifyBatch`. 배치는 검증·미리보기 Scene 저장·Unity PNG 렌더를 수행한다.
+- 기대 로그: `Connected pit tile verification passed`. 8가지 연결, 안쪽 모서리·대각선 접촉, 큰 Collider의 내부, 재생성 중복과 충돌 범위 보존을 검사한다.
+- 실게임 수동 확인: SampleScene Play → F1 → `— Layout —` → `Show layouts` → `Force wide-pit-bridges`. 연결부에 테두리가 생기지 않고 보행은 막히며 투사체는 통과해야 한다. 실제 Play 미술 검수는 별도로 진행한다.
+- 원화·실제 렌더·재현 방법: [구덩이 타일 기록](./art-prompts/pit-tiles-v1/README.md).
+
+### 구덩이 v2 — ㄹ·3×3 이음새 검수
+
+현재 RoomPit 표시는 v1 사분면 Atlas 대신 연결된 Collider 윤곽 전체를 단일 Sprite로 합성한다. 경계 원화는 `Resources/PitTiles/BoundaryRibbon.png`, 내부 원화는 `CavernDepth.png`다. `scripts/export-pit-tiles.cjs`는 v1 기록용이며 현재 원화를 덮어쓸 필요가 없다.
+
+- 전체 10개 모양: `Trickal Fan Game/Artwork/Open Connected Pit Tile Preview`.
+- ㄹ·꽉 찬 3×3 확대: `Trickal Fan Game/Artwork/Open Pit Lieul and 3x3 Review` → `Assets/Scenes/PitContourFocusPreview.unity`의 Game 뷰.
+- 검증: 기존 `Trickal Fan Game/Artwork/Verify Connected Pit Tiles`. 배치 메서드는 `TrickalFanGame.Editor.PitTileArtworkVerification.ApplyAndVerifyBatch`, 기대 로그는 `Continuous pit contour verification passed`.
+- 기준: 여러 Collider로 나누거나 합쳐도 같은 모양의 픽셀이 같아야 한다. 테두리는 칸마다 끊기지 않고 안쪽·바깥 모서리를 돌아야 하며, 3×3 내부에 암벽 질감이 남아야 한다. ㅁ 중앙은 투명한 걸을 수 있는 땅이다.
+- 실제 렌더·원화·설정·검수 기록: [구덩이 v2](./art-prompts/pit-tiles-v2/README.md).
+
+### 에셋별 그림자 검수 페이지 (2026-10-10)
+
+- `output/ground-shadow-review/index.html`은 현재 게임 프리팹·상태·아이템 76종의 정지 모습을 보여준다. Unity에서 실제 바닥, 몸체, `GroundShadow`를 함께 렌더링한 기본 이미지와 분리 레이어를 사용한다. 이동·공격 애니메이션 및 실제 방 배치는 별도 Play 검수 대상이다. 프리팹에 남아 있는 임시 표시도 그대로 나온다.
+- 에셋을 선택해 너비 배율·두께·위치 X/Y·진하기를 개별 조절한다. +X는 오른쪽, +Y는 위쪽이며 위치 1은 Unity 1단위다. 조절 시 분리 레이어로 합성하고, 기본값/초기화 상태는 Unity 원본 렌더를 표시한다. 변경값은 브라우저에만 보관되며 `조절값 복사` 또는 `조절값 JSON 저장`으로 전달한다. 게임 설정에는 자동 반영되지 않는다.
+- 실제 게임 설정은 Edit Mode에서 대상 프리팹 root에 `GroundShadow`를 추가하고 Inspector 값을 저장한다. Play 중 자동으로 붙은 컴포넌트의 값은 Play 종료 후 사라진다. 사용자 검수한 67종은 `Assets/Resources/GroundShadowProfiles.json`에서 ID별 수치를 읽는다. 부스러기 색상·장애물 종류·상자 개폐·아이템/NPC 변화도 자동으로 선택한다. 공용 설정 대상의 개별 Inspector 값을 영구 지정하려면 `Use Shared Profile`을 끄고 프리팹에 저장한다.
+- 다시 만들기: Unity 배치 전용 `TrickalFanGame.Editor.GroundShadowPreviewExporter.ExportBatch` (`-batchmode -quit`, 그래픽 렌더가 필요하므로 `-nographics` 제외) 실행 후 `python scripts/build-ground-shadow-review.py`. Python에는 Pillow가 필요하다. 생성기는 HTML, 대표 모음 `overview.png`, 전체 모음 7장을 만든다. 원본 씬·프리팹은 저장하지 않는다.
+- 확인 근거: Unity 6000.3.22f1 배치 종료 코드 0 (`output/ground-shadow-review-export.log`), 76종 × 4개 레이어 생성, 브라우저 검색·진하기/위치 조절·초기화 확인. 최종 미술 판단 및 개별 값의 게임 반영은 사용자 검수 후 진행한다.
+
+### 확정한 에셋별 그림자 수치 반영 (2026-10-10)
+
+- 사용자가 전달한 67종의 너비 배율·두께·위치·진하기를 `Assets/Resources/GroundShadowProfiles.json`에 저장했다. 76종 중 목록에 없는 9종은 기존 설정을 유지했다. 변경된 기본값으로 실제 Unity 렌더 및 검수 페이지를 갱신했다.
+- 고정 적/보스 및 반죽·크림 14개 프리팹 root의 `GroundShadow.Profile Id`로 이름 변경에도 유지되는 참조를 구성한다. 동적 표시 대상은 실제 컴포넌트의 ID/상태로 선택한다. 수치 적용은 상태 ID가 바뀔 때만 수행하며, 수동 Inspector 조절은 같은 상태 동안 유지된다. `Use Shared Profile`을 끄면 상태가 바뀌어도 수동 설정을 보존한다.
+- 연결 재실행 메뉴: `Trickal Fan Game/Artwork/Apply Reviewed Ground Shadow Profiles`. 배치: `TrickalFanGame.Editor.GroundShadowProfileSetup.ApplyAndVerifyBatch` (`-batchmode -quit`, 렌더 필요). 14개 프리팹만 저장하며 런타임 그림자 자식은 저장하지 않는다. 씬은 저장하지 않는다.
+- 상태 전환 검증 메뉴: `Trickal Fan Game/Artwork/Verify Reviewed Ground Shadow Profiles`, 배치: `TrickalFanGame.Editor.GroundShadowProfileSetup.Verify` (`-batchmode -quit`). 같은 오브젝트의 부스러기 3색, 상자 6상태, 이름 변경 후 참조, 수동 설정 보존과 프리팹 자식 중복 방지를 확인한다. `output/ground-shadow-profile-transitions.log` 성공 종료 코드 0.
+- `output/ground-shadow-profile-apply.log`에서 기존 공용 그림자 검증 및 76종 렌더 성공/종료 코드 0을 확인했고, 출력 manifest와 사용자 수치의 67종 × 5필드 일치 및 나머지 9종 불변도 검사했다. 실제 방에서 움직임·파괴·획득을 포함한 최종 Play 미술 검수는 별도다.
+
+- 후속 `GroundShadowPlayVerification.RunBatch`에서도 15종 생성·재활성화 및 구덩이 2종 제외 검증 성공 로그를 확인했다 (`output/ground-shadow-profile-play.log`).
+
+### 그림자·2칸 나무의 공용 원화 연결
+
+그림자 미리보기와 상태별 선택에 필요한 요정왕국 원화 45장, Resources 카탈로그, 공용 표시 코드와 기존 게임 프리팹 연결을 포함한다. 표시용 프리팹은 `Assets/Prefabs/FairyKingdomArtwork/`, 별도 미리보기 씬은 `Assets/Scenes/FairyKingdomArtworkPreview.unity`다. `Trickal Fan Game/Artwork/Verify Fairy Kingdom 45 Sprites`로 원화 참조와 나무 1×2 표시·하단 1×1 충돌을 확인한다. 재구성 메뉴 `Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites`는 씬·프리팹을 저장하므로 기존 변경을 확인한 뒤 사용한다. 구덩이는 기존 연결 윤곽 렌더를 우선하며 원화 표시로 덮어쓰지 않는다. 방 Layout·상태이상 프레임 구현은 이 커밋에 포함하지 않는다.
+
+### 그림자 재조정·스펠 공통 설정 (2026-10-11)
+
+- 사용자 수정 수치 14종을 반영했다. 에르핀 너비 배율은 1.71, 진하기는 0.58이며 나머지 지정 대상도 전달한 값으로 갱신했다.
+- 모든 스펠 픽업(기존 스펠·일회용·짱셈스펠)은 `single-spell-afterimage`의 그림자 설정을 공유한다. 너비 배율 1.00, 두께 0.28, 위치 (0.00, -0.25), 진하기 0.79다. 아티팩트의 개별 설정은 유지하며 아이템 ID·종류·게임 규칙은 변경하지 않는다. 공용 값을 바꾸면 새 스펠에도 동일하게 적용된다.
+- 배치 `TrickalFanGame.Editor.GroundShadowProfileSetup.VerifyAndExportBatch` (`-batchmode -quit`, 그래픽 필요)에서 스펠 정의 15개·재사용 픽업 재설정·아티팩트 ID 보존·기존 색상/개폐 전환 검증과 76종 실제 렌더를 통과했다. 로그 `output/ground-shadow-spell-tune.log` 종료 코드 0. 미리보기 7개 스펠의 모든 수치가 잔상 설정과 같고, 공용 JSON 변경 대상이 정확히 14종인지 비교했다.
+

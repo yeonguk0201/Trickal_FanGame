@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 7391070505766005571}
   - component: {fileID: 3040447778529561264}
   - component: {fileID: 1312973466367987502}
+  - component: {fileID: 8419723119464296531}
   m_Layer: 6
   m_Name: CrayonShieldMinion
   m_TagString: Untagged
@@ -333,3 +334,21 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 04e31e7a2a2111646b511292072173e1, type: 3}
   - {fileID: 21300000, guid: 9d65eed9c9ff01f4384bc4071b92ec4f, type: 3}
   projectileSprite: {fileID: 0}
+--- !u!114 &8419723119464296531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2407568717261891106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: CrayonShieldMinion
+  useSharedProfile: 1

@@ -24,6 +24,13 @@ namespace TrickalFanGame.Enemy
         private Vector3 idleScale;
 
         public EnemyAttackPhase Phase { get; private set; }
+        public Vector2 CurrentScaleMultiplier => Phase switch
+        {
+            EnemyAttackPhase.Telegraph => telegraphScale,
+            EnemyAttackPhase.Active => activeScale,
+            EnemyAttackPhase.Recovery => recoveryScale,
+            _ => Vector2.one,
+        };
 
         private void Awake()
         {
@@ -44,13 +51,7 @@ namespace TrickalFanGame.Enemy
             }
 
             Phase = phase;
-            Vector2 multiplier = phase switch
-            {
-                EnemyAttackPhase.Telegraph => telegraphScale,
-                EnemyAttackPhase.Active => activeScale,
-                EnemyAttackPhase.Recovery => recoveryScale,
-                _ => Vector2.one,
-            };
+            Vector2 multiplier = CurrentScaleMultiplier;
             transform.localScale = new Vector3(
                 idleScale.x * multiplier.x,
                 idleScale.y * multiplier.y,

@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 6783503925847087411}
   - component: {fileID: 380581064173092314}
   - component: {fileID: 8100401765257524831}
+  - component: {fileID: 915516978997981696}
   m_Layer: 6
   m_Name: ChargingEnemy
   m_TagString: Untagged
@@ -427,3 +428,21 @@ MonoBehaviour:
   - {fileID: 21300000, guid: e0fe562ff16dd39408c4880d70afc69a, type: 3}
   - {fileID: 21300000, guid: 84960c3d0541c71449fc518eb0c46661, type: 3}
   projectileSprite: {fileID: 0}
+--- !u!114 &915516978997981696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 940017362510908874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: ChargingEnemy
+  useSharedProfile: 1

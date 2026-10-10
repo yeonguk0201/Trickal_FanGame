@@ -1,0 +1,375 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e3455e5fbb24e1490602c3546a693a4, type: 3}
+  m_Name: Catalog
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkCatalog
+  entries:
+  - id: chest-diamond-closed
+    sprite: {fileID: 21300000, guid: 4c62504123294939bfbf466037f2904f, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 35
+      y: 77
+      width: 1302
+      height: 980
+  - id: chest-diamond-open
+    sprite: {fileID: 21300000, guid: da7c36e6c86e4a5c84a0a4b62f2dc937, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 55
+      y: 41
+      width: 1264
+      height: 1072
+  - id: chest-golden-closed
+    sprite: {fileID: 21300000, guid: a6d58365cf7f411da26f52c6d4855c6f, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 30
+      y: 96
+      width: 1251
+      height: 1029
+  - id: chest-golden-open
+    sprite: {fileID: 21300000, guid: f65170413f64498690f37e42f2f130b3, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 31
+      y: 51
+      width: 1248
+      height: 1133
+  - id: chest-normal-closed
+    sprite: {fileID: 21300000, guid: 1488c7693e6740208ce70b8053156390, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 190
+      y: 67
+      width: 1156
+      height: 925
+  - id: chest-normal-open
+    sprite: {fileID: 21300000, guid: b264d2ff496b441989386ed99e260f19, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 248
+      y: 54
+      width: 1041
+      height: 955
+  - id: effect-bomb-explosion
+    sprite: {fileID: 21300000, guid: ef2d8f8c7a9e426fab9804128f0d39cf, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 166
+      y: 28
+      width: 1233
+      height: 980
+  - id: effect-burn
+    sprite: {fileID: 21300000, guid: 5e09b139a1c94369b255950d5a41a10f, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 326
+      y: 156
+      width: 683
+      height: 922
+  - id: effect-crumb-death
+    sprite: {fileID: 21300000, guid: 57e5a8682c024a23b456626d35e4f420, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 338
+      y: 141
+      width: 865
+      height: 799
+  - id: effect-lightning
+    sprite: {fileID: 21300000, guid: ba2416998d0343d3a401026660676371, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 273
+      y: 36
+      width: 497
+      height: 1484
+  - id: effect-poison-gas
+    sprite: {fileID: 21300000, guid: 126ece9554dd4580885ec863440c40b2, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 62
+      y: 218
+      width: 1424
+      height: 580
+  - id: effect-poison
+    sprite: {fileID: 21300000, guid: 120e4af6303c44cfbb25323eaeb30bb0, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 285
+      y: 154
+      width: 817
+      height: 928
+  - id: effect-shock
+    sprite: {fileID: 21300000, guid: f1c9f82b2e5c449f9d1be9ffbc7f4034, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 362
+      y: 210
+      width: 990
+      height: 517
+  - id: effect-water-stream
+    sprite: {fileID: 21300000, guid: 5006c88e21194925aa3526fa80154b42, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 11.314918
+      y: 128.29834
+      width: 2016.884
+      height: 343.38675
+  - id: crumb-minion-chocolate
+    sprite: {fileID: 21300000, guid: c408362296224ca18e305e8c89cc6579, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 105
+      y: 99
+      width: 1050
+      height: 1048
+  - id: crumb-minion-cream
+    sprite: {fileID: 21300000, guid: ee48cb01041d48eb863ed2839375ff31, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 64
+      y: 81
+      width: 1151
+      height: 1108
+  - id: crumb-minion-pink
+    sprite: {fileID: 21300000, guid: 7e4db7d16e3e4647986908058f109805, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 229
+      y: 200
+      width: 851
+      height: 907
+  - id: jyubi
+    sprite: {fileID: 21300000, guid: 1a9790bccd724b1d948bce58a74b5508, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 236
+      y: 83
+      width: 983
+      height: 873
+  - id: low-blood-sugar-fairy
+    sprite: {fileID: 21300000, guid: c6793bcb0d244973af281a8761fca08b, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 163
+      y: 17
+      width: 1031
+      height: 1220
+  - id: nururing
+    sprite: {fileID: 21300000, guid: e8a91383c513449b992f727daaa605c9, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 90
+      y: 71
+      width: 1260
+      height: 1002
+  - id: sansamo-pure
+    sprite: {fileID: 21300000, guid: ce94822aa6a14c78b3bbd9d2c50da156, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 266
+      y: 0
+      width: 741
+      height: 1278
+  - id: obstacle-erpin-snack-box
+    sprite: {fileID: 21300000, guid: 3b42d915570f46398546146c4bf171e6, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 45
+      y: 81
+      width: 1286
+      height: 1004
+  - id: obstacle-eshur-bread-box
+    sprite: {fileID: 21300000, guid: b1768b52dca54b10b307a54d7792e4f2, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 11
+      y: 67
+      width: 1354
+      height: 1015
+  - id: obstacle-explosive-box
+    sprite: {fileID: 21300000, guid: c74872fc8dca43618f66f74284ecc1c1, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 164
+      y: 80
+      width: 985
+      height: 1097
+  - id: obstacle-gold-rock
+    sprite: {fileID: 21300000, guid: 238004677baa4beba276aefa22449841, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 61
+      y: 62
+      width: 1193
+      height: 1072
+  - id: obstacle-marie-bomb-box
+    sprite: {fileID: 21300000, guid: 2e81f3ba7efa4f2889c81f5f608b6d83, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 87
+      y: 104
+      width: 1200
+      height: 949
+  - id: obstacle-mayo-collection-box
+    sprite: {fileID: 21300000, guid: b9a02d3b6e6c46d396f9d77c99974f09, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 17
+      y: 92
+      width: 1280
+      height: 1022
+  - id: obstacle-mayo-key-bundle
+    sprite: {fileID: 21300000, guid: 88d77bb7a7324474af2b8b264988ffc6, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 38
+      y: 117
+      width: 1247
+      height: 1051
+  - id: obstacle-ricotta-food-box
+    sprite: {fileID: 21300000, guid: 902bf8cf0eec4c5fafbffaf4d2178433, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 42
+      y: 81
+      width: 1291
+      height: 1008
+  - id: obstacle-rock
+    sprite: {fileID: 21300000, guid: b4c6f27cab094e71954000cc8b5f465c, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 117
+      y: 124
+      width: 1111
+      height: 926
+  - id: obstacle-shady-random-box
+    sprite: {fileID: 21300000, guid: 7e52fb7ba61f4cc68ec6a8f01c1f94a4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 57
+      y: 64
+      width: 1200
+      height: 1083
+  - id: obstacle-sist-vault
+    sprite: {fileID: 21300000, guid: 8f834cac94b84dd3a06a99941a27a686, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 129
+      y: 52
+      width: 1050
+      height: 1122
+  - id: obstacle-tree
+    sprite: {fileID: 21300000, guid: f68c9e6f138d4514bc83caf5d8966c5d, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 6
+      y: 15
+      width: 872
+      height: 1752
+  - id: pickup-bomb
+    sprite: {fileID: 21300000, guid: 67a4ded62aa44f4ab28f1802043f5139, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 271
+      y: 94
+      width: 929
+      height: 944
+  - id: pickup-key
+    sprite: {fileID: 21300000, guid: 2d33b0c5693a4dd8a90174623d53057c, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 232
+      y: 70
+      width: 952
+      height: 1020
+  - id: terrain-pillar
+    sprite: {fileID: 21300000, guid: bfe035d134d84228961ed5432c596bb7, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 221
+      y: 38
+      width: 838
+      height: 1143
+  - id: terrain-pit
+    sprite: {fileID: 21300000, guid: 0c7b5794db44474eaa91b3ab24b263ae, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 81
+      y: 87
+      width: 1396
+      height: 850
+  - id: terrain-secret-pit
+    sprite: {fileID: 21300000, guid: 436447f90cd4422582041c3a2e6f94cb, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 157
+      y: 63
+      width: 1234
+      height: 891
+  - id: trap-damage-puddle
+    sprite: {fileID: 21300000, guid: 0c4533d6f7c0458fb58dda10c10ceb49, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 39
+      y: 229
+      width: 1466
+      height: 538
+  - id: trap-fire
+    sprite: {fileID: 21300000, guid: bed0b7165f7f47fba0d93b202eeada28, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 222
+      y: 51
+      width: 868
+      height: 1093
+  - id: trap-floor-spikes
+    sprite: {fileID: 21300000, guid: b2815b1e7d9d4dbcba2f688bfb990343, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 65
+      y: 101
+      width: 1405
+      height: 827
+  - id: trap-periodic-spikes
+    sprite: {fileID: 21300000, guid: f5f0a7e8e1764197aa2fec3a01162244, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 33
+      y: 133
+      width: 1306
+      height: 856
+  - id: trap-poison-mushroom
+    sprite: {fileID: 21300000, guid: c9e5f5ccd2c245139c227d8c9205f942, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 44
+      y: 81
+      width: 1226
+      height: 1048
+  - id: trap-spiderweb
+    sprite: {fileID: 21300000, guid: d4f73fd334aa43debbfbf32da6f23c77, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 24
+      y: 29
+      width: 1488
+      height: 943
+  - id: trap-spiked-rock
+    sprite: {fileID: 21300000, guid: 98a754f1cb8c4ca59aeefb7822e9bb7d, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 143
+      y: 41
+      width: 1116
+      height: 1036

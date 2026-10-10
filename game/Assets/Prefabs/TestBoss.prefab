@@ -117,6 +117,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6309312184845676733}
+    - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 996412044970775198}
   m_SourcePrefab: {fileID: 100100000, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
 --- !u!1 &421685952657128216 stripped
 GameObject:
@@ -272,6 +275,24 @@ MonoBehaviour:
   groundTreasures: []
   strideLength: 1.35
   hopHeight: 0.48
+--- !u!114 &996412044970775198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 421685952657128216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: TestBoss
+  useSharedProfile: 1
 --- !u!212 &8232130202244265866 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 4592771066635862529, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}

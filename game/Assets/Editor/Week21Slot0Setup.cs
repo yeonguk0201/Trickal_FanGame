@@ -83,7 +83,7 @@ namespace TrickalFanGame.Editor
                 SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(root);
                 renderer.sprite = sprite;
                 renderer.color = SingleUseItemPickup.SpellColor;
-                renderer.sortingOrder = 2;
+                renderer.sortingOrder = TrickalFanGame.Player.PlayerMovement.AboveBodySortingOrder;
                 CircleCollider2D collider = GetOrAdd<CircleCollider2D>(root);
                 collider.isTrigger = true;
                 collider.radius = sprite.bounds.extents.x;

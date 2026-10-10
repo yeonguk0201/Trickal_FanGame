@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4982893477891225751}
   - component: {fileID: 5432532710824000081}
   - component: {fileID: 5248559980272794995}
+  - component: {fileID: 2241165021207736755}
   m_Layer: 8
   m_Name: DestructibleObstacle
   m_TagString: Untagged
@@ -99,6 +100,26 @@ MonoBehaviour:
   visual: {fileID: 8966589268689890781}
   intactColor: {r: 0.62, g: 0.45, b: 0.3, a: 1}
   crackedColor: {r: 0.3, g: 0.2, b: 0.14, a: 1}
+  blocksFlight: 0
+  burnHits: 0
+  burningColor: {r: 0.95, g: 0.45, b: 0.1, a: 1}
+  fixedVariant: {fileID: 0}
+--- !u!114 &2241165021207736755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382020792111085148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
+  artworkId: obstacle-rock
+  mode: 1
+  visual: {fileID: 8966589268689890781}
+  localWidth: 0.16
 --- !u!1 &2030711703272431726
 GameObject:
   m_ObjectHideFlags: 0
@@ -180,8 +201,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.62, g: 0.45, b: 0.3, a: 1}
+  m_Sprite: {fileID: 21300000, guid: b4c6f27cab094e71954000cc8b5f465c, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

@@ -88,6 +88,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7242146462803268354}
+    - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7542088875628723931}
   m_SourcePrefab: {fileID: 100100000, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
 --- !u!1 &7096289180192387305 stripped
 GameObject:
@@ -286,3 +289,21 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fa62f28b046bc7f44888a75bdf8a90f9, type: 3}
   - {fileID: 21300000, guid: 07f542f15215fea4681b2394f65ea8c0, type: 3}
   projectileSprite: {fileID: 21300000, guid: 2d1310d27f0334542addc98b47b90c62, type: 3}
+--- !u!114 &7542088875628723931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7096289180192387305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: HighBloodSugarFairy
+  useSharedProfile: 1

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6997416556607556192}
   - component: {fileID: 5150215809029852035}
   - component: {fileID: 8862331865661293077}
+  - component: {fileID: 8669501103064606822}
   m_Layer: 9
   m_Name: KeyPickup
   m_TagString: Untagged
@@ -82,10 +83,10 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.75, g: 0.85, b: 0.95, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 2d33b0c5693a4dd8a90174623d53057c, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -172,3 +173,19 @@ MonoBehaviour:
   resourceType: 1
   amount: 1
   runProgress: {fileID: 0}
+--- !u!114 &8669501103064606822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5401781955347040268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
+  artworkId: pickup-key
+  mode: 0
+  visual: {fileID: 4726982185617882711}
+  localWidth: 0.2
