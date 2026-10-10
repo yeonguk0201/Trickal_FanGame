@@ -41,6 +41,7 @@ namespace TrickalFanGame.Player
         private float skillElapsed;
 
         public bool IsPlayingSkill => isPlayingSkill;
+        public Sprite IdleSprite => idleSprite;
 
         private void Awake()
         {

@@ -1,0 +1,271 @@
+{
+  "effects": [
+    {
+      "id": "burn",
+      "loopMs": 800,
+      "motionCycleMs": 800,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 444,
+          "height": 444,
+          "durationMs": 100
+        },
+        {
+          "x": 444,
+          "y": 0,
+          "width": 443,
+          "height": 444,
+          "durationMs": 90
+        },
+        {
+          "x": 887,
+          "y": 0,
+          "width": 443,
+          "height": 444,
+          "durationMs": 100
+        },
+        {
+          "x": 1330,
+          "y": 0,
+          "width": 444,
+          "height": 444,
+          "durationMs": 120
+        },
+        {
+          "x": 0,
+          "y": 444,
+          "width": 444,
+          "height": 443,
+          "durationMs": 110
+        },
+        {
+          "x": 444,
+          "y": 444,
+          "width": 443,
+          "height": 443,
+          "durationMs": 90
+        },
+        {
+          "x": 887,
+          "y": 444,
+          "width": 443,
+          "height": 443,
+          "durationMs": 90
+        },
+        {
+          "x": 1330,
+          "y": 444,
+          "width": 444,
+          "height": 443,
+          "durationMs": 100
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0.14,
+          "y": 0.28,
+          "width": 0.27,
+          "height": 0.36,
+          "anchorX": -0.32,
+          "anchorY": 0.4
+        },
+        {
+          "x": 0.6,
+          "y": 0.44,
+          "width": 0.31,
+          "height": 0.3,
+          "anchorX": 0.28,
+          "anchorY": 0.14
+        },
+        {
+          "x": 0.3,
+          "y": 0.66,
+          "width": 0.3,
+          "height": 0.31,
+          "anchorX": -0.25,
+          "anchorY": 0.68
+        }
+      ]
+    },
+    {
+      "id": "poison",
+      "loopMs": 1120,
+      "motionCycleMs": 1120,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 442,
+          "height": 444,
+          "durationMs": 140
+        },
+        {
+          "x": 442,
+          "y": 0,
+          "width": 442,
+          "height": 444,
+          "durationMs": 130
+        },
+        {
+          "x": 884,
+          "y": 0,
+          "width": 443,
+          "height": 444,
+          "durationMs": 140
+        },
+        {
+          "x": 1327,
+          "y": 0,
+          "width": 442,
+          "height": 444,
+          "durationMs": 150
+        },
+        {
+          "x": 0,
+          "y": 444,
+          "width": 442,
+          "height": 445,
+          "durationMs": 140
+        },
+        {
+          "x": 442,
+          "y": 444,
+          "width": 442,
+          "height": 445,
+          "durationMs": 130
+        },
+        {
+          "x": 884,
+          "y": 444,
+          "width": 443,
+          "height": 445,
+          "durationMs": 140
+        },
+        {
+          "x": 1327,
+          "y": 444,
+          "width": 442,
+          "height": 445,
+          "durationMs": 150
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0.14,
+          "y": 0.28,
+          "width": 0.27,
+          "height": 0.36,
+          "anchorX": 0.34,
+          "anchorY": 0.4
+        },
+        {
+          "x": 0.6,
+          "y": 0.44,
+          "width": 0.31,
+          "height": 0.3,
+          "anchorX": -0.35,
+          "anchorY": 0.08
+        },
+        {
+          "x": 0.3,
+          "y": 0.66,
+          "width": 0.3,
+          "height": 0.31,
+          "anchorX": 0.08,
+          "anchorY": 0.24
+        }
+      ]
+    },
+    {
+      "id": "shock",
+      "loopMs": 680,
+      "motionCycleMs": 1100,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 444,
+          "height": 444,
+          "durationMs": 90
+        },
+        {
+          "x": 444,
+          "y": 0,
+          "width": 443,
+          "height": 444,
+          "durationMs": 60
+        },
+        {
+          "x": 887,
+          "y": 0,
+          "width": 443,
+          "height": 444,
+          "durationMs": 90
+        },
+        {
+          "x": 1330,
+          "y": 0,
+          "width": 444,
+          "height": 444,
+          "durationMs": 60
+        },
+        {
+          "x": 0,
+          "y": 444,
+          "width": 444,
+          "height": 443,
+          "durationMs": 110
+        },
+        {
+          "x": 444,
+          "y": 444,
+          "width": 443,
+          "height": 443,
+          "durationMs": 60
+        },
+        {
+          "x": 887,
+          "y": 444,
+          "width": 443,
+          "height": 443,
+          "durationMs": 100
+        },
+        {
+          "x": 1330,
+          "y": 444,
+          "width": 444,
+          "height": 443,
+          "durationMs": 110
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0.14,
+          "y": 0.28,
+          "width": 0.27,
+          "height": 0.36,
+          "anchorX": 0.33,
+          "anchorY": 0.84
+        },
+        {
+          "x": 0.6,
+          "y": 0.44,
+          "width": 0.31,
+          "height": 0.3,
+          "anchorX": -0.43,
+          "anchorY": 0.52
+        },
+        {
+          "x": 0.3,
+          "y": 0.66,
+          "width": 0.3,
+          "height": 0.31,
+          "anchorX": 0.43,
+          "anchorY": 0.16
+        }
+      ]
+    }
+  ]
+}

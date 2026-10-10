@@ -4,7 +4,7 @@
 - 저장: `game/Assets/Art/Drafts/FairyKingdom/Obstacles/obstacle-tree.png` (887×1774). 기존 `.meta` GUID 보존.
 - 표시: 가로 1·세로 2 Unity 단위, 중심은 배치 칸보다 y +0.5. 아래 끝은 충돌 박스 아래 끝과 일치한다.
 - 충돌: 기존 root의 1×1 BoxCollider2D 하나, offset 0. 위 칸에는 충돌을 추가하지 않는다. 파괴·화상·비행 차단 규칙 유지.
-- 기존 tree-grove 4개와 공용 나무 Setup 재실행 경로에 적용. 런타임에는 알파 경계로 자른 원화를 같은 크기로 맞춘다.
+- 기존 tree-grove 4개와 Layout importer/Setup 재실행 경로에 적용. 런타임에는 알파 경계로 자른 원화를 같은 크기로 맞춘다.
 - 정적 확인: PNG 투명 배경, 카탈로그 경계, GUID, 4개 표시 Transform과 하단 충돌 구조 확인.
 - Unity 6000.3.22f1 배치 `TrickalFanGame.Editor.FairyKingdomArtworkVerification.Verify`: 기존 Unity 실행 중 종료 코드 1, 성공 로그 없음. 자동 검증 통과로 처리하지 않는다. 로그: `output/tree-geometry-verification.log`.
 - 수동: Edit Mode에서 `Trickal Fan Game/Artwork/Verify Fairy Kingdom 45 Sprites` 실행. 나무 1×2 표시·하단 1×1 충돌·상단 통과 검사가 통과해야 한다. `Assets/Scenes/SampleScene.unity` Play에서 tree-grove 방의 아래 칸은 막히고 위 칸은 통과하는지, 나무 크기와 파괴·화상 표시를 확인한다. 실제 Play 미술 검수는 미완료.

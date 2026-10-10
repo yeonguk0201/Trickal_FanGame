@@ -57,6 +57,9 @@ namespace TrickalFanGame.Item
             TriggerCount++;
             if (hitEvent.Target.IsDead) return;
             if (stats == null) stats = GetComponent<PlayerStats>();
+            TrickalFanGame.Frontend.FairyKingdomSpriteEffect.Play("effect-lightning",
+                hitEvent.Target.transform.position + Vector3.up * 0.35f, 0.8f, 0.2f,
+                hitEvent.Target.GetComponent<SpriteRenderer>());
             hitEvent.Target.TakeDamage(new DamageContext(
                 gameObject,
                 DamageSourceType.PlayerItemLightning,
