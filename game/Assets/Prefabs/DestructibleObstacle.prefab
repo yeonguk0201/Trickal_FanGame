@@ -91,7 +91,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e517c354dfa3534e9b86f0e65b4a649, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DestructibleObstacle
   obstacleId: obstacle-01
   variantId: rock
@@ -103,6 +103,7 @@ MonoBehaviour:
   blocksFlight: 0
   burnHits: 0
   burningColor: {r: 0.95, g: 0.45, b: 0.1, a: 1}
+  fixedVariant: {fileID: 0}
 --- !u!114 &2241165021207736755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,7 +114,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
   artworkId: obstacle-rock
   mode: 1
