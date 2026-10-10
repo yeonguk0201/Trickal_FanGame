@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using TrickalFanGame.Frontend;
+using TrickalFanGame.Item;
 using TrickalFanGame.Room;
 using UnityEditor;
 using UnityEngine;
@@ -45,6 +46,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Artwork/Verify Reviewed Ground Shadow Profiles")]
         public static void Verify()
         {
+            VerifySpellProfiles();
             GameObject crumb = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(
                 "Assets/Prefabs/BuseureogiCrumbMinion.prefab"));
             GameObject chestObject = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(
@@ -92,6 +94,40 @@ namespace TrickalFanGame.Editor
                 Debug.Log("Reviewed ground shadow profiles passed: stable prefab bindings, three live crumb colors, six live chest states and manual override.");
             }
             finally { UnityEngine.Object.DestroyImmediate(crumb); UnityEngine.Object.DestroyImmediate(chestObject); }
+        }
+
+        private static void VerifySpellProfiles()
+        {
+            GameObject regular = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ItemPickup.prefab"));
+            GameObject singleUse = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/SingleUseItemPickup.prefab"));
+            int spells = 0;
+            try
+            {
+                foreach (string guid in AssetDatabase.FindAssets("t:ItemDefinition"))
+                {
+                    var definition = AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid));
+                    if (definition.Kind == ItemKind.Artifact)
+                    {
+                        if (GroundShadowProfiles.ResolveItemId(definition) != definition.ItemId)
+                            throw new InvalidOperationException("Artifact shadow was aliased to spell profile.");
+                        continue;
+                    }
+                    GameObject owner = definition.IsSingleUse ? singleUse : regular;
+                    if (definition.IsSingleUse) owner.GetComponent<SingleUseItemPickup>().Configure(definition, "shadow-spell-probe", false);
+                    else owner.GetComponent<ItemPickup>().Configure(definition);
+                    AssertSettings(GroundShadow.Ensure(owner), GroundShadowProfiles.SpellProfileId);
+                    spells++;
+                }
+                if (spells == 0) throw new InvalidOperationException("No spell definitions checked.");
+                Debug.Log($"Shared spell shadow verification passed: {spells} definitions, including reusable pickup reconfiguration; artifact IDs preserved.");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(regular); UnityEngine.Object.DestroyImmediate(singleUse); }
+        }
+
+        public static void VerifyAndExportBatch()
+        {
+            Verify();
+            GroundShadowPreviewExporter.ExportBatch();
         }
 
         private static void AssertSettings(GroundShadow shadow, string id)

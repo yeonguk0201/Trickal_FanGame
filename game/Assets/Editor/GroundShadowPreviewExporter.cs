@@ -195,7 +195,7 @@ namespace TrickalFanGame.Editor
                 owner.SetActive(false); floor.SetActive(true); Render(prefix + "-floor.png");
                 Vector3 anchor = camera.WorldToViewportPoint(shadow.Visual.transform.position);
                 SerializedObject settings = new(shadow);
-                if (GroundShadowProfiles.TryGet(id, out var expected))
+                if (GroundShadowProfiles.TryGet(GroundShadowProfiles.ResolveId(owner, shadow.ProfileId), out var expected))
                 {
                     foreach (string property in new[] { "widthMultiplier", "thickness", "opacity" })
                     {

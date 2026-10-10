@@ -1592,3 +1592,9 @@ Play 화면 검수:
 ### 그림자·2칸 나무의 공용 원화 연결
 
 그림자 미리보기와 상태별 선택에 필요한 요정왕국 원화 45장, Resources 카탈로그, 공용 표시 코드와 기존 게임 프리팹 연결을 포함한다. 표시용 프리팹은 `Assets/Prefabs/FairyKingdomArtwork/`, 별도 미리보기 씬은 `Assets/Scenes/FairyKingdomArtworkPreview.unity`다. `Trickal Fan Game/Artwork/Verify Fairy Kingdom 45 Sprites`로 원화 참조와 나무 1×2 표시·하단 1×1 충돌을 확인한다. 재구성 메뉴 `Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites`는 씬·프리팹을 저장하므로 기존 변경을 확인한 뒤 사용한다. 구덩이는 기존 연결 윤곽 렌더를 우선하며 원화 표시로 덮어쓰지 않는다. 방 Layout·상태이상 프레임 구현은 이 커밋에 포함하지 않는다.
+
+### 그림자 재조정·스펠 공통 설정 (2026-10-11)
+
+- 사용자 수정 수치 14종을 반영했다. 에르핀 너비 배율은 1.71, 진하기는 0.58이며 나머지 지정 대상도 전달한 값으로 갱신했다.
+- 모든 스펠 픽업(기존 스펠·일회용·짱셈스펠)은 `single-spell-afterimage`의 그림자 설정을 공유한다. 너비 배율 1.00, 두께 0.28, 위치 (0.00, -0.25), 진하기 0.79다. 아티팩트의 개별 설정은 유지하며 아이템 ID·종류·게임 규칙은 변경하지 않는다. 공용 값을 바꾸면 새 스펠에도 동일하게 적용된다.
+- 배치 `TrickalFanGame.Editor.GroundShadowProfileSetup.VerifyAndExportBatch` (`-batchmode -quit`, 그래픽 필요)에서 스펠 정의 15개·재사용 픽업 재설정·아티팩트 ID 보존·기존 색상/개폐 전환 검증과 76종 실제 렌더를 통과했다. 로그 `output/ground-shadow-spell-tune.log` 종료 코드 0. 미리보기 7개 스펠의 모든 수치가 잔상 설정과 같고, 공용 JSON 변경 대상이 정확히 14종인지 비교했다.

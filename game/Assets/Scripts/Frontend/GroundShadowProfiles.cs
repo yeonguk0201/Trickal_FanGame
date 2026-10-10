@@ -12,6 +12,7 @@ namespace TrickalFanGame.Frontend
     // User-reviewed values live in Resources, independent of shared prefab variants and object names.
     public static class GroundShadowProfiles
     {
+        public const string SpellProfileId = "single-spell-afterimage";
         [Serializable] public sealed class Entry
         {
             public int number;
@@ -39,9 +40,9 @@ namespace TrickalFanGame.Frontend
         {
             if (owner.GetComponent<PlayerMovement>() != null) return "player-erpin";
             var item = owner.GetComponent<ItemPickup>();
-            if (item != null) return item.Definition != null ? item.Definition.ItemId : null;
+            if (item != null) return ResolveItemId(item.Definition);
             var spell = owner.GetComponent<SingleUseItemPickup>();
-            if (spell != null) return spell.Definition != null ? spell.Definition.ItemId : null;
+            if (spell != null) return ResolveItemId(spell.Definition);
             var resource = owner.GetComponent<RunResourcePickup>();
             if (resource != null) return resource.ResourceType switch
             {
@@ -74,5 +75,8 @@ namespace TrickalFanGame.Frontend
                 return keeper.Portrait.sprite == UserArtwork.Load(ShopKeeper.GoldiArtworkKey) ? "npc-goldi" : "npc-sist";
             return explicitId;
         }
+
+        public static string ResolveItemId(ItemDefinition definition) => definition == null ? null :
+            definition.Kind == ItemKind.Artifact ? definition.ItemId : SpellProfileId;
     }
 }
