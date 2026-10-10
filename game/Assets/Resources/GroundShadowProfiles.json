@@ -1,0 +1,607 @@
+{
+  "entries": [
+    {
+      "number": 1,
+      "id": "player-erpin",
+      "widthMultiplier": 2.16,
+      "thickness": 0.36,
+      "offsetX": 0.0,
+      "offsetY": -0.05,
+      "opacity": 0.55
+    },
+    {
+      "number": 2,
+      "id": "ChargingEnemy",
+      "widthMultiplier": 1.08,
+      "thickness": 0.35,
+      "offsetX": 0.07,
+      "offsetY": -0.11,
+      "opacity": 0.49
+    },
+    {
+      "number": 5,
+      "id": "HighBloodSugarFairy",
+      "widthMultiplier": 1.05,
+      "thickness": 0.28,
+      "offsetX": 0.07,
+      "offsetY": -0.15,
+      "opacity": 0.42
+    },
+    {
+      "number": 6,
+      "id": "JyubiEnemy",
+      "widthMultiplier": 1.15,
+      "thickness": 0.32,
+      "offsetX": 0.09,
+      "offsetY": -0.22,
+      "opacity": 0.56
+    },
+    {
+      "number": 7,
+      "id": "SansamoEnemy",
+      "widthMultiplier": 1.02,
+      "thickness": 0.32,
+      "offsetX": -0.03,
+      "offsetY": -0.15,
+      "opacity": 0.47
+    },
+    {
+      "number": 8,
+      "id": "BuseureogiCrumbMinion",
+      "widthMultiplier": 1.25,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.17,
+      "opacity": 0.55
+    },
+    {
+      "number": 9,
+      "id": "CrayonArcherMinion",
+      "widthMultiplier": 0.77,
+      "thickness": 0.33,
+      "offsetX": 0.03,
+      "offsetY": -0.15,
+      "opacity": 0.53
+    },
+    {
+      "number": 10,
+      "id": "CrayonAxeMinion",
+      "widthMultiplier": 0.87,
+      "thickness": 0.35,
+      "offsetX": 0.05,
+      "offsetY": -0.26,
+      "opacity": 0.59
+    },
+    {
+      "number": 11,
+      "id": "CrayonMageMinion",
+      "widthMultiplier": 0.74,
+      "thickness": 0.31,
+      "offsetX": 0.06,
+      "offsetY": -0.16,
+      "opacity": 0.49
+    },
+    {
+      "number": 12,
+      "id": "CrayonShieldMinion",
+      "widthMultiplier": 1.56,
+      "thickness": 0.19,
+      "offsetX": 0.0,
+      "offsetY": -0.14,
+      "opacity": 0.54
+    },
+    {
+      "number": 13,
+      "id": "CrayonHeroBoss",
+      "widthMultiplier": 1.41,
+      "thickness": 0.21,
+      "offsetX": 0.25,
+      "offsetY": -0.63,
+      "opacity": 0.55
+    },
+    {
+      "number": 14,
+      "id": "SaemaeumVaultBoss",
+      "widthMultiplier": 1.79,
+      "thickness": 0.22,
+      "offsetX": 0.16,
+      "offsetY": -0.47,
+      "opacity": 0.71
+    },
+    {
+      "number": 15,
+      "id": "TestBoss",
+      "widthMultiplier": 1.55,
+      "thickness": 0.29,
+      "offsetX": 0.13,
+      "offsetY": -0.55,
+      "opacity": 0.94
+    },
+    {
+      "number": 16,
+      "id": "crumb-cream",
+      "widthMultiplier": 1.17,
+      "thickness": 0.28,
+      "offsetX": 0.01,
+      "offsetY": -0.1,
+      "opacity": 0.61
+    },
+    {
+      "number": 17,
+      "id": "crumb-chocolate",
+      "widthMultiplier": 1.45,
+      "thickness": 0.24,
+      "offsetX": 0.0,
+      "offsetY": -0.06,
+      "opacity": 0.65
+    },
+    {
+      "number": 18,
+      "id": "tree",
+      "widthMultiplier": 1.39,
+      "thickness": 0.33,
+      "offsetX": 0.05,
+      "offsetY": 0.02,
+      "opacity": 0.57
+    },
+    {
+      "number": 19,
+      "id": "obstacle-rock",
+      "widthMultiplier": 1.35,
+      "thickness": 0.37,
+      "offsetX": 0.01,
+      "offsetY": 0.17,
+      "opacity": 0.98
+    },
+    {
+      "number": 20,
+      "id": "obstacle-marie-bomb-box",
+      "widthMultiplier": 1.39,
+      "thickness": 0.31,
+      "offsetX": 0.0,
+      "offsetY": 0.06,
+      "opacity": 0.6
+    },
+    {
+      "number": 21,
+      "id": "obstacle-erpin-snack-box",
+      "widthMultiplier": 1.35,
+      "thickness": 0.3,
+      "offsetX": 0.0,
+      "offsetY": 0.06,
+      "opacity": 0.65
+    },
+    {
+      "number": 22,
+      "id": "obstacle-eshur-bread-box",
+      "widthMultiplier": 1.16,
+      "thickness": 0.29,
+      "offsetX": 0.02,
+      "offsetY": 0.06,
+      "opacity": 0.73
+    },
+    {
+      "number": 23,
+      "id": "obstacle-ricotta-food-box",
+      "widthMultiplier": 1.36,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": 0.05,
+      "opacity": 0.67
+    },
+    {
+      "number": 24,
+      "id": "obstacle-mayo-key-bundle",
+      "widthMultiplier": 0.99,
+      "thickness": 0.4,
+      "offsetX": 0.0,
+      "offsetY": 0.1,
+      "opacity": 0.64
+    },
+    {
+      "number": 25,
+      "id": "obstacle-mayo-collection-box",
+      "widthMultiplier": 1.14,
+      "thickness": 0.32,
+      "offsetX": 0.0,
+      "offsetY": 0.02,
+      "opacity": 0.74
+    },
+    {
+      "number": 26,
+      "id": "obstacle-sist-vault",
+      "widthMultiplier": 1.32,
+      "thickness": 0.4,
+      "offsetX": 0.0,
+      "offsetY": 0.0,
+      "opacity": 0.74
+    },
+    {
+      "number": 27,
+      "id": "obstacle-gold-rock",
+      "widthMultiplier": 1.25,
+      "thickness": 0.33,
+      "offsetX": 0.04,
+      "offsetY": 0.08,
+      "opacity": 0.94
+    },
+    {
+      "number": 28,
+      "id": "obstacle-explosive-box",
+      "widthMultiplier": 1.48,
+      "thickness": 0.29,
+      "offsetX": -0.01,
+      "offsetY": -0.11,
+      "opacity": 0.77
+    },
+    {
+      "number": 29,
+      "id": "obstacle-shady-random-box",
+      "widthMultiplier": 1.51,
+      "thickness": 0.3,
+      "offsetX": 0.0,
+      "offsetY": -0.01,
+      "opacity": 0.81
+    },
+    {
+      "number": 30,
+      "id": "BuseureogiDoughObstacle",
+      "widthMultiplier": 1.85,
+      "thickness": 0.36,
+      "offsetX": 0.0,
+      "offsetY": 0.01,
+      "opacity": 0.64
+    },
+    {
+      "number": 31,
+      "id": "BuseureogiCreamObstacle",
+      "widthMultiplier": 2.13,
+      "thickness": 0.25,
+      "offsetX": 0.03,
+      "offsetY": 0.11,
+      "opacity": 0.73
+    },
+    {
+      "number": 32,
+      "id": "pillar",
+      "widthMultiplier": 1.58,
+      "thickness": 0.39,
+      "offsetX": 0.0,
+      "offsetY": -0.16,
+      "opacity": 0.82
+    },
+    {
+      "number": 33,
+      "id": "chest-Normal-False",
+      "widthMultiplier": 1.4,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": 0.0,
+      "opacity": 0.64
+    },
+    {
+      "number": 34,
+      "id": "chest-Normal-True",
+      "widthMultiplier": 1.56,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": 0.0,
+      "opacity": 0.75
+    },
+    {
+      "number": 35,
+      "id": "chest-Golden-False",
+      "widthMultiplier": 1.54,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": 0.0,
+      "opacity": 0.67
+    },
+    {
+      "number": 36,
+      "id": "chest-Golden-True",
+      "widthMultiplier": 1.65,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": 0.0,
+      "opacity": 0.72
+    },
+    {
+      "number": 37,
+      "id": "chest-Diamond-False",
+      "widthMultiplier": 1.67,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": 0.04,
+      "opacity": 0.71
+    },
+    {
+      "number": 38,
+      "id": "chest-Diamond-True",
+      "widthMultiplier": 1.58,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": 0.03,
+      "opacity": 0.75
+    },
+    {
+      "number": 40,
+      "id": "KeyPickup",
+      "widthMultiplier": 2.25,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.11,
+      "opacity": 0.55
+    },
+    {
+      "number": 41,
+      "id": "BombPickup",
+      "widthMultiplier": 1.8,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.17,
+      "opacity": 0.68
+    },
+    {
+      "number": 42,
+      "id": "HealthPickup",
+      "widthMultiplier": 1.63,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.05,
+      "opacity": 0.49
+    },
+    {
+      "number": 43,
+      "id": "SPPickup",
+      "widthMultiplier": 1.67,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.06,
+      "opacity": 0.5
+    },
+    {
+      "number": 44,
+      "id": "PlacedBomb",
+      "widthMultiplier": 1.66,
+      "thickness": 0.28,
+      "offsetX": -0.04,
+      "offsetY": -0.06,
+      "opacity": 0.56
+    },
+    {
+      "number": 45,
+      "id": "artifact-shushushushuk-glove",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.18,
+      "opacity": 0.8
+    },
+    {
+      "number": 46,
+      "id": "artifact-levi-dagger",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.22,
+      "opacity": 0.78
+    },
+    {
+      "number": 47,
+      "id": "item-02",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.23,
+      "opacity": 0.7
+    },
+    {
+      "number": 48,
+      "id": "artifact-burning-branch",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.23,
+      "opacity": 0.78
+    },
+    {
+      "number": 49,
+      "id": "single-spell-afterimage",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.25,
+      "opacity": 0.79
+    },
+    {
+      "number": 50,
+      "id": "item-14",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.09,
+      "opacity": 0.79
+    },
+    {
+      "number": 54,
+      "id": "artifact-greed-ring",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.15,
+      "opacity": 0.69
+    },
+    {
+      "number": 55,
+      "id": "artifact-giant-potion",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.13,
+      "opacity": 0.72
+    },
+    {
+      "number": 56,
+      "id": "item-13",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.22,
+      "opacity": 0.72
+    },
+    {
+      "number": 57,
+      "id": "artifact-amelia-epad-classic",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.17,
+      "opacity": 0.78
+    },
+    {
+      "number": 58,
+      "id": "artifact-attatta-gun",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.05,
+      "offsetY": -0.17,
+      "opacity": 0.78
+    },
+    {
+      "number": 60,
+      "id": "item-03",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.11,
+      "opacity": 0.68
+    },
+    {
+      "number": 61,
+      "id": "item-08",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.11,
+      "opacity": 0.75
+    },
+    {
+      "number": 62,
+      "id": "artifact-pork-cutlet-hairpin",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.05,
+      "offsetY": -0.06,
+      "opacity": 0.69
+    },
+    {
+      "number": 63,
+      "id": "artifact-sylla-wind-arrow",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.06,
+      "offsetY": -0.09,
+      "opacity": 0.75
+    },
+    {
+      "number": 64,
+      "id": "artifact-blazing-bow",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.12,
+      "opacity": 0.71
+    },
+    {
+      "number": 66,
+      "id": "artifact-explosive-muffin",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.05,
+      "offsetY": -0.18,
+      "opacity": 0.65
+    },
+    {
+      "number": 67,
+      "id": "artifact-emergency-protection-belt",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.08,
+      "opacity": 0.68
+    },
+    {
+      "number": 68,
+      "id": "artifact-life-gem",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.05,
+      "offsetY": -0.1,
+      "opacity": 0.68
+    },
+    {
+      "number": 69,
+      "id": "item-11",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.14,
+      "opacity": 0.65
+    },
+    {
+      "number": 71,
+      "id": "item-15",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.14,
+      "opacity": 0.65
+    },
+    {
+      "number": 72,
+      "id": "artifact-rim-scythe",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.19,
+      "opacity": 0.65
+    },
+    {
+      "number": 73,
+      "id": "artifact-ner-eldr-flag",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.14,
+      "opacity": 0.75
+    },
+    {
+      "number": 74,
+      "id": "artifact-clear-weather-card",
+      "widthMultiplier": 1.0,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.18,
+      "opacity": 0.69
+    },
+    {
+      "number": 75,
+      "id": "npc-sist",
+      "widthMultiplier": 0.93,
+      "thickness": 0.28,
+      "offsetX": 0.05,
+      "offsetY": -0.03,
+      "opacity": 0.69
+    },
+    {
+      "number": 76,
+      "id": "npc-goldi",
+      "widthMultiplier": 1.17,
+      "thickness": 0.28,
+      "offsetX": 0.0,
+      "offsetY": -0.05,
+      "opacity": 0.58
+    }
+  ]
+}

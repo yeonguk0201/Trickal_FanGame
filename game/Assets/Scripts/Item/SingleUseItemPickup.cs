@@ -8,6 +8,8 @@ namespace TrickalFanGame.Item
     [RequireComponent(typeof(Collider2D))]
     public sealed class SingleUseItemPickup : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         public static readonly Color SpellColor = new(0.42f, 0.78f, 1f, 1f);
         public static readonly Color JjangsemSpellColor = new(0.86f, 0.5f, 1f, 1f);
 

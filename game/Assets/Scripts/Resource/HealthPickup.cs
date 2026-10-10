@@ -11,6 +11,8 @@ namespace TrickalFanGame.Resource
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public sealed class HealthPickup : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         public const string LayerName = "Pickup";
         public const int DefaultHealUnits = HealthUnits.UnitsPerHeart;
 

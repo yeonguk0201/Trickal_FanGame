@@ -1560,3 +1560,35 @@ Play 화면 검수:
 - 검증: 기존 `Trickal Fan Game/Artwork/Verify Connected Pit Tiles`. 배치 메서드는 `TrickalFanGame.Editor.PitTileArtworkVerification.ApplyAndVerifyBatch`, 기대 로그는 `Continuous pit contour verification passed`.
 - 기준: 여러 Collider로 나누거나 합쳐도 같은 모양의 픽셀이 같아야 한다. 테두리는 칸마다 끊기지 않고 안쪽·바깥 모서리를 돌아야 하며, 3×3 내부에 암벽 질감이 남아야 한다. ㅁ 중앙은 투명한 걸을 수 있는 땅이다.
 - 실제 렌더·원화·설정·검수 기록: [구덩이 v2](./art-prompts/pit-tiles-v2/README.md).
+
+### 공용 바닥 그림자 (2026-10-10)
+
+- 다음 Play부터 `GroundShadow`가 플레이어·적·보스·파괴/고정 장애물·상자·자원/HP/SP/아이템 픽업·설치 폭탄·상점 NPC에 자동으로 붙는다. 신규 생성과 방 재활성화에도 적용되며 별도 Setup 실행은 필요 없다. 구덩이·바닥 효과·발사체·UI에는 자동 부착하지 않는다.
+- 64×64 부드러운 타원 마스크 하나를 공유한다. 기본 진하기 0.28, 두께/너비 비율 0.28. `GroundShadow` Inspector의 `Width Multiplier`, `Thickness`, `Opacity`, `Offset`으로 조절한다. 개별 설정을 저장하려면 해당 프리팹 root에 컴포넌트를 추가해 값을 지정한다. 자동 부착은 이미 있는 설정을 보존한다.
+- 그림자는 원화 자식과 분리하여 바닥(-100) 위·몸체 아래(-50)에 표시한다. 나무는 높이 2칸과 별개로 하단 충돌 칸을 기준으로 맞춘다. 이동·크기 변화와 획득·파괴·비활성화를 따라가며, 피격 색상과 몸체 애니메이션에 영향받지 않는다. 비행 플레이어는 기존 비행 그림자만 표시하고 같은 마스크를 공유한다.
+- Edit Mode 메뉴: `Trickal Fan Game/Artwork/Verify Common Ground Shadows`. 배치: `TrickalFanGame.Editor.GroundShadowVerification.Verify` (`-batchmode -quit`). 공유 마스크·중복 방지·나무 하단 정렬·정렬 순서·충돌 보존·이동/배율·사망·비행 중 중복 방지를 검사한다.
+- Play 배치: `TrickalFanGame.Editor.GroundShadowPlayVerification.RunBatch` (`-batchmode`, **`-quit` 제외**). 실제 게임 프리팹 15종의 자동 연결·재활성화와 구덩이 2종 제외를 검사하고 종료한다. 사용자 씬을 저장하지 않는 배치 전용 진입점이다.
+- Unity 6000.3.22f1에서 새 Edit/Play 검증 및 `TrickalFanGame.Editor.Week22Flight0Verification.Verify` 회귀가 모두 통과했다. Play와 비행 배치의 실제 종료 코드 0, Edit 배치 로그의 성공 메시지와 return code 0을 확인했다. 로그: `output/ground-shadow-verification.log`, `output/ground-shadow-play-verification.log`, `output/ground-shadow-flight-regression.log`. 관련 소스의 `git diff --check`, UTF-8 및 새 스크립트 `.meta` 검사도 통과했다.
+- 실제 미술 검수는 남아 있다. `Assets/Scenes/SampleScene.unity` Play에서 플레이어 발밑, 나무/돌/상자, 떨어진 픽업, 상점 NPC를 확인한다. F1 개발 패널에서 상자·장애물 생성 및 `— Artifact —`의 `Drop`으로 `시스트의 가짜 날개`를 얻어 그림자가 겹치지 않는지 확인한다. 방 이동 후 그림자 중복 여부, 나무 위 칸 통과, 파괴/획득 뒤 사라짐, 큰 보스·플레이어 크기 변화 시 접지 위치와 진하기를 확인한다.
+
+### 에셋별 그림자 검수 페이지 (2026-10-10)
+
+- `output/ground-shadow-review/index.html`은 현재 게임 프리팹·상태·아이템 76종의 정지 모습을 보여준다. Unity에서 실제 바닥, 몸체, `GroundShadow`를 함께 렌더링한 기본 이미지와 분리 레이어를 사용한다. 이동·공격 애니메이션 및 실제 방 배치는 별도 Play 검수 대상이다. 프리팹에 남아 있는 임시 표시도 그대로 나온다.
+- 에셋을 선택해 너비 배율·두께·위치 X/Y·진하기를 개별 조절한다. +X는 오른쪽, +Y는 위쪽이며 위치 1은 Unity 1단위다. 조절 시 분리 레이어로 합성하고, 기본값/초기화 상태는 Unity 원본 렌더를 표시한다. 변경값은 브라우저에만 보관되며 `조절값 복사` 또는 `조절값 JSON 저장`으로 전달한다. 게임 설정에는 자동 반영되지 않는다.
+- 실제 게임 설정은 Edit Mode에서 대상 프리팹 root에 `GroundShadow`를 추가하고 Inspector 값을 저장한다. Play 중 자동으로 붙은 컴포넌트의 값은 Play 종료 후 사라진다. 사용자 검수한 67종은 `Assets/Resources/GroundShadowProfiles.json`에서 ID별 수치를 읽는다. 부스러기 색상·장애물 종류·상자 개폐·아이템/NPC 변화도 자동으로 선택한다. 공용 설정 대상의 개별 Inspector 값을 영구 지정하려면 `Use Shared Profile`을 끄고 프리팹에 저장한다.
+- 다시 만들기: Unity 배치 전용 `TrickalFanGame.Editor.GroundShadowPreviewExporter.ExportBatch` (`-batchmode -quit`, 그래픽 렌더가 필요하므로 `-nographics` 제외) 실행 후 `python scripts/build-ground-shadow-review.py`. Python에는 Pillow가 필요하다. 생성기는 HTML, 대표 모음 `overview.png`, 전체 모음 7장을 만든다. 원본 씬·프리팹은 저장하지 않는다.
+- 확인 근거: Unity 6000.3.22f1 배치 종료 코드 0 (`output/ground-shadow-review-export.log`), 76종 × 4개 레이어 생성, 브라우저 검색·진하기/위치 조절·초기화 확인. 최종 미술 판단 및 개별 값의 게임 반영은 사용자 검수 후 진행한다.
+
+### 확정한 에셋별 그림자 수치 반영 (2026-10-10)
+
+- 사용자가 전달한 67종의 너비 배율·두께·위치·진하기를 `Assets/Resources/GroundShadowProfiles.json`에 저장했다. 76종 중 목록에 없는 9종은 기존 설정을 유지했다. 변경된 기본값으로 실제 Unity 렌더 및 검수 페이지를 갱신했다.
+- 고정 적/보스 및 반죽·크림 14개 프리팹 root의 `GroundShadow.Profile Id`로 이름 변경에도 유지되는 참조를 구성한다. 동적 표시 대상은 실제 컴포넌트의 ID/상태로 선택한다. 수치 적용은 상태 ID가 바뀔 때만 수행하며, 수동 Inspector 조절은 같은 상태 동안 유지된다. `Use Shared Profile`을 끄면 상태가 바뀌어도 수동 설정을 보존한다.
+- 연결 재실행 메뉴: `Trickal Fan Game/Artwork/Apply Reviewed Ground Shadow Profiles`. 배치: `TrickalFanGame.Editor.GroundShadowProfileSetup.ApplyAndVerifyBatch` (`-batchmode -quit`, 렌더 필요). 14개 프리팹만 저장하며 런타임 그림자 자식은 저장하지 않는다. 씬은 저장하지 않는다.
+- 상태 전환 검증 메뉴: `Trickal Fan Game/Artwork/Verify Reviewed Ground Shadow Profiles`, 배치: `TrickalFanGame.Editor.GroundShadowProfileSetup.Verify` (`-batchmode -quit`). 같은 오브젝트의 부스러기 3색, 상자 6상태, 이름 변경 후 참조, 수동 설정 보존과 프리팹 자식 중복 방지를 확인한다. `output/ground-shadow-profile-transitions.log` 성공 종료 코드 0.
+- `output/ground-shadow-profile-apply.log`에서 기존 공용 그림자 검증 및 76종 렌더 성공/종료 코드 0을 확인했고, 출력 manifest와 사용자 수치의 67종 × 5필드 일치 및 나머지 9종 불변도 검사했다. 실제 방에서 움직임·파괴·획득을 포함한 최종 Play 미술 검수는 별도다.
+
+- 후속 `GroundShadowPlayVerification.RunBatch`에서도 15종 생성·재활성화 및 구덩이 2종 제외 검증 성공 로그를 확인했다 (`output/ground-shadow-profile-play.log`).
+
+### 그림자·2칸 나무의 공용 원화 연결
+
+그림자 미리보기와 상태별 선택에 필요한 요정왕국 원화 45장, Resources 카탈로그, 공용 표시 코드와 기존 게임 프리팹 연결을 포함한다. 표시용 프리팹은 `Assets/Prefabs/FairyKingdomArtwork/`, 별도 미리보기 씬은 `Assets/Scenes/FairyKingdomArtworkPreview.unity`다. `Trickal Fan Game/Artwork/Verify Fairy Kingdom 45 Sprites`로 원화 참조와 나무 1×2 표시·하단 1×1 충돌을 확인한다. 재구성 메뉴 `Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites`는 씬·프리팹을 저장하므로 기존 변경을 확인한 뒤 사용한다. 구덩이는 기존 연결 윤곽 렌더를 우선하며 원화 표시로 덮어쓰지 않는다. 방 Layout·상태이상 프레임 구현은 이 커밋에 포함하지 않는다.

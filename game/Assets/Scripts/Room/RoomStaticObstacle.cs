@@ -8,6 +8,8 @@ namespace TrickalFanGame.Room
     [RequireComponent(typeof(Collider2D))]
     public sealed class RoomStaticObstacle : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         [SerializeField] private string obstacleId;
         [Tooltip("나무 같은 높은 장애물입니다. 켜면 비행 중인 플레이어도 지나가지 못합니다.")]
         [SerializeField] private bool blocksFlight;

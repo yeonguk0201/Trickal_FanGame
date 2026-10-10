@@ -22,9 +22,6 @@ namespace TrickalFanGame.Player
         private const float ShadowGap = 0.12f;
         private const float ShadowBobSpeed = 3f;
         private const float ShadowBobScale = 0.08f;
-
-        private static Sprite shadowSprite;
-
         private readonly List<Collider2D> bodyColliders = new();
         private readonly List<Collider2D> nearbyColliders = new();
         private Rigidbody2D body;
@@ -137,40 +134,11 @@ namespace TrickalFanGame.Player
 
             // The shadow keeps its world size even if the player root is scaled.
             Vector3 parentScale = transform.lossyScale;
-            shadowBaseScale = new Vector3(1f / Mathf.Max(0.01f, Mathf.Abs(parentScale.x)),
-                1f / Mathf.Max(0.01f, Mathf.Abs(parentScale.y)), 1f);
+            shadowBaseScale = new Vector3(ShadowWidth / Mathf.Max(0.01f, Mathf.Abs(parentScale.x)),
+                ShadowWidth * 12f / 32f / Mathf.Max(0.01f, Mathf.Abs(parentScale.y)), 1f);
             shadowObject.transform.localScale = shadowBaseScale;
         }
 
-        private static Sprite GetShadowSprite()
-        {
-            if (shadowSprite != null) return shadowSprite;
-            const int width = 32;
-            const int height = 12;
-            Texture2D texture = new(width, height, TextureFormat.RGBA32, false)
-            {
-                name = "Flight Shadow",
-                filterMode = FilterMode.Bilinear,
-                wrapMode = TextureWrapMode.Clamp,
-                hideFlags = HideFlags.HideAndDontSave,
-            };
-            Color32[] pixels = new Color32[width * height];
-            for (int y = 0; y < height; y++)
-            for (int x = 0; x < width; x++)
-            {
-                float dx = (x + 0.5f) / width * 2f - 1f;
-                float dy = (y + 0.5f) / height * 2f - 1f;
-                float alpha = Mathf.Clamp01(1f - (dx * dx + dy * dy));
-                pixels[y * width + x] = new Color32(255, 255, 255, (byte)(alpha * 255f));
-            }
-
-            texture.SetPixels32(pixels);
-            texture.Apply(false, true);
-            shadowSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f),
-                width / ShadowWidth);
-            shadowSprite.name = "Flight Shadow";
-            shadowSprite.hideFlags = HideFlags.HideAndDontSave;
-            return shadowSprite;
-        }
+        private static Sprite GetShadowSprite() => TrickalFanGame.Frontend.GroundShadow.SharedSprite;
     }
 }

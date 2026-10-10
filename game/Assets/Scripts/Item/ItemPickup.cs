@@ -6,6 +6,8 @@ namespace TrickalFanGame.Item
     [RequireComponent(typeof(Collider2D))]
     public sealed class ItemPickup : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         [SerializeField] private ItemDefinition definition;
 
         public ItemDefinition Definition => definition;

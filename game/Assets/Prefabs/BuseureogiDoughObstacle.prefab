@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4916359766447381570}
   - component: {fileID: 2464849139078855152}
   - component: {fileID: 1786979094170764051}
+  - component: {fileID: 6256017015452741400}
   m_Layer: 6
   m_Name: BuseureogiDoughObstacle
   m_TagString: Untagged
@@ -168,7 +169,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 20
   currentShield: 0
@@ -182,7 +183,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b65f8e205289b64b91a50cb0721cb5a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.TestEnemy
   allowsSPDrop: 0
   destroyOnBossCollision: 1
+--- !u!114 &6256017015452741400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4595007371475726162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: BuseureogiDoughObstacle
+  useSharedProfile: 1

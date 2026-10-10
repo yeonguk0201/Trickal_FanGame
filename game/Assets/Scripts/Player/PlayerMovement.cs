@@ -8,6 +8,8 @@ namespace TrickalFanGame.Player
     [RequireComponent(typeof(PlayerActionState), typeof(DamageInvulnerability), typeof(KnockbackReceiver))]
     public sealed class PlayerMovement : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         private Rigidbody2D body;
         private Health health;
         private PlayerStats stats;

@@ -240,7 +240,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 6450698223841858928}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -272,8 +272,8 @@ Transform:
   m_GameObject: {fileID: 346248635410711741}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 6.25, y: 6.25, z: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1.127395716, y: 1.127395716, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2715929327466602715}
@@ -327,8 +327,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.13, g: 0.4, b: 0.2, a: 1}
+  m_Sprite: {fileID: 21300000, guid: f68c9e6f138d4514bc83caf5d8966c5d, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -439,7 +439,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 3678792496148233502}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -547,7 +547,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 4258206608404286698}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -655,7 +655,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 8783310449410732722}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -707,7 +707,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b50866f6b93d4a4a83c9548360366c79, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomDoorSlot
   direction: 1
   doorway: {fileID: 5608681601300418958}
@@ -944,7 +944,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc18857c8c9f473280116b249d02d99a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DoorController
   blocker: {fileID: 8543706625013942530}
   interiorBlocker: {fileID: 8191917329612366319}
@@ -963,7 +963,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8ee17f91b5fac24a85dc1cb66476f67, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.FairyVillageDoorArtwork
   variants:
   - kind: 4
@@ -1102,7 +1102,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 1239101935507795222}
   textureRepeat: {x: 1, y: 1}
@@ -1210,7 +1210,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 1249314757385441867}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -1312,7 +1312,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshPro
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1530,7 +1530,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 4096256839130972102}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -1967,7 +1967,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4aaca007b1bfb0747ba0cf65a528693b, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ClosedDoorBoundary
   doorway: {fileID: 343829676911697691}
 --- !u!1 &1628267341806516856
@@ -2154,7 +2154,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b50866f6b93d4a4a83c9548360366c79, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomDoorSlot
   direction: 3
   doorway: {fileID: 3401422406641972060}
@@ -2285,7 +2285,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a79e7184c5a4caca82ad905861268f2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomDoorway
   graph: {fileID: 0}
   source: {fileID: 0}
@@ -2386,7 +2386,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7ab8cf7d189d42c189099fa7c39de22f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.ItemDropSource
   pickupPrefab: {fileID: 8014471090233393603, guid: 78154cfb2dc22df4cb6bfe3343fe2ac6, type: 3}
   itemPool:
@@ -2403,7 +2403,7 @@ MonoBehaviour:
   dropPoint: {fileID: 195814053685182730}
   dropParent: {fileID: 7758334852147253792}
   runProgress: {fileID: 0}
-  rewardId: 
+  rewardId:
 --- !u!114 &587032797341093651
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2414,7 +2414,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e7549085d980444c8235ba27a7bf231c, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.RewardRoom
   floorNumber: 1
   roomNumber: 1
@@ -2527,7 +2527,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 4135056386884301934}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -2700,7 +2700,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4aaca007b1bfb0747ba0cf65a528693b, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ClosedDoorBoundary
   doorway: {fileID: 567377489468122488}
 --- !u!1 &2455469012673072203
@@ -2805,7 +2805,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 3423278103572841763}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -2913,7 +2913,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 5400059811539160364}
   textureRepeat: {x: 1, y: 1}
@@ -3021,7 +3021,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 2340721424147385447}
   textureRepeat: {x: 1, y: 1}
@@ -3116,7 +3116,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a79e7184c5a4caca82ad905861268f2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomDoorway
   graph: {fileID: 0}
   source: {fileID: 0}
@@ -3413,7 +3413,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 2993200299069849951}
   textureRepeat: {x: 1, y: 1}
@@ -3464,7 +3464,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aaf2a03c2b1c468a9942b3f0ce83c9a1, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomPrefab
   node: {fileID: 6462173929552859220}
   controller: {fileID: 7491593608512573722}
@@ -3484,7 +3484,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f2f78f7bf9a4f7dbe2f81f8fa26e9c1, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomNode
   roomId: floor-01-room-01
   floorNumber: 1
@@ -3737,7 +3737,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 7636010604267828552}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -3769,8 +3769,8 @@ Transform:
   m_GameObject: {fileID: 3392404638890600738}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 6.25, y: 6.25, z: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1.127395716, y: 1.127395716, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4462291268508905223}
@@ -3824,8 +3824,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.13, g: 0.4, b: 0.2, a: 1}
+  m_Sprite: {fileID: 21300000, guid: f68c9e6f138d4514bc83caf5d8966c5d, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -4230,7 +4230,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 7985213303950163287}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -4388,7 +4388,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc18857c8c9f473280116b249d02d99a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DoorController
   blocker: {fileID: 1488909550179292939}
   interiorBlocker: {fileID: 1035714142417778888}
@@ -4407,7 +4407,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8ee17f91b5fac24a85dc1cb66476f67, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.FairyVillageDoorArtwork
   variants:
   - kind: 4
@@ -4538,7 +4538,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 19d40a6a8d674687a0983511fda85f02, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomController
   floorNumber: 1
   roomNumber: 1
@@ -4595,6 +4595,7 @@ GameObject:
   - component: {fileID: 3929677865855464565}
   - component: {fileID: 7545905884105449772}
   - component: {fileID: 899746717782057785}
+  - component: {fileID: 1938582424826019413}
   m_Layer: 8
   m_Name: Tree tree-01
   m_TagString: Untagged
@@ -4674,7 +4675,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e517c354dfa3534e9b86f0e65b4a649, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DestructibleObstacle
   obstacleId: tree-01
   variantId: tree
@@ -4686,6 +4687,22 @@ MonoBehaviour:
   blocksFlight: 1
   burnHits: 2
   burningColor: {r: 0.95, g: 0.45, b: 0.1, a: 1}
+--- !u!114 &1938582424826019413
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4062683695803806989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
+  artworkId: obstacle-tree
+  mode: 1
+  visual: {fileID: 2513877478610740968}
+  localWidth: 1
 --- !u!1 &4218338371224427447
 GameObject:
   m_ObjectHideFlags: 0
@@ -4732,7 +4749,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b50866f6b93d4a4a83c9548360366c79, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomDoorSlot
   direction: 0
   doorway: {fileID: 567377489468122488}
@@ -4890,7 +4907,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 6528898050526071792}
   textureRepeat: {x: 1, y: 1}
@@ -4998,7 +5015,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 8291812232294057140}
   textureRepeat: {x: 1, y: 1}
@@ -5106,7 +5123,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 1256122314492272786}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -5214,7 +5231,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 5748670600319506277}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -5353,7 +5370,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 1609718461091257356}
   textureRepeat: {x: 1, y: 1}
@@ -5601,8 +5618,8 @@ Transform:
   m_GameObject: {fileID: 5089407173972018917}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 6.25, y: 6.25, z: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1.127395716, y: 1.127395716, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3929677865855464565}
@@ -5656,8 +5673,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.13, g: 0.4, b: 0.2, a: 1}
+  m_Sprite: {fileID: 21300000, guid: f68c9e6f138d4514bc83caf5d8966c5d, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -5768,7 +5785,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 4956876165460106895}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -5876,7 +5893,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 7416211243144733498}
   textureRepeat: {x: 1, y: 1}
@@ -6015,7 +6032,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 7171204260814460143}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -6110,7 +6127,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4aaca007b1bfb0747ba0cf65a528693b, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ClosedDoorBoundary
   doorway: {fileID: 3401422406641972060}
 --- !u!1 &5432529807623984062
@@ -6215,7 +6232,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 7232328840604950549}
   textureRepeat: {x: 1, y: 1}
@@ -6232,6 +6249,7 @@ GameObject:
   - component: {fileID: 4462291268508905223}
   - component: {fileID: 7964763245518437391}
   - component: {fileID: 6196316966183617564}
+  - component: {fileID: 6508107681297382066}
   m_Layer: 8
   m_Name: Tree tree-04
   m_TagString: Untagged
@@ -6311,7 +6329,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e517c354dfa3534e9b86f0e65b4a649, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DestructibleObstacle
   obstacleId: tree-04
   variantId: tree
@@ -6323,6 +6341,22 @@ MonoBehaviour:
   blocksFlight: 1
   burnHits: 2
   burningColor: {r: 0.95, g: 0.45, b: 0.1, a: 1}
+--- !u!114 &6508107681297382066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5445487425075537234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
+  artworkId: obstacle-tree
+  mode: 1
+  visual: {fileID: 7368063955741545970}
+  localWidth: 1
 --- !u!1 &5738901772523778843
 GameObject:
   m_ObjectHideFlags: 0
@@ -6425,7 +6459,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 3434312120976536872}
   textureRepeat: {x: 1, y: 1}
@@ -7021,6 +7055,7 @@ GameObject:
   - component: {fileID: 5839876108403790158}
   - component: {fileID: 1010687119147842465}
   - component: {fileID: 8150561891297467159}
+  - component: {fileID: 6138670622033888264}
   m_Layer: 8
   m_Name: Tree tree-02
   m_TagString: Untagged
@@ -7100,7 +7135,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e517c354dfa3534e9b86f0e65b4a649, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DestructibleObstacle
   obstacleId: tree-02
   variantId: tree
@@ -7112,6 +7147,22 @@ MonoBehaviour:
   blocksFlight: 1
   burnHits: 2
   burningColor: {r: 0.95, g: 0.45, b: 0.1, a: 1}
+--- !u!114 &6138670622033888264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6358912257788987868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
+  artworkId: obstacle-tree
+  mode: 1
+  visual: {fileID: 1919445109202354794}
+  localWidth: 1
 --- !u!1 &6433775775499923090
 GameObject:
   m_ObjectHideFlags: 0
@@ -7378,7 +7429,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a79e7184c5a4caca82ad905861268f2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomDoorway
   graph: {fileID: 0}
   source: {fileID: 0}
@@ -7539,7 +7590,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc18857c8c9f473280116b249d02d99a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DoorController
   blocker: {fileID: 6455693858707172438}
   interiorBlocker: {fileID: 9006626784704840403}
@@ -7558,7 +7609,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8ee17f91b5fac24a85dc1cb66476f67, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.FairyVillageDoorArtwork
   variants:
   - kind: 4
@@ -7778,7 +7829,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc18857c8c9f473280116b249d02d99a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DoorController
   blocker: {fileID: 4910202412761433346}
   interiorBlocker: {fileID: 8704514036196558784}
@@ -7797,7 +7848,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8ee17f91b5fac24a85dc1cb66476f67, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.FairyVillageDoorArtwork
   variants:
   - kind: 4
@@ -7880,7 +7931,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b50866f6b93d4a4a83c9548360366c79, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomDoorSlot
   direction: 2
   doorway: {fileID: 343829676911697691}
@@ -7989,7 +8040,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 6261922668161632307}
   textureRepeat: {x: 1, y: 1}
@@ -8097,7 +8148,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 964067239006860056}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -8205,7 +8256,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 822372531801797942}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -8313,7 +8364,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 3263005596436137610}
   textureRepeat: {x: 1, y: 1}
@@ -8421,7 +8472,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 6958893706642129177}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -8547,7 +8598,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4aaca007b1bfb0747ba0cf65a528693b, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ClosedDoorBoundary
   doorway: {fileID: 5608681601300418958}
 --- !u!1 &7818025803106817674
@@ -8652,7 +8703,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 1408176401437437252}
   textureRepeat: {x: 1, y: 1}
@@ -8760,7 +8811,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 335763729776967059}
   textureRepeat: {x: 1, y: 1}
@@ -8979,8 +9030,8 @@ Transform:
   m_GameObject: {fileID: 8166836876189876454}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 6.25, y: 6.25, z: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1.127395716, y: 1.127395716, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5839876108403790158}
@@ -9034,8 +9085,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.13, g: 0.4, b: 0.2, a: 1}
+  m_Sprite: {fileID: 21300000, guid: f68c9e6f138d4514bc83caf5d8966c5d, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -9086,6 +9137,7 @@ GameObject:
   - component: {fileID: 2715929327466602715}
   - component: {fileID: 7093848580752239250}
   - component: {fileID: 2949227465005911998}
+  - component: {fileID: 4063163465881121706}
   m_Layer: 8
   m_Name: Tree tree-03
   m_TagString: Untagged
@@ -9165,7 +9217,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e517c354dfa3534e9b86f0e65b4a649, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.DestructibleObstacle
   obstacleId: tree-03
   variantId: tree
@@ -9177,6 +9229,22 @@ MonoBehaviour:
   blocksFlight: 1
   burnHits: 2
   burningColor: {r: 0.95, g: 0.45, b: 0.1, a: 1}
+--- !u!114 &4063163465881121706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8264066773833865423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
+  artworkId: obstacle-tree
+  mode: 1
+  visual: {fileID: 7272538103809045907}
+  localWidth: 1
 --- !u!1 &8417279730900450431
 GameObject:
   m_ObjectHideFlags: 0
@@ -9420,7 +9488,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 1694447018956451522}
   textureRepeat: {x: 1, y: 1}
@@ -9528,7 +9596,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 3482101361204222385}
   textureRepeat: {x: 1, y: 1}
@@ -9870,7 +9938,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a79e7184c5a4caca82ad905861268f2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.RoomDoorway
   graph: {fileID: 0}
   source: {fileID: 0}
@@ -9980,7 +10048,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 1838628362247011336}
   textureRepeat: {x: 1, y: 0.99999994}
@@ -10088,7 +10156,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b29aef929494004cbb1dba9e28d9b50, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ConnectedRoomPatch
   artwork: {fileID: 2952708325455635029}
   textureRepeat: {x: 1, y: 1}

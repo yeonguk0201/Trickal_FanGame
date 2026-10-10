@@ -6,6 +6,8 @@ namespace TrickalFanGame.Player
     [RequireComponent(typeof(Collider2D))]
     public sealed class SPPickup : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         private bool isCollected;
 
         public bool IsCollected => isCollected;

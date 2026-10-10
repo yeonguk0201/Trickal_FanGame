@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TrickalFanGame.Room;
+using TrickalFanGame.Frontend;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -109,35 +110,7 @@ namespace TrickalFanGame.Editor
                     Transform existing = container.Find(objectName);
                     GameObject tree = existing != null ? existing.gameObject : new GameObject(objectName);
                     tree.transform.SetParent(container, false);
-                    tree.transform.localPosition = TreeCells[index];
-                    tree.transform.localRotation = Quaternion.identity;
-                    tree.transform.localScale = Vector3.one;
-                    tree.layer = environment;
-                    BoxCollider2D collider = GetOrAdd<BoxCollider2D>(tree);
-                    collider.isTrigger = false;
-                    collider.offset = Vector2.zero;
-                    collider.size = Vector2.one;
-
-                    Transform visualTransform = tree.transform.Find(TreeVisualName);
-                    GameObject visual = visualTransform != null ? visualTransform.gameObject : new GameObject(TreeVisualName);
-                    visual.transform.SetParent(tree.transform, false);
-                    visual.transform.localPosition = Vector3.zero;
-                    visual.layer = environment;
-                    SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(visual);
-                    renderer.sprite = sprite;
-                    renderer.color = TreeColor;
-                    renderer.sortingOrder = 1;
-                    Vector2 spriteSize = sprite.bounds.size;
-                    visual.transform.localScale = new Vector3(1f / spriteSize.x, 1f / spriteSize.y, 1f);
-
-                    // Before Obstacle-7 a tree was a fixed RoomStaticObstacle.
-                    if (tree.TryGetComponent(out RoomStaticObstacle fixedObstacle))
-                        Object.DestroyImmediate(fixedObstacle);
-                    DestructibleObstacle obstacle = GetOrAdd<DestructibleObstacle>(tree);
-                    obstacle.Configure(id, TreeHits, null, renderer);
-                    obstacle.ConfigureFixedKind(DestructibleObstacle.TreeVariantId, TreeColor, TreeCrackedColor, true,
-                        DestructibleObstacle.TreeBurnHits, TreeBurningColor);
-                    if (!obstacle.TryValidate(out string error)) throw new InvalidOperationException(error);
+                    ConfigureTree(tree, id, TreeCells[index], sprite, environment);
                     kept.Add(tree);
                 }
 
@@ -150,6 +123,51 @@ namespace TrickalFanGame.Editor
             {
                 PrefabUtility.UnloadPrefabContents(root);
             }
+        }
+
+        // One tree on a Layout cell. The room Layout importer (T7) places its trees through the same path.
+        public static void ConfigureTree(GameObject tree, string id, Vector2 cell, Sprite sprite, int environment)
+        {
+            tree.transform.localPosition = cell;
+            tree.transform.localRotation = Quaternion.identity;
+            tree.transform.localScale = Vector3.one;
+            tree.layer = environment;
+            BoxCollider2D collider = GetOrAdd<BoxCollider2D>(tree);
+            collider.isTrigger = false;
+            collider.offset = Vector2.zero;
+            collider.size = Vector2.one;
+
+            Transform visualTransform = tree.transform.Find(TreeVisualName);
+            GameObject visual = visualTransform != null ? visualTransform.gameObject : new GameObject(TreeVisualName);
+            visual.transform.SetParent(tree.transform, false);
+            visual.transform.localPosition = Vector3.zero;
+            visual.layer = environment;
+            SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(visual);
+            renderer.sprite = sprite;
+            renderer.color = TreeColor;
+            renderer.sortingOrder = 1;
+            Vector2 spriteSize = sprite.bounds.size;
+            visual.transform.localScale = new Vector3(1f / spriteSize.x, 1f / spriteSize.y, 1f);
+
+            // Before Obstacle-7 a tree was a fixed RoomStaticObstacle.
+            if (tree.TryGetComponent(out RoomStaticObstacle fixedObstacle))
+                Object.DestroyImmediate(fixedObstacle);
+            DestructibleObstacle obstacle = GetOrAdd<DestructibleObstacle>(tree);
+            obstacle.Configure(id, TreeHits, null, renderer);
+            obstacle.ConfigureFixedKind(DestructibleObstacle.TreeVariantId, TreeColor, TreeCrackedColor, true,
+                DestructibleObstacle.TreeBurnHits, TreeBurningColor);
+            // Layout import and repeated setup must retain the two-cell artwork and one-cell collider.
+            FairyKingdomArtworkView artwork = GetOrAdd<FairyKingdomArtworkView>(tree);
+            artwork.Configure("obstacle-tree", FairyKingdomArtworkMode.Obstacle, renderer, 1f);
+            Sprite treeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+                FairyKingdomArtworkSetup.ArtRoot + "/Obstacles/obstacle-tree.png");
+            if (treeSprite != null)
+            {
+                renderer.sprite = treeSprite;
+                renderer.color = Color.white;
+                FairyKingdomArtworkView.ConfigureTreeVisual(renderer);
+            }
+            if (!obstacle.TryValidate(out string error)) throw new InvalidOperationException(error);
         }
 
         private static void RegisterTemplate(RoomTemplateDefinition added)

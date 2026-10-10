@@ -30,7 +30,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2311666414337553906, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: walkReferenceSprite
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: 4cc843696874e3947b0b3bed063a7340, type: 3}
     - target: {fileID: 2311666414337553906, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: walkFrames.Array.size
@@ -38,19 +38,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2311666414337553906, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: 'walkFrames.Array.data[0]'
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: ed937fe17f85c2741914520af70d7416, type: 3}
     - target: {fileID: 2311666414337553906, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: 'walkFrames.Array.data[1]'
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: dd368048ce1200541ac010d9705fb886, type: 3}
     - target: {fileID: 2311666414337553906, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: 'walkFrames.Array.data[2]'
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: 21931a10fc6db274188eb75e90a5eb52, type: 3}
     - target: {fileID: 2311666414337553906, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: 'walkFrames.Array.data[3]'
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: c0152b4de4a442a448264ae7bbdbeb34, type: 3}
     - target: {fileID: 2726524135096534971, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: damageTier
@@ -62,7 +62,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4592771066635862529, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_Sprite
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: 4cc843696874e3947b0b3bed063a7340, type: 3}
     - target: {fileID: 4592771066635862529, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_Color.b
@@ -122,23 +122,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6354528119158790540, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: referenceSprite
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: 4cc843696874e3947b0b3bed063a7340, type: 3}
     - target: {fileID: 6354528119158790540, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: 'frames.Array.data[0]'
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: fd1d11449335eb64a8e65e6d2c40978c, type: 3}
     - target: {fileID: 6354528119158790540, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: 'frames.Array.data[1]'
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: 75fdf711487ac464fb34c9e1f7473fc7, type: 3}
     - target: {fileID: 6354528119158790540, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: 'frames.Array.data[2]'
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: ec7bbbf76e77021418001b6408bce82b, type: 3}
     - target: {fileID: 6354528119158790540, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: 'frames.Array.data[3]'
-      value: 
+      value:
       objectReference: {fileID: 21300000, guid: 5cd6b2b8843673a439728067fd197cb7, type: 3}
     - target: {fileID: 8647675937649764220, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: moveSpeed
@@ -147,5 +147,31 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1923137235884895029}
   m_SourcePrefab: {fileID: 100100000, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+--- !u!1 &4653349662447937955 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+  m_PrefabInstance: {fileID: 634039706426779440}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1923137235884895029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4653349662447937955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: SansamoEnemy
+  useSharedProfile: 1

@@ -230,6 +230,7 @@ namespace TrickalFanGame.Enemy
 
         private void OnEnable()
         {
+            TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
             if (health != null && !health.IsDead && State == BossActionState.Defeated)
                 SetState(BossActionState.Idle, 0f);
         }

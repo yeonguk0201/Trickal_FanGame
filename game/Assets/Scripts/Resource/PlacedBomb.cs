@@ -9,6 +9,8 @@ namespace TrickalFanGame.Resource
     [DisallowMultipleComponent]
     public sealed class PlacedBomb : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         public const float DefaultFuseDuration = 0.75f;
         // 2.5 until Obstacle-5 (2026-10-06 decision): exploding obstacles share this explosion.
         public const float DefaultExplosionRadius = 2f;

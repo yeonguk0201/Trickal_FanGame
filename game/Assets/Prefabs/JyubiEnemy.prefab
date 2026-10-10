@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 4269060093392529854}
   - component: {fileID: 8430337977897414036}
   - component: {fileID: 6529102546216898977}
+  - component: {fileID: 8392679841437909941}
+  - component: {fileID: 3348534805829953870}
   m_Layer: 6
   m_Name: JyubiEnemy
   m_TagString: Untagged
@@ -90,8 +92,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: bfcc03dd03fa881439a030200827ec91, type: 3}
-  m_Color: {r: 0.75, g: 0.6, b: 1, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 1a9790bccd724b1d948bce58a74b5508, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -173,7 +175,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
   maxHealth: 1
   currentShield: 0
@@ -188,7 +190,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b65f8e205289b64b91a50cb0721cb5a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.TestEnemy
   allowsSPDrop: 1
   destroyOnBossCollision: 0
@@ -202,7 +204,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
   damageTier: 0
   cooldown: 1
@@ -217,7 +219,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f54127202aaa284d837f6e0e8434051, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyChase
   moveSpeed: 5.5
   detectionRange: 20
@@ -234,7 +236,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bf1b41879624f79ada69acb4b727f91, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
@@ -249,7 +251,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa527e4c75f4de29f4975b643b25cab, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyBehaviorContext
 --- !u!114 &6529102546216898977
 MonoBehaviour:
@@ -261,5 +263,39 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e8d4335d3f1170429a1fefb5896262d, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyFlight
+--- !u!114 &8392679841437909941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440243880890223438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
+  artworkId: jyubi
+  mode: 0
+  visual: {fileID: 8826787595993244343}
+  localWidth: 1.254
+--- !u!114 &3348534805829953870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440243880890223438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: JyubiEnemy
+  useSharedProfile: 1

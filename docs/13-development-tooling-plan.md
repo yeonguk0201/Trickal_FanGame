@@ -470,3 +470,10 @@ Unity 6000.3.22f1 배치 종료 코드 0과 성공 로그를 확인했다. Play 
 - [x] Unity 자동 검증에서 3×3 및 ㄱ의 Collider 분할 방식에 따른 픽셀 완전 일치, ㅁ 중앙 투명도, 3×3 내부 색상 다양성·밝기, 대각선 분리, 중복 방지 및 충돌 범위 보존을 확인했다. 최종 실행 기록은 `output/pit-contour-v2-final.log`와 [작업 기록](./art-prompts/pit-tiles-v2/README.md)을 따른다.
 - [ ] 실제 SampleScene Play 조작 확인과 사용자 최종 미술 검수.
 - 사용법은 [개발 환경](./05-development-setup.md)의 구덩이 v2 항목을 따른다.
+
+### 에셋별 공용 그림자 검수 도구 (2026-10-10)
+
+- [x] `GroundShadowPreviewExporter.ExportBatch`로 실제 프리팹·변형·상태 76종의 Unity 합성 및 바닥/몸체/그림자 레이어를 생성했다. Unity 6000.3.22f1 성공 종료 코드 0과 이미지 생성을 확인했다 (`output/ground-shadow-review-export.log`). 원본 씬·프리팹은 저장하지 않는다.
+- [x] `scripts/build-ground-shadow-review.py`로 검색·종류 필터·개별 너비/두께/위치/진하기 조절·원본 비교·초기화·값 전달용 로컬 페이지와 모음 이미지를 생성했다. 브라우저에서 검색, 진하기/위치 변경 및 초기화를 확인했다.
+- [x] 사용자 제공 67종 검수 수치를 공용 JSON 및 상태별 런타임 선택으로 반영했다. 실제 Unity 재렌더와 67종 전 수치 일치, 미지정 9종 불변, 동일 오브젝트의 색상·개폐 전환과 수동 설정 보존을 검증했다 (`output/ground-shadow-profile-apply.log`, `output/ground-shadow-profile-transitions.log`, 종료 코드 0).
+- 실행 및 보관 범위는 `docs/05-development-setup.md`의 에셋별 그림자 검수 페이지를 따른다.

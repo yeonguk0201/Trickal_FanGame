@@ -249,6 +249,10 @@ namespace TrickalFanGame.Enemy
                     minionSpacing * minionSpacing)) continue;
                 GameObject instance = Instantiate(minionPrefab, position, Quaternion.identity);
                 instance.name = "Buseureogi Crumb Minion";
+                var artwork = instance.GetComponent<TrickalFanGame.Frontend.FairyKingdomArtworkView>();
+                if (artwork != null)
+                    artwork.SetArtwork(new[] { "crumb-minion-pink", "crumb-minion-cream", "crumb-minion-chocolate" }
+                        [(start + offset) % 3]);
                 minions.Add(instance);
                 boss?.RegisterOwnedObject(instance);
                 EnemyBehaviorContext context = instance.GetComponent<EnemyBehaviorContext>();

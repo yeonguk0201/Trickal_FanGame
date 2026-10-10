@@ -21,6 +21,8 @@ namespace TrickalFanGame.Room
     [RequireComponent(typeof(Collider2D), typeof(Rigidbody2D))]
     public sealed class TreasureChest : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         public const string LayerName = "Environment";
         // Units per second while pushed; the player walks at 5 and pushes a heart almost at that speed.
         public const float PushSpeed = 1.2f;

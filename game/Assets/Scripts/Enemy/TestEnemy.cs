@@ -6,6 +6,8 @@ namespace TrickalFanGame.Enemy
     [RequireComponent(typeof(Health))]
     public sealed class TestEnemy : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         [SerializeField] private bool allowsSPDrop = true;
         [SerializeField] private bool destroyOnBossCollision;
 

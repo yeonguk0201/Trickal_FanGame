@@ -21,6 +21,8 @@ namespace TrickalFanGame.Room
     [RequireComponent(typeof(Collider2D))]
     public sealed class DestructibleObstacle : MonoBehaviour
     {
+        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+
         public const int DefaultRequiredHits = 4;
         public const int TreeBurnHits = 2;
         public const string TreeVariantId = "tree";
