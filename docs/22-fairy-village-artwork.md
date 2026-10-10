@@ -163,3 +163,22 @@ Small의 승인된 47% 설정은 그대로 보존한다. 다른 크기는 등록
 - 검증: Unity 6000.3.22f1 배치에서 `FairyVillageArtworkVerification.SetupAndVerifyBatch`(30개 템플릿, Door-1 회귀 포함)와 `RoomLayoutImporterVerification.ImportAndVerifyBatch`가 종료 코드 0으로 통과했다. 사용자가 2026-10-11 Play 화면에서 벽 위치와 벽 옆 장애물을 확인했다.
 
 수동 확인: 새 Run에서 네 벽에 붙어 걸을 때 멈추는 위치, 벽 옆 칸의 장애물이 벽에 빈틈없이 붙는지, Small·Tall·Large에서 아래 덤불에 가려지는 정도가 어색하지 않은지 확인한다.
+
+## 그리기 순서 정리 (2026-10-11)
+
+플레이어와 바위의 순서 값이 둘 다 0이라 걷는 그림으로 바뀔 때마다 앞뒤가 뒤집혔고, 나무(1)는 항상 플레이어를 가렸다. 사용자 결정으로 아래 순서를 정했다.
+
+| 순서 값 | 대상 |
+| --- | --- |
+| 0 | 장애물, 적 |
+| 1 | 나무 아래 절반(충돌 칸), 상자 |
+| 2 | 플레이어(`PlayerMovement.BodySortingOrder`), 비행 중 4 |
+| 3·4 | 보상 상호작용 표시·안내 글자 |
+| 10 | 픽업 전부와 설치 폭탄(`PlayerMovement.AboveBodySortingOrder`) |
+| 15 | 나무 위 절반(`FairyKingdomArtworkView.TreeCanopySortingOrder`) |
+| 20 | 아래쪽 덤불 전경 |
+
+- 나무 위 절반은 Play 중에 `FairyKingdomArtworkView`가 같은 그림의 위쪽 절반을 한 번 더 그린다. 방 Prefab에는 나무 렌더러가 하나만 저장된다.
+- 비행 중 플레이어(4)와 보상 안내 글자(4)는 값이 같다. 날면서 보상 위에 있을 때만 겹치므로 그대로 뒀다.
+- 적은 0 그대로라 바위와 겹치면 앞뒤가 일정하지 않을 수 있다.
+- 검증: Unity 배치에서 `Week22Flight0Verification`, `Week20Special2Verification`, `Week23Shop1Verification`, `Week23Obstacle7Verification`, `FairyKingdomArtworkVerification`, `ErpinWalkAnimationVerification`, `GroundShadowVerification`이 종료 코드 0으로 통과했다. 나무 위 절반은 Play 전용이라 자동 검증이 없고, 사용자가 2026-10-11 Play 화면에서 확인했다.

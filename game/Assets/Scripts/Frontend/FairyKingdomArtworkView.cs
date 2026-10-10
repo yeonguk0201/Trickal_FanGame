@@ -23,6 +23,12 @@ namespace TrickalFanGame.Frontend
         private string shown;
         private Sprite fitted;
         private SpriteRenderer burningOverlay;
+        private SpriteRenderer treeCanopy;
+        // The upper half of a tree drawing, cut once per source sprite.
+        private static readonly System.Collections.Generic.Dictionary<Sprite, Sprite> CanopySprites = new();
+        // The part of a tree above its collider cell covers the player (2, flying 4), pickups and placed bombs (10);
+        // the lower hedge foreground (20) still covers it. The trunk cell keeps the obstacle order under the player.
+        public const int TreeCanopySortingOrder = 15;
         private bool referencesCached;
         public string ArtworkId => artworkId;
         public FairyKingdomArtworkMode Mode => mode;
@@ -92,6 +98,7 @@ namespace TrickalFanGame.Frontend
                 // The root marks the lower grid cell. Only the drawing reaches into the cell above it.
                 ConfigureTreeVisual(visual);
             }
+            RefreshTreeCanopy(id == "obstacle-tree" && visual.transform != transform);
             Rigidbody2D movingBody = GetComponent<Rigidbody2D>();
             if ((mode == FairyKingdomArtworkMode.Fixed || mode == FairyKingdomArtworkMode.Crumb) &&
                 GetComponent<TrickalFanGame.Enemy.TestEnemy>() != null && movingBody != null &&
@@ -115,6 +122,46 @@ namespace TrickalFanGame.Frontend
             }
             else if (mode == FairyKingdomArtworkMode.Chest || mode == FairyKingdomArtworkMode.Bomb)
                 visual.color = Color.white;
+            if (treeCanopy != null) treeCanopy.color = visual.color;
+        }
+
+        // Draws the half of the tree above its collider cell a second time, over actors and pickups. Play only, so
+        // room Prefabs keep a single tree renderer.
+        private void RefreshTreeCanopy(bool isTree)
+        {
+            if (!Application.isPlaying) return;
+            if (!isTree || visual.sprite == null)
+            {
+                if (treeCanopy != null) treeCanopy.enabled = false;
+                return;
+            }
+
+            if (treeCanopy == null)
+            {
+                GameObject child = new("Tree canopy artwork") { layer = visual.gameObject.layer };
+                child.transform.SetParent(visual.transform, false);
+                treeCanopy = child.AddComponent<SpriteRenderer>();
+            }
+
+            Sprite source = visual.sprite;
+            if (!CanopySprites.TryGetValue(source, out Sprite canopy) || canopy == null)
+            {
+                Rect rect = source.rect;
+                canopy = Sprite.Create(source.texture,
+                    new Rect(rect.x, rect.y + rect.height * 0.5f, rect.width, rect.height * 0.5f),
+                    new Vector2(0.5f, 0f), source.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+                canopy.name = source.name + " canopy";
+                CanopySprites[source] = canopy;
+            }
+
+            Bounds bounds = source.bounds;
+            treeCanopy.sprite = canopy;
+            treeCanopy.transform.localPosition = new Vector3(bounds.center.x, bounds.center.y, 0f);
+            treeCanopy.sharedMaterial = visual.sharedMaterial;
+            treeCanopy.flipX = visual.flipX;
+            treeCanopy.sortingLayerID = visual.sortingLayerID;
+            treeCanopy.sortingOrder = TreeCanopySortingOrder;
+            treeCanopy.enabled = visual.enabled;
         }
 
         public static void ConfigureTreeVisual(SpriteRenderer renderer)

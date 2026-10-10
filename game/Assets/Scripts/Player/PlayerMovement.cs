@@ -47,6 +47,13 @@ namespace TrickalFanGame.Player
         public Vector2 RootPositionForStanding(Vector2 standingPosition) =>
             standingPosition + ((Vector2)transform.position - StandingPosition);
 
+        // Obstacles and enemies draw at 0 and trees and chests at 1. With an equal order Unity may
+        // put either sprite in front and the choice changed with the walk frames, so the player always draws above
+        // them. Reward interaction markers (3) and the lower hedge foreground (20) still draw over the player.
+        public const int BodySortingOrder = 2;
+        // Pickups and placed bombs draw above the player, in flight too (BodySortingOrder + the flight boost).
+        public const int AboveBodySortingOrder = 10;
+
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
@@ -55,6 +62,7 @@ namespace TrickalFanGame.Player
             actionState = GetComponent<PlayerActionState>();
             knockback = GetComponent<KnockbackReceiver>();
             spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null) spriteRenderer.sortingOrder = BodySortingOrder;
             if (spriteRenderer != null && GetComponent<PlayerWalkAnimator>() == null)
             {
                 gameObject.AddComponent<PlayerWalkAnimator>();
