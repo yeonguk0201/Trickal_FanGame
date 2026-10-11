@@ -424,6 +424,15 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d0ea3c7e8ce04ec39a05449d853ce66f, type: 3}
   - {fileID: 21300000, guid: 601e226afd884dc2a89e3ed08e8d3430, type: 3}
   - {fileID: 21300000, guid: 777c7801c2ed4ff9871fc58d865d0421, type: 3}
+  goldenWalkFrames:
+  - {fileID: 21300000, guid: 961f7bee0b3242bca707f091e0867f50, type: 3}
+  - {fileID: 21300000, guid: cd44246e4d564cb5b053712750455f75, type: 3}
+  - {fileID: 21300000, guid: bb5195420e3348d184eaf345c5a5625a, type: 3}
+  - {fileID: 21300000, guid: f3b22f104afd47509351397815dbe955, type: 3}
+  - {fileID: 21300000, guid: 1ab9713f81c64bc89e489bdeec2988fe, type: 3}
+  - {fileID: 21300000, guid: a0a44b91dd4a44e390ed58a865dd17b9, type: 3}
+  - {fileID: 21300000, guid: 0441c9cc94d24db2b556f71fd874b810, type: 3}
+  - {fileID: 21300000, guid: eea188ffdec04e909ed7ddaf542964ff, type: 3}
   awakeningFrames:
   - {fileID: 21300000, guid: 6a260a3a3b724bb48a14ad10ffd6b501, type: 3}
   - {fileID: 21300000, guid: 5fb0eb48f07b1e34f91adadfca9eaa49, type: 3}

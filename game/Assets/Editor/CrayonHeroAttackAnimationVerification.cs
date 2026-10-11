@@ -234,6 +234,7 @@ namespace TrickalFanGame.Editor
                 Require(runtime.AwakenedSprite != null && animator.AwakeningFrameCount == 4,
                     "Awakening requires the supplied golden body and four transformation poses.");
                 Require(animator.GoldenAttackFrameCount == 14, "Golden phase requires fourteen attack poses.");
+                Require(animator.GoldenWalkFrameCount == 8, "Golden phase requires eight walking poses.");
                 for (int i = 0; i < 14; i++)
                 {
                     Sprite attack = animator.GetGoldenAttackFrame(i);
@@ -271,15 +272,34 @@ namespace TrickalFanGame.Editor
                 {
                     Set(runtime, "attackPoseIndex", i);
                     animator.RenderPose(0.5f, true);
-                    Require(animator.Artwork.sprite == (i < 0 ? runtime.AwakenedSprite : animator.GetGoldenAttackFrame(i)) && animator.Artwork.color == Color.white,
-                        "Golden attacks must use dedicated artwork and return to the correct awakened body.");
+                    Require(animator.Artwork.sprite == (i < 0 ? animator.GetGoldenWalkFrame(4) : animator.GetGoldenAttackFrame(i)) && animator.Artwork.color == Color.white,
+                        "Golden attacks must take priority over dedicated golden walking artwork.");
                 }
                 Set(runtime, "attackPoseIndex", -1);
+                Vector3 rootPosition = root.transform.localPosition, rootScale = root.transform.localScale;
+                for (int i = 0; i < 8; i++)
+                {
+                    Sprite walking = animator.GetGoldenWalkFrame(i);
+                    Require(walking != null && walking.rect.size == new Vector2(1024, 1024) &&
+                        walking.pivot == new Vector2(512, 512) && Mathf.Approximately(walking.pixelsPerUnit, 400f),
+                        "Golden walk frames must preserve registered canvas and PPU.");
+                    for (int earlier = 0; earlier < i; earlier++)
+                        Require(walking != animator.GetGoldenWalkFrame(earlier), "Golden walking poses must be distinct.");
+                    animator.RenderPose((i + 0.1f) / 8f, true);
+                    Require(animator.Artwork.sprite == walking && animator.Artwork.transform.localScale == Vector3.one,
+                        "Golden walking must play all eight poses without stretching.");
+                }
+                animator.RenderPose(1f, true);
+                Require(animator.Artwork.sprite == animator.GetGoldenWalkFrame(0), "Golden walking must loop.");
+                animator.RenderPose(0.5f, false);
+                Require(animator.Artwork.sprite == runtime.AwakenedSprite &&
+                    root.transform.localPosition == rootPosition && root.transform.localScale == rootScale,
+                    "Stopping must restore awakened idle without changing the physics transform.");
                 Set(boss, "currentPhase", 1);
                 Invoke(runtime, "ApplyPhasePresentation");
                 animator.RenderPose(0.1f, true);
                 Require(animator.Artwork.sprite == animator.GetWalkFrame(0), "Normal phase must retain original artwork.");
-                Debug.Log("Crayon Hero awakening verification passed: timed snap transformation, supplied golden body, no color multiplication and phase reset.");
+                Debug.Log("Crayon Hero awakening verification passed: timed snap transformation, eight golden walking poses, attack priority, awakened idle and phase reset.");
             }
             finally { UnityEngine.Object.DestroyImmediate(root); UnityEngine.Object.DestroyImmediate(target); }
         }

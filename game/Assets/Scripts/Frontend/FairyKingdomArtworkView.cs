@@ -80,7 +80,10 @@ namespace TrickalFanGame.Frontend
             }
             if (visual == null) return;
             string id = artworkId;
-            if (mode == FairyKingdomArtworkMode.Obstacle && obstacle != null)
+            // Trap-0: an obstacle trap (불, 가시 돌, 독버섯) keeps its trap drawing and the obstacle hit shading.
+            if (mode == FairyKingdomArtworkMode.Obstacle && TryGetComponent(out RoomTrap trap))
+                id = RoomTrap.ArtworkIdOf(trap.Kind);
+            else if (mode == FairyKingdomArtworkMode.Obstacle && obstacle != null)
                 id = "obstacle-" + obstacle.VariantId;
             else if (mode == FairyKingdomArtworkMode.Chest && chest != null)
                 id = "chest-" + chest.Kind.ToString().ToLowerInvariant() + (chest.IsOpened ? "-open" : "-closed");

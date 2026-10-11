@@ -109,6 +109,9 @@ namespace TrickalFanGame.Room
             visual = configuredVisual;
         }
 
+        // Trap-0: a placed copy of an obstacle trap Prefab takes its own ID and keeps the Prefab's kind.
+        public void ConfigureObstacleId(string configuredObstacleId) => obstacleId = configuredObstacleId;
+
         // A fixed kind authored in a Layout instead of resolved from a variant table.
         public void ConfigureFixedKind(string configuredVariantId, Color configuredIntactColor,
             Color configuredCrackedColor, bool configuredBlocksFlight, int configuredBurnHits,

@@ -129,6 +129,7 @@ namespace TrickalFanGame.Resource
             }
 
             DestructibleObstacle.DestroyByBombInCircle(center, explosionRadius);
+            RoomTrap.RemoveWebsByBombInCircle(center, explosionRadius);
             SecretPassageWall.OpenByBombInCircle(center, explosionRadius);
             TreasureChest.OpenByBombInCircle(center, explosionRadius);
             if (visual != null)
