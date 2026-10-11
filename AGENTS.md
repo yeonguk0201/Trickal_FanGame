@@ -49,6 +49,12 @@
 - 변경 위험에 비례하여 가장 가까운 자동 테스트부터 실행한다.
 - Backend 변경은 `backend/`에서 관련 Jest 테스트와 필요 시 `pnpm build`를 실행한다.
 - Web 변경은 `web/`에서 `pnpm lint`와 필요 시 `pnpm build`를 실행한다.
+- Unity 검증은 단계에 맞는 것만 돌린다. 대응표는 `.agents/skills/unity-verification-runner/SKILL.md`에 있다.
+  - 작업 중 수정할 때마다: 해당 조각의 단독 `Verify` 하나만 실행한다. 회귀 묶음을 돌리지 않는다.
+  - 커밋·ship 직전: 해당 조각의 회귀 묶음(`VerifyWithRegressionsBatch` 등)을 최종 변경에 대해 한 번 실행한다.
+  - 문서·주석·원화 PNG만 바꾼 변경: Unity 배치를 생략한다.
+  - 생성기·Room 계약처럼 여러 조각이 함께 쓰는 기반을 바꾼 변경: 작업 중에도 회귀 묶음을 실행한다.
+  - 사용자가 범위를 지정하면(예: "검증 없이", "회귀까지") 그 지정을 따른다.
 - Unity 자동 검증을 실행할 수 없으면 가능한 정적 검사를 수행하고, 정확한 메뉴 경로와 기대 결과를 수동 검증 항목으로 남긴다.
 - 자동 검증 또는 사용자가 제공한 수동 확인 증거가 있는 항목만 계획 문서에서 완료 처리한다.
 - 새 개발 도구의 계획과 상태는 `docs/13-development-tooling-plan.md`, 실제 실행 방법은 구현 후 `docs/05-development-setup.md`에 기록한다.
