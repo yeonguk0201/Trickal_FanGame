@@ -1559,6 +1559,13 @@ Resources 원화를 런타임에 불러오므로 Scene/Prefab Setup 재실행 �
 검광은 0.14초 내려온 뒤 최대 형태를 0.7초 유지하고 0.28초 소멸한다.
 피해 시점·범위는 기존 공격 로직을 유지한다. 지면 충격파는 접지 후 0.58초 이내, 파편은 접지 후 0.90초 이내 제거한다.
 기존 0.8유닛의 넓은 경계 감쇠 대신 0.035유닛의 좁은 경계 처리로 변경했다.
+각성 후 이동하면 전용 8프레임 걷기, 정지하면 각성 본체를 표시한다. 공격과 변신 표시는 걷기보다 우선한다.
+프레임은 `scripts/split-crayon-golden-walk.ps1`로 승인 시트에서 분리하며, 아래 줄 5~8번의 19px 높이 보정을 반영한다.
+원화 비율을 유지하는 동일 배율로 1024×1024 캔버스에 배치하고 400 PPU를 사용한다.
+재구성은 `Trickal Fan Game > Artwork > Setup Boss Movement Animations`, 단독 검증은 위 각성 검증 메뉴를 사용한다.
+수동 확인은 `Trickal Fan Game > Debug > Open Boss Test Room` → Play → `Boss 3 - Crayon Hero` 소환 → HP 50% 이하에서
+이동·정지를 반복하여 4→5 및 8→1 연결, 망토·빛 날개와 공격 전환을 확인한다.
+
 극히 짧은 경로는 원화 전체를 압축하지 않고 오른쪽 원화 창을 표시하므로 전체 실루엣과는 차이가 있다.
 
 - 자동 검사: `Trickal Fan Game > Effects > Verify Reviewed Effects With Combat Regressions`.

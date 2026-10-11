@@ -117,6 +117,9 @@ namespace TrickalFanGame.Editor
 
         private static void ConfigureGoldenFrames(BossMovementAnimator animator)
         {
+            var walking = new Sprite[8];
+            for (int i = 0; i < walking.Length; i++) walking[i] = Import($"{Folder}/CrayonHero_Golden_Walk_{i}.png");
+            animator.ConfigureGoldenWalking(walking);
             var transition = new Sprite[4];
             for (int i = 0; i < 4; i++) transition[i] = Import($"{Folder}/CrayonHero_Awaken_{i}.png");
             animator.ConfigureAwakening(transition);

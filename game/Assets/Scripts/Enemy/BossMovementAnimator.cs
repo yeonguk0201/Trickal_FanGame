@@ -18,6 +18,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private Sprite[] healFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] crayonAttackFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] goldenAttackFrames = Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] goldenWalkFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] awakeningFrames = Array.Empty<Sprite>();
         [SerializeField] private SpriteRenderer[] groundTreasures = Array.Empty<SpriteRenderer>();
         [SerializeField, Min(0.1f)] private float strideLength = 1.4f;
@@ -58,6 +59,9 @@ namespace TrickalFanGame.Enemy
         public int GoldenAttackFrameCount => goldenAttackFrames.Length;
         public Sprite GetGoldenAttackFrame(int i) => goldenAttackFrames[i];
         public void ConfigureGoldenAttacks(Sprite[] frames) => goldenAttackFrames = frames ?? Array.Empty<Sprite>();
+        public int GoldenWalkFrameCount => goldenWalkFrames.Length;
+        public Sprite GetGoldenWalkFrame(int i) => goldenWalkFrames[i];
+        public void ConfigureGoldenWalking(Sprite[] frames) => goldenWalkFrames = frames ?? Array.Empty<Sprite>();
         public int AwakeningFrameCount => awakeningFrames.Length;
         public Sprite GetAwakeningFrame(int i) => awakeningFrames[i];
         public void ConfigureAwakening(Sprite[] transition)
@@ -224,10 +228,11 @@ namespace TrickalFanGame.Enemy
                     artwork.sprite = attacks[knight.AttackPoseIndex];
                     return;
                 }
-                // Awaiting dedicated golden walking poses: keep the supplied awakened body between attacks.
                 if (golden)
                 {
-                    artwork.sprite = knight.AwakenedSprite;
+                    artwork.sprite = animate && goldenWalkFrames.Length > 0
+                        ? goldenWalkFrames[Mathf.FloorToInt(Mathf.Repeat(progress, 1f) * goldenWalkFrames.Length)]
+                        : knight.AwakenedSprite;
                     return;
                 }
                 if (animate && walkFrames.Length > 0)
