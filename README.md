@@ -104,7 +104,7 @@ flowchart LR
 | Phase 7 | 게임 빌드 배포, Backend·Web 배포 | 예정 |
 | Phase 8 | 시연 영상, 회고 | 예정 |
 
-지금은 상자, 일회용 스펠, 상점 경제를 다루는 [여섯째 달 계획](docs/21-sixth-month-plan.md)을 진행하고 있습니다. 전체 계획은 [로드맵](docs/02-roadmap.md)에 있습니다.
+상자, 일회용 스펠, 상점 경제를 다룬 [여섯째 달 계획](docs/21-sixth-month-plan.md)의 구현 조각을 마쳤고, 지금은 함정·신규 적·교주의 권능과 통합 검증을 다루는 [일곱째 달 계획](docs/26-seventh-month-plan.md)을 진행하고 있습니다. 전체 계획은 [로드맵](docs/02-roadmap.md)에 있습니다.
 
 ## 로컬 실행
 

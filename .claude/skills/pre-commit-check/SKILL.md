@@ -91,7 +91,7 @@ cd web && pnpm lint && pnpm build
 
 #### 5.1 계획 문서 체크박스
 
-`docs/10-second-month-plan.md` 확인:
+현재 실행 계획(`docs/26-seventh-month-plan.md`) 확인:
 - `[x]` 항목에 해당 코드가 없음 → WARN
 - 코드 추가했는데 `[ ]` 그대로 → WARN (체크 권장)
 

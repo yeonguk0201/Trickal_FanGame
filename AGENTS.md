@@ -10,7 +10,7 @@
 
 - 사용자 변경과 관련 없는 작업을 보존하고, 수정 전에 `git status --short`를 확인한다.
 - 사용자가 지정한 범위와 완료 조건을 최우선으로 따른다.
-- 현재 실행 범위는 `docs/10-second-month-plan.md`, 시스템 의존성은 `docs/12-skill-system-plan.md`, 장기 범위는 `docs/02-roadmap.md`를 기준으로 확인한다.
+- 현재 실행 범위는 `docs/26-seventh-month-plan.md`, 시스템 의존성은 `docs/12-skill-system-plan.md`, 장기 범위는 `docs/02-roadmap.md`를 기준으로 확인한다.
 - 날짜보다 확정된 시스템 의존성 순서를 우선한다.
 - 필수 MVP 흐름이 안정되기 전에는 선택 기능, 폴리싱, 랜덤화가 필수 작업을 밀어내지 않게 한다.
 
