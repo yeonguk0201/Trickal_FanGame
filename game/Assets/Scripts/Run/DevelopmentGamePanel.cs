@@ -30,6 +30,9 @@ namespace TrickalFanGame.Run
         private ItemDefinition[] artifactItems;
         private bool showArtifacts;
         private bool showLayouts;
+        private RoomTrap[] trapPrefabs;
+        private bool trapSecondPhase;
+        private int placedTrapCount;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateForDevelopment()
@@ -89,6 +92,7 @@ namespace TrickalFanGame.Run
             DrawResourceSection(progress);
             DrawChestSection(assembler);
             DrawObstacleSection(assembler);
+            DrawTrapSection(assembler);
             DrawRoomSection(assembler);
             DrawLayoutSection(assembler);
             DrawBossSection(assembler);
@@ -414,6 +418,82 @@ namespace TrickalFanGame.Run
                                   (tree.IsBurning ? " BURNING" : string.Empty)
                                 : "No unbroken tree in this room.") +
                             $"   burned this Run {assembler.Progress.BurnedObstacleCount}");
+        }
+
+        // Trap-0: places a trap of each kind on the cell to the right of the player, bound the way the room build
+        // binds an authored one (assisted Run). The list collects every trap Prefab. A placed trap lasts until the
+        // floor is rebuilt.
+        private void DrawTrapSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Trap —");
+            RoomPrefab room = CurrentRoom(assembler);
+            PlayerMovement player = assembler.Graph?.Player;
+            if (room == null || player == null)
+            {
+                GUILayout.Label("No current room or player.");
+                return;
+            }
+
+            RoomTrap nearest = room.GetComponentsInChildren<RoomTrap>(false)
+                .OrderBy(trap => (trap.transform.position - player.transform.position).sqrMagnitude)
+                .FirstOrDefault();
+            DestructibleObstacle nearestObstacle = nearest != null ? nearest.GetComponent<DestructibleObstacle>() : null;
+            GUILayout.Label(nearest == null
+                ? "No trap in this room."
+                : $"Nearest {nearest.Kind} {nearest.TrapId}" +
+                  (nearest.IsFloorTrap
+                      ? $"  hit {nearest.HitSize.x:0.##}x{nearest.HitSize.y:0.##}" +
+                        (nearest.ContainsFeet(player.FeetPosition) ? " ON" : string.Empty)
+                      : string.Empty) +
+                  (nearest.Kind == RoomTrapKind.PeriodicSpikes
+                      ? $"  {nearest.StateAt(Time.time)}{(nearest.SecondPhase ? " (B)" : " (A)")}"
+                      : string.Empty) +
+                  (nearestObstacle != null
+                      ? $"  {nearestObstacle.HitsTaken}/{nearestObstacle.RequiredHits} hits"
+                      : string.Empty));
+            GUILayout.Label($"Web slow x{EnvironmentSlow.MultiplierOf(player):0.##}   " +
+                            $"gas clouds {room.GetComponentsInChildren<PoisonGasCloud>(false).Length}");
+#if UNITY_EDITOR
+            const string trapFolder = "Assets/Prefabs/Traps";
+            trapPrefabs ??= UnityEditor.AssetDatabase.IsValidFolder(trapFolder)
+                ? UnityEditor.AssetDatabase.FindAssets("t:Prefab", new[] { trapFolder })
+                    .Select(guid => UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                        UnityEditor.AssetDatabase.GUIDToAssetPath(guid)))
+                    .Select(prefab => prefab != null ? prefab.GetComponent<RoomTrap>() : null)
+                    .Where(trap => trap != null)
+                    .OrderBy(trap => trap.Kind)
+                    .ToArray()
+                : System.Array.Empty<RoomTrap>();
+            if (trapPrefabs.Length == 0)
+            {
+                GUILayout.Label("No trap Prefab. Run the Trap-0 setup.");
+                return;
+            }
+
+            trapSecondPhase = GUILayout.Toggle(trapSecondPhase, "Periodic spikes start raised (phase B)");
+            foreach (RoomTrap prefab in trapPrefabs)
+            {
+                if (!AssistedButton($"Place {prefab.Kind}")) continue;
+                Transform content = room.Node.ContentRoot.transform;
+                Vector2 local = content.InverseTransformPoint(player.StandingPosition + Vector2.right * 1.5f);
+                RoomTrap trap = Instantiate(prefab, content);
+                trap.transform.localPosition = new Vector3(Mathf.Floor(local.x) + 0.5f, Mathf.Floor(local.y) + 0.5f);
+                string id = $"dev-trap-{++placedTrapCount:000}";
+                trap.name = $"{prefab.name} ({id})";
+                trap.ConfigurePlacement(id, trapSecondPhase);
+                RoomRunState state = assembler.Progress.GetRoomState(room.Node.RoomId);
+                if (trap.TryGetComponent(out DestructibleObstacle obstacle))
+                {
+                    obstacle.Bind(state, 0, content, assembler.Progress, null, room.Node, room.Controller);
+                    obstacle.BindBurnSource(player.GetComponent<PlayerStats>());
+                }
+
+                trap.Bind(state, player, Time.time);
+                status = $"Placed {prefab.Kind} {id} to the right of the player.";
+            }
+#else
+            GUILayout.Label("Trap placement is editor-only.");
+#endif
         }
 
         private static bool TrySpawnChest(RoomGraphAssembler assembler, ChestKind kind, out string message)

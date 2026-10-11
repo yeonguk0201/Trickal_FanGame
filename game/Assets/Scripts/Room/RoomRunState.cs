@@ -15,6 +15,8 @@ namespace TrickalFanGame.Room
         public bool IsKeyLockOpen { get; private set; }
         public IReadOnlyCollection<string> DestroyedObstacleIds => destroyedObstacleIds;
         private readonly HashSet<string> destroyedObstacleIds = new(StringComparer.Ordinal);
+        public IReadOnlyCollection<string> RemovedTrapIds => removedTrapIds;
+        private readonly HashSet<string> removedTrapIds = new(StringComparer.Ordinal);
         // Secret rooms only: neighbor room IDs whose hidden passage is open on both sides.
         public IReadOnlyCollection<string> OpenedSecretPassages => openedSecretPassages;
         private readonly HashSet<string> openedSecretPassages = new(StringComparer.Ordinal);
@@ -171,6 +173,19 @@ namespace TrickalFanGame.Room
         public bool TryMarkObstacleDestroyed(string obstacleId)
         {
             if (string.IsNullOrWhiteSpace(obstacleId) || !destroyedObstacleIds.Add(obstacleId)) return false;
+            HasVisited = true;
+            Changed?.Invoke();
+            return true;
+        }
+
+        // Trap-0: a 거미줄 a bomb removed stays removed. Traps that are obstacles (불, 가시 돌, 독버섯) are kept as
+        // destroyed obstacles instead.
+        public bool IsTrapRemoved(string trapId) =>
+            !string.IsNullOrWhiteSpace(trapId) && removedTrapIds.Contains(trapId);
+
+        public bool TryMarkTrapRemoved(string trapId)
+        {
+            if (string.IsNullOrWhiteSpace(trapId) || !removedTrapIds.Add(trapId)) return false;
             HasVisited = true;
             Changed?.Invoke();
             return true;

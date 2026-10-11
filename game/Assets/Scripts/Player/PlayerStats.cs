@@ -80,10 +80,12 @@ namespace TrickalFanGame.Player
         // Passive-2: PlayerBodySize turns this into the look, the hurtbox and the fixed feet.
         public float PlayerSizeMultiplier => 1f + playerSizePercentBonus;
 
+        // Trap-0: a 거미줄 under the feet scales the final speed (EnvironmentSlow).
         public float MoveSpeed => (baseMoveSpeed + moveSpeedBonus) *
             Mathf.Max(0f, 1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent +
                 currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus +
-                (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f));
+                (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f)) *
+            EnvironmentSlow.MultiplierOf(this);
         public float AttackSpeed => baseAttackSpeed *
             Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus +
                              singleUseRoomAttackSpeedPercentBonus + killFrenzyAttackSpeedPercent);

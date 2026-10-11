@@ -292,6 +292,11 @@ namespace TrickalFanGame.Room
                     DestroyFloor(nextRoot);
                     return false;
                 }
+                if (!BindTraps(instance, generatedNode, state, out error))
+                {
+                    DestroyFloor(nextRoot);
+                    return false;
+                }
                 if (!ApplyEncounter(instance, generatedNode, state, out error))
                 {
                     DestroyFloor(nextRoot);
@@ -545,6 +550,25 @@ namespace TrickalFanGame.Room
                     instance.Node, instance.Controller);
                 obstacle.BindRareItems(selectionRewardPool, inventory);
                 obstacle.BindBurnSource(stats);
+            }
+
+            error = null;
+            return true;
+        }
+
+        // Trap-0: runs after the obstacles are bound, because an obstacle trap reads its obstacle's broken state.
+        private bool BindTraps(RoomPrefab instance, GeneratedRoomNode node, RoomRunState state, out string error)
+        {
+            HashSet<string> ids = new(StringComparer.Ordinal);
+            foreach (RoomTrap trap in instance.GetComponentsInChildren<RoomTrap>(true))
+            {
+                if (!trap.TryValidate(out error) || !ids.Add(trap.TrapId))
+                {
+                    error = $"Room {node.RoomId} has an invalid or duplicate trap '{trap.TrapId}'. {error}";
+                    return false;
+                }
+
+                trap.Bind(state, graph.Player, Time.time);
             }
 
             error = null;

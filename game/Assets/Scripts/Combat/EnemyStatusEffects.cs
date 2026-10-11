@@ -65,9 +65,10 @@ namespace TrickalFanGame.Combat
 
         public static float MoveSpeedMultiplierOf(Component enemy)
         {
-            return enemy != null && enemy.TryGetComponent(out EnemyStatusEffects effects)
+            // Trap-0: a 거미줄 slows the same ordinary movement, with or without a status effect.
+            return (enemy != null && enemy.TryGetComponent(out EnemyStatusEffects effects)
                 ? effects.MoveSpeedMultiplier
-                : 1f;
+                : 1f) * EnvironmentSlow.MultiplierOf(enemy);
         }
 
         public static bool RollsPoison(PoisonSettings settings, float roll)

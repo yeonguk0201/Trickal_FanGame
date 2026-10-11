@@ -173,7 +173,11 @@ namespace TrickalFanGame.Item
                 {
                     if (beamTargets.Add(obstacle))
                     {
-                        DestructibleObstacle.TryHitCollider(hit.collider);
+                        // Trap-0: water puts a 불 out in one hit.
+                        if (!obstacle.TryGetComponent(out RoomTrap trap) || !trap.TryExtinguish())
+                        {
+                            DestructibleObstacle.TryHitCollider(hit.collider);
+                        }
                     }
 
                     continue;

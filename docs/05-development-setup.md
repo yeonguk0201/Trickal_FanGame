@@ -1016,6 +1016,37 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   2번 때리면 주황색으로 불타고 줄에 `BURNING`이 뜨며, 2번 더 때리면 부서지고 `burned this Run`이 1 늘어난다. (4) 방을
   나갔다 돌아와도 부서진 나무는 다시 생기지 않고 `burned this Run`이 다시 늘지 않는다.
 
+- Trap-0 함정 7종: 메뉴 `Trickal Fan Game > Week 25 > Setup Trap-0 Trap Prefabs`가 `Assets/Prefabs/Traps/`에 종류별 Prefab
+  7개(`trap-floor-spikes`·`trap-periodic-spikes`·`trap-damage-puddle`·`trap-spiderweb`·`trap-fire`·`trap-spiked-rock`·
+  `trap-poison-mushroom`)를 만들고 `Assets/Art/Drafts/FairyKingdom/Traps/`의 원화를 연결한다. 바닥형 4종은 Collider가 없고,
+  불·가시 돌·독버섯은 종류가 고정된 `DestructibleObstacle`(Environment 레이어, 3타·4타·2타)이다. GUID를 보존하며 멱등이다.
+  기본 장애물 드롭 표(`obstacle-basic-drop-table`)는 읽기만 하고 다시 만들지 않는다. 방에 배치하는 Layout은 Trap-1에서
+  추가하므로 지금은 개발 패널로만 놓을 수 있다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 25 > Verify Trap-0 Traps`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Trap0Verification.Verify -logFile <로그 경로>`다
+  (Setup 2회 GUID 확인까지는 `SetupAndVerifyBatch`). Prefab 7개의 구성과 원화 연결, 플레이어 피해 반 칸·발 중심~발바닥 세로선이 그림 타원에 걸칠 때만 판정(위로 0.3 더 넓음, 칸 안이라도 그림 밖이면 미판정)·
+  피격 무적 공유·같은 함정 1초 간격, 적 고정 피해 5와 중심의 그림 타원 판정·처치 미귀속·방의 생존 수 감소, 비행 플레이어·비행 적의
+  바닥형 무시, 주기 가시의 2초/2초·0.5초 예고·A/B 반 주기·재진입 시 초기화, 거미줄 감속 40%(피해 없음)와 폭탄 제거,
+  불 3타·물줄기 1타·비행 차단, 가시 돌 4타·비행 통과, 독버섯 2타·드롭 없음과 독가스(반경 1.5·3초·발 중심 기준 플레이어 1회·적 1초마다
+  중독 최대 3스택·중독 처치의 플레이어 귀속), 재구성 시 꺼진 불·부서진 가시 돌·독버섯·제거된 거미줄 보존을 검사한다.
+  관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-1, Obstacle-7, Enemy-6, Special-2, Passive-4, 상태 이상 이펙트, 요정왕국
+  원화, 개발 패널의 단독 `Verify`)다. Obstacle-7의 회귀 묶음은 그 안의 Chest-0 검증이 원화 연결 이후의 상자 Prefab 색을
+  통과시키지 못해(Trap-0 이전부터) 묶지 않았다. 이 묶음의 개발 패널 검증은 `SecretPit.prefab`을 임시
+  스프라이트로 다시 쓰므로 실행 뒤 그 파일은 되돌린다.
+  2026-10-12 최종 판정 기준으로 `Verify`와 `VerifyWithRegressionsBatch`가 종료 코드 0으로 통과했고, 아래 수동 확인도
+  사용자가 마쳤다.
+  수동 확인: Game Scene Play → `F1` 패널 `— Trap —`. `Place <종류>`는 플레이어 오른쪽 칸에 함정을 놓고, 첫 줄에 가장
+  가까운 함정의 종류·판정 크기(`hit 1x0.37` 형태, 밟은 것으로 판정되면 `ON`)·주기 가시 상태(`Lowered`/`Warning`/`Raised`, A/B)·타수가, 둘째 줄에 `Web slow`와 `gas clouds`가
+  나온다. (1) `Place FloorSpikes`·`Place DamagePuddle` 위에 서면 1초마다 반 칸씩 깎이고, 적에게 맞은 직후에는 깎이지
+  않는다. (2) `Place PeriodicSpikes`는 흐린 상태에서 0.5초 붉게 예고한 뒤 2초 동안 올라와 그때만 피해를 준다. 토글을 켜고
+  하나 더 놓으면 반대로 움직인다. (3) `Place Spiderweb` 위에서 `Web slow x0.6`이 되고 공격으로는 없어지지 않으며 폭탄(F)에
+  없어진다. (4) `Place Fire`는 닿으면 반 칸이고 3번 때리면 꺼진다. 샤샤의 항아리(`— Artifact —` Drop)를 얻으면 물줄기 1번에
+  꺼진다. (5) `Place SpikedRock`은 닿으면 반 칸, 4번 때리면 부서진다. (6) `Place PoisonMushroom`을 2번 때리면 독가스가
+  3초 남아 플레이어는 한 번만 반 칸 깎이고, 가스 안의 적은 `Nearest status`에 poison 스택이 3까지 쌓인다. (7) `Golden
+  exclusive`의 가짜 날개로 비행하면 가시·장판·거미줄을 무시하고 가시 돌·독버섯 위를 지나가며 불에는 막힌다. (8) 적을
+  가시·장판 위로 유인하면 적도 피해를 받고, 그렇게 죽은 적으로도 방이 클리어된다. (9) 방을 나갔다 돌아오면 꺼진 불·부서진
+  가시 돌·독버섯·제거된 거미줄은 그대로 없다(개발 패널로 놓은 함정은 층을 다시 만들면 사라진다).
+
 - Enemy-6 쥬비: 메뉴 `Trickal Fan Game > Week 23 > Setup Enemy-6 Jyubi`가 추적형 적 Prefab을 풀어 복사한
   `Assets/Prefabs/JyubiEnemy.prefab`을 만들고(근접 공격·이동 애니메이션 컴포넌트 제거, 크기 0.5, 체력 1, 속도 5.5, 비행
   추적, 반 칸 접촉 피해, `EnemyFlight` 추가) Obstacle-5 Setup을 다시 실행해 셰이디의 랜덤박스 종류에 쥬비 5마리 결과를
@@ -1532,6 +1563,13 @@ Play Mode에서 새 Run의 Q 돌격·WASD 방향 전환·적/보스 충돌과 �
 수정 후 Unity 배치 검증은 종료 코드 0과 성공 로그를 확인했으며, 실제 Play Mode 화면 확인은 별도다.
 BossTestScene 또는 새 Run에서 HP를 50% 이하로 낮춰 순간 변신과 각성 본체 유지를 확인한다.
 
+각성 후 이동하면 전용 8프레임 걷기, 정지하면 각성 본체를 표시한다. 공격과 변신 표시는 걷기보다 우선한다.
+프레임은 `scripts/split-crayon-golden-walk.ps1`로 승인 시트에서 분리하며, 아래 줄 5~8번의 19px 높이 보정을 반영한다.
+원화 비율을 유지하는 동일 배율로 1024×1024 캔버스에 배치하고 400 PPU를 사용한다.
+재구성은 `Trickal Fan Game > Artwork > Setup Boss Movement Animations`, 단독 검증은 위 각성 검증 메뉴를 사용한다.
+수동 확인은 `Trickal Fan Game > Debug > Open Boss Test Room` → Play → `Boss 3 - Crayon Hero` 소환 → HP 50% 이하에서
+이동·정지를 반복하여 4→5 및 8→1 연결, 망토·빛 날개와 공격 전환을 확인한다.
+
 ### 크레용사용 각성 공격과 금빛 차징
 
 각성 원본을 기준으로 일반 하향 베기·교차 대시·내려찍기와 3단계 금빛 검 아우라를 연결했다.
@@ -1559,13 +1597,6 @@ Resources 원화를 런타임에 불러오므로 Scene/Prefab Setup 재실행 �
 검광은 0.14초 내려온 뒤 최대 형태를 0.7초 유지하고 0.28초 소멸한다.
 피해 시점·범위는 기존 공격 로직을 유지한다. 지면 충격파는 접지 후 0.58초 이내, 파편은 접지 후 0.90초 이내 제거한다.
 기존 0.8유닛의 넓은 경계 감쇠 대신 0.035유닛의 좁은 경계 처리로 변경했다.
-각성 후 이동하면 전용 8프레임 걷기, 정지하면 각성 본체를 표시한다. 공격과 변신 표시는 걷기보다 우선한다.
-프레임은 `scripts/split-crayon-golden-walk.ps1`로 승인 시트에서 분리하며, 아래 줄 5~8번의 19px 높이 보정을 반영한다.
-원화 비율을 유지하는 동일 배율로 1024×1024 캔버스에 배치하고 400 PPU를 사용한다.
-재구성은 `Trickal Fan Game > Artwork > Setup Boss Movement Animations`, 단독 검증은 위 각성 검증 메뉴를 사용한다.
-수동 확인은 `Trickal Fan Game > Debug > Open Boss Test Room` → Play → `Boss 3 - Crayon Hero` 소환 → HP 50% 이하에서
-이동·정지를 반복하여 4→5 및 8→1 연결, 망토·빛 날개와 공격 전환을 확인한다.
-
 극히 짧은 경로는 원화 전체를 압축하지 않고 오른쪽 원화 창을 표시하므로 전체 실루엣과는 차이가 있다.
 
 - 자동 검사: `Trickal Fan Game > Effects > Verify Reviewed Effects With Combat Regressions`.
@@ -1665,7 +1696,7 @@ Play 화면 검수:
 - 전용 검증: `Trickal Fan Game/Artwork/Verify Fairy Kingdom 45 Sprites`. 45개 스프라이트·프리팹, 동적 장애물·상자 상태·폭탄 전환과 표시 갱신 전후 충돌 영역·root scale을 검사한다.
 - 실제 게임 확인: `Assets/Scenes/SampleScene.unity`를 열고 Play. 기존 F1 개발 패널의 상자·장애물 생성과 아티팩트 Drop으로 상자 열기, 파괴·불타는 나무, 물줄기·번개·독·화상·감전을 확인한다. 해당 기능의 피해 규칙과 충돌 크기는 이번 에셋 연결에서 바꾸지 않았다.
 - 전체 미술 보기: `Assets/Scenes/FairyKingdomArtworkPreview.unity`. 45장을 한 화면에서 확인하는 별도 씬이며 실제 플레이 씬이나 빌드 시작 씬이 아니다.
-- 표시용 프리팹: `Assets/Prefabs/FairyKingdomArtwork/`. 누루링, 함정 7종, 독가스는 대응 게임 로직이 아직 없어 이 폴더의 표시용 프리팹으로만 제공된다. 임의의 공격·피해·생성 규칙은 추가하지 않았다.
+- 표시용 프리팹: `Assets/Prefabs/FairyKingdomArtwork/`. 누루링은 대응 게임 로직이 아직 없어 이 폴더의 표시용 프리팹으로만 제공된다. 함정 7종과 독가스는 Trap-0부터 `Assets/Prefabs/Traps/`의 게임 Prefab이 같은 원화를 쓴다. 임의의 공격·피해·생성 규칙은 추가하지 않았다.
 - 현재 단일 프레임 연결이다. 부스러기 쫄따구는 3가지 그림을 소환 순서에 따라 사용하고 사망 시 그림 효과만 표시한다. 사망 폭발 피해 규칙은 새로 구현하지 않았다. 새 프레임 추가 전까지 해당 적의 기존 다른 그림용 이동·공격 프레임 컴포넌트는 보존하되 비활성화한다.
 - 돌진형(`ChargingEnemy`)과 원거리·저격형(`RangedEnemy`, `QuickRangedFairy`, `HighBloodSugarFairy`)은 초안 그림을 연결하지 않고 기존 Idle·걷기·공격 에셋을 유지한다. `RangedEnemy`에 표시 컴포넌트를 붙이면 variant인 저격형까지 덮어쓰므로 베이스에도 붙이지 않으며, 전용 검증이 이를 검사한다.
 - 자동 실행: `TrickalFanGame.Editor.FairyKingdomArtworkSetup.ApplyAndVerifyBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkVerification.VerifyWithCombatRegressionsBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkPlayVerification.RunBatch` (`-batchmode`, **`-quit` 제외**). Play 검증은 전용 미리보기 씬과 격리된 probe만 사용하고 종료 코드를 반환한다.
