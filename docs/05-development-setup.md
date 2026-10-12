@@ -1021,7 +1021,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   `trap-poison-mushroom`)를 만들고 `Assets/Art/Drafts/FairyKingdom/Traps/`의 원화를 연결한다. 바닥형 4종은 Collider가 없고,
   불·가시 돌·독버섯은 종류가 고정된 `DestructibleObstacle`(Environment 레이어, 3타·4타·2타)이다. GUID를 보존하며 멱등이다.
   기본 장애물 드롭 표(`obstacle-basic-drop-table`)는 읽기만 하고 다시 만들지 않는다. 방에 배치하는 Layout은 Trap-1에서
-  추가하므로 지금은 개발 패널로만 놓을 수 있다.
+  추가했다(아래 항목).
   자동 검증 메뉴는 `Trickal Fan Game > Week 25 > Verify Trap-0 Traps`, 배치는 Unity `-batchmode -nographics -quit
   -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Trap0Verification.Verify -logFile <로그 경로>`다
   (Setup 2회 GUID 확인까지는 `SetupAndVerifyBatch`). Prefab 7개의 구성과 원화 연결, 플레이어 피해 반 칸·발 중심~발바닥 세로선이 그림 타원에 걸칠 때만 판정(위로 0.3 더 넓음, 칸 안이라도 그림 밖이면 미판정)·
@@ -1230,10 +1230,42 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   전투 중인 방에서 사용하면 패널에 `Room CRIT +15% DMG +50%`가 보이고 방을 나가면 사라져야 한다.
   2026-10-05 사용자 화면 확인 완료.
 
+- Trap-1 함정 Layout 3종: 별도 Setup 메뉴는 없고 T7 방 Layout 임포터(아래 항목)가 방 파일의 함정 글자를 Trap-0 Prefab의
+  복사본으로 놓는다. 방은 `basic-spike-field`(바닥 가시·주기 가시 A/B), `wide-fire-lane`(불·가시 돌),
+  `large-web-garden`(거미줄·독버섯·장판)이고 가중치는 기본 100, Layout 난이도 보정은 +1이다. Room 콘텐츠 버전은 12 → 13이다.
+  함정 ID는 칸 위치로 만든다(`trap-c03-r05`). 불·가시 돌·독버섯은 같은 ID의 종류 고정 장애물이라 방당 특수 장애물 1개
+  추첨의 후보가 아니다. 바닥형 배치 규칙은 `RoomObstacleLayout.TryValidateFloorTraps`에 있고 임포터와
+  `RoomTemplateDefinition.TryValidateLayout`(층 생성 전 카탈로그 검사)이 함께 쓴다. 상자 위치 탐색
+  (`ChestPlacement.TryFindSafeLocalPosition`)은 상자 몸체가 바닥 함정 칸에 걸치는 자리를 건너뛴다. 함정이 없는 방의
+  상자 위치는 그대로다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 25 > Verify Trap-1 Layouts`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Trap1Verification.Verify -logFile <로그 경로>`다
+  (방 파일을 고쳐 다시 들여와야 하면 `ImportAndVerifyBatch`. 글이 바뀐 방만 다시 만들고 에셋·Game Scene을 저장한다).
+  바닥 함정 배치 거부 11가지와 사유(중복 ID·같은 칸·장애물·구덩이·SpawnPoint 겹침·격자 밖·1×1 아님·바닥 밖·문 안전
+  진입점 반경 1.5·문 사이 경로 차단), 세 방의 프로필·난이도 +1·함정 종류와 위상·칸 위치 ID, 만들어진 Prefab 기준의
+  장애물·함정 배치 규칙, 함정 열을 하나 더 놓으면 경로 검사가 실패하는지, 함정 칸·문 진입점을 선호 위치로 줘도 상자가
+  함정 칸을 피하는지, 방 조립과 같은 순서의 바인딩에서 ID 중복 없음·주기 가시 A 내려감/B 올라옴 시작, 재구성 뒤 폭탄으로
+  없앤 거미줄과 꺼진 불만 없는지, 400 seed 생성에서 세 방이 모두 쓰이고 32 seed의 방·콘텐츠 seed가 재생성과 같은지를
+  검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(T7 임포터 검증과 그 회귀 묶음, Trap-0 단독 `Verify`)다.
+  2026-10-12 `ImportAndVerifyBatch`는 종료 코드 0으로 통과했다. 회귀 묶음은 Obstacle-6 회귀 안의 Chest-0("The chest Prefab
+  must show its own normal-chest sprite.", Trap-1 이전부터 있던 실패)에서 종료 코드 1로 멈췄고, 그 앞의 Trap-1·Room
+  Layout·Encounter-4·Spawn-2·Difficulty-1·Terrain-0·Chest-1·Jjangsem-1·Obstacle-6·5·4·2·1·Special-2·3·Flight-0은 통과했다.
+  도달하지 못한 Trap-0·Obstacle-7은 단독 `Verify`로 통과를 확인했다. 아래 수동 확인은 2026-10-12 사용자가 마쳤다
+  (이상 없음).
+  수동 확인: Game Scene Play → `F1` 패널 `— Layout —`의 `Show layouts`에서 `Force basic-spike-field`(또는
+  `wide-fire-lane`·`large-web-garden`)를 누르면 같은 seed로 Run이 다시 시작되고 그 프로필의 전투방이 그 방으로 바뀐다
+  (보조 Run). 방 안에서 `— Trap —` 첫 줄로 가장 가까운 함정의 종류·ID(`trap-c03-r05` 형태)·주기 가시 위상을 본다.
+  확인할 것: (1) 어느 문으로 들어와도 서 있는 자리에 함정이 없다. (2) 가시밭에서 함정을 밟지 않고 네 문을 오갈 수 있고,
+  주기 가시가 A·B 두 묶음으로 번갈아 올라온다. (3) 불 통로에서 불에 닿으면 반 칸이고 3타에 꺼지며, 꺼진 자리로 지나갈
+  수 있다. 가시 돌은 4타에 부서진다. (4) 거미줄 정원에서 거미줄 위는 느려지고, 독버섯을 부수면 가스가 옆 거미줄까지
+  덮는다. 장판 위에서는 1초마다 반 칸이다. (5) 방을 클리어해 상자가 나올 때 함정 위에 놓이지 않는다. (6) 방을 나갔다
+  돌아오면 꺼진 불·부서진 가시 돌·독버섯·폭탄으로 없앤 거미줄은 없고 나머지 함정은 그대로다. (7) 적이 함정 사이에
+  끼이지 않고 방이 클리어된다. 끝나면 `Clear forced layout and restart`를 누른다.
+
 - T7 방 Layout 임포터(1단계): 방 하나를 `game/RoomLayouts/<방 ID>.room.txt` 텍스트 파일 하나로 적고, 메뉴
   `Trickal Fan Game > Tools > Import Room Layouts`가 파일마다 방 Prefab(`Assets/Rooms/Prefabs/Layouts/room-<ID>.prefab`)과
   템플릿(`Assets/Rooms/Templates/Layouts/<ID>.asset`)을 만들어 Game Scene 생성기 목록에 등록한다. Room 콘텐츠 버전은
-  12다. 임포터 이전에 만든 템플릿 19개는 건드리지 않는다.
+  13이다(Trap-1에서 함정 방 3개를 더하며 12에서 올렸다). 임포터 이전에 만든 템플릿 19개는 건드리지 않는다.
   - **파일 형식**: 위쪽은 `키: 값` 머리말, `grid:` 줄 아래는 격자다. `//`로 시작하는 줄은 머리말에서만 주석이다.
 
     ```text
@@ -1289,6 +1321,9 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
     | `M` `G` `K` | 종류 고정: 마리의 폭탄상자·황금돌·마요의 열쇠꾸러미 |
     | `S` `B` `F` | 종류 고정: 에르핀의 간식상자·에슈르의 빵상자·리코타의 음식상자 |
     | `V` `X` `R` `Q` | 종류 고정: 시스트의 금고·폭발 상자·셰이디의 랜덤박스·마요의 수집품 상자 |
+    | `^` `~` `w` | 바닥 함정: 바닥 가시·장판·거미줄 (Trap-1) |
+    | `a` `b` | 바닥 함정: 주기 가시 A 위상(내려간 상태로 시작)·B 위상(올라온 상태로 시작) |
+    | `*` `Z` `P` | 장애물 함정: 불(비행도 막음)·가시 돌·독버섯. 장애물 규칙을 그대로 따른다 |
 
     종류 고정 장애물은 방당 특수 장애물 1개 규칙에 세지 않는다. 같은 방의 `#`는 그대로 40% 확률로 1개가 특수
     장애물이 된다.
@@ -1301,6 +1336,12 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
       수 없다(도달 판정 격자가 점을 오른쪽 위 칸으로 보기 때문이다).
     - SpawnPoint마다 전투 구역의 35% 이상이 보여야 한다.
     - 상자끼리는 1.5 이상 떨어져야 한다(사이에 한 칸 이상).
+    - 바닥 함정은 문 안전 진입점에서 1.5 안에 둘 수 없다. Basic은 좌우 3열의 가운데 3행, 가운데 3열의 위아래 3행이다
+      (Wide·Large도 문마다 같은 3×3칸).
+    - 모든 문 사이에 바닥 함정 칸을 밟지 않는 길이 있어야 한다. 발밑 원(반지름 0.3) 기준이라 함정 칸 사이 1칸 틈은
+      지나갈 수 있는 것으로 보지만, 대각선으로 맞닿은 함정 칸 사이는 막힌 것으로 본다. 장애물은 지금처럼 몸 원
+      (반지름 0.5) 기준이다.
+    - 바닥 함정은 SpawnPoint 옆 칸에 둘 수 있다(같은 칸만 안 된다). 적은 중심이 함정 그림 안에 있을 때만 밟는다.
     - 문이 어떤 조합으로 열려도 그 프로필의 모든 Encounter가 배치되어야 한다. SpawnPoint를 문 안전 진입점에서 1.5,
       문에서 2 이상 떨어뜨려 두면 된다.
   - **메뉴**(`Trickal Fan Game > Tools`): `Validate Room Layouts`는 에셋을 쓰지 않고 검사만 한다. `Import Room Layouts`는
@@ -1316,9 +1357,9 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   - **글자 추가**: `RoomLayoutFormat.BuildSymbols`에 한 줄, `RoomLayoutImporter.PlaceContent`에 배치 분기 하나를 넣는다.
   - 자동 검증 메뉴는 `Trickal Fan Game > Tools > Verify Room Layouts`, 배치는 Unity `-batchmode -nographics -quit
     -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.RoomLayoutImporterVerification.ImportAndVerifyBatch
-    -logFile <로그 경로>`다. 형식·배치 거부 22가지와 사유, 임포트 2회의 GUID·Prefab 내용 불변, 강제 재임포트의 GUID,
+    -logFile <로그 경로>`다. 형식·배치 거부 25가지와 사유(함정 3가지 포함), 함정 글자 8개의 종류·위상, 임포트 2회의 GUID·Prefab 내용 불변, 강제 재임포트의 GUID,
     임시 방의 추가·잘못된 수정 거부 시 이전 버전 보존·파일 삭제 시 그 방 에셋만 제거, 파일과 Prefab·템플릿의 일치
-    (짱돌 슬롯·종류 고정·나무·합쳐진 구덩이·SpawnPoint 역할·상자·가중치·난이도), 모든 문 조합의 Encounter 배치,
+    (짱돌 슬롯·종류 고정·나무·합쳐진 구덩이·함정·SpawnPoint 역할·상자·가중치·난이도), 모든 문 조합의 Encounter 배치,
     seed 변형 추첨 뒤에도 유지되는 고정 종류, Layout 상자의 1회 배치·재구성 복원·층 이탈 뒤 미복원, 가중치 추첨 분포,
     400 seed 생성과 결정성, 강제 Layout을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Encounter-4, Spawn-2,
     Difficulty-1, Terrain-0, Chest-1, Jjangsem-1, Obstacle-6과 그 회귀, Obstacle-7)다.

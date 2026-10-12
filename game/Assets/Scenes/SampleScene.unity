@@ -2240,13 +2240,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
   - {fileID: 11400000, guid: bbbef5a18185b6e428a3c5387645e964, type: 2}
-  roomContentVersion: 12
+  roomContentVersion: 13
   roomTemplates:
   - {fileID: 11400000, guid: 0acb0c03ac29fe741a8006a51518cf60, type: 2}
   - {fileID: 11400000, guid: cd8ea15c0b6de5949bdfe798aa38e5e3, type: 2}
   - {fileID: 11400000, guid: ebc732a907dde864a89e4e51e00fd192, type: 2}
   - {fileID: 11400000, guid: 3c2e3ef06b0dcaa4d93b30ed9f97616e, type: 2}
   - {fileID: 11400000, guid: df06b46fec3bdeb4ba7615ea726ba289, type: 2}
+  - {fileID: 11400000, guid: b7ac74e19d331a440925252e0658e9cd, type: 2}
   - {fileID: 11400000, guid: 684a6d37e34e4a640b4de439e8dd6680, type: 2}
   - {fileID: 11400000, guid: 0b1f2725e46883140bddc30622c1fbac, type: 2}
   - {fileID: 11400000, guid: 15fb0d600fe1da54892fbf0c53e1eb32, type: 2}
@@ -2261,6 +2262,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a93cb28704aedfd428f780d46d039154, type: 2}
   - {fileID: 11400000, guid: 2c2a80946d5e1f448bb8048ebae64166, type: 2}
   - {fileID: 11400000, guid: 025c80049bfec5843b1f45e2c3f9a5d7, type: 2}
+  - {fileID: 11400000, guid: 630ae55b3a8f36d499c5ee56aec6440a, type: 2}
   - {fileID: 11400000, guid: 2f432c532142ad049914402d66bfbf27, type: 2}
   - {fileID: 11400000, guid: 644045cdac5987c478eff8c892a7155d, type: 2}
   - {fileID: 11400000, guid: 7e42edc154314df4aa56be0401028675, type: 2}
@@ -2268,6 +2270,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6db8706b343978240be992cbbca5f3b7, type: 2}
   - {fileID: 11400000, guid: 9c4ef623dfcfad048ae2af84d0410cef, type: 2}
   - {fileID: 11400000, guid: e034ec40cf372ef40902bde3b871ac3a, type: 2}
+  - {fileID: 11400000, guid: 3cdd8ef442b75ed468b8200ea4426fc3, type: 2}
   - {fileID: 11400000, guid: cd4ee4c6a7187354a9a77810e0e0ce14, type: 2}
   - {fileID: 11400000, guid: f49e8a2b7fd0c66418e08e30ef81e565, type: 2}
   - {fileID: 11400000, guid: 96c440fa91f28a342ae804f9000e9e6a, type: 2}

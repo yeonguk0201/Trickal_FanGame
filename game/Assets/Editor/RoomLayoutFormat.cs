@@ -17,6 +17,10 @@ namespace TrickalFanGame.Editor
         Pit,
         SpawnPoint,
         Chest,
+        // Trap-1: a trap without a collider (바닥 가시, 주기 가시, 장판, 거미줄).
+        FloorTrap,
+        // Trap-1: a trap that is a fixed-kind obstacle (불, 가시 돌, 독버섯).
+        ObstacleTrap,
     }
 
     // One symbol of the room text format. A new cell kind needs one entry here and one placement branch in the
@@ -24,7 +28,8 @@ namespace TrickalFanGame.Editor
     public readonly struct RoomLayoutSymbol
     {
         public RoomLayoutSymbol(char symbol, RoomLayoutCellKind kind, string description, string variantId = null,
-            ChestKind chestKind = ChestKind.Normal, int spawnIndex = -1)
+            ChestKind chestKind = ChestKind.Normal, int spawnIndex = -1,
+            RoomTrapKind trapKind = RoomTrapKind.FloorSpikes, bool secondPhase = false)
         {
             Symbol = symbol;
             Kind = kind;
@@ -32,6 +37,8 @@ namespace TrickalFanGame.Editor
             VariantId = variantId;
             ChestKind = chestKind;
             SpawnIndex = spawnIndex;
+            TrapKind = trapKind;
+            SecondPhase = secondPhase;
         }
 
         public char Symbol { get; }
@@ -40,8 +47,13 @@ namespace TrickalFanGame.Editor
         public string VariantId { get; }
         public ChestKind ChestKind { get; }
         public int SpawnIndex { get; }
+        // Read only when IsTrap.
+        public RoomTrapKind TrapKind { get; }
+        // 주기 가시 only: the B phase, half a cycle after A.
+        public bool SecondPhase { get; }
+        public bool IsTrap => Kind is RoomLayoutCellKind.FloorTrap or RoomLayoutCellKind.ObstacleTrap;
         public bool IsObstacle => Kind is RoomLayoutCellKind.Rock or RoomLayoutCellKind.FixedObstacle or
-            RoomLayoutCellKind.Tree;
+            RoomLayoutCellKind.Tree or RoomLayoutCellKind.ObstacleTrap;
     }
 
     // The fixed grid of a Room Profile. One symbol is one 1x1 cell and the grid is centered on the room, so cell
@@ -140,6 +152,8 @@ namespace TrickalFanGame.Editor
             Cells().Where(cell => cell.Symbol.Kind == kind);
 
         public IEnumerable<RoomLayoutCell> Obstacles => Cells().Where(cell => cell.Symbol.IsObstacle);
+
+        public IEnumerable<RoomLayoutCell> Traps => Cells().Where(cell => cell.Symbol.IsTrap);
 
         public Vector2[] SpawnPoints => CellsOf(RoomLayoutCellKind.SpawnPoint)
             .OrderBy(cell => cell.Symbol.SpawnIndex).Select(cell => cell.Center).ToArray();
@@ -258,7 +272,8 @@ namespace TrickalFanGame.Editor
 
             if (!header.ContainsKey("difficulty"))
             {
-                bool hasTerrain = parsed.Obstacles.Any() || parsed.CellsOf(RoomLayoutCellKind.Pit).Any();
+                bool hasTerrain = parsed.Obstacles.Any() || parsed.CellsOf(RoomLayoutCellKind.Pit).Any() ||
+                                  parsed.Traps.Any();
                 parsed.Difficulty = hasTerrain ? Week19Difficulty1Setup.ObstacleLayoutModifier : 0;
             }
 
@@ -440,6 +455,18 @@ namespace TrickalFanGame.Editor
                 new RoomLayoutSymbol('X', RoomLayoutCellKind.FixedObstacle, "폭발 상자", "explosive-box"),
                 new RoomLayoutSymbol('R', RoomLayoutCellKind.FixedObstacle, "셰이디의 랜덤박스", "shady-random-box"),
                 new RoomLayoutSymbol('Q', RoomLayoutCellKind.FixedObstacle, "마요의 수집품 상자", "mayo-collection-box"),
+                new RoomLayoutSymbol('^', RoomLayoutCellKind.FloorTrap, "바닥 가시", trapKind: RoomTrapKind.FloorSpikes),
+                new RoomLayoutSymbol('a', RoomLayoutCellKind.FloorTrap, "주기 가시 (A 위상, 내려간 상태로 시작)",
+                    trapKind: RoomTrapKind.PeriodicSpikes),
+                new RoomLayoutSymbol('b', RoomLayoutCellKind.FloorTrap, "주기 가시 (B 위상, 올라온 상태로 시작)",
+                    trapKind: RoomTrapKind.PeriodicSpikes, secondPhase: true),
+                new RoomLayoutSymbol('~', RoomLayoutCellKind.FloorTrap, "장판", trapKind: RoomTrapKind.DamagePuddle),
+                new RoomLayoutSymbol('w', RoomLayoutCellKind.FloorTrap, "거미줄", trapKind: RoomTrapKind.Spiderweb),
+                new RoomLayoutSymbol('*', RoomLayoutCellKind.ObstacleTrap, "불 (비행도 막음)",
+                    trapKind: RoomTrapKind.Fire),
+                new RoomLayoutSymbol('Z', RoomLayoutCellKind.ObstacleTrap, "가시 돌", trapKind: RoomTrapKind.SpikedRock),
+                new RoomLayoutSymbol('P', RoomLayoutCellKind.ObstacleTrap, "독버섯",
+                    trapKind: RoomTrapKind.PoisonMushroom),
             };
             for (int index = 0; index < 9; index++)
             {

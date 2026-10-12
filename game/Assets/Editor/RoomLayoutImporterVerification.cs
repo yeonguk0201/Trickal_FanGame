@@ -242,6 +242,12 @@ namespace TrickalFanGame.Editor
                     Basic(id, (2, 6, '#'), (4, 6, '#'), (3, 5, '#'), (3, 7, '#')), "not reachable"),
                 ("a chest in a door passage", Basic(id, (3, 1, 'c')), "door passage"),
                 ("two chests side by side", Basic(id, (0, 1, 'c'), (0, 2, 'g')), "Chest at"),
+                // Trap-1: an obstacle trap follows the obstacle rules, a floor trap its own.
+                ("a fire in a door passage", Basic(id, (3, 0, '*')), "door passage"),
+                ("a floor trap beside a door's safe entry", Basic(id, (3, 2, '^')), "safe entry"),
+                ("a floor trap column that every path between the doors must cross",
+                    Basic(id, Enumerable.Range(0, 7).Select(row => (row, 3, row % 2 == 0 ? 'a' : 'b')).ToArray()),
+                    "avoids every floor trap"),
             };
             foreach ((string label, string text, string expected) in invalidGeometry)
             {
@@ -249,6 +255,35 @@ namespace TrickalFanGame.Editor
                 Assert(!RoomLayoutImporter.TryValidateGeometry(document, out error) &&
                        error.Contains(expected, StringComparison.Ordinal),
                     $"The importer must reject {label} with its reason. Got: {error}");
+            }
+
+            // Trap-1: a floor trap may leave a one-cell lane (the feet circle is narrower than a body), traps count
+            // as terrain for the default difficulty, and each symbol names its kind and phase.
+            Assert(RoomLayoutFormat.TryParse(
+                       Basic(id, Enumerable.Range(0, 7).Where(row => row != 1)
+                           .Select(row => (row, 3, row % 2 == 0 ? 'a' : 'b')).ToArray()), file,
+                       out RoomLayoutDocument trapped, out error) &&
+                   RoomLayoutImporter.TryValidateGeometry(trapped, out error),
+                $"A floor trap column with a one-cell gap must leave a trap-free path. {error}");
+            Assert(trapped.Difficulty == Week19Difficulty1Setup.ObstacleLayoutModifier &&
+                   trapped.CellsOf(RoomLayoutCellKind.FloorTrap).Count() == 6 && !trapped.Obstacles.Any(),
+                "A room with only floor traps must default to the obstacle Layout difficulty and hold no obstacle.");
+            (char symbol, RoomTrapKind kind, bool secondPhase)[] trapSymbols =
+            {
+                ('^', RoomTrapKind.FloorSpikes, false), ('a', RoomTrapKind.PeriodicSpikes, false),
+                ('b', RoomTrapKind.PeriodicSpikes, true), ('~', RoomTrapKind.DamagePuddle, false),
+                ('w', RoomTrapKind.Spiderweb, false), ('*', RoomTrapKind.Fire, false),
+                ('Z', RoomTrapKind.SpikedRock, false), ('P', RoomTrapKind.PoisonMushroom, false),
+            };
+            Assert(RoomLayoutFormat.Symbols.Values.Count(symbol => symbol.IsTrap) == trapSymbols.Length,
+                "The room format must define exactly the eight trap symbols.");
+            foreach ((char symbol, RoomTrapKind kind, bool secondPhase) in trapSymbols)
+            {
+                Assert(RoomLayoutFormat.Symbols.TryGetValue(symbol, out RoomLayoutSymbol entry) && entry.IsTrap &&
+                       entry.TrapKind == kind && entry.SecondPhase == secondPhase &&
+                       entry.IsObstacle == !RoomTrap.IsFloorKind(kind) &&
+                       (entry.Kind == RoomLayoutCellKind.FloorTrap) == RoomTrap.IsFloorKind(kind),
+                    $"Trap symbol '{symbol}' must place a {kind}.");
             }
 
             // Pit cells merge into rectangles and keep a position-based ID.
@@ -352,6 +387,11 @@ namespace TrickalFanGame.Editor
                         RoomLayoutCellKind.Tree => !hasSlot && obstacle.FixedVariant == null && obstacle.BlocksFlight &&
                                                    obstacle.VariantId == DestructibleObstacle.TreeVariantId &&
                                                    obstacle.DropTable == null,
+                        RoomLayoutCellKind.ObstacleTrap =>
+                            !hasSlot && obstacle.FixedVariant == null &&
+                            obstacle.VariantId == RoomTrap.ObstacleVariantIdOf(cell.Symbol.TrapKind) &&
+                            obstacle.RequiredHits == RoomTrap.RequiredHitsOf(cell.Symbol.TrapKind) &&
+                            obstacle.BlocksFlight == RoomTrap.BlocksFlightOf(cell.Symbol.TrapKind),
                         _ => !hasSlot && obstacle.FixedVariant != null &&
                              obstacle.FixedVariant.VariantId == cell.Symbol.VariantId &&
                              obstacle.VariantId == cell.Symbol.VariantId &&
@@ -369,6 +409,23 @@ namespace TrickalFanGame.Editor
                 Assert(pitFootprints.Length == pits.Count && pits.All(pit => pitFootprints.Any(footprint =>
                            footprint.ObstacleId == pit.PitId && Same(footprint.Bounds, pit.Bounds))),
                     $"{label} pits do not match its grid.");
+
+                // Trap-1: one trap per trap cell, of the symbol's kind and phase, with a position-based ID.
+                Dictionary<string, RoomTrap> traps = prefab.GetComponentsInChildren<RoomTrap>(true)
+                    .ToDictionary(trap => trap.TrapId, StringComparer.Ordinal);
+                RoomLayoutCell[] trapCells = document.Traps.ToArray();
+                Assert(traps.Count == trapCells.Length, $"{label} has {traps.Count} traps, not {trapCells.Length}.");
+                foreach (RoomLayoutCell cell in trapCells)
+                {
+                    string trapId = cell.Id(RoomLayoutImporter.TrapIdPrefix);
+                    Assert(traps.TryGetValue(trapId, out RoomTrap trap) && trap.Kind == cell.Symbol.TrapKind &&
+                           trap.SecondPhase == cell.Symbol.SecondPhase &&
+                           trap.IsFloorTrap == (cell.Symbol.Kind == RoomLayoutCellKind.FloorTrap) &&
+                           (Vector2)prefab.transform.InverseTransformPoint(trap.transform.position) == cell.Center &&
+                           trap.TryValidate(out error),
+                        $"{label} is missing trap {trapId} of the kind its symbol '{cell.Symbol.Symbol}' asks " +
+                        $"for on its cell. {error}");
+                }
             }
 
             return documents;

@@ -37,7 +37,7 @@
 | T4 | 플레이테스트 텔레메트리 | 예정 | 전투·방 이벤트 안정 후, 8주차 밸런싱 전 | 밸런싱에는 권장 |
 | T5 | Unity MCP | 조건부 | 수동 Editor 조작이 측정 가능한 병목이 된 뒤 | 아니오 |
 | T6 | Web UI 상태 테스트 | 완료 — Vitest·Testing Library 6개 테스트 통과, 2026-09-04 | 12주차 통계·랭킹 마감 | 아니오 |
-| T7 | 방 Layout 대량 제작 도구(맵 에디터) | 1단계(포맷·임포터·종류 고정 장애물·상자 칸·시범 방 11개) 자동 검증 완료, 2026-10-10. 화면 확인과 2~4단계는 남음 ([아래 절](#방-layout-대량-제작-도구-제안-2026-10-07)) | 방 종류 확장을 콘텐츠 범위에 넣을 때 | 아니오 |
+| T7 | 방 Layout 대량 제작 도구(맵 에디터) | 1단계(포맷·임포터·종류 고정 장애물·상자 칸·시범 방 11개) 자동 검증 완료, 2026-10-10. 3단계(함정 글자 8개·함정 방 3개) 자동 검증 완료, 2026-10-12. 화면 확인과 2·4단계는 남음 ([아래 절](#방-layout-대량-제작-도구-제안-2026-10-07)) | 방 종류 확장을 콘텐츠 범위에 넣을 때 | 아니오 |
 
 ## 4. T0 — 저장소 전용 기능 개발 스킬
 
@@ -418,7 +418,8 @@ Unity 6000.3.22f1 배치 종료 코드 0과 성공 로그를 확인했다. Play 
 ## 방 Layout 대량 제작 도구 제안 (2026-10-07)
 
 상태: **1단계 구현·자동 검증 완료(2026-10-10)**. 포맷과 임포터의 사용법은 [개발 환경](./05-development-setup.md)의
-"T7 방 Layout 임포터"에 있다. 실제 화면 확인, 방별 적 구성(2단계), 함정 글자(3단계), 에디터 창(4단계)은 남아 있다.
+"T7 방 Layout 임포터"에 있다. **3단계 함정 글자도 구현·자동 검증 완료(2026-10-12, Trap-1)**이며 결과는 맨 아래
+"3단계 구현"에 있다. 실제 화면 확인, 방별 적 구성(2단계), 에디터 창(4단계)은 남아 있다.
 아래 "사용자가 원하는 것"부터 "착수 전에 정할 것"까지는 착수 전 기록이고, 정해진 결과는 맨 아래 "1단계 구현"에 있다.
 
 ### 사용자가 원하는 것 (2026-10-07)
@@ -575,6 +576,32 @@ Room Layout, Encounter-4, Spawn-2, Difficulty-1, Terrain-0, Chest-1, Jjangsem-1,
 통과한 뒤 Chest-0의 "The chest Prefab must show its own normal-chest sprite."에서 멈췄다(종료 코드 1). 같은 날 병행
 작업으로 `TreasureChest.prefab`의 스프라이트가 바뀐 것이 원인이고 방 Layout 변경과는 무관하다. 그 뒤 순서인 개발
 패널 회귀와 Obstacle-7은 이번에 다시 돌지 못했다.
+
+### 3단계 구현 — 함정 글자 (2026-10-12, Trap-1)
+
+만든 것:
+
+- 함정 글자 8개(`RoomLayoutFormat.BuildSymbols`): `^` 바닥 가시, `a`·`b` 주기 가시 A·B, `~` 장판, `w` 거미줄, `*` 불,
+  `Z` 가시 돌, `P` 독버섯. 임포터는 Trap-0 Prefab의 복사본을 방의 `Traps` 아래에 놓고 칸 위치 ID(`trap-c03-r05`)와
+  위상을 준다.
+- 바닥 함정 배치 규칙 `RoomObstacleLayout.TryValidateFloorTraps`. 임포터의 텍스트 검사와
+  `RoomTemplateDefinition.TryValidateLayout`이 함께 쓰므로 층 생성 전 카탈로그 검사에도 걸린다.
+- `ChestPlacement`가 바닥 함정 칸에 걸치는 상자 자리를 건너뛴다.
+- 함정 방 3개(`basic-spike-field`·`wide-fire-lane`·`large-web-garden`)와 검증기 `Week25Trap1Verification`. Room 콘텐츠
+  버전 12 → 13. 기존 방 11개는 글이 바뀌지 않아 다시 만들지 않았다(`BuildRevision` 유지).
+
+알게 된 제약:
+
+- 불·가시 돌·독버섯은 장애물이라 문 통로·2칸 통로·SpawnPoint 왼쪽/아래 칸 금지 규칙을 그대로 받는다.
+- 바닥 함정은 문마다 안전 진입점 주변 3×3칸에 둘 수 없다. Small 방은 이 구역과 SpawnPoint를 빼면 남는 칸이 거의 없다.
+- 함정 없는 경로는 발밑 원 0.3 기준이라 함정 칸 사이 1칸 틈은 통과로 보지만, 대각선으로 맞닿은 칸 사이는 막힌다.
+
+검증: 2026-10-12 Unity 6000.3.22f1 배치에서 `Week25Trap1Verification.ImportAndVerifyBatch`가 종료 코드 0으로 통과했다.
+`VerifyWithRegressionsBatch`는 Trap-1, Room Layout, Encounter-4, Spawn-2, Difficulty-1, Terrain-0, Chest-1, Jjangsem-1,
+Obstacle-6과 그 회귀 중 Flight-0까지 통과한 뒤 위와 같은 Chest-0의 "The chest Prefab must show its own normal-chest
+sprite."에서 멈췄다(종료 코드 1, 2026-10-10부터 있던 실패이며 이번 변경과 무관). 묶음이 도달하지 못한 Trap-0과
+Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통과했다. 그 뒤 순서의 개발 패널 회귀는 돌지 않았다.
+함정 방 3개의 실제 화면 확인은 사용자가 마쳤다(2026-10-12, 이상 없음).
 
 ## 요정왕국 에셋 연결 도구 — 2026-10-10
 
