@@ -1810,3 +1810,7 @@ Play 화면 검수:
 - 모든 스펠 픽업(기존 스펠·일회용·짱셈스펠)은 `single-spell-afterimage`의 그림자 설정을 공유한다. 너비 배율 1.00, 두께 0.28, 위치 (0.00, -0.25), 진하기 0.79다. 아티팩트의 개별 설정은 유지하며 아이템 ID·종류·게임 규칙은 변경하지 않는다. 공용 값을 바꾸면 새 스펠에도 동일하게 적용된다.
 - 배치 `TrickalFanGame.Editor.GroundShadowProfileSetup.VerifyAndExportBatch` (`-batchmode -quit`, 그래픽 필요)에서 스펠 정의 15개·재사용 픽업 재설정·아티팩트 ID 보존·기존 색상/개폐 전환 검증과 76종 실제 렌더를 통과했다. 로그 `output/ground-shadow-spell-tune.log` 종료 코드 0. 미리보기 7개 스펠의 모든 수치가 잔상 설정과 같고, 공용 JSON 변경 대상이 정확히 14종인지 비교했다.
 
+
+### 샤샤 실시간 물줄기 비교 프로토타입 (2026-10-12)
+
+`F1 > — Artifact — > Show artifact drops > Drop 샤샤의 항아리`로 얻은 뒤 같은 섹션의 `Shasha: realtime water (off = original)`로 새 메시·셰이더·월드 물방울과 기존 이미지를 비교한다. 기본값은 새 효과다. 피해 규칙과 발사 주기는 유지한다. 단독 검증 메뉴는 `Trickal Fan Game > Effects > Verify Shasha Realtime Water Prototype`, 정지 비교 렌더는 `Export Shasha Water Comparison`이다. C# 컴파일과 커밋 전 `ShashaWaterPrototypeVerification.VerifyWithRegressionsBatch`를 확인했다(2026-10-13, 종료 코드 0, `output/shasha-water-precommit.log`). 2026-10-13 사용자 실제 Play 비교에서 개선을 확인했고, 메시·셰이더·독립 파티클 합성을 새 효과·어색한 효과 개선의 우선 제작 방향으로 채택했다. 물다운 표현 보강과 미확인 Play 조건의 개별 검수는 남아 있다. 현재 무난한 효과는 일괄 교체하지 않는다. 구성·정확한 확인 절차·검증 기록은 [샤샤 비교 기록](./art-prompts/shasha-realtime-v1/README.md)을 따른다.

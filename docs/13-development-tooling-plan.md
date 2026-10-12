@@ -635,3 +635,7 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 - [x] `scripts/build-ground-shadow-review.py`로 검색·종류 필터·개별 너비/두께/위치/진하기 조절·원본 비교·초기화·값 전달용 로컬 페이지와 모음 이미지를 생성했다. 브라우저에서 검색, 진하기/위치 변경 및 초기화를 확인했다.
 - [x] 사용자 제공 67종 검수 수치를 공용 JSON 및 상태별 런타임 선택으로 반영했다. 실제 Unity 재렌더와 67종 전 수치 일치, 미지정 9종 불변, 동일 오브젝트의 색상·개폐 전환과 수동 설정 보존을 검증했다 (`output/ground-shadow-profile-apply.log`, `output/ground-shadow-profile-transitions.log`, 종료 코드 0).
 - 실행 및 보관 범위는 `docs/05-development-setup.md`의 에셋별 그림자 검수 페이지를 따른다.
+
+### 샤샤 실시간 물줄기 A/B 검수 (2026-10-12)
+
+사용자 요청으로 샤샤만 비교용 대표 효과로 구현했다. F1 아티팩트 섹션에서 기존 이미지와 메시·셰이더·월드 물방울을 전환한다. `ShashaWaterPrototypeVerification.Verify` 단독 검사와 임시 Preview Scene 정지 비교 렌더 메뉴를 추가했다. C# 컴파일과 2026-10-13 커밋 전 `ShashaWaterPrototypeVerification.VerifyWithRegressionsBatch` 통과(종료 코드 0, `output/shasha-water-precommit.log`). 2026-10-13 사용자 Play 비교에서 개선을 확인하고 실시간 합성 제작 방향을 채택했다. 물다운 표현 보강·미확인 Play 조건의 검수는 남아 있다. [구성·검증 기록](./art-prompts/shasha-realtime-v1/README.md)과 [실행법](./05-development-setup.md)의 샤샤 비교 항목을 따른다.

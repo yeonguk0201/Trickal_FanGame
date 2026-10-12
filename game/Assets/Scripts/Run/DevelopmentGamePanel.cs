@@ -243,6 +243,13 @@ namespace TrickalFanGame.Run
             ChestContentTable table = assembler.ChestContentTable;
             Transform player = assembler.Graph?.Player != null ? assembler.Graph.Player.transform : null;
             DrawArtifactStateRows(player);
+            PlayerWaterStream water = player != null ? player.GetComponent<PlayerWaterStream>() : null;
+            if (water != null)
+            {
+                bool realtime = GUILayout.Toggle(water.UseProceduralVisual, "Shasha: realtime water (off = original)");
+                if (realtime != water.UseProceduralVisual) water.SetVisualMode(realtime);
+                GUILayout.Label($"Water view: {(water.UseProceduralVisual ? "mesh + shader + droplets" : "original image")}");
+            }
             if (table == null || table.ArtifactPickupPrefab == null || player == null)
             {
                 GUILayout.Label("No artifact pickup Prefab or player.");

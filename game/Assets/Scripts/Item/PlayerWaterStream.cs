@@ -49,6 +49,22 @@ namespace TrickalFanGame.Item
         private float knockbackShare;
         private float nextFireTime = float.NegativeInfinity;
         private float burstHideTime;
+        private Vector2 burstForward;
+        private Vector2 previousVisualPosition;
+        private bool hasVisualPosition;
+        private readonly List<ProceduralWaterStream> proceduralBeams = new();
+        private readonly List<ProceduralWaterStream> proceduralFlashes = new();
+
+        // A/B prototype selection affects presentation only; it never resets the attack cooldown.
+        public bool UseProceduralVisual { get; private set; } = true;
+
+        public void SetVisualMode(bool procedural)
+        {
+            if (UseProceduralVisual == procedural) return;
+            HideBeams();
+            ClearProceduralEffects();
+            UseProceduralVisual = procedural;
+        }
 
         public bool IsConfigured => width > 0f;
         // True while the attack direction is held, between bursts too.
@@ -67,14 +83,39 @@ namespace TrickalFanGame.Item
             if (Time.timeScale <= 0f) return;
             EnsureReferences();
             bool canFire = IsConfigured && !health.IsDead && (actionState == null || actionState.CanBasicAttack);
+            if (!canFire)
+            {
+                StopFiring();
+                return;
+            }
+            Vector2 position = transform.position;
+            if (hasVisualPosition && (position - previousVisualPosition).sqrMagnitude > 16f)
+            {
+                HideBeams();
+                ClearProceduralEffects();
+                burstHideTime = 0;
+            }
+            previousVisualPosition = position;
+            hasVisualPosition = true;
             Vector2 direction = Vector2.zero;
             Tick(canFire && PlayerAttack.TryReadAttackDirection(out direction) ? direction : (Vector2?)null, Time.time);
             if (Time.time >= burstHideTime) HideBeams();
+            else if (UseProceduralVisual) RefreshProceduralPaths();
+            proceduralFlashes.RemoveAll(effect => effect == null);
         }
 
         private void OnDisable()
         {
             StopFiring();
+        }
+
+        private void OnDestroy()
+        {
+            foreach (ProceduralWaterStream effect in proceduralBeams)
+                if (effect != null) CombatEffectArtwork.Release(effect.gameObject);
+            foreach (ProceduralWaterStream effect in proceduralFlashes)
+                if (effect != null) CombatEffectArtwork.Release(effect.gameObject);
+            CombatEffectArtwork.Release(streamMaterial);
         }
 
         public void Configure(float configuredWidth, float configuredKnockbackShare)
@@ -111,6 +152,7 @@ namespace TrickalFanGame.Item
             burstHideTime = currentTime + Mathf.Min(BurstSeconds, interval * BurstIntervalShare);
             BurstCount++;
             Vector2 forward = direction.Value.normalized;
+            burstForward = forward;
             Vector2 side = new(-forward.y, forward.x);
             int beamCount = BeamCount;
             float halfWidth = BeamWidth * 0.5f;
@@ -128,6 +170,8 @@ namespace TrickalFanGame.Item
                 beamVisuals[index].enabled = false;
             }
             for (int index = beamCount; index < artworkBeams.Count; index++) artworkBeams[index].enabled = false;
+            for (int index = beamCount; index < proceduralBeams.Count; index++)
+                if (proceduralBeams[index] != null) proceduralBeams[index].HideBody();
 
             return true;
         }
@@ -315,10 +359,14 @@ namespace TrickalFanGame.Item
         {
             IsFiring = false;
             HideBeams();
+            ClearProceduralEffects();
+            burstHideTime = 0;
         }
 
         private void HideBeams()
         {
+            foreach (ProceduralWaterStream effect in proceduralBeams)
+                if (effect != null) effect.HideBody();
             foreach (SpriteRenderer sprite in artworkBeams) if (sprite != null) sprite.enabled = false;
             foreach (LineRenderer visual in beamVisuals)
             {
@@ -336,9 +384,44 @@ namespace TrickalFanGame.Item
 
         private readonly List<SpriteRenderer> artworkBeams = new();
 
+        private void ClearProceduralEffects()
+        {
+            foreach (ProceduralWaterStream effect in proceduralBeams)
+                if (effect != null) effect.Clear();
+            foreach (ProceduralWaterStream effect in proceduralFlashes)
+                if (effect != null) CombatEffectArtwork.Release(effect.gameObject);
+            proceduralFlashes.Clear();
+        }
+
+        private void RefreshProceduralPaths()
+        {
+            Vector2 side = new(-burstForward.y, burstForward.x);
+            for (int i = 0; i < proceduralBeams.Count && i < BeamCount; i++)
+            {
+                ProceduralWaterStream effect = proceduralBeams[i];
+                if (effect == null || !effect.BodyVisible) continue;
+                Vector2 origin = (Vector2)transform.position + side * ((i - (BeamCount - 1) * 0.5f) * BeamSpacing);
+                float length = ResolveLength(origin, burstForward, MaximumLength);
+                effect.SetPath(origin, origin + burstForward * length, length < MaximumLength - 0.001f);
+            }
+        }
+
         private void ShowBeam(int beam, Vector2 start, Vector2 end, float lineWidth)
         {
             if (!Application.isPlaying) return;
+            if (UseProceduralVisual)
+            {
+                while (proceduralBeams.Count <= beam) proceduralBeams.Add(null);
+                if (proceduralBeams[beam] == null)
+                    proceduralBeams[beam] = ProceduralWaterStream.Create(gameObject);
+                if (proceduralBeams[beam] != null)
+                {
+                    proceduralBeams[beam].Begin(start, end, lineWidth, Time.time,
+                        Mathf.Min(BurstSeconds, HitInterval * BurstIntervalShare),
+                        Vector2.Distance(start, end) < MaximumLength - 0.001f);
+                    return;
+                }
+            }
             if (TrickalFanGame.Frontend.FairyKingdomArtwork.Catalog != null)
             {
                 while (artworkBeams.Count <= beam)
@@ -357,6 +440,17 @@ namespace TrickalFanGame.Item
         private void ShowFlash(Vector2 start, Vector2 end, float lineWidth)
         {
             if (!Application.isPlaying) return;
+            if (UseProceduralVisual)
+            {
+                ProceduralWaterStream effect = ProceduralWaterStream.Create(gameObject, true);
+                if (effect != null)
+                {
+                    // Cutter/bounce links are fixed hit paths, not wall impact splashes.
+                    effect.Begin(start, end, lineWidth, Time.time, FlashSeconds, false);
+                    proceduralFlashes.Add(effect);
+                    return;
+                }
+            }
             if (TrickalFanGame.Frontend.FairyKingdomArtwork.Catalog != null)
             {
                 SpriteRenderer flashArtwork = CreateArtworkBeam(null);
