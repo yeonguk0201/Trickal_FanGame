@@ -189,8 +189,6 @@ namespace TrickalFanGame.Editor
 
         private static void VerifyFullRunProgression()
         {
-            Week7FloorTransitionVerification.Verify();
-
             float originalTimeScale = Time.timeScale;
             GameObject root = new("Phase E-8 Full Run Verification");
             try

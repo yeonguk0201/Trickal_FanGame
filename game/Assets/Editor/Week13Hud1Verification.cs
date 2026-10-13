@@ -60,7 +60,8 @@ namespace TrickalFanGame.Editor
             ValidateHeartRow(view);
             Assert(!view.GetComponentsInChildren<Graphic>(true).Any(graphic => graphic.raycastTarget &&
                 graphic.GetComponentInParent<GamePauseArtifactView>() == null &&
-                graphic.GetComponentInParent<ItemRewardSelectionView>() == null),
+                graphic.GetComponentInParent<ItemRewardSelectionView>() == null &&
+                graphic.GetComponentInParent<ShopView>(true) == null),
                 "HUD-1 graphics must not intercept combat input.");
 
             Canvas canvas = view.GetComponent<Canvas>();
