@@ -226,12 +226,12 @@ MonoBehaviour:
   detectionRange: 7
   minimumChargeDistance: 1
   pursuitSpeed: 2.75
-  pursuitDuration: 0
+  pursuitDuration: 1.1
   windupDuration: 0.65
   dashSpeed: 9.5
   dashDuration: 0.8
-  recoveryDuration: 0.6
-  chargeCooldown: 1.5
+  recoveryDuration: 0.75
+  chargeCooldown: 0
   chargeDamageTier: 2
   target: {fileID: 0}
   logChargeDiagnostics: 0
