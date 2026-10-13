@@ -166,6 +166,23 @@ namespace TrickalFanGame.Run
                 if (!invulnerable) health?.SetInvulnerable(false);
             }
 
+            // Every direct hit becomes critical, to see the critical hit stop and camera shake.
+            PlayerStats stats = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<PlayerStats>()
+                : null;
+            if (stats != null)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"CRIT {stats.CriticalChance:P0}");
+                if (AssistedButton("CRIT 100%"))
+                {
+                    stats.AddCriticalChance(1f);
+                    status = "Critical chance 100% for this run.";
+                }
+
+                GUILayout.EndHorizontal();
+            }
+
             // Hitbox-1: the look follows the size, the hurtbox stops at its limit and the feet never change.
             PlayerBodySize size = assembler.Graph?.Player != null
                 ? assembler.Graph.Player.GetComponent<PlayerBodySize>()

@@ -32,13 +32,23 @@ namespace TrickalFanGame.Combat
         private void OnEnable()
         {
             if (health == null) Awake();
-            if (health != null) { health.Healed += HandleHeal; health.DamageApplied += HandleDamage; }
+            if (health != null)
+            {
+                health.Healed += HandleHeal;
+                health.DamageApplied += HandleDamage;
+                health.DamageResolved += HandleCritical;
+            }
             if (sp != null) sp.Restored += HandleSP;
         }
 
         private void OnDisable()
         {
-            if (health != null) { health.Healed -= HandleHeal; health.DamageApplied -= HandleDamage; }
+            if (health != null)
+            {
+                health.Healed -= HandleHeal;
+                health.DamageApplied -= HandleDamage;
+                health.DamageResolved -= HandleCritical;
+            }
             if (sp != null) sp.Restored -= HandleSP;
             hitEndsAt = 0f;
             if (overlay != null) overlay.enabled = false;
@@ -62,6 +72,15 @@ namespace TrickalFanGame.Combat
             if (sp != null || damage <= 0f || remaining <= 0f) return;
             hitStartedAt = Time.time;
             hitEndsAt = Time.time + 0.28f;
+        }
+
+        // Only the player's critical hits on an enemy stop the frame and shake the camera.
+        private void HandleCritical(DamageContext context, DamageResult result)
+        {
+            if (sp != null || !result.IsCritical || result.FinalDamage <= 0f || context.Source == null ||
+                context.Source.GetComponent<PlayerCombatEvents>() == null) return;
+            HitStop.Play();
+            CameraShake.Play();
         }
 
         private void LateUpdate()

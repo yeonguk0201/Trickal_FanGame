@@ -1854,3 +1854,10 @@ Edit Mode에서 `Trickal Fan Game > Effects > Preview Shasha Water`를 열고 `O
 창 닫기·Play 전환·리로드 때 임시 리소스를 정리한다. Unity 6000.3 내부 SceneView 연결을 확인하는 어댑터를 사용하므로 Editor 업그레이드 시 미지원 오류가 없는지 확인한다. 현재 실제 배경·캐릭터 및 원본과의 비교는 SampleScene Play의 F1 토글을 사용한다. 시작점 이동 조작·실제 배경 합성은 미리보기 후속 범위다. Scene 뷰 조작과 최종 Play 미술 검수는 아직 확인 대기다.
 
 단독 자동 검사와 정지 렌더: `TrickalFanGame.Editor.ShashaWaterPrototypeVerification.VerifyAndExportBatch`. 렌더는 씬을 교체하는 게임플레이 검사보다 먼저 수행한다. 결과 PNG: `output/art-review/shasha-water/unity-comparison.png`(위: 원본, 아래: 물결 본체·접촉 포말). 입자·이동 검수는 이 PNG로 대체하지 않는다.
+
+### 착탄 스파크 · 치명타 히트스톱 (2026-10-14)
+
+- Edit Mode: `Trickal Fan Game/Effects/Preview Hit Spark` → `Open / reset Scene preview`. 반경·탄 방향·타격점, 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
+- 검사: `Trickal Fan Game/Effects/Verify Hit Feedback` (`TrickalFanGame.Editor.HitFeedbackVerification.Verify`).
+- 실제 Play: 적을 기본 공격으로 맞혀 스파크를 확인한다. `F1 → — Player — → CRIT 100%`로 이번 Run의 직접 타격을 모두 치명타로 만들면 히트스톱과 약한 카메라 흔들림을 매번 볼 수 있다.
+- 상세 범위와 미확인 항목: [작업 기록](art-prompts/hit-spark.md).

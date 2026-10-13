@@ -320,7 +320,13 @@ namespace TrickalFanGame.Combat
             float impactDistance = Vector2.Distance(launchPosition, transform.position);
             float healthBeforeHit = target.CurrentHealth + target.CurrentShield;
             target.TakeDamage(context.WithImpactDistance(impactDistance));
-            ApplyHitEffects(target, healthBeforeHit - (target.CurrentHealth + target.CurrentShield));
+            float appliedDamage = healthBeforeHit - (target.CurrentHealth + target.CurrentShield);
+            if (appliedDamage > 0f)
+            {
+                HitSpark.Play(transform.position, flightVelocity, target);
+            }
+
+            ApplyHitEffects(target, appliedDamage);
 
             IgnoreTargetColliders(target);
             if (!isSplitProjectile && splitSettings.IsEnabled)
