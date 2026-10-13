@@ -50,6 +50,8 @@ namespace TrickalFanGame.Editor
                 LayerMask.NameToLayer("Player"),
                 LayerMask.NameToLayer("Environment"),
                 pickupLayer,
+                // Terrain-0: pits stop pickups from sliding in.
+                LayerMask.NameToLayer("Pit"),
             };
             Assert(Array.TrueForAll(collidingLayers, layer => layer >= 0),
                 "Player and Environment layers must exist.");

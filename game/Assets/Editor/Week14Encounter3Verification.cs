@@ -14,28 +14,22 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Verify Encounter-3 Waves and Revisit State")]
         public static void Verify()
         {
+            Week18Obstacle2Setup.OpenGameScene();
             FloorGenerator generator = GameObject.Find(Week8RandomRoomSetup.GeneratorObjectName)
                 ?.GetComponent<FloorGenerator>();
             RoomGraphAssembler assembler = UnityEngine.Object.FindFirstObjectByType<RoomGraphAssembler>();
             Assert(generator != null && assembler != null && assembler.EnemyRoster != null &&
                    assembler.EncounterClearDropTable != null,
                 "Run Encounter-3 Setup before verification.");
-            string[] baselineEncounterIds =
-            {
-                "crossfire-ranged", "lane-charging-ranged", "pressure-chaser-ranged",
-                Week14Encounter3Setup.EncounterId,
-            };
-            Assert(generator.EncounterContentVersion >= Week14Encounter3Setup.ContentVersion &&
-                   baselineEncounterIds.All(id => generator.EncounterDefinitions.Any(definition =>
-                       definition.EncounterId == id)),
-                "Encounter-3 catalog or content version is not configured.");
-
-            EncounterDefinition twoWave = generator.EncounterDefinitions.Single(definition =>
-                definition.EncounterId == Week14Encounter3Setup.EncounterId);
-            ValidateDefinitionAndSelection(generator, twoWave);
+            // Encounter-4 replaced the Week 14 catalog, so the two-wave Encounter is no longer selected by the
+            // generator. Its asset still drives the wave rules checked here.
+            EncounterDefinition twoWave =
+                AssetDatabase.LoadAssetAtPath<EncounterDefinition>(Week14Encounter3Setup.EncounterPath);
+            Assert(generator.EncounterContentVersion >= Week14Encounter3Setup.ContentVersion && twoWave != null,
+                "Encounter-3 content version or the two-wave Encounter asset is missing.");
+            ValidateDefinition(twoWave);
             ValidateWaveStateBoundaries();
             ValidateRuntimeProgression(assembler, twoWave);
-            ValidateAssemblerBinding(assembler);
             Week14Room5Verification.Verify();
             Debug.Log("Week 14 Encounter-3 verification passed: two waves wait for every required enemy, " +
                       "start and complete once, persist completed-wave and clear-reward state, restore safely, " +
@@ -54,8 +48,7 @@ namespace TrickalFanGame.Editor
             Verify();
         }
 
-        private static void ValidateDefinitionAndSelection(FloorGenerator generator,
-            EncounterDefinition twoWave)
+        private static void ValidateDefinition(EncounterDefinition twoWave)
         {
             Assert(twoWave.TryValidate(out string error), error);
             Assert(twoWave.MinimumFloor == 2 && twoWave.MaximumFloor == 3 && twoWave.Waves.Count == 2,
@@ -63,28 +56,6 @@ namespace TrickalFanGame.Editor
             Assert(twoWave.Waves[0].StartCondition == EncounterWaveStartCondition.RoomEntered &&
                    twoWave.Waves[1].StartCondition == EncounterWaveStartCondition.PreviousWaveCleared,
                 "The second wave must wait for the first wave to clear.");
-
-            int selectedCount = 0;
-            for (int seed = 1; seed <= 256; seed++)
-            {
-                Assert(generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out error), error);
-                foreach (GeneratedRoomNode node in graph.Nodes.Where(node =>
-                             node.EncounterId == Week14Encounter3Setup.EncounterId))
-                {
-                    Assert(node.FloorNumber >= 2, "The two-wave Encounter appeared before floor 2.");
-                    for (int waveIndex = 0; waveIndex < 2; waveIndex++)
-                    {
-                        Assert(twoWave.TryResolveWave(node.Template, node.FloorNumber,
-                            node.DirectionalConnections, waveIndex,
-                            out ResolvedEncounterSpawn[] spawns, out error), error);
-                        Assert(spawns.Length == 2 &&
-                               spawns.Select(spawn => spawn.SpawnPointIndex).Distinct().Count() == 2,
-                            $"Two-wave Encounter wave {waveIndex + 1} must resolve two unique SpawnPoints.");
-                    }
-                    selectedCount++;
-                }
-            }
-            Assert(selectedCount > 0, "256 seeds did not select the two-wave Encounter.");
         }
 
         private static void ValidateWaveStateBoundaries()
@@ -183,24 +154,6 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        private static void ValidateAssemblerBinding(RoomGraphAssembler assembler)
-        {
-            int seed = FindFloorTwoSeed(assembler.Generator);
-            Assert(seed > 0, "Could not find a floor-2 seed containing the two-wave Encounter.");
-            Assert(assembler.TryApplyGeneratedGraphForVerification(seed, out string error), error);
-            Assert(assembler.TryLoadFloor(2, assembler.Graph.Player, out error), error);
-            GeneratedRoomNode generated = assembler.GeneratedGraph.FindFloor(2).Nodes.First(node =>
-                node.EncounterId == Week14Encounter3Setup.EncounterId);
-            RoomPrefab instance = assembler.CurrentFloorRoot.GetComponentsInChildren<RoomPrefab>(true)
-                .Single(room => room.Node.RoomId == generated.RoomId);
-            RoomClearRewardSpawner reward = instance.Controller.GetComponent<RoomClearRewardSpawner>();
-            Assert(instance.Controller.WaveCount == 2 &&
-                   instance.Controller.EncounterWaves.All(wave => wave.EnemyPrefabs.Count == 2) &&
-                   reward != null && reward.DropTable == assembler.EncounterClearDropTable &&
-                   reward.DropSeed == RoomClearRewardSpawner.DeriveDropSeed(generated.ContentSeed),
-                "RoomGraphAssembler did not bind both waves and the clear reward Prefab.");
-        }
-
         // The configured table only drops 33% of the time; a 100% copy keeps the "rewards exactly once" check stable.
         private static ResourceDropTable AlwaysDropTable(RoomGraphAssembler assembler)
         {
@@ -251,17 +204,6 @@ namespace TrickalFanGame.Editor
             Assert(health != null && !health.IsDead, "The expected required enemy is missing or already dead.");
             health.TakeDamage(health.MaxHealth + 1f);
             Assert(health.IsDead, "The required enemy did not die during verification.");
-        }
-
-        private static int FindFloorTwoSeed(FloorGenerator generator)
-        {
-            for (int seed = 1; seed <= 4096; seed++)
-            {
-                if (!generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out _)) continue;
-                if (graph.FindFloor(2).Nodes.Any(node =>
-                        node.EncounterId == Week14Encounter3Setup.EncounterId)) return seed;
-            }
-            return -1;
         }
 
         private static void Assert(bool condition, string message)

@@ -362,10 +362,10 @@ namespace TrickalFanGame.Editor
                 runtime.OnPatternStateChanged(BossActionState.Telegraph,
                     BossPatternExecution.CrayonHeroMapSlash, Time.time + 1f);
                 SpriteRenderer renderer = root.GetComponentInChildren<SpriteRenderer>();
+                // The awakened phase has its own drawings now, so the sprite is no longer tinted.
                 Assert(boss.CurrentPhase == 2 && Mathf.Approximately(boss.CurrentTempoMultiplier, 0.78f) &&
-                       !health.IsInvulnerable && renderer.color != Color.white &&
-                       runtime.CurrentApproachSpeed > 2.5f,
-                    "Golden phase must release invulnerability, tint the same sprite, and accelerate tempo/movement.");
+                       !health.IsInvulnerable && runtime.CurrentApproachSpeed > 2.5f,
+                    "Golden phase must release invulnerability and accelerate tempo/movement.");
 
                 target.GetComponent<DamageInvulnerability>().ResetHitWindow();
                 // The three golden lines deliberately use narrow 0.57-wide lanes; keep the

@@ -84,6 +84,8 @@ namespace TrickalFanGame.Editor
                     configured.MinimumBossDistance,
                     configured.GenerationRetryLimit,
                     CopyDefinitions(configured));
+                // Floor-1 settings decide the topology, so the copy needs them to be comparable.
+                reversed.ConfigureFloorSettings(configured.FloorSettings.ToArray());
                 reversed.ConfigureTemplates(
                     configured.RoomContentVersion,
                     configured.RoomTemplates.Reverse().ToArray());

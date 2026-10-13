@@ -40,7 +40,7 @@ git status --porcelain game/
 
 | 변경 파일 패턴 | 검증 메뉴 |
 |---|---|
-| `Scripts/Item/`, `PlayerStats`, `PlayerInventory` | `Trickal Fan Game > Verify PlayerStats and Item Effects` |
+| `Scripts/Item/`, `PlayerStats`, `PlayerInventory` | `Trickal Fan Game > HP > Verify HP-3 Item Effects` |
 | `DamageContext`, `DamageCalculator` | `Trickal Fan Game > Verify Damage Context` |
 | `PlayerCombatEvents` | `Trickal Fan Game > Verify Player Combat Events` |
 | `RoomNode`, `RoomGraphController`, `RoomDoorway` | `Trickal Fan Game > Verify Fixed Room Graph` |

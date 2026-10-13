@@ -170,7 +170,8 @@ namespace TrickalFanGame.Editor
                 charging.SetTarget(player.transform);
                 chargingObject.GetComponent<EnemyBehaviorContext>().BeginCombat(player.transform);
                 charging.TickBehavior(10f);
-                Assert(charging.State == ChargingEnemyState.Windup && charging.LockedDirection.x > 0f,
+                // Enemy-3: the pattern now opens with the pursuit and reaches the windup after it.
+                Assert(charging.State is ChargingEnemyState.Pursuing or ChargingEnemyState.Windup,
                     "An alerted charging enemy must start its pattern outside its original detection range.");
 
                 chargingObject.SetActive(false);

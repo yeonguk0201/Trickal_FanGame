@@ -42,7 +42,7 @@ TrickalFanGame에서 계획된 기능 하나를 검증 가능한 수직 조각�
 
 - 런타임 규칙을 Editor Setup 코드에 숨기지 않는다. Setup 코드는 씬, 프리팹, ScriptableObject와 직렬화 참조를 구성하는 역할로 제한한다.
 - 반복적인 씬·에셋 구성이 필요하면 기존 `game/Assets/Editor/Week*Setup.cs` 패턴을 참고한다. 재실행 시 중복 오브젝트나 에셋을 만들지 않고, 가능한 경우 Undo와 dirty/save 처리를 제공한다.
-- 검증 코드는 결과를 사람이 눈으로 추측하게 하지 말고 핵심 불변조건 실패 시 명시적으로 실패하게 한다. 기존 `Week6ItemVerification.cs`처럼 양방향 순서, 중복 실행, 상한, 상태 유지 등 요구사항의 경계도 확인한다.
+- 검증 코드는 결과를 사람이 눈으로 추측하게 하지 말고 핵심 불변조건 실패 시 명시적으로 실패하게 한다. 기존 `Week14Encounter3Verification.cs`처럼 양방향 순서, 중복 실행, 상한, 상태 유지 등 요구사항의 경계도 확인한다.
 - Scene 또는 Prefab 텍스트를 직접 대규모 수정하기 전에 Editor 구성 코드나 작은 직렬화 변경으로 해결할 수 있는지 검토한다.
 - Unity가 생성하는 `.meta` 파일과 GUID 참조를 보존한다.
 
