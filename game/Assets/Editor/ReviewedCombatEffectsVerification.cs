@@ -29,7 +29,7 @@ namespace TrickalFanGame.Editor
             }
             foreach (string name in new[] { "sp-mote", "warning-chevron", "landing-shadow" })
                 Assert(CombatEffectArtwork.Frames(name).Length == 1, name + " is missing.");
-            foreach (string name in new[] { "EnemyHitOverlay", "ChargeWarning", "GroundSlam", "SlamLight", "LayeredSlam" })
+            foreach (string name in new[] { "EnemyHitOverlay", "ChargeWarning", "MeleeWarning", "GroundSlam", "SlamLight", "LayeredSlam" })
             {
                 Material material = CombatEffectArtwork.Material(name);
                 Assert(material != null && !ShaderUtil.ShaderHasError(material.shader), name + " shader failed to import.");
@@ -45,7 +45,7 @@ namespace TrickalFanGame.Editor
             ValidateSlamLightTiming();
             ValidateLayeredSlam();
             Debug.Log("Reviewed combat effects verification passed: legacy alpha sheets and five layered slam textures, " +
-                      "six shaders, bounded slam layout, independent light with sustained peak, actual HP/SP recovery events, and no recovery VFX for resets, overheal or spending.");
+                      "seven shaders, bounded slam layout, independent light with sustained peak, actual HP/SP recovery events, and no recovery VFX for resets, overheal or spending.");
         }
 
         private static void ValidateSlamLightTiming()

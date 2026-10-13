@@ -37,12 +37,15 @@ namespace TrickalFanGame.Enemy
 
         private static readonly Color TrackingPathColor = new(1f, 0.85f, 0.2f, 0.22f);
         private static readonly Color LockedPathColor = new(1f, 0.25f, 0.1f, 0.4f);
+        // The band begins under the attacker, so that end is thinned to keep the body readable.
+        private const float LungeWarningNearFade = 0.6f;
 
         private EnemyChase chase;
         private EnemyBehaviorContext behavior;
         private EnemyAttackPresentation presentation;
         private Rigidbody2D body;
         private LineRenderer lungePath;
+        private MeleeWarningVisual lungeWarning;
         private float bodyRadius;
         private float stateEndsAt;
         private float nextAttackTime;
@@ -291,6 +294,10 @@ namespace TrickalFanGame.Enemy
             }
 
             UpdateLungePath();
+            if (lungeWarning != null)
+            {
+                lungeWarning.SetTiming(stateEndsAt - currentTime, telegraphDuration, aimLocked);
+            }
         }
 
         // The lunge stops at the first obstacle or pit instead of pushing into it for the rest of the active phase.
@@ -391,6 +398,8 @@ namespace TrickalFanGame.Enemy
             }
 
             lungePath.enabled = false;
+            // The hit area is a circle swept along the lunge, so the band is drawn with a round far end.
+            lungeWarning = MeleeWarningVisual.Bind(lungePath, lungeHitRadius, LungeWarningNearFade, -1);
         }
 
         private void CancelAttack(float currentTime)

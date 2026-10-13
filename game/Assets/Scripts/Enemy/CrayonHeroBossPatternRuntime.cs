@@ -62,6 +62,10 @@ namespace TrickalFanGame.Enemy
         public void ConfigureAwakenedArtwork(Sprite sprite) => awakenedSprite = sprite;
 
         private const float DashPushSkin = 0.02f;
+        // The swing and the map slash hit real boxes, so their corners are only softened.
+        private const float WarningCornerRadius = 0.18f;
+        // The hitbox lines sort two above the boss sprite; the drawn areas go one below it.
+        private const int WarningOrderOffset = -3;
 
         private static readonly List<RaycastHit2D> DashHits = new List<RaycastHit2D>();
         private static readonly List<RaycastHit2D> FeetHits = new List<RaycastHit2D>();
@@ -97,6 +101,7 @@ namespace TrickalFanGame.Enemy
         private int completedDashes;
         private GameObject telegraphObject;
         private LineRenderer telegraphLine;
+        private MeleeWarningVisual swingWarning;
         private GameObject recognitionDebugObject;
         private LineRenderer recognitionDebugLine;
         private int attackPoseIndex = -1;
@@ -378,11 +383,11 @@ namespace TrickalFanGame.Enemy
             {
                 case BossPatternExecution.CrayonHeroMapSlash:
                     UpdateAimDirection();
-                    ShowMapSlashTelegraph();
                     slashPending = true;
                     slashResolved = false;
                     slashResolvesAt = lastTickTime + slashLockedDelay;
                     chargeImpactAt = slashResolvesAt;
+                    ShowMapSlashTelegraph();
                     return true;
                 case BossPatternExecution.CrayonHeroSummonMinions:
                     if (!summonAvailable) return false;
@@ -539,6 +544,7 @@ namespace TrickalFanGame.Enemy
                 swingResolvesAt = now + swingWindup;
                 attackPoseIndex = 0;
                 ShowSwingTelegraph();
+                if (swingWarning != null) swingWarning.SetTiming(swingWindup, swingWindup, false);
                 return;
             }
 
@@ -548,6 +554,8 @@ namespace TrickalFanGame.Enemy
                 else swingDirectionLocked = true;
             }
             UpdateSwingTelegraphPositions();
+            if (swingWarning != null)
+                swingWarning.SetTiming(swingResolvesAt - now, swingWindup, swingDirectionLocked);
             if (now < swingResolvesAt)
             {
                 attackPoseIndex = now < swingResolvesAt - swingWindup * 0.5f ? 0 : 1;
@@ -761,6 +769,12 @@ namespace TrickalFanGame.Enemy
                 ConfigureLine(line, 6, ActiveSlashWidth, new Color(1f, 0.28f, 0.02f, 0.62f),
                     new Color(1f, 0.78f, 0.05f, 0.78f));
                 ChargeWarningVisual.Bind(line, ActiveSlashWidth, false);
+                // Each slash starts under the boss, so that end is thinned. The fill arrives with the impact and
+                // the flash marks the moment the direction is fixed.
+                MeleeWarningVisual warning = MeleeWarningVisual.Bind(line, WarningCornerRadius,
+                    ResolveBodyRadius() * 1.5f, WarningOrderOffset);
+                if (warning != null)
+                    warning.SetTiming(chargeImpactAt - lastTickTime, chargeImpactAt - chargeStartedAt, slashPending);
                 line.SetPosition(0, transform.position);
                 line.SetPosition(1, (Vector2)transform.position + directions[index] * slashLength);
             }
@@ -772,6 +786,8 @@ namespace TrickalFanGame.Enemy
             ChargeWarningVisual.Bind(line, swingWidth, false);
             ConfigureLine(line, 0, swingWidth, new Color(1f, 0.05f, 0.05f, 0.82f),
                 new Color(1f, 0.2f, 0.05f, 0.9f));
+            // The line keeps the hitbox data; the drawn area sits on the floor under the boss and the player.
+            swingWarning = MeleeWarningVisual.Bind(line, WarningCornerRadius, 0f, WarningOrderOffset);
             UpdateSwingTelegraphPositions();
         }
 
