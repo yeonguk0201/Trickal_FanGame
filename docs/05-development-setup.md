@@ -1760,6 +1760,13 @@ Play 화면 검수:
 - 자동 검증: Unity 6000.3.22f1의 `TrickalFanGame.Editor.UserArtworkVerification.Verify` 배치를 시도했으나, 종료 코드 1 및 성공 로그 부재로 검증 완료로 처리하지 않았다.
 - 수동 확인: Edit Mode에서 `Trickal Fan Game > Artwork > Verify User Artwork` 실행 시 `User artwork verification passed: 44 PNGs` 로그와 미리보기의 새 에르핀 아이콘을 확인한다. Game Scene Play에서 우하단 Q 스킬 아이콘이 제공 이미지로 표시되고, 사용 가능·쿨타임 상태 표시가 유지되는지 확인한다. 골디는 골디 상점(위 Shop-1 수동 확인)에서 확인한다.
 
+### 골드 픽업 아트워크 — 2026-10-14
+
+- `Assets/Resources/UserArtwork/gold-pickup.png`: 사용자가 제공한 황금 잎사귀 메달 원본(1265×1243, 투명 배경). 바닥 골드 픽업(`ElifPickup.prefab`)이 `RunResourcePickup.Awake`에서 `UserArtwork.ApplyResourcePickup`으로 이 그림을 쓴다. 표시 크기는 하트·SP 캡슐과 같은 `ResourcePickupWorldSize`(0.5)이며 충돌체와 프리팹은 바꾸지 않았다. 열쇠·폭탄 픽업은 임시 원형을 유지한다.
+- 이에 따라 `Verify User Artwork`의 기대 PNG 수는 45개이고, 성공 로그는 `User artwork verification passed: 45 PNGs`로 시작한다.
+- 자동 검증: `UserArtworkVerification.Verify` 배치 통과(종료 코드 0, 2026-10-14).
+- 수동 확인(사용자 확인 완료, 2026-10-14): Game Scene Play에서 금광석·상자·방 클리어 보상으로 바닥에 떨어진 골드가 메달 그림으로 보이고, 밀리기·획득·99 한도 동작이 그대로인지 확인한다.
+
 ## 요정왕국 신규 에셋 45장 연결 (2026-10-10)
 
 - 나무는 새 세로형 원화를 사용하며 표시 1×2칸, 충돌은 아래 1×1칸 하나다. Layout 가져오기와 Setup 재실행에도 유지한다. [원화 프롬프트·검증 기록](./art-prompts/two-cell-tree.md). 위 검증 메뉴는 나무의 표시 크기·바닥 정렬·상단 통과도 검사한다. 이번 나무 변경의 배치 검증은 기존 Editor 실행 상태에서 종료 코드 1로 미실행되어 Edit Mode 메뉴 실행과 Play 화면 확인이 남아 있다.
