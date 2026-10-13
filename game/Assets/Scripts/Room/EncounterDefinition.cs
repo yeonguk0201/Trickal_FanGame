@@ -14,6 +14,8 @@ namespace TrickalFanGame.Room
         Boss,
         FastChaser,
         Sniper,
+        // Enemy-7: 쥬비 as an Encounter enemy. It only appears in the dedicated jyubi-swarm Encounters.
+        Jyubi,
     }
     public enum EncounterWaveStartCondition { RoomEntered, PreviousWaveCleared }
     public enum EncounterWaveCompletionCondition { AllRequiredEnemiesDefeated }
@@ -325,7 +327,8 @@ namespace TrickalFanGame.Room
                         template.SupportsEnemyRole(index, selectedRole) &&
                         IsSafe(template.SpawnPoints[index], activeDoors));
                     bool prefersCloseSpawn = selectedRole == EncounterEnemyRole.Chaser ||
-                                             selectedRole == EncounterEnemyRole.FastChaser;
+                                             selectedRole == EncounterEnemyRole.FastChaser ||
+                                             selectedRole == EncounterEnemyRole.Jyubi;
                     int selectedIndex = prefersCloseSpawn
                         ? available.OrderBy(index => template.SpawnPoints[index].sqrMagnitude)
                             .ThenBy(index => index).First()

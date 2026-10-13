@@ -168,6 +168,7 @@ MonoBehaviour:
   projectileDamageTier: 1
   phaseTransitionDuration: 1.25
   phaseTwoTempoMultiplier: 0.72
+  keepsOwnedObjectsOnDefeat: 1
 --- !u!114 &1341662532215233610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -271,6 +272,7 @@ MonoBehaviour:
   healFrames: []
   crayonAttackFrames: []
   goldenAttackFrames: []
+  goldenWalkFrames: []
   awakeningFrames: []
   groundTreasures: []
   strideLength: 1.35
@@ -285,7 +287,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
   widthMultiplier: 1
   thickness: 0.28

@@ -1063,6 +1063,37 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   플레이어에게 곧장 날아오고, 닿으면 하트가 반 칸 줄며, 한 대 맞으면 죽는다. 클리어된 방에서 부숴도 문이 잠기지 않고
   보상이 다시 나오지 않는지, 전투 중에 부수면 쥬비를 다 잡아야 방이 클리어되는지 본다.
 
+- Enemy-7 표시 이름·쥬비 Encounter·쫄따구 사망 폭발: 메뉴 `Trickal Fan Game > Week 25 > Setup Enemy-7 Jyubi Swarm and
+  Crumb Blast`가 난이도 표에 쥬비 위협 점수 1을 넣고, 적 roster에 `Jyubi` 역할 → `JyubiEnemy.prefab`을 더하고, 프로필마다
+  `spawn-<프로필>-jyubi-swarm-v1` Encounter(Small·Basic·Wide 3+3, Tall·Large 4+3, 선언 위협 6·7)를 만들고,
+  `BuseureogiCrumbMinion.prefab`에 `EnemyDeathExplosion`(예고 0.6초, 반경 1.2, 1칸)을 붙이고, Game Scene의
+  `encounterContentVersion`을 13으로 올린다. GUID를 보존하며 멱등이다. **코드만 받고 이 Setup을 실행하지 않으면 난이도
+  표에 쥬비 점수가 없어 층 생성이 명시적으로 실패한다.** Spawn-2·Difficulty-1 Setup을 다시 실행해도 쥬비 roster와 점수는
+  유지된다. 바뀐 표시 이름(산사모-활발·산사모-순수·저혈당 요정-순수)은 `Week25Enemy7Setup.EnemyDisplayNames`에 있고 Prefab
+  이름은 그대로다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 25 > Verify Enemy-7 Jyubi Swarm and Crumb Blast`, 배치는 Unity `-batchmode
+  -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Enemy7Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 GUID와 컴포넌트 미중복, 이름이 바뀐 3종의 Prefab·역할 연결 보존, 쥬비 위협 1과
+  roster, `jyubi-swarm`의 방 크기별 구성·위협·쉬움 등급과 기존 Encounter의 쥬비 미포함, 15가지 출입구 조합 배치, 512개
+  seed의 선택·재현과 런타임 Prefab 연결, 두 웨이브 처치 뒤 방 클리어, 쫄따구 폭발의 0.6초 예고·1·3층 정확히 1칸·반경
+  밖과 무적 플레이어·다른 적 무피해·1회 판정·자동 제거, 예고 중에도 방이 바로 클리어되는지, 보스 정리 시 폭발 제거를
+  검사한다. 성공 로그는 `Enemy-7 verification passed`로 시작한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Spawn-2,
+  Difficulty-1, Encounter-4, Enemy-6의 `Verify`. 검증마다 Game Scene을 새로 연다)다. 2026-10-13 두 배치가 종료 코드 0으로
+  통과했다(512개 seed의 전투방 11,709개 중 `jyubi-swarm` 1,415개, 층별 346/367/702). Boss-1 `Verify`는 묶음에서 뺐다.
+  쫄따구가 보스 Sprite를 임시로 쓴다는 15주차 단정("Crumb minion must temporarily reuse Buseureogi art…")이 전용 그림
+  연결 뒤로 맞지 않아 Enemy-7과 무관하게 실패한다.
+  수동 확인: (1) Game Scene Play → `F1` 패널 `— Seed —`의 `Find Jyubi swarm F1` → `Restart Run with this seed`. `— Room
+  —`의 `Encounter:`가 `…-jyubi-swarm-v1`인 방에 들어가면 쥬비만 3~4마리 나오고, 다 잡으면 3마리가 한 번 더 나온 뒤
+  방이 클리어된다. (2) 아무 방에서 `— Room —`의 `Spawn crumb minion (explodes on death)`로 쫄따구를 불러 잡는다. 죽은
+  쫄따구가 그 자리에 멈춘 채 붉어지고 주변에 붉은 원이 0.6초 보이다가 사망 그림과 함께 폭발하고, 원 안에 있으면 하트가 1칸 줄고 밖에 있으면 줄지 않으며, 옆의 적과
+  장애물은 그대로다. `Death blasts pending` 숫자가 예고 동안 1이었다가 0이 된다. 클리어된 방에서 불러도 문이 잠기지
+  않는다. (3) `— Boss room —`의 버튼으로 부스러기가 나오는 층의 보스방에 가서 소환된 쫄따구가 같은 폭발을 남기는지, 보스를 잡아도
+  쫄따구·장애물·날아가던 투사체가 남고 방은 정상 클리어되는지, 남은 쫄따구를 잡으면 여전히 폭발하는지 본다(2026-10-13
+  사용자 결정. Setup이 부스러기 보스 Prefab의 `keepsOwnedObjectsOnDefeat`를 켠다. 1~3은 변경 전 구현으로 사용자가 Play
+  확인했다. 이 변경 뒤에는 Enemy-7 단독 `Verify`만 다시 통과했고 회귀 묶음은 다시 돌리지 않았다. 플레이 중에는 죽은
+  보스 오브젝트를 지우는 처리가 보스의 사망 처리보다 먼저 실행되어 `OnDisable`이 소환물을 지우던 문제가 있었고, 죽은
+  보스의 `OnDisable`도 소환물을 넘겨주도록 고쳤다).
+
 - Passive-1 넉백 교체·칸나의 대포·비비의 콧물: 메뉴 `Trickal Fan Game > Week 23 > Setup Passive-1 Cannon and Snot`이
   `Assets/Items/`에 `artifact-kanna-cannon`(Rare, 최대 2스택, 효과 43 `ProjectileSizePercent` `magnitude` 0.5)과
   `artifact-bibi-snot`(Rare, 최대 2스택, 효과 44 `BasicAttackPoison` `magnitude` 0.15·`secondaryMagnitude` 0.15·
@@ -1814,3 +1845,11 @@ Play 화면 검수:
 ### 샤샤 실시간 물줄기 비교 프로토타입 (2026-10-12)
 
 `F1 > — Artifact — > Show artifact drops > Drop 샤샤의 항아리`로 얻은 뒤 같은 섹션의 `Shasha: realtime water (off = original)`로 새 메시·셰이더·월드 물방울과 기존 이미지를 비교한다. 기본값은 새 효과다. 피해 규칙과 발사 주기는 유지한다. 단독 검증 메뉴는 `Trickal Fan Game > Effects > Verify Shasha Realtime Water Prototype`, 정지 비교 렌더는 `Export Shasha Water Comparison`이다. C# 컴파일과 커밋 전 `ShashaWaterPrototypeVerification.VerifyWithRegressionsBatch`를 확인했다(2026-10-13, 종료 코드 0, `output/shasha-water-precommit.log`). 2026-10-13 사용자 실제 Play 비교에서 개선을 확인했고, 메시·셰이더·독립 파티클 합성을 새 효과·어색한 효과 개선의 우선 제작 방향으로 채택했다. 물다운 표현 보강과 미확인 Play 조건의 개별 검수는 남아 있다. 현재 무난한 효과는 일괄 교체하지 않는다. 구성·정확한 확인 절차·검증 기록은 [샤샤 비교 기록](./art-prompts/shasha-realtime-v1/README.md)을 따른다.
+
+### 샤샤 물결·접촉 포말 미리보기 (2026-10-13)
+
+Edit Mode에서 `Trickal Fan Game > Effects > Preview Shasha Water`를 열고 `Open / reset Scene preview`를 누른다. 별도 Scene 뷰에 임시 Preview Scene을 표시한다. `Length`, `Width`, `Direction`, `Wall contact`로 경로와 접촉을 바꾸고 `Body`, `Droplets`, `Contact foam`으로 레이어를 확인한다. `Burst time (seconds)`는 0~0.4초 탐색, `Playback speed`는 0.05~1배, `Loop playback`은 반복, `Restart`는 시간 초기화다. 본체·접촉 포말의 표시 시간은 게임과 같은 0.12초이고 이후에는 잔여 물방울만 남는다. 정지·시간 역행 때 같은 시드로 입자를 다시 시뮬레이션한다.
+
+창 닫기·Play 전환·리로드 때 임시 리소스를 정리한다. Unity 6000.3 내부 SceneView 연결을 확인하는 어댑터를 사용하므로 Editor 업그레이드 시 미지원 오류가 없는지 확인한다. 현재 실제 배경·캐릭터 및 원본과의 비교는 SampleScene Play의 F1 토글을 사용한다. 시작점 이동 조작·실제 배경 합성은 미리보기 후속 범위다. Scene 뷰 조작과 최종 Play 미술 검수는 아직 확인 대기다.
+
+단독 자동 검사와 정지 렌더: `TrickalFanGame.Editor.ShashaWaterPrototypeVerification.VerifyAndExportBatch`. 렌더는 씬을 교체하는 게임플레이 검사보다 먼저 수행한다. 결과 PNG: `output/art-review/shasha-water/unity-comparison.png`(위: 원본, 아래: 물결 본체·접촉 포말). 입자·이동 검수는 이 PNG로 대체하지 않는다.
