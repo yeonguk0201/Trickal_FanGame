@@ -3,6 +3,7 @@ Shader "TrickalFanGame/Procedural Water Stream"
     Properties
     {
         _Droplet ("Droplet mode", Float) = 0
+        _Splash ("Contact fan mode", Float) = 0
         _Opacity ("Burst opacity", Float) = 1
         _Clock ("Animation clock", Float) = 0
         _Length ("World length", Float) = 1
@@ -21,7 +22,7 @@ Shader "TrickalFanGame/Procedural Water Stream"
             #pragma fragment Frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             CBUFFER_START(UnityPerMaterial)
-            float _Droplet, _Opacity, _Clock, _Length, _AtWall;
+            float _Droplet, _Splash, _Opacity, _Clock, _Length, _AtWall;
             float4 _EndPlane;
             CBUFFER_END
             struct Attributes { float3 positionOS:POSITION; float2 uv:TEXCOORD0; half4 color:COLOR; };
@@ -47,6 +48,22 @@ Shader "TrickalFanGame/Procedural Water Stream"
                 half3 blue=half3(0.025,0.49,0.78);
                 half3 cyan=half3(0.13,0.81,0.94);
                 half3 foam=half3(0.77,0.98,1.0);
+                if (_Splash>0.5)
+                {
+                    // Incoming jet spreads sideways and curls back from the contact plane.
+                    float u=i.uv.x, v=abs(i.uv.y);
+                    float n=Noise(float2(u*9-_Clock*22,v*7));
+                    float fanWidth=lerp(0.10,0.87,smoothstep(0.05,0.95,u));
+                    float edge=v-fanWidth-(n-0.5)*0.10;
+                    float aa=max(fwidth(edge),0.025);
+                    float mask=(1-smoothstep(-aa,aa,edge))*smoothstep(0,0.18,u);
+                    float curl=abs(v-(0.20+0.51*u+0.06*sin(u*12-_Clock*35)));
+                    float lace=(1-smoothstep(0.04,0.15,curl))*smoothstep(0.25,0.6,n);
+                    float contact=smoothstep(0.72,0.98,u)*(1-smoothstep(0.12,0.65,v));
+                    half3 c=lerp(blue,cyan,0.55+0.25*n);
+                    c=lerp(c,foam,saturate(lace+contact*0.85));
+                    return half4(c,mask*_Opacity*(0.58+0.35*contact));
+                }
                 if (_Droplet>0.5)
                 {
                     if (_AtWall>0.5) clip(-dot(i.world-_EndPlane.xy,_EndPlane.zw));
@@ -74,6 +91,10 @@ Shader "TrickalFanGame/Procedural Water Stream"
                 // Broken, travelling foam streaks; no continuous white laser core.
                 float streak=pow(saturate(sin(v*14+n*6)),12)*smoothstep(0.45,0.72,m);
                 c=lerp(c,foam,streak*(1-smoothstep(0.55,0.72,edge)));
+                // Curved transverse ridges read as pumped water, rather than parallel laser bands.
+                float ridge=pow(saturate(cos(u*7.5-_Clock*32+v*v*2.8)),14);
+                ridge*=smoothstep(0.18,0.65,m)*(1-smoothstep(0.65,0.84,edge));
+                c=lerp(c,foam,ridge*0.75);
                 float cap=smoothstep(0,0.035,u)*smoothstep(0,0.035,_Length-u);
                 return half4(c,alpha*_Opacity*cap);
             }

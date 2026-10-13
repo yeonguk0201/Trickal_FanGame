@@ -35,7 +35,9 @@ namespace TrickalFanGame.Editor
                 Vector2 size = original.sprite.bounds.size;
                 owner.transform.localScale = new Vector3(5.5f / size.x, 0.2f / size.y, 1);
                 effect = ProceduralWaterStream.Create(owner);
-                effect.gameObject.layer = 31;
+                Require(effect != null, "Realtime water material is unavailable for the render probe.");
+                foreach (Transform child in effect.GetComponentsInChildren<Transform>(true))
+                    child.gameObject.layer = 31;
                 UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(effect.gameObject, scene);
                 effect.Begin(new Vector2(-2.75f, -0.5f), new Vector2(2.75f, -0.5f), 0.2f, 10, 0.12f, true);
                 effect.RenderAt(10.045f);
@@ -74,8 +76,9 @@ namespace TrickalFanGame.Editor
 
         public static void VerifyAndExportBatch()
         {
-            Verify();
+            // Gameplay fixtures replace the active Scene and can unload cached render resources.
             ExportComparison();
+            Verify();
         }
 
         public static void VerifyWithRegressionsBatch()
@@ -118,10 +121,14 @@ namespace TrickalFanGame.Editor
                         Vector2 center = (before[i] + before[i + 1]) * 0.5f;
                         float along = Vector2.Dot(center - from, direction);
                         Vector2 side = new(-direction.y, direction.x);
-                        Require(Mathf.Abs(Vector2.Dot(center - from, side)) < 0.003f &&
+                        Require(Mathf.Abs(Vector2.Dot(center - from, side)) < 0.084f &&
                             along >= -0.003f && along <= length + 0.003f,
-                            "Visual centerline must stay straight and inside the path in every direction.");
+                            "Decorative waves must stay bounded around the hit path in every direction.");
                     }
+                    Require(effect.SplashVisible, "Wall contact must display an independent foam fan.");
+                    foreach (Vector3 vertex in effect.SplashMesh.vertices)
+                        Require(Vector2.Dot((Vector2)vertex - effect.EndPoint, direction) <= 0.003f,
+                            "Contact foam must stay on the incoming side of the wall plane.");
                     effect.RenderAt(10.07f);
                     Require((effect.BodyMesh.vertices[35] - before[35]).sqrMagnitude > 0.0000001f,
                         "Water contour must animate instead of remaining a static stretched image.");
@@ -133,13 +140,22 @@ namespace TrickalFanGame.Editor
                         Vector2.Distance((after[^2] + after[^1]) * 0.5f, effect.EndPoint) < 0.003f,
                         "Moving start and wall endpoint must update together without parent scale distortion.");
                     effect.RenderAt(10.13f);
-                    Require(!effect.BodyVisible, "Body must expire at the burst deadline.");
+                    Require(!effect.BodyVisible && !effect.SplashVisible,
+                        "Body and contact foam must expire at the burst deadline.");
                 }
+                effect.Begin(from, from + Vector2.right * 3, 0.2f, 10, 0.12f, false);
+                effect.RenderAt(10.04f);
+                Require(!effect.SplashVisible, "Free endpoints must not pretend to hit a wall.");
+                Vector3[] waveVertices = effect.BodyMesh.vertices;
+                bool hasWave = false;
+                for (int i = 2; i < waveVertices.Length - 2; i += 2)
+                    hasWave |= Mathf.Abs(((waveVertices[i] + waveVertices[i + 1]) * 0.5f).y - from.y) > 0.01f;
+                Require(hasWave, "The pumped stream must have a travelling center wave, not only changing width.");
                 effect.Begin(from, from, 0.2f, 20, 0.12f, true);
                 Require(!effect.BodyVisible, "Zero-length wall paths must not produce an inverted strip.");
                 effect.Clear();
-                Require(!effect.BodyVisible && effect.Droplets.particleCount == 0,
-                    "Cancellation must clear body and droplets.");
+                Require(!effect.BodyVisible && !effect.SplashVisible && effect.Droplets.particleCount == 0,
+                    "Cancellation must clear body, contact foam and droplets.");
 
                 PlayerWaterStream stream = owner.AddComponent<PlayerWaterStream>();
                 var nextFire = typeof(PlayerWaterStream).GetField("nextFireTime", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -156,7 +172,7 @@ namespace TrickalFanGame.Editor
             }
             // Existing gameplay fixture checks damage, cooldown, walls, pass-through and item synergies.
             Week23Passive4Verification.Verify();
-            Debug.Log("Shasha realtime water prototype verification passed: shader, animated straight geometry, " +
+            Debug.Log("Shasha realtime water prototype verification passed: shader, bounded travelling waves, contact fan, " +
                 "world droplets, moved endpoints, cancellation, A/B cooldown preservation and existing stream rules. " +
                 "Actual Play art comparison pending.");
         }
