@@ -6,6 +6,7 @@ Shader "TrickalFanGame/Procedural Water Stream"
         _Splash ("Contact fan mode", Float) = 0
         _Opacity ("Burst opacity", Float) = 1
         _Clock ("Animation clock", Float) = 0
+        _BurstAge ("Normalized burst age", Float) = 0
         _Length ("World length", Float) = 1
         _AtWall ("Clip at wall", Float) = 0
         _EndPlane ("Wall plane", Vector) = (0,0,1,0)
@@ -22,7 +23,7 @@ Shader "TrickalFanGame/Procedural Water Stream"
             #pragma fragment Frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             CBUFFER_START(UnityPerMaterial)
-            float _Droplet, _Splash, _Opacity, _Clock, _Length, _AtWall;
+            float _Droplet, _Splash, _Opacity, _Clock, _Length, _AtWall, _BurstAge;
             float4 _EndPlane;
             CBUFFER_END
             struct Attributes { float3 positionOS:POSITION; float2 uv:TEXCOORD0; half4 color:COLOR; };
@@ -50,19 +51,25 @@ Shader "TrickalFanGame/Procedural Water Stream"
                 half3 foam=half3(0.77,0.98,1.0);
                 if (_Splash>0.5)
                 {
-                    // Incoming jet spreads sideways and curls back from the contact plane.
-                    float u=i.uv.x, v=abs(i.uv.y);
-                    float n=Noise(float2(u*9-_Clock*22,v*7));
-                    float fanWidth=lerp(0.10,0.87,smoothstep(0.05,0.95,u));
-                    float edge=v-fanWidth-(n-0.5)*0.10;
-                    float aa=max(fwidth(edge),0.025);
-                    float mask=(1-smoothstep(-aa,aa,edge))*smoothstep(0,0.18,u);
-                    float curl=abs(v-(0.20+0.51*u+0.06*sin(u*12-_Clock*35)));
-                    float lace=(1-smoothstep(0.04,0.15,curl))*smoothstep(0.25,0.6,n);
-                    float contact=smoothstep(0.72,0.98,u)*(1-smoothstep(0.12,0.65,v));
-                    half3 c=lerp(blue,cyan,0.55+0.25*n);
-                    c=lerp(c,foam,saturate(lace+contact*0.85));
-                    return half4(c,mask*_Opacity*(0.58+0.35*contact));
+                    // The origin is the wall contact. Lobes radiate BACK into the room;
+                    // a hollow, torn rim replaces the solid triangular end cap.
+                    float2 q=float2((1-i.uv.x)*1.15,i.uv.y);
+                    float r=length(q), angle=atan2(q.y,max(q.x,0.0001));
+                    float fingers=0.5+0.5*sin(angle*11+0.7*sin(angle*7)+_BurstAge*3);
+                    float n=Noise(q*10+float2(-_Clock*13,_Clock*7));
+                    float boundary=0.63+0.22*pow(fingers,3)+(n-0.5)*0.07;
+                    float aa=max(fwidth(r),0.014);
+                    float mask=1-smoothstep(boundary-aa,boundary+aa,r);
+                    float rim=smoothstep(boundary-0.17,boundary-0.06,r);
+                    float spokes=pow(fingers,5)*(1-smoothstep(0.65,0.9,r));
+                    float contact=1-smoothstep(0.08,0.32,r);
+                    float holes=smoothstep(0.28,0.48,r)*(1-rim)*
+                        smoothstep(0.35,0.65,n)*(1-spokes);
+                    mask*=1-holes*0.88;
+                    half3 c=lerp(blue,cyan,0.65+0.25*n);
+                    float flash=(1-smoothstep(0.05,0.3,_BurstAge))*contact;
+                    c=lerp(c,foam,saturate(rim*0.95+spokes*0.55+contact+flash));
+                    return half4(c,mask*_Opacity*lerp(0.48,0.98,saturate(rim+contact+spokes)));
                 }
                 if (_Droplet>0.5)
                 {
@@ -95,7 +102,7 @@ Shader "TrickalFanGame/Procedural Water Stream"
                 float ridge=pow(saturate(cos(u*7.5-_Clock*32+v*v*2.8)),14);
                 ridge*=smoothstep(0.18,0.65,m)*(1-smoothstep(0.65,0.84,edge));
                 c=lerp(c,foam,ridge*0.75);
-                float cap=smoothstep(0,0.035,u)*smoothstep(0,0.035,_Length-u);
+                float cap=smoothstep(0,0.035,u)*lerp(smoothstep(0,0.035,_Length-u),1,step(0.5,_AtWall));
                 return half4(c,alpha*_Opacity*cap);
             }
             ENDHLSL

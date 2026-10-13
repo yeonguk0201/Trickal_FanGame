@@ -79,3 +79,14 @@
 - 수동 검수: `SampleScene` Play → `F1 > — Artifact — > Show artifact drops > Drop 샤샤의 항아리` → `Shasha: realtime water` 켜기. 이동·수직/대각선·벽 가까이·짧은 줄기에서 물결이 앞으로 흐르는지, 접촉 포말이 벽 안쪽으로 퍼지는지, 여러 줄기가 캐릭터를 과하게 가리지 않는지 확인한다. 비교 토글의 끄기는 최초 원본 PNG이며, v1 절차적 효과와의 비교 토글은 아니다.
 - 자동 검증: 최종 `ShashaWaterPrototypeVerification.VerifyAndExportBatch` 결과는 아래 실행 기록에 남긴다. Scene 뷰 조작·Play 미술 수용은 자동 검증과 구분하며 아직 확인 대기다.
 v2 최종 실행 기록: Unity 6000.3.22f1에서 `ShashaWaterPrototypeVerification.VerifyAndExportBatch` 종료 코드 0. `Shasha realtime water prototype verification passed`와 `Passive-4 verification passed`를 확인했다. 로그: `output/shasha-water-wave-verify.log`. 본체·접촉 포말의 정지 PNG를 직접 확인했다(위 원본/아래 v2). 처음 실행의 미리보기 내부 API 접근 컴파일 오류를 가드된 어댑터로 수정했고, 이후 검사 다음 렌더에서 발생한 리소스 소실은 렌더를 먼저 실행하도록 호출 순서를 수정했다. 최종 결과는 두 문제 수정 후의 실행이다. 이미지로 포말·물결 형태를 확인한 것이며 실제 Play 미술 승인이나 미리보기 UI 조작 확인을 뜻하지 않는다.
+
+## v3: 벽 충돌 물보라 개선 (2026-10-13, 미술 검수 대기)
+
+- 요청: 끝부분이 벽에 부딪혀 터지는 느낌이 약하다는 사용자 피드백. 기존 삼각형 접촉 포말을 교체했다. 대표 형태는 접촉점을 중심으로 방 안쪽에 퍼지는 반원형 물보라이며, 갈라진 외곽·흰 포말 테두리·부분적으로 뚫린 내부를 같은 실시간 셰이더로 만든다. 새 PNG는 사용하지 않는다.
+- 움직임: 접촉 메시가 초기 크기 45%에서 빠르게 펼쳐진다. 깊이와 옆 퍼짐은 별도로 계산하고 깊이는 경로 길이로 제한한다. 벽 끝에서는 본체의 끝 알파 감쇠를 제거해 포말까지 물이 이어지도록 한다. 자유 끝점은 기존 감쇠를 유지한다.
+- 물방울: 첫 벽 접촉 방출을 18개 묶음으로 만들고 이후 방출은 3개씩 유지한다. 옆과 뒤로 되튀는 속도·크기 차이를 늘리고 수명에 따라 축소한다. World 공간, 총 96개 제한, 벽 평면 클리핑, 전역 난수 미사용을 유지한다. 미리보기 재시뮬레이션도 최초 방출 상태를 초기화한다.
+- 범위: 피해·공격 주기·본체/포말 표시 종료 시점은 변경하지 않았다. 기존 Scene 미리보기의 시간·방향·길이·레이어 조작을 그대로 사용한다. 기존 PNG 및 GUID는 유지한다.
+- 자동 검증: `ShashaWaterPrototypeVerification.VerifyAndExportBatch` 실행을 시도했으나 Unity가 프로젝트 경로 확인 직후 종료 코드 1로 끝났다. 검증 성공/렌더 로그가 없고 구체 원인은 로그에 없어 잠금으로 단정하지 않는다. 로그: `output/shasha-water-impact-verify.log`. 이전 v2의 성공 결과를 v3에 적용하지 않는다.
+- 대체 확인: 현재 Unity Bee 응답 파일과 포함된 Roslyn으로 런타임 C#를 별도 출력 위치에 컴파일하여 종료 코드 0. 기존 `TestRunSender.sendAsCleared` 미사용 경고만 확인했다. `git diff --check` 통과. 셰이더 컴파일·실제 렌더·Play 미술 검수는 미확인이다.
+- 수동 확인: Edit Mode의 `Trickal Fan Game > Effects > Preview Shasha Water` → `Open / reset Scene preview` → `Wall contact` 켜고 `Loop playback` 재생. 접촉점에서 빠르게 펼쳐지는 포말과 뒤로 튀는 물방울을 확인한다. 길이 0.02/0.2/5.5, 수평/수직/대각선에서도 벽 바깥으로 핵심 메시가 넘어가지 않아야 한다. `Verify Shasha Realtime Water Prototype` 메뉴의 기대 로그는 `Shasha realtime water prototype verification passed`다.
+- 실제 크기 검수: SampleScene Play → `F1 > — Artifact — > Show artifact drops > Drop 샤샤의 항아리` → `Shasha: realtime water` 켜기. 벽 근처·다중 줄기에서 충돌 타격감과 캐릭터 가림을 확인한다. 현재 상태는 구현 적용·사용자 미술 검수 대기이며 승인 완료로 처리하지 않는다.

@@ -26,6 +26,7 @@ namespace TrickalFanGame.Combat
         private Vector2 start, end, previousSource;
         private int emission;
         private float nextEmission;
+        private bool impactEmitted;
 
         public bool BodyVisible => body != null && body.enabled;
         public Vector2 StartPoint => start;
@@ -110,6 +111,10 @@ namespace TrickalFanGame.Combat
             gradient.SetKeys(new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
                 new[] { new GradientAlphaKey(0.9f, 0), new GradientAlphaKey(0.9f, 0.45f), new GradientAlphaKey(0, 1) });
             color.color = gradient;
+            var sizeOverLifetime = droplets.sizeOverLifetime;
+            sizeOverLifetime.enabled = true;
+            sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1,
+                AnimationCurve.EaseInOut(0, 1, 1, 0.25f));
             var dropRenderer = droplets.GetComponent<ParticleSystemRenderer>();
             dropMaterial = new Material(material) { name = "Shasha water droplets" };
             dropMaterial.SetFloat("_Droplet", 1);
@@ -124,6 +129,7 @@ namespace TrickalFanGame.Combat
             ends = now + Mathf.Max(0.001f, duration);
             width = Mathf.Max(0.001f, lineWidth);
             nextEmission = now;
+            impactEmitted = false;
             SetPath(from, to, hitsWall);
             RenderAt(now);
             if (!Application.isPlaying) return;
@@ -177,12 +183,17 @@ namespace TrickalFanGame.Combat
             properties.SetFloat("_Clock", now);
             properties.SetFloat("_Opacity", envelope);
             properties.SetFloat("_Length", length);
+            properties.SetFloat("_BurstAge", age);
+            properties.SetFloat("_AtWall", atWall ? 1 : 0);
             body.SetPropertyBlock(properties);
             if (splash.enabled)
             {
                 // All vertices stay on the incoming side of the endpoint plane, even on short paths.
-                float depth = Mathf.Min(length, width * 2.4f);
-                float spread = width * (2.1f + 0.16f * Mathf.Sin(now * 46));
+                // A fast impact opens into a broken crown, then sheds fading droplets.
+                // Scale depth separately so a nearby wall cannot push the fan behind the nozzle.
+                float expansion = 0.45f + 0.55f * (1 - Mathf.Pow(1 - age, 3));
+                float depth = Mathf.Min(length, width * 3.2f * expansion);
+                float spread = width * 3.1f * expansion;
                 Vector2 back = end - forward * depth;
                 splashVertices[0] = back - side * spread;
                 splashVertices[1] = back + side * spread;
@@ -214,7 +225,11 @@ namespace TrickalFanGame.Combat
             if (now < started || now >= ends || now < nextEmission) return;
             nextEmission = now + 1f / 60f;
             EmitDrops(false);
-            if (atWall) EmitDrops(true);
+            if (atWall)
+            {
+                EmitDrops(true, !impactEmitted);
+                impactEmitted = true;
+            }
         }
 
         public void ResetPreviewParticles()
@@ -222,6 +237,7 @@ namespace TrickalFanGame.Combat
             droplets.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             emission = 0;
             nextEmission = started;
+            impactEmitted = false;
         }
 
         public void Clear()
@@ -243,14 +259,14 @@ namespace TrickalFanGame.Combat
             if (transient && !BodyVisible && !droplets.IsAlive()) Destroy(gameObject);
         }
 
-        private void EmitDrops(bool impact)
+        private void EmitDrops(bool impact, bool burst = false)
         {
             Vector2 delta = end - start;
             float length = delta.magnitude;
             if (length < 0.02f) return;
             Vector2 forward = delta / length;
             Vector2 side = new(-forward.y, forward.x);
-            int count = impact ? 4 : Mathf.Clamp(Mathf.CeilToInt(length * 0.65f), 1, 5);
+            int count = impact ? (burst ? 18 : 3) : Mathf.Clamp(Mathf.CeilToInt(length * 0.65f), 1, 5);
             for (int i = 0; i < count; i++)
             {
                 float seed = Seed(++emission);
@@ -258,9 +274,10 @@ namespace TrickalFanGame.Combat
                 Vector2 point = impact ? end - forward * Mathf.Min(length * 0.5f, width * 0.3f) :
                     start + forward * (length * (i + 0.5f) / count);
                 point += side * width * sign * 0.35f;
-                Vector2 velocity = impact ? -forward * (0.4f + seed * 1.1f) + side * sign * (0.5f + seed * 1.5f) :
+                Vector2 velocity = impact ? (-forward * (0.6f + seed * 1.8f) +
+                    side * sign * (1.4f + Seed(emission + 53) * 2.5f)) * (burst ? 1.4f : 0.75f) :
                     forward * (1.8f + seed * 2) + side * sign * (0.3f + seed * 0.7f);
-                float size = width * (0.22f + seed * 0.25f);
+                float size = width * (impact ? 0.24f + seed * 0.42f : 0.18f + seed * 0.22f);
                 var particle = new ParticleSystem.EmitParams
                 {
                     position = point,
