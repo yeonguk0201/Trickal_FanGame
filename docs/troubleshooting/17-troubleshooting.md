@@ -18,6 +18,7 @@
 
 ## 최근 기록
 
+- [Unity 검증이 20분 넘게 걸리고 낡은 검증기가 섞여 있던 문제](./verification-speed-and-stale-verifiers.md)
 - [새마음금고 마지막 점프가 중간에 끊기는 문제](./saemaeum-vault-final-jump-cutoff.md)
 
 ---
