@@ -177,6 +177,8 @@ namespace TrickalFanGame.Frontend
 
         private void OnDied()
         {
+            // Enemy-7: an enemy that explodes after dying shows this burst with its explosion (EnemyDeathBlast).
+            if (GetComponent<TrickalFanGame.Enemy.EnemyDeathExplosion>() != null) return;
             if (visual != null)
                 FairyKingdomSpriteEffect.Play("effect-crumb-death", transform.position,
                     Mathf.Max(0.3f, visual.bounds.size.x * 1.2f), 0.24f, visual);

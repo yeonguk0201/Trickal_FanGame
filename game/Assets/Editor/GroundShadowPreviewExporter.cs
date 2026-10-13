@@ -159,10 +159,12 @@ namespace TrickalFanGame.Editor
         {
             foreach (Transform node in owner.GetComponentsInChildren<Transform>(true)) node.gameObject.layer = 30;
         }
-        private static string EnemyName(string name) => name switch
+        // Enemy-7: the renamed enemies read their display name from one table.
+        private static string EnemyName(string name) =>
+            Week25Enemy7Setup.EnemyDisplayNames.TryGetValue(name, out string renamed) ? renamed : name switch
         {
-            "ChargingEnemy" => "돌진 요정", "RangedEnemy" => "원거리 요정", "QuickRangedFairy" => "저혈당 요정",
-            "HighBloodSugarFairy" => "고혈당 요정", "JyubiEnemy" => "쥬비", "SansamoEnemy" => "산사모",
+            "RangedEnemy" => "원거리 요정",
+            "HighBloodSugarFairy" => "고혈당 요정", "JyubiEnemy" => "쥬비",
             "BuseureogiCrumbMinion" => "부스러기 · 분홍", "CrayonHeroBoss" => "크레용사용",
             "SaemaeumVaultBoss" => "새마음금고", _ => name,
         };

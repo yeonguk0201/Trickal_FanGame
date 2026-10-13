@@ -139,6 +139,11 @@ namespace TrickalFanGame.Run
                 FindSeed(assembler, node => node.Role == GeneratedRoomRole.Shop, "Shop room");
             GUILayout.EndHorizontal();
             if (GUILayout.Button("Find Goldi shop F1")) FindSeed(assembler, node => node.IsGoldiShop, "Goldi shop");
+            // Enemy-7: the 쥬비 only Encounter is one of several Easy candidates, so a seed is searched for it.
+            if (GUILayout.Button("Find Jyubi swarm F1"))
+                FindSeed(assembler, node => node.EncounterId != null &&
+                                            node.EncounterId.EndsWith("-jyubi-swarm-v1", System.StringComparison.Ordinal),
+                    "Jyubi swarm room");
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -243,6 +248,13 @@ namespace TrickalFanGame.Run
             ChestContentTable table = assembler.ChestContentTable;
             Transform player = assembler.Graph?.Player != null ? assembler.Graph.Player.transform : null;
             DrawArtifactStateRows(player);
+            PlayerWaterStream water = player != null ? player.GetComponent<PlayerWaterStream>() : null;
+            if (water != null)
+            {
+                bool realtime = GUILayout.Toggle(water.UseProceduralVisual, "Shasha: realtime water (off = original)");
+                if (realtime != water.UseProceduralVisual) water.SetVisualMode(realtime);
+                GUILayout.Label($"Water view: {(water.UseProceduralVisual ? "mesh + shader + droplets" : "original image")}");
+            }
             if (table == null || table.ArtifactPickupPrefab == null || player == null)
             {
                 GUILayout.Label("No artifact pickup Prefab or player.");
@@ -521,9 +533,37 @@ namespace TrickalFanGame.Run
         private void DrawRoomSection(RoomGraphAssembler assembler)
         {
             GUILayout.Label("— Room —");
-            RoomController controller = CurrentRoom(assembler)?.Controller;
+            RoomPrefab room = CurrentRoom(assembler);
+            RoomController controller = room?.Controller;
             if (AssistedButton("Kill current wave") && controller != null)
                 status = $"Killed {controller.KillAliveEnemiesForDevelopment()} enemies.";
+
+            // Enemy-7: this room's Encounter, and a 쫄따구 to kill without reaching 부스러기 (assisted Run). It is
+            // an extra enemy of the room, so it never locks a cleared room.
+            GeneratedRoomNode node = room != null
+                ? assembler.GeneratedGraph?.FindFloor(room.Node.FloorNumber)?.Nodes
+                    .FirstOrDefault(candidate => candidate.RoomId == room.Node.RoomId)
+                : null;
+            GUILayout.Label($"Encounter: {node?.EncounterId ?? "-"}" +
+                            (node != null && node.HasDifficulty
+                                ? $"  score {node.Difficulty.Score} {node.Difficulty.Tier}"
+                                : string.Empty));
+            GUILayout.Label("Death blasts pending " +
+                            FindObjectsByType<TrickalFanGame.Enemy.EnemyDeathBlast>(FindObjectsSortMode.None)
+                                .Count(blast => !blast.HasExploded));
+#if UNITY_EDITOR
+            PlayerMovement player = assembler.Graph?.Player;
+            if (AssistedButton("Spawn crumb minion (explodes on death)") && controller != null && player != null)
+            {
+                GameObject minion = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/BuseureogiCrumbMinion.prefab");
+                status = controller.SpawnExtraEnemy(minion, player.transform.position + Vector3.right * 2.5f) != null
+                    ? "Spawned a crumb minion to the right of the player."
+                    : "Crumb minion spawn failed.";
+            }
+#else
+            GUILayout.Label("Crumb minion spawn is editor-only.");
+#endif
         }
 
         // T7: restarts the Run on its seed with one Layout forced into every combat room it fits, so a new room is

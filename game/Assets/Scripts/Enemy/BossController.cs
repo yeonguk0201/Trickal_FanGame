@@ -35,6 +35,9 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0f)] private float phaseTransitionDuration;
         [SerializeField, Range(0.1f, 1f)] private float phaseTwoTempoMultiplier = 1f;
 
+        [Header("Defeat")]
+        [SerializeField] private bool keepsOwnedObjectsOnDefeat;
+
         private readonly List<GameObject> ownedObjects = new();
         private Health health;
         private KnockbackReceiver knockback;
@@ -66,6 +69,7 @@ namespace TrickalFanGame.Enemy
         public float PhaseTransitionDuration => Mathf.Max(0f, phaseTransitionDuration);
         public float PhaseTwoTempoMultiplier => Mathf.Clamp(phaseTwoTempoMultiplier, 0.1f, 1f);
         public float CurrentTempoMultiplier => CurrentPhase >= 2 ? PhaseTwoTempoMultiplier : 1f;
+        public bool KeepsOwnedObjectsOnDefeat => keepsOwnedObjectsOnDefeat;
         public int OwnedObjectCount
         {
             get
@@ -195,6 +199,21 @@ namespace TrickalFanGame.Enemy
             ownedObjects.Clear();
         }
 
+        // Enemy-7: a defeated boss can leave what it made (부스러기's 쫄따구, obstacles and projectiles). They stop
+        // being the boss's and move under its parent, so they still go away with the room.
+        public void ConfigureDefeat(bool configuredKeepsOwnedObjects)
+        {
+            keepsOwnedObjectsOnDefeat = configuredKeepsOwnedObjects;
+        }
+
+        public void ReleaseOwnedObjects()
+        {
+            foreach (GameObject ownedObject in ownedObjects)
+                if (ownedObject != null && ownedObject.transform.parent == null)
+                    ownedObject.transform.SetParent(transform.parent, true);
+            ownedObjects.Clear();
+        }
+
         public void CancelCombat()
         {
             combatStarted = false;
@@ -237,7 +256,9 @@ namespace TrickalFanGame.Enemy
 
         private void OnDisable()
         {
-            if (State != BossActionState.Defeated) CancelCombat();
+            // The dead boss's object can be removed, and so disabled, before OnDied has run.
+            if (keepsOwnedObjectsOnDefeat && health != null && health.IsDead) ReleaseOwnedObjects();
+            else if (State != BossActionState.Defeated) CancelCombat();
             else CleanupOwnedObjects();
         }
 
@@ -389,7 +410,8 @@ namespace TrickalFanGame.Enemy
             currentPatternIndex = -1;
             pendingPhase = 0;
             SetState(BossActionState.Defeated, 0f);
-            CleanupOwnedObjects();
+            if (keepsOwnedObjectsOnDefeat) ReleaseOwnedObjects();
+            else CleanupOwnedObjects();
             Died?.Invoke();
         }
 

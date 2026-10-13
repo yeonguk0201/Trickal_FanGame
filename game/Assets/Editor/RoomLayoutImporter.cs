@@ -21,7 +21,7 @@ namespace TrickalFanGame.Editor
     // The 19 templates authored before the importer are not part of it and are never touched.
     public static class RoomLayoutImporter
     {
-        public const int RoomContentVersion = 12;
+        public const int RoomContentVersion = 13;
         // Folder beside Assets, so the text files need no .meta.
         public const string LayoutFolderName = "RoomLayouts";
         public const string TemplateFolder = Week14Room1Setup.TemplateFolder + "/Layouts";
@@ -30,6 +30,9 @@ namespace TrickalFanGame.Editor
         public const string RockIdPrefix = "obstacle";
         public const string TreeIdPrefix = "tree";
         public const string ChestIdPrefix = "chest-layout";
+        // Trap-1: a trap's ID, shared with its obstacle when the trap is one.
+        public const string TrapIdPrefix = "trap";
+        public const string TrapContainerName = "Traps";
         // Part of each room's content hash. Raise it when the importer builds a different Prefab from the same text.
         public const int BuildRevision = 3;
 
@@ -46,6 +49,8 @@ namespace TrickalFanGame.Editor
             public int Rocks;
             public int FixedObstacles;
             public int Trees;
+            public int ObstacleTraps;
+            public int FloorTraps;
             public int PitCells;
             public int Chests;
             public float Density;
@@ -71,7 +76,8 @@ namespace TrickalFanGame.Editor
                 {
                     text.AppendLine($"  {room.Id}  [{room.ProfileId}] weight {room.Weight} difficulty +{room.Difficulty}  " +
                                     $"rock {room.Rocks} fixed {room.FixedObstacles} tree {room.Trees} " +
-                                    $"pit {room.PitCells} chest {room.Chests}  density {room.Density:P0}" +
+                                    $"pit {room.PitCells} chest {room.Chests} trap {room.ObstacleTraps}+" +
+                                    $"{room.FloorTraps} floor  density {room.Density:P0}" +
                                     (room.Rebuilt ? "  (rebuilt)" : string.Empty));
                 }
 
@@ -185,7 +191,7 @@ namespace TrickalFanGame.Editor
             : Enumerable.Empty<string>();
 
         // Parses and checks every file against the rules that need no Prefab: the grid, the door passages, the
-        // obstacle Layout contract and chest positions.
+        // obstacle Layout contract, chest positions and floor trap placement.
         public static List<RoomLayoutDocument> ReadDocuments(string folderPath, FloorGenerator generator, Report report)
         {
             List<RoomLayoutDocument> documents = new();
@@ -262,6 +268,16 @@ namespace TrickalFanGame.Editor
 
             if (!RoomObstacleLayout.TryValidate(document.Id, movementBounds, encounterBounds, doors, spawnPoints,
                     withChests, out error))
+            {
+                return false;
+            }
+
+            // Trap-1: floor traps block nothing, so they are checked apart from the obstacles above.
+            List<RoomObstacleFootprint> floorTraps = document.CellsOf(RoomLayoutCellKind.FloorTrap)
+                .Select(cell => new RoomObstacleFootprint(cell.Id(TrapIdPrefix), profile.CellRect(cell.Column, cell.Row),
+                    false)).ToList();
+            if (!RoomObstacleLayout.TryValidateFloorTraps(document.Id, movementBounds, doors, spawnPoints, withChests,
+                    floorTraps, out error))
             {
                 return false;
             }
@@ -413,9 +429,34 @@ namespace TrickalFanGame.Editor
                 Transform obstacles = EmptyContainer(content, Week18Obstacle2Setup.ObstacleContainerName);
                 Transform trees = EmptyContainer(content, Week23Obstacle6Setup.TreeContainerName);
                 Transform pits = EmptyContainer(content, Week22Terrain0Setup.PitContainerName);
+                Transform traps = EmptyContainer(content, TrapContainerName);
+
+                // Trap-1: a copy of the kind's Trap-0 Prefab with its own position-based ID. An obstacle trap keeps
+                // the Prefab's fixed kind, so it is never a candidate for the room's seeded special obstacle.
+                foreach (RoomLayoutCell cell in document.Traps)
+                {
+                    string id = cell.Id(TrapIdPrefix);
+                    GameObject trapPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                        Week25Trap0Setup.PrefabPath(cell.Symbol.TrapKind));
+                    if (trapPrefab == null || trapPrefab.GetComponent<RoomTrap>() == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"The importer is missing the {cell.Symbol.TrapKind} trap Prefab. Run Trap-0 setup.");
+                    }
+
+                    GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(trapPrefab, traps);
+                    instance.name = $"Trap {id}";
+                    instance.transform.localPosition = cell.Center;
+                    instance.transform.localRotation = Quaternion.identity;
+                    instance.transform.localScale = Vector3.one;
+                    RoomTrap trap = instance.GetComponent<RoomTrap>();
+                    trap.ConfigurePlacement(id, cell.Symbol.SecondPhase);
+                    if (!trap.TryValidate(out string error)) throw new InvalidOperationException(error);
+                }
 
                 foreach (RoomLayoutCell cell in document.Obstacles)
                 {
+                    if (cell.Symbol.Kind == RoomLayoutCellKind.ObstacleTrap) continue;
                     string id = ObstacleId(cell);
                     if (cell.Symbol.Kind == RoomLayoutCellKind.Tree)
                     {
@@ -459,7 +500,7 @@ namespace TrickalFanGame.Editor
                     instance.GetComponent<RoomPit>().Configure(pit.PitId);
                 }
 
-                foreach (Transform container in new[] { obstacles, trees, pits })
+                foreach (Transform container in new[] { obstacles, trees, pits, traps })
                     if (container.childCount == 0) Object.DestroyImmediate(container.gameObject);
                 if (PrefabUtility.SaveAsPrefabAsset(root, prefabPath) == null)
                     throw new InvalidOperationException($"The importer could not save {prefabPath}.");
@@ -470,8 +511,12 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        public static string ObstacleId(RoomLayoutCell cell) =>
-            cell.Id(cell.Symbol.Kind == RoomLayoutCellKind.Tree ? TreeIdPrefix : RockIdPrefix);
+        public static string ObstacleId(RoomLayoutCell cell) => cell.Id(cell.Symbol.Kind switch
+        {
+            RoomLayoutCellKind.Tree => TreeIdPrefix,
+            RoomLayoutCellKind.ObstacleTrap => TrapIdPrefix,
+            _ => RockIdPrefix,
+        });
 
         public static ObstacleVariantDefinition LoadVariant(string variantId)
         {
@@ -549,6 +594,7 @@ namespace TrickalFanGame.Editor
             int rocks = document.CellsOf(RoomLayoutCellKind.Rock).Count();
             int fixedObstacles = document.CellsOf(RoomLayoutCellKind.FixedObstacle).Count();
             int trees = document.CellsOf(RoomLayoutCellKind.Tree).Count();
+            int obstacleTraps = document.CellsOf(RoomLayoutCellKind.ObstacleTrap).Count();
             return new RoomSummary
             {
                 Id = document.Id,
@@ -558,9 +604,12 @@ namespace TrickalFanGame.Editor
                 Rocks = rocks,
                 FixedObstacles = fixedObstacles,
                 Trees = trees,
+                ObstacleTraps = obstacleTraps,
+                FloorTraps = document.CellsOf(RoomLayoutCellKind.FloorTrap).Count(),
                 PitCells = pitCells,
                 Chests = document.CellsOf(RoomLayoutCellKind.Chest).Count(),
-                Density = (rocks + fixedObstacles + trees + pitCells) /
+                // Floor traps do not block movement, so they are not part of the density.
+                Density = (rocks + fixedObstacles + trees + obstacleTraps + pitCells) /
                           (float)(document.Profile.Columns * document.Profile.Rows),
                 Rebuilt = rebuilt,
             };

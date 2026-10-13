@@ -167,15 +167,18 @@ namespace TrickalFanGame.Editor
                 throw new InvalidOperationException("Spawn-2 requires the verified normal enemy roster and Prefabs.");
             }
 
-            Undo.RecordObject(roster, "Configure Spawn-2 enemy roster");
-            roster.Configure(new[]
+            EncounterEnemyPrefabBinding[] owned =
             {
-                new EncounterEnemyPrefabBinding(EncounterEnemyRole.Chaser, chaser),
-                new EncounterEnemyPrefabBinding(EncounterEnemyRole.FastChaser, fastChaser),
-                new EncounterEnemyPrefabBinding(EncounterEnemyRole.Ranged, quickRanged),
-                new EncounterEnemyPrefabBinding(EncounterEnemyRole.Charging, charging),
-                new EncounterEnemyPrefabBinding(EncounterEnemyRole.Sniper, sniper),
-            });
+                new(EncounterEnemyRole.Chaser, chaser),
+                new(EncounterEnemyRole.FastChaser, fastChaser),
+                new(EncounterEnemyRole.Ranged, quickRanged),
+                new(EncounterEnemyRole.Charging, charging),
+                new(EncounterEnemyRole.Sniper, sniper),
+            };
+            Undo.RecordObject(roster, "Configure Spawn-2 enemy roster");
+            // Keep roles bound by later setups (Enemy-7 쥬비) when Spawn-2 is re-run.
+            roster.Configure(owned.Concat(roster.Bindings.Where(binding =>
+                owned.All(entry => entry.Role != binding.Role))).ToArray());
             EditorUtility.SetDirty(roster);
             return roster;
         }

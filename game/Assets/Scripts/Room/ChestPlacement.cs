@@ -6,8 +6,9 @@ namespace TrickalFanGame.Room
 {
     // Chest-0: picks a chest position in a room. The result is the Layout grid point nearest the preferred point that
     // the player can stand on and walk to from the doors, clear of every obstacle (destructible ones count as intact),
-    // of each required door passage including the safe entry point, of chests already placed and of the avoided point
-    // (the player when a room clears). The search only reads the Template and the room's authored obstacles.
+    // of each required door passage including the safe entry point, of chests already placed, of floor trap cells
+    // (Trap-1) and of the avoided point (the player when a room clears). The search only reads the Template and the
+    // room's authored obstacles and traps.
     // A solid chest drops its contents outside its body: FindContentPositions picks free points on two rings around it.
     public static class ChestPlacement
     {
@@ -63,6 +64,7 @@ namespace TrickalFanGame.Room
             if (!RoomObstacleLayout.TryCollectFootprints(room, out List<RoomObstacleFootprint> footprints, out error))
                 return false;
 
+            List<RoomObstacleFootprint> floorTraps = RoomObstacleLayout.CollectFloorTraps(room);
             Rect bounds = template.Profile.MovementBounds;
             Func<Vector2, bool> isReachable = RoomObstacleLayout.CreateReachability(bounds,
                 template.DoorSlots[0].SafeEntryPosition, footprints);
@@ -83,6 +85,7 @@ namespace TrickalFanGame.Room
                 float distance = (candidate - preferredLocal).sqrMagnitude;
                 if (distance >= bestDistance ||
                     !IsSafe(candidate, isReachable, doorPassages, occupiedLocal, minimumSpacing) ||
+                    OverlapsFloorTrap(candidate, floorTraps) ||
                     (avoidLocal.HasValue &&
                      (candidate - avoidLocal.Value).sqrMagnitude < AvoidClearance * AvoidClearance))
                 {
@@ -112,6 +115,16 @@ namespace TrickalFanGame.Room
             foreach (Vector2 occupied in occupiedLocal)
                 if ((candidate - occupied).sqrMagnitude < minimumSpacing * minimumSpacing) return false;
             return true;
+        }
+
+        // Whether a chest body centered on the point covers part of a floor trap cell.
+        public static bool OverlapsFloorTrap(Vector2 candidate, IReadOnlyList<RoomObstacleFootprint> floorTraps)
+        {
+            if (floorTraps == null) return false;
+            Rect body = new(candidate - Vector2.one * ChestHalfSize, Vector2.one * ChestWorldSize);
+            foreach (RoomObstacleFootprint trap in floorTraps)
+                if (RoomObstacleLayout.Overlaps(body, trap.Bounds)) return true;
+            return false;
         }
 
         // Room-local drop points around a chest: free of walls, obstacles, other chest bodies and each other, inner

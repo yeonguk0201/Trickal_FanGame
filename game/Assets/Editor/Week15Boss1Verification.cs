@@ -307,9 +307,14 @@ namespace TrickalFanGame.Editor
                 int ownedBeforeDeath = boss.OwnedObjectCount;
                 Assert(ownedBeforeDeath >= runtime.LiveMinionCount + runtime.LiveObstacleCount,
                     "Every minion and obstacle must be registered for boss-owned cleanup.");
+                int minionsBeforeDeath = runtime.LiveMinionCount, obstaclesBeforeDeath = runtime.LiveObstacleCount;
                 boss.Health.TakeDamage(999f);
-                Assert(boss.OwnedObjectCount == 0,
-                    "Boss death must clean up every surviving crumb minion and obstacle.");
+                // Enemy-7 (2026-10-13): the defeated boss releases what it made instead of removing it.
+                Assert(boss.OwnedObjectCount == 0 && runtime.LiveMinionCount == minionsBeforeDeath &&
+                       runtime.LiveObstacleCount == obstaclesBeforeDeath && !runtime.HasPendingObstacleTelegraph,
+                    "Boss death must release every surviving crumb minion and obstacle without removing them.");
+                foreach (GameObject released in runtime.LiveMinions.Concat(runtime.LiveObstacles).ToArray())
+                    UnityEngine.Object.DestroyImmediate(released);
             }
             finally
             {

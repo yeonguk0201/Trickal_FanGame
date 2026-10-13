@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 4705006949878185492}
   - component: {fileID: 9221612778466097809}
   - component: {fileID: 6926745107085970175}
+  - component: {fileID: 5916165776844035527}
   m_Layer: 6
   m_Name: BuseureogiCrumbMinion
   m_TagString: Untagged
@@ -318,7 +319,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
   widthMultiplier: 1
   thickness: 0.28
@@ -326,3 +327,18 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: BuseureogiCrumbMinion
   useSharedProfile: 1
+--- !u!114 &5916165776844035527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4637529536798824959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e653915fa0e2c8a4892b1618c02e344b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDeathExplosion
+  telegraphDuration: 0.6
+  radius: 1.2
+  damageUnits: 2

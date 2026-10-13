@@ -175,6 +175,8 @@ namespace TrickalFanGame.Enemy
             else if (state != BossActionState.Active)
             {
                 StopMovement();
+                // Enemy-7: the boss's objects outlive it, but a landing it never throws must not stay marked.
+                if (state == BossActionState.Defeated) ClearPendingObstacleTelegraph();
             }
         }
 
@@ -255,6 +257,7 @@ namespace TrickalFanGame.Enemy
                         [(start + offset) % 3]);
                 minions.Add(instance);
                 boss?.RegisterOwnedObject(instance);
+                instance.GetComponent<EnemyDeathExplosion>()?.ConfigureOwner(boss);
                 EnemyBehaviorContext context = instance.GetComponent<EnemyBehaviorContext>();
                 context?.BeginCombat(target);
                 spawned++;

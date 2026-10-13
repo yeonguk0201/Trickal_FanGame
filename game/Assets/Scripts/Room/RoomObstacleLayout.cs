@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TrickalFanGame.Player;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -27,7 +28,7 @@ namespace TrickalFanGame.Room
     // Static checks for an authored obstacle Layout. Obstacles are treated as solid even when destructible, so a
     // Layout never needs attacks or bombs to keep its doors connected, its SpawnPoints reachable, or its ranged
     // SpawnPoints able to fire into the combat area. Pits (Terrain-0) block reachability like obstacles but never
-    // block sightlines.
+    // block sightlines. Floor traps (Trap-1) never block anything; TryValidateFloorTraps checks them on their own.
     public static class RoomObstacleLayout
     {
         public const float ActorRadius = 0.5f;
@@ -36,6 +37,8 @@ namespace TrickalFanGame.Room
         public const float SightSampleSpacing = 1f;
         public const float MinimumSightCoverage = 0.35f;
         public const float GridStep = 0.5f;
+        // A floor trap keeps this far from every door's safe entry point, so entering a room never lands on one.
+        public const float FloorTrapDoorClearance = 1.5f;
         private const float Tolerance = 0.0001f;
 
         public static bool TryCollectFootprints(GameObject roomPrefab, out List<RoomObstacleFootprint> footprints,
@@ -68,6 +71,120 @@ namespace TrickalFanGame.Room
                 if (!TryReadBox(root, pit.gameObject, pit.PitId, out Rect bounds, out error))
                     return false;
                 footprints.Add(new RoomObstacleFootprint(pit.PitId, bounds, false, true));
+            }
+
+            error = null;
+            return true;
+        }
+
+        // Trap-1: the 1x1 cells of a room's floor traps. They carry no collider, so they are not footprints.
+        public static List<RoomObstacleFootprint> CollectFloorTraps(GameObject roomPrefab)
+        {
+            List<RoomObstacleFootprint> traps = new();
+            if (roomPrefab == null) return traps;
+            Transform root = roomPrefab.transform;
+            foreach (RoomTrap trap in roomPrefab.GetComponentsInChildren<RoomTrap>(true))
+            {
+                if (!trap.IsFloorTrap) continue;
+                Vector2 center = root.InverseTransformPoint(trap.transform.position);
+                traps.Add(new RoomObstacleFootprint(trap.TrapId,
+                    new Rect(center - Vector2.one * RoomTrap.CellSize * 0.5f, Vector2.one * RoomTrap.CellSize), false));
+            }
+
+            return traps;
+        }
+
+        // Trap-1: floor traps sit on 1x1 cells of the Layout grid, clear of obstacles, pits, chests, SpawnPoints and
+        // each door's safe entry point, and the doors stay connected by a path whose feet circle never touches a
+        // trap cell. The cell is larger than the drawn hit area, so a path that passes here never steps on a trap.
+        public static bool TryValidateFloorTraps(
+            string layoutId,
+            Rect movementBounds,
+            IReadOnlyList<RoomTemplateDoor> doors,
+            IReadOnlyList<Vector2> spawnPoints,
+            IReadOnlyList<RoomObstacleFootprint> footprints,
+            IReadOnlyList<RoomObstacleFootprint> floorTraps,
+            out string error)
+        {
+            if (floorTraps == null || floorTraps.Count == 0)
+            {
+                error = null;
+                return true;
+            }
+
+            IReadOnlyList<RoomObstacleFootprint> solid = footprints ?? Array.Empty<RoomObstacleFootprint>();
+            HashSet<string> ids = new(StringComparer.Ordinal);
+            foreach (RoomObstacleFootprint footprint in solid) ids.Add(footprint.ObstacleId ?? string.Empty);
+            for (int index = 0; index < floorTraps.Count; index++)
+            {
+                RoomObstacleFootprint trap = floorTraps[index];
+                Rect bounds = trap.Bounds;
+                if (!ids.Add(trap.ObstacleId ?? string.Empty))
+                {
+                    error = $"Layout '{layoutId}' duplicates floor trap ID '{trap.ObstacleId}'.";
+                    return false;
+                }
+
+                if (bounds.xMin < movementBounds.xMin - Tolerance || bounds.xMax > movementBounds.xMax + Tolerance ||
+                    bounds.yMin < movementBounds.yMin - Tolerance || bounds.yMax > movementBounds.yMax + Tolerance)
+                {
+                    error = $"Layout '{layoutId}' floor trap '{trap.ObstacleId}' leaves the movement bounds.";
+                    return false;
+                }
+
+                if (!Approximately(bounds.size, Vector2.one) || !OnGrid(bounds.center.x) || !OnGrid(bounds.center.y))
+                {
+                    error = $"Layout '{layoutId}' floor trap '{trap.ObstacleId}' must be a 1x1 unit on the " +
+                            $"{GridStep} grid.";
+                    return false;
+                }
+
+                for (int other = 0; other < index; other++)
+                {
+                    if (!Overlaps(bounds, floorTraps[other].Bounds)) continue;
+                    error = $"Layout '{layoutId}' floor traps '{floorTraps[other].ObstacleId}' and " +
+                            $"'{trap.ObstacleId}' overlap.";
+                    return false;
+                }
+
+                foreach (RoomObstacleFootprint footprint in solid)
+                {
+                    if (!Overlaps(bounds, footprint.Bounds)) continue;
+                    error = $"Layout '{layoutId}' floor trap '{trap.ObstacleId}' overlaps {footprint.Kind} " +
+                            $"'{footprint.ObstacleId}'.";
+                    return false;
+                }
+
+                foreach (RoomTemplateDoor door in doors)
+                {
+                    if (Distance(door.SafeEntryPosition, bounds) >= FloorTrapDoorClearance - Tolerance) continue;
+                    error = $"Layout '{layoutId}' floor trap '{trap.ObstacleId}' is within " +
+                            $"{FloorTrapDoorClearance} of the {door.Direction} safe entry.";
+                    return false;
+                }
+
+                for (int spawn = 0; spawn < spawnPoints.Count; spawn++)
+                {
+                    if (Distance(spawnPoints[spawn], bounds) >= ActorRadius - Tolerance) continue;
+                    error = $"Layout '{layoutId}' floor trap '{trap.ObstacleId}' overlaps SpawnPoint {spawn + 1}.";
+                    return false;
+                }
+            }
+
+            if (doors.Count == 0)
+            {
+                error = null;
+                return true;
+            }
+
+            ReachabilityGrid grid = new(movementBounds, solid, floorTraps, PlayerFeet.Radius);
+            bool[] reachable = grid.FloodFrom(doors[0].SafeEntryPosition);
+            foreach (RoomTemplateDoor door in doors)
+            {
+                if (grid.IsReachable(reachable, door.SafeEntryPosition)) continue;
+                error = $"Layout '{layoutId}' has no path from the {doors[0].Direction} safe entry to the " +
+                        $"{door.Direction} safe entry that avoids every floor trap.";
+                return false;
             }
 
             error = null;
@@ -338,6 +455,7 @@ namespace TrickalFanGame.Room
             (first - second).sqrMagnitude < Tolerance;
 
         // Cells whose centers keep an actor-sized circle clear of every obstacle and pit and inside the movement bounds.
+        // The avoided rectangles (floor trap cells) are kept clear by their own, smaller radius.
         private sealed class ReachabilityGrid
         {
             private readonly Rect bounds;
@@ -345,7 +463,8 @@ namespace TrickalFanGame.Room
             private readonly int height;
             private readonly bool[] free;
 
-            public ReachabilityGrid(Rect movementBounds, IReadOnlyList<RoomObstacleFootprint> footprints)
+            public ReachabilityGrid(Rect movementBounds, IReadOnlyList<RoomObstacleFootprint> footprints,
+                IReadOnlyList<RoomObstacleFootprint> avoided = null, float avoidedRadius = 0f)
             {
                 bounds = movementBounds;
                 width = Mathf.Max(1, Mathf.RoundToInt(movementBounds.width / ReachabilityCellSize));
@@ -360,6 +479,11 @@ namespace TrickalFanGame.Room
                     for (int index = 0; clear && index < footprints.Count; index++)
                     {
                         clear = Distance(center, footprints[index].Bounds) >= ActorRadius - Tolerance;
+                    }
+
+                    for (int index = 0; clear && avoided != null && index < avoided.Count; index++)
+                    {
+                        clear = Distance(center, avoided[index].Bounds) >= avoidedRadius - Tolerance;
                     }
 
                     free[y * width + x] = clear;

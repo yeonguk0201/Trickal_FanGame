@@ -66,6 +66,7 @@ namespace TrickalFanGame.Editor
                     waterOwner.transform.position = new Vector3(500, 510, 0);
                     waterOwner.transform.localScale = Vector3.one * 1.7f;
                     water = waterOwner.AddComponent<PlayerWaterStream>();
+                    water.SetVisualMode(false); // This probe explicitly verifies the original artwork path.
                     water.enabled = false;
                     typeof(PlayerWaterStream).GetMethod("ShowBeam", BindingFlags.Instance | BindingFlags.NonPublic)
                         .Invoke(water, new object[] { 0, new Vector2(500, 510), new Vector2(503, 510), 0.3f });

@@ -126,6 +126,7 @@ namespace TrickalFanGame.Room
             {
                 EncounterEnemyRole.Chaser => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.FastChaser => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.Jyubi => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.Ranged => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Sniper => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Charging => SpawnPointPlacementRole.ChargeLane,
@@ -458,7 +459,9 @@ namespace TrickalFanGame.Room
             if (!RoomObstacleLayout.TryCollectFootprints(roomPrefab, out List<RoomObstacleFootprint> footprints,
                     out error) ||
                 !RoomObstacleLayout.TryValidate(templateId, profile.MovementBounds, profile.EncounterBounds,
-                    doorSlots, spawnPoints, footprints, out error))
+                    doorSlots, spawnPoints, footprints, out error) ||
+                !RoomObstacleLayout.TryValidateFloorTraps(templateId, profile.MovementBounds, doorSlots, spawnPoints,
+                    footprints, RoomObstacleLayout.CollectFloorTraps(roomPrefab), out error))
             {
                 error = $"Room template '{templateId}' has an invalid obstacle Layout. {error}";
                 return false;
