@@ -44,9 +44,14 @@ namespace TrickalFanGame.Editor
                 Require(prefab.GetComponentInChildren<Collider2D>() == null && prefab.GetComponent<Health>() == null,
                     "Artwork previews must not invent gameplay: " + entry.id);
             }
-            foreach (string name in new[] { "ChargingEnemy", "RangedEnemy", "QuickRangedFairy", "HighBloodSugarFairy" })
+            foreach (string name in new[] { "ChargingEnemy", "RangedEnemy", "HighBloodSugarFairy" })
                 VerifyKeepsOriginalArt(name);
             VerifyExisting("JyubiEnemy", "jyubi");
+            VerifyExisting("QuickRangedFairy", "sansamo-pure");
+            SpriteRenderer pureSansamo = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/QuickRangedFairy.prefab")
+                .GetComponent<SpriteRenderer>();
+            Require(pureSansamo != null && pureSansamo.color == Color.white,
+                "산사모-순수 must not keep the placeholder tint over its drawing.");
             VerifyExisting("KeyPickup", "pickup-key");
             VerifyExisting("BombPickup", "pickup-bomb");
             VerifyExisting("SecretPit", "terrain-secret-pit");

@@ -21,11 +21,19 @@ namespace TrickalFanGame.Editor
         public const string DisplayRoot = "Assets/Prefabs/FairyKingdomArtwork";
         public const string PreviewScenePath = "Assets/Scenes/FairyKingdomArtworkPreview.unity";
         // Charging and ranged/sniper fairies keep their existing idle, walk and attack art. Variants inherit a
-        // binding placed on RangedEnemy, so the base must stay unbound too.
+        // binding placed on RangedEnemy, so the base must stay unbound too. 산사모-순수 (QuickRangedFairy) is bound
+        // on its own variant.
         private static readonly Dictionary<string, string> EnemyIds = new()
         {
             ["JyubiEnemy"] = "jyubi",
             ["BuseureogiCrumbMinion"] = "crumb-minion-pink",
+            ["QuickRangedFairy"] = "sansamo-pure",
+        };
+        // First-bind width where the placeholder sprite has a different shape. 0.7 draws 산사모-순수 as tall as
+        // 산사모-활발 (about 1.2). A width already tuned on the Prefab is kept.
+        private static readonly Dictionary<string, float> EnemyWidths = new()
+        {
+            ["QuickRangedFairy"] = 0.7f,
         };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites")]
@@ -183,7 +191,9 @@ namespace TrickalFanGame.Editor
                 FairyKingdomArtworkCatalog.Entry entry = catalog.Entries.FirstOrDefault(value => value.id == id);
                 if (entry == null) continue; // Boss-owned dough/cream obstacles have their own existing art.
                 FairyKingdomArtworkView view = owner.GetComponent<FairyKingdomArtworkView>();
-                float width = view != null ? view.LocalWidth : renderer.sprite != null ? renderer.sprite.bounds.size.x : 1f;
+                float width = view != null ? view.LocalWidth :
+                    EnemyWidths.TryGetValue(baseName, out float enemyWidth) ? enemyWidth :
+                    renderer.sprite != null ? renderer.sprite.bounds.size.x : 1f;
                 if (id == "obstacle-tree") width = 1f;
                 if (view == null) view = Undo.AddComponent<FairyKingdomArtworkView>(owner);
                 Undo.RecordObject(view, "Bind fairy kingdom artwork");

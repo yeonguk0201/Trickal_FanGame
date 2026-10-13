@@ -139,7 +139,8 @@ namespace TrickalFanGame.Editor
                     QuickMaximumPredictionTime);
 
                 SpriteRenderer renderer = root.GetComponent<SpriteRenderer>();
-                if (renderer != null) renderer.color = new Color(0.45f, 0.8f, 1f, 1f);
+                // 산사모-순수 has its own drawing (FairyKingdomArtworkSetup), so no placeholder tint.
+                if (renderer != null) renderer.color = Color.white;
                 if (PrefabUtility.SaveAsPrefabAsset(root, QuickRangedPrefabPath) == null)
                 {
                     throw new InvalidOperationException("Spawn-2 could not save the quick ranged Prefab.");

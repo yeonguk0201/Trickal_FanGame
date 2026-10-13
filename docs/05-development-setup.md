@@ -1771,7 +1771,8 @@ Play 화면 검수:
 - 전체 미술 보기: `Assets/Scenes/FairyKingdomArtworkPreview.unity`. 45장을 한 화면에서 확인하는 별도 씬이며 실제 플레이 씬이나 빌드 시작 씬이 아니다.
 - 표시용 프리팹: `Assets/Prefabs/FairyKingdomArtwork/`. 누루링은 대응 게임 로직이 아직 없어 이 폴더의 표시용 프리팹으로만 제공된다. 함정 7종과 독가스는 Trap-0부터 `Assets/Prefabs/Traps/`의 게임 Prefab이 같은 원화를 쓴다. 임의의 공격·피해·생성 규칙은 추가하지 않았다.
 - 현재 단일 프레임 연결이다. 부스러기 쫄따구는 3가지 그림을 소환 순서에 따라 사용하고 사망 시 그림 효과만 표시한다. 사망 폭발 피해 규칙은 새로 구현하지 않았다. 새 프레임 추가 전까지 해당 적의 기존 다른 그림용 이동·공격 프레임 컴포넌트는 보존하되 비활성화한다.
-- 돌진형(`ChargingEnemy`)과 원거리·저격형(`RangedEnemy`, `QuickRangedFairy`, `HighBloodSugarFairy`)은 초안 그림을 연결하지 않고 기존 Idle·걷기·공격 에셋을 유지한다. `RangedEnemy`에 표시 컴포넌트를 붙이면 variant인 저격형까지 덮어쓰므로 베이스에도 붙이지 않으며, 전용 검증이 이를 검사한다.
+- 돌진형(`ChargingEnemy`)과 원거리·저격형(`RangedEnemy`, `HighBloodSugarFairy`)은 초안 그림을 연결하지 않고 기존 Idle·걷기·공격 에셋을 유지한다. `RangedEnemy`에 표시 컴포넌트를 붙이면 variant인 저격형까지 덮어쓰므로 베이스에도 붙이지 않으며, 전용 검증이 이를 검사한다.
+- 산사모-순수(`QuickRangedFairy`)는 2026-10-13부터 초안 원화 `sansamo-pure`를 단일 프레임으로 쓴다. 표시 컴포넌트는 variant 자신에만 붙이고 임시 파란 색조는 뺐다. 표시 폭은 Prefab의 `FairyKingdomArtworkView.localWidth`(0.7, 산사모-활발과 같은 키 약 1.2)로 조절하며 충돌 영역은 그대로다. 걷기·공격 프레임은 아직 없다. Play 미술 확인 전이다.
 - 자동 실행: `TrickalFanGame.Editor.FairyKingdomArtworkSetup.ApplyAndVerifyBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkVerification.VerifyWithCombatRegressionsBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkPlayVerification.RunBatch` (`-batchmode`, **`-quit` 제외**). Play 검증은 전용 미리보기 씬과 격리된 probe만 사용하고 종료 코드를 반환한다.
 - 상세 결과와 Unity 렌더: `output/asset-integration/`. 자동 검증은 사용자 Play 미술 승인을 대신하지 않는다.
 
@@ -1854,7 +1855,6 @@ Edit Mode에서 `Trickal Fan Game > Effects > Preview Shasha Water`를 열고 `O
 창 닫기·Play 전환·리로드 때 임시 리소스를 정리한다. Unity 6000.3 내부 SceneView 연결을 확인하는 어댑터를 사용하므로 Editor 업그레이드 시 미지원 오류가 없는지 확인한다. 현재 실제 배경·캐릭터 및 원본과의 비교는 SampleScene Play의 F1 토글을 사용한다. 시작점 이동 조작·실제 배경 합성은 미리보기 후속 범위다. Scene 뷰 조작과 최종 Play 미술 검수는 아직 확인 대기다.
 
 단독 자동 검사와 정지 렌더: `TrickalFanGame.Editor.ShashaWaterPrototypeVerification.VerifyAndExportBatch`. 렌더는 씬을 교체하는 게임플레이 검사보다 먼저 수행한다. 결과 PNG: `output/art-review/shasha-water/unity-comparison.png`(위: 원본, 아래: 물결 본체·접촉 포말). 입자·이동 검수는 이 PNG로 대체하지 않는다.
-
 ### 착탄 스파크 · 치명타 히트스톱 (2026-10-14)
 
 - Edit Mode: `Trickal Fan Game/Effects/Preview Hit Spark` → `Open / reset Scene preview`. 반경·탄 방향·타격점, 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
