@@ -48,7 +48,6 @@ namespace TrickalFanGame.Enemy
         private EnemyAttackPresentation attackPresentation;
         private SpriteRenderer spriteRenderer;
         private LineRenderer chargePath;
-        private Color idleColor = Color.white;
         private float stateEndsAt;
         private float nextChargeTime;
         private Vector2 lockedDirection;
@@ -74,11 +73,6 @@ namespace TrickalFanGame.Enemy
         private void Awake()
         {
             CacheComponents();
-            if (spriteRenderer != null)
-            {
-                idleColor = spriteRenderer.color;
-            }
-
             SetState(ChargingEnemyState.Idle);
         }
 
@@ -557,11 +551,6 @@ namespace TrickalFanGame.Enemy
                 });
             }
 
-            if (spriteRenderer == null)
-            {
-                return;
-            }
-
             if (chargePath != null)
             {
                 bool showPath = State == ChargingEnemyState.Windup && lockedDirection.sqrMagnitude > 0.001f;
@@ -571,14 +560,6 @@ namespace TrickalFanGame.Enemy
                     UpdateChargePath();
                 }
             }
-
-            spriteRenderer.color = State switch
-            {
-                ChargingEnemyState.Windup => new Color(1f, 0.85f, 0.2f),
-                ChargingEnemyState.Dashing => new Color(1f, 0.2f, 0.15f),
-                ChargingEnemyState.Recovering => Color.Lerp(idleColor, Color.gray, 0.55f),
-                _ => idleColor,
-            };
         }
 
         private void CacheComponents()
