@@ -12,6 +12,11 @@ namespace TrickalFanGame.Enemy
     [RequireComponent(typeof(Rigidbody2D), typeof(Health), typeof(KnockbackReceiver))]
     public sealed class EnemyBehaviorContext : MonoBehaviour
     {
+        // A freshly spawned enemy stands still first, and its touch stays harmless a little longer so the release
+        // itself cannot hit a player standing on the spawn point. It can be damaged the whole time.
+        public const float SpawnActionDelaySeconds = 0.3f;
+        public const float SpawnContactGraceSeconds = 0.5f;
+
         private Rigidbody2D body;
         private Health health;
         private KnockbackReceiver knockback;
@@ -19,13 +24,16 @@ namespace TrickalFanGame.Enemy
         private Health targetHealth;
         private bool controllerMovementSuppressed;
         private bool controllerVelocityOwned;
+        private float spawnActionReadyTime;
+        private float spawnContactReadyTime;
 
         public bool IsAlerted { get; private set; }
         public Transform Target => target;
         public Health TargetHealth => targetHealth;
         public bool HasLivingTarget => target != null && targetHealth != null && !targetHealth.IsDead;
+        public bool IsSpawnActionDelayed => Time.time < spawnActionReadyTime;
         public bool IsActionSuppressed => health == null || health.IsDead || !IsAlerted || !HasLivingTarget ||
-                                          knockback == null || knockback.IsActive;
+                                          knockback == null || knockback.IsActive || IsSpawnActionDelayed;
         public bool IsMovementSuppressed => IsActionSuppressed || controllerMovementSuppressed;
 
         private void Awake()
@@ -72,6 +80,14 @@ namespace TrickalFanGame.Enemy
                 IsAlerted = true;
             }
         }
+
+        public void BeginSpawnGrace(float currentTime)
+        {
+            spawnActionReadyTime = currentTime + SpawnActionDelaySeconds;
+            spawnContactReadyTime = currentTime + SpawnContactGraceSeconds;
+        }
+
+        public bool IsSpawnContactGraceActive(float currentTime) => currentTime < spawnContactReadyTime;
 
         public bool TryAcquireOrAlert(float detectionRange)
         {

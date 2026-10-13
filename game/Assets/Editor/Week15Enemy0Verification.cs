@@ -131,6 +131,34 @@ namespace TrickalFanGame.Editor
                 Assert(behavior.IsMovementSuppressed && body.linearVelocity.x < 0f,
                     "Shared suppression must preserve knockback velocity instead of overwriting it.");
 
+                knockback.Stop();
+                ContactDamage contact = enemy.AddComponent<ContactDamage>();
+                behavior.BeginSpawnGrace(Time.time);
+                chase.TickChase();
+                Assert(behavior.IsSpawnActionDelayed && behavior.IsActionSuppressed &&
+                       body.linearVelocity == Vector2.zero,
+                    "A freshly spawned enemy must stand still during the spawn action delay.");
+                Assert(!contact.TryApplyDamage(playerHealth, Time.time) &&
+                       Mathf.Approximately(playerHealth.CurrentHealth, playerHealth.MaxHealth),
+                    "A freshly spawned enemy must not deal contact damage during the spawn grace.");
+                float healthBeforeGraceHit = enemyHealth.CurrentHealth;
+                enemyHealth.TakeDamage(new DamageContext(player, DamageSourceType.PlayerAttack, 1f));
+                Assert(enemyHealth.CurrentHealth < healthBeforeGraceHit,
+                    "A freshly spawned enemy must stay damageable during the spawn grace.");
+
+                behavior.BeginSpawnGrace(Time.time - EnemyBehaviorContext.SpawnActionDelaySeconds);
+                chase.TickChase();
+                Assert(!behavior.IsSpawnActionDelayed && body.linearVelocity.x > 0f,
+                    "An enemy must resume pursuit once the spawn action delay has passed.");
+                Assert(!contact.TryApplyDamage(playerHealth, Time.time),
+                    "Contact damage must stay off after the action delay until the longer contact grace ends.");
+
+                behavior.BeginSpawnGrace(Time.time - EnemyBehaviorContext.SpawnContactGraceSeconds);
+                Assert(contact.TryApplyDamage(playerHealth, Time.time) &&
+                       playerHealth.CurrentHealth < playerHealth.MaxHealth,
+                    "Contact damage must apply once the spawn contact grace has passed.");
+                playerHealth.ResetHealth();
+
                 playerHealth.TakeDamage(playerHealth.MaxHealth);
                 chase.TickChase();
                 Assert(!behavior.IsAlerted && body.linearVelocity == Vector2.zero,

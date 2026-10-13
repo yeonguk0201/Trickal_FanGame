@@ -429,6 +429,8 @@ namespace TrickalFanGame.Room
                 ? enemyHealth.GetComponent<EnemyBehaviorContext>()
                 : null;
             behavior?.BeginCombat(playerHealth != null ? playerHealth.transform : null);
+            // Edit-mode verification has no advancing clock, so a grace started there would never end.
+            if (Application.isPlaying) behavior?.BeginSpawnGrace(Time.time);
         }
 
         private void OnEnemyDied(Health enemyHealth)
