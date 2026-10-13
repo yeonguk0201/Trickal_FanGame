@@ -80,7 +80,7 @@ namespace TrickalFanGame.Frontend
             }
             if (visual == null) return;
             string id = artworkId;
-            // Trap-0: an obstacle trap (불, 가시 돌, 독버섯) keeps its trap drawing and the obstacle hit shading.
+            // Obstacle traps keep their own drawing; stone kinds use progressive fracture frames.
             if (mode == FairyKingdomArtworkMode.Obstacle && TryGetComponent(out RoomTrap trap))
                 id = RoomTrap.ArtworkIdOf(trap.Kind);
             else if (mode == FairyKingdomArtworkMode.Obstacle && obstacle != null)
@@ -95,7 +95,10 @@ namespace TrickalFanGame.Frontend
                 shown = id;
             }
             if (fitted == null) return;
-            visual.sprite = fitted;
+            bool rockDamage = mode == FairyKingdomArtworkMode.Obstacle && RockDamageArtwork.Supports(id);
+            int damageStage = rockDamage && obstacle != null
+                ? RockDamageArtwork.Stage(obstacle.HitsTaken, obstacle.RequiredHits) : 0;
+            visual.sprite = damageStage > 0 ? RockDamageArtwork.Fit(id, damageStage, localWidth) ?? fitted : fitted;
             if (id == "obstacle-tree" && visual.transform != transform)
             {
                 // The root marks the lower grid cell. Only the drawing reaches into the cell above it.
@@ -110,7 +113,7 @@ namespace TrickalFanGame.Frontend
             // Legacy placeholder palettes must not recolor authored art. Hit feedback owns fixed enemy colors.
             if (mode == FairyKingdomArtworkMode.Obstacle)
             {
-                float shade = obstacle != null ? Mathf.Lerp(1f, 0.7f,
+                float shade = !rockDamage && obstacle != null ? Mathf.Lerp(1f, 0.7f,
                     obstacle.HitsTaken / (float)obstacle.RequiredHits) : 1f;
                 visual.color = new Color(shade, shade, shade, 1f);
                 if (obstacle != null && obstacle.IsBurning && burningOverlay == null)

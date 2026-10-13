@@ -1863,6 +1863,10 @@ Edit Mode에서 `Trickal Fan Game > Effects > Preview Shasha Water`를 열고 `O
 - 실제 Play: `F1 → — Artifact — → Show artifact drops → Drop 날씨는 맑음 카드` 획득 후 기본 공격 10회 적중. 화면 상단부터 해당 적까지 가는 번개를 확인한다.
 - 상세 범위와 미확인 항목: [작업 기록](art-prompts/clear-weather-lightning.md).
 
+### 바위 균열 프레임 (2026-10-14)
+
+Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금·가시 바위의 9개 손상 프레임, 흰색 표시, 지면 기준점·충돌 크기, 네 번째 타격 파괴를 검사한다. Play에서는 일반 바위를 때리고, `F1 → — Obstacle — → gold-rock`, `F1 → — Trap — → Place SpikedRock`으로 나머지 종류를 확인한다. [에셋·프롬프트·검증 기록](art-prompts/rock-damage-frames.md).
+
 ### 착탄 스파크 · 치명타 히트스톱 (2026-10-14)
 
 - Edit Mode: `Trickal Fan Game/Effects/Preview Hit Spark` → `Open / reset Scene preview`. 반경·탄 방향·타격점, 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
