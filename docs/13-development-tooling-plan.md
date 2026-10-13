@@ -654,6 +654,12 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 
 샤샤는 `Preview Shasha Water`로 효과 단독 Scene 뷰 재생·시간·레이어·길이/방향/굵기·벽 접촉 조절을 구현했다. 같은 런타임 구성과 고정 간격 입자 재시뮬레이션을 사용한다. UI 조작·정리 수동 확인, 실제 캐릭터/배경 합성·시작점 이동·동일 조건 A/B는 남아 있어 위 전체 체크리스트는 완료 처리하지 않는다. 조작법은 `docs/05-development-setup.md`의 샤샤 물결·접촉 포말 미리보기 항목을 따른다.
 
+### 날씨는 맑음 번개 도구 (2026-10-13)
+
+- 구현: `ClearWeatherLightningPreview` 임시 Scene 미리보기(굵기·길이·타격점·시간·반복·속도, 선택 SpriteRenderer 참조 복사).
+- 구현: `ClearWeatherLightningVerification` 화면 상단 경로·끝점·하강·소멸·시간 역행과 기존 카드 규칙 검사.
+- 실제 미리보기 조작과 Play 미술 검수는 대기. 실행 방법은 [개발 환경](05-development-setup.md), 근거는 [효과 기록](art-prompts/clear-weather-lightning.md)에 기록한다.
+
 ### 타격 피드백 도구 (2026-10-14)
 
 - 구현: `HitSparkPreview` 임시 Scene 미리보기(반경·탄 방향·타격점·시간·반복·속도, 선택 SpriteRenderer 참조 복사).
