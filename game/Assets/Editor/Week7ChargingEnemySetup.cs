@@ -93,9 +93,10 @@ namespace TrickalFanGame.Editor
                 }
 
                 SpriteRenderer renderer = contents.GetComponent<SpriteRenderer>();
+                // 저혈당 has its own drawing, so no placeholder tint.
                 if (renderer != null)
                 {
-                    renderer.color = new Color(1f, 0.5f, 0.15f);
+                    renderer.color = Color.white;
                 }
 
                 GameObject prefab = PrefabUtility.SaveAsPrefabAsset(contents, ChargingPrefabPath);

@@ -45,6 +45,10 @@ namespace TrickalFanGame.Editor
                    prefab.GetComponents<LineRenderer>().Length == 1,
                 "Enemy-3 prefab must have exactly one controller, shared behavior, presentation, and path renderer.");
 
+            SpriteRenderer renderer = prefab.GetComponent<SpriteRenderer>();
+            Assert(renderer != null && renderer.color == Color.white,
+                "Enemy-3 prefab must not keep a placeholder tint over its drawing.");
+
             ChargingEnemyController charging = prefab.GetComponent<ChargingEnemyController>();
             Assert(charging.PursuitSpeed > 0f && charging.PursuitDuration > 0f,
                 "Enemy-3 prefab must spend a positive duration actively pursuing between charges.");

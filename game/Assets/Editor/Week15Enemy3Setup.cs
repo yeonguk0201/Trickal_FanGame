@@ -42,7 +42,8 @@ namespace TrickalFanGame.Editor
                 SpriteRenderer renderer = contents.GetComponent<SpriteRenderer>();
                 if (renderer != null)
                 {
-                    renderer.color = Week15EnemyRoleColorSetup.LowBloodSugarColor;
+                    // 저혈당 has its own drawing, so no placeholder tint.
+                    renderer.color = Color.white;
                 }
 
                 charging.ConfigurePursuitCharge(7f, 2.75f, 1.1f, 0.65f,
