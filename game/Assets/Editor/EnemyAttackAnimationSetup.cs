@@ -10,8 +10,13 @@ namespace TrickalFanGame.Editor
         public const string Folder = Week15Enemy5Setup.ArtFolder + "/Attacking";
         public static readonly string[] Names = { "Bulhyojason", "Sansamo", "LowBloodSugarFairy", "HighBloodSugarFairy" };
         public const string ProjectilePath = Folder + "/GreenOnion_Projectile.png";
-        public const float ProjectilePixelsPerUnit = 200f;
+        public const float ProjectilePixelsPerUnit = 160f;
         public const string MinionFolder = BossMovementAnimationSetup.Folder + "/MinionAttacks";
+        public const string ArrowProjectilePath = MinionFolder + "/CrayonArrow_Projectile.png";
+        public const string MagicProjectilePath = MinionFolder + "/CrayonMagic_Projectile.png";
+        // The thin arrow is drawn longest; the magic bolt's thickness matches the DrawnEnemyScale hitbox.
+        public const float ArrowProjectilePixelsPerUnit = 195f;
+        public const float MagicProjectilePixelsPerUnit = 200f;
 
         [MenuItem("Trickal Fan Game/Artwork/Setup Enemy Attack Animations")]
         public static void Setup()
@@ -65,7 +70,7 @@ namespace TrickalFanGame.Editor
                 string name = EnemyMovementAnimationSetup.MinionNames[i];
                 Sprite[] frames = new Sprite[4];
                 for (int j = 0; j < frames.Length; j++) frames[j] = Import($"{MinionFolder}/{name}_Attack_{j}.png");
-                Sprite projectile = i < 2 ? Import($"{MinionFolder}/{(i == 0 ? "CrayonArrow" : "CrayonMagic")}_Projectile.png") : null;
+                Sprite projectile = i < 2 ? Import(i == 0 ? ArrowProjectilePath : MagicProjectilePath) : null;
                 string path = EnemyMovementAnimationSetup.MinionPrefabPaths[i];
                 GameObject root = PrefabUtility.LoadPrefabContents(path);
                 try
@@ -90,8 +95,10 @@ namespace TrickalFanGame.Editor
             if (importer == null) throw new InvalidOperationException("Missing attack artwork: " + path);
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
-            // Sprite import scale affects artwork only; EnemyProjectile keeps its fixed circular collider.
-            importer.spritePixelsPerUnit = path == ProjectilePath ? ProjectilePixelsPerUnit : 400f;
+            // Sprite import scale affects artwork only; the hitbox comes from ProjectileSizing.DrawnEnemyScale.
+            importer.spritePixelsPerUnit = path == ProjectilePath ? ProjectilePixelsPerUnit
+                : path == ArrowProjectilePath ? ArrowProjectilePixelsPerUnit
+                : path == MagicProjectilePath ? MagicProjectilePixelsPerUnit : 400f;
             importer.alphaIsTransparency = true;
             importer.mipmapEnabled = false;
             importer.npotScale = TextureImporterNPOTScale.None;

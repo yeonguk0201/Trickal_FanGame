@@ -345,6 +345,10 @@ Enemy-7(2026-10-13)에서 구현했고 Prefab 이름과 안정 ID는 그대로�
 2026-10-05 파의 가독성 요청으로 해당 Sprite만 400→200 PPU로 변경해 그림을 2배 키웠다.
 투사체 Transform 배율 0.3과 Collider 월드 반지름 0.15는 유지한다. 실제 발사·월드 판정 크기 및
 전투 회귀를 Unity 배치로 확인했다 (`game/Logs/onion-artwork-size-retry.log`, 종료 코드 0).
+2026-10-14 파·화살·마법탄이 여전히 작다는 요청으로 PPU를 160·195·200으로 낮추고, 그림이 있는 적
+투사체만 Transform 배율 0.4·월드 반지름 0.2로 키웠다. `EnemyAttackAnimationVerification.Verify` 단독
+배치를 화살 175 PPU 상태에서 통과했다 (종료 코드 0). 이후 화살만 195 PPU로 약간 줄였고, 그 재실행은
+열린 Editor의 프로젝트 잠금으로 수행하지 못했다. 실제 Play 가독성 확인은 남아 있다.
 원본 일치 조건과 보스 상속 경계로 크레용 졸개·보스에게 일반 적 공격 에셋이 적용되지 않게 했다.
 [프롬프트·등록 기준](./art-prompts/enemy-attack.md)을 참조한다.
 

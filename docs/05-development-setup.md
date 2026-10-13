@@ -1441,8 +1441,9 @@ Play Mode 수동 확인: 새 Run에서 각 적이 실제로 이동할 때만 모
 던진다. 기존 전투의 Telegraph·Active·Recovery에 실제 포즈 PNG를 연결했다. 공격 단계는 이동
 모션보다 우선하며 목표/잠긴 돌진·발사 방향에 따라 좌우 반전한다. 루트 배율과 Collider는 고정이다.
 고혈당 요정의 실제 발사는 별도 파 PNG를 사용하고, 파 색상을 유지하며 발사 방향으로 회전한다.
-파는 200 PPU로 등록해 최초 적용보다 표시 크기를 2배 키웠다. 투사체 루트 배율 0.3과 원형 판정의
-월드 반지름 0.15는 유지한다. 피해량·발사 속도·수명은 기존 값을 유지한다. 졸개에는 이 그림/파가 상속되지 않는다.
+파는 160 PPU로 등록한다. 그림이 있는 적 투사체(파·화살·마법탄)는 `ProjectileSizing.DrawnEnemyScale`
+0.4를 써서 원형 판정의 월드 반지름이 0.2다(2026-10-14 가독성 확대, 이전 배율 0.3·반지름 0.15).
+그림이 없는 적 투사체는 배율 0.3을 유지한다. 피해량·발사 속도·수명은 기존 값을 유지한다. 졸개에는 이 그림/파가 상속되지 않는다.
 
 - 적용: `Trickal Fan Game > Artwork > Setup Enemy Attack Animations` (이동 모션 적용 이후)
 - 검증: `Trickal Fan Game > Artwork > Verify Enemy Attack Animations`
@@ -1539,7 +1540,8 @@ BossTestScene의 크레용사용 소환 후 네 졸개가 이동할 때만 걷�
 궁병은 몸을 굽히며 시위·화살을 당기고 발사, 마법사는 지팡이를 들어 시전, 도끼병은 높이 들고
 앞으로 휘두르기, 방패병은 양손으로 방패를 올리고 내린 뒤 복귀한다. 기존 준비·공격·회복 단계에
 전용 그림을 선택하며 원거리 두 졸개는 전용 화살·마법탄을 발사한다. 이동 프레임보다 공격 포즈가
-우선한다. 본체 배율·공격 시간·피해·Collider와 투사체 원형 판정 반경 0.15는 유지한다.
+우선한다. 본체 배율·공격 시간·피해·Collider는 유지한다. 화살은 195 PPU, 마법탄은 200 PPU로 등록하며
+투사체 원형 판정 반경은 0.2다(2026-10-14 가독성 확대, 이전 400 PPU·반경 0.15).
 
 - 적용: `Trickal Fan Game > Artwork > Setup Crayon Minion Attack Animations`
 - 검증: `Trickal Fan Game > Artwork > Verify Enemy Attack Animations` (일반 적과 졸개 8종)

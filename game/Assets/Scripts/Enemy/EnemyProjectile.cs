@@ -44,7 +44,7 @@ namespace TrickalFanGame.Enemy
             SpriteRenderer renderer = projectileObject.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
             renderer.color = authoredArtwork ? Color.white : new Color(0.2f, 0.8f, 1f);
-            // Authored projectile points left; only rotate the artwork, leaving the circular hitbox unchanged.
+            // Authored projectile points left; rotating the artwork leaves the circular hitbox unaffected.
             if (authoredArtwork && direction.sqrMagnitude > 0.001f)
                 renderer.transform.rotation = Quaternion.Euler(0f, 0f,
                     Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 180f);
@@ -54,7 +54,8 @@ namespace TrickalFanGame.Enemy
             projectileBody.gravityScale = 0f;
             CircleCollider2D collider = projectileObject.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
-            ProjectileSizing.Apply(projectileObject.transform, collider, ProjectileSizing.RangedEnemyScale);
+            ProjectileSizing.Apply(projectileObject.transform, collider,
+                authoredArtwork ? ProjectileSizing.DrawnEnemyScale : ProjectileSizing.RangedEnemyScale);
 
             EnemyProjectile projectile = projectileObject.AddComponent<EnemyProjectile>();
             projectile.Launch(direction, source, damageTier, speed, lifetime);

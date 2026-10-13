@@ -57,6 +57,8 @@ namespace TrickalFanGame.Combat
         public const float PlayerBasicScale = 0.4f;
         public const float PlayerSkillScale = 0.28f;
         public const float RangedEnemyScale = 0.3f;
+        // Drawn enemy shots (onion, crayon arrow/magic) are enlarged for readability; the hitbox follows the artwork.
+        public const float DrawnEnemyScale = 0.4f;
         public const float BossScale = 0.35f;
         // Passive-0 §4.1: a grown basic attack shot must still pass a one-tile corridor.
         public const float MaximumPlayerBasicRadius = 0.45f;
