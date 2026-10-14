@@ -75,7 +75,8 @@ namespace TrickalFanGame.Editor
                 SpriteRenderer renderer = contents.GetComponent<SpriteRenderer>();
                 if (renderer != null)
                 {
-                    renderer.color = PlaceholderColor;
+                    // The placeholder tint only applies until 쥬비 is bound to its drawing.
+                    if (!FairyKingdomArtworkSetup.HasAuthoredArtwork(contents)) renderer.color = PlaceholderColor;
                     renderer.sortingOrder = SortingOrder;
                 }
 

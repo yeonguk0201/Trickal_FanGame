@@ -50,8 +50,12 @@ namespace TrickalFanGame.Editor
                 root.layer = pickupLayer;
                 root.transform.localScale = Vector3.one * (PitWorldDiameter / sprite.bounds.size.x);
                 SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(root);
-                renderer.sprite = sprite;
-                renderer.color = PitColor;
+                // Scale and trigger still come from the placeholder size; only the look belongs to the drawing.
+                if (!FairyKingdomArtworkSetup.HasAuthoredArtwork(root))
+                {
+                    renderer.sprite = sprite;
+                    renderer.color = PitColor;
+                }
                 renderer.sortingOrder = 0;
                 foreach (Collider2D collider in root.GetComponents<Collider2D>())
                     if (collider is not CircleCollider2D) Object.DestroyImmediate(collider);

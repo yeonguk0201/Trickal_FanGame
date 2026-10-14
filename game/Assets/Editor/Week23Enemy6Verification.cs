@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
@@ -18,11 +19,14 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 23/Setup and Verify Enemy-6 Jyubi")]
         public static void SetupAndVerifyBatch()
         {
+            // Enemy-6 setup also re-runs Obstacle-5 and the resource pickup setups, which predate the artwork.
+            Dictionary<string, string> artwork = FairyKingdomArtworkVerification.SnapshotBoundArtwork();
             Week23Enemy6Setup.Setup();
             string guid = AssetDatabase.AssetPathToGUID(Week23Enemy6Setup.PrefabPath);
             Week23Enemy6Setup.Setup();
             Assert(!string.IsNullOrWhiteSpace(guid) && guid == AssetDatabase.AssetPathToGUID(Week23Enemy6Setup.PrefabPath),
                 "Enemy-6 setup changed or lost the Jyubi Prefab GUID.");
+            FairyKingdomArtworkVerification.RequireBoundArtworkUnchanged(artwork, "Enemy-6 setup");
             Verify();
         }
 
@@ -70,6 +74,9 @@ namespace TrickalFanGame.Editor
                    prefab.GetComponent<KnockbackReceiver>() != null && prefab.GetComponent<TestEnemy>() != null &&
                    prefab.GetComponent<Collider2D>() != null && !prefab.GetComponent<Collider2D>().isTrigger,
                 "Jyubi must be a solid Enemy-layer body with health, chase, contact damage and flight.");
+            Assert(!FairyKingdomArtworkSetup.HasAuthoredArtwork(prefab) ||
+                   prefab.GetComponent<SpriteRenderer>().color == Color.white,
+                "Jyubi bound to its drawing must not get the placeholder tint back.");
             Assert(prefab.GetComponent<MeleeEnemyAttack>() == null &&
                    prefab.GetComponent<EnemyMovementAnimator>() == null &&
                    prefab.GetComponent<EnemyAttackArtwork>() == null &&

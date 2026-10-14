@@ -86,6 +86,22 @@ namespace TrickalFanGame.Editor
             FairyKingdomArtworkVerification.Verify();
         }
 
+        public const string UserArtworkRoot = "Assets/Resources/UserArtwork/";
+
+        // A Prefab bound to its drawing, or already showing a user drawing (UserArtwork), keeps that sprite and color.
+        // Older setups that predate the artwork call this so a re-run only rewrites gameplay values and never brings
+        // their placeholder look back.
+        public static bool HasAuthoredArtwork(GameObject root)
+        {
+            if (root == null) return false;
+            if (root.GetComponent<FairyKingdomArtworkView>() != null) return true;
+            SpriteRenderer renderer = root.GetComponentInChildren<SpriteRenderer>(true);
+            return renderer != null && IsUserArtwork(renderer.sprite);
+        }
+
+        public static bool IsUserArtwork(Sprite sprite) =>
+            sprite != null && AssetDatabase.GetAssetPath(sprite).StartsWith(UserArtworkRoot, StringComparison.Ordinal);
+
         // Rebuilds only the catalog (sprites and visible rects), for a setup that changed one drawing.
         public static FairyKingdomArtworkCatalog RefreshCatalog() => BuildCatalog();
 

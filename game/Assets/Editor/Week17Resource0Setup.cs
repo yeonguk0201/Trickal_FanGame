@@ -83,8 +83,11 @@ namespace TrickalFanGame.Editor
             root.transform.localScale = Vector3.one * PickupScale;
 
             SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(root);
-            renderer.sprite = sprite;
-            renderer.color = Color.white;
+            if (!FairyKingdomArtworkSetup.HasAuthoredArtwork(root))
+            {
+                renderer.sprite = sprite;
+                renderer.color = Color.white;
+            }
             renderer.sortingOrder = TrickalFanGame.Player.PlayerMovement.AboveBodySortingOrder;
 
             Rigidbody2D body = GetOrAdd<Rigidbody2D>(root);

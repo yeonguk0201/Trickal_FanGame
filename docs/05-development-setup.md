@@ -1057,6 +1057,13 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   대 처치, 구덩이·낮은 장애물 무시와 나무·벽·플레이어 충돌 유지, 장애물 너머 대상으로의 직선 이동, 방의 추가 적 등록과
   처치 시 방 상태 불변을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-6과 그 회귀 전체, 하트 체력
   `Hp1HealthUnitsVerification`)다.
+  **원화 보존(2026-10-14)**: Enemy-6 Setup은 Obstacle-5를 거쳐 Resource-0(하트)·Resource-1(열쇠·폭탄)·Special-3(비밀
+  구덩이) Setup까지 다시 실행한다. 이 Setup들은 원화보다 먼저 만들어져 실행할 때마다 임시 스프라이트·색을 다시 써서
+  쥬비 틴트와 픽업·구덩이 그림을 되돌렸다. 이제 요정왕국 원화가 연결됐거나(`FairyKingdomArtworkView`) 사용자 원화
+  (`Assets/Resources/UserArtwork/`) 스프라이트를 쓰는 Prefab은 그림·색을 건드리지 않고(`FairyKingdomArtworkSetup.HasAuthoredArtwork`),
+  크기·충돌 같은 게임 값만 다시 쓴다. Enemy-6의 `SetupAndVerifyBatch`는 Setup 전후 원화 연결 Prefab의 스프라이트·색을
+  비교해(`FairyKingdomArtworkVerification.SnapshotBoundArtwork`) 바뀌면 실패한다. 2026-10-14 수정 뒤 Enemy-6
+  `SetupAndVerifyBatch`가 Prefab 변경 없이 종료 코드 0으로 통과했다.
   수동 확인: Game Scene Play → 장애물이 있는 전투방에서 `F1` 패널 `— Obstacle —`의 `Next broken random box releases
   enemies`를 켜고 `Make shady-random-box`로 바꾼 장애물을 부순다. 연보라색 작은 적 5마리가 나와 장애물·구덩이 위를 지나
   플레이어에게 곧장 날아오고, 닿으면 하트가 반 칸 줄며, 한 대 맞으면 죽는다. 클리어된 방에서 부숴도 문이 잠기지 않고
