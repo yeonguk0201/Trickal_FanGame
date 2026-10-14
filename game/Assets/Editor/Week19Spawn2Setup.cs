@@ -198,8 +198,9 @@ namespace TrickalFanGame.Editor
                 EncounterSpawnRule melee = CandidateRule(
                     new EncounterEnemyCandidate(EncounterEnemyRole.Chaser, 70),
                     new EncounterEnemyCandidate(EncounterEnemyRole.FastChaser, 30));
-                // Enemy-8: the pressure melee slots also draw 저혈당 요정-활발; crossfire keeps its two chasers.
-                EncounterSpawnRule pressureMelee = CandidateRule(Week25Enemy8Setup.MeleeCandidates());
+                // Enemy-8/9: the pressure melee slots also draw 저혈당 요정-활발 and 누루링-요정전사; crossfire keeps
+                // its two chasers.
+                EncounterSpawnRule pressureMelee = CandidateRule(Week25Enemy9Setup.PressureMeleeCandidates());
                 EncounterSpawnRule rear = CandidateRule(
                     new EncounterEnemyCandidate(EncounterEnemyRole.Ranged, spec.QuickRangedWeight),
                     new EncounterEnemyCandidate(EncounterEnemyRole.Sniper, spec.SniperWeight));

@@ -1061,7 +1061,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   구덩이) Setup까지 다시 실행한다. 이 Setup들은 원화보다 먼저 만들어져 실행할 때마다 임시 스프라이트·색을 다시 써서
   쥬비 틴트와 픽업·구덩이 그림을 되돌렸다. 이제 요정왕국 원화가 연결됐거나(`FairyKingdomArtworkView`) 사용자 원화
   (`Assets/Resources/UserArtwork/`) 스프라이트를 쓰는 Prefab은 그림·색을 건드리지 않고(`FairyKingdomArtworkSetup.HasAuthoredArtwork`),
-  크기·충돌 같은 게임 값만 다시 쓴다. Enemy-6의 `SetupAndVerifyBatch`는 Setup 전후 원화 연결 Prefab의 스프라이트·색을
+  크기·충돌 같은 게임 값만 다시 쓴다. Enemy-6·Enemy-9의 `SetupAndVerifyBatch`는 Setup 전후 원화 연결 Prefab의 스프라이트·색을
   비교해(`FairyKingdomArtworkVerification.SnapshotBoundArtwork`) 바뀌면 실패한다. 2026-10-14 수정 뒤 Enemy-6
   `SetupAndVerifyBatch`가 Prefab 변경 없이 종료 코드 0으로 통과했다.
   수동 확인: Game Scene Play → 장애물이 있는 전투방에서 `F1` 패널 `— Obstacle —`의 `Next broken random box releases
@@ -1121,6 +1121,32 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   1칸 준다. 0.6초 쉰 뒤 다시 걷고, 걷는 방향은 대체로 플레이어 쪽이다. 예고 중에 때려 밀어내면 그 발사는 나가지 않는다.
   (2) `— Seed —`의 `Find lively fairy F1` → `Restart Run with this seed`로 이 적이 나오는 방에 들어가 다 잡으면 방이
   클리어되는지 본다.
+
+- Enemy-9 누루링-요정전사: 메뉴 `Trickal Fan Game > Week 25 > Setup Enemy-9 Nururing Fairy Warrior`가 추적형
+  `TestEnemy.prefab`을 풀어 분열체 `NururingSplit.prefab`(Prefab 전체 0.7배, 체력 10, 속도 3.25(Play 뒤 3.75에서 조정), 넉백 무게 0.7, 약 등급
+  접촉만)과 본체 `NururingFairyWarrior.prefab`(체력 40, 속도 2.5, 넉백 무게 1.2, 추적형과 같은 런지를 중 등급으로, 접촉
+  약 등급, `EnemySplitOnDeath` → 분열체 2마리·좌우 0.5)을 만들고, 둘 다 요정왕국 원화 `nururing`(폭 1.3)을 연결한다. 난이도
+  표에 `SplittingChaser` 위협 4, roster에 같은 역할 → 본체를 넣고, `pressure` Encounter의 근접 후보를 50/25/15/10으로 바꿔
+  선언 위협 범위를 10~16으로 올린 뒤 Game Scene의 `encounterContentVersion`을 15로 올린다(`swarm`은 Enemy-8의 60/25/15
+  그대로). GUID를 보존하며 멱등이다. **코드만 받고 이 Setup을 실행하지 않으면 난이도 표에 새 역할 점수가 없어 층 생성이
+  명시적으로 실패한다.** Spawn-2·Difficulty-1 Setup을 다시 실행해도 같은 후보와 범위를 쓴다
+  (`Week25Enemy9Setup.PressureMeleeCandidates`, `Week19Difficulty1Setup.PressureMaximumThreat`). 자동 검증 메뉴는
+  `Trickal Fan Game > Week 25 > Verify Enemy-9 Nururing Fairy Warrior`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Enemy9Verification.SetupAndVerifyBatch -logFile
+  <로그 경로>`다. Setup 2회 GUID와 컴포넌트 미중복, 두 Prefab의 수치·원화·0.7배 크기, 위협 4·roster·근접 압박 지점,
+  `pressure`에만 50/25/15/10으로 들어가고 10~16을 계산·선언하는지, 512개 seed의 선택·재현·배치 지점과 런타임 Prefab 연결,
+  공격·폭탄·중독·함정·원인 불명 사망 모두 좌우 0.5에 분열체 2마리를 한 번만 만들고 분열체가 본체의 층·대상을 이어받아
+  0.3초 동안 행동하지 않으며 다시 분열하지 않는지, 개발용 웨이브 처치 뒤에도 분열체 4마리가 웨이브를 붙잡고 층 체력 배율을
+  받으며 마지막 분열체가 죽어야 다음 웨이브와 방 클리어가 오는지 검사한다. 성공 로그는 `Enemy-9 verification passed`로
+  시작한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Enemy-8, Enemy-7, Spawn-2, Difficulty-1, Encounter-4, 요정왕국 원화의
+  `Verify`)다. 2026-10-14 단독 배치가 종료 코드 0으로 통과했다(512개 seed의 전투방 11,709개 중 781개에 818마리, 층별
+  221/211/349방). 같은 날 회귀 묶음과 개발 패널 검증(`Week20DevPanelVerification.Verify`)도
+  종료 코드 0으로 통과했다. 같은 날 사용자가 Play로 확인했고, 분열체가 빨라 속도를 3.25로 낮춘 뒤 단독 배치를 다시 통과했다.
+  수동 확인: (1) Game Scene Play → `F1` 패널 `— Room —`의 `Spawn nururing (splits on death)`로 플레이어 오른쪽 2칸에
+  부른다. 노란 푸딩 누루링이 다가와 런지하고, 죽이면 그 자리 좌우에 더 작은 누루링 2마리가 생겨 잠깐(0.3초) 멈췄다가 더
+  빠르게 쫓아오며, 닿으면 하트 1칸을 잃는다. 작은 누루링을 죽여도 더 갈라지지 않는다. 패널의 `Nururing bodies N, splits M`
+  표시로 수를 본다. 폭탄으로 죽여도 갈라지는지 본다. (2) `— Seed —`의 `Find nururing F1` → `Restart Run with this seed`로
+  이 적이 나오는 방에 들어가, 본체만 잡은 상태에서는 문이 잠겨 있고 분열체까지 다 잡아야 다음 웨이브·방 클리어가 되는지 본다.
 
 - Passive-1 넉백 교체·칸나의 대포·비비의 콧물: 메뉴 `Trickal Fan Game > Week 23 > Setup Passive-1 Cannon and Snot`이
   `Assets/Items/`에 `artifact-kanna-cannon`(Rare, 최대 2스택, 효과 43 `ProjectileSizePercent` `magnitude` 0.5)과

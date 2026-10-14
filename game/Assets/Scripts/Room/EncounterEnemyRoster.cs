@@ -74,6 +74,8 @@ namespace TrickalFanGame.Room
                                                 binding.Prefab.GetComponent<EnemyFlight>() != null,
                     EncounterEnemyRole.FourWayShooter =>
                         binding.Prefab.GetComponent<FourWayShooterController>() != null,
+                    EncounterEnemyRole.SplittingChaser => binding.Prefab.GetComponent<EnemyChase>() != null &&
+                                                          binding.Prefab.GetComponent<EnemySplitOnDeath>() != null,
                     EncounterEnemyRole.Boss => true,
                     _ => false,
                 };

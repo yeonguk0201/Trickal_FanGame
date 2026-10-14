@@ -30,6 +30,9 @@ namespace TrickalFanGame.Editor
             ["QuickRangedFairy"] = "sansamo-pure",
             // Enemy-8: 저혈당 요정-활발. The user's drawing (2026-10-14) replaced the earlier preview-only draft.
             ["LivelyLowBloodSugarFairy"] = "low-blood-sugar-fairy",
+            // Enemy-9: 누루링-요정전사 and its small splits share one drawing; the split Prefab is scaled down.
+            ["NururingFairyWarrior"] = "nururing",
+            ["NururingSplit"] = "nururing",
         };
         // First-bind width where the placeholder sprite has a different shape. 0.7 draws 산사모-순수 as tall as
         // 산사모-활발 (about 1.2). A width already tuned on the Prefab is kept.
@@ -38,6 +41,9 @@ namespace TrickalFanGame.Editor
             ["QuickRangedFairy"] = 0.7f,
             // About 1.2 tall, like 저혈당 요정-순수.
             ["LivelyLowBloodSugarFairy"] = 1.07f,
+            // The drawing is wider than tall: 1.3 wide stands about 1.05 tall. The split's root scale shrinks it.
+            ["NururingFairyWarrior"] = Week25Enemy9Setup.ArtworkWidth,
+            ["NururingSplit"] = Week25Enemy9Setup.ArtworkWidth,
         };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites")]

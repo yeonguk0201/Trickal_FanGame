@@ -150,6 +150,12 @@ namespace TrickalFanGame.Run
                                             node.ResolvedEncounterWaves.Any(wave => wave.Any(spawn =>
                                                 spawn.Role == EncounterEnemyRole.FourWayShooter)),
                     "Lively fairy room");
+            // Enemy-9: 누루링-요정전사 is one of four melee candidates in pressure rooms.
+            if (GUILayout.Button("Find nururing F1"))
+                FindSeed(assembler, node => node.ResolvedEncounterWaves != null &&
+                                            node.ResolvedEncounterWaves.Any(wave => wave.Any(spawn =>
+                                                spawn.Role == EncounterEnemyRole.SplittingChaser)),
+                    "Nururing room");
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -597,8 +603,27 @@ namespace TrickalFanGame.Run
             }
             GUILayout.Label("Lively fairies " + FindObjectsByType<TrickalFanGame.Enemy.FourWayShooterController>(
                 FindObjectsSortMode.None).Length);
+
+            // Enemy-9: 누루링-요정전사 two tiles to the right of the player. Killing it leaves two small 누루링
+            // that hold the room until they die too.
+            if (AssistedButton("Spawn nururing (splits on death)") && controller != null && player != null)
+            {
+                GameObject nururing = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/NururingFairyWarrior.prefab");
+                status = controller.SpawnExtraEnemy(nururing, player.transform.position + Vector3.right * 2f) != null
+                    ? "Spawned a nururing to the right of the player."
+                    : "Nururing spawn failed.";
+            }
+            int nururingBodies = FindObjectsByType<TrickalFanGame.Enemy.EnemySplitOnDeath>(FindObjectsSortMode.None)
+                .Count(body => body.TryGetComponent(out Health bodyHealth) && !bodyHealth.IsDead);
+            int nururingSplits = FindObjectsByType<TrickalFanGame.Frontend.FairyKingdomArtworkView>(
+                    FindObjectsSortMode.None)
+                .Count(view => view.ArtworkId == "nururing" &&
+                               view.GetComponent<TrickalFanGame.Enemy.EnemySplitOnDeath>() == null &&
+                               view.TryGetComponent(out Health splitHealth) && !splitHealth.IsDead);
+            GUILayout.Label($"Nururing bodies {nururingBodies}, splits {nururingSplits}");
 #else
-            GUILayout.Label("Crumb minion and lively fairy spawns are editor-only.");
+            GUILayout.Label("Crumb minion, lively fairy and nururing spawns are editor-only.");
 #endif
         }
 

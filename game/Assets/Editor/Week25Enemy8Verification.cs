@@ -209,16 +209,20 @@ namespace TrickalFanGame.Editor
                     "does not follow that.");
                 if (!holds) continue;
                 found++;
+                bool pressure = definition.EncounterId.EndsWith("-pressure-v1", StringComparison.Ordinal);
+                // Enemy-9 added 누루링-요정전사 to the pressure melee slots (50/25/15/10); swarm keeps 60/25/15.
+                EncounterEnemyCandidate[] expected = pressure
+                    ? Week25Enemy9Setup.PressureMeleeCandidates()
+                    : Week25Enemy8Setup.MeleeCandidates();
                 foreach (EncounterSpawnRule rule in rules.Where(rule => rule.Candidates.Any(candidate =>
                              candidate.EnemyRole == EncounterEnemyRole.FourWayShooter)))
                 {
-                    Assert(Weight(rule, EncounterEnemyRole.Chaser) == 60 &&
-                           Weight(rule, EncounterEnemyRole.FastChaser) == 25 &&
-                           Weight(rule, EncounterEnemyRole.FourWayShooter) == 15 && rule.Candidates.Count == 3,
-                        $"'{definition.EncounterId}' melee slots must weigh 60/25/15.");
+                    Assert(rule.Candidates.Count == expected.Length &&
+                           expected.All(candidate => Weight(rule, candidate.EnemyRole) == candidate.Weight),
+                        $"'{definition.EncounterId}' melee slots must weigh " +
+                        string.Join("/", expected.Select(candidate => candidate.Weight)) + ".");
                 }
 
-                bool pressure = definition.EncounterId.EndsWith("-pressure-v1", StringComparison.Ordinal);
                 Week19Encounter4Setup.SwarmSpec swarm = Week19Encounter4Setup.Swarms.FirstOrDefault(spec =>
                     Week19Spawn2Setup.EncounterId(spec.ProfileId, "swarm") == definition.EncounterId);
                 Assert(pressure

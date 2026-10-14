@@ -18,6 +18,8 @@ namespace TrickalFanGame.Room
         Jyubi,
         // Enemy-8: 저혈당 요정-활발, which stops and fires bread up, down, left and right.
         FourWayShooter,
+        // Enemy-9: 누루링-요정전사, which splits into two small 누루링 when it dies.
+        SplittingChaser,
     }
     public enum EncounterWaveStartCondition { RoomEntered, PreviousWaveCleared }
     public enum EncounterWaveCompletionCondition { AllRequiredEnemiesDefeated }
@@ -331,7 +333,8 @@ namespace TrickalFanGame.Room
                     bool prefersCloseSpawn = selectedRole == EncounterEnemyRole.Chaser ||
                                              selectedRole == EncounterEnemyRole.FastChaser ||
                                              selectedRole == EncounterEnemyRole.Jyubi ||
-                                             selectedRole == EncounterEnemyRole.FourWayShooter;
+                                             selectedRole == EncounterEnemyRole.FourWayShooter ||
+                                             selectedRole == EncounterEnemyRole.SplittingChaser;
                     int selectedIndex = prefersCloseSpawn
                         ? available.OrderBy(index => template.SpawnPoints[index].sqrMagnitude)
                             .ThenBy(index => index).First()
