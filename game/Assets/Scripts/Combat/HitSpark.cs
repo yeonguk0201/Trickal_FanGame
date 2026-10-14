@@ -55,11 +55,14 @@ namespace TrickalFanGame.Combat
         public MeshRenderer Visual => visual;
         public Mesh Mesh => mesh;
 
-        // incoming: the direction the shot was flying. The streaks spray back from it.
-        public static void Play(Vector3 position, Vector2 incoming, Health target)
+        // incoming: the direction the shot was flying. The streaks spray back from it. target is the enemy or
+        // obstacle that was hit; an obstacle the hit just broke is already inactive, so its sprite is looked up
+        // among inactive children too.
+        public static void Play(Vector3 position, Vector2 incoming, Component target)
         {
             if (!Application.isPlaying || target == null) return;
-            HitSpark effect = Create(position, incoming, DefaultRadius, target.GetComponentInChildren<SpriteRenderer>());
+            HitSpark effect = Create(position, incoming, DefaultRadius,
+                target.GetComponentInChildren<SpriteRenderer>(true));
             if (effect == null) return;
             SceneManager.MoveGameObjectToScene(effect.gameObject, target.gameObject.scene);
             effect.seed = nextSeed++;

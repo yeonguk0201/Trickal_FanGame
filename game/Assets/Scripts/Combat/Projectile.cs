@@ -277,9 +277,15 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
-            if (collider.GetComponentInParent<DestructibleObstacle>() != null)
+            DestructibleObstacle obstacle = collider.GetComponentInParent<DestructibleObstacle>();
+            if (obstacle != null)
             {
-                DestructibleObstacle.TryHitCollider(collider);
+                // Same burst as an enemy hit, but only when the hit counted (not on bomb-only obstacles).
+                if (DestructibleObstacle.TryHitCollider(collider))
+                {
+                    HitSpark.Play(transform.position, flightVelocity, obstacle);
+                }
+
                 DestroyProjectile();
                 return;
             }
