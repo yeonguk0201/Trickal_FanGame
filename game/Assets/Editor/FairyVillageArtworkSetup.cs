@@ -254,13 +254,37 @@ namespace TrickalFanGame.Editor
             importer.SaveAndReimport();
         }
 
+        // The see-through aperture of the registered door frame, which every door family shares, in source pixels from
+        // the door cell's world origin. Side doors open between the upper and lower frame stones where they meet the
+        // wall face (source rows 400-489; row 470.5 is world 0 in the 300-560 cell). Top and bottom doors open
+        // between the stone pillars (60 px either side of column 836).
+        private const float SideOpeningTopPixels = 70.5f;
+        private const float SideOpeningBottomPixels = -18.5f;
+        private const float VerticalOpeningHalfPixels = 60f;
+        // Feet diameter (0.6) plus clearance, so Small's scaled-down frame stays passable.
+        public const float MinimumDoorOpening = 0.8f;
+
+        // The lateral span (x = min, y = max) the wall boundaries leave open for a door: along Y for side doors and
+        // along X for top and bottom doors. It follows the drawn aperture, so the walls stop actors and the Shasha
+        // water stream wherever the painting shows wall or frame instead of the symmetric RoomLayout opening.
+        public static Vector2 DoorOpening(RoomDoorDirection direction, Vector2 size)
+        {
+            float scale = NativeScale(size);
+            bool side = direction == RoomDoorDirection.Left || direction == RoomDoorDirection.Right;
+            float min = side ? SideOpeningBottomPixels * scale : -VerticalOpeningHalfPixels * scale;
+            float max = side ? SideOpeningTopPixels * scale : VerticalOpeningHalfPixels * scale;
+            float widen = Mathf.Max(0f, MinimumDoorOpening - (max - min)) * 0.5f;
+            return new Vector2(min - widen, max + widen);
+        }
+
         private static void BuildWallBoundaries(Transform content, Vector2 size)
         {
             Remove(content, BoundaryName);
             Transform root = new GameObject(BoundaryName).transform;
             root.SetParent(content, false);
             Rect floor = WalkableFloor(size);
-            float gap = RoomLayout.DoorOpeningLength / 2;
+            Vector2 vertical = DoorOpening(RoomDoorDirection.Up, size);
+            Vector2 side = DoorOpening(RoomDoorDirection.Right, size);
             int layer = content.Find("Top Left Wall").gameObject.layer;
             void Wall(string name, float left, float bottom, float right, float top) {
                 Transform wall = new GameObject(name).transform;
@@ -272,14 +296,14 @@ namespace TrickalFanGame.Editor
             foreach (bool upper in new[] { false, true }) {
                 float bottom = upper ? floor.yMax : -size.y / 2;
                 float top = upper ? size.y / 2 : floor.yMin;
-                Wall(upper ? "Upper Left" : "Lower Left", -size.x / 2, bottom, -gap, top);
-                Wall(upper ? "Upper Right" : "Lower Right", gap, bottom, size.x / 2, top);
+                Wall(upper ? "Upper Left" : "Lower Left", -size.x / 2, bottom, vertical.x, top);
+                Wall(upper ? "Upper Right" : "Lower Right", vertical.y, bottom, size.x / 2, top);
             }
             foreach (bool right in new[] { false, true }) {
                 float left = right ? floor.xMax : -size.x / 2;
                 float outer = right ? size.x / 2 : floor.xMin;
-                Wall(right ? "Right Lower" : "Left Lower", left, floor.yMin, outer, -gap);
-                Wall(right ? "Right Upper" : "Left Upper", left, gap, outer, floor.yMax);
+                Wall(right ? "Right Lower" : "Left Lower", left, floor.yMin, outer, side.x);
+                Wall(right ? "Right Upper" : "Left Upper", left, side.y, outer, floor.yMax);
             }
         }
         private static bool IsDoorCell(int col, int row) => col == 2 && (row == 0 || row == 4) || row == 2 && (col == 0 || col == 4);
