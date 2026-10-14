@@ -1047,7 +1047,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   가시 돌·독버섯·제거된 거미줄은 그대로 없다(개발 패널로 놓은 함정은 층을 다시 만들면 사라진다).
 
 - Enemy-6 쥬비: 메뉴 `Trickal Fan Game > Week 23 > Setup Enemy-6 Jyubi`가 추적형 적 Prefab을 풀어 복사한
-  `Assets/Prefabs/JyubiEnemy.prefab`을 만들고(근접 공격·이동 애니메이션 컴포넌트 제거, 크기 0.5, 체력 1, 속도 5.5, 비행
+  `Assets/Prefabs/JyubiEnemy.prefab`을 만들고(근접 공격·이동 애니메이션 컴포넌트 제거, 크기 0.5, 체력 1, 속도 5.2(2026-10-14 5.5에서 조정), 비행
   추적, 반 칸 접촉 피해, `EnemyFlight` 추가) Obstacle-5 Setup을 다시 실행해 셰이디의 랜덤박스 종류에 쥬비 5마리 결과를
   연결한다. GUID를 보존하며 멱등이다. Obstacle-5 Setup도 같은 Prefab 구성 코드를 호출한다.
   자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Enemy-6 Jyubi`, 배치는 Unity `-batchmode -nographics -quit
