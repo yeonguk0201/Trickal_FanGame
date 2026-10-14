@@ -359,7 +359,8 @@ Run 시작
   | 위협 점수 |      2 |      3 |             3 |      4 |      4 |
 
   쥬비는 1이다(Enemy-7, 2026-10-13). 쥬비만 나오는 `jyubi-swarm`(위협 6~7, 쉬움)에서만 쓰며, 이 조합을 더하면서
-  `encounterContentVersion`을 13으로 올렸다.
+  `encounterContentVersion`을 13으로 올렸다. 저혈당 요정-활발은 3이다(Enemy-8, 2026-10-14). `pressure`·`swarm`의
+  근접 후보(60/25/15)로 들어가며 선언 위협 범위는 바뀌지 않았고, `encounterContentVersion`을 14로 올렸다.
 
 - Encounter는 선언 위협 범위를 가진다. 각 슬롯 후보의 최소·최대 점수 × 수량을 모두 더한 합계가 선언 범위를
   벗어나면 Encounter 검증과 층 생성이 실패한다. 현재 `pressure`는 10~14, `crossfire`는 15~19다.

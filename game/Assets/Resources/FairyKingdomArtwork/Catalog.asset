@@ -161,10 +161,10 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: c6793bcb0d244973af281a8761fca08b, type: 3}
     visibleRect:
       serializedVersion: 2
-      x: 163
-      y: 17
-      width: 1031
-      height: 1220
+      x: 133
+      y: 7
+      width: 1106
+      height: 1238
   - id: nururing
     sprite: {fileID: 21300000, guid: e8a91383c513449b992f727daaa605c9, type: 3}
     visibleRect:

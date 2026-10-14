@@ -206,17 +206,14 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        private static EncounterDefinition[] ConfigureEncounters()
+        internal static EncounterDefinition[] ConfigureEncounters()
         {
             List<EncounterDefinition> definitions = new();
             foreach (SwarmSpec spec in Swarms)
             {
                 RoomProfile profile = LoadProfile(spec.ProfileId);
-                EncounterEnemyCandidate[] melee =
-                {
-                    new(EncounterEnemyRole.Chaser, 70),
-                    new(EncounterEnemyRole.FastChaser, 30),
-                };
+                // Enemy-8: the swarm's melee slots also draw 저혈당 요정-활발 (threat 3, like 산사모-활발).
+                EncounterEnemyCandidate[] melee = Week25Enemy8Setup.MeleeCandidates();
                 EncounterDefinition swarm = CreateOrUpdate(spec.ProfileId, "swarm", profile,
                     Wave(1, new EncounterSpawnRule(melee, spec.FirstWave, null, "all")),
                     Wave(2, new EncounterSpawnRule(melee, spec.SecondWave, null, "all")));

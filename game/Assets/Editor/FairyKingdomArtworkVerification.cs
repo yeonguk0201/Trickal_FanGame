@@ -48,6 +48,7 @@ namespace TrickalFanGame.Editor
                 VerifyKeepsOriginalArt(name);
             VerifyExisting("JyubiEnemy", "jyubi");
             VerifyExisting("QuickRangedFairy", "sansamo-pure");
+            VerifyExisting("LivelyLowBloodSugarFairy", "low-blood-sugar-fairy");
             SpriteRenderer pureSansamo = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/QuickRangedFairy.prefab")
                 .GetComponent<SpriteRenderer>();
             Require(pureSansamo != null && pureSansamo.color == Color.white,

@@ -184,7 +184,7 @@ namespace TrickalFanGame.Editor
             return roster;
         }
 
-        private static EncounterDefinition[] ConfigureEncounters()
+        internal static EncounterDefinition[] ConfigureEncounters()
         {
             List<EncounterDefinition> definitions = new();
             foreach (ProfileSpec spec in Profiles)
@@ -198,6 +198,8 @@ namespace TrickalFanGame.Editor
                 EncounterSpawnRule melee = CandidateRule(
                     new EncounterEnemyCandidate(EncounterEnemyRole.Chaser, 70),
                     new EncounterEnemyCandidate(EncounterEnemyRole.FastChaser, 30));
+                // Enemy-8: the pressure melee slots also draw 저혈당 요정-활발; crossfire keeps its two chasers.
+                EncounterSpawnRule pressureMelee = CandidateRule(Week25Enemy8Setup.MeleeCandidates());
                 EncounterSpawnRule rear = CandidateRule(
                     new EncounterEnemyCandidate(EncounterEnemyRole.Ranged, spec.QuickRangedWeight),
                     new EncounterEnemyCandidate(EncounterEnemyRole.Sniper, spec.SniperWeight));
@@ -205,8 +207,8 @@ namespace TrickalFanGame.Editor
                     new EncounterEnemyCandidate(EncounterEnemyRole.Charging, 100));
 
                 definitions.Add(CreateOrUpdate(spec.ProfileId, "pressure", profile,
-                    Wave(1, melee, rear),
-                    Wave(2, melee, rear)));
+                    Wave(1, pressureMelee, rear),
+                    Wave(2, pressureMelee, rear)));
                 definitions.Add(CreateOrUpdate(spec.ProfileId, "crossfire", profile,
                     Wave(1, CandidateRule(3,
                         new EncounterEnemyCandidate(EncounterEnemyRole.Ranged, spec.QuickRangedWeight),

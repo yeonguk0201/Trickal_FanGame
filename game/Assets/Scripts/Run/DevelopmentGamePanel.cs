@@ -144,6 +144,12 @@ namespace TrickalFanGame.Run
                 FindSeed(assembler, node => node.EncounterId != null &&
                                             node.EncounterId.EndsWith("-jyubi-swarm-v1", System.StringComparison.Ordinal),
                     "Jyubi swarm room");
+            // Enemy-8: 저혈당 요정-활발 is one of three melee candidates in pressure and swarm rooms.
+            if (GUILayout.Button("Find lively fairy F1"))
+                FindSeed(assembler, node => node.ResolvedEncounterWaves != null &&
+                                            node.ResolvedEncounterWaves.Any(wave => wave.Any(spawn =>
+                                                spawn.Role == EncounterEnemyRole.FourWayShooter)),
+                    "Lively fairy room");
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -578,8 +584,21 @@ namespace TrickalFanGame.Run
                     ? "Spawned a crumb minion to the right of the player."
                     : "Crumb minion spawn failed.";
             }
+
+            // Enemy-8: 저혈당 요정-활발 three tiles above the player, so its left and right shots miss and the
+            // downward one comes straight at the player.
+            if (AssistedButton("Spawn lively fairy (4-way shots)") && controller != null && player != null)
+            {
+                GameObject fairy = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/LivelyLowBloodSugarFairy.prefab");
+                status = controller.SpawnExtraEnemy(fairy, player.transform.position + Vector3.up * 3f) != null
+                    ? "Spawned a lively fairy above the player."
+                    : "Lively fairy spawn failed.";
+            }
+            GUILayout.Label("Lively fairies " + FindObjectsByType<TrickalFanGame.Enemy.FourWayShooterController>(
+                FindObjectsSortMode.None).Length);
 #else
-            GUILayout.Label("Crumb minion spawn is editor-only.");
+            GUILayout.Label("Crumb minion and lively fairy spawns are editor-only.");
 #endif
         }
 

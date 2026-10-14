@@ -1093,6 +1093,28 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   보스 오브젝트를 지우는 처리가 보스의 사망 처리보다 먼저 실행되어 `OnDisable`이 소환물을 지우던 문제가 있었고, 죽은
   보스의 `OnDisable`도 소환물을 넘겨주도록 고쳤다).
 
+- Enemy-8 저혈당 요정-활발: 메뉴 `Trickal Fan Game > Week 25 > Setup Enemy-8 Lively Low Blood Sugar Fairy`가
+  `RangedEnemy.prefab`을 풀어 `LivelyLowBloodSugarFairy.prefab`(체력 30, 넉백 무게 1, `FourWayShooterController`)을 만들고,
+  요정왕국 원화 `low-blood-sugar-fairy`(폭 1.07, 키 약 1.2)와 임시 빵 발사체 `LivelyFairyBread_Projectile.png`(파와 같은
+  PPU 160)를 연결하고, 난이도 표에 `FourWayShooter` 위협 3, roster에 같은 역할 → 이 Prefab을 넣고, `pressure`·`swarm`
+  Encounter의 근접 후보를 60/25/15로 다시 구성한 뒤 Game Scene의 `encounterContentVersion`을 14로 올린다. GUID를 보존하며
+  멱등이다. **코드만 받고 이 Setup을 실행하지 않으면 난이도 표에 새 역할 점수가 없어 층 생성이 명시적으로 실패한다.**
+  Spawn-2·Encounter-4·Difficulty-1 Setup을 다시 실행해도 같은 후보와 점수를 쓴다(`Week25Enemy8Setup.MeleeCandidates`).
+  자동 검증 메뉴는 `Trickal Fan Game > Week 25 > Verify Enemy-8 Lively Low Blood Sugar Fairy`, 배치는 Unity `-batchmode
+  -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Enemy8Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 GUID와 컴포넌트 미중복, Prefab 수치·원화·파와 같은 크기의 발사체, 이동 방향 분포,
+  위협 3·roster·근접 압박 지점, `pressure`·`swarm`에만 60/25/15로 들어가고 선언 위협 범위가 그대로인지, 512개 seed의
+  선택·재현·배치 지점과 런타임 Prefab 연결, 한 주기(1.2초 이동 → 0.4초 예고 → 장애물 너머로도 4방향 발사 → 0.6초 회복 →
+  다시 이동)와 탄속 5·1.2초 뒤 소멸·1칸 피해, 넉백이 예고를 끊는지, 두 웨이브 처치 뒤 방 클리어를 검사한다. 성공 로그는
+  `Enemy-8 verification passed`로 시작한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Enemy-7, Spawn-2, Difficulty-1,
+  Encounter-4, 요정왕국 원화의 `Verify`)다. 2026-10-14 두 배치가 종료 코드 0으로 통과했다(512개 seed의 전투방
+  11,709개 중 2,750개에 3,518마리, 층별 704/699/1,347방). 같은 날 사용자가 Play로 확인했다.
+  수동 확인: (1) Game Scene Play → `F1` 패널 `— Room —`의 `Spawn lively fairy (4-way shots)`로 플레이어 위 3칸에 부른다.
+  1.2초쯤 걷다가 멈추고 상하좌우로 경고 화살표가 0.4초 보인 뒤 빵 4개를 쏘고, 빵은 6칸쯤 날아가 사라지며, 맞으면 하트가
+  1칸 준다. 0.6초 쉰 뒤 다시 걷고, 걷는 방향은 대체로 플레이어 쪽이다. 예고 중에 때려 밀어내면 그 발사는 나가지 않는다.
+  (2) `— Seed —`의 `Find lively fairy F1` → `Restart Run with this seed`로 이 적이 나오는 방에 들어가 다 잡으면 방이
+  클리어되는지 본다.
+
 - Passive-1 넉백 교체·칸나의 대포·비비의 콧물: 메뉴 `Trickal Fan Game > Week 23 > Setup Passive-1 Cannon and Snot`이
   `Assets/Items/`에 `artifact-kanna-cannon`(Rare, 최대 2스택, 효과 43 `ProjectileSizePercent` `magnitude` 0.5)과
   `artifact-bibi-snot`(Rare, 최대 2스택, 효과 44 `BasicAttackPoison` `magnitude` 0.15·`secondaryMagnitude` 0.15·

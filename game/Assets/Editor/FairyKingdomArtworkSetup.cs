@@ -28,12 +28,16 @@ namespace TrickalFanGame.Editor
             ["JyubiEnemy"] = "jyubi",
             ["BuseureogiCrumbMinion"] = "crumb-minion-pink",
             ["QuickRangedFairy"] = "sansamo-pure",
+            // Enemy-8: 저혈당 요정-활발. The user's drawing (2026-10-14) replaced the earlier preview-only draft.
+            ["LivelyLowBloodSugarFairy"] = "low-blood-sugar-fairy",
         };
         // First-bind width where the placeholder sprite has a different shape. 0.7 draws 산사모-순수 as tall as
         // 산사모-활발 (about 1.2). A width already tuned on the Prefab is kept.
         private static readonly Dictionary<string, float> EnemyWidths = new()
         {
             ["QuickRangedFairy"] = 0.7f,
+            // About 1.2 tall, like 저혈당 요정-순수.
+            ["LivelyLowBloodSugarFairy"] = 1.07f,
         };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites")]
@@ -81,6 +85,13 @@ namespace TrickalFanGame.Editor
             Apply();
             FairyKingdomArtworkVerification.Verify();
         }
+
+        // Rebuilds only the catalog (sprites and visible rects), for a setup that changed one drawing.
+        public static FairyKingdomArtworkCatalog RefreshCatalog() => BuildCatalog();
+
+        // Binds the drawing to one loaded Prefab the same way Apply does, without touching other Prefabs or Scenes.
+        public static bool BindPrefabContents(GameObject root, FairyKingdomArtworkCatalog catalog) =>
+            ApplyHierarchy(root, catalog);
 
         private static FairyKingdomArtworkCatalog BuildCatalog()
         {

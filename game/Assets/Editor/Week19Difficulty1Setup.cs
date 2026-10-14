@@ -28,6 +28,8 @@ namespace TrickalFanGame.Editor
             new(EncounterEnemyRole.Charging, 4),
             // Enemy-7: every normal role needs a score, so 쥬비 lives here and a re-run keeps it.
             new(EncounterEnemyRole.Jyubi, 1),
+            // Enemy-8: 저혈당 요정-활발.
+            new(EncounterEnemyRole.FourWayShooter, 3),
         };
 
         public static readonly RoomDifficultyTierBand[] TierBands =
@@ -80,7 +82,7 @@ namespace TrickalFanGame.Editor
             }
 
             AssetDatabase.SaveAssets();
-            Debug.Log("Difficulty-1 ready: threat scores 2/3/3/4/4 and Jyubi 1, Easy<=11/Normal 12~15/Hard>=16, " +
+            Debug.Log("Difficulty-1 ready: threat scores 2/3/3/4/4, Jyubi 1 and four-way 3, Easy<=11/Normal 12~15/Hard>=16, " +
                       "floor caps 18/20/22, distance tier weights 40/45/15 -> 10/40/50, obstacle Layouts +1.");
         }
 
