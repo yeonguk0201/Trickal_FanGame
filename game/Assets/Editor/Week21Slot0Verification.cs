@@ -53,8 +53,10 @@ namespace TrickalFanGame.Editor
                    (int)ItemKind.SingleUseSpell == 2 && (int)ItemKind.JjangsemSpell == 3,
                 "ItemKind values are serialized by number and must stay Artifact 0, Spell 1, SingleUseSpell 2, " +
                 "JjangsemSpell 3.");
-            Assert(Enum.GetValues(typeof(ItemKind)).Length == 4,
-                "Reserved kinds (Trinket 4, Active 5) must not be added before their first item.");
+            // Power-1 added Active = 5 with the first 교주의 권능; Trinket 4 stays reserved.
+            Assert(Enum.GetValues(typeof(ItemKind)).Length == 5 && (int)ItemKind.Active == 5 &&
+                   !Enum.IsDefined(typeof(ItemKind), 4),
+                "The reserved kind Trinket 4 must not be added before its first item.");
             Assert(ItemDefinition.IsItemIdValidForKind("single-spell-catch-that-one", ItemKind.SingleUseSpell) &&
                    ItemDefinition.IsItemIdValidForKind("jjangsem-melune-card", ItemKind.JjangsemSpell),
                 "New single-use prefixes must be valid for their kinds.");

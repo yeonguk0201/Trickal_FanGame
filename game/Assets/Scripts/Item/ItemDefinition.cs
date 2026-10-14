@@ -19,6 +19,8 @@ namespace TrickalFanGame.Item
         [SerializeField] private float effectValue = 1f;
         [SerializeField] private ItemStackMode stackMode = ItemStackMode.Additive;
         [SerializeField, Min(0)] private int maxStacks;
+        // 교주의 권능 only: combat or boss rooms to clear for a full gauge (Power-1).
+        [SerializeField, Min(0)] private int activeChargeRooms;
 
         public string ItemId => itemId;
         public string DisplayName => displayName;
@@ -31,11 +33,14 @@ namespace TrickalFanGame.Item
         public ItemStackMode StackMode => stackMode;
         public int MaxStacks => maxStacks;
         public bool IsSingleUse => ItemKindText.IsSingleUse(kind);
+        public bool IsActivePower => ItemKindText.IsActivePower(kind);
+        public int ActiveChargeRooms => activeChargeRooms;
 
         public bool IsValid => IsItemIdValidForKind(itemId, kind) &&
                                !string.IsNullOrWhiteSpace(displayName) &&
                                maxStacks >= 0 &&
                                (!IsSingleUse || maxStacks == 1) &&
+                               (!IsActivePower || (maxStacks == 1 && activeChargeRooms > 0)) &&
                                (effects != null && effects.Count > 0
                                    ? effects.All(effect => effect != null && effect.TryValidate(out _))
                                    : effectValue > 0f);
@@ -54,11 +59,17 @@ namespace TrickalFanGame.Item
                 ItemKind.Spell => configuredItemId.StartsWith("spell-", System.StringComparison.Ordinal),
                 ItemKind.SingleUseSpell => configuredItemId.StartsWith("single-spell-", System.StringComparison.Ordinal),
                 ItemKind.JjangsemSpell => configuredItemId.StartsWith("jjangsem-", System.StringComparison.Ordinal),
+                ItemKind.Active => configuredItemId.StartsWith("active-", System.StringComparison.Ordinal),
                 _ => false,
             };
         }
 
 #if UNITY_EDITOR
+        public void ConfigureActiveCharge(int configuredChargeRooms)
+        {
+            activeChargeRooms = Mathf.Max(0, configuredChargeRooms);
+        }
+
         public void ConfigureContract(
             string configuredItemId,
             string configuredDisplayName,

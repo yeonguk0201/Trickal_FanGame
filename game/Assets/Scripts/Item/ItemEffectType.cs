@@ -139,5 +139,26 @@ namespace TrickalFanGame.Item
         // MaximumDistance = their range, ScaleMultiplier = their size as a share of the base shot. They inherit
         // pierces from other items and never split again. Replaces the legacy SplitAfterPierce (16) on item-11.
         SplitOnHit = 64,
+        // Power-1 (교주의 권능, contract 23 §9). Only the 권능 slot runs these, on use; holding one does nothing.
+        // 팝핀 스타: every enemy in the room takes Magnitude x attack damage (ScaleMultiplier x that for non-bosses).
+        // Each enemy hit adds SecondaryMagnitude player damage for DurationSeconds, up to IntegerAmount stacks.
+        PowerRoomBlast = 65,
+        // 애착 담요: for DurationSeconds every hit is reduced by Magnitude HP units (never below half a heart), and
+        // IntegerAmount HP units are healed every IntervalSeconds.
+        PowerProtectiveBlanket = 66,
+        // 찐짜천벌: the enemy with the most health (bosses first) takes Magnitude x attack damage and IntegerAmount
+        // shock stacks (SecondaryMagnitude slow per stack for DurationSeconds).
+        PowerSmite = 67,
+        // 명치 꽂기: every enemy in the room, bosses included, is stunned for DurationSeconds.
+        PowerStunRoomEnemies = 68,
+        // 명치 꽂기: every enemy in the room takes Magnitude more damage for DurationSeconds.
+        PowerRoomEnemyVulnerability = 69,
+        // 날먹보호막: Magnitude HP units of shield, within the 15 heart health + shield limit.
+        PowerGainShield = 70,
+        // 급발진: for DurationSeconds attack speed +Magnitude, move speed +SecondaryMagnitude and the high-grade
+        // skill cooldown runs as if ScaleMultiplier shorter.
+        PowerOverdrive = 71,
+        // 급발진: IntegerAmount full SP at once.
+        PowerRestoreSP = 72,
     }
 }

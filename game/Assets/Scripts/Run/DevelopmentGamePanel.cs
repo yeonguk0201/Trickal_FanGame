@@ -28,6 +28,7 @@ namespace TrickalFanGame.Run
         private Vector2 scrollPosition;
         private ItemDefinition[] singleUseItems;
         private ItemDefinition[] artifactItems;
+        private ItemDefinition[] powerItems;
         private bool showArtifacts;
         private bool showLayouts;
         private RoomTrap[] trapPrefabs;
@@ -88,6 +89,7 @@ namespace TrickalFanGame.Run
             DrawSeedSection(assembler);
             DrawPlayerSection(assembler);
             DrawSpellSlotSection(assembler);
+            DrawPowerSection(assembler);
             DrawArtifactSection(assembler);
             DrawResourceSection(progress);
             DrawChestSection(assembler);
@@ -265,6 +267,62 @@ namespace TrickalFanGame.Run
             }
 #else
             GUILayout.Label("Single-use drops are editor-only.");
+#endif
+        }
+
+        // Power-1: drops a 권능 next to the player, so it is picked up through the normal slot path (new 권능 start
+        // empty, swaps drop the held one with its gauge). The list collects every valid 권능 asset.
+        private void DrawPowerSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Power (R) —");
+            PlayerPowerSlot slot = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<PlayerPowerSlot>()
+                : null;
+            if (slot == null || slot.PickupPrefab == null)
+            {
+                GUILayout.Label("The player has no power slot.");
+                return;
+            }
+
+            PlayerPowerEffects effects = slot.GetComponent<PlayerPowerEffects>();
+            GUILayout.Label($"Held: {(slot.HasPower ? slot.HeldDefinition.DisplayName : "-")}" +
+                            (slot.HasPower ? $"   gauge {slot.Charge}/{slot.RequiredCharge}   {slot.GetUseState()}" : string.Empty));
+            if (effects != null)
+            {
+                string active = (effects.BlastDamageBonus > 0f
+                                    ? $"Star DMG +{effects.BlastDamageBonus:P0} {effects.BlastRemainingSeconds:F1}s  "
+                                    : string.Empty) +
+                                (effects.IsBlanketActive ? $"Blanket {effects.BlanketRemainingSeconds:F1}s  " : string.Empty) +
+                                (effects.IsOverdriveActive ? $"Overdrive {effects.OverdriveRemainingSeconds:F1}s" : string.Empty);
+                if (active.Length > 0) GUILayout.Label(active);
+            }
+
+            GUILayout.BeginHorizontal();
+            if (AssistedButton("+1 charge"))
+                status = slot.AddCharge(1) > 0 ? $"Power gauge {slot.Charge}/{slot.RequiredCharge}." : "No charge added.";
+            if (AssistedButton("Fill gauge"))
+                status = slot.AddCharge(slot.RequiredCharge) > 0 ? "Power gauge filled." : "No charge added.";
+            GUILayout.EndHorizontal();
+#if UNITY_EDITOR
+            powerItems ??= UnityEditor.AssetDatabase.FindAssets("t:ItemDefinition")
+                .Select(guid => UnityEditor.AssetDatabase.LoadAssetAtPath<ItemDefinition>(
+                    UnityEditor.AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(item => item != null && item.IsActivePower && item.IsValid)
+                .OrderBy(item => item.ItemId, System.StringComparer.Ordinal)
+                .ToArray();
+            foreach (ItemDefinition item in powerItems)
+            {
+                if (!AssistedButton($"Drop {item.DisplayName} ({item.ActiveChargeRooms})")) continue;
+                RoomPrefab room = CurrentRoom(assembler);
+                ActivePowerPickup pickup = Instantiate(slot.PickupPrefab,
+                    slot.transform.position + Vector3.left * 1.2f, Quaternion.identity,
+                    room != null ? room.transform : null);
+                pickup.name = $"Active Power ({item.ItemId})";
+                pickup.Configure(item, null, ActivePowerPickup.NoStoredCharge, false);
+                status = $"Dropped {item.DisplayName} next to the player.";
+            }
+#else
+            GUILayout.Label("Power drops are editor-only.");
 #endif
         }
 

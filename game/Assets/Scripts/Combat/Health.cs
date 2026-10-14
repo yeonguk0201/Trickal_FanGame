@@ -11,6 +11,12 @@ namespace TrickalFanGame.Combat
 
         // Flat amount taken off every hit before the shield (빅우드의 열매). Health units when the owner uses them.
         private float incomingDamageReduction;
+        // Power-1 (애착 담요): its own flat reduction, separate from 빅우드의 열매, that never takes a hit below the floor.
+        private float powerDamageReduction;
+        private float powerDamageFloor;
+        // Power-1 (명치 꽂기): extra share of every hit taken until the end time. Game time.
+        private float incomingDamageBonus;
+        private float incomingDamageBonusEndTime;
         private bool explicitInvulnerability;
         private Func<bool> lethalDamageGuard;
         // Current health + shield never exceeds this (the player's 15 hearts). 0 = no limit.
@@ -22,6 +28,7 @@ namespace TrickalFanGame.Combat
         public float CurrentShield => currentShield;
         public bool UsesHealthUnits => useHealthUnits;
         public float IncomingDamageReduction => incomingDamageReduction;
+        public float IncomingDamageBonus => Time.time < incomingDamageBonusEndTime ? incomingDamageBonus : 0f;
         public float MaxHealthHearts => useHealthUnits ? HealthUnits.ToHearts(maxHealth) : maxHealth;
         public bool IsDead { get; private set; }
         public float HealthAndShieldLimit => healthAndShieldLimit;
@@ -71,6 +78,12 @@ namespace TrickalFanGame.Combat
             }
 
             DamageResult result = DamageCalculator.Resolve(context);
+            float damageBonus = IncomingDamageBonus;
+            if (damageBonus > 0f)
+            {
+                result = new DamageResult(result.FinalDamage * (1f + damageBonus), result.IsCritical);
+            }
+
             if (useHealthUnits)
             {
                 result = new DamageResult(HealthUnits.ToDamageUnits(result.FinalDamage, context.AllowsHalfHeart),
@@ -80,6 +93,12 @@ namespace TrickalFanGame.Combat
             if (incomingDamageReduction > 0f)
             {
                 result = new DamageResult(Mathf.Max(0f, result.FinalDamage - incomingDamageReduction),
+                    result.IsCritical);
+            }
+
+            if (powerDamageReduction > 0f && result.FinalDamage > powerDamageFloor)
+            {
+                result = new DamageResult(Mathf.Max(powerDamageFloor, result.FinalDamage - powerDamageReduction),
                     result.IsCritical);
             }
 
@@ -146,6 +165,10 @@ namespace TrickalFanGame.Combat
             CurrentHealth = HealthCeiling;
             IsDead = false;
             incomingDamageReduction = 0f;
+            incomingDamageBonus = 0f;
+            incomingDamageBonusEndTime = 0f;
+            powerDamageReduction = 0f;
+            powerDamageFloor = 0f;
             explicitInvulnerability = false;
             ResolveDamageInvulnerability()?.ResetHitWindow();
             Changed?.Invoke(CurrentHealth, MaxHealth);
@@ -154,6 +177,22 @@ namespace TrickalFanGame.Combat
         public void SetIncomingDamageReduction(float amount)
         {
             incomingDamageReduction = Mathf.Max(0f, amount);
+        }
+
+        public float PowerDamageReduction => powerDamageReduction;
+
+        public void SetPowerDamageReduction(float amount, float floor)
+        {
+            powerDamageReduction = Mathf.Max(0f, amount);
+            powerDamageFloor = Mathf.Max(0f, floor);
+        }
+
+        // A new bonus replaces a running one when it is larger or lasts longer; it never shortens the current one.
+        public void ApplyIncomingDamageBonus(float bonus, float durationSeconds)
+        {
+            if (IsDead || bonus <= 0f || durationSeconds <= 0f) return;
+            incomingDamageBonus = Mathf.Max(IncomingDamageBonus, bonus);
+            incomingDamageBonusEndTime = Mathf.Max(incomingDamageBonusEndTime, Time.time + durationSeconds);
         }
 
         public void SetInvulnerable(bool invulnerable)

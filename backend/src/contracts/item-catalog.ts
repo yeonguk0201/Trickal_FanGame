@@ -690,6 +690,108 @@ export const ITEM_CATALOG = [
       { type: 'WaterStreamAttack', magnitude: 0.2, secondaryMagnitude: 0.3 },
     ],
   },
+  // Power-1 (교주의 권능, contract 23 §9): held in the 권능 slot, charged by clearing combat or boss rooms.
+  {
+    id: 'active-poppin-star',
+    name: '팝핀 스타',
+    description:
+      '교주의 권능. 방 2개를 클리어하면 충전됩니다. 방의 모든 적에게 공격력 100% 피해(보스가 아닌 적은 2배)를 주고, 맞힌 적 1명당 6초간 피해가 8% 증가합니다(최대 40%).',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'PowerRoomBlast',
+        magnitude: 1,
+        secondaryMagnitude: 0.08,
+        integerAmount: 5,
+        scaleMultiplier: 2,
+        durationSeconds: 6,
+      },
+    ],
+  },
+  {
+    id: 'active-security-blanket',
+    name: '애착 담요',
+    description:
+      '교주의 권능. 방 3개를 클리어하면 충전됩니다. 6초간 받는 피해가 반 칸 줄어들고(최소 반 칸), 3초마다 HP를 반 칸 회복합니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'PowerProtectiveBlanket',
+        magnitude: 1,
+        integerAmount: 1,
+        intervalSeconds: 3,
+        durationSeconds: 6,
+      },
+    ],
+  },
+  {
+    id: 'active-divine-punishment',
+    name: '찐짜천벌',
+    description:
+      '교주의 권능. 방 3개를 클리어하면 충전됩니다. 체력이 가장 높은 적 1명(보스 우선)에게 공격력 500% 번개를 떨어뜨리고 감전 4스택을 겁니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'PowerSmite',
+        magnitude: 5,
+        secondaryMagnitude: 0.1,
+        integerAmount: 4,
+        durationSeconds: 2.5,
+      },
+    ],
+  },
+  {
+    id: 'active-solar-plexus-strike',
+    name: '명치 꽂기',
+    description:
+      '교주의 권능. 방 4개를 클리어하면 충전됩니다. 방의 모든 적을 3초간 기절시키고(보스 포함), 6초간 받는 피해를 50% 늘립니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'PowerStunRoomEnemies', durationSeconds: 3 },
+      {
+        type: 'PowerRoomEnemyVulnerability',
+        magnitude: 0.5,
+        durationSeconds: 6,
+      },
+    ],
+  },
+  {
+    id: 'active-freeloader-shield',
+    name: '날먹보호막',
+    description:
+      '교주의 권능. 방 4개를 클리어하면 충전됩니다. 방어막 2칸을 얻습니다(HP·방어막 합 15칸 상한).',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'PowerGainShield', magnitude: 4 }],
+  },
+  {
+    id: 'active-sudden-acceleration',
+    name: '급발진',
+    description:
+      '교주의 권능. 방 5개를 클리어하면 충전됩니다. 15초간 공격속도 60%·이동속도 20%가 증가하고 고학년 스킬 쿨타임이 40% 짧아지며, 사용 즉시 SP 1칸을 회복합니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'PowerOverdrive',
+        magnitude: 0.6,
+        secondaryMagnitude: 0.2,
+        scaleMultiplier: 0.4,
+        durationSeconds: 15,
+      },
+      { type: 'PowerRestoreSP', integerAmount: 1 },
+    ],
+  },
   {
     id: 'item-06',
     name: '다중 투사체',

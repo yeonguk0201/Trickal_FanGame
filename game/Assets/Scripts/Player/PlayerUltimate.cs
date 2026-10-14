@@ -185,6 +185,13 @@ namespace TrickalFanGame.Player
             return Mathf.Max(0f, nextReadyTime - currentTime);
         }
 
+        // 급발진 (Power-1): moves the next ready time earlier by the given seconds, never before now.
+        public void AdvanceCooldown(float seconds)
+        {
+            if (seconds <= 0f || nextReadyTime <= Time.time) return;
+            nextReadyTime = Mathf.Max(Time.time, nextReadyTime - seconds);
+        }
+
         public bool TryActivate(float currentTime)
         {
             if (!IsReadyAt(currentTime) ||

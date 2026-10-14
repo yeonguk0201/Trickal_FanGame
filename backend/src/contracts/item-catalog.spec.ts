@@ -54,6 +54,12 @@ describe('Item catalog', () => {
       'artifact-aisia-wallet',
       'artifact-kanta-top',
       'artifact-shasha-jar',
+      'active-poppin-star',
+      'active-security-blanket',
+      'active-divine-punishment',
+      'active-solar-plexus-strike',
+      'active-freeloader-shield',
+      'active-sudden-acceleration',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -105,8 +111,14 @@ describe('Item catalog', () => {
       'RARE',
       'RARE',
       'EPIC',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(49);
+    expect(new Set(active.map((item) => item.id)).size).toBe(55);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -327,6 +339,51 @@ describe('Item catalog', () => {
         rarity: 'EPIC',
         maxStacks: 1,
       },
+    ]);
+  });
+
+  it('matches the Power-1 active power contracts', () => {
+    const powers = ITEM_CATALOG.filter((item) => item.id.startsWith('active-'));
+    expect(powers.map((item) => item.id)).toEqual([
+      'active-poppin-star',
+      'active-security-blanket',
+      'active-divine-punishment',
+      'active-solar-plexus-strike',
+      'active-freeloader-shield',
+      'active-sudden-acceleration',
+    ]);
+    expect(
+      powers.every(
+        (item) =>
+          item.rarity === 'RARE' &&
+          item.isActive &&
+          item.maxStacks === 1 &&
+          item.effects.every((effect) => effect.type.startsWith('Power')),
+      ),
+    ).toBe(true);
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'active-solar-plexus-strike')
+        ?.effects,
+    ).toEqual([
+      { type: 'PowerStunRoomEnemies', durationSeconds: 3 },
+      {
+        type: 'PowerRoomEnemyVulnerability',
+        magnitude: 0.5,
+        durationSeconds: 6,
+      },
+    ]);
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'active-sudden-acceleration')
+        ?.effects,
+    ).toEqual([
+      {
+        type: 'PowerOverdrive',
+        magnitude: 0.6,
+        secondaryMagnitude: 0.2,
+        scaleMultiplier: 0.4,
+        durationSeconds: 15,
+      },
+      { type: 'PowerRestoreSP', integerAmount: 1 },
     ]);
   });
 

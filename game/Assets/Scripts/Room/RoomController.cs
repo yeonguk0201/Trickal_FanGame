@@ -30,6 +30,7 @@ namespace TrickalFanGame.Room
 
         public RoomState State { get; private set; } = RoomState.Waiting;
         public int AliveEnemyCount => enemyDeathHandlers.Count;
+        public IReadOnlyCollection<Health> AliveEnemies => enemyDeathHandlers.Keys;
         public bool HasStarted { get; private set; }
         public bool IsProgressionStopped { get; private set; }
         public int FloorNumber => floorNumber;
@@ -476,6 +477,7 @@ namespace TrickalFanGame.Room
         {
             if (State == RoomState.Cleared) return;
             runState?.MarkCleared();
+            runProgress?.RecordRoomCleared(runState?.RoomId);
             ChangeState(RoomState.Cleared);
             SetDoorsLocked(false);
             clearRewardSpawner?.TrySpawn();

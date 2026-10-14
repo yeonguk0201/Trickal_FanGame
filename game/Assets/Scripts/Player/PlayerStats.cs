@@ -72,10 +72,15 @@ namespace TrickalFanGame.Player
         private float killFrenzyBasicAttackDamagePercent;
         private float killFrenzyAttackSpeedPercent;
         private float killFrenzyKnockbackPercent;
+        // 교주의 권능 (Power-1): timed bonuses the 권능 effects own (팝핀 스타, 급발진).
+        private float powerAttackDamagePercentBonus;
+        private float powerAttackSpeedPercentBonus;
+        private float powerMoveSpeedPercentBonus;
 
         public float MaxHealth => baseMaxHealth + maxHealthBonus;
         public float AttackDamage =>
-            (baseAttackDamage + flatAttackDamageBonus) * Mathf.Max(0f, 1f + attackDamagePercentBonus);
+            (baseAttackDamage + flatAttackDamageBonus) *
+            Mathf.Max(0f, 1f + attackDamagePercentBonus + powerAttackDamagePercentBonus);
         public float SkillDamageMultiplier => 1f + skillDamagePercentBonus;
         // Passive-2: PlayerBodySize turns this into the look, the hurtbox and the fixed feet.
         public float PlayerSizeMultiplier => 1f + playerSizePercentBonus;
@@ -83,12 +88,13 @@ namespace TrickalFanGame.Player
         // Trap-0: a 거미줄 under the feet scales the final speed (EnvironmentSlow).
         public float MoveSpeed => (baseMoveSpeed + moveSpeedBonus) *
             Mathf.Max(0f, 1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent +
-                currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus +
+                currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus + powerMoveSpeedPercentBonus +
                 (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f)) *
             EnvironmentSlow.MultiplierOf(this);
         public float AttackSpeed => baseAttackSpeed *
             Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus +
-                             singleUseRoomAttackSpeedPercentBonus + killFrenzyAttackSpeedPercent);
+                             singleUseRoomAttackSpeedPercentBonus + killFrenzyAttackSpeedPercent +
+                             powerAttackSpeedPercentBonus);
         public float BasicAttackRoomDamageMultiplier =>
             1f + basicAttackDamagePercentBonus + currentRoomAttackDamagePercentBonus +
             singleUseRoomAttackDamagePercentBonus + killFrenzyBasicAttackDamagePercent;
@@ -212,6 +218,13 @@ namespace TrickalFanGame.Player
         {
             singleUseRoomAttackSpeedPercentBonus = Mathf.Max(0f, attackSpeed);
             singleUseRoomMoveSpeedPercentBonus = Mathf.Max(0f, moveSpeed);
+        }
+
+        public void SetPowerBonuses(float attackDamage, float attackSpeed, float moveSpeed)
+        {
+            powerAttackDamagePercentBonus = Mathf.Max(0f, attackDamage);
+            powerAttackSpeedPercentBonus = Mathf.Max(0f, attackSpeed);
+            powerMoveSpeedPercentBonus = Mathf.Max(0f, moveSpeed);
         }
 
         public void SetCurrentRoomAttackSpeedPercent(float amount)
@@ -471,7 +484,7 @@ namespace TrickalFanGame.Player
             bool isSkill = context.SourceType is DamageSourceType.PlayerSkillExplosion or
                 DamageSourceType.PlayerUltimateImpact;
             if (!isBasicAttack && !isSkill && context.SourceType is not (DamageSourceType.PlayerItemLightning or
-                    DamageSourceType.PlayerItemExplosion))
+                    DamageSourceType.PlayerItemExplosion or DamageSourceType.PlayerPower))
             {
                 return context;
             }

@@ -57,6 +57,8 @@ namespace TrickalFanGame.Run
         { DevelopmentPlaytest?.RecordItemUse(item != null ? item.ItemId : null); }
 
         private PlayerSpellSlot DevelopmentSpellSlot => inventory != null ? inventory.GetComponent<PlayerSpellSlot>() : null;
+        // Power-1: 권능 uses go to the same local item-use record (contract 23 §9.4).
+        private PlayerPowerSlot DevelopmentPowerSlot => inventory != null ? inventory.GetComponent<PlayerPowerSlot>() : null;
 
         private void FinishDevelopmentPlaytest(string outcome)
         {
@@ -243,6 +245,7 @@ namespace TrickalFanGame.Run
                 developmentGenerator?.EncounterContentVersion ?? 0);
             runProgress.RoomChanged += RecordDevelopmentFloor;
             if (DevelopmentSpellSlot != null) DevelopmentSpellSlot.ItemUsed += RecordDevelopmentItemUse;
+            if (DevelopmentPowerSlot != null) DevelopmentPowerSlot.PowerUsed += RecordDevelopmentItemUse;
 #endif
             statusMessage = $"Run in progress: {characterId}.";
 
@@ -520,6 +523,7 @@ namespace TrickalFanGame.Run
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (runProgress != null) runProgress.RoomChanged -= RecordDevelopmentFloor;
             if (DevelopmentSpellSlot != null) DevelopmentSpellSlot.ItemUsed -= RecordDevelopmentItemUse;
+            if (DevelopmentPowerSlot != null) DevelopmentPowerSlot.PowerUsed -= RecordDevelopmentItemUse;
 #endif
             if (playerHealth != null) playerHealth.Died -= OnPlayerDied;
             if (boss != null) boss.Died -= OnBossDied;
