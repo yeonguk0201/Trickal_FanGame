@@ -37,6 +37,7 @@ namespace TrickalFanGame.Editor
         public static readonly (string Path, float Weight)[] KnockbackWeights =
         {
             ("Assets/Prefabs/JyubiEnemy.prefab", 0.5f),
+            ("Assets/Prefabs/NururingSplit.prefab", Week25Enemy9Setup.SplitKnockbackWeight),
             ("Assets/Prefabs/BuseureogiCrumbMinion.prefab", 0.8f),
             ("Assets/Prefabs/QuickRangedFairy.prefab", 0.8f),
             ("Assets/Prefabs/CrayonMageMinion.prefab", 0.9f),
@@ -45,7 +46,9 @@ namespace TrickalFanGame.Editor
             ("Assets/Prefabs/HighBloodSugarFairy.prefab", 1f),
             ("Assets/Prefabs/CrayonArcherMinion.prefab", 1f),
             ("Assets/Prefabs/TestEnemy.prefab", 1f),
+            ("Assets/Prefabs/NururingFairyWarrior.prefab", Week25Enemy9Setup.KnockbackWeight),
             ("Assets/Prefabs/CrayonAxeMinion.prefab", 1.3f),
+            ("Assets/Prefabs/LivelyLowBloodSugarFairy.prefab", Week25Enemy8Setup.KnockbackWeight),
             ("Assets/Prefabs/ChargingEnemy.prefab", 1.5f),
             ("Assets/Prefabs/CrayonShieldMinion.prefab", 2f),
             ("Assets/Prefabs/TestBoss.prefab", BossKnockbackWeight),

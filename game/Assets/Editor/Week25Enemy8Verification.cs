@@ -76,7 +76,7 @@ namespace TrickalFanGame.Editor
             ValidateInterrupt(prefab);
             ValidateRoomClears(prefab);
             Debug.Log($"Enemy-8 verification passed: {Week25Enemy8Setup.DisplayName} has 30 health, knockback " +
-                      "weight 1 and its own drawing; it moves 1.2 s at 2.5 mostly toward the player, warns 0.4 s on " +
+                      $"weight {Week25Enemy8Setup.KnockbackWeight} and its own drawing; it moves 1.2 s at 2.5 mostly toward the player, warns 0.4 s on " +
                       "four arms, fires one light shot each up, down, left and right at speed 5 for 1.2 s (range 6) " +
                       "even through an obstacle, sized like the green onion, recovers 0.6 s and walks again, and a " +
                       "knockback cancels the warning. Threat 3 on melee pressure points in the pressure and swarm " +
@@ -111,8 +111,9 @@ namespace TrickalFanGame.Editor
                 "The lively fairy Prefab must keep its name and have no missing script.");
             Health health = prefab.GetComponent<Health>();
             Assert(health != null && Mathf.Approximately(health.MaxHealth, 30f) &&
-                   Mathf.Approximately(prefab.GetComponent<KnockbackReceiver>().KnockbackWeight, 1f),
-                "The lively fairy must have 30 health and knockback weight 1.");
+                   Mathf.Approximately(prefab.GetComponent<KnockbackReceiver>().KnockbackWeight,
+                       Week25Enemy8Setup.KnockbackWeight),
+                $"The lively fairy must have 30 health and knockback weight {Week25Enemy8Setup.KnockbackWeight}.");
             Assert(prefab.GetComponent<RangedEnemyController>() == null &&
                    prefab.GetComponent<MobileRangedEnemyController>() == null &&
                    prefab.GetComponent<LongRangeSniperController>() == null &&
