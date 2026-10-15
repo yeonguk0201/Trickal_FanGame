@@ -16,6 +16,11 @@ namespace TrickalFanGame.Frontend
         public const string ChargingText = "충전 중";
         public const string UnusableText = "[" + PlayerPowerSlot.UseKeyLabel + "] 사용 불가";
         public const string AllFixedText = KindLabel + EmptyText + UsableText + ChargingText + UnusableText + "/0123456789";
+        // Power-2: the line a 3택1 card or a shop detail shows for a 권능 instead of artifact stacks.
+        public const string OfferFixedText = "충전방 · [" + PlayerPowerSlot.UseKeyLabel + "] 사용 · 1개만 보유0123456789";
+
+        public static string BuildOfferLine(ItemDefinition power) =>
+            $"충전 {power.ActiveChargeRooms}방 · [{PlayerPowerSlot.UseKeyLabel}] 사용 · 1개만 보유";
         public static readonly Color FilledCellColor = new(1f, 0.82f, 0.32f, 1f);
         public static readonly Color EmptyCellColor = new(0.22f, 0.25f, 0.32f, 0.95f);
 

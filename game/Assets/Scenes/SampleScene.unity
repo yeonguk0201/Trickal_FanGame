@@ -2240,7 +2240,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
   - {fileID: 11400000, guid: bbbef5a18185b6e428a3c5387645e964, type: 2}
-  roomContentVersion: 13
+  roomContentVersion: 14
   roomTemplates:
   - {fileID: 11400000, guid: 0acb0c03ac29fe741a8006a51518cf60, type: 2}
   - {fileID: 11400000, guid: cd8ea15c0b6de5949bdfe798aa38e5e3, type: 2}
@@ -2389,6 +2389,13 @@ MonoBehaviour:
   shopRoomPrefab: {fileID: 4476114902965739689, guid: a82065ee9eee8d34499405155bb64313, type: 3}
   shopCatalog: {fileID: 11400000, guid: 3bc3c90a27b3d15489f27d764c008817, type: 2}
   shopSession: {fileID: 906197861}
+  powerRewardPool:
+  - {fileID: 11400000, guid: f83326b0b6c3d514e8c7c3072e4e5fc3, type: 2}
+  - {fileID: 11400000, guid: 8b2fbe5767d3aad438f571b4a5857645, type: 2}
+  - {fileID: 11400000, guid: 3f64ff1c549b99a43b4ec8be6ff36bf7, type: 2}
+  - {fileID: 11400000, guid: 9f07f8926653b0b43b8435dc5abaf545, type: 2}
+  - {fileID: 11400000, guid: 4d222251776e6f542bcaa6c1d2c80f84, type: 2}
+  - {fileID: 11400000, guid: 8ecd1bdc7195ed14da7875583d81ef81, type: 2}
 --- !u!1 &49446195
 GameObject:
   m_ObjectHideFlags: 0
@@ -3719,6 +3726,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 1059308992}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &85268215
@@ -11063,6 +11071,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 600400802}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &311465635
@@ -13083,6 +13092,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 1753281247}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &381461747
@@ -17573,6 +17583,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 1274279840}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &504119546
@@ -24909,6 +24920,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 1225907311}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &861643317
@@ -34222,6 +34234,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 71204565}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &1165982203
@@ -42439,6 +42452,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 1228692816}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &1441868265
@@ -47228,6 +47242,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 2024198822}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &1551030354
@@ -50313,6 +50328,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 1082500441}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &1632398751
@@ -52399,6 +52415,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 119523443}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &1699078772
@@ -59684,6 +59701,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 1574020216}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 0}
   interactionPrompt: {fileID: 0}
 --- !u!114 &1940907253

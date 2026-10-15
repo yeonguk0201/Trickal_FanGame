@@ -64,11 +64,14 @@ namespace TrickalFanGame.Item
             if (isActiveAndEnabled) BindProgress(runProgress);
         }
 
-        public bool CanCollect(ActivePowerPickup pickup)
+        public bool CanCollect(ActivePowerPickup pickup) =>
+            pickup != null && !pickup.IsCollected && CanGrant(pickup.Definition);
+
+        // Power-2: whether a 3택1 card or a shop purchase can put this 권능 in the slot now.
+        public bool CanGrant(ItemDefinition definition)
         {
             EnsureReferences();
-            return pickup != null && !pickup.IsCollected && pickup.Definition != null &&
-                   pickup.Definition.IsValid && pickup.Definition.IsActivePower &&
+            return definition != null && definition.IsValid && definition.IsActivePower &&
                    health != null && !health.IsDead &&
                    runProgress != null && !runProgress.IsProgressionStopped &&
                    // A held 권능 is dropped on a swap, which needs the pickup Prefab; never lose it instead.
@@ -80,16 +83,33 @@ namespace TrickalFanGame.Item
             if (!CanCollect(pickup)) return false;
 
             pickup.AssignInstanceId(GeneratedInstancePrefix + ++generatedInstanceCount);
+            Hold(pickup.Definition, pickup.InstanceId,
+                pickup.HasStoredCharge ? pickup.StoredCharge : ActivePowerPickup.NoStoredCharge,
+                pickup.transform.position, pickup.transform.parent, pickup.MarkCollected);
+            return true;
+        }
+
+        // Power-2: a 권능 taken from a 3택1 or bought in a shop goes straight into the slot as a new instance with an
+        // empty gauge; a held one drops at dropPosition under dropParent (the room) with its gauge, as on a swap.
+        public bool TryGrant(ItemDefinition definition, Vector3 dropPosition, Transform dropParent)
+        {
+            if (!CanGrant(definition)) return false;
+            Hold(definition, GeneratedInstancePrefix + ++generatedInstanceCount, ActivePowerPickup.NoStoredCharge,
+                dropPosition, dropParent, null);
+            return true;
+        }
+
+        private void Hold(ItemDefinition definition, string instanceId, int storedCharge, Vector3 dropPosition,
+            Transform dropParent, Action consumeSource)
+        {
             ItemDefinition previousDefinition = heldDefinition;
             string previousInstanceId = heldInstanceId;
             int previousCharge = charge;
-            Transform dropParent = pickup.transform.parent;
-            Vector3 dropPosition = pickup.transform.position;
 
-            heldDefinition = pickup.Definition;
-            heldInstanceId = pickup.InstanceId;
-            charge = pickup.HasStoredCharge ? Mathf.Clamp(pickup.StoredCharge, 0, RequiredCharge) : 0;
-            pickup.MarkCollected();
+            heldDefinition = definition;
+            heldInstanceId = instanceId;
+            charge = storedCharge >= 0 ? Mathf.Clamp(storedCharge, 0, RequiredCharge) : 0;
+            consumeSource?.Invoke();
             inventory.TryRecordSingleUseAcquisition(heldDefinition, heldInstanceId);
 
             if (previousDefinition != null)
@@ -101,7 +121,6 @@ namespace TrickalFanGame.Item
 
             Debug.Log($"[PlayerPowerSlot] Holding {heldDefinition.DisplayName} ({charge}/{RequiredCharge}).", this);
             Changed?.Invoke();
-            return true;
         }
 
         // Adds charge as if that many rooms had been cleared. Returns the charge actually added.

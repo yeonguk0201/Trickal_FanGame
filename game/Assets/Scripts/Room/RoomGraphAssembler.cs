@@ -26,6 +26,8 @@ namespace TrickalFanGame.Room
         [SerializeField] private ShopRoom shopRoomPrefab;
         [SerializeField] private ShopCatalog shopCatalog;
         [SerializeField] private ShopSession shopSession;
+        // Power-2: the 교주의 권능 a start-floor treasure room, a secret room or a shop can offer (ActivePowerOffers).
+        [SerializeField] private ItemDefinition[] powerRewardPool = Array.Empty<ItemDefinition>();
 
         private GeneratedFloorGraph generatedGraph;
         private GameObject currentFloorRoot;
@@ -50,6 +52,7 @@ namespace TrickalFanGame.Room
         public ShopRoom ShopRoomPrefab => shopRoomPrefab;
         public ShopCatalog ShopCatalog => shopCatalog;
         public ShopSession ShopSession => shopSession;
+        public IReadOnlyList<ItemDefinition> PowerRewardPool => powerRewardPool;
 
         public void Configure(
             FloorGenerator configuredGenerator,
@@ -105,6 +108,11 @@ namespace TrickalFanGame.Room
         public void ConfigureShopSession(ShopSession configuredSession)
         {
             shopSession = configuredSession;
+        }
+
+        public void ConfigurePowerRewards(ItemDefinition[] configuredPool)
+        {
+            powerRewardPool = configuredPool ?? Array.Empty<ItemDefinition>();
         }
 
         public GameObject ResolveBossPrefab(int floorNumber)
@@ -324,6 +332,9 @@ namespace TrickalFanGame.Room
                     instance.RewardRoom.Configure(generatedNode.FloorNumber, generatedNode.RoomNumber,
                         runProgress, instance.RewardRoom.GetComponent<ItemDropSource>(), instance.Controller,
                         rewardSelectionSession, selectionRewardPool);
+                    instance.RewardRoom.ConfigurePowerOffer(ActivePowerOffers.IsOfferedInRewardRoom(generatedNode)
+                        ? powerRewardPool
+                        : null);
                     instance.RewardRoom.BindRunState(state);
                 }
                 instances.Add(generatedNode.RoomId, instance);
@@ -418,7 +429,7 @@ namespace TrickalFanGame.Room
             PlayerInventory inventory = graph.Player != null ? graph.Player.GetComponent<PlayerInventory>() : null;
             ShopKind kind = node.IsGoldiShop ? ShopKind.Goldi : ShopKind.General;
             ShopStockState Build() => ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog,
-                selectionRewardPool, inventory, kind);
+                selectionRewardPool, inventory, kind, powerRewardPool);
             ShopStockState stock = runProgress != null
                 ? runProgress.GetOrCreateShopStock(ShopStockBuilder.BuildShopId(node.RoomId), Build)
                 : Build();

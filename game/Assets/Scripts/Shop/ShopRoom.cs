@@ -85,8 +85,7 @@ namespace TrickalFanGame.Shop
             if (stock == null || slotIndex < 0 || slotIndex >= stock.Offers.Count) return ShopOfferStatus.Empty;
             ShopOffer offer = stock.Offers[slotIndex];
             if (stock.IsPurchased(slotIndex)) return ShopOfferStatus.SoldOut;
-            if (offer.Kind == ShopOfferKind.Item &&
-                (inventory == null || !ArtifactRewardSelector.IsEligible(offer.Item, inventory)))
+            if (offer.Kind == ShopOfferKind.Item && !CanReceive(offer.Item, inventory))
                 return ShopOfferStatus.ItemUnavailable;
             if (stock.GetPrice(slotIndex) == 0) return ShopOfferStatus.Free;
             return CanAfford(offer) ? ShopOfferStatus.Available : ShopOfferStatus.NotEnoughGold;
@@ -101,15 +100,14 @@ namespace TrickalFanGame.Shop
 
             ShopOffer offer = stock.Offers[slotIndex];
             if (stock.IsPurchased(slotIndex)) return ShopPurchaseResult.SoldOut;
-            if (offer.Kind == ShopOfferKind.Item &&
-                (inventory == null || !ArtifactRewardSelector.IsEligible(offer.Item, inventory)))
+            if (offer.Kind == ShopOfferKind.Item && !CanReceive(offer.Item, inventory))
                 return ShopPurchaseResult.ItemUnavailable;
             // A free offer (멤버십카드) spends nothing.
             int price = stock.GetPrice(slotIndex);
             if (price > 0 && !runProgress.TrySpendResource(RunResourceType.Gold, price))
                 return ShopPurchaseResult.NotEnoughGold;
 
-            if (offer.Kind == ShopOfferKind.Item && !inventory.TryAcquire(offer.Item))
+            if (offer.Kind == ShopOfferKind.Item && !Grant(offer, inventory))
             {
                 if (price > 0) runProgress.TryAddResource(RunResourceType.Gold, price);
                 return ShopPurchaseResult.ItemUnavailable;
@@ -119,6 +117,23 @@ namespace TrickalFanGame.Shop
             if (offer.Kind == ShopOfferKind.Consumable) LastDroppedPickup = DropPickup(offer, slotIndex);
             Purchased?.Invoke(offer);
             return ShopPurchaseResult.Purchased;
+        }
+
+        // Power-2: a 교주의 권능 goes to the 권능 slot (never the one already held); the held one drops at the offer's
+        // spot in front of the shopkeeper. Every other Item goes to the inventory.
+        public static bool CanReceive(ItemDefinition item, PlayerInventory inventory)
+        {
+            if (inventory == null || item == null) return false;
+            if (!item.IsActivePower) return ArtifactRewardSelector.IsEligible(item, inventory);
+            PlayerPowerSlot slot = inventory.GetComponent<PlayerPowerSlot>();
+            return slot != null && slot.HeldDefinition != item && slot.CanGrant(item);
+        }
+
+        private bool Grant(ShopOffer offer, PlayerInventory inventory)
+        {
+            if (!offer.Item.IsActivePower) return inventory.TryAcquire(offer.Item);
+            return inventory.GetComponent<PlayerPowerSlot>().TryGrant(offer.Item, GetDropPosition(offer.SlotIndex),
+                dropParent != null ? dropParent : transform);
         }
 
         // Each grid column drops at its own spot, so several bought consumables do not stack on one point.

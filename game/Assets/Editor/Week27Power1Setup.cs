@@ -234,7 +234,7 @@ namespace TrickalFanGame.Editor
                 EditorUtility.SetDirty(component);
         }
 
-        private static void EnsureGlyphs(TMP_FontAsset font, string characters)
+        internal static void EnsureGlyphs(TMP_FontAsset font, string characters)
         {
             if (font.HasCharacters(characters)) return;
             if (!font.TryAddCharacters(characters, out string missing))

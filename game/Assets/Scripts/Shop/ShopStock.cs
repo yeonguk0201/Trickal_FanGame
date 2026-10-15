@@ -101,25 +101,35 @@ namespace TrickalFanGame.Shop
         // Items use the treasure-room rarity weights (distinct, skipping maxed stacks at roll time); consumables are
         // distinct picks from the catalog. If too few Items are eligible, extra consumables fill the empty slots.
         // The 골디 shop rolls among Items of GoldiMinimumRarity or better first and fills what is left from the rest.
+        // Power-2: when the room's 권능 roll hits (ActivePowerOffers.ShopPercent), the last Item slot sells one
+        // 교주의 권능 from powerPool at the Rare price instead.
         public static ShopStockState Build(string roomId, int roomContentSeed, ShopCatalog catalog,
-            IReadOnlyList<ItemDefinition> itemPool, PlayerInventory inventory, ShopKind kind = ShopKind.General)
+            IReadOnlyList<ItemDefinition> itemPool, PlayerInventory inventory, ShopKind kind = ShopKind.General,
+            IReadOnlyList<ItemDefinition> powerPool = null)
         {
             string shopId = BuildShopId(roomId);
             int stockSeed = FloorGenerator.DeriveSeed(roomContentSeed, 0, StockSalt);
             List<ShopOffer> offers = new(ShopCatalog.OfferCount);
+            ItemDefinition power = ActivePowerOffers.RollShop(roomContentSeed)
+                ? ActivePowerOffers.Choose(powerPool, ActivePowerOffers.HeldPower(inventory),
+                    unchecked((uint)FloorGenerator.DeriveSeed(stockSeed, 0, ActivePowerOffers.ShopSalt)))
+                : null;
+            int itemLimit = ShopCatalog.ItemOfferCount - (power != null ? 1 : 0);
             if (kind == ShopKind.Goldi)
             {
                 List<ItemDefinition> better = new(), rest = new();
                 if (itemPool != null)
                     foreach (ItemDefinition item in itemPool)
                         if (item != null) (item.Rarity >= GoldiMinimumRarity ? better : rest).Add(item);
-                AddItemOffers(offers, better, inventory, stockSeed, shopId, catalog);
-                AddItemOffers(offers, rest, inventory, stockSeed, shopId + ":fill", catalog);
+                AddItemOffers(offers, better, inventory, stockSeed, shopId, catalog, itemLimit);
+                AddItemOffers(offers, rest, inventory, stockSeed, shopId + ":fill", catalog, itemLimit);
             }
             else
             {
-                AddItemOffers(offers, itemPool, inventory, stockSeed, shopId, catalog);
+                AddItemOffers(offers, itemPool, inventory, stockSeed, shopId, catalog, itemLimit);
             }
+
+            if (power != null) offers.Add(ShopOffer.ForItem(offers.Count, power, catalog.GetItemPrice(power.Rarity)));
 
             List<ShopConsumable> consumables = new(catalog.Consumables);
             consumables.Sort((left, right) => string.CompareOrdinal(left.ConsumableId, right.ConsumableId));
@@ -137,13 +147,13 @@ namespace TrickalFanGame.Shop
         }
 
         private static void AddItemOffers(List<ShopOffer> offers, IReadOnlyList<ItemDefinition> itemPool,
-            PlayerInventory inventory, int stockSeed, string rewardId, ShopCatalog catalog)
+            PlayerInventory inventory, int stockSeed, string rewardId, ShopCatalog catalog, int itemLimit)
         {
-            if (offers.Count >= ShopCatalog.ItemOfferCount) return;
+            if (offers.Count >= itemLimit) return;
             foreach (ItemRewardCandidate candidate in ArtifactRewardSelector.BuildCandidates(
                          itemPool, inventory, stockSeed, rewardId))
             {
-                if (offers.Count >= ShopCatalog.ItemOfferCount) break;
+                if (offers.Count >= itemLimit) break;
                 if (candidate.IsItem)
                     offers.Add(ShopOffer.ForItem(offers.Count, candidate.Definition,
                         catalog.GetItemPrice(candidate.Definition.Rarity)));
