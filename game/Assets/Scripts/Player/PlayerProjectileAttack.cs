@@ -107,6 +107,7 @@ namespace TrickalFanGame.Player
                 (Vector2)transform.position + direction * spawnOffset,
                 Quaternion.identity);
             projectile.transform.localScale = projectilePrefab.transform.localScale * ProjectileSizeMultiplier;
+            projectile.PushOutOfWallsBeside(direction);
 
             Vector2 velocity = direction * ProjectileSpeed
                 + movement.CurrentVelocity * inheritedVelocityFactor;

@@ -87,6 +87,7 @@ namespace TrickalFanGame.Combat
         private DamageContext damageContext;
         private const int EnemyLayerMask = 1 << 6;
         private const float BounceContactDistance = 0.02f;
+        private const float WallClearance = 0.02f;
 
         // How often this shot has hit each enemy. Only a bounce (Passive-0 §4.4) hits the same enemy again.
         private readonly Dictionary<Health, int> hitCounts = new();
@@ -197,6 +198,59 @@ namespace TrickalFanGame.Combat
             }
 
             return isSpent;
+        }
+
+        // The player's shot starts at the body center, above the feet that walls stop. Fired along a wall the feet
+        // touch (the wall above), it would start inside that wall and vanish at once, so it is pushed out sideways.
+        // A wall ahead of the shot is left alone and still takes it.
+        public void PushOutOfWallsBeside(Vector2 direction)
+        {
+            Collider2D ownCollider = GetComponent<Collider2D>();
+            int environmentLayer = LayerMask.NameToLayer("Environment");
+            if (ownCollider == null || environmentLayer < 0 || direction.sqrMagnitude <= 0.0001f)
+            {
+                return;
+            }
+
+            Vector2 forward = direction.normalized;
+            Vector2 side = new(-forward.y, forward.x);
+            Physics2D.SyncTransforms();
+            ContactFilter2D filter = new() { useLayerMask = true, layerMask = 1 << environmentLayer, useTriggers = false };
+            List<Collider2D> walls = new();
+            ownCollider.Overlap(filter, walls);
+
+            float push = 0f;
+            foreach (Collider2D wall in walls)
+            {
+                ColliderDistance2D gap = ownCollider.Distance(wall);
+                if (!gap.isOverlapped)
+                {
+                    continue;
+                }
+
+                Vector2 separation = gap.pointB - gap.pointA;
+                float across = Vector2.Dot(separation, side);
+                if (Mathf.Abs(across) > Mathf.Abs(Vector2.Dot(separation, forward)) && Mathf.Abs(across) > Mathf.Abs(push))
+                {
+                    push = across;
+                }
+            }
+
+            if (Mathf.Approximately(push, 0f))
+            {
+                return;
+            }
+
+            // A small margin so the shot does not touch the wall it slides along.
+            Vector2 offset = side * (push + Mathf.Sign(push) * WallClearance);
+            transform.position += (Vector3)offset;
+            Rigidbody2D projectileBody = GetComponent<Rigidbody2D>();
+            if (projectileBody != null)
+            {
+                projectileBody.position += offset;
+            }
+
+            Physics2D.SyncTransforms();
         }
 
         public void Launch(
