@@ -175,8 +175,9 @@ namespace TrickalFanGame.Enemy
             else if (state != BossActionState.Active)
             {
                 StopMovement();
-                // Enemy-7: the boss's objects outlive it, but a landing it never throws must not stay marked.
-                if (state == BossActionState.Defeated) ClearPendingObstacleTelegraph();
+                // Enemy-7: the boss's objects outlive it, but a landing it never throws must not stay marked. A stun
+                // (Jjangsem-2) also cancels the throw; the restarted telegraph marks new landings.
+                if (state == BossActionState.Defeated || state == BossActionState.Idle) ClearPendingObstacleTelegraph();
             }
         }
 

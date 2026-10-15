@@ -160,5 +160,27 @@ namespace TrickalFanGame.Item
         PowerOverdrive = 71,
         // 급발진: IntegerAmount full SP at once.
         PowerRestoreSP = 72,
+        // Jjangsem-2 (짱셈스펠 4종, plan 26 §4.2). Room-bound effects only start in an uncleared combat or boss room.
+        // 파스텔빛: every IntervalSeconds for DurationSeconds each enemy in the room takes Magnitude x attack damage
+        // (no critical, no knockback, credited to the player). Clearing or leaving the room ends it.
+        CurrentRoomPulseDamage = 73,
+        // 파스텔빛: every IntervalSeconds for DurationSeconds IntegerAmount HP units are healed. Ends with the pulse.
+        CurrentRoomPulseHeal = 74,
+        // 수상한 물약: for DurationSeconds every enemy hit taken in the room it was used in loses Magnitude of its
+        // damage, rounded up to half hearts and never below half a heart.
+        CurrentRoomEnemyDamageReduction = 75,
+        // 이성의 끈: player basic attack, skill and artifact damage x Magnitude in the room it was used in.
+        // 권능 damage, status ticks and bombs are excluded. Leaving the room ends it.
+        CurrentRoomDamageMultiplier = 76,
+        // 깜짝상자: IntegerAmount random enemies of the room (bosses included) are stunned for DurationSeconds and
+        // lose Magnitude of their maximum health, which never kills. A boss loses SecondaryMagnitude of its maximum
+        // health instead (0 = the same Magnitude).
+        StunAndCutRandomEnemies = 77,
+        // 파스텔빛: every IntervalSeconds for DurationSeconds IntegerAmount half SP slots are gained. Ends with the
+        // pulse.
+        CurrentRoomPulseSP = 78,
+        // 수상한 물약: every enemy in the room at use gets IntegerAmount poison stacks (up to IntegerAmount), each
+        // dealing Magnitude x attack damage every IntervalSeconds for DurationSeconds.
+        CurrentRoomEnemyPoison = 79,
     }
 }

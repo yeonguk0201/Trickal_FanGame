@@ -375,6 +375,18 @@ namespace TrickalFanGame.Enemy
                 StopMovement();
                 ClearTelegraph();
             }
+            else if (state == BossActionState.Idle)
+            {
+                // A stun (Jjangsem-2) or a cancelled fight drops the pattern under way; it restarts from its telegraph.
+                ResetAttackArtwork();
+                StopMovement();
+                ClearTelegraph();
+                ResetSwingState();
+                ResetDashState();
+                chargingSlash = false;
+                slashPending = false;
+                slashResolved = false;
+            }
         }
 
         public bool TryExecute(BossPatternExecution execution)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,6 +41,9 @@ namespace TrickalFanGame.Combat
         public Vector2 PushVelocity => IsPushed ? pushVelocity : Vector2.zero;
         public float KnockbackWeight => knockbackWeight;
         public Vector2 CurrentVelocity => body != null ? body.linearVelocity : Vector2.zero;
+
+        // Raised by ApplyStun after the stun starts. A boss cancels the pattern it is running (Jjangsem-2).
+        public event Action Stunned;
 
         private void Awake()
         {
@@ -108,7 +112,7 @@ namespace TrickalFanGame.Combat
             return true;
         }
 
-        // Power-1 (명치 꽂기) and later 깜짝상자: stops the enemy in place for the duration without moving it. Every
+        // Power-1 (명치 꽂기) and Jjangsem-2 (깜짝상자): stops the enemy in place for the duration without moving it. Every
         // behavior that waits on IsActive (movement, attacks, boss patterns) holds until it ends. A longer stun
         // already running is kept; a knockback during it never shortens it.
         public bool ApplyStun(float duration)
@@ -133,6 +137,7 @@ namespace TrickalFanGame.Combat
                 body.linearVelocity = Vector2.zero;
             }
 
+            Stunned?.Invoke();
             return true;
         }
 

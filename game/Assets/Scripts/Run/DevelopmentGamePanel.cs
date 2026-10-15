@@ -246,6 +246,17 @@ namespace TrickalFanGame.Run
                             (effects != null && effects.RoomAttackSpeedPercent > 0f
                                 ? $"   Room ASPD +{effects.RoomAttackSpeedPercent:P0} " +
                                   $"MS +{effects.RoomMoveSpeedPercent:P0}"
+                                : string.Empty) +
+                            (effects != null && effects.IsPulseActive
+                                ? $"   Pastel {effects.PulseRemainingSeconds:F1}s " +
+                                  $"hit {effects.PulseDamageDeliveredTicks} heal {effects.PulseHealDeliveredTicks}"
+                                : string.Empty) +
+                            (effects != null && effects.IsEnemyDamageReductionActive
+                                ? $"   Potion {effects.EnemyDamageReductionRemainingSeconds:F1}s " +
+                                  $"({effects.EnemyDamageReductionRoomId})"
+                                : string.Empty) +
+                            (effects != null && effects.IsRoomDamageMultiplierActive
+                                ? $"   Reason x{effects.RoomDamageMultiplier:0.#}"
                                 : string.Empty));
 #if UNITY_EDITOR
             singleUseItems ??= UnityEditor.AssetDatabase.FindAssets("t:ItemDefinition")

@@ -105,6 +105,10 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 아이시아의 지갑 | 아티팩트(황금 전용) | `artifact-aisia-wallet` | Artifact-3 |
 | 칸타의 팽이 | 아티팩트 | `artifact-kanta-top` | Passive-3 |
 | 샤샤의 항아리 | 아티팩트 | `artifact-shasha-jar` | Passive-4 |
+| 파스텔빛 | 짱셈스펠 | `jjangsem-pastel-light` | Jjangsem-2 |
+| 수상한 물약 | 짱셈스펠 | `jjangsem-suspicious-potion` | Jjangsem-2 |
+| 이성의 끈 | 짱셈스펠 | `jjangsem-thread-of-reason` | Jjangsem-2 |
+| 깜짝상자 | 짱셈스펠 | `jjangsem-surprise-box` | Jjangsem-2 |
 
 ### 2.4 등급·효과·스택
 
@@ -181,6 +185,15 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
   `PowerSmite = 67`(찐짜천벌), `PowerStunRoomEnemies = 68`·`PowerRoomEnemyVulnerability = 69`(명치 꽂기), `PowerGainShield = 70`
   (날먹보호막), `PowerOverdrive = 71`·`PowerRestoreSP = 72`(급발진). 필드 의미는 `ItemEffectType` 주석에 있다. 필요 게이지는 효과가
   아니라 `ItemDefinition.activeChargeRooms`에 둔다(Backend는 설명 문구에만 적는다).
+  Jjangsem-2(2026-10-15)에서 짱셈스펠 4종의 73~77을 추가했다: `CurrentRoomPulseDamage = 73`(`magnitude` = 공격력 비율,
+  `intervalSeconds`, `durationSeconds`)과 `CurrentRoomPulseHeal = 74`(`integerAmount` = 회복 HP 단위, `intervalSeconds`,
+  `durationSeconds`)는 파스텔빛, `CurrentRoomEnemyDamageReduction = 75`(`magnitude` = 감소 비율, `durationSeconds`)는 수상한
+  물약, `CurrentRoomDamageMultiplier = 76`(`magnitude` = 최종 배율)은 이성의 끈, `StunAndCutRandomEnemies = 77`(`magnitude` =
+  최대 체력 기준 감소 비율, `secondaryMagnitude` = 보스의 최대 체력 기준 감소 비율(0이면 `magnitude`), `integerAmount` = 대상 수,
+  `durationSeconds` = 스턴)은 깜짝상자만 쓴다. 같은 날 수치 조정에서 `CurrentRoomPulseSP = 78`(`integerAmount` = SP 반 칸 수,
+  `intervalSeconds`, `durationSeconds`, 파스텔빛)과 `CurrentRoomEnemyPoison = 79`(`magnitude` = 중첩당 틱 공격력 비율,
+  `integerAmount` = 중첩 수, `intervalSeconds`, `durationSeconds`, 수상한 물약)를 더했다. 네 ID(Rare, 최대 1스택)를 Backend
+  카탈로그에도 같은 값으로 기록했다. 피해 출처 `DamageSourceType.PlayerSpell`(파스텔빛·깜짝상자)을 뒤에 추가했다.
 - 일회용 아이템(`SingleUseSpell`, `JjangsemSpell`)은 `maxStacks = 1`이다. 보유 중에는 **효과가 적용되지
   않고**, 사용 성공 시에만 효과를 실행한다. `PlayerInventory`의 상시 효과 적용·아티팩트 HUD·일시정지
   아티팩트 목록에 들어가지 않는다.
@@ -271,7 +284,7 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | Spell-0~4 | §2.3 ID, Backend 카탈로그·테스트·seed 동시 반영, 레거시 `spell-*` 풀 제거·Backend 활성 유지 |
 | Chest-1·2 | §3 경로별 허용 분류, 유효 ID만 생성. Chest-2(2026-10-05): `ChestContentTable.TryValidate`가 일반·다이아몬드의 특별 보상과 일반·황금의 짱셈스펠 비율을 거부하고, 스펠·짱셈스펠·황금 전용 아티팩트 목록을 분류별로 따로 검사한다 |
 | Flight-0 | 가짜 날개는 `ItemKind.Artifact`, 전용 풀 소속으로만 획득. 풀은 `chest-content-table`의 황금 전용 아티팩트 목록이며, 전 보상 풀을 모으는 Setup(Reward-3)은 `GoldenChestExclusivePool` 목록을 제외한다 |
-| Jjangsem-0·1 | `jjangsem-` 접두사, 일회용 아이템 비복제. Jjangsem-0(2026-10-05): `jjangsem-bigwood-fruit`는 `chest-content-table`의 짱셈스펠 목록(다이아몬드 상자)으로만 획득 |
+| Jjangsem-0·1·2 | `jjangsem-` 접두사, 일회용 아이템 비복제. Jjangsem-0(2026-10-05): `jjangsem-bigwood-fruit`는 `chest-content-table`의 짱셈스펠 목록(다이아몬드 상자)으로만 획득. Jjangsem-2(2026-10-15): 효과 73~77은 뒤에 추가, 네 ID는 짱셈스펠 목록에만 소속(선택 보상·상점 풀 금지, 검증기가 확인), Backend 카탈로그·테스트·seed 동시 반영 |
 | Verify-0 | 풀별 분류 불변조건과 Unity↔Backend 카탈로그 ID·등급 일치 검사 |
 | Range-0 | 효과 33·34는 뒤에 추가, 33은 `artifact-sylla-wind-arrow`만(Artifact-2부터)·34는 `item-15`만 사용(검증기가 확인), 아이템 추가 시 Backend 카탈로그·seed 동시 반영 |
 | Passive-1 | 효과 43·44는 뒤에 추가, 43은 `artifact-kanna-cannon`·44는 `artifact-bibi-snot`만 사용(검증기가 확인), 둘 다 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |

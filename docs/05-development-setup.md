@@ -868,6 +868,28 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   벽에 붙은 상자·하트에 붙은 상자가 밀리지 않던 문제를 고쳤다. 벽에 붙인 상자를 벽을 따라 밀고, 하트를 상자 앞에 두고 밀어
   하트가 함께 밀리는지 다시 확인한다.
 
+- Jjangsem-2 짱셈스펠 4종: 메뉴 `Trickal Fan Game > Week 26 > Setup Jjangsem-2 Four Jjangsem Spells`가
+  `Assets/Items/jjangsem-pastel-light.asset`(효과 73·78·74), `jjangsem-suspicious-potion.asset`(75·79),
+  `jjangsem-thread-of-reason.asset`(76), `jjangsem-surprise-box.asset`(77)을 GUID를 보존하며 멱등 구성하고(모두 Rare 짱셈스펠),
+  이름·설명 글리프를 추가한 뒤 Chest-1의 표 구성을 다시 실행해 `chest-content-table.jjangsemSpells`에 넣는다. Scene은 바꾸지
+  않는다. 표 구성이 `TreasureChest.prefab`을 플레이스홀더 그림으로 되돌리는 기존 부작용이 있으니 실행 뒤 그 Prefab 변경은
+  되돌린다. Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시 실행한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 26 > Verify Jjangsem-2 Four Jjangsem Spells`, 배치는 Unity `-batchmode -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week26Jjangsem2Verification.SetupAndVerifyBatch -logFile <로그
+  경로>`다(글리프 추가 때문에 `-nographics` 없이 실행). Setup 2회 GUID, 효과 73~79·`PlayerSpell` 번호와 수치 검증, 아이템
+  계약·설명·글리프, 짱셈 목록 단독 소속과 다이아몬드 상자 등장, 파스텔빛의 사용 방 조건·미소비·간격 뒤 첫 틱·2.5초 간격 7회 피해와 6회
+  회복·SP 반 칸 3회·나중에 나온 적과 보스 피격·일시정지·클리어/이탈/사망 종료, 수상한 물약의 반 칸 단위 올림·최소 반 칸·함정 제외·방 밖
+  미적용·10초 갱신과 종료·사용 시 방 안 적 중독 3중첩, 이성의 끈의 출처별 2배/제외(권능 제외)·다른 보너스와 곱연산·같은 방 재사용 거부·이탈/Run 종료 해제, 깜짝상자의
+  적 없음 미소비·서로 다른 2명·보스 포함·최대 체력 50%(보스 20%) 감소·피격과 같은 피해 표시 이벤트·처치 없음·무적 제외·2초 스턴, 스턴 중 보스 패턴 취소와 같은 패턴의
+  예고부터 재시작을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Jjangsem-0·1, Slot-0, Spell-1, Power-1, Enemy-7,
+  Boss-0~4, Chest-2·1, 개발 패널)다. 2026-10-15 두 배치가 종료 코드 0으로 통과했고 Backend Jest(140개)도 통과했다. 2026-10-15·16 수치
+  조정 뒤에도 두 배치가 종료 코드 0으로, Backend Jest(140개)와 `pnpm build`가 다시 통과했다.
+  수동 확인: Game Scene Play → `F1` → `— Spell slot —`의 `Drop 파스텔빛`·`Drop 수상한 물약`·`Drop 이성의 끈`·`Drop 깜짝상자`로
+  주워 Left Shift로 쓴다. 시작방·클리어한 방에서는 앞의 셋이 사용되지 않고, 적이 없는 방에서는 깜짝상자가 사용되지 않아야
+  한다. 전투방에서 패널 줄에 `Pastel`·`Potion`·`Reason` 상태가 보이고, 파스텔빛은 2.5초마다 적 체력이 깎이고 3초마다 하트 반
+  칸이, 6초마다 SP 반 칸이 차고, 수상한 물약은 적에게 중독(패널 `poison x3`)이 걸리고 1칸 피해가 반 칸으로, 이성의 끈 중 공격 피해가 두 배로 보여야 한다. 깜짝상자는 적 2명이 멈추고
+  최대 체력의 절반만큼 체력이 줄며 피해 숫자와 일반 적 체력바가 보이고, 보스는 최대 체력의 20%만큼 줄며, 보스에게 쓰면 예고 중이던 패턴이 끊겼다가 2초 뒤 예고부터 다시 나와야 한다. 시각 이펙트는 아직 없다.
+
 - Spell-4 멤버십카드: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-4 Membership Card`가
   `Assets/Items/single-spell-membership-card.asset`(Rare 일회용 스펠, 효과 42 `FreeCurrentShopOffers`, 수치 필드 없음)을
   GUID를 보존하며 멱등 구성하고, 이름·설명과 상점 화면의 `무료`·`받기` 글리프를 추가한 뒤 Chest-1의 표 구성을 다시 실행해

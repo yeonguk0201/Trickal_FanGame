@@ -28,6 +28,8 @@ namespace TrickalFanGame.Player
         private float singleUseRoomCriticalChanceBonus;
         private float singleUseRoomAttackSpeedPercentBonus;
         private float singleUseRoomMoveSpeedPercentBonus;
+        // Jjangsem-2 (이성의 끈): final multiplier of player damage in the room it was used in. 1 = none.
+        private float singleUseRoomDamageMultiplier = 1f;
         private float attackSpeedPercentBonus;
         private float currentRoomAttackSpeedPercentBonus;
         private float criticalChanceBonus;
@@ -219,6 +221,21 @@ namespace TrickalFanGame.Player
             singleUseRoomAttackSpeedPercentBonus = Mathf.Max(0f, attackSpeed);
             singleUseRoomMoveSpeedPercentBonus = Mathf.Max(0f, moveSpeed);
         }
+
+        public float SingleUseRoomDamageMultiplier => singleUseRoomDamageMultiplier;
+
+        public void SetSingleUseRoomDamageMultiplier(float multiplier)
+        {
+            singleUseRoomDamageMultiplier = Mathf.Max(1f, multiplier);
+        }
+
+        // 이성의 끈 doubles basic attacks, skills and artifact damage (lightning, aura, explosion). 권능 damage, status
+        // ticks, bombs and jjangsem spell pulses are left out.
+        public static bool IsRoomDamageMultiplierSource(DamageSourceType sourceType) => sourceType is
+            DamageSourceType.PlayerProjectile or DamageSourceType.PlayerAttack or
+            DamageSourceType.PlayerSkillExplosion or DamageSourceType.PlayerUltimateImpact or
+            DamageSourceType.PlayerDamageAura or DamageSourceType.PlayerItemLightning or
+            DamageSourceType.PlayerItemExplosion;
 
         public void SetPowerBonuses(float attackDamage, float attackSpeed, float moveSpeed)
         {
@@ -471,6 +488,12 @@ namespace TrickalFanGame.Player
         // status ticks, auras and bombs do not.
         public DamageContext ApplyTargetBonuses(Health target, DamageContext context)
         {
+            // 이성의 끈 is a final multiplier, so it multiplies with every other bonus.
+            if (singleUseRoomDamageMultiplier > 1f && IsRoomDamageMultiplierSource(context.SourceType))
+            {
+                context = context.WithTargetBonuses(singleUseRoomDamageMultiplier, 0f, 0f);
+            }
+
             if (target == null || context.DeliveryType != DamageDeliveryType.Direct ||
                 (burningTargetDirectDamagePercent <= 0f && shockedTargetSkillDamagePercent <= 0f &&
                  shockedTargetCriticalDamageBonus <= 0f && shockedTargetCriticalChanceBonus <= 0f) ||

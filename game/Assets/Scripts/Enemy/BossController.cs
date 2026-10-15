@@ -52,6 +52,9 @@ namespace TrickalFanGame.Enemy
         private int currentPhase = 1;
         private int pendingPhase;
         private bool combatStarted;
+        // Jjangsem-2: a stun (명치 꽂기, 깜짝상자) cancels the pattern being telegraphed or carried out, and that pattern
+        // starts again from its telegraph once the stun ends.
+        private int stunInterruptedPatternIndex = -1;
 
         public event Action Died;
         public event Action<int, int> PhaseChanged;
@@ -65,6 +68,7 @@ namespace TrickalFanGame.Enemy
         public BossActionState State { get; private set; } = BossActionState.Idle;
         public float StateEndsAt => stateEndsAt;
         public string CurrentPatternId => CurrentPattern?.PatternId;
+        public bool HasStunInterruptedPattern => stunInterruptedPatternIndex >= 0;
         public int EncounterSeed => encounterSeed;
         public float PhaseTransitionDuration => Mathf.Max(0f, phaseTransitionDuration);
         public float PhaseTwoTempoMultiplier => Mathf.Clamp(phaseTwoTempoMultiplier, 0.1f, 1f);
@@ -131,6 +135,7 @@ namespace TrickalFanGame.Enemy
             currentPatternIndex = -1;
             previousPatternIndex = -1;
             pendingPhase = 0;
+            stunInterruptedPatternIndex = -1;
             foreach (IBossPatternRuntime runtime in patternRuntimes)
                 runtime.BeginCombat(configuredTarget, configuredSeed, now);
             StartNextPattern(now);
@@ -139,6 +144,7 @@ namespace TrickalFanGame.Enemy
         public void TickBehavior(float now)
         {
             if (!combatStarted || IsActionSuppressed || State == BossActionState.Defeated) return;
+            if (stunInterruptedPatternIndex >= 0) RestartInterruptedPattern(now);
 
             foreach (IBossPatternRuntime runtime in patternRuntimes)
                 runtime.TickPattern(State, CurrentPattern?.Execution ?? BossPatternExecution.SignalOnly, now);
@@ -219,6 +225,7 @@ namespace TrickalFanGame.Enemy
             combatStarted = false;
             target = null;
             currentPatternIndex = -1;
+            stunInterruptedPatternIndex = -1;
             pendingPhase = 0;
             SetState(BossActionState.Idle, 0f);
             CleanupOwnedObjects();
@@ -244,6 +251,7 @@ namespace TrickalFanGame.Enemy
             currentPhase = Mathf.Clamp(currentPhase, 1, PhaseCount);
             health.Changed += OnHealthChanged;
             health.Died += OnDied;
+            if (knockback != null) knockback.Stunned += OnStunned;
             ResetPatternRuntime();
         }
 
@@ -269,6 +277,7 @@ namespace TrickalFanGame.Enemy
                 health.Changed -= OnHealthChanged;
                 health.Died -= OnDied;
             }
+            if (knockback != null) knockback.Stunned -= OnStunned;
             CleanupOwnedObjects();
         }
 
@@ -289,6 +298,7 @@ namespace TrickalFanGame.Enemy
             currentPatternIndex = -1;
             previousPatternIndex = -1;
             pendingPhase = 0;
+            stunInterruptedPatternIndex = -1;
             combatStarted = false;
             State = BossActionState.Idle;
         }
@@ -404,10 +414,37 @@ namespace TrickalFanGame.Enemy
             SetPhase(phase);
         }
 
+        // Idle tells every pattern runtime to drop its telegraph, movement and attack state. The pattern keeps its
+        // reuse time, so after the stun it runs again from the start rather than a new pattern being chosen.
+        private void OnStunned()
+        {
+            if (!combatStarted || health == null || health.IsDead || currentPatternIndex < 0 ||
+                (State != BossActionState.Telegraph && State != BossActionState.Active))
+                return;
+
+            stunInterruptedPatternIndex = currentPatternIndex;
+            SetState(BossActionState.Idle, float.PositiveInfinity);
+        }
+
+        private void RestartInterruptedPattern(float now)
+        {
+            currentPatternIndex = stunInterruptedPatternIndex;
+            stunInterruptedPatternIndex = -1;
+            if (CurrentPattern == null)
+            {
+                currentPatternIndex = -1;
+                StartNextPattern(now);
+                return;
+            }
+
+            SetState(BossActionState.Telegraph, now + CurrentPattern.GetTelegraphDuration(CurrentTempoMultiplier));
+        }
+
         private void OnDied()
         {
             combatStarted = false;
             currentPatternIndex = -1;
+            stunInterruptedPatternIndex = -1;
             pendingPhase = 0;
             SetState(BossActionState.Defeated, 0f);
             if (keepsOwnedObjectsOnDefeat) ReleaseOwnedObjects();
@@ -430,6 +467,7 @@ namespace TrickalFanGame.Enemy
             if (pendingPhase >= phase || State == BossActionState.PhaseTransition) return;
             pendingPhase = phase;
             currentPatternIndex = -1;
+            stunInterruptedPatternIndex = -1;
             knockback?.Stop();
             SetState(BossActionState.PhaseTransition, now + PhaseTransitionDuration);
         }

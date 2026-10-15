@@ -180,6 +180,27 @@ namespace TrickalFanGame.Frontend
                     $"{Number(effect.DurationSeconds)}초간 공격속도 +{Percent(effect.Magnitude)}·이동속도 " +
                     $"+{Percent(effect.SecondaryMagnitude)}·고학년 스킬 쿨타임 {Percent(effect.ScaleMultiplier)} 감소",
                 ItemEffectType.PowerRestoreSP => $"SP {effect.IntegerAmount}칸 즉시 회복",
+                ItemEffectType.CurrentRoomPulseDamage =>
+                    $"현재 방에서 {Number(effect.DurationSeconds)}초 동안 {Number(effect.IntervalSeconds)}초마다 모든 적에게 " +
+                    $"공격력 {Percent(effect.Magnitude)} 피해",
+                ItemEffectType.CurrentRoomPulseHeal =>
+                    $"{Number(effect.IntervalSeconds)}초마다 HP {Hearts(effect.IntegerAmount)} 회복 (방 클리어·이탈 시 종료)",
+                ItemEffectType.CurrentRoomEnemyDamageReduction =>
+                    $"현재 방의 적에게 받는 피해 {Number(effect.DurationSeconds)}초간 {Percent(effect.Magnitude)} 감소 " +
+                    "(최소 반 칸)",
+                ItemEffectType.CurrentRoomDamageMultiplier =>
+                    $"현재 방에서 주는 피해 {Number(effect.Magnitude)}배 (권능·상태이상·폭탄 제외, 방 이탈 시 해제)",
+                ItemEffectType.StunAndCutRandomEnemies =>
+                    $"무작위 적 {effect.IntegerAmount}명 {Number(effect.DurationSeconds)}초 기절, 최대 체력 " +
+                    $"{Percent(effect.Magnitude)} 감소" +
+                    (effect.SecondaryMagnitude > 0f
+                        ? $" (보스는 {Percent(effect.SecondaryMagnitude)})"
+                        : " (보스 포함)"),
+                ItemEffectType.CurrentRoomPulseSP =>
+                    $"{Number(effect.IntervalSeconds)}초마다 SP {SPHalves(effect.IntegerAmount)} 회복",
+                ItemEffectType.CurrentRoomEnemyPoison =>
+                    $"현재 방의 모든 적에게 중독 {effect.IntegerAmount}중첩 ({Number(effect.DurationSeconds)}초간 " +
+                    $"{Number(effect.IntervalSeconds)}초마다 중첩당 공격력 {Percent(effect.Magnitude)} 피해)",
                 _ => effect.EffectType.ToString(),
             };
         }

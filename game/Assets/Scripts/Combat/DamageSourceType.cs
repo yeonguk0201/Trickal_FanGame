@@ -20,6 +20,8 @@ namespace TrickalFanGame.Combat
         // Trap-0: a room trap (가시, 장판, 불, 가시 돌, 독가스). Not player damage, so its kills are not credited.
         Environment,
         // Power-1: damage a 교주의 권능 deals (팝핀 스타, 찐짜천벌). Player damage.
-        PlayerPower
+        PlayerPower,
+        // Jjangsem-2 (파스텔빛): a jjangsem spell's pulse over the room. Player damage, but periodic like a status tick.
+        PlayerSpell
     }
 }

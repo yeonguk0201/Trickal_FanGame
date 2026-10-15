@@ -325,31 +325,10 @@ namespace TrickalFanGame.Item
         // The alive enemies of the room the player is in. Enemies of other rooms are never touched.
         public List<Health> CollectRoomEnemies()
         {
-            List<Health> enemies = new();
-            IEnumerable<Health> source = enemySourceOverride?.Invoke();
-            if (source == null)
-            {
-                RoomController room = FindCurrentRoomController();
-                if (room == null || room.IsProgressionStopped) return enemies;
-                source = room.AliveEnemies;
-            }
-
-            foreach (Health enemy in source)
-            {
-                if (enemy != null && !enemy.IsDead && enemy.isActiveAndEnabled) enemies.Add(enemy);
-            }
-
-            return enemies;
-        }
-
-        private RoomController FindCurrentRoomController()
-        {
+            IEnumerable<Health> overridden = enemySourceOverride?.Invoke();
+            if (overridden != null) return CurrentRoomEnemies.Filter(overridden);
             if (roomGraph == null) roomGraph = FindFirstObjectByType<RoomGraphController>();
-            RoomNode node = roomGraph != null ? roomGraph.CurrentNode : null;
-            if (node == null) return null;
-            RoomPrefab prefab = node.GetComponent<RoomPrefab>();
-            if (prefab != null && prefab.Controller != null) return prefab.Controller;
-            return node.ContentRoot != null ? node.ContentRoot.GetComponentInChildren<RoomController>(true) : null;
+            return CurrentRoomEnemies.Collect(roomGraph);
         }
 
         private static bool IsBoss(Health enemy) => enemy != null && enemy.GetComponent<BossController>() != null;

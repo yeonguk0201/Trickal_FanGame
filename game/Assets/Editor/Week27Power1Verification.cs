@@ -113,7 +113,7 @@ namespace TrickalFanGame.Editor
             }
 
             ItemEffectType[] powerTypes = Enum.GetValues(typeof(ItemEffectType)).Cast<ItemEffectType>()
-                .Where(type => (int)type >= 65).ToArray();
+                .Where(type => (int)type is >= 65 and <= 72).ToArray();
             Assert(powerTypes.Length == 8 && (int)ItemEffectType.PowerRoomBlast == 65 &&
                    (int)ItemEffectType.PowerRestoreSP == 72,
                 "The 권능 effect types must be appended as 65~72.");
@@ -122,7 +122,7 @@ namespace TrickalFanGame.Editor
             {
                 ItemDefinition item = AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid));
                 if (item == null || item.IsActivePower) continue;
-                Assert(item.Effects.All(effect => effect == null || (int)effect.EffectType < 65),
+                Assert(item.Effects.All(effect => effect == null || (int)effect.EffectType is < 65 or > 72),
                     $"{item.ItemId} must not use a 권능 effect type.");
             }
         }

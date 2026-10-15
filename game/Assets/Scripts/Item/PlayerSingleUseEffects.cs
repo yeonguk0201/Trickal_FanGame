@@ -28,6 +28,8 @@ namespace TrickalFanGame.Item
 
         // 랜덤코인: inclusive minimum and maximum. Replaced in verification to pin the amount.
         private static Func<int, int, int> goldRollProvider = DefaultGoldRoll;
+        // 깜짝상자: an index in [0, count) among the enemies not picked yet. Replaced in verification.
+        private static Func<int, int> enemyPickProvider = DefaultEnemyPick;
 
         [SerializeField] private RoomGraphController roomGraph;
         [SerializeField] private HealthPickup heartPickupPrefab;
@@ -66,6 +68,38 @@ namespace TrickalFanGame.Item
         private bool isRecoverySubscribed;
         private readonly List<PendingRecovery> pendingRecoveries = new();
 
+        // Verification seam: replaces the current room's enemy list (깜짝상자, 파스텔빛).
+        private Func<IEnumerable<Health>> enemySourceOverride;
+
+        // 파스텔빛: pulses bound to the room it was used in. Clearing or leaving that room, death or the end of the
+        // Run ends them; the first pulse of each kind comes one interval after use.
+        private string pulseRoomId;
+        private float pulseElapsed;
+        private float pulseDamageShare;
+        private float pulseDamageInterval;
+        private int pulseDamageTotalTicks;
+        private int pulseDamageDeliveredTicks;
+        private int pulseHealUnits;
+        private float pulseHealInterval;
+        private int pulseHealTotalTicks;
+        private int pulseHealDeliveredTicks;
+        private int pulseSPHalves;
+        private float pulseSPInterval;
+        private int pulseSPTotalTicks;
+        private int pulseSPDeliveredTicks;
+
+        // 수상한 물약: the effect sits on the room, not on its enemies. Its timer runs in game time wherever the
+        // player is, and enemy hits are reduced only while the player is in that room.
+        private string enemyDamageReductionRoomId;
+        private float enemyDamageReductionShare;
+        private float enemyDamageReductionRemainingSeconds;
+
+        // 이성의 끈: a final damage multiplier bound to the room it was used in, like the room bonuses above.
+        private string roomDamageMultiplierRoomId;
+        private float roomDamageMultiplier = 1f;
+
+        private readonly List<Health> lastSurpriseTargets = new();
+
         private struct PendingRecovery
         {
             public float RemainingSeconds;
@@ -87,6 +121,23 @@ namespace TrickalFanGame.Item
         public float RoomAttackDamagePercent => IsRoomBoostActive ? roomAttackDamagePercent : 0f;
         public float RoomAttackSpeedPercent => IsRoomBoostActive ? roomAttackSpeedPercent : 0f;
         public float RoomMoveSpeedPercent => IsRoomBoostActive ? roomMoveSpeedPercent : 0f;
+
+        public bool IsPulseActive => !string.IsNullOrEmpty(pulseRoomId);
+        public string PulseRoomId => pulseRoomId;
+        public float PulseRemainingSeconds => IsPulseActive
+            ? Mathf.Max(0f, Mathf.Max(pulseDamageTotalTicks * pulseDamageInterval,
+                pulseHealTotalTicks * pulseHealInterval, pulseSPTotalTicks * pulseSPInterval) - pulseElapsed)
+            : 0f;
+        public int PulseDamageDeliveredTicks => pulseDamageDeliveredTicks;
+        public int PulseHealDeliveredTicks => pulseHealDeliveredTicks;
+        public int PulseSPDeliveredTicks => pulseSPDeliveredTicks;
+        public bool IsEnemyDamageReductionActive => enemyDamageReductionRemainingSeconds > 0f;
+        public string EnemyDamageReductionRoomId => IsEnemyDamageReductionActive ? enemyDamageReductionRoomId : null;
+        public float EnemyDamageReductionRemainingSeconds => Mathf.Max(0f, enemyDamageReductionRemainingSeconds);
+        public bool IsRoomDamageMultiplierActive => !string.IsNullOrEmpty(roomDamageMultiplierRoomId);
+        public string RoomDamageMultiplierRoomId => roomDamageMultiplierRoomId;
+        public float RoomDamageMultiplier => IsRoomDamageMultiplierActive ? roomDamageMultiplier : 1f;
+        public IReadOnlyList<Health> LastSurpriseTargets => lastSurpriseTargets;
 
         public bool IsRegenerating => regenerationDeliveredTicks < regenerationTotalTicks;
         public int RegenerationTotalTicks => regenerationTotalTicks;
@@ -131,17 +182,38 @@ namespace TrickalFanGame.Item
         private static int DefaultGoldRoll(int minimum, int maximum) =>
             UnityEngine.Random.Range(minimum, maximum + 1);
 
+        public static void SetEnemyPickProviderForTesting(Func<int, int> provider)
+        {
+            enemyPickProvider = provider ?? throw new ArgumentNullException(nameof(provider));
+        }
+
+        public static void ResetEnemyPickProvider()
+        {
+            enemyPickProvider = DefaultEnemyPick;
+        }
+
+        private static int DefaultEnemyPick(int count) => UnityEngine.Random.Range(0, count);
+
+        public void ConfigureEnemySourceForVerification(Func<IEnumerable<Health>> source)
+        {
+            enemySourceOverride = source;
+        }
+
         private void Update()
         {
             AdvanceRegeneration(Time.deltaTime);
             AdvanceDamageRecovery(Time.deltaTime);
             RefreshRoomBoost();
+            AdvanceJjangsemRoomEffects(Time.deltaTime);
         }
 
         private void OnDisable()
         {
             ClearRoomBoost();
             StopDamageRecovery();
+            StopPulse();
+            StopEnemyDamageReduction();
+            ClearRoomDamageMultiplier();
         }
 
         public bool CanExecute(ItemDefinition definition, out string reason)
@@ -395,6 +467,71 @@ namespace TrickalFanGame.Item
                 case ItemEffectType.FreeCurrentShopOffers:
                     // Usable in any shop, even a sold-out or already free one (D5): the card is then simply spent.
                     return TryResolveCurrentShop(out _, out reason);
+                case ItemEffectType.CurrentRoomPulseDamage:
+                case ItemEffectType.CurrentRoomPulseHeal:
+                case ItemEffectType.CurrentRoomPulseSP:
+                    if (health == null || health.IsDead || playerStats == null || playerSP == null)
+                    {
+                        reason = "The player cannot use it now.";
+                        return false;
+                    }
+
+                    if (!IsInUnclearedCombatRoom(false, out reason)) return false;
+                    if (IsPulseActive && string.Equals(pulseRoomId, CurrentRoomId(spellSlot.Progress),
+                            StringComparison.Ordinal))
+                    {
+                        reason = "It is already running in this room.";
+                        return false;
+                    }
+
+                    return true;
+                case ItemEffectType.CurrentRoomEnemyDamageReduction:
+                    if (health == null || health.IsDead)
+                    {
+                        reason = "The player has no HP to protect.";
+                        return false;
+                    }
+
+                    return IsInUnclearedCombatRoom(false, out reason);
+                case ItemEffectType.CurrentRoomEnemyPoison:
+                    if (playerStats == null)
+                    {
+                        reason = "The player has no stats.";
+                        return false;
+                    }
+
+                    return IsInUnclearedCombatRoom(false, out reason);
+                case ItemEffectType.CurrentRoomDamageMultiplier:
+                    if (playerStats == null)
+                    {
+                        reason = "The player has no stats.";
+                        return false;
+                    }
+
+                    if (!IsInUnclearedCombatRoom(false, out reason)) return false;
+                    if (IsRoomDamageMultiplierActive && string.Equals(roomDamageMultiplierRoomId,
+                            CurrentRoomId(spellSlot.Progress), StringComparison.Ordinal))
+                    {
+                        reason = "It is already active in this room.";
+                        return false;
+                    }
+
+                    return true;
+                case ItemEffectType.StunAndCutRandomEnemies:
+                    if (health == null || health.IsDead)
+                    {
+                        reason = "The player cannot use it now.";
+                        return false;
+                    }
+
+                    if (CollectRoomEnemies().Count == 0)
+                    {
+                        reason = "There is no enemy in this room.";
+                        return false;
+                    }
+
+                    reason = string.Empty;
+                    return true;
                 default:
                     reason = $"{effect.EffectType} is not a connected single-use effect.";
                     return false;
@@ -457,6 +594,51 @@ namespace TrickalFanGame.Item
                     Debug.Log($"[PlayerSingleUseEffects] Membership card used in {shop.ShopId}: " +
                               (changed ? "remaining offers are free." : "it was already free."), this);
                     break;
+                case ItemEffectType.CurrentRoomPulseDamage:
+                    BeginPulseInCurrentRoom();
+                    pulseDamageShare = effect.Magnitude;
+                    pulseDamageInterval = effect.IntervalSeconds;
+                    pulseDamageTotalTicks = PulseTicks(effect);
+                    pulseDamageDeliveredTicks = 0;
+                    Debug.Log($"[PlayerSingleUseEffects] Pastel pulse damage in {pulseRoomId}: " +
+                              $"{pulseDamageTotalTicks} pulses every {pulseDamageInterval}s.", this);
+                    break;
+                case ItemEffectType.CurrentRoomPulseHeal:
+                    BeginPulseInCurrentRoom();
+                    pulseHealUnits = effect.IntegerAmount;
+                    pulseHealInterval = effect.IntervalSeconds;
+                    pulseHealTotalTicks = PulseTicks(effect);
+                    pulseHealDeliveredTicks = 0;
+                    break;
+                case ItemEffectType.CurrentRoomPulseSP:
+                    BeginPulseInCurrentRoom();
+                    pulseSPHalves = effect.IntegerAmount;
+                    pulseSPInterval = effect.IntervalSeconds;
+                    pulseSPTotalTicks = PulseTicks(effect);
+                    pulseSPDeliveredTicks = 0;
+                    break;
+                case ItemEffectType.CurrentRoomEnemyPoison:
+                    PoisonRoomEnemies(effect);
+                    break;
+                case ItemEffectType.CurrentRoomEnemyDamageReduction:
+                    // Using it again restarts the timer; using it in another room moves the effect there.
+                    enemyDamageReductionRoomId = CurrentRoomId(spellSlot.Progress);
+                    enemyDamageReductionShare = effect.Magnitude;
+                    enemyDamageReductionRemainingSeconds = effect.DurationSeconds;
+                    ApplyEnemyDamageReduction();
+                    Debug.Log($"[PlayerSingleUseEffects] Suspicious potion in {enemyDamageReductionRoomId}: enemy " +
+                              $"hits -{enemyDamageReductionShare:P0} for {enemyDamageReductionRemainingSeconds}s.", this);
+                    break;
+                case ItemEffectType.CurrentRoomDamageMultiplier:
+                    roomDamageMultiplierRoomId = CurrentRoomId(spellSlot.Progress);
+                    roomDamageMultiplier = effect.Magnitude;
+                    playerStats.SetSingleUseRoomDamageMultiplier(roomDamageMultiplier);
+                    Debug.Log($"[PlayerSingleUseEffects] Thread of reason in {roomDamageMultiplierRoomId}: player " +
+                              $"damage x{roomDamageMultiplier}.", this);
+                    break;
+                case ItemEffectType.StunAndCutRandomEnemies:
+                    StunAndCutRandomEnemies(effect);
+                    break;
                 case ItemEffectType.ReduceAndRecoverDamageTaken:
                     // Using it again while active restarts the full window; heals already pending stay.
                     recoveryRemainingSeconds = effect.DurationSeconds;
@@ -473,6 +655,185 @@ namespace TrickalFanGame.Item
                         this);
                     break;
             }
+        }
+
+        // Advances 파스텔빛 and 수상한 물약 and ends the room-bound jjangsem effects once their room is no longer the
+        // player's. Paused game time (time scale 0) never advances a timer.
+        public void AdvanceJjangsemRoomEffects(float deltaSeconds)
+        {
+            if (!IsPulseActive && !IsEnemyDamageReductionActive && !IsRoomDamageMultiplierActive) return;
+
+            EnsureReferences();
+            RunProgress progress = spellSlot != null ? spellSlot.Progress : null;
+            if (health == null || health.IsDead || progress == null || progress.IsProgressionStopped)
+            {
+                StopPulse();
+                StopEnemyDamageReduction();
+                ClearRoomDamageMultiplier();
+                return;
+            }
+
+            string roomId = CurrentRoomId(progress);
+            if (IsRoomDamageMultiplierActive &&
+                !string.Equals(roomDamageMultiplierRoomId, roomId, StringComparison.Ordinal))
+                ClearRoomDamageMultiplier();
+
+            bool advances = deltaSeconds > 0f && Time.timeScale > 0f;
+            if (IsEnemyDamageReductionActive && advances)
+            {
+                enemyDamageReductionRemainingSeconds -= deltaSeconds;
+                if (enemyDamageReductionRemainingSeconds <= TickTolerance) StopEnemyDamageReduction();
+            }
+
+            ApplyEnemyDamageReduction();
+            if (IsPulseActive) AdvancePulse(progress, roomId, advances ? deltaSeconds : 0f);
+        }
+
+        private void AdvancePulse(RunProgress progress, string roomId, float deltaSeconds)
+        {
+            RoomRunState state = progress.GetRoomState(pulseRoomId);
+            if (!string.Equals(pulseRoomId, roomId, StringComparison.Ordinal) || state == null || state.IsCleared)
+            {
+                StopPulse();
+                return;
+            }
+
+            if (deltaSeconds <= 0f) return;
+
+            pulseElapsed += deltaSeconds;
+            int dueHeals = DueTicks(pulseHealInterval, pulseHealTotalTicks);
+            while (pulseHealDeliveredTicks < dueHeals)
+            {
+                pulseHealDeliveredTicks++;
+                health.Heal(pulseHealUnits);
+            }
+
+            int dueSP = DueTicks(pulseSPInterval, pulseSPTotalTicks);
+            while (pulseSPDeliveredTicks < dueSP)
+            {
+                pulseSPDeliveredTicks++;
+                for (int i = 0; i < pulseSPHalves; i++) playerSP.TryAddHalf();
+            }
+
+            int dueDamage = DueTicks(pulseDamageInterval, pulseDamageTotalTicks);
+            while (pulseDamageDeliveredTicks < dueDamage)
+            {
+                pulseDamageDeliveredTicks++;
+                // Enemies that appeared after use and bosses are hit too.
+                float damage = playerStats.AttackDamage * pulseDamageShare;
+                foreach (Health enemy in CollectRoomEnemies())
+                    enemy.TakeDamage(new DamageContext(gameObject, DamageSourceType.PlayerSpell, damage,
+                        deliveryType: DamageDeliveryType.Periodic));
+            }
+
+            if (pulseHealDeliveredTicks >= pulseHealTotalTicks && pulseDamageDeliveredTicks >= pulseDamageTotalTicks &&
+                pulseSPDeliveredTicks >= pulseSPTotalTicks)
+                StopPulse();
+        }
+
+        private int DueTicks(float interval, int total) => interval <= 0f
+            ? 0
+            : Mathf.Min(total, Mathf.FloorToInt(pulseElapsed / interval + TickTolerance));
+
+        private static int PulseTicks(ItemEffectEntry effect) =>
+            Mathf.Max(1, Mathf.FloorToInt(effect.DurationSeconds / effect.IntervalSeconds + TickTolerance));
+
+        // Every 파스텔빛 effect shares one room and one clock.
+        private void BeginPulseInCurrentRoom()
+        {
+            string roomId = CurrentRoomId(spellSlot.Progress);
+            if (string.Equals(pulseRoomId, roomId, StringComparison.Ordinal)) return;
+            StopPulse();
+            pulseRoomId = roomId;
+        }
+
+        private void StopPulse()
+        {
+            if (IsPulseActive) Debug.Log("[PlayerSingleUseEffects] Pastel pulse ended.", this);
+            pulseRoomId = null;
+            pulseElapsed = 0f;
+            pulseDamageShare = 0f;
+            pulseDamageInterval = 0f;
+            pulseDamageTotalTicks = 0;
+            pulseDamageDeliveredTicks = 0;
+            pulseHealUnits = 0;
+            pulseHealInterval = 0f;
+            pulseHealTotalTicks = 0;
+            pulseHealDeliveredTicks = 0;
+            pulseSPHalves = 0;
+            pulseSPInterval = 0f;
+            pulseSPTotalTicks = 0;
+            pulseSPDeliveredTicks = 0;
+        }
+
+        private void ApplyEnemyDamageReduction()
+        {
+            if (health == null) return;
+            bool inRoom = IsEnemyDamageReductionActive && spellSlot != null && string.Equals(
+                enemyDamageReductionRoomId, CurrentRoomId(spellSlot.Progress), StringComparison.Ordinal);
+            health.SetEnemyDamageReduction(inRoom ? enemyDamageReductionShare : 0f);
+        }
+
+        private void StopEnemyDamageReduction()
+        {
+            enemyDamageReductionRoomId = null;
+            enemyDamageReductionShare = 0f;
+            enemyDamageReductionRemainingSeconds = 0f;
+            if (health != null) health.SetEnemyDamageReduction(0f);
+        }
+
+        private void ClearRoomDamageMultiplier()
+        {
+            if (IsRoomDamageMultiplierActive) Debug.Log("[PlayerSingleUseEffects] Thread of reason ended.", this);
+            roomDamageMultiplierRoomId = null;
+            roomDamageMultiplier = 1f;
+            if (playerStats != null) playerStats.SetSingleUseRoomDamageMultiplier(1f);
+        }
+
+        // 수상한 물약: the enemies in the room at use are poisoned at once, from the attack damage at use. Enemies that
+        // appear later are not.
+        private void PoisonRoomEnemies(ItemEffectEntry effect)
+        {
+            PoisonSettings settings = new(1f, effect.Magnitude, effect.DurationSeconds, effect.IntervalSeconds,
+                effect.IntegerAmount);
+            float attackDamage = playerStats.AttackDamage;
+            List<Health> enemies = CollectRoomEnemies();
+            foreach (Health enemy in enemies)
+                for (int stack = 0; stack < effect.IntegerAmount; stack++)
+                    EnemyStatusEffects.TryApplyPoison(enemy, gameObject, attackDamage, settings, 0f);
+            Debug.Log($"[PlayerSingleUseEffects] Suspicious potion poisoned {enemies.Count} enemies " +
+                      $"x{effect.IntegerAmount}.", this);
+        }
+
+        // 깜짝상자: two different enemies when there are two or more. The stun comes first, so a boss drops the
+        // pattern it was running before its health falls. The cut shows like a hit from the player.
+        private void StunAndCutRandomEnemies(ItemEffectEntry effect)
+        {
+            List<Health> candidates = CollectRoomEnemies();
+            lastSurpriseTargets.Clear();
+            int count = Mathf.Min(effect.IntegerAmount, candidates.Count);
+            for (int picked = 0; picked < count; picked++)
+            {
+                int index = Mathf.Clamp(enemyPickProvider(candidates.Count), 0, candidates.Count - 1);
+                Health enemy = candidates[index];
+                candidates.RemoveAt(index);
+                lastSurpriseTargets.Add(enemy);
+                if (enemy.TryGetComponent(out KnockbackReceiver receiver)) receiver.ApplyStun(effect.DurationSeconds);
+                bool isBoss = enemy.GetComponent<TrickalFanGame.Enemy.BossController>() != null;
+                float share = isBoss && effect.SecondaryMagnitude > 0f ? effect.SecondaryMagnitude : effect.Magnitude;
+                float removed = enemy.CutHealth(share,
+                    new DamageContext(gameObject, DamageSourceType.PlayerSpell, 0f));
+                Debug.Log($"[PlayerSingleUseEffects] Surprise box hit {enemy.name}: stunned " +
+                          $"{effect.DurationSeconds}s, health -{removed:0.#}.", this);
+            }
+        }
+
+        public List<Health> CollectRoomEnemies()
+        {
+            IEnumerable<Health> overridden = enemySourceOverride?.Invoke();
+            return overridden != null
+                ? CurrentRoomEnemies.Filter(overridden)
+                : CurrentRoomEnemies.Collect(ResolveRoomGraph());
         }
 
         // Hearts go to free points around the player, in the current room's content so they leave with the floor.

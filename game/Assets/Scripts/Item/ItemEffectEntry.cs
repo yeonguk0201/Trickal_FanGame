@@ -338,6 +338,69 @@ namespace TrickalFanGame.Item
                     }
 
                     break;
+                case ItemEffectType.CurrentRoomPulseDamage:
+                    if (intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "CurrentRoomPulseDamage requires a positive interval and a duration of at least one " +
+                                "pulse.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomPulseHeal:
+                    if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "CurrentRoomPulseHeal requires a positive heal, a positive interval and a duration of " +
+                                "at least one pulse.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomEnemyDamageReduction:
+                    if (magnitude >= 1f || durationSeconds <= 0f)
+                    {
+                        error = "CurrentRoomEnemyDamageReduction requires a reduction within (0, 1) and a positive " +
+                                "duration.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomDamageMultiplier:
+                    if (magnitude <= 1f)
+                    {
+                        error = "CurrentRoomDamageMultiplier requires a multiplier above 1.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.StunAndCutRandomEnemies:
+                    if (magnitude >= 1f || integerAmount <= 0 || durationSeconds <= 0f ||
+                        secondaryMagnitude < 0f || secondaryMagnitude >= 1f)
+                    {
+                        error = "StunAndCutRandomEnemies requires a health cut within (0, 1), a positive target count, " +
+                                "a positive stun duration and a boss share within [0, 1).";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomPulseSP:
+                    if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "CurrentRoomPulseSP requires a positive SP gain, a positive interval and a duration of " +
+                                "at least one pulse.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomEnemyPoison:
+                    if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "CurrentRoomEnemyPoison requires a positive stack count, a positive interval and a " +
+                                "duration of at least one tick.";
+                        return false;
+                    }
+
+                    break;
                 case ItemEffectType.PowerRestoreSP:
                 case ItemEffectType.Pierce:
                 case ItemEffectType.MaxSP:
@@ -373,7 +436,9 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.SplitOnHit &&
                    type != ItemEffectType.FreeCurrentShopOffers &&
                    type != ItemEffectType.PowerStunRoomEnemies &&
-                   type != ItemEffectType.PowerRestoreSP;
+                   type != ItemEffectType.PowerRestoreSP &&
+                   type != ItemEffectType.CurrentRoomPulseHeal &&
+                   type != ItemEffectType.CurrentRoomPulseSP;
         }
     }
 }
