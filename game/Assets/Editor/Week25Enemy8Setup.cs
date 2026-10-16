@@ -30,7 +30,8 @@ namespace TrickalFanGame.Editor
         public const string ProjectilePath = EnemyAttackAnimationSetup.Folder + "/LivelyFairyBread_Projectile.png";
 
         public const float MaxHealth = 30f;
-        public const float KnockbackWeight = 1f;
+        // Same as 저혈당 요정-순수 (ChargingEnemy), 사용자 결정 2026-10-16.
+        public const float KnockbackWeight = 1.5f;
         public const float MoveSpeed = 2.5f;
         public const float DetectionRange = 12f;
         public const float MoveDuration = 1.2f;

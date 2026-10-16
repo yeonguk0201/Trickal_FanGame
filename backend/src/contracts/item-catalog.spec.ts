@@ -64,6 +64,11 @@ describe('Item catalog', () => {
       'jjangsem-suspicious-potion',
       'jjangsem-thread-of-reason',
       'jjangsem-surprise-box',
+      'single-spell-netti-map',
+      'single-spell-eshur-grimoire',
+      'single-spell-tig-challenge',
+      'single-spell-goldi-invitation',
+      'single-spell-ellis-tarot-card',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -125,8 +130,13 @@ describe('Item catalog', () => {
       'RARE',
       'RARE',
       'RARE',
+      'UNCOMMON',
+      'UNCOMMON',
+      'RARE',
+      'RARE',
+      'RARE',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(59);
+    expect(new Set(active.map((item) => item.id)).size).toBe(64);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -583,6 +593,51 @@ describe('Item catalog', () => {
         isActive: true,
         maxStacks: 1,
         effects: [{ type: 'FreeCurrentShopOffers' }],
+      },
+      {
+        id: 'single-spell-netti-map',
+        name: '네티의 지도',
+        rarity: 'UNCOMMON',
+        isActive: true,
+        maxStacks: 1,
+        effects: [
+          { type: 'RevealCurrentFloorMap' },
+          { type: 'GainGold', integerAmount: 5 },
+        ],
+      },
+      {
+        id: 'single-spell-eshur-grimoire',
+        name: '에슈르의 마도서',
+        rarity: 'UNCOMMON',
+        isActive: true,
+        maxStacks: 1,
+        effects: [
+          { type: 'CurrentRoomBasicAttackHoming', magnitude: 0.5, radius: 4 },
+        ],
+      },
+      {
+        id: 'single-spell-tig-challenge',
+        name: '티그의 도전장',
+        rarity: 'RARE',
+        isActive: true,
+        maxStacks: 1,
+        effects: [{ type: 'TeleportToBossRoom' }],
+      },
+      {
+        id: 'single-spell-goldi-invitation',
+        name: '골디의 초대장',
+        rarity: 'RARE',
+        isActive: true,
+        maxStacks: 1,
+        effects: [{ type: 'TeleportToGoldiShop' }],
+      },
+      {
+        id: 'single-spell-ellis-tarot-card',
+        name: '엘리스의 타로카드',
+        rarity: 'RARE',
+        isActive: true,
+        maxStacks: 1,
+        effects: [{ type: 'RandomStatShift' }],
       },
     ]);
   });

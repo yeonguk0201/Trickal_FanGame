@@ -141,7 +141,7 @@ namespace TrickalFanGame.Combat
             }
             if (CurrentHealth > 0f)
             {
-                ResolveDamageInvulnerability()?.BeginHitWindow(Time.time);
+                ResolveDamageInvulnerability()?.BeginHitWindowForDamage(Time.time, result.FinalDamage);
             }
             DamageResolved?.Invoke(context, result);
             AnyDamageResolved?.Invoke(this, context, result);

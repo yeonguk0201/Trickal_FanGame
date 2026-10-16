@@ -257,7 +257,22 @@ namespace TrickalFanGame.Run
                                 : string.Empty) +
                             (effects != null && effects.IsRoomDamageMultiplierActive
                                 ? $"   Reason x{effects.RoomDamageMultiplier:0.#}"
+                                : string.Empty) +
+                            (effects != null && effects.RoomHomingCoefficient > 0f
+                                ? $"   Homing {effects.RoomHomingCoefficient:0.##} r{effects.RoomHomingRange:0.#}"
                                 : string.Empty));
+            // Spell-6: the floor map state and the Run's tarot steps (엘리스의 타로카드).
+            RunProgress progress = assembler.Progress;
+            PlayerStats stats = slot.GetComponent<PlayerStats>();
+            if (progress != null && stats != null)
+            {
+                string tarot = string.Join(" ", TarotCardDraw.Stats
+                    .Where(stat => !Mathf.Approximately(stats.GetTarotStep(stat), 0f))
+                    .Select(stat => $"{stat} {stats.GetTarotStep(stat):+0.##;-0.##}"));
+                GUILayout.Label($"Map {(progress.IsFloorMapRevealed(progress.CurrentFloor) ? "revealed" : "hidden")}" +
+                                $"   Tarot x{progress.TarotDrawCount}" +
+                                (tarot.Length > 0 ? $"   {tarot}" : string.Empty));
+            }
 #if UNITY_EDITOR
             singleUseItems ??= UnityEditor.AssetDatabase.FindAssets("t:ItemDefinition")
                 .Select(guid => UnityEditor.AssetDatabase.LoadAssetAtPath<ItemDefinition>(

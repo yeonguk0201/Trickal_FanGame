@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 6529102546216898977}
   - component: {fileID: 8392679841437909941}
   - component: {fileID: 3348534805829953870}
+  - component: {fileID: 9074860351931137074}
   m_Layer: 6
   m_Name: JyubiEnemy
   m_TagString: Untagged
@@ -299,3 +300,18 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: JyubiEnemy
   useSharedProfile: 1
+--- !u!114 &9074860351931137074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440243880890223438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83df187639dfd7a4ea7de048bfd81353, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyContactRecoil
+  distance: 0.85
+  duration: 0.18
+  pause: 0.3

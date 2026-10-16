@@ -206,7 +206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.KnockbackReceiver
   defaultDuration: 0.2
   defaultStunDuration: 0.4
-  knockbackWeight: 1
+  knockbackWeight: 1.5
 --- !u!114 &7375691177170415146
 MonoBehaviour:
   m_ObjectHideFlags: 0

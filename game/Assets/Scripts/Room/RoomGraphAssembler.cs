@@ -416,6 +416,68 @@ namespace TrickalFanGame.Room
             wall.Bind(secretState, neighborId, () => Bind(false));
         }
 
+        // Spell-6 (골디의 초대장): reports whether the current floor's secret room can hold the 골디 shop. It already does,
+        // or it can become one while its treasure-style reward is untaken.
+        public bool CanHoldGoldiShop(GeneratedRoomNode secretRoom, out string error)
+        {
+            if (secretRoom == null || secretRoom.Role != GeneratedRoomRole.Secret)
+            {
+                error = "This floor has no secret room.";
+                return false;
+            }
+
+            if (secretRoom.IsGoldiShop)
+            {
+                error = null;
+                return true;
+            }
+
+            if (runProgress?.GetRoomState(secretRoom.RoomId)?.HasClaimedArtifact == true)
+            {
+                error = "The secret room's reward was already taken.";
+                return false;
+            }
+
+            if (FindRoomInstance(secretRoom.RoomId) == null)
+            {
+                error = $"The secret room {secretRoom.RoomId} is not on the floor being shown.";
+                return false;
+            }
+
+            if (shopRoomPrefab == null || shopCatalog == null || !shopCatalog.TryValidate(out error))
+            {
+                error = "The 골디 shop requires a ShopRoom Prefab and a valid ShopCatalog.";
+                return false;
+            }
+
+            error = null;
+            return true;
+        }
+
+        // Turns the built secret room into the 골디 shop: the generated node remembers it for later floor builds, the
+        // stock rolls from the room's content seed like a rolled 골디 shop, and the treasure-style reward goes away.
+        public bool TryConvertSecretRoomToGoldiShop(GeneratedRoomNode secretRoom, out string error)
+        {
+            if (!CanHoldGoldiShop(secretRoom, out error)) return false;
+            if (secretRoom.IsGoldiShop) return true;
+
+            RoomPrefab instance = FindRoomInstance(secretRoom.RoomId);
+            secretRoom.AssignGoldiShop();
+            if (!TryBuildShop(instance, secretRoom, out error)) return false;
+            if (instance.RewardRoom != null) instance.RewardRoom.gameObject.SetActive(false);
+            runProgress?.NotifyMapChanged();
+            Debug.Log($"[RoomGraphAssembler] {secretRoom.RoomId} became the 골디 shop.", this);
+            return true;
+        }
+
+        private RoomPrefab FindRoomInstance(string roomId)
+        {
+            if (graph == null) return null;
+            foreach (RoomNode node in graph.Nodes)
+                if (node != null && node.RoomId == roomId) return node.GetComponent<RoomPrefab>();
+            return null;
+        }
+
         // Special-4: the shopkeeper goes into the room content; the stock rolls on the first build and is reused after.
         // Shop-1: a 골디 secret room gets the same shop with the 골디 stock.
         private bool TryBuildShop(RoomPrefab instance, GeneratedRoomNode node, out string error)

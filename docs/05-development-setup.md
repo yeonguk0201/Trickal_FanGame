@@ -872,8 +872,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   `Assets/Items/jjangsem-pastel-light.asset`(효과 73·78·74), `jjangsem-suspicious-potion.asset`(75·79),
   `jjangsem-thread-of-reason.asset`(76), `jjangsem-surprise-box.asset`(77)을 GUID를 보존하며 멱등 구성하고(모두 Rare 짱셈스펠),
   이름·설명 글리프를 추가한 뒤 Chest-1의 표 구성을 다시 실행해 `chest-content-table.jjangsemSpells`에 넣는다. Scene은 바꾸지
-  않는다. 표 구성이 `TreasureChest.prefab`을 플레이스홀더 그림으로 되돌리는 기존 부작용이 있으니 실행 뒤 그 Prefab 변경은
-  되돌린다. Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시 실행한다.
+  않는다. 표 구성이 `TreasureChest.prefab`을 플레이스홀더 그림으로 되돌리던 부작용은 2026-10-16 Spell-6에서 고쳤다(아래 Spell-6
+  항목). Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시 실행한다.
   자동 검증 메뉴는 `Trickal Fan Game > Week 26 > Verify Jjangsem-2 Four Jjangsem Spells`, 배치는 Unity `-batchmode -quit
   -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week26Jjangsem2Verification.SetupAndVerifyBatch -logFile <로그
   경로>`다(글리프 추가 때문에 `-nographics` 없이 실행). Setup 2회 GUID, 효과 73~79·`PlayerSpell` 번호와 수치 검증, 아이템
@@ -889,6 +889,36 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   한다. 전투방에서 패널 줄에 `Pastel`·`Potion`·`Reason` 상태가 보이고, 파스텔빛은 2.5초마다 적 체력이 깎이고 3초마다 하트 반
   칸이, 6초마다 SP 반 칸이 차고, 수상한 물약은 적에게 중독(패널 `poison x3`)이 걸리고 1칸 피해가 반 칸으로, 이성의 끈 중 공격 피해가 두 배로 보여야 한다. 깜짝상자는 적 2명이 멈추고
   최대 체력의 절반만큼 체력이 줄며 피해 숫자와 일반 적 체력바가 보이고, 보스는 최대 체력의 20%만큼 줄며, 보스에게 쓰면 예고 중이던 패턴이 끊겼다가 2초 뒤 예고부터 다시 나와야 한다. 시각 이펙트는 아직 없다.
+
+- Spell-6 스펠 5종: 메뉴 `Trickal Fan Game > Week 26 > Setup Spell-6 Five Spells`가
+  `Assets/Items/single-spell-netti-map.asset`(효과 80·81), `single-spell-eshur-grimoire.asset`(82),
+  `single-spell-tig-challenge.asset`(83), `single-spell-goldi-invitation.asset`(84), `single-spell-ellis-tarot-card.asset`(85)를
+  GUID를 보존하며 멱등 구성하고 이름·설명 글리프를 추가한 뒤, Chest-1의 표 구성을 다시 실행해 `chest-content-table.spells`에
+  넣고 희귀 스펠을 떨구는 장애물 변형(`mayo-collection-box`·`sist-vault`)의 스펠 목록도 구현된 스펠 전체로 맞춘다. Scene은 바꾸지
+  않는다. 표 구성이 다시 만드는 `TreasureChest.prefab`은 그림을 그대로 유지한다(2026-10-16 수정: `Week22Chest0Setup`이
+  요정왕국 그림이 붙은 상자의 그림·색을 보존하고, `SetupAndVerifyBatch`가 이를 확인한다). Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시 실행한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 26 > Verify Spell-6 Five Spells`, 배치는 Unity `-batchmode -quit -projectPath <game
+  경로> -executeMethod TrickalFanGame.Editor.Week26Spell6Verification.SetupAndVerifyBatch -logFile <로그 경로>`다(글리프 추가
+  때문에 `-nographics` 없이 실행). Setup 2회 GUID, 효과 80~85 번호와 값 검사, 아이템 계약·설명·글리프, 상자 스펠 목록 단독 소속과
+  상자 등장·희귀 스펠 장애물 소속·선택 보상 풀 제외, 타로카드 추첨의 seed·순번 재현과 확률(60/40, 30%, 70/30)·증감 값·증가/하락
+  비중복, 네티의 지도의 미니맵 전체 공개(비밀방은 표시만, 숨은 통로 선 없음·통로 미개방)와 골드 5·99에서도 사용, 에슈르의 마도서의
+  시작방·클리어한 방 미소비·계수 0.5 합산 1.0·범위 4·실제 기본 공격 탄에 유도 전달·방 이탈 해제, 티그의 도전장의 이동 차단 시
+  미소비·보스방 문 진입점 도착·즉시 보스전·떠난 전투방 초기화(처치 미집계)·보스방 안 미소비·클리어한 보스방 이동, 골디의 초대장의
+  전투 중·비밀방 없는 층·보상 받은 비밀방 미소비·골디 상점 변환(골디 재고, 보물 보상 비활성, 깨어난 뒤에도 골디 상점지기 그림·이름)·숨은
+  통로 개방·안에서 미소비·
+  두 번째 사용은 이동만, 엘리스의 타로카드의 순번별 추첨과 누적·Run 초기화, 유도 조향(계수당 초당 360°, 속력 유지, 앞쪽 180°,
+  범위 밖·뒤쪽·이미 맞힌 적 제외)과 타로 능력치 증감·탄속·사거리 하한 0.1을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`
+  (Spell-1·2·5, Jjangsem-2, Special-3, Shop-1, Room-5 미니맵, Range-0, Passive-3, Obstacle-5, Chest-2·1, 개발 패널)다.
+  2026-10-16 `SetupAndVerifyBatch`가 종료 코드 0으로 통과했고 Backend Jest(140개)도 통과했다. 같은 날 `VerifyWithRegressionsBatch`도 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → `F1` → `— Spell slot —`의 `Drop 네티의 지도`·`Drop 에슈르의 마도서`·`Drop 티그의 도전장`·
+  `Drop 골디의 초대장`·`Drop 엘리스의 타로카드`로 주워 Left Shift로 쓴다. 네티의 지도는 미니맵에 층 전체가 나타나고 비밀방은
+  `H`(또는 `G`) 칸만 선 없이 보이며 골드가 5 오른다(99에서도 사용되고 99 유지). 에슈르의 마도서는 시작방에서 사용되지 않고,
+  전투방에서 패널에 `Homing 0.5 r4`가 보이며 기본 공격이 앞쪽 적 쪽으로 휘고, 방을 나가면 표시가 사라진다. 티그의 도전장은
+  전투 중에 쓰면 보스방 문 앞으로 이동해 바로 보스전이 시작되고, 떠난 방에 다시 들어가면 첫 웨이브부터 나온다. 보스방
+  안에서는 사용되지 않는다. 골디의 초대장은 비밀방이 있는 층(`F1`의 `Find secret F1`으로 seed를 찾는다)에서 그 방으로 이동하며 골디가
+  서 있는 상점이 되고 미니맵에 `G`로 보인다. 전투 중, 비밀방이 없는 층, 보상을 이미 받은 비밀방에서는 사용되지 않는다. 엘리스의
+  타로카드는 패널 아래 줄에 `Tarot x1`과 바뀐 능력치(예: `AttackDamage +0.08`)가 보이고 같은 seed로 다시 시작해 같은 순서로
+  쓰면 같은 결과가 나와야 한다. 시각 이펙트는 아직 없다.
 
 - Spell-4 멤버십카드: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-4 Membership Card`가
   `Assets/Items/single-spell-membership-card.asset`(Rare 일회용 스펠, 효과 42 `FreeCurrentShopOffers`, 수치 필드 없음)을
@@ -1070,14 +1100,15 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
 
 - Enemy-6 쥬비: 메뉴 `Trickal Fan Game > Week 23 > Setup Enemy-6 Jyubi`가 추적형 적 Prefab을 풀어 복사한
   `Assets/Prefabs/JyubiEnemy.prefab`을 만들고(근접 공격·이동 애니메이션 컴포넌트 제거, 크기 0.5, 체력 1, 속도 5.2(2026-10-14 5.5에서 조정), 비행
-  추적, 반 칸 접촉 피해, `EnemyFlight` 추가) Obstacle-5 Setup을 다시 실행해 셰이디의 랜덤박스 종류에 쥬비 5마리 결과를
+  추적, 반 칸 접촉 피해, `EnemyFlight` 추가, 2026-10-17부터 `EnemyContactRecoil` 튕김 0.85·0.18초 감속 곡선·멈춤 0.3초) Obstacle-5 Setup을 다시 실행해 셰이디의 랜덤박스 종류에 쥬비 5마리 결과를
   연결한다. GUID를 보존하며 멱등이다. Obstacle-5 Setup도 같은 Prefab 구성 코드를 호출한다.
   자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Enemy-6 Jyubi`, 배치는 Unity `-batchmode -nographics -quit
   -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week23Enemy6Verification.SetupAndVerifyBatch -logFile
   <로그 경로>`다. Setup 2회 GUID, Prefab 구성과 누락 스크립트 없음, 플레이어 기본 속도보다 빠르고 1.25배 이하인 속도,
   1·3층에서 정확히 반 칸 피해와 접촉 쿨다운, 반 칸 옵션이 없는 접촉 피해의 1칸 유지, 1~3층 체력 배율에서 기본 공격 한
   대 처치, 구덩이·낮은 장애물 무시와 나무·벽·플레이어 충돌 유지, 장애물 너머 대상으로의 직선 이동, 방의 추가 적 등록과
-  처치 시 방 상태 불변을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-6과 그 회귀 전체, 하트 체력
+  처치 시 방 상태 불변, 통과 중인 플레이어에 겹친 쥬비의 튕김·멈춤·재추적, 플레이어 몸 안의 적이 탄에 맞고 뒤쪽 적은
+  맞지 않음을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-6과 그 회귀 전체, 하트 체력
   `Hp1HealthUnitsVerification`)다.
   **원화 보존(2026-10-14)**: Enemy-6 Setup은 Obstacle-5를 거쳐 Resource-0(하트)·Resource-1(열쇠·폭탄)·Special-3(비밀
   구덩이) Setup까지 다시 실행한다. 이 Setup들은 원화보다 먼저 만들어져 실행할 때마다 임시 스프라이트·색을 다시 써서
@@ -1957,3 +1988,19 @@ Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금�
 - 검사: `Trickal Fan Game/Effects/Verify Hit Feedback` (`TrickalFanGame.Editor.HitFeedbackVerification.Verify`).
 - 실제 Play: 적을 기본 공격으로 맞혀 스파크를 확인한다. `F1 → — Player — → CRIT 100%`로 이번 Run의 직접 타격을 모두 치명타로 만들면 히트스톱과 약한 카메라 흔들림을 매번 볼 수 있다.
 - 상세 범위와 미확인 항목: [작업 기록](art-prompts/hit-spark.md).
+
+### 폭발 머핀 실시간 폭발 (2026-10-16)
+
+- Edit Mode: `Trickal Fan Game/Effects/Preview Muffin Explosion` → `Open / reset Scene preview`. 피해 반경, 섬광·불덩이·충격파 링·불꽃 조각·연기 레이어, 기준 적 표시, 기존 `circular-explosion` 시트와의 A/B 전환, 0~0.4초 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
+- 검사: `Trickal Fan Game/Effects/Verify Muffin Explosion` (`TrickalFanGame.Editor.MuffinExplosionVerification.Verify`). 커밋 전 회귀는 `Verify Muffin Explosion With Regressions`(`VerifyWithRegressionsBatch`, 2026-10-16 통과).
+- 정지 프레임 렌더: `Export Muffin Explosion Frames` → `output/art-review/muffin-explosion/unity-frames.png`(위: 새 효과, 아래: 기존 시트). 배치는 `VerifyAndExportBatch`이며 그래픽이 필요해 `-nographics` 없이 실행한다.
+- 실제 Play: `F1 → — Artifact — → Show artifact drops → Drop 폭발 머핀` 획득 후 기본 공격 8회 적중.
+- 상세 범위와 미확인 항목: [작업 기록](art-prompts/muffin-explosion-realtime-v1.md).
+
+### 폭탄 폭발 불씨·충격파 (2026-10-16)
+
+- Edit Mode: `Trickal Fan Game/Effects/Preview Bomb Burst` → `Open / reset Scene preview`. 폭발 원화(게임과 같은 0.15초 표시)·충격파 링·불씨 표시, 피해 반경, 0~0.8초 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
+- 검사: `Trickal Fan Game/Effects/Verify Bomb Burst` (`TrickalFanGame.Editor.BombBurstVerification.Verify`). 커밋 전 회귀는 `Verify Bomb Burst With Regressions`(`VerifyWithRegressionsBatch`, 2026-10-16 통과).
+- 정지 프레임 렌더: `Export Bomb Burst Frames` → `output/art-review/bomb-burst/unity-frames.png`(위: 원화 포함, 아래: 새 레이어만). 배치는 `VerifyAndExportBatch`이며 `-nographics` 없이 실행한다.
+- 실제 Play: 폭탄을 얻어 `F`로 설치하고 0.75초 뒤 폭발을 본다. 폭발 장애물도 같은 폭발을 쓰므로 함께 확인한다.
+- 상세 범위와 미확인 항목: [작업 기록](art-prompts/bomb-burst-v1.md).

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -80,6 +81,7 @@ namespace TrickalFanGame.Editor
                 ValidateTerrainUsesFeet();
                 ValidateEnemiesUseBody();
                 ValidateDoorwayUsesFeet();
+                ValidateShotAlongWallAbove();
             }
             finally
             {
@@ -219,6 +221,64 @@ namespace TrickalFanGame.Editor
                 crossed = body.position.x > Origin.x + 3f;
             });
             return crossed;
+        }
+
+        // Bug fix (2026-10-16 play feedback): with the feet against the wall above, the body center is closer to that
+        // wall than a basic shot's radius. A shot fired sideways slides clear of it; a shot fired into it stays.
+        private static void ValidateShotAlongWallAbove()
+        {
+            Run("shot along wall above", root =>
+            {
+                Box(root, "Environment", Origin + new Vector2(0f, 2f), new Vector2(20f, 1f));
+                Rigidbody2D body = Player(root, Origin);
+                Drive(body, Vector2.up);
+                Vector2 center = body.position;
+                Collider2D wall = root.GetComponentsInChildren<BoxCollider2D>().Single();
+                const float spawnOffset = 0.65f;
+                const float range = 5.3f;
+
+                foreach (float sign in new[] { 1f, -1f })
+                {
+                    Vector2 direction = new(sign, 0f);
+                    Projectile shot = Shot(root, center + direction * spawnOffset);
+                    Collider2D shotCollider = shot.GetComponent<Collider2D>();
+                    Assert(shotCollider.Distance(wall).isOverlapped,
+                        "The probe must reproduce the bug: a sideways shot from the body center starts in the wall.");
+                    shot.PushOutOfWallsBeside(direction);
+                    Assert(!shotCollider.Distance(wall).isOverlapped,
+                        $"A shot fired {(sign > 0f ? "right" : "left")} along the wall above must start clear of it.");
+                    Assert(Mathf.Abs(shot.transform.position.x - (center.x + sign * spawnOffset)) < 0.001f &&
+                           shot.transform.position.y < center.y && center.y - shot.transform.position.y < 0.2f,
+                        "The shot must only move down out of the wall, by less than its radius.");
+                    ContactFilter2D filter = new()
+                        { useLayerMask = true, layerMask = LayerMask.GetMask("Environment"), useTriggers = false };
+                    Assert(shotCollider.Cast(direction, filter, new RaycastHit2D[1], range) == 0,
+                        "A shot pushed out of the wall above must fly its range without touching it.");
+                    UnityEngine.Object.DestroyImmediate(shot.gameObject);
+                }
+
+                Projectile upward = Shot(root, center + Vector2.up * spawnOffset);
+                Vector3 before = upward.transform.position;
+                upward.PushOutOfWallsBeside(Vector2.up);
+                Assert(upward.transform.position == before &&
+                       upward.GetComponent<Collider2D>().Distance(wall).isOverlapped,
+                    "A shot fired into the wall must not be moved; the wall still takes it.");
+            });
+        }
+
+        private static Projectile Shot(GameObject root, Vector2 position)
+        {
+            GameObject shotObject = new("Hitbox-0 Shot", typeof(Rigidbody2D), typeof(CircleCollider2D));
+            shotObject.transform.SetParent(root.transform);
+            shotObject.transform.position = position;
+            shotObject.layer = LayerMask.NameToLayer("PlayerProjectile");
+            Rigidbody2D shotBody = shotObject.GetComponent<Rigidbody2D>();
+            shotBody.gravityScale = 0f;
+            ProjectileSizing.Apply(shotObject.transform, shotObject.GetComponent<CircleCollider2D>(),
+                ProjectileSizing.PlayerBasicScale);
+            Projectile shot = shotObject.AddComponent<Projectile>();
+            Physics2D.SyncTransforms();
+            return shot;
         }
 
         private static void ValidateEnemiesUseBody()

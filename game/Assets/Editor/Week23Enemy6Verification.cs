@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
+using TrickalFanGame.Frontend;
 using TrickalFanGame.Player;
 using TrickalFanGame.Room;
 using UnityEditor;
@@ -43,13 +44,18 @@ namespace TrickalFanGame.Editor
             ValidateDirectChase(prefab);
             ValidateRoomSpawn(prefab);
             ValidateProjectileHitsOneOverlappingEnemy(prefab);
+            ValidateContactRecoil(prefab);
+            ValidateShotHitsEnemyInsidePlayer(prefab);
             Debug.Log("Enemy-6 verification passed: setup is idempotent, Jyubi is a small Enemy-layer body with 1 " +
                       "health that any player hit kills on every floor, its touch takes exactly half a heart on " +
                       "floors 1 and 3 while other enemy damage keeps the one-heart minimum, it is faster than the " +
                       "player's base speed, it ignores pits and low obstacles but not trees or the player, it heads " +
                       "straight for its target past an obstacle, and a room registers it as an extra enemy that " +
                       "counts as a kill without changing the room state, and a player shot without pierce " +
-                      "hits only one of several overlapping enemies while each pierce adds exactly one more.");
+                      "hits only one of several overlapping enemies while each pierce adds exactly one more, it " +
+                      "bounces away from the player it touches or sits inside and pauses before chasing again, and " +
+                      "a player shot hits an enemy inside the player behind the shot's start but not one behind the " +
+                      "player.");
         }
 
         [MenuItem("Trickal Fan Game/Week 23/Verify Enemy-6 With Regressions")]
@@ -286,6 +292,142 @@ namespace TrickalFanGame.Editor
                     Assert(projectile.IsSpent && dead == pierces + 1 && enemies[0].IsDead && !enemies[^1].IsDead,
                         $"A shot with {pierces} pierce(s) must hit exactly {pierces + 1} of three overlapping " +
                         $"enemies, but hit {dead}.");
+                }
+                finally
+                {
+                    Object.DestroyImmediate(root);
+                    Physics2D.SyncTransforms();
+                }
+            }
+        }
+
+        // 2026-10-17: 쥬비 bounces off the player instead of riding along inside a player who passes through enemies.
+        private static void ValidateContactRecoil(GameObject prefab)
+        {
+            EnemyContactRecoil configured = prefab.GetComponent<EnemyContactRecoil>();
+            Assert(configured != null &&
+                   Mathf.Approximately(configured.Distance, Week23Enemy6Setup.RecoilDistance) &&
+                   Mathf.Approximately(configured.Duration, Week23Enemy6Setup.RecoilDuration) &&
+                   Mathf.Approximately(configured.Pause, Week23Enemy6Setup.RecoilPause) && configured.Pause > 0f,
+                "Jyubi must bounce off the player and pause with the configured recoil.");
+
+            GameObject root = new("Enemy-6 Recoil Verification");
+            try
+            {
+                Health player = CreatePlayer(root.transform);
+                player.transform.position = Origin;
+                PlayerHitPassThrough passThrough = player.gameObject.AddComponent<PlayerHitPassThrough>();
+                GameObject jyubi = (GameObject)PrefabUtility.InstantiatePrefab(prefab, root.transform);
+                jyubi.transform.position = Origin + Vector2.right * 0.1f;
+                InvokeAwake(jyubi.GetComponent<Health>());
+                EnemyBehaviorContext behavior = jyubi.GetComponent<EnemyBehaviorContext>();
+                behavior.Initialize();
+                behavior.BeginCombat(player.transform);
+                Physics2D.SyncTransforms();
+
+                EnemyContactRecoil recoil = jyubi.GetComponent<EnemyContactRecoil>();
+                KnockbackReceiver knockback = jyubi.GetComponent<KnockbackReceiver>();
+                Rigidbody2D body = jyubi.GetComponent<Rigidbody2D>();
+                FairyKingdomArtworkView view = jyubi.GetComponent<FairyKingdomArtworkView>();
+                if (view != null && view.Visual != null)
+                {
+                    // Control: moving right without a bounce turns the drawing right (flipX true).
+                    body.linearVelocity = Vector2.right;
+                    view.Visual.flipX = false;
+                    view.Refresh();
+                    Assert(view.Visual.flipX, "Jyubi's drawing must face the way it moves outside a bounce.");
+                    body.linearVelocity = Vector2.zero;
+                }
+
+                passThrough.Tick(Time.time);
+                Assert(!passThrough.IsPassingThrough && !recoil.Tick() && !knockback.IsActive,
+                    "Jyubi must not bounce off a player who is not passing through enemies without a touch.");
+
+                player.GetComponent<DamageInvulnerability>().BeginHitWindow(Time.time);
+                passThrough.Tick(Time.time);
+                Assert(passThrough.IsPassingThrough && recoil.Tick() && knockback.IsKnockedBack &&
+                       recoil.IsRecoiling &&
+                       Vector2.Distance(body.linearVelocity, Vector2.right * recoil.PeakSpeed) < 0.01f,
+                    $"Jyubi inside a passing-through player must bounce straight away, but moved {body.linearVelocity}.");
+                if (view != null && view.Visual != null)
+                {
+                    // Facing the player on its left (flipX false faces left); the bounce moves it right.
+                    view.Visual.flipX = false;
+                    view.Refresh();
+                    Assert(!view.Visual.flipX, "A bouncing Jyubi must keep facing the player it hit.");
+                }
+
+                const float step = 0.02f;
+                float travelled = 0f;
+                float previousSpeed = float.PositiveInfinity;
+                for (float elapsed = 0f; elapsed < recoil.Duration - 0.0001f; elapsed += step)
+                {
+                    recoil.TickRecoilVelocity(step);
+                    Vector2 velocity = body.linearVelocity;
+                    Assert(Vector2.Dot(velocity.normalized, Vector2.right) > 0.999f &&
+                           velocity.magnitude < previousSpeed,
+                        $"Jyubi's bounce must keep its direction and slow down every step, but moved {velocity}.");
+                    previousSpeed = velocity.magnitude;
+                    travelled += velocity.magnitude * step;
+                }
+
+                Assert(Mathf.Abs(travelled - recoil.Distance) < 0.001f &&
+                       Mathf.Approximately(recoil.DistanceCoveredAt(recoil.Duration), recoil.Distance),
+                    $"Jyubi's bounce must cover {recoil.Distance}, but covers {travelled}.");
+                Assert(!recoil.Tick() && !recoil.Recoil(player.transform),
+                    "Jyubi must not bounce again while its bounce is still running.");
+
+                Assert(behavior.IsMovementSuppressed, "Jyubi must not chase during its bounce.");
+                knockback.Tick(Time.time + recoil.Duration + 0.01f);
+                Assert(knockback.IsStunned && behavior.IsMovementSuppressed,
+                    "Jyubi must pause after its bounce before chasing again.");
+                knockback.Tick(Time.time + recoil.Duration + recoil.Pause + 0.01f);
+                Assert(!knockback.IsActive && !behavior.IsMovementSuppressed && recoil.Recoil(player.transform),
+                    "Jyubi must chase and bounce again after its pause.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Physics2D.SyncTransforms();
+            }
+        }
+
+        // A shot starts ahead of the player's body, so an enemy inside the player is swept from the body center.
+        private static void ValidateShotHitsEnemyInsidePlayer(GameObject prefab)
+        {
+            GameObject projectilePrefab =
+                AssetDatabase.LoadAssetAtPath<GameObject>(ErpinProjectileArtworkSetup.BasicPrefabPath);
+            PlayerProjectileAttack attack = Object.FindFirstObjectByType<PlayerProjectileAttack>();
+            Assert(attack != null, "Enemy-6 verification needs the Game Scene player attack.");
+            float spawnOffset = new SerializedObject(attack).FindProperty("spawnOffset").floatValue;
+            Assert(spawnOffset > 0.3f, "The shot must start ahead of the player for this check to mean anything.");
+
+            foreach ((Vector2 enemyOffset, bool expectHit) in new[]
+                     {
+                         (Vector2.zero, true),
+                         (Vector2.right * spawnOffset * 0.5f, true),
+                         (Vector2.left * 0.6f, false),
+                     })
+            {
+                GameObject root = new("Enemy-6 Inside Shot Verification");
+                try
+                {
+                    Health player = CreatePlayer(root.transform);
+                    player.transform.position = Origin;
+                    GameObject jyubi = (GameObject)PrefabUtility.InstantiatePrefab(prefab, root.transform);
+                    jyubi.transform.position = Origin + enemyOffset;
+                    Health enemy = jyubi.GetComponent<Health>();
+                    InvokeAwake(enemy);
+                    GameObject shot = (GameObject)PrefabUtility.InstantiatePrefab(projectilePrefab, root.transform);
+                    shot.transform.position = Origin + Vector2.right * spawnOffset;
+                    Physics2D.SyncTransforms();
+                    Projectile projectile = shot.GetComponent<Projectile>();
+                    projectile.Launch(Vector2.right, player,
+                        new DamageContext(player.gameObject, DamageSourceType.PlayerProjectile, 10f));
+                    projectile.HitEnemiesBehindLaunch(Origin);
+                    Assert(enemy.IsDead == expectHit && projectile.IsSpent == expectHit,
+                        $"A shot fired right must {(expectHit ? "" : "not ")}hit an enemy at {enemyOffset} from the " +
+                        "player's center.");
                 }
                 finally
                 {

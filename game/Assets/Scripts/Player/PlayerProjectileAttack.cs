@@ -107,6 +107,7 @@ namespace TrickalFanGame.Player
                 (Vector2)transform.position + direction * spawnOffset,
                 Quaternion.identity);
             projectile.transform.localScale = projectilePrefab.transform.localScale * ProjectileSizeMultiplier;
+            projectile.PushOutOfWallsBeside(direction);
 
             Vector2 velocity = direction * ProjectileSpeed
                 + movement.CurrentVelocity * inheritedVelocityFactor;
@@ -118,7 +119,9 @@ namespace TrickalFanGame.Player
                 stats.ProjectileSplitSettings,
                 configuredLifetime: ProjectileLifetime,
                 configuredHitEffects: stats.BasicAttackHitEffects,
-                configuredBounce: stats.ProjectileBounce);
+                configuredBounce: stats.ProjectileBounce,
+                configuredHoming: stats.BasicAttackHoming);
+            projectile.HitEnemiesBehindLaunch(transform.position);
         }
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)

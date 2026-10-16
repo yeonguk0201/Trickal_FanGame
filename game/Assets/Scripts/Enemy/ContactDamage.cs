@@ -32,6 +32,9 @@ namespace TrickalFanGame.Enemy
         {
             Health target = collision.collider.GetComponentInParent<Health>();
             TryApplyDamage(target, Time.time);
+            // A rammer (쥬비) bounces off every touch on the player, also one its cooldown kept harmless.
+            if (target != null && !target.IsDead && target.GetComponent<PlayerMovement>() != null)
+                GetComponent<EnemyContactRecoil>()?.Recoil(target.transform);
         }
 
         public bool TryApplyDamage(Health target, float currentTime)

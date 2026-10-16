@@ -65,8 +65,7 @@ namespace TrickalFanGame.Item
         private void Explode(Vector2 center)
         {
             if (stats == null) stats = GetComponent<PlayerStats>();
-            CombatSpriteEffect.Play("circular-explosion", center, radius * 2.2f, radius * 2.2f, 0.4f, transform,
-                GetComponentInChildren<SpriteRenderer>());
+            MuffinExplosionEffect.Play(center, radius, transform, GetComponentInChildren<SpriteRenderer>());
             explosionTargets.Clear();
             foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, radius, targetLayers))
             {
