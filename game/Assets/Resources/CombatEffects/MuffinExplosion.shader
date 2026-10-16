@@ -2,7 +2,7 @@ Shader "TrickalFanGame/Muffin Explosion"
 {
     Properties
     {
-        _Mode ("0 flash, 1 fireball, 2 ring, 3 spark, 4 smoke", Float) = 0
+        _Mode ("0 flash, 1 fireball, 2 ring, 3 spark, 4 smoke, 5 ember", Float) = 0
         _Opacity ("Layer opacity", Float) = 1
         _Age ("Normalized layer age", Float) = 0
         _Hole ("Fireball hollow radius", Float) = 0
@@ -97,6 +97,13 @@ Shader "TrickalFanGame/Muffin Explosion"
                     float core=1-smoothstep(0.0,0.55,d);
                     half3 c=lerp(i.color.rgb,half3(1,1,0.9),core*0.8);
                     return half4(c,(1-smoothstep(0.45,1,d))*i.color.a);
+                }
+                if (_Mode>4.5)
+                {
+                    // Ember: a solid glowing bead, hot yellow inside and a deeper rim that reads on bright floors.
+                    float core=1-smoothstep(0.0,0.75,d);
+                    half3 c=lerp(half3(0.86,0.24,0.06),lerp(i.color.rgb,half3(1,0.82,0.25),0.5),core);
+                    return half4(c,(1-smoothstep(0.75,1,d))*i.color.a);
                 }
                 // Smoke: a soft puff whose outline breaks up with world-space noise.
                 float s=Noise(i.world*3.1+_Seed)+Noise(i.world*6.7)*0.5;

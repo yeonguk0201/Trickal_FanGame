@@ -141,6 +141,7 @@ namespace TrickalFanGame.Resource
                 float diameterScale = explosionRadius * 2f / Mathf.Max(0.01f, armedDiameter);
                 transform.localScale = armedScale * diameterScale;
             }
+            BombBurstEffect.Play(center, explosionRadius, owner != null ? owner.transform : null, visual);
 
             Exploded?.Invoke(this);
             return true;
