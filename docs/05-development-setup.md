@@ -1987,3 +1987,11 @@ Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금�
 - 검사: `Trickal Fan Game/Effects/Verify Hit Feedback` (`TrickalFanGame.Editor.HitFeedbackVerification.Verify`).
 - 실제 Play: 적을 기본 공격으로 맞혀 스파크를 확인한다. `F1 → — Player — → CRIT 100%`로 이번 Run의 직접 타격을 모두 치명타로 만들면 히트스톱과 약한 카메라 흔들림을 매번 볼 수 있다.
 - 상세 범위와 미확인 항목: [작업 기록](art-prompts/hit-spark.md).
+
+### 폭발 머핀 실시간 폭발 (2026-10-16)
+
+- Edit Mode: `Trickal Fan Game/Effects/Preview Muffin Explosion` → `Open / reset Scene preview`. 피해 반경, 섬광·불덩이·충격파 링·불꽃 조각·연기 레이어, 기준 적 표시, 기존 `circular-explosion` 시트와의 A/B 전환, 0~0.4초 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
+- 검사: `Trickal Fan Game/Effects/Verify Muffin Explosion` (`TrickalFanGame.Editor.MuffinExplosionVerification.Verify`). 커밋 전 회귀는 `Verify Muffin Explosion With Regressions`(`VerifyWithRegressionsBatch`, 2026-10-16 통과).
+- 정지 프레임 렌더: `Export Muffin Explosion Frames` → `output/art-review/muffin-explosion/unity-frames.png`(위: 새 효과, 아래: 기존 시트). 배치는 `VerifyAndExportBatch`이며 그래픽이 필요해 `-nographics` 없이 실행한다.
+- 실제 Play: `F1 → — Artifact — → Show artifact drops → Drop 폭발 머핀` 획득 후 기본 공격 8회 적중.
+- 상세 범위와 미확인 항목: [작업 기록](art-prompts/muffin-explosion-realtime-v1.md).
