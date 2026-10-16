@@ -1,5 +1,6 @@
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
+using TrickalFanGame.Item;
 using UnityEngine;
 
 namespace TrickalFanGame.Player
@@ -78,11 +79,21 @@ namespace TrickalFanGame.Player
         private float powerAttackDamagePercentBonus;
         private float powerAttackSpeedPercentBonus;
         private float powerMoveSpeedPercentBonus;
+        // Spell-6 (엘리스의 타로카드): Run-long signed steps. Unlike item bonuses they may be negative.
+        private float tarotAttackDamagePercent;
+        private float tarotAttackSpeedPercent;
+        private float tarotMoveSpeedPercent;
+        private float tarotRangePercent;
+        private float tarotShotSpeedPercent;
+        private float tarotCriticalChance;
+        private float tarotCriticalDamage;
+        // Spell-6 (에슈르의 마도서): basic attack homing in the room the spell was used in.
+        private ProjectileHomingSettings singleUseRoomHoming;
 
         public float MaxHealth => baseMaxHealth + maxHealthBonus;
         public float AttackDamage =>
             (baseAttackDamage + flatAttackDamageBonus) *
-            Mathf.Max(0f, 1f + attackDamagePercentBonus + powerAttackDamagePercentBonus);
+            Mathf.Max(0f, 1f + attackDamagePercentBonus + powerAttackDamagePercentBonus + tarotAttackDamagePercent);
         public float SkillDamageMultiplier => 1f + skillDamagePercentBonus;
         // Passive-2: PlayerBodySize turns this into the look, the hurtbox and the fixed feet.
         public float PlayerSizeMultiplier => 1f + playerSizePercentBonus;
@@ -91,19 +102,22 @@ namespace TrickalFanGame.Player
         public float MoveSpeed => (baseMoveSpeed + moveSpeedBonus) *
             Mathf.Max(0f, 1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent +
                 currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus + powerMoveSpeedPercentBonus +
+                tarotMoveSpeedPercent +
                 (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f)) *
             EnvironmentSlow.MultiplierOf(this);
         public float AttackSpeed => baseAttackSpeed *
             Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus +
                              singleUseRoomAttackSpeedPercentBonus + killFrenzyAttackSpeedPercent +
-                             powerAttackSpeedPercentBonus);
+                             powerAttackSpeedPercentBonus + tarotAttackSpeedPercent);
         public float BasicAttackRoomDamageMultiplier =>
             1f + basicAttackDamagePercentBonus + currentRoomAttackDamagePercentBonus +
             singleUseRoomAttackDamagePercentBonus + killFrenzyBasicAttackDamagePercent;
         public float CriticalChance =>
-            Mathf.Clamp01(baseCriticalChance + criticalChanceBonus + singleUseRoomCriticalChanceBonus);
+            Mathf.Clamp01(baseCriticalChance + criticalChanceBonus + singleUseRoomCriticalChanceBonus +
+                          tarotCriticalChance);
         public float CriticalDamageMultiplier =>
-            Mathf.Max(1f, baseCriticalDamageMultiplier + criticalDamageBonus + singleUseRoomCriticalDamageBonus);
+            Mathf.Max(1f, baseCriticalDamageMultiplier + criticalDamageBonus + singleUseRoomCriticalDamageBonus +
+                          tarotCriticalDamage);
         public int ProjectileCount => 1 + additionalProjectileCount;
         public int PierceCount => pierceCount;
         public float HealOnKill => healOnKill;
@@ -117,8 +131,13 @@ namespace TrickalFanGame.Player
         public int PeriodicKillHealProgress => periodicKillHealProgress;
         public ProjectileSplitSettings ProjectileSplitSettings => projectileSplitSettings;
         // Range-0: basic attack travel distance = flight time × shot speed.
-        public float ProjectileSpeedMultiplier => 1f + projectileSpeedPercentBonus;
-        public float ProjectileLifetimeMultiplier => 1f + projectileLifetimePercentBonus;
+        // 엘리스의 타로카드 may lower them, never below MinimumTarotMultiplier.
+        public float ProjectileSpeedMultiplier =>
+            Mathf.Max(MinimumTarotMultiplier, 1f + projectileSpeedPercentBonus + tarotShotSpeedPercent);
+        public float ProjectileLifetimeMultiplier =>
+            Mathf.Max(MinimumTarotMultiplier, 1f + projectileLifetimePercentBonus + tarotRangePercent);
+        public const float MinimumTarotMultiplier = 0.1f;
+        public ProjectileHomingSettings BasicAttackHoming => singleUseRoomHoming;
         // Passive-0 §4.1: scales the basic attack shot's look and collision radius together, never its damage.
         public float ProjectileSizeMultiplier =>
             Mathf.Min(1f + projectileSizePercentBonus, ProjectileSizing.MaximumPlayerBasicSizeMultiplier);
@@ -243,6 +262,39 @@ namespace TrickalFanGame.Player
             powerAttackSpeedPercentBonus = Mathf.Max(0f, attackSpeed);
             powerMoveSpeedPercentBonus = Mathf.Max(0f, moveSpeed);
         }
+
+        public void SetSingleUseRoomHoming(float coefficient, float detectionRange)
+        {
+            singleUseRoomHoming = new ProjectileHomingSettings(coefficient, detectionRange);
+        }
+
+        // 엘리스의 타로카드: adds one signed step for the rest of the Run.
+        public void AddTarotStep(TarotStat stat, float amount)
+        {
+            switch (stat)
+            {
+                case TarotStat.AttackDamage: tarotAttackDamagePercent += amount; break;
+                case TarotStat.AttackSpeed: tarotAttackSpeedPercent += amount; break;
+                case TarotStat.MoveSpeed: tarotMoveSpeedPercent += amount; break;
+                case TarotStat.Range: tarotRangePercent += amount; break;
+                case TarotStat.ShotSpeed: tarotShotSpeedPercent += amount; break;
+                case TarotStat.CriticalChance: tarotCriticalChance += amount; break;
+                case TarotStat.CriticalDamage: tarotCriticalDamage += amount; break;
+                default: throw new System.ArgumentOutOfRangeException(nameof(stat), stat, null);
+            }
+        }
+
+        public float GetTarotStep(TarotStat stat) => stat switch
+        {
+            TarotStat.AttackDamage => tarotAttackDamagePercent,
+            TarotStat.AttackSpeed => tarotAttackSpeedPercent,
+            TarotStat.MoveSpeed => tarotMoveSpeedPercent,
+            TarotStat.Range => tarotRangePercent,
+            TarotStat.ShotSpeed => tarotShotSpeedPercent,
+            TarotStat.CriticalChance => tarotCriticalChance,
+            TarotStat.CriticalDamage => tarotCriticalDamage,
+            _ => 0f,
+        };
 
         public void SetCurrentRoomAttackSpeedPercent(float amount)
         {

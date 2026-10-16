@@ -27,6 +27,7 @@ namespace TrickalFanGame.Frontend
         public IReadOnlyList<MinimapRoomMarkerView> VisibleMarkers => visibleMarkers;
         public int VisibleConnectionCount => visibleConnections.Count;
         public string CurrentRoomId { get; private set; }
+        public bool IsFloorRevealed { get; private set; }
         public float EffectiveSpacing { get; private set; }
 
         public void Configure(RunProgress configuredProgress, RectTransform configuredMapRoot,
@@ -62,6 +63,7 @@ namespace TrickalFanGame.Frontend
         {
             ClearInstances();
             CurrentRoomId = null;
+            IsFloorRevealed = false;
             EffectiveSpacing = roomSpacing;
             if (runProgress == null || mapRoot == null || markerTemplate == null || connectionTemplate == null ||
                 runProgress.GeneratedGraph == null || runProgress.CurrentFloor < 1 || runProgress.CurrentRoom < 1)
@@ -76,6 +78,9 @@ namespace TrickalFanGame.Frontend
             if (current == null) return;
 
             CurrentRoomId = current.RoomId;
+            // Spell-6 (네티의 지도): every room shows, the secret room by its position only.
+            bool isRevealed = runProgress.IsFloorMapRevealed(floor.FloorNumber);
+            IsFloorRevealed = isRevealed;
             HashSet<string> visitedIds = new(StringComparer.Ordinal);
             HashSet<string> visibleIds = new(StringComparer.Ordinal);
             foreach (GeneratedRoomNode node in floor.Nodes)
@@ -84,6 +89,10 @@ namespace TrickalFanGame.Frontend
                 if (node.RoomId == current.RoomId || state?.HasVisited == true)
                 {
                     visitedIds.Add(node.RoomId);
+                    visibleIds.Add(node.RoomId);
+                }
+                else if (isRevealed)
+                {
                     visibleIds.Add(node.RoomId);
                 }
             }
@@ -124,7 +133,8 @@ namespace TrickalFanGame.Frontend
                 foreach (GeneratedRoomConnection connection in node.DirectionalConnections)
                 {
                     if (!visibleIds.Contains(connection.DestinationRoomId) || !IsPassageKnown(node, connection) ||
-                        (!visitedIds.Contains(node.RoomId) && !visitedIds.Contains(connection.DestinationRoomId)))
+                        (!isRevealed && !visitedIds.Contains(node.RoomId) &&
+                         !visitedIds.Contains(connection.DestinationRoomId)))
                         continue;
                     string key = string.CompareOrdinal(node.RoomId, connection.DestinationRoomId) < 0
                         ? node.RoomId + "|" + connection.DestinationRoomId
@@ -164,13 +174,19 @@ namespace TrickalFanGame.Frontend
             {
                 runProgress.RoomChanged -= HandleRoomChanged;
                 runProgress.RoomChanged += HandleRoomChanged;
+                runProgress.MapChanged -= RefreshNow;
+                runProgress.MapChanged += RefreshNow;
             }
             SyncStateSubscriptions();
         }
 
         private void Unsubscribe()
         {
-            if (runProgress != null) runProgress.RoomChanged -= HandleRoomChanged;
+            if (runProgress != null)
+            {
+                runProgress.RoomChanged -= HandleRoomChanged;
+                runProgress.MapChanged -= RefreshNow;
+            }
             foreach (RoomRunState state in observedRoomStates) state.Changed -= HandleRoomStateChanged;
             observedRoomStates.Clear();
         }

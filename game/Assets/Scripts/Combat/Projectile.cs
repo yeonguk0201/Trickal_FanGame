@@ -93,6 +93,7 @@ namespace TrickalFanGame.Combat
         private readonly Dictionary<Health, int> hitCounts = new();
         private int remainingPierces;
         private ProjectileBounceSettings bounceSettings;
+        private ProjectileHomingSettings homingSettings;
         private int remainingBounces;
         // The enemy the shot flies to after a bounce.
         private Health bounceTarget;
@@ -124,6 +125,8 @@ namespace TrickalFanGame.Combat
         public int RemainingBounces => remainingBounces;
         public Health BounceTarget => bounceTarget;
         public Health RepeatTarget => repeatTarget;
+        public ProjectileHomingSettings Homing => homingSettings;
+        public Health HomingTarget { get; private set; }
         public Vector2 Velocity => body != null ? body.linearVelocity : Vector2.zero;
 
         private void Awake()
@@ -140,6 +143,7 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
+            TickHoming(Time.fixedDeltaTime);
             if (maximumTravelDistance > 0f &&
                 ((Vector2)transform.position - travelOrigin).sqrMagnitude >=
                 maximumTravelDistance * maximumTravelDistance)
@@ -198,6 +202,69 @@ namespace TrickalFanGame.Combat
             }
 
             return isSpent;
+        }
+
+        // Passive-0 §4.2: turns the flight toward the nearest enemy in front of the shot, keeping its speed, so the
+        // range (flight time × speed) does not change. With no enemy in range the shot flies straight on.
+        public void TickHoming(float deltaTime)
+        {
+            HomingTarget = null;
+            // A bounce (칸타의 팽이) already steers the shot to its next enemy.
+            if (!homingSettings.IsEnabled || isSpent || deltaTime <= 0f || flightVelocity.sqrMagnitude <= 0.0001f ||
+                bounceTarget != null || repeatTarget != null)
+            {
+                return;
+            }
+
+            HomingTarget = FindHomingTarget();
+            if (HomingTarget == null)
+            {
+                return;
+            }
+
+            Vector2 desired = (Vector2)HomingTarget.transform.position - (Vector2)transform.position;
+            if (desired.sqrMagnitude <= 0.0001f)
+            {
+                return;
+            }
+
+            float currentAngle = Mathf.Atan2(flightVelocity.y, flightVelocity.x) * Mathf.Rad2Deg;
+            float desiredAngle = Mathf.Atan2(desired.y, desired.x) * Mathf.Rad2Deg;
+            float nextAngle = Mathf.MoveTowardsAngle(currentAngle, desiredAngle,
+                homingSettings.TurnDegreesPerSecond * deltaTime) * Mathf.Deg2Rad;
+            SetFlightVelocity(new Vector2(Mathf.Cos(nextAngle), Mathf.Sin(nextAngle)) * flightVelocity.magnitude);
+        }
+
+        private Health FindHomingTarget()
+        {
+            Vector2 center = transform.position;
+            Vector2 forward = flightVelocity.normalized;
+            Health nearest = null;
+            float nearestDistance = float.PositiveInfinity;
+            foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, homingSettings.DetectionRange,
+                         EnemyLayerMask))
+            {
+                Health candidate = hit.GetComponentInParent<Health>();
+                if (candidate == null || candidate == owner || candidate.IsDead ||
+                    !candidate.gameObject.activeInHierarchy || hitCounts.ContainsKey(candidate) ||
+                    candidate.GetComponent<PlayerCombatEvents>() != null)
+                {
+                    continue;
+                }
+
+                Vector2 offset = (Vector2)candidate.transform.position - center;
+                float distance = offset.sqrMagnitude;
+                // Only the half in front of the shot (180°).
+                if (Vector2.Dot(offset, forward) < 0f || distance >= nearestDistance)
+                {
+                    continue;
+                }
+
+                nearestDistance = distance;
+                nearest = candidate;
+            }
+
+            return nearest;
         }
 
         // The player's shot starts at the body center, above the feet that walls stop. Fired along a wall the feet
@@ -263,7 +330,8 @@ namespace TrickalFanGame.Combat
             float configuredMaximumTravelDistance = 0f,
             float configuredLifetime = 0f,
             ProjectileHitEffects configuredHitEffects = default,
-            ProjectileBounceSettings configuredBounce = default)
+            ProjectileBounceSettings configuredBounce = default,
+            ProjectileHomingSettings configuredHoming = default)
         {
             if (body == null)
             {
@@ -284,6 +352,8 @@ namespace TrickalFanGame.Combat
             hitEffects = configuredHitEffects;
             bounceSettings = configuredBounce;
             remainingBounces = configuredBounce.IsEnabled ? configuredBounce.BounceCount : 0;
+            homingSettings = configuredHoming;
+            HomingTarget = null;
             bounceTarget = null;
             repeatTarget = null;
             flightVelocity = velocity;

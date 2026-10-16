@@ -873,6 +873,61 @@ export const ITEM_CATALOG = [
     ],
   },
   {
+    id: 'single-spell-netti-map',
+    name: '네티의 지도',
+    description:
+      '사용하면 현재 층의 모든 방을 미니맵에 공개하고 골드 5를 얻습니다. 비밀방은 위치만 표시되며 벽은 열리지 않습니다. 골드가 가득해도 사용할 수 있고 한도 99를 넘는 골드는 버려집니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'RevealCurrentFloorMap' },
+      { type: 'GainGold', integerAmount: 5 },
+    ],
+  },
+  {
+    id: 'single-spell-eshur-grimoire',
+    name: '에슈르의 마도서',
+    description:
+      '아직 클리어하지 않은 전투방·보스방에서 사용하면 그 방에 있는 동안 기본 공격이 진행 방향 앞쪽 4m 안의 가장 가까운 적에게 유도됩니다(유도 계수 0.5, 초당 180° 회전). 같은 방에서 다시 쓰면 유도 계수가 더해지고, 방을 떠나면 해제됩니다.',
+    rarity: 'UNCOMMON',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'CurrentRoomBasicAttackHoming', magnitude: 0.5, radius: 4 },
+    ],
+  },
+  {
+    id: 'single-spell-tig-challenge',
+    name: '티그의 도전장',
+    description:
+      '사용하면 현재 층의 보스방 입구로 즉시 이동해 보스전을 시작합니다. 보스를 클리어한 뒤에도 이동할 수 있습니다. 전투 중인 방에서 쓰면 떠난 방은 처음부터 다시 시작하며, 보스방 안에서는 사용할 수 없습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'TeleportToBossRoom' }],
+  },
+  {
+    id: 'single-spell-goldi-invitation',
+    name: '골디의 초대장',
+    description:
+      '사용하면 현재 층의 비밀방을 골디 상점으로 바꾸고 그 안으로 이동합니다(이미 골디 상점이면 이동만). 전투 중이거나, 비밀방이 없는 층이나 보상을 이미 받은 비밀방에서는 사용할 수 없습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'TeleportToGoldiShop' }],
+  },
+  {
+    id: 'single-spell-ellis-tarot-card',
+    name: '엘리스의 타로카드',
+    description:
+      '사용하면 Run이 끝날 때까지 무작위 능력치 1개(60%) 또는 2개(40%)가 오르고, 30% 확률로 다른 능력치 1개(70%) 또는 2개(30%)가 내려갑니다. 공격력 ±8%, 공격 속도 ±8%, 이동 속도 ±5%, 사거리 ±10%, 탄속 ±10%, 치명타 확률 ±5%p, 치명타 피해 ±20%p이며 HP·SP는 바뀌지 않습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'RandomStatShift' }],
+  },
+  {
     id: 'item-06',
     name: '다중 투사체',
     description:

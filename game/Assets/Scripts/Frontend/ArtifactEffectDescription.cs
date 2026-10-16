@@ -201,8 +201,27 @@ namespace TrickalFanGame.Frontend
                 ItemEffectType.CurrentRoomEnemyPoison =>
                     $"현재 방의 모든 적에게 중독 {effect.IntegerAmount}중첩 ({Number(effect.DurationSeconds)}초간 " +
                     $"{Number(effect.IntervalSeconds)}초마다 중첩당 공격력 {Percent(effect.Magnitude)} 피해)",
+                ItemEffectType.RevealCurrentFloorMap => "현재 층 지도 전체 공개 (비밀방은 위치만 표시)",
+                ItemEffectType.GainGold => $"골드 +{effect.IntegerAmount} (보유 한도 99까지)",
+                ItemEffectType.CurrentRoomBasicAttackHoming =>
+                    $"현재 방에서 기본 공격이 앞쪽 {Number(effect.Radius)}m 안의 적을 유도 추적 (유도 계수 " +
+                    $"{Number(effect.Magnitude)}, 방 이탈 시 해제)",
+                ItemEffectType.TeleportToBossRoom => "현재 층 보스방으로 즉시 이동해 보스전 시작 (보스방 안에서는 사용 불가)",
+                ItemEffectType.TeleportToGoldiShop =>
+                    "현재 층 비밀방을 골디 상점으로 바꾸고 그 안으로 이동 (전투 중·비밀방이 없거나 보상을 받았으면 사용 불가)",
+                ItemEffectType.RandomStatShift => TarotDescription(),
                 _ => effect.EffectType.ToString(),
             };
+        }
+
+        // 엘리스의 타로카드: the draw table lives in TarotCardDraw, so the text follows it.
+        private static string TarotDescription()
+        {
+            string steps = string.Join(", ", System.Array.ConvertAll(TarotCardDraw.Stats, stat =>
+                TarotCardDraw.NameOf(stat) + " ±" + (stat is TarotStat.CriticalChance or TarotStat.CriticalDamage
+                    ? PercentPoint(TarotCardDraw.StepOf(stat))
+                    : Percent(TarotCardDraw.StepOf(stat)))));
+            return $"Run 동안 무작위 능력치 1~2개 증가, {TarotCardDraw.DropPercent}% 확률로 다른 1~2개 감소 (" + steps + ")";
         }
 
         private static string SPHalves(int halves) => halves == 1

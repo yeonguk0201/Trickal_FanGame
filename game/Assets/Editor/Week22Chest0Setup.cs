@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using TrickalFanGame.Frontend;
 using TrickalFanGame.Room;
 using UnityEditor;
 using UnityEngine;
@@ -41,7 +42,12 @@ namespace TrickalFanGame.Editor
                 root.layer = LayerMask.NameToLayer(TreasureChest.LayerName);
                 root.transform.localScale = Vector3.one * (ChestPlacement.ChestWorldSize / sprite.bounds.size.x);
                 SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(root);
-                renderer.sprite = sprite;
+                // FairyKingdomArtworkSetup draws the chest afterwards. Later setups that rebuild the chest table call
+                // this again, so a chest that already carries its artwork keeps that sprite and colour; only the
+                // placeholder-based size, body and chest contract are refreshed.
+                bool hasArtwork = root.GetComponent<FairyKingdomArtworkView>() != null && renderer.sprite != null;
+                Color keptColor = renderer.color;
+                if (!hasArtwork) renderer.sprite = sprite;
                 renderer.sortingOrder = 1;
                 BoxCollider2D collider = GetOrAdd<BoxCollider2D>(root);
                 collider.isTrigger = false;
@@ -51,6 +57,7 @@ namespace TrickalFanGame.Editor
                 TreasureChest chest = GetOrAdd<TreasureChest>(root);
                 chest.Configure(TreasureChest.DefaultChestId, ChestKind.Normal);
                 chest.ConfigureDisplay(renderer);
+                if (hasArtwork) renderer.color = keptColor;
 
                 Directory.CreateDirectory("Assets/Prefabs");
                 if (PrefabUtility.SaveAsPrefabAsset(root, ChestPrefabPath) == null)

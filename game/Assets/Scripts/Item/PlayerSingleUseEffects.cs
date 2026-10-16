@@ -58,6 +58,9 @@ namespace TrickalFanGame.Item
         private float roomMoveSpeedPercent;
         private float roomCriticalDamagePercent;
         private float roomCriticalChancePercent;
+        // 에슈르의 마도서: coefficients add up; the detection range is the largest one (contract 24 §4.2).
+        private float roomHomingCoefficient;
+        private float roomHomingRange;
 
         // 빅우드의 열매: while the window runs every hit is reduced, and each hit that still costs HP is healed back
         // after a delay with a bonus. Game time only, kept across rooms and floors. Hits after the window are not
@@ -99,6 +102,8 @@ namespace TrickalFanGame.Item
         private float roomDamageMultiplier = 1f;
 
         private readonly List<Health> lastSurpriseTargets = new();
+        private readonly List<TarotStatChange> lastTarotChanges = new();
+        private RoomGraphAssembler roomAssembler;
 
         private struct PendingRecovery
         {
@@ -121,6 +126,11 @@ namespace TrickalFanGame.Item
         public float RoomAttackDamagePercent => IsRoomBoostActive ? roomAttackDamagePercent : 0f;
         public float RoomAttackSpeedPercent => IsRoomBoostActive ? roomAttackSpeedPercent : 0f;
         public float RoomMoveSpeedPercent => IsRoomBoostActive ? roomMoveSpeedPercent : 0f;
+        public float RoomHomingCoefficient => IsRoomBoostActive ? roomHomingCoefficient : 0f;
+        public float RoomHomingRange => IsRoomBoostActive ? roomHomingRange : 0f;
+        public IReadOnlyList<TarotStatChange> LastTarotChanges => lastTarotChanges;
+        // The room a move spell left mid-fight, reset like 그건 내 잔상 (null when the left room was not fighting).
+        public string LastAbandonedRoomId { get; private set; }
 
         public bool IsPulseActive => !string.IsNullOrEmpty(pulseRoomId);
         public string PulseRoomId => pulseRoomId;
@@ -167,6 +177,11 @@ namespace TrickalFanGame.Item
         public void ConfigureChestContents(ChestContentTable configuredChestContentTable)
         {
             chestContentTable = configuredChestContentTable;
+        }
+
+        public void ConfigureRoomAssembler(RoomGraphAssembler configuredAssembler)
+        {
+            roomAssembler = configuredAssembler;
         }
 
         public static void SetGoldRollProviderForTesting(Func<int, int, int> provider)
@@ -517,6 +532,46 @@ namespace TrickalFanGame.Item
                     }
 
                     return true;
+                case ItemEffectType.RevealCurrentFloorMap:
+                    if (FindCurrentNode(spellSlot != null ? spellSlot.Progress : null) == null)
+                    {
+                        reason = "The player is not on a generated floor.";
+                        return false;
+                    }
+
+                    reason = string.Empty;
+                    return true;
+                case ItemEffectType.GainGold:
+                    // Unlike 랜덤코인 a full wallet does not refuse it (네티의 지도): the gold beyond the limit is lost.
+                    if (spellSlot == null || spellSlot.Progress == null || spellSlot.Progress.IsProgressionStopped)
+                    {
+                        reason = "The Run is not in progress.";
+                        return false;
+                    }
+
+                    reason = string.Empty;
+                    return true;
+                case ItemEffectType.CurrentRoomBasicAttackHoming:
+                    if (playerStats == null)
+                    {
+                        reason = "The player has no stats.";
+                        return false;
+                    }
+
+                    return IsInUnclearedCombatRoom(false, out reason);
+                case ItemEffectType.TeleportToBossRoom:
+                    return CanMoveTo(GeneratedRoomRole.Boss, out reason, out _);
+                case ItemEffectType.TeleportToGoldiShop:
+                    return CanMoveTo(GeneratedRoomRole.Secret, out reason, out _);
+                case ItemEffectType.RandomStatShift:
+                    if (playerStats == null || spellSlot == null || spellSlot.Progress == null)
+                    {
+                        reason = "The player has no stats.";
+                        return false;
+                    }
+
+                    reason = string.Empty;
+                    return true;
                 case ItemEffectType.StunAndCutRandomEnemies:
                     if (health == null || health.IsDead)
                     {
@@ -638,6 +693,28 @@ namespace TrickalFanGame.Item
                     break;
                 case ItemEffectType.StunAndCutRandomEnemies:
                     StunAndCutRandomEnemies(effect);
+                    break;
+                case ItemEffectType.RevealCurrentFloorMap:
+                    int floorNumber = spellSlot.Progress.CurrentFloor;
+                    bool revealed = spellSlot.Progress.TryRevealFloorMap(floorNumber);
+                    Debug.Log($"[PlayerSingleUseEffects] Netti map: floor {floorNumber} " +
+                              (revealed ? "revealed." : "was already revealed."), this);
+                    break;
+                case ItemEffectType.GainGold:
+                    LastGoldGained = spellSlot.Progress.TryAddResource(RunResourceType.Gold, effect.IntegerAmount);
+                    Debug.Log($"[PlayerSingleUseEffects] Gained {LastGoldGained} of {effect.IntegerAmount} gold.", this);
+                    break;
+                case ItemEffectType.CurrentRoomBasicAttackHoming:
+                    StartRoomBoost(0f, 0f, 0f, 0f, 0f, effect.Magnitude, effect.Radius);
+                    break;
+                case ItemEffectType.TeleportToBossRoom:
+                    MoveTo(GeneratedRoomRole.Boss);
+                    break;
+                case ItemEffectType.TeleportToGoldiShop:
+                    MoveTo(GeneratedRoomRole.Secret);
+                    break;
+                case ItemEffectType.RandomStatShift:
+                    DrawTarotCard();
                     break;
                 case ItemEffectType.ReduceAndRecoverDamageTaken:
                     // Using it again while active restarts the full window; heals already pending stay.
@@ -1024,6 +1101,160 @@ namespace TrickalFanGame.Item
             return true;
         }
 
+        // 티그의 도전장 and 골디의 초대장: move first, then reset a room left mid-fight (only 티그의 도전장 may leave one), so
+        // a refused move never leaves a reset room behind. The boss fight starts on arrival; the secret room becomes the
+        // 골디 shop before the move.
+        private void MoveTo(GeneratedRoomRole role)
+        {
+            if (!CanMoveTo(role, out string reason, out GeneratedRoomNode target))
+                throw new InvalidOperationException("[PlayerSingleUseEffects] Move refused: " + reason);
+
+            RoomGraphController graph = ResolveRoomGraph();
+            RoomNode source = graph.CurrentNode;
+            RoomNode destination = FindRuntimeNode(graph, target.RoomId);
+            RoomController sourceRoom = FindRoomController(source);
+            bool leavesFight = sourceRoom != null && sourceRoom.State == RoomState.Combat &&
+                               !sourceRoom.IsProgressionStopped;
+            if (role == GeneratedRoomRole.Secret && !target.IsGoldiShop &&
+                !ResolveRoomAssembler().TryConvertSecretRoomToGoldiShop(target, out string error))
+                throw new InvalidOperationException("[PlayerSingleUseEffects] Goldi shop refused: " + error);
+
+            if (!graph.TryTeleport(source, destination, DoorEntryPosition(destination, target),
+                    GetComponent<PlayerMovement>()))
+                throw new InvalidOperationException($"[PlayerSingleUseEffects] Move to {target.RoomId} failed.");
+
+            LastAbandonedRoomId = null;
+            if (leavesFight)
+            {
+                if (sourceRoom.TryAbandonCombat()) LastAbandonedRoomId = source.RoomId;
+                else Debug.LogError($"[PlayerSingleUseEffects] {source.RoomId} could not reset after the move.", this);
+            }
+
+            if (role == GeneratedRoomRole.Boss)
+            {
+                // The room trigger would also start it on the next physics step; starting here makes it immediate.
+                RoomController bossRoom = FindRoomController(destination);
+                if (bossRoom != null && bossRoom.State != RoomState.Cleared) bossRoom.BeginCombat(health);
+            }
+
+            Debug.Log($"[PlayerSingleUseEffects] Moved from {source.RoomId} to {target.RoomId}" +
+                      (LastAbandonedRoomId != null ? $", {LastAbandonedRoomId} reset." : "."), this);
+        }
+
+        // The boss room or the floor's secret room (골디 shop), on the floor the graph is showing, from any other room.
+        private bool CanMoveTo(GeneratedRoomRole role, out string reason, out GeneratedRoomNode target)
+        {
+            target = null;
+            RunProgress progress = spellSlot != null ? spellSlot.Progress : null;
+            RoomGraphController graph = ResolveRoomGraph();
+            PlayerMovement player = GetComponent<PlayerMovement>();
+            if (health == null || health.IsDead || graph == null || player == null || progress == null ||
+                (graph.Progress != null && graph.Progress != progress))
+            {
+                reason = "The player is not in a room graph.";
+                return false;
+            }
+
+            GeneratedRoomNode current = FindCurrentNode(progress);
+            RoomNode source = graph.CurrentNode;
+            if (current == null || source == null ||
+                !string.Equals(source.RoomId, current.RoomId, StringComparison.Ordinal))
+            {
+                reason = "The player is not in a generated room.";
+                return false;
+            }
+
+            GeneratedFloor floor = progress.GeneratedGraph.FindFloor(current.FloorNumber);
+            if (floor != null)
+                foreach (GeneratedRoomNode node in floor.Nodes)
+                    if (node != null && node.Role == role) target = node;
+            if (target == null)
+            {
+                reason = role == GeneratedRoomRole.Boss ? "This floor has no boss room." : "This floor has no secret room.";
+                return false;
+            }
+
+            if (string.Equals(target.RoomId, current.RoomId, StringComparison.Ordinal))
+            {
+                reason = role == GeneratedRoomRole.Boss ? "The player is already in the boss room."
+                    : "The player is already in the secret room.";
+                return false;
+            }
+
+            if (role == GeneratedRoomRole.Secret)
+            {
+                // 골디의 초대장 is a shopping trip, not an escape (user decision, 2026-10-16).
+                RoomController currentRoom = FindRoomController(source);
+                if (currentRoom != null && currentRoom.State == RoomState.Combat && !currentRoom.IsProgressionStopped)
+                {
+                    reason = "It cannot be used during combat.";
+                    return false;
+                }
+
+                RoomGraphAssembler assembler = ResolveRoomAssembler();
+                if (assembler == null)
+                {
+                    reason = "No room assembler can build the 골디 shop.";
+                    return false;
+                }
+
+                if (!assembler.CanHoldGoldiShop(target, out reason)) return false;
+            }
+
+            RoomNode destination = FindRuntimeNode(graph, target.RoomId);
+            if (destination == null || !graph.CanTeleport(source, destination, player))
+            {
+                reason = "The player cannot move between rooms right now.";
+                return false;
+            }
+
+            reason = string.Empty;
+            return true;
+        }
+
+        // The safe entry point inside one of the room's doors (the boss room has exactly one), as a doorway would use.
+        private static Vector2 DoorEntryPosition(RoomNode destination, GeneratedRoomNode generated)
+        {
+            RoomPrefab prefab = destination.GetComponent<RoomPrefab>();
+            if (prefab != null)
+            {
+                foreach (GeneratedRoomConnection connection in generated.DirectionalConnections)
+                {
+                    RoomDoorSlot slot = prefab.FindSlot(connection.Direction);
+                    if (slot != null && slot.EntryPoint != null) return slot.EntryPoint.position;
+                }
+            }
+
+            return destination.DefaultEntryPoint != null
+                ? destination.DefaultEntryPoint.position
+                : destination.InitialSpawnPosition;
+        }
+
+        private static RoomNode FindRuntimeNode(RoomGraphController graph, string roomId)
+        {
+            foreach (RoomNode node in graph.Nodes)
+                if (node != null && string.Equals(node.RoomId, roomId, StringComparison.Ordinal)) return node;
+            return null;
+        }
+
+        // 엘리스의 타로카드: the draw index counts every card of the Run, so a seed replays the same cards in order.
+        private void DrawTarotCard()
+        {
+            RunProgress progress = spellSlot.Progress;
+            int drawIndex = progress.RecordTarotDraw();
+            lastTarotChanges.Clear();
+            lastTarotChanges.AddRange(TarotCardDraw.Draw(progress.RunSeed, drawIndex));
+            foreach (TarotStatChange change in lastTarotChanges) playerStats.AddTarotStep(change.Stat, change.Amount);
+            Debug.Log($"[PlayerSingleUseEffects] Tarot card #{drawIndex + 1}: " + string.Join(", ",
+                lastTarotChanges.ConvertAll(change => $"{change.Stat} {change.Amount:+0.##;-0.##}")), this);
+        }
+
+        private RoomGraphAssembler ResolveRoomAssembler()
+        {
+            if (roomAssembler == null) roomAssembler = FindFirstObjectByType<RoomGraphAssembler>();
+            return roomAssembler;
+        }
+
         private RoomGraphController ResolveRoomGraph()
         {
             if (roomGraph == null) roomGraph = FindFirstObjectByType<RoomGraphController>();
@@ -1039,7 +1270,7 @@ namespace TrickalFanGame.Item
 
         // Another use in the same room adds to the bonuses; they still end when the room is left.
         private void StartRoomBoost(float attackDamage, float attackSpeed, float moveSpeed, float criticalDamage,
-            float criticalChance)
+            float criticalChance, float homingCoefficient = 0f, float homingRange = 0f)
         {
             RunProgress progress = spellSlot.Progress;
             string roomId = CurrentRoomId(progress);
@@ -1058,13 +1289,17 @@ namespace TrickalFanGame.Item
             roomMoveSpeedPercent += moveSpeed;
             roomCriticalDamagePercent += criticalDamage;
             roomCriticalChancePercent += criticalChance;
+            roomHomingCoefficient += homingCoefficient;
+            roomHomingRange = Mathf.Max(roomHomingRange, homingRange);
             playerStats.SetSingleUseRoomAttackDamagePercent(roomAttackDamagePercent);
+            playerStats.SetSingleUseRoomHoming(roomHomingCoefficient, roomHomingRange);
             playerStats.SetSingleUseRoomSpeedPercent(roomAttackSpeedPercent, roomMoveSpeedPercent);
             playerStats.SetSingleUseRoomCritical(roomCriticalDamagePercent, roomCriticalChancePercent);
             Debug.Log($"[PlayerSingleUseEffects] Room bonus in {roomId}: basic attack +{roomAttackDamagePercent:P0}, " +
                       $"attack speed +{roomAttackSpeedPercent:P0}, move speed +{roomMoveSpeedPercent:P0}, " +
                       $"critical damage +{roomCriticalDamagePercent:P0}, critical chance " +
-                      $"+{roomCriticalChancePercent:P0}.", this);
+                      $"+{roomCriticalChancePercent:P0}, homing {roomHomingCoefficient:0.##} within " +
+                      $"{roomHomingRange:0.##}.", this);
         }
 
         private void HandleRoomChanged(int _, int __)
@@ -1083,8 +1318,11 @@ namespace TrickalFanGame.Item
             roomMoveSpeedPercent = 0f;
             roomCriticalDamagePercent = 0f;
             roomCriticalChancePercent = 0f;
+            roomHomingCoefficient = 0f;
+            roomHomingRange = 0f;
             if (playerStats != null)
             {
+                playerStats.SetSingleUseRoomHoming(0f, 0f);
                 playerStats.SetSingleUseRoomAttackDamagePercent(0f);
                 playerStats.SetSingleUseRoomSpeedPercent(0f, 0f);
                 playerStats.SetSingleUseRoomCritical(0f, 0f);

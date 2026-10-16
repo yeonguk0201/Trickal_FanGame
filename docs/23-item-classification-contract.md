@@ -109,6 +109,11 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 수상한 물약 | 짱셈스펠 | `jjangsem-suspicious-potion` | Jjangsem-2 |
 | 이성의 끈 | 짱셈스펠 | `jjangsem-thread-of-reason` | Jjangsem-2 |
 | 깜짝상자 | 짱셈스펠 | `jjangsem-surprise-box` | Jjangsem-2 |
+| 네티의 지도 | 스펠 | `single-spell-netti-map` | Spell-6 |
+| 에슈르의 마도서 | 스펠 | `single-spell-eshur-grimoire` | Spell-6 |
+| 티그의 도전장 | 스펠 | `single-spell-tig-challenge` | Spell-6 |
+| 골디의 초대장 | 스펠 | `single-spell-goldi-invitation` | Spell-6 |
+| 엘리스의 타로카드 | 스펠 | `single-spell-ellis-tarot-card` | Spell-6 |
 
 ### 2.4 등급·효과·스택
 
@@ -194,6 +199,12 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
   `intervalSeconds`, `durationSeconds`, 파스텔빛)과 `CurrentRoomEnemyPoison = 79`(`magnitude` = 중첩당 틱 공격력 비율,
   `integerAmount` = 중첩 수, `intervalSeconds`, `durationSeconds`, 수상한 물약)를 더했다. 네 ID(Rare, 최대 1스택)를 Backend
   카탈로그에도 같은 값으로 기록했다. 피해 출처 `DamageSourceType.PlayerSpell`(파스텔빛·깜짝상자)을 뒤에 추가했다.
+  Spell-6(2026-10-16)에서 스펠 5종의 80~85를 추가했다: `RevealCurrentFloorMap = 80`(수치 필드 없음)과 `GainGold = 81`
+  (`integerAmount` = 골드, 지갑이 가득해도 사용)은 네티의 지도, `CurrentRoomBasicAttackHoming = 82`(`magnitude` = 유도 계수,
+  `radius` = 감지 범위)는 에슈르의 마도서, `TeleportToBossRoom = 83`은 티그의 도전장, `TeleportToGoldiShop = 84`는 골디의 초대장,
+  `RandomStatShift = 85`는 엘리스의 타로카드가 쓴다(83~85는 수치 필드 없음, 타로카드의 확률과 능력치별 증감은 Unity
+  `TarotCardDraw`에 있다). 랜덤코인의 `GainRandomGold`(39)는 골드가 가득하면 거부되므로 재사용하지 않았다. 다섯 ID(최대 1스택,
+  등급은 26번 §4.3)를 Backend 카탈로그에도 같은 값으로 기록했다.
 - 일회용 아이템(`SingleUseSpell`, `JjangsemSpell`)은 `maxStacks = 1`이다. 보유 중에는 **효과가 적용되지
   않고**, 사용 성공 시에만 효과를 실행한다. `PlayerInventory`의 상시 효과 적용·아티팩트 HUD·일시정지
   아티팩트 목록에 들어가지 않는다.
@@ -285,6 +296,7 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | Chest-1·2 | §3 경로별 허용 분류, 유효 ID만 생성. Chest-2(2026-10-05): `ChestContentTable.TryValidate`가 일반·다이아몬드의 특별 보상과 일반·황금의 짱셈스펠 비율을 거부하고, 스펠·짱셈스펠·황금 전용 아티팩트 목록을 분류별로 따로 검사한다 |
 | Flight-0 | 가짜 날개는 `ItemKind.Artifact`, 전용 풀 소속으로만 획득. 풀은 `chest-content-table`의 황금 전용 아티팩트 목록이며, 전 보상 풀을 모으는 Setup(Reward-3)은 `GoldenChestExclusivePool` 목록을 제외한다 |
 | Jjangsem-0·1·2 | `jjangsem-` 접두사, 일회용 아이템 비복제. Jjangsem-0(2026-10-05): `jjangsem-bigwood-fruit`는 `chest-content-table`의 짱셈스펠 목록(다이아몬드 상자)으로만 획득. Jjangsem-2(2026-10-15): 효과 73~77은 뒤에 추가, 네 ID는 짱셈스펠 목록에만 소속(선택 보상·상점 풀 금지, 검증기가 확인), Backend 카탈로그·테스트·seed 동시 반영 |
+| Spell-6 | 효과 80~85는 뒤에 추가, 다섯 ID는 `single-spell-` 접두사로 상자 스펠 목록·희귀 스펠 장애물 변형에 소속(선택 보상·상점 풀 금지, 검증기가 확인), Backend 카탈로그·테스트·seed 동시 반영. DTO 형태 변경 없음 |
 | Verify-0 | 풀별 분류 불변조건과 Unity↔Backend 카탈로그 ID·등급 일치 검사 |
 | Range-0 | 효과 33·34는 뒤에 추가, 33은 `artifact-sylla-wind-arrow`만(Artifact-2부터)·34는 `item-15`만 사용(검증기가 확인), 아이템 추가 시 Backend 카탈로그·seed 동시 반영 |
 | Passive-1 | 효과 43·44는 뒤에 추가, 43은 `artifact-kanna-cannon`·44는 `artifact-bibi-snot`만 사용(검증기가 확인), 둘 다 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |

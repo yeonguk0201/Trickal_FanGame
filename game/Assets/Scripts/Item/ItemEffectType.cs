@@ -182,5 +182,26 @@ namespace TrickalFanGame.Item
         // 수상한 물약: every enemy in the room at use gets IntegerAmount poison stacks (up to IntegerAmount), each
         // dealing Magnitude x attack damage every IntervalSeconds for DurationSeconds.
         CurrentRoomEnemyPoison = 79,
+        // Spell-6 (스펠 5종, plan 26 §4.3).
+        // 네티의 지도: the minimap shows every room of the current floor, secret rooms included (their position
+        // only: hidden passages stay sealed and unknown). No value fields are used.
+        RevealCurrentFloorMap = 80,
+        // 네티의 지도: IntegerAmount gold, usable with a full wallet (the part beyond the limit is dropped).
+        GainGold = 81,
+        // 에슈르의 마도서: basic attack shots fired in the room it was used in steer toward an enemy (contract 24 §4.2).
+        // Magnitude = homing coefficient (x 360 degrees per second), Radius = detection range. Only in an uncleared
+        // combat or boss room; another use in the same room adds the coefficient, leaving the room ends it.
+        CurrentRoomBasicAttackHoming = 82,
+        // 티그의 도전장: moves the player to the current floor's boss room at its door entry and starts the boss fight.
+        // A room left mid-fight resets like 그건 내 잔상. Refused inside the boss room. No value fields are used.
+        TeleportToBossRoom = 83,
+        // 골디의 초대장: turns the current floor's secret room into the 골디 shop (if it is not one already) and moves
+        // the player inside. Refused during combat, on a floor without a secret room or when its reward was taken.
+        // No value fields.
+        TeleportToGoldiShop = 84,
+        // 엘리스의 타로카드: raises one or two random stats and sometimes lowers others for the rest of the Run
+        // (TarotCardDraw holds the odds and amounts). The draw comes from the Run seed and the use count.
+        // No value fields are used.
+        RandomStatShift = 85,
     }
 }

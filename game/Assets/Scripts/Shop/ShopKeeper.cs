@@ -71,17 +71,22 @@ namespace TrickalFanGame.Shop
         {
             owner = configuredOwner;
             session = configuredSession;
-            ShopKind kind = owner != null ? owner.Kind : ShopKind.General;
-            if (nameLabel != null) nameLabel.text = GetDisplayName(kind);
-            TrickalFanGame.Frontend.UserArtwork.ApplyPickup(portrait, GetArtworkKey(kind));
-            FitPortrait();
+            ApplyLook();
             RefreshPrompt();
         }
 
+        // A shop built inside a hidden room (골디의 초대장) is bound before it wakes, so waking must keep the bound kind.
         private void Awake()
         {
             GetComponent<Collider2D>().isTrigger = true;
-            TrickalFanGame.Frontend.UserArtwork.ApplyPickup(portrait, ArtworkKey);
+            ApplyLook();
+        }
+
+        private void ApplyLook()
+        {
+            ShopKind kind = owner != null ? owner.Kind : ShopKind.General;
+            if (nameLabel != null) nameLabel.text = GetDisplayName(kind);
+            TrickalFanGame.Frontend.UserArtwork.ApplyPickup(portrait, GetArtworkKey(kind));
             FitPortrait();
         }
 

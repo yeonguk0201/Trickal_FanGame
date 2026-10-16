@@ -58,10 +58,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 357cb4cc394bacd4dbe9310b1974f57d, type: 2}
   - {fileID: 11400000, guid: 76fcd715ffd998d4088df117e7dbfe35, type: 2}
   - {fileID: 11400000, guid: a61d91e8539e6364b99b1f3e06e0cf26, type: 2}
+  - {fileID: 11400000, guid: aed3c41a3c8da02419a15e816934c2cf, type: 2}
+  - {fileID: 11400000, guid: 5b0fc79edfef6f54e9a21362c0ff226e, type: 2}
   - {fileID: 11400000, guid: da4ddba585fe8c542a00cc75ee71fa89, type: 2}
+  - {fileID: 11400000, guid: f22f25e76158c754180e0fdc587d332b, type: 2}
   - {fileID: 11400000, guid: 374ba4fdc2ee0ed43a98a2d7f3730399, type: 2}
   - {fileID: 11400000, guid: e8ffb6626565227488dbc0703867a928, type: 2}
+  - {fileID: 11400000, guid: 4fd13e1dd83127f41bbae01977f8d2e3, type: 2}
   - {fileID: 11400000, guid: 3583ead3432edac4cb77c5b2ffcc761a, type: 2}
+  - {fileID: 11400000, guid: 5ab55e17cf0ef9f4da6356431c37f19d, type: 2}
   chestPrefab: {fileID: 2912694241956306997, guid: 50f7c33047ea94743a682f09811b116d, type: 3}
   spellPickupPrefab: {fileID: 1815312715874959976, guid: c1702e67b68926b479f3c3350b823624, type: 3}
   goldenExclusiveArtifacts:

@@ -401,6 +401,15 @@ namespace TrickalFanGame.Item
                     }
 
                     break;
+                case ItemEffectType.CurrentRoomBasicAttackHoming:
+                    if (radius <= 0f)
+                    {
+                        error = "CurrentRoomBasicAttackHoming requires a positive detection range.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.GainGold:
                 case ItemEffectType.PowerRestoreSP:
                 case ItemEffectType.Pierce:
                 case ItemEffectType.MaxSP:
@@ -438,7 +447,12 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.PowerStunRoomEnemies &&
                    type != ItemEffectType.PowerRestoreSP &&
                    type != ItemEffectType.CurrentRoomPulseHeal &&
-                   type != ItemEffectType.CurrentRoomPulseSP;
+                   type != ItemEffectType.CurrentRoomPulseSP &&
+                   type != ItemEffectType.RevealCurrentFloorMap &&
+                   type != ItemEffectType.GainGold &&
+                   type != ItemEffectType.TeleportToBossRoom &&
+                   type != ItemEffectType.TeleportToGoldiShop &&
+                   type != ItemEffectType.RandomStatShift;
         }
     }
 }

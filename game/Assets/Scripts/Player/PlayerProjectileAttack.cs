@@ -119,7 +119,8 @@ namespace TrickalFanGame.Player
                 stats.ProjectileSplitSettings,
                 configuredLifetime: ProjectileLifetime,
                 configuredHitEffects: stats.BasicAttackHitEffects,
-                configuredBounce: stats.ProjectileBounce);
+                configuredBounce: stats.ProjectileBounce,
+                configuredHoming: stats.BasicAttackHoming);
         }
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)

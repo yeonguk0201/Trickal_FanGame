@@ -14,6 +14,8 @@ namespace TrickalFanGame.Room
         private readonly Dictionary<string, ShopStockState> shopStocks = new(StringComparer.Ordinal);
         private readonly RunResourceWallet resources = new();
         private readonly HashSet<string> clearedRoomIds = new(StringComparer.Ordinal);
+        // Spell-6 (네티의 지도): floors whose whole map the minimap shows.
+        private readonly HashSet<int> revealedMapFloors = new();
         private string activeRewardSelectionId;
 
         public int RunSeed { get; private set; }
@@ -26,6 +28,8 @@ namespace TrickalFanGame.Room
         public bool IsProgressionStopped { get; private set; }
         public bool HasClearedFinalBoss { get; private set; }
         public GeneratedFloorGraph GeneratedGraph { get; private set; }
+        // Spell-6 (엘리스의 타로카드): cards drawn so far in this Run; the next draw uses this index.
+        public int TarotDrawCount { get; private set; }
         public IReadOnlyDictionary<string, RoomRunState> RoomStates => roomStates;
         public IReadOnlyDictionary<string, ItemRewardSelectionState> RewardSelections => rewardSelections;
         public ItemRewardSelectionState PendingRewardSelection
@@ -43,6 +47,8 @@ namespace TrickalFanGame.Room
         public event Action RewardSelectionStateChanged;
 
         public event Action<int, int> RoomChanged;
+        // Spell-6: a floor's whole map was revealed (네티의 지도) or a room changed what it holds (골디의 초대장).
+        public event Action MapChanged;
         public event Action<RunResourceType, int> ResourceChanged
         {
             add => resources.Changed += value;
@@ -186,6 +192,21 @@ namespace TrickalFanGame.Room
             return true;
         }
 
+        public bool IsFloorMapRevealed(int floorNumber) => revealedMapFloors.Contains(floorNumber);
+
+        // Returns false when the floor was already revealed; the map stays revealed for the rest of the Run.
+        public bool TryRevealFloorMap(int floorNumber)
+        {
+            if (floorNumber < 1 || !revealedMapFloors.Add(floorNumber)) return false;
+            MapChanged?.Invoke();
+            return true;
+        }
+
+        public void NotifyMapChanged() => MapChanged?.Invoke();
+
+        // Returns the index of this draw and counts it.
+        public int RecordTarotDraw() => TarotDrawCount++;
+
         public void RecordRoomCleared(string roomId)
         {
             if (IsProgressionStopped || string.IsNullOrWhiteSpace(roomId) || !clearedRoomIds.Add(roomId)) return;
@@ -295,6 +316,8 @@ namespace TrickalFanGame.Room
             activeRewardSelectionId = null;
             roomStates.Clear();
             clearedRoomIds.Clear();
+            revealedMapFloors.Clear();
+            TarotDrawCount = 0;
             rewardSelections.Clear();
             shopStocks.Clear();
             resources.Clear();

@@ -96,6 +96,25 @@ namespace TrickalFanGame.Combat
             new(bounceCount, SearchRadius, RepeatDamageRatio, SameTargetDelaySeconds);
     }
 
+    // Passive-0 §4.2 (에슈르의 마도서): a basic attack shot keeps its speed and turns toward the nearest living enemy
+    // within DetectionRange in front of it (180°), at Coefficient x 360 degrees per second. Re-chosen every physics
+    // step; an enemy the shot already hit is left out because it cannot hit it again.
+    public readonly struct ProjectileHomingSettings
+    {
+        public const float DegreesPerSecondPerCoefficient = 360f;
+
+        public ProjectileHomingSettings(float coefficient, float detectionRange)
+        {
+            Coefficient = Mathf.Max(0f, coefficient);
+            DetectionRange = Mathf.Max(0f, detectionRange);
+        }
+
+        public float Coefficient { get; }
+        public float DetectionRange { get; }
+        public float TurnDegreesPerSecond => Coefficient * DegreesPerSecondPerCoefficient;
+        public bool IsEnabled => Coefficient > 0f && DetectionRange > 0f;
+    }
+
     // What a basic attack shot does to an enemy it hits besides the direct damage. Taken at launch, so an item
     // gained afterwards does not change shots already flying (Passive-0 §3).
     public readonly struct ProjectileHitEffects
