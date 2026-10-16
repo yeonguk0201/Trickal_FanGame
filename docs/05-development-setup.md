@@ -1100,14 +1100,15 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
 
 - Enemy-6 쥬비: 메뉴 `Trickal Fan Game > Week 23 > Setup Enemy-6 Jyubi`가 추적형 적 Prefab을 풀어 복사한
   `Assets/Prefabs/JyubiEnemy.prefab`을 만들고(근접 공격·이동 애니메이션 컴포넌트 제거, 크기 0.5, 체력 1, 속도 5.2(2026-10-14 5.5에서 조정), 비행
-  추적, 반 칸 접촉 피해, `EnemyFlight` 추가) Obstacle-5 Setup을 다시 실행해 셰이디의 랜덤박스 종류에 쥬비 5마리 결과를
+  추적, 반 칸 접촉 피해, `EnemyFlight` 추가, 2026-10-17부터 `EnemyContactRecoil` 튕김 0.85·0.18초 감속 곡선·멈춤 0.3초) Obstacle-5 Setup을 다시 실행해 셰이디의 랜덤박스 종류에 쥬비 5마리 결과를
   연결한다. GUID를 보존하며 멱등이다. Obstacle-5 Setup도 같은 Prefab 구성 코드를 호출한다.
   자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Enemy-6 Jyubi`, 배치는 Unity `-batchmode -nographics -quit
   -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week23Enemy6Verification.SetupAndVerifyBatch -logFile
   <로그 경로>`다. Setup 2회 GUID, Prefab 구성과 누락 스크립트 없음, 플레이어 기본 속도보다 빠르고 1.25배 이하인 속도,
   1·3층에서 정확히 반 칸 피해와 접촉 쿨다운, 반 칸 옵션이 없는 접촉 피해의 1칸 유지, 1~3층 체력 배율에서 기본 공격 한
   대 처치, 구덩이·낮은 장애물 무시와 나무·벽·플레이어 충돌 유지, 장애물 너머 대상으로의 직선 이동, 방의 추가 적 등록과
-  처치 시 방 상태 불변을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-6과 그 회귀 전체, 하트 체력
+  처치 시 방 상태 불변, 통과 중인 플레이어에 겹친 쥬비의 튕김·멈춤·재추적, 플레이어 몸 안의 적이 탄에 맞고 뒤쪽 적은
+  맞지 않음을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-6과 그 회귀 전체, 하트 체력
   `Hp1HealthUnitsVerification`)다.
   **원화 보존(2026-10-14)**: Enemy-6 Setup은 Obstacle-5를 거쳐 Resource-0(하트)·Resource-1(열쇠·폭탄)·Special-3(비밀
   구덩이) Setup까지 다시 실행한다. 이 Setup들은 원화보다 먼저 만들어져 실행할 때마다 임시 스프라이트·색을 다시 써서

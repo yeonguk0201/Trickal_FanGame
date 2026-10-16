@@ -106,8 +106,10 @@ namespace TrickalFanGame.Frontend
             }
             RefreshTreeCanopy(id == "obstacle-tree" && visual.transform != transform);
             Rigidbody2D movingBody = GetComponent<Rigidbody2D>();
+            // A bouncing 쥬비 keeps facing the player it hit, so the bounce does not read as walking backwards.
+            bool bouncing = TryGetComponent(out TrickalFanGame.Enemy.EnemyContactRecoil recoil) && recoil.IsRecoiling;
             if ((mode == FairyKingdomArtworkMode.Fixed || mode == FairyKingdomArtworkMode.Crumb) &&
-                GetComponent<TrickalFanGame.Enemy.TestEnemy>() != null && movingBody != null &&
+                GetComponent<TrickalFanGame.Enemy.TestEnemy>() != null && movingBody != null && !bouncing &&
                 Mathf.Abs(movingBody.linearVelocity.x) > 0.001f)
                 visual.flipX = movingBody.linearVelocity.x > 0f;
             // Legacy placeholder palettes must not recolor authored art. Hit feedback owns fixed enemy colors.

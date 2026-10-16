@@ -23,6 +23,12 @@ namespace TrickalFanGame.Editor
         public const float DetectionRange = 20f;
         public const float ContactCooldown = 1f;
         public const float Scale = 0.5f;
+        // Bounces off the player it touches (user decision, 2026-10-17): snaps back 0.85 in 0.18 s, fast at first and
+        // slowing hard, then hangs 0.3 s before chasing again. First 1.75 / 0.25 s / 0.5 s at one speed; shortened and
+        // eased after Play checks because it flew too far and read as a move rather than a bounce.
+        public const float RecoilDistance = 0.85f;
+        public const float RecoilDuration = 0.18f;
+        public const float RecoilPause = 0.3f;
         public const int SortingOrder = 2;
 
         // Placeholder look until 쥬비 has artwork: the chaser sprite, small and tinted.
@@ -93,6 +99,9 @@ namespace TrickalFanGame.Editor
                 contact.Configure(EnemyDamageTier.Light, ContactCooldown);
                 contact.ConfigureHalfHeart(true);
                 if (contents.GetComponent<EnemyFlight>() == null) contents.AddComponent<EnemyFlight>();
+                EnemyContactRecoil recoil = contents.GetComponent<EnemyContactRecoil>();
+                if (recoil == null) recoil = contents.AddComponent<EnemyContactRecoil>();
+                recoil.Configure(RecoilDistance, RecoilDuration, RecoilPause);
 
                 if (PrefabUtility.SaveAsPrefabAsset(contents, PrefabPath) == null)
                     throw new InvalidOperationException($"Could not save {PrefabPath}.");

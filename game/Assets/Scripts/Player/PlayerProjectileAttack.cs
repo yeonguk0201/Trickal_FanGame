@@ -121,6 +121,7 @@ namespace TrickalFanGame.Player
                 configuredHitEffects: stats.BasicAttackHitEffects,
                 configuredBounce: stats.ProjectileBounce,
                 configuredHoming: stats.BasicAttackHoming);
+            projectile.HitEnemiesBehindLaunch(transform.position);
         }
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)

@@ -320,6 +320,35 @@ namespace TrickalFanGame.Combat
             Physics2D.SyncTransforms();
         }
 
+        // The player's shot starts ahead of the body center, so an enemy inside the player (one that came through
+        // while the player passes through enemies after a hit) sits behind it and would never be touched. Called
+        // right after Launch, the gap from the given origin to the shot is swept once and the enemies in it are hit
+        // nearest first, as if the shot had flown out from the origin.
+        public void HitEnemiesBehindLaunch(Vector2 origin)
+        {
+            if (isSpent || owner == null) return;
+            Vector2 offset = (Vector2)transform.position - origin;
+            float gap = offset.magnitude;
+            if (gap <= 0.0001f) return;
+
+            CircleCollider2D circle = GetComponent<CircleCollider2D>();
+            float radius = circle != null ? circle.radius * Mathf.Abs(transform.lossyScale.x) : 0f;
+            RaycastHit2D[] hits = Physics2D.CircleCastAll(origin, radius, offset / gap, gap, EnemyLayerMask);
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            foreach (RaycastHit2D cast in hits)
+            {
+                if (isSpent) return;
+                Health target = cast.collider.GetComponentInParent<Health>();
+                if (target == null || target == owner || target.IsDead || hitCounts.ContainsKey(target) ||
+                    target.GetComponent<PlayerCombatEvents>() != null)
+                {
+                    continue;
+                }
+
+                HitTarget(target);
+            }
+        }
+
         public void Launch(
             Vector2 velocity,
             Health projectileOwner,
