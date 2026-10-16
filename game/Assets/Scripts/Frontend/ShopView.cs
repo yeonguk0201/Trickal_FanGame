@@ -292,8 +292,9 @@ namespace TrickalFanGame.Frontend
                     $"{ItemKindText.GetDisplayName(item.Kind)}  ·  {ItemRewardCardView.RarityLabel(item.Rarity)}");
                 string maximum = item.MaxStacks > 0 ? item.MaxStacks.ToString() : "제한 없음";
                 int stacks = session.Inventory != null ? session.Inventory.GetStackCount(item.ItemId) : 0;
-                SetText(detailEffectText,
-                    $"{ArtifactEffectDescription.Build(item)}\n\n현재 스택 {stacks} / {maximum}");
+                SetText(detailEffectText, item.IsActivePower
+                    ? $"{ArtifactEffectDescription.Build(item)}\n\n{GamePowerHudView.BuildOfferLine(item)}"
+                    : $"{ArtifactEffectDescription.Build(item)}\n\n현재 스택 {stacks} / {maximum}");
             }
             else
             {

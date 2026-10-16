@@ -8,7 +8,7 @@
 - 대상: `artifact-shasha-jar`의 기본 공격, 다중 줄기와 커터·팽이의 짧은 연결 줄기.
 - `ProceduralWaterStream.cs`: 월드 좌표 띠 메시 80구간, 분출 시간 곡선, 외곽 파동, 별도 물방울 Particle System.
 - `ProceduralWaterStream.shader`: URP Universal2D 패스, 시간에 따라 흐르는 노이즈·물결·끊어진 포말, 어두운 외곽과 청록색 내부. 텍스처·프레임 시트·AI 이미지 생성 없이 계산한다.
-- 원본 진행 방향은 +X이며 런타임 경로 방향으로 배치한다. 중심선은 직선으로 유지하고 외곽만 바뀐다. 몸통 장식 폭은 판정 폭의 약 1.44배에 파동을 적용한다.
+- 원본 진행 방향은 +X이며 런타임 경로 방향으로 배치한다. v1은 중심선이 직선이고 외곽만 바뀌었으며, 아래 v2에서 양 끝을 고정한 진행 물결로 보강했다. 몸통 장식 폭은 판정 폭의 약 1.44배에 파동을 적용한다.
 - 피해 폭·공격 주기·최대 사거리·관통·넉백·시너지 규칙은 유지한다. 본체 표시는 기존 최대 0.12초, 분열·튕김은 0.08초다. 표시 중 발사점과 벽 끝점만 갱신하며 피해를 다시 계산하지 않는다. 방향은 해당 발사 시점 방향을 유지한다.
 - 물방울은 World 공간, 최대 96개/줄기로 제한한다. 본체보다 짧게 남아 날아가며 별도 프레임 에셋을 쓰지 않는다. 벽 물보라는 방 안쪽 방향으로 방출하고 현재 벽 끝 평면 밖을 자른다.
 - 공격 불가·사망·비활성화·A/B 전환에서 본체와 입자를 제거한다. 위치가 한 프레임에 4월드 단위를 넘게 바뀌면 방 이동/텔레포트로 간주해 잔여 표시를 지운다.
@@ -48,7 +48,7 @@
 - 단독: `Trickal Fan Game > Effects > Verify Shasha Realtime Water Prototype`.
 - 배치: `TrickalFanGame.Editor.ShashaWaterPrototypeVerification.Verify`, `-batchmode -quit`, 그래픽 장치 사용.
 - 커밋 전 회귀 배치: `TrickalFanGame.Editor.ShashaWaterPrototypeVerification.VerifyWithRegressionsBatch`. 전용 검사와 기존 물줄기 공격 규칙, `FairyKingdomArtworkVerification.Verify`의 원본 에셋 연결을 함께 확인한다.
-- 검사: 셰이더 오류, 6방향·길이 0.02/0.2/3/40의 직선 중심선·끝점·움직이는 외곽, 부모 반전/스케일과 독립, 종료/취소, 월드 입자 제한, 비교 전환의 쿨다운 보존. 기존 `Week23Passive4Verification.Verify`의 공격 규칙 검사도 같은 호출에서 실행한다.
+- 검사: 셰이더 오류, 6방향·길이 0.02/0.2/3/40의 제한된 중심 물결·고정 끝점·움직이는 외곽·벽 안쪽 접촉 포말, 부모 반전/스케일과 독립, 종료/취소, 월드 입자 제한, 비교 전환의 쿨다운 보존. 기존 `Week23Passive4Verification.Verify`의 공격 규칙 검사도 같은 호출에서 실행한다.
 - 기대 성공 로그: `Shasha realtime water prototype verification passed`.
 - 정지 비교 렌더: `Trickal Fan Game > Effects > Export Shasha Water Comparison`. Edit Mode에서 실행한다. 원본 씬을 저장하지 않는 임시 Preview Scene을 사용한다. 결과는 `output/art-review/shasha-water/unity-comparison.png`이며 위가 기존 이미지, 아래가 새 본체다. 입자·실제 배경·움직임 검수는 별도다.
 - 검사+렌더 배치: `TrickalFanGame.Editor.ShashaWaterPrototypeVerification.VerifyAndExportBatch`.
@@ -64,3 +64,29 @@
 ## 다음 작업
 
 샤샤의 물다운 실루엣·포말·물보라를 보강하고 비교한다. 변경 후 영향받는 자동 검증과 미확인 Play 조건을 확인한다. 용사용 등 다른 효과는 각각의 개선 작업 때 같은 기준을 적용하며 일괄 전환하지 않는다.
+
+2026-10-13 Scene 뷰 미리보기 제작 기준을 확정했다. 샤샤에도 게임 Play 없이 전체 재생·시간 조절·본체/물방울/물보라 개별 표시와 경로 조절을 할 Editor 미리보기를 후속으로 마련한다.
+현재는 미구현이며 기존 정지 PNG 출력과 구분한다. 기준은 `docs/25-combat-effects-guide.md` §5.D, 도구 계획은 `docs/13-development-tooling-plan.md`의 Scene 뷰 미리보기 항목을 따른다.
+
+## v2: 펌프 물결과 접촉 포말 (2026-10-13)
+
+- 본체: 진행 방향으로 이동하는 굵기 맥동과 중심선 굴곡을 합성했다. 양 끝은 경로에 고정하고, 중심 굴곡은 판정 폭의 0.4배 이내로 제한한다. 판정은 기존 직선을 유지한다. 시작·끝에서 0.24월드 단위에 걸쳐 굴곡을 줄여 짧은 경로의 과도한 꺾임을 피한다.
+- 표면: 평행한 포말 외에 굽은 가로 물결 마루가 발사 방향으로 흐른다. 본체 길이·공격 주기·피해·시너지는 변경하지 않았다.
+- 접촉: 벽 끝점에 별도 메시·셰이더의 부채꼴 청록 포말을 배치하고, 접촉면에서 양옆으로 퍼지는 흰 포말과 방 안쪽으로 되튀는 물방울을 합성한다. 접촉 메시 깊이는 경로 길이로 제한한다. 자유 끝점·분열/튕김 연결에는 벽 충돌 포말을 만들지 않는다. 적은 관통 대상이므로 적 위치에서 본체가 끊어지는 연출은 추가하지 않았다.
+- 물방울: 분출 중 최대 초당 60회 방출 기회를 두며 프레임당 몸통 1~5개·접촉 4개, World 공간·최대 96개 제한을 유지한다. 게임의 전역 난수는 소비하지 않는다. 본체/포말은 기존 0.12초 표시 후 사라지고 물방울은 자체 수명으로 감쇠한다.
+- Edit Mode 미리보기: `Trickal Fan Game > Effects > Preview Shasha Water`에서 `Open / reset Scene preview`를 누른다. 임시 Preview Scene에 같은 런타임 효과를 만든다. 길이·굵기·방향·벽 접촉, 본체/물방울/접촉 포말 표시, 반복·속도·시간 슬라이더·재시작을 제공한다. 시간 변경마다 고정 시드와 1/60초 간격으로 같은 방출 규칙을 재시뮬레이션한다. 원본 씬 저장이나 피해 로직 호출은 하지 않는다.
+- 미리보기 한계: 현재 효과 단독 보기다. 실제 캐릭터·배경 및 기존 이미지 A/B는 SampleScene Play로 확인한다. 시작점 이동 조작과 실제 배경 합성은 후속이다. Unity 6000.3의 내부 `SceneView.customScene` 연결을 지원 여부 확인 후 사용하며, 미지원 Editor에서는 오류를 안내하고 임시 리소스를 정리한다.
+- 수동 검수: `SampleScene` Play → `F1 > — Artifact — > Show artifact drops > Drop 샤샤의 항아리` → `Shasha: realtime water` 켜기. 이동·수직/대각선·벽 가까이·짧은 줄기에서 물결이 앞으로 흐르는지, 접촉 포말이 벽 안쪽으로 퍼지는지, 여러 줄기가 캐릭터를 과하게 가리지 않는지 확인한다. 비교 토글의 끄기는 최초 원본 PNG이며, v1 절차적 효과와의 비교 토글은 아니다.
+- 자동 검증: 최종 `ShashaWaterPrototypeVerification.VerifyAndExportBatch` 결과는 아래 실행 기록에 남긴다. Scene 뷰 조작·Play 미술 수용은 자동 검증과 구분하며 아직 확인 대기다.
+v2 최종 실행 기록: Unity 6000.3.22f1에서 `ShashaWaterPrototypeVerification.VerifyAndExportBatch` 종료 코드 0. `Shasha realtime water prototype verification passed`와 `Passive-4 verification passed`를 확인했다. 로그: `output/shasha-water-wave-verify.log`. 본체·접촉 포말의 정지 PNG를 직접 확인했다(위 원본/아래 v2). 처음 실행의 미리보기 내부 API 접근 컴파일 오류를 가드된 어댑터로 수정했고, 이후 검사 다음 렌더에서 발생한 리소스 소실은 렌더를 먼저 실행하도록 호출 순서를 수정했다. 최종 결과는 두 문제 수정 후의 실행이다. 이미지로 포말·물결 형태를 확인한 것이며 실제 Play 미술 승인이나 미리보기 UI 조작 확인을 뜻하지 않는다.
+
+## v3: 벽 충돌 물보라 개선 (2026-10-13, 미술 검수 대기)
+
+- 요청: 끝부분이 벽에 부딪혀 터지는 느낌이 약하다는 사용자 피드백. 기존 삼각형 접촉 포말을 교체했다. 대표 형태는 접촉점을 중심으로 방 안쪽에 퍼지는 반원형 물보라이며, 갈라진 외곽·흰 포말 테두리·부분적으로 뚫린 내부를 같은 실시간 셰이더로 만든다. 새 PNG는 사용하지 않는다.
+- 움직임: 접촉 메시가 초기 크기 45%에서 빠르게 펼쳐진다. 깊이와 옆 퍼짐은 별도로 계산하고 깊이는 경로 길이로 제한한다. 벽 끝에서는 본체의 끝 알파 감쇠를 제거해 포말까지 물이 이어지도록 한다. 자유 끝점은 기존 감쇠를 유지한다.
+- 물방울: 첫 벽 접촉 방출을 18개 묶음으로 만들고 이후 방출은 3개씩 유지한다. 옆과 뒤로 되튀는 속도·크기 차이를 늘리고 수명에 따라 축소한다. World 공간, 총 96개 제한, 벽 평면 클리핑, 전역 난수 미사용을 유지한다. 미리보기 재시뮬레이션도 최초 방출 상태를 초기화한다.
+- 범위: 피해·공격 주기·본체/포말 표시 종료 시점은 변경하지 않았다. 기존 Scene 미리보기의 시간·방향·길이·레이어 조작을 그대로 사용한다. 기존 PNG 및 GUID는 유지한다.
+- 자동 검증: `ShashaWaterPrototypeVerification.VerifyAndExportBatch` 실행을 시도했으나 Unity가 프로젝트 경로 확인 직후 종료 코드 1로 끝났다. 검증 성공/렌더 로그가 없고 구체 원인은 로그에 없어 잠금으로 단정하지 않는다. 로그: `output/shasha-water-impact-verify.log`. 이전 v2의 성공 결과를 v3에 적용하지 않는다.
+- 대체 확인: 현재 Unity Bee 응답 파일과 포함된 Roslyn으로 런타임 C#를 별도 출력 위치에 컴파일하여 종료 코드 0. 기존 `TestRunSender.sendAsCleared` 미사용 경고만 확인했다. `git diff --check` 통과. 셰이더 컴파일·실제 렌더·Play 미술 검수는 미확인이다.
+- 수동 확인: Edit Mode의 `Trickal Fan Game > Effects > Preview Shasha Water` → `Open / reset Scene preview` → `Wall contact` 켜고 `Loop playback` 재생. 접촉점에서 빠르게 펼쳐지는 포말과 뒤로 튀는 물방울을 확인한다. 길이 0.02/0.2/5.5, 수평/수직/대각선에서도 벽 바깥으로 핵심 메시가 넘어가지 않아야 한다. `Verify Shasha Realtime Water Prototype` 메뉴의 기대 로그는 `Shasha realtime water prototype verification passed`다.
+- 실제 크기 검수: SampleScene Play → `F1 > — Artifact — > Show artifact drops > Drop 샤샤의 항아리` → `Shasha: realtime water` 켜기. 벽 근처·다중 줄기에서 충돌 타격감과 캐릭터 가림을 확인한다. 현재 상태는 구현 적용·사용자 미술 검수 대기이며 승인 완료로 처리하지 않는다.

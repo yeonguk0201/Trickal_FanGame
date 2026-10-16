@@ -11,6 +11,14 @@ namespace TrickalFanGame.Combat
 
         // Flat amount taken off every hit before the shield (빅우드의 열매). Health units when the owner uses them.
         private float incomingDamageReduction;
+        // Power-1 (애착 담요): its own flat reduction, separate from 빅우드의 열매, that never takes a hit below the floor.
+        private float powerDamageReduction;
+        private float powerDamageFloor;
+        // Power-1 (명치 꽂기): extra share of every hit taken until the end time. Game time.
+        private float incomingDamageBonus;
+        private float incomingDamageBonusEndTime;
+        // Jjangsem-2 (수상한 물약): share taken off every enemy hit (contact, melee, projectile) when it lands.
+        private float enemyDamageReduction;
         private bool explicitInvulnerability;
         private Func<bool> lethalDamageGuard;
         // Current health + shield never exceeds this (the player's 15 hearts). 0 = no limit.
@@ -22,6 +30,7 @@ namespace TrickalFanGame.Combat
         public float CurrentShield => currentShield;
         public bool UsesHealthUnits => useHealthUnits;
         public float IncomingDamageReduction => incomingDamageReduction;
+        public float IncomingDamageBonus => Time.time < incomingDamageBonusEndTime ? incomingDamageBonus : 0f;
         public float MaxHealthHearts => useHealthUnits ? HealthUnits.ToHearts(maxHealth) : maxHealth;
         public bool IsDead { get; private set; }
         public float HealthAndShieldLimit => healthAndShieldLimit;
@@ -71,15 +80,35 @@ namespace TrickalFanGame.Combat
             }
 
             DamageResult result = DamageCalculator.Resolve(context);
+            float damageBonus = IncomingDamageBonus;
+            if (damageBonus > 0f)
+            {
+                result = new DamageResult(result.FinalDamage * (1f + damageBonus), result.IsCritical);
+            }
+
             if (useHealthUnits)
             {
                 result = new DamageResult(HealthUnits.ToDamageUnits(result.FinalDamage, context.AllowsHalfHeart),
                     result.IsCritical);
             }
 
+            if (enemyDamageReduction > 0f && IsEnemyDamage(context.SourceType) && result.FinalDamage > 0f)
+            {
+                float reduced = result.FinalDamage * (1f - enemyDamageReduction);
+                result = new DamageResult(useHealthUnits
+                    ? Mathf.Max(HealthUnits.HalfHeartDamageUnits, Mathf.CeilToInt(reduced - 0.0001f))
+                    : reduced, result.IsCritical);
+            }
+
             if (incomingDamageReduction > 0f)
             {
                 result = new DamageResult(Mathf.Max(0f, result.FinalDamage - incomingDamageReduction),
+                    result.IsCritical);
+            }
+
+            if (powerDamageReduction > 0f && result.FinalDamage > powerDamageFloor)
+            {
+                result = new DamageResult(Mathf.Max(powerDamageFloor, result.FinalDamage - powerDamageReduction),
                     result.IsCritical);
             }
 
@@ -146,6 +175,11 @@ namespace TrickalFanGame.Combat
             CurrentHealth = HealthCeiling;
             IsDead = false;
             incomingDamageReduction = 0f;
+            incomingDamageBonus = 0f;
+            incomingDamageBonusEndTime = 0f;
+            powerDamageReduction = 0f;
+            powerDamageFloor = 0f;
+            enemyDamageReduction = 0f;
             explicitInvulnerability = false;
             ResolveDamageInvulnerability()?.ResetHitWindow();
             Changed?.Invoke(CurrentHealth, MaxHealth);
@@ -154,6 +188,55 @@ namespace TrickalFanGame.Combat
         public void SetIncomingDamageReduction(float amount)
         {
             incomingDamageReduction = Mathf.Max(0f, amount);
+        }
+
+        public float PowerDamageReduction => powerDamageReduction;
+
+        public void SetPowerDamageReduction(float amount, float floor)
+        {
+            powerDamageReduction = Mathf.Max(0f, amount);
+            powerDamageFloor = Mathf.Max(0f, floor);
+        }
+
+        public float EnemyDamageReduction => enemyDamageReduction;
+
+        public void SetEnemyDamageReduction(float share)
+        {
+            enemyDamageReduction = Mathf.Clamp(share, 0f, 0.99f);
+        }
+
+        public static bool IsEnemyDamage(DamageSourceType sourceType) => sourceType is DamageSourceType.EnemyContact
+            or DamageSourceType.EnemyMelee or DamageSourceType.EnemyProjectile;
+
+        // Jjangsem-2 (깜짝상자): takes a share of the maximum health. It is reported like a hit (damage number, health
+        // bar, hit flash, aggro) but never kills (a sliver stays), starts no hit window, skips every damage modifier
+        // and is ignored while invulnerable. Returns the health removed.
+        public float CutHealth(float maxHealthShare, DamageContext context)
+        {
+            if (IsDead || IsInvulnerable || maxHealthShare <= 0f || CurrentHealth <= 0f) return 0f;
+
+            float previousHealth = CurrentHealth;
+            float next = previousHealth - MaxHealth * Mathf.Clamp01(maxHealthShare);
+            if (useHealthUnits) next = Mathf.Max(1f, Mathf.Ceil(next - 0.0001f));
+            CurrentHealth = Mathf.Clamp(next, Mathf.Min(previousHealth, 0.0001f), previousHealth);
+            float removed = previousHealth - CurrentHealth;
+            if (removed <= 0f) return 0f;
+
+            DamageResult result = new(removed, false);
+            DamageResolved?.Invoke(context, result);
+            AnyDamageResolved?.Invoke(this, context, result);
+            DamageApplied?.Invoke(context, removed, CurrentHealth);
+            Damaged?.Invoke(CurrentHealth, MaxHealth);
+            Changed?.Invoke(CurrentHealth, MaxHealth);
+            return removed;
+        }
+
+        // A new bonus replaces a running one when it is larger or lasts longer; it never shortens the current one.
+        public void ApplyIncomingDamageBonus(float bonus, float durationSeconds)
+        {
+            if (IsDead || bonus <= 0f || durationSeconds <= 0f) return;
+            incomingDamageBonus = Mathf.Max(IncomingDamageBonus, bonus);
+            incomingDamageBonusEndTime = Mathf.Max(incomingDamageBonusEndTime, Time.time + durationSeconds);
         }
 
         public void SetInvulnerable(bool invulnerable)

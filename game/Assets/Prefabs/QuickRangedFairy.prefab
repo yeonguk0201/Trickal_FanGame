@@ -11,18 +11,18 @@ PrefabInstance:
     - target: {fileID: 2598891031156092179, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 89f5a572fe62ff9418c33b6930c08716, type: 3}
+      objectReference: {fileID: 21300000, guid: ce94822aa6a14c78b3bbd9d2c50da156, type: 3}
     - target: {fileID: 2598891031156092179, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2598891031156092179, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       propertyPath: m_Color.g
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2598891031156092179, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       propertyPath: m_Color.r
-      value: 0.45
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2647689867473359760, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -87,6 +87,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3646013102199251637}
+    - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5820317746190253184}
   m_SourcePrefab: {fileID: 100100000, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
 --- !u!1 &7096289180192387305 stripped
 GameObject:
@@ -133,3 +136,24 @@ MonoBehaviour:
   projectileLifetime: 1.4
   maximumPredictionTime: 0.25
   target: {fileID: 0}
+--- !u!114 &5820317746190253184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7096289180192387305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc6e97aa22847a794bddeadfd4407d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
+  artworkId: sansamo-pure
+  mode: 0
+  visual: {fileID: 2914408135527760391}
+  localWidth: 0.7
+--- !u!212 &2914408135527760391 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2598891031156092179, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+  m_PrefabInstance: {fileID: 4004944391421821621}
+  m_PrefabAsset: {fileID: 0}

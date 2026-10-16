@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,6 +28,8 @@ namespace TrickalFanGame.Combat
         private IKnockbackPushBlocker[] pushBlockers;
         private float knockbackEndTime;
         private float stunEndTime;
+        // Power-1 (명치 꽂기): a stun that a later knockback must not shorten.
+        private float forcedStunEndTime;
         private Vector2 pushVelocity;
         private float pushEndTime;
 
@@ -38,6 +41,9 @@ namespace TrickalFanGame.Combat
         public Vector2 PushVelocity => IsPushed ? pushVelocity : Vector2.zero;
         public float KnockbackWeight => knockbackWeight;
         public Vector2 CurrentVelocity => body != null ? body.linearVelocity : Vector2.zero;
+
+        // Raised by ApplyStun after the stun starts. A boss cancels the pattern it is running (Jjangsem-2).
+        public event Action Stunned;
 
         private void Awake()
         {
@@ -101,8 +107,37 @@ namespace TrickalFanGame.Combat
             IsStunned = false;
             IsPushed = false;
             knockbackEndTime = Time.time + resolvedDuration;
-            stunEndTime = knockbackEndTime + resolvedStunDuration;
+            stunEndTime = Mathf.Max(knockbackEndTime + resolvedStunDuration, forcedStunEndTime);
             body.linearVelocity = direction.normalized * speed;
+            return true;
+        }
+
+        // Power-1 (명치 꽂기) and Jjangsem-2 (깜짝상자): stops the enemy in place for the duration without moving it. Every
+        // behavior that waits on IsActive (movement, attacks, boss patterns) holds until it ends. A longer stun
+        // already running is kept; a knockback during it never shortens it.
+        public bool ApplyStun(float duration)
+        {
+            if (health == null)
+            {
+                Awake();
+            }
+
+            if (health.IsDead || duration <= 0f)
+            {
+                return false;
+            }
+
+            float endTime = Time.time + duration;
+            forcedStunEndTime = Mathf.Max(forcedStunEndTime, endTime);
+            stunEndTime = Mathf.Max(IsActive ? stunEndTime : 0f, endTime);
+            IsPushed = false;
+            if (!IsKnockedBack)
+            {
+                IsStunned = true;
+                body.linearVelocity = Vector2.zero;
+            }
+
+            Stunned?.Invoke();
             return true;
         }
 
@@ -158,6 +193,7 @@ namespace TrickalFanGame.Combat
             IsKnockedBack = false;
             IsStunned = false;
             IsPushed = false;
+            forcedStunEndTime = 0f;
             if (body != null)
             {
                 body.linearVelocity = Vector2.zero;

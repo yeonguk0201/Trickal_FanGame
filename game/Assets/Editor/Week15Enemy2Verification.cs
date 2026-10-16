@@ -31,8 +31,9 @@ namespace TrickalFanGame.Editor
             GameObject boss = AssetDatabase.LoadAssetAtPath<GameObject>(Week15Enemy2Setup.LegacyBossPrefabPath);
             Assert(boss != null && boss.GetComponent<BossController>() != null,
                 "The legacy boss prefab must remain available for pre-Boss-0 encounters.");
-            Assert(boss.GetComponent<MeleeEnemyAttack>() == null &&
-                   boss.GetComponent<EnemyAttackPresentation>() == null,
+            // The shared attack presentation was added to every enemy prefab later; the melee attack is the
+            // Enemy-2 behavior the legacy boss must not have.
+            Assert(boss.GetComponent<MeleeEnemyAttack>() == null,
                 "The legacy boss variant must not inherit Enemy-2 normal-enemy melee behavior.");
         }
 

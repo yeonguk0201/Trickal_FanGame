@@ -17,6 +17,8 @@ namespace TrickalFanGame.Item
 
         private ItemRewardSelectionState state;
         private RunProgress subscribedProgress;
+        private Vector3 powerDropPosition;
+        private Transform powerDropParent;
 
         public ItemRewardSelectionState State => state;
         public IReadOnlyList<ItemRewardCandidate> Candidates =>
@@ -48,7 +50,13 @@ namespace TrickalFanGame.Item
         private void OnDisable() => UnsubscribeProgress();
         private void OnDestroy() => UnsubscribeProgress();
 
-        public bool TryOpen(IReadOnlyList<ItemDefinition> itemPool, string rewardId, out string error)
+        public bool TryOpen(IReadOnlyList<ItemDefinition> itemPool, string rewardId, out string error) =>
+            TryOpen(itemPool, rewardId, null, Vector3.zero, null, out error);
+
+        // Power-2: a non-empty powerPool makes one card a 교주의 권능 when the 3택1 is first rolled. Taking it puts it
+        // in the 권능 slot, and a held 권능 drops at powerDropAt under powerDropUnder (the reward's room).
+        public bool TryOpen(IReadOnlyList<ItemDefinition> itemPool, string rewardId,
+            IReadOnlyList<ItemDefinition> powerPool, Vector3 powerDropAt, Transform powerDropUnder, out string error)
         {
             if (!TryValidateDependencies(out error)) return false;
             if (string.IsNullOrWhiteSpace(rewardId))
@@ -69,7 +77,7 @@ namespace TrickalFanGame.Item
             if (state == null)
             {
                 IReadOnlyList<ItemRewardCandidate> candidates = ArtifactRewardSelector.BuildCandidates(
-                    itemPool, inventory, runProgress.RunSeed, rewardId);
+                    itemPool, inventory, runProgress.RunSeed, rewardId, powerPool);
                 if (candidates.Count == 0)
                 {
                     error = $"Reward selection '{rewardId}' has no valid candidates.";
@@ -92,6 +100,9 @@ namespace TrickalFanGame.Item
                 SyncActionBlock();
                 return false;
             }
+
+            powerDropPosition = powerDropAt;
+            powerDropParent = powerDropUnder;
 
             Opened?.Invoke(state);
             error = null;
@@ -129,7 +140,13 @@ namespace TrickalFanGame.Item
 
         private bool TryApplyAndComplete(ItemRewardCandidate candidate)
         {
-            if (candidate.IsItem)
+            if (candidate.IsItem && candidate.Definition.IsActivePower)
+            {
+                PlayerPowerSlot powerSlot = inventory.GetComponent<PlayerPowerSlot>();
+                if (powerSlot == null || !powerSlot.TryGrant(candidate.Definition, powerDropPosition, powerDropParent))
+                    return false;
+            }
+            else if (candidate.IsItem)
             {
                 if (!inventory.TryAcquire(candidate.Definition)) return false;
             }

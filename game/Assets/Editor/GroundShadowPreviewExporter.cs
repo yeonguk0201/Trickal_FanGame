@@ -116,6 +116,8 @@ namespace TrickalFanGame.Editor
                     GameObject owner = Prefab(name);
                     if (name == "HealthPickup" || name == "SPPickup")
                         UserArtwork.ApplyResourcePickup(owner.GetComponentInChildren<SpriteRenderer>(), name == "HealthPickup" ? "hp-pickup" : "sp-pickup");
+                    else if (name == "ElifPickup")
+                        UserArtwork.ApplyResourcePickup(owner.GetComponentInChildren<SpriteRenderer>(), TrickalFanGame.Resource.RunResourcePickup.GoldArtworkKey);
                     Capture(owner, name, name, "픽업·폭탄", name + ".prefab");
                 }
                 foreach (string guid in AssetDatabase.FindAssets("t:ItemDefinition").OrderBy(value => value))

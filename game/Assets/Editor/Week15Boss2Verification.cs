@@ -15,6 +15,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Verify Boss-2 Saemaeum Vault")]
         public static void Verify()
         {
+            Week18Obstacle2Setup.OpenGameScene();
             ValidatePrefabAndTallRoom();
             ValidateElasticReadabilityAndSeededJumps();
             ValidateApproachFanVolleys();

@@ -54,6 +54,16 @@ describe('Item catalog', () => {
       'artifact-aisia-wallet',
       'artifact-kanta-top',
       'artifact-shasha-jar',
+      'active-poppin-star',
+      'active-security-blanket',
+      'active-divine-punishment',
+      'active-solar-plexus-strike',
+      'active-freeloader-shield',
+      'active-sudden-acceleration',
+      'jjangsem-pastel-light',
+      'jjangsem-suspicious-potion',
+      'jjangsem-thread-of-reason',
+      'jjangsem-surprise-box',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -105,8 +115,18 @@ describe('Item catalog', () => {
       'RARE',
       'RARE',
       'EPIC',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(49);
+    expect(new Set(active.map((item) => item.id)).size).toBe(59);
     expect(
       active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
     ).toBe(true);
@@ -327,6 +347,135 @@ describe('Item catalog', () => {
         rarity: 'EPIC',
         maxStacks: 1,
       },
+    ]);
+  });
+
+  it('adds the four Jjangsem-2 jjangsem spells', () => {
+    const jjangsem = ITEM_CATALOG.filter((item) =>
+      item.id.startsWith('jjangsem-'),
+    );
+    expect(jjangsem.map((item) => item.id)).toEqual([
+      'jjangsem-bigwood-fruit',
+      'jjangsem-melune-card',
+      'jjangsem-pastel-light',
+      'jjangsem-suspicious-potion',
+      'jjangsem-thread-of-reason',
+      'jjangsem-surprise-box',
+    ]);
+    expect(
+      jjangsem.every(
+        (item) =>
+          item.rarity === 'RARE' && item.isActive && item.maxStacks === 1,
+      ),
+    ).toBe(true);
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'jjangsem-pastel-light'),
+    ).toMatchObject({
+      name: '파스텔빛',
+      effects: [
+        {
+          type: 'CurrentRoomPulseDamage',
+          magnitude: 1,
+          intervalSeconds: 2.5,
+          durationSeconds: 18,
+        },
+        {
+          type: 'CurrentRoomPulseSP',
+          integerAmount: 1,
+          intervalSeconds: 6,
+          durationSeconds: 18,
+        },
+        {
+          type: 'CurrentRoomPulseHeal',
+          integerAmount: 1,
+          intervalSeconds: 3,
+          durationSeconds: 18,
+        },
+      ],
+    });
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'jjangsem-suspicious-potion'),
+    ).toMatchObject({
+      name: '수상한 물약',
+      effects: [
+        {
+          type: 'CurrentRoomEnemyDamageReduction',
+          magnitude: 0.5,
+          durationSeconds: 10,
+        },
+        {
+          type: 'CurrentRoomEnemyPoison',
+          magnitude: 0.15,
+          integerAmount: 3,
+          intervalSeconds: 1,
+          durationSeconds: 10,
+        },
+      ],
+    });
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'jjangsem-thread-of-reason'),
+    ).toMatchObject({
+      name: '이성의 끈',
+      effects: [{ type: 'CurrentRoomDamageMultiplier', magnitude: 2 }],
+    });
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'jjangsem-surprise-box'),
+    ).toMatchObject({
+      name: '깜짝상자',
+      effects: [
+        {
+          type: 'StunAndCutRandomEnemies',
+          magnitude: 0.5,
+          secondaryMagnitude: 0.2,
+          integerAmount: 2,
+          durationSeconds: 2,
+        },
+      ],
+    });
+  });
+
+  it('matches the Power-1 active power contracts', () => {
+    const powers = ITEM_CATALOG.filter((item) => item.id.startsWith('active-'));
+    expect(powers.map((item) => item.id)).toEqual([
+      'active-poppin-star',
+      'active-security-blanket',
+      'active-divine-punishment',
+      'active-solar-plexus-strike',
+      'active-freeloader-shield',
+      'active-sudden-acceleration',
+    ]);
+    expect(
+      powers.every(
+        (item) =>
+          item.rarity === 'RARE' &&
+          item.isActive &&
+          item.maxStacks === 1 &&
+          item.effects.every((effect) => effect.type.startsWith('Power')),
+      ),
+    ).toBe(true);
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'active-solar-plexus-strike')
+        ?.effects,
+    ).toEqual([
+      { type: 'PowerStunRoomEnemies', durationSeconds: 3 },
+      {
+        type: 'PowerRoomEnemyVulnerability',
+        magnitude: 0.5,
+        durationSeconds: 6,
+      },
+    ]);
+    expect(
+      ITEM_CATALOG.find((item) => item.id === 'active-sudden-acceleration')
+        ?.effects,
+    ).toEqual([
+      {
+        type: 'PowerOverdrive',
+        magnitude: 0.6,
+        secondaryMagnitude: 0.2,
+        scaleMultiplier: 0.4,
+        durationSeconds: 15,
+      },
+      { type: 'PowerRestoreSP', integerAmount: 1 },
     ]);
   });
 

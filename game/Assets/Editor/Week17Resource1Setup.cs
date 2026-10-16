@@ -132,8 +132,12 @@ namespace TrickalFanGame.Editor
             root.transform.localScale = Vector3.one * (spec.WorldDiameter / sprite.bounds.size.x);
 
             SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(root);
-            renderer.sprite = sprite;
-            renderer.color = spec.Tint;
+            // Scale and collider still come from the placeholder size; only the look belongs to the drawing.
+            if (!FairyKingdomArtworkSetup.HasAuthoredArtwork(root))
+            {
+                renderer.sprite = sprite;
+                renderer.color = spec.Tint;
+            }
             renderer.sortingOrder = TrickalFanGame.Player.PlayerMovement.AboveBodySortingOrder;
 
             Rigidbody2D body = GetOrAdd<Rigidbody2D>(root);

@@ -78,9 +78,9 @@ namespace TrickalFanGame.Editor
                    Load<Sprite>(Week15Boss1Setup.BossSpritePath),
                 "Buseureogi body art is not assigned to the boss prefab.");
             GameObject minion = Load<GameObject>(Week15Boss1Setup.MinionPrefabPath);
-            Assert(minion != null && minion.GetComponent<SpriteRenderer>().sprite ==
-                   Load<Sprite>(Week15Boss1Setup.BossSpritePath) && minion.GetComponent<EnemyChase>() != null,
-                "Crumb minion must temporarily reuse Buseureogi art and the verified melee behavior.");
+            // The minion has its own drawing now; only the melee behavior is still required here.
+            Assert(minion != null && minion.GetComponent<EnemyChase>() != null,
+                "Crumb minion must keep the verified melee behavior.");
             ValidateObstacle(Week15Boss1Setup.CreamPrefabPath, Week15Boss1Setup.CreamSpritePath);
             ValidateObstacle(Week15Boss1Setup.DoughPrefabPath, Week15Boss1Setup.DoughSpritePath);
 
@@ -308,8 +308,10 @@ namespace TrickalFanGame.Editor
                 Assert(ownedBeforeDeath >= runtime.LiveMinionCount + runtime.LiveObstacleCount,
                     "Every minion and obstacle must be registered for boss-owned cleanup.");
                 int minionsBeforeDeath = runtime.LiveMinionCount, obstaclesBeforeDeath = runtime.LiveObstacleCount;
+                // Enemy-7 (2026-10-13): the defeated boss releases what it made instead of removing it. The
+                // runtime boss built here needs the setting the Buseureogi Prefab carries.
+                boss.ConfigureDefeat(true);
                 boss.Health.TakeDamage(999f);
-                // Enemy-7 (2026-10-13): the defeated boss releases what it made instead of removing it.
                 Assert(boss.OwnedObjectCount == 0 && runtime.LiveMinionCount == minionsBeforeDeath &&
                        runtime.LiveObstacleCount == obstaclesBeforeDeath && !runtime.HasPendingObstacleTelegraph,
                     "Boss death must release every surviving crumb minion and obstacle without removing them.");

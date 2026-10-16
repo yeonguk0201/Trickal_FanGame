@@ -93,10 +93,18 @@ namespace TrickalFanGame.Editor
                    body != null && body.bodyType == RigidbodyType2D.Kinematic && body.freezeRotation &&
                    body.useFullKinematicContacts,
                 "The chest Prefab needs one solid BoxCollider2D on a kinematic Rigidbody2D with full contacts.");
+            // The fairy kingdom artwork setup binds the drawn chest, which must not take the placeholder tint.
+            TrickalFanGame.Frontend.FairyKingdomArtworkView artwork =
+                prefab.GetComponent<TrickalFanGame.Frontend.FairyKingdomArtworkView>();
+            Color prefabColor = artwork != null && artwork.Mode == TrickalFanGame.Frontend.FairyKingdomArtworkMode.Chest
+                ? Color.white
+                : TreasureChest.NormalColor;
             Assert(prefab.Visual != null && prefab.Visual.gameObject == prefab.gameObject &&
-                   prefab.Visual.sprite != null && prefab.Visual.color == TreasureChest.NormalColor,
+                   prefab.Visual.sprite != null && prefab.Visual.color == prefabColor,
                 "The chest Prefab must show its own normal-chest sprite.");
-            float worldSize = prefab.Visual.sprite.bounds.size.x * prefab.transform.localScale.x;
+            // The drawn chest is fitted to the width the placeholder sprite had.
+            float localWidth = artwork != null ? artwork.LocalWidth : prefab.Visual.sprite.bounds.size.x;
+            float worldSize = localWidth * prefab.transform.localScale.x;
             Assert(Mathf.Abs(worldSize - ChestPlacement.ChestWorldSize) < 0.001f,
                 "The chest Prefab must match the placement chest size.");
 

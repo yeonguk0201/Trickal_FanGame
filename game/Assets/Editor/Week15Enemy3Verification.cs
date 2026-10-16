@@ -45,6 +45,10 @@ namespace TrickalFanGame.Editor
                    prefab.GetComponents<LineRenderer>().Length == 1,
                 "Enemy-3 prefab must have exactly one controller, shared behavior, presentation, and path renderer.");
 
+            SpriteRenderer renderer = prefab.GetComponent<SpriteRenderer>();
+            Assert(renderer != null && renderer.color == Color.white,
+                "Enemy-3 prefab must not keep a placeholder tint over its drawing.");
+
             ChargingEnemyController charging = prefab.GetComponent<ChargingEnemyController>();
             Assert(charging.PursuitSpeed > 0f && charging.PursuitDuration > 0f,
                 "Enemy-3 prefab must spend a positive duration actively pursuing between charges.");
@@ -75,10 +79,12 @@ namespace TrickalFanGame.Editor
                 charging.TickBehavior(1f);
                 Vector2 locked = charging.LockedDirection;
                 LineRenderer path = enemy.GetComponent<LineRenderer>();
+                SpriteRenderer bodyArtwork = enemy.GetComponent<SpriteRenderer>();
                 Assert(charging.State == ChargingEnemyState.Windup && body.linearVelocity == Vector2.zero &&
                        locked.x > 0.99f && presentation.Phase == EnemyAttackPhase.Telegraph && path.enabled &&
                        Vector2.Dot(((Vector2)path.GetPosition(1) - (Vector2)path.GetPosition(0)).normalized, locked) > 0.99f,
                     "Windup must stop movement and show the locked dash path without relying on color alone.");
+                Assert(bodyArtwork.color == Color.white, "Windup must not tint the charger's drawing.");
 
                 player.transform.position = Vector2.left * 5f;
                 charging.TickBehavior(1.49f);
@@ -91,6 +97,7 @@ namespace TrickalFanGame.Editor
                 Assert(charging.State == ChargingEnemyState.Dashing && body.linearVelocity.x < 0f && !path.enabled &&
                        charging.LockedDirection == tracked,
                     "Dash start must lock the latest tracked direction and hide the telegraph path once active.");
+                Assert(bodyArtwork.color == Color.white, "The dash must not tint the charger's drawing.");
 
                 GameObject wall = new("Enemy-3 Wall");
                 wall.transform.SetParent(root.transform);
@@ -100,6 +107,7 @@ namespace TrickalFanGame.Editor
                        charging.State == ChargingEnemyState.Recovering && body.linearVelocity == Vector2.zero &&
                        presentation.Phase == EnemyAttackPhase.Recovery,
                     "A wall collision must end the dash in a stationary, readable recovery.");
+                Assert(bodyArtwork.color == Color.white, "Recovery must not tint the charger's drawing.");
                 // The wall sits on the enemy for this collision check only; left in place it would block pursuit.
                 UnityEngine.Object.DestroyImmediate(wall);
                 Physics2D.SyncTransforms();

@@ -25,6 +25,10 @@ MonoBehaviour:
     score: 4
   - role: 6
     score: 1
+  - role: 7
+    score: 3
+  - role: 8
+    score: 4
   tierBands:
   - tier: 0
     minimumScore: 0

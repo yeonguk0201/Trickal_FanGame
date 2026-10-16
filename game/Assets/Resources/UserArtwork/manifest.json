@@ -125,6 +125,11 @@
     "connected": true
   },
   {
+    "source": "황금 잎사귀 메달 아이콘.png",
+    "resource": "gold-pickup",
+    "connected": true
+  },
+  {
     "source": "탐욕의 반지.png",
     "resource": "artifact-greed-ring",
     "connected": true

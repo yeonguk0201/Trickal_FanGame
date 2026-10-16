@@ -293,6 +293,115 @@ namespace TrickalFanGame.Item
                     }
 
                     break;
+                case ItemEffectType.PowerRoomBlast:
+                    if (scaleMultiplier < 1f || secondaryMagnitude <= 0f || integerAmount <= 0 ||
+                        durationSeconds <= 0f)
+                    {
+                        error = "PowerRoomBlast requires a non-boss multiplier of at least 1 and a positive damage " +
+                                "bonus, stack limit and duration.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.PowerProtectiveBlanket:
+                    if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds <= 0f)
+                    {
+                        error = "PowerProtectiveBlanket requires a positive heal, heal interval and duration.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.PowerSmite:
+                    if (integerAmount <= 0 || secondaryMagnitude <= 0f || secondaryMagnitude > 1f ||
+                        durationSeconds <= 0f)
+                    {
+                        error = "PowerSmite requires positive shock stacks, a slow within (0, 1] and a duration.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.PowerStunRoomEnemies:
+                case ItemEffectType.PowerRoomEnemyVulnerability:
+                    if (durationSeconds <= 0f)
+                    {
+                        error = $"{effectType} requires a positive duration.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.PowerOverdrive:
+                    if (secondaryMagnitude < 0f || scaleMultiplier < 0f || scaleMultiplier >= 1f ||
+                        durationSeconds <= 0f)
+                    {
+                        error = "PowerOverdrive requires a cooldown reduction within [0, 1) and a positive duration.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomPulseDamage:
+                    if (intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "CurrentRoomPulseDamage requires a positive interval and a duration of at least one " +
+                                "pulse.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomPulseHeal:
+                    if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "CurrentRoomPulseHeal requires a positive heal, a positive interval and a duration of " +
+                                "at least one pulse.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomEnemyDamageReduction:
+                    if (magnitude >= 1f || durationSeconds <= 0f)
+                    {
+                        error = "CurrentRoomEnemyDamageReduction requires a reduction within (0, 1) and a positive " +
+                                "duration.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomDamageMultiplier:
+                    if (magnitude <= 1f)
+                    {
+                        error = "CurrentRoomDamageMultiplier requires a multiplier above 1.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.StunAndCutRandomEnemies:
+                    if (magnitude >= 1f || integerAmount <= 0 || durationSeconds <= 0f ||
+                        secondaryMagnitude < 0f || secondaryMagnitude >= 1f)
+                    {
+                        error = "StunAndCutRandomEnemies requires a health cut within (0, 1), a positive target count, " +
+                                "a positive stun duration and a boss share within [0, 1).";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomPulseSP:
+                    if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "CurrentRoomPulseSP requires a positive SP gain, a positive interval and a duration of " +
+                                "at least one pulse.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.CurrentRoomEnemyPoison:
+                    if (integerAmount <= 0 || intervalSeconds <= 0f || durationSeconds < intervalSeconds)
+                    {
+                        error = "CurrentRoomEnemyPoison requires a positive stack count, a positive interval and a " +
+                                "duration of at least one tick.";
+                        return false;
+                    }
+
+                    break;
+                case ItemEffectType.PowerRestoreSP:
                 case ItemEffectType.Pierce:
                 case ItemEffectType.MaxSP:
                 case ItemEffectType.MultiShot:
@@ -325,7 +434,11 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.NegateLethalDamageOnce &&
                    type != ItemEffectType.BounceBetweenEnemies &&
                    type != ItemEffectType.SplitOnHit &&
-                   type != ItemEffectType.FreeCurrentShopOffers;
+                   type != ItemEffectType.FreeCurrentShopOffers &&
+                   type != ItemEffectType.PowerStunRoomEnemies &&
+                   type != ItemEffectType.PowerRestoreSP &&
+                   type != ItemEffectType.CurrentRoomPulseHeal &&
+                   type != ItemEffectType.CurrentRoomPulseSP;
         }
     }
 }

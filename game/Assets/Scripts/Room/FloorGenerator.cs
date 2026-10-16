@@ -300,6 +300,8 @@ namespace TrickalFanGame.Room
             if (distances.Count != floor.Nodes.Count - secretRooms ||!distances.TryGetValue(floor.BossRoomId, out int bossDistance) ||
                 bossDistance < requiredBossDistance || byId[floor.BossRoomId].DirectionalConnections.Count != 1)
             { error = $"Floor {floor.FloorNumber} is disconnected or its boss is not an end room at distance {requiredBossDistance}+."; return false; }
+            if (FloorGenerator.UsesStartTreasure(floor.FloorNumber, floor.Settings != null) &&
+                !IsValidStartTreasure(floor, out error)) return false;
             foreach (GeneratedRoomNode node in floor.Nodes)
             {
                 if (node.Role == GeneratedRoomRole.Shop && !IsValidShop(node, byId, out error)) return false;
@@ -324,6 +326,34 @@ namespace TrickalFanGame.Room
             {
                 error = $"Shop room {shop.RoomId} must be a key-locked end room behind a start or intermediate room.";
                 return false;
+            }
+
+            error = null;
+            return true;
+        }
+
+        // Power-2: the start-floor treasure room is a key-free end room behind one regular door of the start room.
+        // Hidden passages of the secret room may still touch it.
+        private static bool IsValidStartTreasure(GeneratedFloor floor, out string error)
+        {
+            foreach (GeneratedRoomNode node in floor.Nodes)
+            {
+                if (node.Role != GeneratedRoomRole.Treasure) continue;
+                int regular = 0;
+                bool fromStart = false;
+                foreach (GeneratedRoomConnection connection in node.DirectionalConnections)
+                {
+                    if (connection.IsSecret) continue;
+                    regular++;
+                    fromStart |= connection.DestinationRoomId == floor.StartingRoomId;
+                }
+
+                if (node.RequiresKey || regular != 1 || !fromStart)
+                {
+                    error = $"Floor {floor.FloorNumber} treasure room {node.RoomId} must be an unlocked end room " +
+                            "next to the start room.";
+                    return false;
+                }
             }
 
             error = null;
@@ -383,6 +413,9 @@ namespace TrickalFanGame.Room
         public const int ShopRoomPercent = 60;
         // Shop-1: how often a generated secret room holds the 골디 shop.
         public const int GoldiShopPercent = 20;
+        // Power-2: on this floor of a configured (floor-settings) Run, the treasure room is a key-free end room right
+        // next to the start room, so the guaranteed 교주의 권능 offer is always the first thing the player can reach.
+        public const int StartTreasureFloor = 1;
         [SerializeField, Min(1)] private int floorCount = 3;
         [SerializeField, Min(3)] private int minimumRoomsPerFloor = 6;
         [SerializeField, Min(3)] private int maximumRoomsPerFloor = 8;
@@ -523,6 +556,7 @@ namespace TrickalFanGame.Room
             int topologySeed = DeriveSeed(floorSeed, 0, TopologySalt), contentSeed = DeriveSeed(floorSeed, 0, ContentSalt);
             FloorGenerationSettings settings = floorSettings.Length == 0 ? null : floorSettings[floorNumber - 1];
             int requiredBossDistance = settings?.MinimumBossDistance ?? minimumBossDistance;
+            bool startTreasure = UsesStartTreasure(floorNumber, settings != null);
             int totalRooms = 0, reservedSpecialRooms = 0;
             if (settings != null)
             {
@@ -536,12 +570,16 @@ namespace TrickalFanGame.Room
                 StableRandom random = new(unchecked((uint)DeriveSeed(topologySeed, attempt, AttemptSalt)));
                 List<MutableRoom> rooms = settings == null
                     ? Grow(random.NextInclusive(minimumRoomsPerFloor, maximumRoomsPerFloor), ref random)
-                    : GrowWithBossRoute(totalRooms - reservedSpecialRooms, requiredBossDistance, ref random);
+                    : GrowWithBossRoute(totalRooms - reservedSpecialRooms, requiredBossDistance, startTreasure,
+                        ref random);
                 if (rooms == null) continue;
                 Dictionary<int, int> distance = MutableDistances(rooms);
-                int bossIndex = BossIndex(rooms, distance, requiredBossDistance, ref random);
+                int startTreasureIndex = startTreasure ? requiredBossDistance + 1 : -1;
+                int bossIndex = BossIndex(rooms, distance, requiredBossDistance, startTreasureIndex, ref random);
                 if (bossIndex < 0) continue;
-                int treasureIndex = TreasureIndex(rooms, distance, bossIndex, ref random);
+                int treasureIndex = startTreasure
+                    ? startTreasureIndex
+                    : TreasureIndex(rooms, distance, bossIndex, ref random);
                 if (treasureIndex < 0) continue;
                 GeneratedRoomNode[] nodes = new GeneratedRoomNode[rooms.Count];
                 for (int i = 0; i < rooms.Count; i++)
@@ -561,7 +599,7 @@ namespace TrickalFanGame.Room
                 bool optionalRoute = GeneratedFloorGraph.CanReachWithoutRoomForGeneration(
                     nodes[0].RoomId, nodes[bossIndex].RoomId, treasure.RoomId, byId);
                 uint lockRoll = unchecked((uint)DeriveSeed(contentSeed, treasure.RoomNumber, TreasureLockSalt));
-                treasure.AssignKeyRequirement(optionalRoute && lockRoll % 100u < TreasureLockPercent);
+                treasure.AssignKeyRequirement(!startTreasure && optionalRoute && lockRoll % 100u < TreasureLockPercent);
                 nodes = AppendSecretRoom(floorNumber, contentSeed, nodes, reward, shop.Count > 0);
                 nodes = AppendShopRoom(floorNumber, contentSeed, nodes, shop);
                 // Retry topology if a reserved special room had no valid cell; never change the size or special rolls.
@@ -571,6 +609,9 @@ namespace TrickalFanGame.Room
             }
             floor = null; error = $"Could not place an end-room boss at distance {requiredBossDistance}+, a separate treasure room, and the reserved special rooms."; return false;
         }
+
+        public static bool UsesStartTreasure(int floorNumber, bool hasFloorSettings) =>
+            hasFloorSettings && floorNumber == StartTreasureFloor;
 
         private static bool RollSpecialRoom(int contentSeed, uint salt, int percent)
         {
@@ -702,7 +743,10 @@ namespace TrickalFanGame.Room
         }
         // Build a self-avoiding required route first, then branch without extending its protected end room.
         // This prevents small floors with a long minimum route from failing through unlucky shallow growth.
-        private static List<MutableRoom> GrowWithBossRoute(int count, int bossDistance, ref StableRandom random)
+        // Power-2: with startTreasure the next room (index bossDistance + 1) is a leaf next to the start room that
+        // never grows a branch, so it stays an end room one door from the start.
+        private static List<MutableRoom> GrowWithBossRoute(int count, int bossDistance, bool startTreasure,
+            ref StableRandom random)
         {
             List<MutableRoom> rooms = new() { new MutableRoom(new RoomGridPosition(0, 0)) };
             HashSet<RoomGridPosition> occupied = new() { rooms[0].Position };
@@ -723,13 +767,26 @@ namespace TrickalFanGame.Room
                 }
                 if (!added) return null;
             }
-            int protectedEnd = bossDistance;
+            int protectedEnd = bossDistance, protectedTreasure = -1;
+            if (startTreasure)
+            {
+                if (count < bossDistance + 2) return null;
+                List<RoomDoorDirection> free = new();
+                foreach (RoomDoorDirection direction in directions)
+                    if (!occupied.Contains(rooms[0].Position.Offset(direction))) free.Add(direction);
+                if (free.Count == 0) return null;
+                RoomDoorDirection chosen = free[random.NextIndex(free.Count)];
+                RoomGridPosition position = rooms[0].Position.Offset(chosen);
+                occupied.Add(position);
+                protectedTreasure = rooms.Count;
+                AddRoom(rooms, 0, chosen, position);
+            }
             while (rooms.Count < count)
             {
                 List<(int Source, RoomDoorDirection Direction, RoomGridPosition Position)> candidates = new();
                 for (int source = 0; source < rooms.Count; source++)
                 {
-                    if (source == protectedEnd) continue;
+                    if (source == protectedEnd || source == protectedTreasure) continue;
                     foreach (RoomDoorDirection direction in directions)
                     {
                         RoomGridPosition position = rooms[source].Position.Offset(direction);
@@ -754,12 +811,12 @@ namespace TrickalFanGame.Room
         }
 
         private static int BossIndex(IReadOnlyList<MutableRoom> rooms, IReadOnlyDictionary<int, int> distances,
-            int minimumBossDistance, ref StableRandom random)
+            int minimumBossDistance, int excluded, ref StableRandom random)
         {
             List<int> choices = new(); int greatest = minimumBossDistance - 1;
             for (int i = 1; i < rooms.Count; i++)
             {
-                if (rooms[i].Connections.Count != 1 || distances[i] < minimumBossDistance) continue;
+                if (i == excluded || rooms[i].Connections.Count != 1 || distances[i] < minimumBossDistance) continue;
                 if (distances[i] > greatest) { greatest = distances[i]; choices.Clear(); }
                 if (distances[i] == greatest) choices.Add(i);
             }

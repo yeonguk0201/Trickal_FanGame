@@ -21,11 +21,29 @@ namespace TrickalFanGame.Editor
         public const string DisplayRoot = "Assets/Prefabs/FairyKingdomArtwork";
         public const string PreviewScenePath = "Assets/Scenes/FairyKingdomArtworkPreview.unity";
         // Charging and ranged/sniper fairies keep their existing idle, walk and attack art. Variants inherit a
-        // binding placed on RangedEnemy, so the base must stay unbound too.
+        // binding placed on RangedEnemy, so the base must stay unbound too. 산사모-순수 (QuickRangedFairy) is bound
+        // on its own variant.
         private static readonly Dictionary<string, string> EnemyIds = new()
         {
             ["JyubiEnemy"] = "jyubi",
             ["BuseureogiCrumbMinion"] = "crumb-minion-pink",
+            ["QuickRangedFairy"] = "sansamo-pure",
+            // Enemy-8: 저혈당 요정-활발. The user's drawing (2026-10-14) replaced the earlier preview-only draft.
+            ["LivelyLowBloodSugarFairy"] = "low-blood-sugar-fairy",
+            // Enemy-9: 누루링-요정전사 and its small splits share one drawing; the split Prefab is scaled down.
+            ["NururingFairyWarrior"] = "nururing",
+            ["NururingSplit"] = "nururing",
+        };
+        // First-bind width where the placeholder sprite has a different shape. 0.7 draws 산사모-순수 as tall as
+        // 산사모-활발 (about 1.2). A width already tuned on the Prefab is kept.
+        private static readonly Dictionary<string, float> EnemyWidths = new()
+        {
+            ["QuickRangedFairy"] = 0.7f,
+            // About 1.2 tall, like 저혈당 요정-순수.
+            ["LivelyLowBloodSugarFairy"] = 1.07f,
+            // The drawing is wider than tall: 1.3 wide stands about 1.05 tall. The split's root scale shrinks it.
+            ["NururingFairyWarrior"] = Week25Enemy9Setup.ArtworkWidth,
+            ["NururingSplit"] = Week25Enemy9Setup.ArtworkWidth,
         };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites")]
@@ -73,6 +91,29 @@ namespace TrickalFanGame.Editor
             Apply();
             FairyKingdomArtworkVerification.Verify();
         }
+
+        public const string UserArtworkRoot = "Assets/Resources/UserArtwork/";
+
+        // A Prefab bound to its drawing, or already showing a user drawing (UserArtwork), keeps that sprite and color.
+        // Older setups that predate the artwork call this so a re-run only rewrites gameplay values and never brings
+        // their placeholder look back.
+        public static bool HasAuthoredArtwork(GameObject root)
+        {
+            if (root == null) return false;
+            if (root.GetComponent<FairyKingdomArtworkView>() != null) return true;
+            SpriteRenderer renderer = root.GetComponentInChildren<SpriteRenderer>(true);
+            return renderer != null && IsUserArtwork(renderer.sprite);
+        }
+
+        public static bool IsUserArtwork(Sprite sprite) =>
+            sprite != null && AssetDatabase.GetAssetPath(sprite).StartsWith(UserArtworkRoot, StringComparison.Ordinal);
+
+        // Rebuilds only the catalog (sprites and visible rects), for a setup that changed one drawing.
+        public static FairyKingdomArtworkCatalog RefreshCatalog() => BuildCatalog();
+
+        // Binds the drawing to one loaded Prefab the same way Apply does, without touching other Prefabs or Scenes.
+        public static bool BindPrefabContents(GameObject root, FairyKingdomArtworkCatalog catalog) =>
+            ApplyHierarchy(root, catalog);
 
         private static FairyKingdomArtworkCatalog BuildCatalog()
         {
@@ -183,7 +224,9 @@ namespace TrickalFanGame.Editor
                 FairyKingdomArtworkCatalog.Entry entry = catalog.Entries.FirstOrDefault(value => value.id == id);
                 if (entry == null) continue; // Boss-owned dough/cream obstacles have their own existing art.
                 FairyKingdomArtworkView view = owner.GetComponent<FairyKingdomArtworkView>();
-                float width = view != null ? view.LocalWidth : renderer.sprite != null ? renderer.sprite.bounds.size.x : 1f;
+                float width = view != null ? view.LocalWidth :
+                    EnemyWidths.TryGetValue(baseName, out float enemyWidth) ? enemyWidth :
+                    renderer.sprite != null ? renderer.sprite.bounds.size.x : 1f;
                 if (id == "obstacle-tree") width = 1f;
                 if (view == null) view = Undo.AddComponent<FairyKingdomArtworkView>(owner);
                 Undo.RecordObject(view, "Bind fairy kingdom artwork");

@@ -16,6 +16,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Verify Room-6 Tall Large and Boss Profiles")]
         public static void Verify()
         {
+            Week18Obstacle2Setup.OpenGameScene();
             FloorGenerator generator = GameObject.Find(Week8RandomRoomSetup.GeneratorObjectName)
                 ?.GetComponent<FloorGenerator>();
             string[] baselineTemplateIds =

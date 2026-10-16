@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -127,6 +128,8 @@ namespace TrickalFanGame.Room
                 EncounterEnemyRole.Chaser => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.FastChaser => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.Jyubi => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.FourWayShooter => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.SplittingChaser => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.Ranged => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Sniper => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Charging => SpawnPointPlacementRole.ChargeLane,
@@ -457,11 +460,30 @@ namespace TrickalFanGame.Room
             }
 
             if (!RoomObstacleLayout.TryCollectFootprints(roomPrefab, out List<RoomObstacleFootprint> footprints,
-                    out error) ||
-                !RoomObstacleLayout.TryValidate(templateId, profile.MovementBounds, profile.EncounterBounds,
-                    doorSlots, spawnPoints, footprints, out error) ||
-                !RoomObstacleLayout.TryValidateFloorTraps(templateId, profile.MovementBounds, doorSlots, spawnPoints,
-                    footprints, RoomObstacleLayout.CollectFloorTraps(roomPrefab), out error))
+                    out error))
+            {
+                error = $"Room template '{templateId}' has an invalid obstacle Layout. {error}";
+                return false;
+            }
+
+            // The checks depend only on the values read here, so an unchanged Layout reuses its last result. The
+            // Prefab is still read on every call, so an edited Layout is checked again.
+            List<RoomObstacleFootprint> floorTraps = RoomObstacleLayout.CollectFloorTraps(roomPrefab);
+            string key = LayoutResultKey(footprints, floorTraps);
+            if (!LayoutResults.TryGetValue(key, out error))
+            {
+                if (RoomObstacleLayout.TryValidate(templateId, profile.MovementBounds, profile.EncounterBounds,
+                        doorSlots, spawnPoints, footprints, out error))
+                {
+                    RoomObstacleLayout.TryValidateFloorTraps(templateId, profile.MovementBounds, doorSlots,
+                        spawnPoints, footprints, floorTraps, out error);
+                }
+
+                if (LayoutResults.Count >= MaximumLayoutResults) LayoutResults.Clear();
+                LayoutResults.Add(key, error);
+            }
+
+            if (error != null)
             {
                 error = $"Room template '{templateId}' has an invalid obstacle Layout. {error}";
                 return false;
@@ -469,6 +491,63 @@ namespace TrickalFanGame.Room
 
             return true;
         }
+
+        private const int MaximumLayoutResults = 1024;
+        // Layout check error by the exact values the check read; null for a valid Layout.
+        private static readonly Dictionary<string, string> LayoutResults = new(StringComparer.Ordinal);
+
+        private string LayoutResultKey(List<RoomObstacleFootprint> footprints, List<RoomObstacleFootprint> floorTraps)
+        {
+            StringBuilder key = new(512);
+            AppendKey(key, templateId);
+            AppendKey(key, profile.MovementBounds);
+            AppendKey(key, profile.EncounterBounds);
+            key.Append(doorSlots != null ? doorSlots.Length : -1).Append('|');
+            if (doorSlots != null)
+            {
+                foreach (RoomTemplateDoor door in doorSlots)
+                {
+                    key.Append((int)door.Direction).Append(',');
+                    AppendKey(key, door.SlotPosition);
+                    AppendKey(key, door.SafeEntryPosition);
+                }
+            }
+
+            key.Append(spawnPoints != null ? spawnPoints.Length : -1).Append('|');
+            if (spawnPoints != null)
+            {
+                foreach (Vector2 point in spawnPoints) AppendKey(key, point);
+            }
+
+            AppendKey(key, footprints);
+            AppendKey(key, floorTraps);
+            return key.ToString();
+        }
+
+        private static void AppendKey(StringBuilder key, List<RoomObstacleFootprint> footprints)
+        {
+            key.Append(footprints.Count).Append('|');
+            foreach (RoomObstacleFootprint footprint in footprints)
+            {
+                AppendKey(key, footprint.ObstacleId);
+                AppendKey(key, footprint.Bounds);
+                key.Append(footprint.IsDestructible ? '1' : '0').Append(footprint.IsPit ? '1' : '0');
+            }
+        }
+
+        private static void AppendKey(StringBuilder key, string text) =>
+            key.Append(text != null ? text.Length : -1).Append(':').Append(text).Append('|');
+
+        private static void AppendKey(StringBuilder key, Rect rect)
+        {
+            AppendKey(key, rect.position);
+            AppendKey(key, rect.size);
+        }
+
+        // Exact float bits, so two Layouts share a result only when every value is identical.
+        private static void AppendKey(StringBuilder key, Vector2 value) =>
+            key.Append(BitConverter.SingleToInt32Bits(value.x)).Append(',')
+                .Append(BitConverter.SingleToInt32Bits(value.y)).Append(',');
 
         private static Vector2 ToLocal(Transform root, Transform child) => root.InverseTransformPoint(child.position);
 

@@ -472,9 +472,9 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 - Room-5 구성: Unity 메뉴 `Trickal Fan Game > Week 14 > Setup Room-5 Runtime Room Transitions`. Room-4 카탈로그를 보존하고 런타임 조립기가 선택된 Small·Basic·Wide Prefab과 Profile을 사용하도록 준비하며 플레이어 물리 보간을 켜 Wide 카메라의 렌더 프레임 추적을 안정화한다.
 - Room-5 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room5Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 세 크기의 실제 Prefab 인스턴스, 플레이어 물리 보간, 서로 다른 Profile 사이 양방향 이동과 반대편 안전 진입점, 현재 방 단독 활성화, 카메라 유효 경계, RunProgress·미니맵 실루엣 갱신, Setup 재실행과 Room-0~4 회귀를 검사한다.
 - Encounter-1 구성: Unity 메뉴 `Trickal Fan Game > Week 14 > Setup Encounter-1 Contract`. Small·Basic·Wide와 1~3층을 허용하는 추적형·원거리형·돌진형 단일 역할 Encounter 에셋을 생성·갱신하고 Game Scene의 `FloorGenerator`에 콘텐츠 버전 1 카탈로그를 연결한다.
-- Encounter-1 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Encounter1Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 안정 ID, 적 역할·수, Profile·층, SpawnPoint/Group, 안전거리, 웨이브·클리어 조건, 128 seed 결정성·카탈로그 순서 독립성, 잘못된 참조·거리·중복 ID 실패, Setup 재실행 GUID와 Room-0~5 회귀를 검사한다.
+- Encounter-1 자동 검증기는 2026-10-13에 제거했다. Encounter 3종만 있는 카탈로그를 기대했고, 현재 카탈로그는 `Week19Encounter4Verification` 이후 검증기가 확인한다.
 - Encounter-2 구성: Unity 메뉴 `Trickal Fan Game > Week 14 > Setup Encounter-2 Mixed Encounters`. 역할 로스터를 기존 추적형·원거리형·돌진형 Prefab에 연결하고 `pressure-chaser-ranged`, `lane-charging-ranged`, `crossfire-ranged` 세 Encounter를 콘텐츠 버전 2 카탈로그로 구성한다.
-- Encounter-2 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Encounter2Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 256 seed 선택, 활성 출입구 안전거리, 고유 SpawnPoint, 역할 우선 배치, 실제 Prefab 인스턴스, 로스터 실패 경로, Setup 재실행 GUID와 Room-0~5 회귀를 검사한다.
+- Encounter-2 자동 검증기는 2026-10-13에 제거했다. 사유는 Encounter-1과 같다.
 - Encounter-3 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Encounter3Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 2~3층 2웨이브 선택, 필수 적 전멸 경계, 웨이브 단일 시작·종료, 완료 웨이브 복원, 클리어 드롭 1회 추첨(검증용 100% 표), 재진입·방 재구성 중복 방지, Setup 재실행 GUID와 Room-0~5 회귀를 검사한다.
 - Room-6 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room6Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Tall 세로·Large 양축 카메라, 1~3층별 Wide/Tall/Large 보스 후보, Template 층 범위, 512 seed 결정성·AABB 비겹침·후보 선택, Tall/Large Encounter 해석, Setup 재실행 GUID와 Encounter-3·Room-0~5 회귀를 검사한다.
 - Room-7 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week14Room7Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Large 중앙 고정 기둥의 비파괴·무드롭 계약, 네 방향 우회 통로, 플레이어 이동 sweep, 양쪽 투사체 사선, 추적 Rigidbody와 돌진 정지, 1,024 seed의 `pillar-crossfire` 호환 선택, Setup 재실행 GUID와 Room-0~6 회귀를 검사한다.
@@ -485,8 +485,8 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 - Enemy-0 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Enemy0Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 세 일반 적 Prefab에 공유 행동 컨텍스트를 중복 없이 구성하고 GUID를 보존하며, 방 전투 시작·피격 경계, 감지 거리 밖 지속 추적, 플레이어·적 사망, 넉백, 방 비활성화 정리와 기존 추적형·원거리형·돌진형 행동 회귀를 검사한다.
 - Enemy-3 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Enemy3Verification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 두 번의 Prefab GUID·컴포넌트 단일성, 추격 → 방향 고정 예고선 → 돌진 → 회복 → 즉시 재추격, Large 방 대비 돌진 거리, 벽 충돌과 넉백·사망·방 비활성화 정리 및 Enemy-0~1·기존 적 밸런스 회귀를 검사한다.
 - Enemy-4 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Enemy4Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 기존 원거리 Prefab 보존과 신규 저격형 Prefab의 Setup 재실행 GUID·컴포넌트 단일성, 재배치 → 방향 고정 조준선 → 발사 → 회복, 근거리 사격, 선택적 좌우 이동, 시간·막힘 방향 반전, 플레이어보다 느린 후퇴, 넉백·사망·방 비활성화 정리 및 Enemy-0~1·기존 적 밸런스 회귀를 검사한다.
-- 일반 적 임시 식별 색상: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15EnemyRoleColorVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 불효자손 갈색·산사모 초록·저혈당 파랑·고혈당 분홍을 멱등 적용하고, 네 Prefab GUID, 색상 쌍 구분 거리, 저혈당 대기색과 돌진 예고·위험색 분리 및 Enemy-2~4 행동 회귀를 검사한다.
-- Enemy-5 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Enemy5Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 사용자 제공 투명 PNG 4종의 Sprite 임포트와 Prefab·역할 로스터 연결, Setup 두 번의 에셋·Prefab·Encounter GUID, Small의 저격형 제외, Large의 저격·돌진 웨이브 분리, 1,024 seed 노출과 Enemy-2~4 행동 회귀를 검사한다.
+- 일반 적 임시 식별 색상 검증기는 2026-10-13에 제거했다. 원화 연결로 임시 색을 쓰지 않는다.
+- Enemy-5 자동 검증기는 2026-10-13에 제거했다. 초기 스프라이트 연결과 Week 15 Encounter 구성을 기대했고, 원화는 `FairyKingdomArtworkVerification`, Encounter는 Week 19 이후 검증기가 확인한다.
 - Boss-0 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week15Boss0Verification.SetupAndVerifyBatch -logFile <로그 경로>`. 큰 임시 보스 Prefab의 GUID와 Setup 재실행 안정성, 콘텐츠 seed 기반 패턴 순서, 예고 → 실행 → 후딜 → 재사용 대기 시간 경계, 즉시 반복 방지, HP 3단계 HUD, 세 보스 Room Profile의 충돌 여유, 사망·방 비활성화 시 소환물·투사체 정리와 HUD-5 회귀를 검사한다.
 - Boss-2 구성: Unity 메뉴 `Trickal Fan Game > Week 15 > Setup Boss-2 Saemaeum Vault`. 부스러기 Prefab을 보존하면서 사용자 에셋 `Boss_SaemaeumGeumgo.png`, 새마음금고 전용 Prefab, 접근 투척·연속 점프·보물 회복과 2페이즈 수치를 멱등 구성하고 Run 조립기의 2층 보스 슬롯에 연결한다.
 - Boss-2 즉시 전투: `Trickal Fan Game > Debug > Open Boss-2 Test Room`을 선택하고 Play한다. 처음 실행하면 기존 ItemTestScene을 복사해 별도 `Assets/Scenes/Boss2TestScene.unity`를 만들고 새마음금고 한 마리만 시작 시 생성한다. 오른쪽 패널에서 플레이어와 살아 있는 보스의 현재/최대 HP를 함께 확인하며, `Heal / Reset HP`와 `Respawn Enemies`로 반복 테스트한다. 이후에는 해당 Scene을 직접 열어 Play해도 된다. `Debug > Verify Boss-2 Test Room`에서 참조·단일 보스 생성·HP 표시 대상·Scene GUID 유지 검사를 실행할 수 있다.
@@ -563,9 +563,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
 - `Trickal Fan Game > Setup Phase D High Grade Skill`: Play Mode 밖에서 Player 행동 상태·고학년 스킬 컴포넌트와 적 넉백 수신기를 생성 또는 갱신하고 씬·적 프리팹을 저장한다. 재실행해도 중복 컴포넌트를 만들지 않는다.
 - `Trickal Fan Game > Verify Phase D High Grade Skill`: Q 쿨타임, 조향·무적 돌진, 행동·전환 게이트, 200% 범위 피해, 일반/보스 넉백 후 경직, 충돌 후 플레이어 무적 경직, 시간 만료 감속과 사망 정리를 검사한다. 성공 시 Console에 `Phase D verification passed`가 출력되고 불변조건 위반 시 예외로 실패한다.
 - `Trickal Fan Game > Setup Phase F-1 Random Room Definitions`: Play Mode 밖에서 `Assets/Rooms/Definitions`의 일반방 3종·보상방 1종·보스방 1종 정의 에셋과 씬의 `Phase F Floor Generator`를 생성 또는 갱신한다. 재실행해도 오브젝트나 에셋을 중복 생성하지 않는다.
-- `Trickal Fan Game > Verify Phase F-1 Random Room Graph`: 고정 seed 재현성, 안정적인 `floor-XX-room-YY` ID, 중복 ID 거부, 시작→일반/보상→보스 연결, 전 층 도달 가능성과 잘못된 정의 실패를 검사한다. 성공 시 Console에 `Phase F-1 random room graph verification passed`가 출력된다.
 - `Trickal Fan Game > Setup Phase F-2 Generated Room Graph Binding`: F-1 Setup을 갱신한 뒤 생성 결과를 Phase E에서 검증된 9개 방의 정의·몬스터 구성·보상방 활성 상태·출입구 순서에 적용하고 `RoomGraphController`를 연결한다. 완료된 Phase E-7 그래프가 선행되어야 하며 재실행해도 assembler나 출입구를 중복 생성하지 않는다.
-- `Trickal Fan Game > Verify Phase F-2 Generated Room Graph Binding`: 생성 노드와 씬 방의 1:1 대응, 몬스터 패턴, 보상방 활성화, 정확한 출입구 순서와 graph 참조, 재적용 멱등성, 방 수 불일치 실패를 검사한다. 성공 시 Console에 `Phase F-2 generated room graph binding verification passed`가 출력된다.
+- Phase E-5~E-7 고정 그래프와 Phase F-1·F-2·F-4·F-5 검증 메뉴는 2026-10-13에 제거했다. 고정 9방 그래프와 초기 생성기 설정을 기대해 현재 Game Scene에서 통과할 수 없었다. 생성·바인딩 불변조건은 `RoomLayoutImporterVerification`과 Week 19 이후 검증기가 확인한다.
 - `Trickal Fan Game > Setup Phase H-5 Meta Progression`: Play Mode 밖에서 기존 `RunSession`에 `PlayerProgressClient`를 하나만 추가하거나 갱신하고 `test-player`, 저학년 스킬과 고학년 스킬 참조를 연결해 씬을 저장한다. Backend와 seed가 먼저 실행 중이어야 실제 온라인 진행을 조회할 수 있다.
 - `Trickal Fan Game > Verify Phase H-5 Meta Progression`: 온라인·캐시·Lv.1 폴백, Lv.1/Lv.10 실제 스킬 효과, 새 스냅샷 덮어쓰기, 클리어·사망 Run DTO, 중복 종료 방지, 동일 `clientRunId` 재시도, 성공·네트워크 실패·충돌 결과 표시를 검사한다. Edit Mode와 Play Mode에서 각각 실행해 `Phase H-5 verification passed`와 Console 오류 0개를 확인한다.
 
@@ -869,6 +868,28 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   벽에 붙은 상자·하트에 붙은 상자가 밀리지 않던 문제를 고쳤다. 벽에 붙인 상자를 벽을 따라 밀고, 하트를 상자 앞에 두고 밀어
   하트가 함께 밀리는지 다시 확인한다.
 
+- Jjangsem-2 짱셈스펠 4종: 메뉴 `Trickal Fan Game > Week 26 > Setup Jjangsem-2 Four Jjangsem Spells`가
+  `Assets/Items/jjangsem-pastel-light.asset`(효과 73·78·74), `jjangsem-suspicious-potion.asset`(75·79),
+  `jjangsem-thread-of-reason.asset`(76), `jjangsem-surprise-box.asset`(77)을 GUID를 보존하며 멱등 구성하고(모두 Rare 짱셈스펠),
+  이름·설명 글리프를 추가한 뒤 Chest-1의 표 구성을 다시 실행해 `chest-content-table.jjangsemSpells`에 넣는다. Scene은 바꾸지
+  않는다. 표 구성이 `TreasureChest.prefab`을 플레이스홀더 그림으로 되돌리는 기존 부작용이 있으니 실행 뒤 그 Prefab 변경은
+  되돌린다. Backend `ITEM_CATALOG`에도 추가했으므로 로컬 DB는 `backend/`에서 `pnpm prisma:seed`를 다시 실행한다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 26 > Verify Jjangsem-2 Four Jjangsem Spells`, 배치는 Unity `-batchmode -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week26Jjangsem2Verification.SetupAndVerifyBatch -logFile <로그
+  경로>`다(글리프 추가 때문에 `-nographics` 없이 실행). Setup 2회 GUID, 효과 73~79·`PlayerSpell` 번호와 수치 검증, 아이템
+  계약·설명·글리프, 짱셈 목록 단독 소속과 다이아몬드 상자 등장, 파스텔빛의 사용 방 조건·미소비·간격 뒤 첫 틱·2.5초 간격 7회 피해와 6회
+  회복·SP 반 칸 3회·나중에 나온 적과 보스 피격·일시정지·클리어/이탈/사망 종료, 수상한 물약의 반 칸 단위 올림·최소 반 칸·함정 제외·방 밖
+  미적용·10초 갱신과 종료·사용 시 방 안 적 중독 3중첩, 이성의 끈의 출처별 2배/제외(권능 제외)·다른 보너스와 곱연산·같은 방 재사용 거부·이탈/Run 종료 해제, 깜짝상자의
+  적 없음 미소비·서로 다른 2명·보스 포함·최대 체력 50%(보스 20%) 감소·피격과 같은 피해 표시 이벤트·처치 없음·무적 제외·2초 스턴, 스턴 중 보스 패턴 취소와 같은 패턴의
+  예고부터 재시작을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Jjangsem-0·1, Slot-0, Spell-1, Power-1, Enemy-7,
+  Boss-0~4, Chest-2·1, 개발 패널)다. 2026-10-15 두 배치가 종료 코드 0으로 통과했고 Backend Jest(140개)도 통과했다. 2026-10-15·16 수치
+  조정 뒤에도 두 배치가 종료 코드 0으로, Backend Jest(140개)와 `pnpm build`가 다시 통과했다.
+  수동 확인: Game Scene Play → `F1` → `— Spell slot —`의 `Drop 파스텔빛`·`Drop 수상한 물약`·`Drop 이성의 끈`·`Drop 깜짝상자`로
+  주워 Left Shift로 쓴다. 시작방·클리어한 방에서는 앞의 셋이 사용되지 않고, 적이 없는 방에서는 깜짝상자가 사용되지 않아야
+  한다. 전투방에서 패널 줄에 `Pastel`·`Potion`·`Reason` 상태가 보이고, 파스텔빛은 2.5초마다 적 체력이 깎이고 3초마다 하트 반
+  칸이, 6초마다 SP 반 칸이 차고, 수상한 물약은 적에게 중독(패널 `poison x3`)이 걸리고 1칸 피해가 반 칸으로, 이성의 끈 중 공격 피해가 두 배로 보여야 한다. 깜짝상자는 적 2명이 멈추고
+  최대 체력의 절반만큼 체력이 줄며 피해 숫자와 일반 적 체력바가 보이고, 보스는 최대 체력의 20%만큼 줄며, 보스에게 쓰면 예고 중이던 패턴이 끊겼다가 2초 뒤 예고부터 다시 나와야 한다. 시각 이펙트는 아직 없다.
+
 - Spell-4 멤버십카드: 메뉴 `Trickal Fan Game > Week 22 > Setup Spell-4 Membership Card`가
   `Assets/Items/single-spell-membership-card.asset`(Rare 일회용 스펠, 효과 42 `FreeCurrentShopOffers`, 수치 필드 없음)을
   GUID를 보존하며 멱등 구성하고, 이름·설명과 상점 화면의 `무료`·`받기` 글리프를 추가한 뒤 Chest-1의 표 구성을 다시 실행해
@@ -1048,7 +1069,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   가시 돌·독버섯·제거된 거미줄은 그대로 없다(개발 패널로 놓은 함정은 층을 다시 만들면 사라진다).
 
 - Enemy-6 쥬비: 메뉴 `Trickal Fan Game > Week 23 > Setup Enemy-6 Jyubi`가 추적형 적 Prefab을 풀어 복사한
-  `Assets/Prefabs/JyubiEnemy.prefab`을 만들고(근접 공격·이동 애니메이션 컴포넌트 제거, 크기 0.5, 체력 1, 속도 5.5, 비행
+  `Assets/Prefabs/JyubiEnemy.prefab`을 만들고(근접 공격·이동 애니메이션 컴포넌트 제거, 크기 0.5, 체력 1, 속도 5.2(2026-10-14 5.5에서 조정), 비행
   추적, 반 칸 접촉 피해, `EnemyFlight` 추가) Obstacle-5 Setup을 다시 실행해 셰이디의 랜덤박스 종류에 쥬비 5마리 결과를
   연결한다. GUID를 보존하며 멱등이다. Obstacle-5 Setup도 같은 Prefab 구성 코드를 호출한다.
   자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Enemy-6 Jyubi`, 배치는 Unity `-batchmode -nographics -quit
@@ -1058,6 +1079,13 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   대 처치, 구덩이·낮은 장애물 무시와 나무·벽·플레이어 충돌 유지, 장애물 너머 대상으로의 직선 이동, 방의 추가 적 등록과
   처치 시 방 상태 불변을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-6과 그 회귀 전체, 하트 체력
   `Hp1HealthUnitsVerification`)다.
+  **원화 보존(2026-10-14)**: Enemy-6 Setup은 Obstacle-5를 거쳐 Resource-0(하트)·Resource-1(열쇠·폭탄)·Special-3(비밀
+  구덩이) Setup까지 다시 실행한다. 이 Setup들은 원화보다 먼저 만들어져 실행할 때마다 임시 스프라이트·색을 다시 써서
+  쥬비 틴트와 픽업·구덩이 그림을 되돌렸다. 이제 요정왕국 원화가 연결됐거나(`FairyKingdomArtworkView`) 사용자 원화
+  (`Assets/Resources/UserArtwork/`) 스프라이트를 쓰는 Prefab은 그림·색을 건드리지 않고(`FairyKingdomArtworkSetup.HasAuthoredArtwork`),
+  크기·충돌 같은 게임 값만 다시 쓴다. Enemy-6·Enemy-9의 `SetupAndVerifyBatch`는 Setup 전후 원화 연결 Prefab의 스프라이트·색을
+  비교해(`FairyKingdomArtworkVerification.SnapshotBoundArtwork`) 바뀌면 실패한다. 2026-10-14 수정 뒤 Enemy-6
+  `SetupAndVerifyBatch`가 Prefab 변경 없이 종료 코드 0으로 통과했다.
   수동 확인: Game Scene Play → 장애물이 있는 전투방에서 `F1` 패널 `— Obstacle —`의 `Next broken random box releases
   enemies`를 켜고 `Make shady-random-box`로 바꾼 장애물을 부순다. 연보라색 작은 적 5마리가 나와 장애물·구덩이 위를 지나
   플레이어에게 곧장 날아오고, 닿으면 하트가 반 칸 줄며, 한 대 맞으면 죽는다. 클리어된 방에서 부숴도 문이 잠기지 않고
@@ -1093,6 +1121,54 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   확인했다. 이 변경 뒤에는 Enemy-7 단독 `Verify`만 다시 통과했고 회귀 묶음은 다시 돌리지 않았다. 플레이 중에는 죽은
   보스 오브젝트를 지우는 처리가 보스의 사망 처리보다 먼저 실행되어 `OnDisable`이 소환물을 지우던 문제가 있었고, 죽은
   보스의 `OnDisable`도 소환물을 넘겨주도록 고쳤다).
+
+- Enemy-8 저혈당 요정-활발: 메뉴 `Trickal Fan Game > Week 25 > Setup Enemy-8 Lively Low Blood Sugar Fairy`가
+  `RangedEnemy.prefab`을 풀어 `LivelyLowBloodSugarFairy.prefab`(체력 30, 넉백 무게 1, `FourWayShooterController`)을 만들고,
+  요정왕국 원화 `low-blood-sugar-fairy`(폭 1.07, 키 약 1.2)와 임시 빵 발사체 `LivelyFairyBread_Projectile.png`(파와 같은
+  PPU 160)를 연결하고, 난이도 표에 `FourWayShooter` 위협 3, roster에 같은 역할 → 이 Prefab을 넣고, `pressure`·`swarm`
+  Encounter의 근접 후보를 60/25/15로 다시 구성한 뒤 Game Scene의 `encounterContentVersion`을 14로 올린다. GUID를 보존하며
+  멱등이다. **코드만 받고 이 Setup을 실행하지 않으면 난이도 표에 새 역할 점수가 없어 층 생성이 명시적으로 실패한다.**
+  Spawn-2·Encounter-4·Difficulty-1 Setup을 다시 실행해도 같은 후보와 점수를 쓴다(`Week25Enemy8Setup.MeleeCandidates`).
+  자동 검증 메뉴는 `Trickal Fan Game > Week 25 > Verify Enemy-8 Lively Low Blood Sugar Fairy`, 배치는 Unity `-batchmode
+  -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Enemy8Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. Setup 2회 GUID와 컴포넌트 미중복, Prefab 수치·원화·파와 같은 크기의 발사체, 이동 방향 분포,
+  위협 3·roster·근접 압박 지점, `pressure`·`swarm`에만 60/25/15로 들어가고 선언 위협 범위가 그대로인지, 512개 seed의
+  선택·재현·배치 지점과 런타임 Prefab 연결, 한 주기(1.2초 이동 → 0.4초 예고 → 장애물 너머로도 4방향 발사 → 0.6초 회복 →
+  다시 이동)와 탄속 5·1.2초 뒤 소멸·1칸 피해, 넉백이 예고를 끊는지, 두 웨이브 처치 뒤 방 클리어를 검사한다. 성공 로그는
+  `Enemy-8 verification passed`로 시작한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Enemy-7, Spawn-2, Difficulty-1,
+  Encounter-4, 요정왕국 원화의 `Verify`)다. 2026-10-14 두 배치가 종료 코드 0으로 통과했다(512개 seed의 전투방
+  11,709개 중 2,750개에 3,518마리, 층별 704/699/1,347방). 같은 날 사용자가 Play로 확인했다.
+  수동 확인: (1) Game Scene Play → `F1` 패널 `— Room —`의 `Spawn lively fairy (4-way shots)`로 플레이어 위 3칸에 부른다.
+  1.2초쯤 걷다가 멈추고 상하좌우로 경고 화살표가 0.4초 보인 뒤 빵 4개를 쏘고, 빵은 6칸쯤 날아가 사라지며, 맞으면 하트가
+  1칸 준다. 0.6초 쉰 뒤 다시 걷고, 걷는 방향은 대체로 플레이어 쪽이다. 예고 중에 때려 밀어내면 그 발사는 나가지 않는다.
+  (2) `— Seed —`의 `Find lively fairy F1` → `Restart Run with this seed`로 이 적이 나오는 방에 들어가 다 잡으면 방이
+  클리어되는지 본다.
+
+- Enemy-9 누루링-요정전사: 메뉴 `Trickal Fan Game > Week 25 > Setup Enemy-9 Nururing Fairy Warrior`가 추적형
+  `TestEnemy.prefab`을 풀어 분열체 `NururingSplit.prefab`(Prefab 전체 0.7배, 체력 10, 속도 3.25(Play 뒤 3.75에서 조정), 넉백 무게 0.7, 약 등급
+  접촉만)과 본체 `NururingFairyWarrior.prefab`(체력 40, 속도 2.5, 넉백 무게 1.2, 추적형과 같은 런지를 중 등급으로, 접촉
+  약 등급, `EnemySplitOnDeath` → 분열체 2마리·좌우 0.5)을 만들고, 둘 다 요정왕국 원화 `nururing`(폭 1.3)을 연결한다. 난이도
+  표에 `SplittingChaser` 위협 4, roster에 같은 역할 → 본체를 넣고, `pressure` Encounter의 근접 후보를 50/25/15/10으로 바꿔
+  선언 위협 범위를 10~16으로 올린 뒤 Game Scene의 `encounterContentVersion`을 15로 올린다(`swarm`은 Enemy-8의 60/25/15
+  그대로). GUID를 보존하며 멱등이다. **코드만 받고 이 Setup을 실행하지 않으면 난이도 표에 새 역할 점수가 없어 층 생성이
+  명시적으로 실패한다.** Spawn-2·Difficulty-1 Setup을 다시 실행해도 같은 후보와 범위를 쓴다
+  (`Week25Enemy9Setup.PressureMeleeCandidates`, `Week19Difficulty1Setup.PressureMaximumThreat`). 자동 검증 메뉴는
+  `Trickal Fan Game > Week 25 > Verify Enemy-9 Nururing Fairy Warrior`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Enemy9Verification.SetupAndVerifyBatch -logFile
+  <로그 경로>`다. Setup 2회 GUID와 컴포넌트 미중복, 두 Prefab의 수치·원화·0.7배 크기, 위협 4·roster·근접 압박 지점,
+  `pressure`에만 50/25/15/10으로 들어가고 10~16을 계산·선언하는지, 512개 seed의 선택·재현·배치 지점과 런타임 Prefab 연결,
+  공격·폭탄·중독·함정·원인 불명 사망 모두 좌우 0.5에 분열체 2마리를 한 번만 만들고 분열체가 본체의 층·대상을 이어받아
+  0.3초 동안 행동하지 않으며 다시 분열하지 않는지, 개발용 웨이브 처치 뒤에도 분열체 4마리가 웨이브를 붙잡고 층 체력 배율을
+  받으며 마지막 분열체가 죽어야 다음 웨이브와 방 클리어가 오는지 검사한다. 성공 로그는 `Enemy-9 verification passed`로
+  시작한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Enemy-8, Enemy-7, Spawn-2, Difficulty-1, Encounter-4, 요정왕국 원화의
+  `Verify`)다. 2026-10-14 단독 배치가 종료 코드 0으로 통과했다(512개 seed의 전투방 11,709개 중 781개에 818마리, 층별
+  221/211/349방). 같은 날 회귀 묶음과 개발 패널 검증(`Week20DevPanelVerification.Verify`)도
+  종료 코드 0으로 통과했다. 같은 날 사용자가 Play로 확인했고, 분열체가 빨라 속도를 3.25로 낮춘 뒤 단독 배치를 다시 통과했다.
+  수동 확인: (1) Game Scene Play → `F1` 패널 `— Room —`의 `Spawn nururing (splits on death)`로 플레이어 오른쪽 2칸에
+  부른다. 노란 푸딩 누루링이 다가와 런지하고, 죽이면 그 자리 좌우에 더 작은 누루링 2마리가 생겨 잠깐(0.3초) 멈췄다가 더
+  빠르게 쫓아오며, 닿으면 하트 1칸을 잃는다. 작은 누루링을 죽여도 더 갈라지지 않는다. 패널의 `Nururing bodies N, splits M`
+  표시로 수를 본다. 폭탄으로 죽여도 갈라지는지 본다. (2) `— Seed —`의 `Find nururing F1` → `Restart Run with this seed`로
+  이 적이 나오는 방에 들어가, 본체만 잡은 상태에서는 문이 잠겨 있고 분열체까지 다 잡아야 다음 웨이브·방 클리어가 되는지 본다.
 
 - Passive-1 넉백 교체·칸나의 대포·비비의 콧물: 메뉴 `Trickal Fan Game > Week 23 > Setup Passive-1 Cannon and Snot`이
   `Assets/Items/`에 `artifact-kanna-cannon`(Rare, 최대 2스택, 효과 43 `ProjectileSizePercent` `magnitude` 0.5)과
@@ -1442,8 +1518,9 @@ Play Mode 수동 확인: 새 Run에서 각 적이 실제로 이동할 때만 모
 던진다. 기존 전투의 Telegraph·Active·Recovery에 실제 포즈 PNG를 연결했다. 공격 단계는 이동
 모션보다 우선하며 목표/잠긴 돌진·발사 방향에 따라 좌우 반전한다. 루트 배율과 Collider는 고정이다.
 고혈당 요정의 실제 발사는 별도 파 PNG를 사용하고, 파 색상을 유지하며 발사 방향으로 회전한다.
-파는 200 PPU로 등록해 최초 적용보다 표시 크기를 2배 키웠다. 투사체 루트 배율 0.3과 원형 판정의
-월드 반지름 0.15는 유지한다. 피해량·발사 속도·수명은 기존 값을 유지한다. 졸개에는 이 그림/파가 상속되지 않는다.
+파는 160 PPU로 등록한다. 그림이 있는 적 투사체(파·화살·마법탄)는 `ProjectileSizing.DrawnEnemyScale`
+0.4를 써서 원형 판정의 월드 반지름이 0.2다(2026-10-14 가독성 확대, 이전 배율 0.3·반지름 0.15).
+그림이 없는 적 투사체는 배율 0.3을 유지한다. 피해량·발사 속도·수명은 기존 값을 유지한다. 졸개에는 이 그림/파가 상속되지 않는다.
 
 - 적용: `Trickal Fan Game > Artwork > Setup Enemy Attack Animations` (이동 모션 적용 이후)
 - 검증: `Trickal Fan Game > Artwork > Verify Enemy Attack Animations`
@@ -1540,7 +1617,8 @@ BossTestScene의 크레용사용 소환 후 네 졸개가 이동할 때만 걷�
 궁병은 몸을 굽히며 시위·화살을 당기고 발사, 마법사는 지팡이를 들어 시전, 도끼병은 높이 들고
 앞으로 휘두르기, 방패병은 양손으로 방패를 올리고 내린 뒤 복귀한다. 기존 준비·공격·회복 단계에
 전용 그림을 선택하며 원거리 두 졸개는 전용 화살·마법탄을 발사한다. 이동 프레임보다 공격 포즈가
-우선한다. 본체 배율·공격 시간·피해·Collider와 투사체 원형 판정 반경 0.15는 유지한다.
+우선한다. 본체 배율·공격 시간·피해·Collider는 유지한다. 화살은 195 PPU, 마법탄은 200 PPU로 등록하며
+투사체 원형 판정 반경은 0.2다(2026-10-14 가독성 확대, 이전 400 PPU·반경 0.15).
 
 - 적용: `Trickal Fan Game > Artwork > Setup Crayon Minion Attack Animations`
 - 검증: `Trickal Fan Game > Artwork > Verify Enemy Attack Animations` (일반 적과 졸개 8종)
@@ -1759,6 +1837,13 @@ Play 화면 검수:
 - 자동 검증: Unity 6000.3.22f1의 `TrickalFanGame.Editor.UserArtworkVerification.Verify` 배치를 시도했으나, 종료 코드 1 및 성공 로그 부재로 검증 완료로 처리하지 않았다.
 - 수동 확인: Edit Mode에서 `Trickal Fan Game > Artwork > Verify User Artwork` 실행 시 `User artwork verification passed: 44 PNGs` 로그와 미리보기의 새 에르핀 아이콘을 확인한다. Game Scene Play에서 우하단 Q 스킬 아이콘이 제공 이미지로 표시되고, 사용 가능·쿨타임 상태 표시가 유지되는지 확인한다. 골디는 골디 상점(위 Shop-1 수동 확인)에서 확인한다.
 
+### 골드 픽업 아트워크 — 2026-10-14
+
+- `Assets/Resources/UserArtwork/gold-pickup.png`: 사용자가 제공한 황금 잎사귀 메달 원본(1265×1243, 투명 배경). 바닥 골드 픽업(`ElifPickup.prefab`)이 `RunResourcePickup.Awake`에서 `UserArtwork.ApplyResourcePickup`으로 이 그림을 쓴다. 표시 크기는 하트·SP 캡슐과 같은 `ResourcePickupWorldSize`(0.5)이며 충돌체와 프리팹은 바꾸지 않았다. 열쇠·폭탄 픽업은 임시 원형을 유지한다.
+- 이에 따라 `Verify User Artwork`의 기대 PNG 수는 45개이고, 성공 로그는 `User artwork verification passed: 45 PNGs`로 시작한다.
+- 자동 검증: `UserArtworkVerification.Verify` 배치 통과(종료 코드 0, 2026-10-14).
+- 수동 확인(사용자 확인 완료, 2026-10-14): Game Scene Play에서 금광석·상자·방 클리어 보상으로 바닥에 떨어진 골드가 메달 그림으로 보이고, 밀리기·획득·99 한도 동작이 그대로인지 확인한다.
+
 ## 요정왕국 신규 에셋 45장 연결 (2026-10-10)
 
 - 나무는 새 세로형 원화를 사용하며 표시 1×2칸, 충돌은 아래 1×1칸 하나다. Layout 가져오기와 Setup 재실행에도 유지한다. [원화 프롬프트·검증 기록](./art-prompts/two-cell-tree.md). 위 검증 메뉴는 나무의 표시 크기·바닥 정렬·상단 통과도 검사한다. 이번 나무 변경의 배치 검증은 기존 Editor 실행 상태에서 종료 코드 1로 미실행되어 Edit Mode 메뉴 실행과 Play 화면 확인이 남아 있다.
@@ -1770,7 +1855,8 @@ Play 화면 검수:
 - 전체 미술 보기: `Assets/Scenes/FairyKingdomArtworkPreview.unity`. 45장을 한 화면에서 확인하는 별도 씬이며 실제 플레이 씬이나 빌드 시작 씬이 아니다.
 - 표시용 프리팹: `Assets/Prefabs/FairyKingdomArtwork/`. 누루링은 대응 게임 로직이 아직 없어 이 폴더의 표시용 프리팹으로만 제공된다. 함정 7종과 독가스는 Trap-0부터 `Assets/Prefabs/Traps/`의 게임 Prefab이 같은 원화를 쓴다. 임의의 공격·피해·생성 규칙은 추가하지 않았다.
 - 현재 단일 프레임 연결이다. 부스러기 쫄따구는 3가지 그림을 소환 순서에 따라 사용하고 사망 시 그림 효과만 표시한다. 사망 폭발 피해 규칙은 새로 구현하지 않았다. 새 프레임 추가 전까지 해당 적의 기존 다른 그림용 이동·공격 프레임 컴포넌트는 보존하되 비활성화한다.
-- 돌진형(`ChargingEnemy`)과 원거리·저격형(`RangedEnemy`, `QuickRangedFairy`, `HighBloodSugarFairy`)은 초안 그림을 연결하지 않고 기존 Idle·걷기·공격 에셋을 유지한다. `RangedEnemy`에 표시 컴포넌트를 붙이면 variant인 저격형까지 덮어쓰므로 베이스에도 붙이지 않으며, 전용 검증이 이를 검사한다.
+- 돌진형(`ChargingEnemy`)과 원거리·저격형(`RangedEnemy`, `HighBloodSugarFairy`)은 초안 그림을 연결하지 않고 기존 Idle·걷기·공격 에셋을 유지한다. `RangedEnemy`에 표시 컴포넌트를 붙이면 variant인 저격형까지 덮어쓰므로 베이스에도 붙이지 않으며, 전용 검증이 이를 검사한다.
+- 산사모-순수(`QuickRangedFairy`)는 2026-10-13부터 초안 원화 `sansamo-pure`를 단일 프레임으로 쓴다. 표시 컴포넌트는 variant 자신에만 붙이고 임시 파란 색조는 뺐다. 표시 폭은 Prefab의 `FairyKingdomArtworkView.localWidth`(0.7, 산사모-활발과 같은 키 약 1.2)로 조절하며 충돌 영역은 그대로다. 걷기·공격 프레임은 아직 없다. Play 미술 확인 전이다.
 - 자동 실행: `TrickalFanGame.Editor.FairyKingdomArtworkSetup.ApplyAndVerifyBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkVerification.VerifyWithCombatRegressionsBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkPlayVerification.RunBatch` (`-batchmode`, **`-quit` 제외**). Play 검증은 전용 미리보기 씬과 격리된 probe만 사용하고 종료 코드를 반환한다.
 - 상세 결과와 Unity 렌더: `output/asset-integration/`. 자동 검증은 사용자 Play 미술 승인을 대신하지 않는다.
 
@@ -1853,3 +1939,21 @@ Edit Mode에서 `Trickal Fan Game > Effects > Preview Shasha Water`를 열고 `O
 창 닫기·Play 전환·리로드 때 임시 리소스를 정리한다. Unity 6000.3 내부 SceneView 연결을 확인하는 어댑터를 사용하므로 Editor 업그레이드 시 미지원 오류가 없는지 확인한다. 현재 실제 배경·캐릭터 및 원본과의 비교는 SampleScene Play의 F1 토글을 사용한다. 시작점 이동 조작·실제 배경 합성은 미리보기 후속 범위다. Scene 뷰 조작과 최종 Play 미술 검수는 아직 확인 대기다.
 
 단독 자동 검사와 정지 렌더: `TrickalFanGame.Editor.ShashaWaterPrototypeVerification.VerifyAndExportBatch`. 렌더는 씬을 교체하는 게임플레이 검사보다 먼저 수행한다. 결과 PNG: `output/art-review/shasha-water/unity-comparison.png`(위: 원본, 아래: 물결 본체·접촉 포말). 입자·이동 검수는 이 PNG로 대체하지 않는다.
+### 날씨는 맑음 카드 번개 미리보기 (2026-10-13)
+
+- Edit Mode: `Trickal Fan Game/Effects/Preview Clear Weather Lightning` → `Open / reset Scene preview`.
+- 길이·굵기·타격점, 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 선택한 SpriteRenderer 그림만 임시 Scene에 복사해 크기를 비교할 수 있다. 값은 임시이며 에셋을 저장하지 않는다.
+- 검사: `Trickal Fan Game/Effects/Verify Clear Weather Lightning` (`TrickalFanGame.Editor.ClearWeatherLightningVerification.Verify`).
+- 실제 Play: `F1 → — Artifact — → Show artifact drops → Drop 날씨는 맑음 카드` 획득 후 기본 공격 10회 적중. 화면 상단부터 해당 적까지 가는 번개를 확인한다.
+- 상세 범위와 미확인 항목: [작업 기록](art-prompts/clear-weather-lightning.md).
+
+### 바위 균열 프레임 (2026-10-14)
+
+Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금·가시 바위의 9개 손상 프레임, 흰색 표시, 지면 기준점·충돌 크기, 네 번째 타격 파괴를 검사한다. Play에서는 일반 바위를 때리고, `F1 → — Obstacle — → gold-rock`, `F1 → — Trap — → Place SpikedRock`으로 나머지 종류를 확인한다. [에셋·프롬프트·검증 기록](art-prompts/rock-damage-frames.md).
+
+### 착탄 스파크 · 치명타 히트스톱 (2026-10-14)
+
+- Edit Mode: `Trickal Fan Game/Effects/Preview Hit Spark` → `Open / reset Scene preview`. 반경·탄 방향·타격점, 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
+- 검사: `Trickal Fan Game/Effects/Verify Hit Feedback` (`TrickalFanGame.Editor.HitFeedbackVerification.Verify`).
+- 실제 Play: 적을 기본 공격으로 맞혀 스파크를 확인한다. `F1 → — Player — → CRIT 100%`로 이번 Run의 직접 타격을 모두 치명타로 만들면 히트스톱과 약한 카메라 흔들림을 매번 볼 수 있다.
+- 상세 범위와 미확인 항목: [작업 기록](art-prompts/hit-spark.md).

@@ -42,6 +42,12 @@ namespace TrickalFanGame.Enemy
                 return false;
             }
 
+            EnemyBehaviorContext behavior = GetComponent<EnemyBehaviorContext>();
+            if (behavior != null && behavior.IsSpawnContactGraceActive(currentTime))
+            {
+                return false;
+            }
+
             target.GetComponent<PlayerDeathReason>()?.SetReason("ENEMY");
             target.TakeDamage(halfHeartDamage
                 ? new DamageContext(gameObject, DamageSourceType.EnemyContact, HealthUnits.HalfHeartDamageUnits,

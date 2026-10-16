@@ -10,6 +10,9 @@ namespace TrickalFanGame.Editor
 {
     public static class Week20Special1Verification
     {
+        // Power-2 keeps floor 1's treasure room unlocked, so the runtime key check uses the next floor.
+        private const int RuntimeFloor = FloorGenerator.StartTreasureFloor + 1;
+
         [MenuItem("Trickal Fan Game/Week 20/Verify Special-1 Locked Treasure Rooms")]
         public static void Verify()
         {
@@ -46,12 +49,18 @@ namespace TrickalFanGame.Editor
                         node.Role == GeneratedRoomRole.Treasure);
                     Assert(treasure.RequiresKey == repeatedTreasure.RequiresKey,
                         $"Seed {seed}, floor {floorNumber} changed its treasure lock result.");
+                    // Power-2: the start floor's treasure room is never locked; only later floors roll a lock.
+                    if (FloorGenerator.UsesStartTreasure(floorNumber, floor.Settings != null))
+                    {
+                        Assert(!treasure.RequiresKey, $"Seed {seed}, floor {floorNumber} locked the start-floor treasure.");
+                        continue;
+                    }
                     if (treasure.RequiresKey)
                     {
                         locked++;
                         Assert(CanReachBossWithoutTreasure(floor, treasure.RoomId),
                             $"Seed {seed}, floor {floorNumber} locked treasure blocks the boss route.");
-                        if (floorNumber == 1 && runtimeSeed == 0) runtimeSeed = seed;
+                        if (floorNumber == RuntimeFloor && runtimeSeed == 0) runtimeSeed = seed;
                     }
                     else
                     {
@@ -63,7 +72,7 @@ namespace TrickalFanGame.Editor
             float observed = locked / (float)(locked + unlocked);
             Assert(locked > 0 && unlocked > 0 && observed >= 0.2f && observed <= 0.5f,
                 $"Optional-route filtering should still expose locked and open treasure rooms; observed {observed:P1} locked.");
-            Assert(runtimeSeed > 0, "No floor-1 locked treasure room was found for runtime verification.");
+            Assert(runtimeSeed > 0, $"No floor-{RuntimeFloor} locked treasure room was found for runtime verification.");
             return runtimeSeed;
         }
 
@@ -113,7 +122,8 @@ namespace TrickalFanGame.Editor
         {
             assembler.Progress.ResetProgress();
             Assert(assembler.TryApplyGeneratedGraphForVerification(seed, out string error), error);
-            GeneratedFloor floor = assembler.GeneratedGraph.FindFloor(1);
+            Assert(assembler.TryLoadFloor(RuntimeFloor, null, out error), error);
+            GeneratedFloor floor = assembler.GeneratedGraph.FindFloor(RuntimeFloor);
             GeneratedRoomNode treasure = floor.Nodes.Single(node =>
                 node.Role == GeneratedRoomRole.Treasure && node.RequiresKey);
             GeneratedRoomNode source = floor.Nodes.Single(node =>
@@ -144,7 +154,8 @@ namespace TrickalFanGame.Editor
             Assert(slot.Doorway.TryUnlockWithKey() && assembler.Progress.GetResourceCount(RunResourceType.Key) == 0,
                 "Reusing an open treasure doorway must not consume another key.");
 
-            Assert(assembler.TryLoadFloor(2, null, out error) && assembler.TryLoadFloor(1, null, out error), error);
+            Assert(assembler.TryLoadFloor(RuntimeFloor + 1, null, out error) &&
+                   assembler.TryLoadFloor(RuntimeFloor, null, out error), error);
             RoomDoorSlot restored = FindRuntimeRoom(assembler, source.RoomId).FindSlot(connection.Direction);
             Assert(restored.Doorway.RequiresKey && restored.Doorway.IsKeyLockOpen &&
                    !restored.Blocker.IsLocked && assembler.Progress.GetRoomState(treasure.RoomId).IsKeyLockOpen,

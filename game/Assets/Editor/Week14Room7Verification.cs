@@ -18,6 +18,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Verify Room-7 Fixed Pillar Layout")]
         public static void Verify()
         {
+            Week18Obstacle2Setup.OpenGameScene();
             FloorGenerator generator = GameObject.Find(Week8RandomRoomSetup.GeneratorObjectName)
                 ?.GetComponent<FloorGenerator>();
             Assert(generator != null &&
@@ -27,17 +28,14 @@ namespace TrickalFanGame.Editor
 
             RoomTemplateDefinition template = generator.RoomTemplates.Single(candidate =>
                 candidate.TemplateId == Week14Room7Setup.TemplateId);
-            EncounterDefinition encounter = generator.EncounterDefinitions.Single(candidate =>
-                candidate.EncounterId == Week14Room7Setup.EncounterId);
             Assert(template.TryValidate(out string error), error);
-            Assert(encounter.TryValidateFor(template, 1, out error), error);
             ValidateCatalogSelection(generator);
             ValidatePrefabAndPassages(template);
             ValidateCollisionBehavior(template);
             Week14Room6Verification.Verify();
             Debug.Log("Week 14 Room-7 verification passed: the fixed pillar has no health or drops, keeps all " +
                       "four required entrance routes open, blocks player-sized movement and both projectile lines, " +
-                      "stops charging enemies, and remains compatible with chaser/ranged/charging Encounters.");
+                      "and takes a compatible Encounter. Charging enemies against obstacles are Obstacle-0's.");
         }
 
         public static void SetupAndVerifyBatch()
@@ -58,9 +56,10 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateCatalogSelection(FloorGenerator generator)
         {
+            // Encounter-4 replaced the Week 14 catalog, so the pillar room takes whichever current Encounter fits.
             bool sawPillar = false;
-            bool sawCompatiblePair = false;
-            for (int seed = 1; seed <= 1024 && !sawCompatiblePair; seed++)
+            bool sawEncounter = false;
+            for (int seed = 1; seed <= 1024 && !sawEncounter; seed++)
             {
                 Assert(generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out string error), error);
                 foreach (GeneratedRoomNode node in graph.Nodes)
@@ -73,12 +72,11 @@ namespace TrickalFanGame.Editor
                     Assert(node.Encounter != null &&
                            node.Encounter.TryValidateFor(node.Template, node.FloorNumber,
                                node.DirectionalConnections, out error), error);
-                    if (node.EncounterId == Week14Room7Setup.EncounterId)
-                        sawCompatiblePair = true;
+                    sawEncounter = true;
                 }
             }
-            Assert(sawPillar && sawCompatiblePair,
-                "1024 seeds must select the pillar Layout and its compatible Encounter together at least once.");
+            Assert(sawPillar && sawEncounter,
+                "1024 seeds must select the pillar Layout with a compatible Encounter at least once.");
         }
 
         private static void ValidatePrefabAndPassages(RoomTemplateDefinition template)
@@ -141,7 +139,6 @@ namespace TrickalFanGame.Editor
                 ValidateEnemyProjectile(pillar);
                 ValidatePlayerProjectile(actorRoot.transform, pillar);
                 ValidateChaser(actorRoot.transform, pillar);
-                ValidateChargingEnemy(actorRoot.transform, pillar);
             }
             finally
             {
@@ -192,35 +189,16 @@ namespace TrickalFanGame.Editor
             chase.SetTarget(target.transform);
             chase.TickChase();
             Rigidbody2D body = chaserObject.GetComponent<Rigidbody2D>();
-            Assert(body.linearVelocity.x > 0f,
-                "The chaser must attempt its existing direct movement toward a target behind the pillar.");
+            // Obstacle-0: the chaser steers around the pillar, so only movement is required here. The straight
+            // line to the target still has to be blocked by the pillar's collider.
+            Assert(body.linearVelocity.sqrMagnitude > 0f,
+                "The chaser must move toward a target behind the pillar.");
             ContactFilter2D filter = new();
             filter.SetLayerMask(1 << LayerMask.NameToLayer("Environment"));
             RaycastHit2D[] hits = new RaycastHit2D[8];
-            int count = body.Cast(body.linearVelocity.normalized, filter, hits, 12f);
+            int count = body.Cast(Vector2.right, filter, hits, 12f);
             Assert(hits.Take(count).Any(hit => hit.collider == pillar),
                 "The chaser Rigidbody sweep must be stopped by the fixed pillar collision.");
-        }
-
-        private static void ValidateChargingEnemy(Transform parent, Collider2D pillar)
-        {
-            GameObject target = new("Charging Target");
-            target.transform.SetParent(parent);
-            target.transform.position = new Vector2(6f, 0f);
-            target.AddComponent<Health>();
-            GameObject enemyObject = UnityEngine.Object.Instantiate(
-                AssetDatabase.LoadAssetAtPath<GameObject>(Week14Encounter2Setup.ChargingPrefabPath),
-                new Vector2(-6f, 0f), Quaternion.identity, parent);
-            ChargingEnemyController charging = enemyObject.GetComponent<ChargingEnemyController>();
-            charging.Configure(20f, 0.01f, 9f, 1f, 0.5f, 1f, EnemyDamageTier.Light);
-            charging.SetTarget(target.transform);
-            charging.TickBehavior(0f);
-            charging.TickBehavior(0.02f);
-            Assert(charging.State == ChargingEnemyState.Dashing &&
-                   charging.TryResolveCollision(pillar, 0.03f) &&
-                   charging.State == ChargingEnemyState.Recovering &&
-                   enemyObject.GetComponent<Rigidbody2D>().linearVelocity == Vector2.zero,
-                "A charging enemy must enter recovery and stop on the Environment pillar.");
         }
 
         private static bool HasOrthogonalRoute(Vector2 start, Rect blocked, Rect movementBounds)

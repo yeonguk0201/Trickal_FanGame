@@ -690,6 +690,188 @@ export const ITEM_CATALOG = [
       { type: 'WaterStreamAttack', magnitude: 0.2, secondaryMagnitude: 0.3 },
     ],
   },
+  // Power-1 (교주의 권능, contract 23 §9): held in the 권능 slot, charged by clearing combat or boss rooms.
+  {
+    id: 'active-poppin-star',
+    name: '팝핀 스타',
+    description:
+      '교주의 권능. 방 2개를 클리어하면 충전됩니다. 방의 모든 적에게 공격력 100% 피해(보스가 아닌 적은 2배)를 주고, 맞힌 적 1명당 6초간 피해가 8% 증가합니다(최대 40%).',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'PowerRoomBlast',
+        magnitude: 1,
+        secondaryMagnitude: 0.08,
+        integerAmount: 5,
+        scaleMultiplier: 2,
+        durationSeconds: 6,
+      },
+    ],
+  },
+  {
+    id: 'active-security-blanket',
+    name: '애착 담요',
+    description:
+      '교주의 권능. 방 3개를 클리어하면 충전됩니다. 6초간 받는 피해가 반 칸 줄어들고(최소 반 칸), 3초마다 HP를 반 칸 회복합니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'PowerProtectiveBlanket',
+        magnitude: 1,
+        integerAmount: 1,
+        intervalSeconds: 3,
+        durationSeconds: 6,
+      },
+    ],
+  },
+  {
+    id: 'active-divine-punishment',
+    name: '찐짜천벌',
+    description:
+      '교주의 권능. 방 3개를 클리어하면 충전됩니다. 체력이 가장 높은 적 1명(보스 우선)에게 공격력 500% 번개를 떨어뜨리고 감전 4스택을 겁니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'PowerSmite',
+        magnitude: 5,
+        secondaryMagnitude: 0.1,
+        integerAmount: 4,
+        durationSeconds: 2.5,
+      },
+    ],
+  },
+  {
+    id: 'active-solar-plexus-strike',
+    name: '명치 꽂기',
+    description:
+      '교주의 권능. 방 4개를 클리어하면 충전됩니다. 방의 모든 적을 3초간 기절시키고(보스 포함), 6초간 받는 피해를 50% 늘립니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      { type: 'PowerStunRoomEnemies', durationSeconds: 3 },
+      {
+        type: 'PowerRoomEnemyVulnerability',
+        magnitude: 0.5,
+        durationSeconds: 6,
+      },
+    ],
+  },
+  {
+    id: 'active-freeloader-shield',
+    name: '날먹보호막',
+    description:
+      '교주의 권능. 방 4개를 클리어하면 충전됩니다. 방어막 2칸을 얻습니다(HP·방어막 합 15칸 상한).',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'PowerGainShield', magnitude: 4 }],
+  },
+  {
+    id: 'active-sudden-acceleration',
+    name: '급발진',
+    description:
+      '교주의 권능. 방 5개를 클리어하면 충전됩니다. 15초간 공격속도 60%·이동속도 20%가 증가하고 고학년 스킬 쿨타임이 40% 짧아지며, 사용 즉시 SP 1칸을 회복합니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'PowerOverdrive',
+        magnitude: 0.6,
+        secondaryMagnitude: 0.2,
+        scaleMultiplier: 0.4,
+        durationSeconds: 15,
+      },
+      { type: 'PowerRestoreSP', integerAmount: 1 },
+    ],
+  },
+  {
+    id: 'jjangsem-pastel-light',
+    name: '파스텔빛',
+    description:
+      '아직 클리어하지 않은 전투방·보스방에서 사용하면 18초 동안 2.5초마다 그 방의 모든 적에게 공격력의 100% 피해를 주고, 3초마다 하트 반 칸을, 6초마다 SP 반 칸을 회복합니다. 방을 클리어하거나 떠나면 끝납니다. 다이아몬드 상자에서만 얻을 수 있습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'CurrentRoomPulseDamage',
+        magnitude: 1,
+        intervalSeconds: 2.5,
+        durationSeconds: 18,
+      },
+      {
+        type: 'CurrentRoomPulseSP',
+        integerAmount: 1,
+        intervalSeconds: 6,
+        durationSeconds: 18,
+      },
+      {
+        type: 'CurrentRoomPulseHeal',
+        integerAmount: 1,
+        intervalSeconds: 3,
+        durationSeconds: 18,
+      },
+    ],
+  },
+  {
+    id: 'jjangsem-suspicious-potion',
+    name: '수상한 물약',
+    description:
+      '아직 클리어하지 않은 전투방·보스방에서 사용하면 10초 동안 그 방의 적에게 받는 피해가 절반으로 줄어들고(하트 반 칸 단위 올림, 최소 반 칸), 그 방의 모든 적에게 중독 3중첩(10초 동안 1초마다 중첩당 공격력의 15% 피해)을 겁니다. 다이아몬드 상자에서만 얻을 수 있습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'CurrentRoomEnemyDamageReduction',
+        magnitude: 0.5,
+        durationSeconds: 10,
+      },
+      {
+        type: 'CurrentRoomEnemyPoison',
+        magnitude: 0.15,
+        integerAmount: 3,
+        intervalSeconds: 1,
+        durationSeconds: 10,
+      },
+    ],
+  },
+  {
+    id: 'jjangsem-thread-of-reason',
+    name: '이성의 끈',
+    description:
+      '아직 클리어하지 않은 전투방·보스방에서 사용하면 그 방을 떠날 때까지 기본 공격·스킬·아티팩트 피해가 2배가 됩니다. 권능·상태이상·폭탄 피해는 제외됩니다. 다이아몬드 상자에서만 얻을 수 있습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [{ type: 'CurrentRoomDamageMultiplier', magnitude: 2 }],
+  },
+  {
+    id: 'jjangsem-surprise-box',
+    name: '깜짝상자',
+    description:
+      '사용하면 방의 무작위 적 2명(1명뿐이면 1명)을 2초 동안 기절시키고 최대 체력의 50%만큼 체력을 줄입니다. 보스는 최대 체력의 20%만큼 줄어들며, 이 효과로는 처치되지 않습니다. 적이 없으면 사용할 수 없습니다. 다이아몬드 상자에서만 얻을 수 있습니다.',
+    rarity: 'RARE',
+    isActive: true,
+    maxStacks: 1,
+    effects: [
+      {
+        type: 'StunAndCutRandomEnemies',
+        magnitude: 0.5,
+        secondaryMagnitude: 0.2,
+        integerAmount: 2,
+        durationSeconds: 2,
+      },
+    ],
+  },
   {
     id: 'item-06',
     name: '다중 투사체',

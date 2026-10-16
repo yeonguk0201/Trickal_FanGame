@@ -13,6 +13,7 @@ namespace TrickalFanGame.Room
         private readonly Dictionary<string, ItemRewardSelectionState> rewardSelections = new(StringComparer.Ordinal);
         private readonly Dictionary<string, ShopStockState> shopStocks = new(StringComparer.Ordinal);
         private readonly RunResourceWallet resources = new();
+        private readonly HashSet<string> clearedRoomIds = new(StringComparer.Ordinal);
         private string activeRewardSelectionId;
 
         public int RunSeed { get; private set; }
@@ -37,6 +38,8 @@ namespace TrickalFanGame.Room
         }
         public bool IsRewardSelectionPending => PendingRewardSelection != null;
         public event Action FinalBossCleared;
+        // Power-1: a room's fight was won for the first time in this Run (the 권능 gauge charges on it).
+        public event Action<string> RoomCleared;
         public event Action RewardSelectionStateChanged;
 
         public event Action<int, int> RoomChanged;
@@ -183,6 +186,12 @@ namespace TrickalFanGame.Room
             return true;
         }
 
+        public void RecordRoomCleared(string roomId)
+        {
+            if (IsProgressionStopped || string.IsNullOrWhiteSpace(roomId) || !clearedRoomIds.Add(roomId)) return;
+            RoomCleared?.Invoke(roomId);
+        }
+
         public void RecordFinalBossCleared()
         {
             if (IsProgressionStopped || HasClearedFinalBoss) return;
@@ -285,6 +294,7 @@ namespace TrickalFanGame.Room
             GeneratedGraph = null;
             activeRewardSelectionId = null;
             roomStates.Clear();
+            clearedRoomIds.Clear();
             rewardSelections.Clear();
             shopStocks.Clear();
             resources.Clear();

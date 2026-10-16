@@ -112,7 +112,11 @@ namespace TrickalFanGame.Editor
             ResourceDropTable table = ScriptableObject.CreateInstance<ResourceDropTable>();
             try
             {
-                SecretPit pitPrefab = Week20Special3Setup.EnsureSecretPitPrefab();
+                // Loaded, not rebuilt: the setup would put the placeholder sprite back over the drawn pit.
+                SecretPit pitPrefab = AssetDatabase
+                    .LoadAssetAtPath<GameObject>(Week20Special3Setup.SecretPitPrefabPath)?.GetComponent<SecretPit>();
+                Assert(pitPrefab != null,
+                    $"Run Special-3 setup first: {Week20Special3Setup.SecretPitPrefabPath} is missing.");
                 table.Configure(0f, new[] { new ResourceDropEntry("pit", pitPrefab.gameObject, 1) });
                 DestructibleObstacle.DevelopmentForceNextSecretPit = true;
 

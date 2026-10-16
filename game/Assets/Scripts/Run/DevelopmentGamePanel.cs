@@ -28,6 +28,7 @@ namespace TrickalFanGame.Run
         private Vector2 scrollPosition;
         private ItemDefinition[] singleUseItems;
         private ItemDefinition[] artifactItems;
+        private ItemDefinition[] powerItems;
         private bool showArtifacts;
         private bool showLayouts;
         private RoomTrap[] trapPrefabs;
@@ -88,6 +89,7 @@ namespace TrickalFanGame.Run
             DrawSeedSection(assembler);
             DrawPlayerSection(assembler);
             DrawSpellSlotSection(assembler);
+            DrawPowerSection(assembler);
             DrawArtifactSection(assembler);
             DrawResourceSection(progress);
             DrawChestSection(assembler);
@@ -144,6 +146,18 @@ namespace TrickalFanGame.Run
                 FindSeed(assembler, node => node.EncounterId != null &&
                                             node.EncounterId.EndsWith("-jyubi-swarm-v1", System.StringComparison.Ordinal),
                     "Jyubi swarm room");
+            // Enemy-8: 저혈당 요정-활발 is one of three melee candidates in pressure and swarm rooms.
+            if (GUILayout.Button("Find lively fairy F1"))
+                FindSeed(assembler, node => node.ResolvedEncounterWaves != null &&
+                                            node.ResolvedEncounterWaves.Any(wave => wave.Any(spawn =>
+                                                spawn.Role == EncounterEnemyRole.FourWayShooter)),
+                    "Lively fairy room");
+            // Enemy-9: 누루링-요정전사 is one of four melee candidates in pressure rooms.
+            if (GUILayout.Button("Find nururing F1"))
+                FindSeed(assembler, node => node.ResolvedEncounterWaves != null &&
+                                            node.ResolvedEncounterWaves.Any(wave => wave.Any(spawn =>
+                                                spawn.Role == EncounterEnemyRole.SplittingChaser)),
+                    "Nururing room");
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -164,6 +178,23 @@ namespace TrickalFanGame.Run
                 invulnerable = nextInvulnerable;
                 if (invulnerable) MarkAssisted("Invulnerable");
                 if (!invulnerable) health?.SetInvulnerable(false);
+            }
+
+            // Every direct hit becomes critical, to see the critical hit stop and camera shake.
+            PlayerStats stats = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<PlayerStats>()
+                : null;
+            if (stats != null)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"CRIT {stats.CriticalChance:P0}");
+                if (AssistedButton("CRIT 100%"))
+                {
+                    stats.AddCriticalChance(1f);
+                    status = "Critical chance 100% for this run.";
+                }
+
+                GUILayout.EndHorizontal();
             }
 
             // Hitbox-1: the look follows the size, the hurtbox stops at its limit and the feet never change.
@@ -215,6 +246,17 @@ namespace TrickalFanGame.Run
                             (effects != null && effects.RoomAttackSpeedPercent > 0f
                                 ? $"   Room ASPD +{effects.RoomAttackSpeedPercent:P0} " +
                                   $"MS +{effects.RoomMoveSpeedPercent:P0}"
+                                : string.Empty) +
+                            (effects != null && effects.IsPulseActive
+                                ? $"   Pastel {effects.PulseRemainingSeconds:F1}s " +
+                                  $"hit {effects.PulseDamageDeliveredTicks} heal {effects.PulseHealDeliveredTicks}"
+                                : string.Empty) +
+                            (effects != null && effects.IsEnemyDamageReductionActive
+                                ? $"   Potion {effects.EnemyDamageReductionRemainingSeconds:F1}s " +
+                                  $"({effects.EnemyDamageReductionRoomId})"
+                                : string.Empty) +
+                            (effects != null && effects.IsRoomDamageMultiplierActive
+                                ? $"   Reason x{effects.RoomDamageMultiplier:0.#}"
                                 : string.Empty));
 #if UNITY_EDITOR
             singleUseItems ??= UnityEditor.AssetDatabase.FindAssets("t:ItemDefinition")
@@ -236,6 +278,62 @@ namespace TrickalFanGame.Run
             }
 #else
             GUILayout.Label("Single-use drops are editor-only.");
+#endif
+        }
+
+        // Power-1: drops a 권능 next to the player, so it is picked up through the normal slot path (new 권능 start
+        // empty, swaps drop the held one with its gauge). The list collects every valid 권능 asset.
+        private void DrawPowerSection(RoomGraphAssembler assembler)
+        {
+            GUILayout.Label("— Power (R) —");
+            PlayerPowerSlot slot = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<PlayerPowerSlot>()
+                : null;
+            if (slot == null || slot.PickupPrefab == null)
+            {
+                GUILayout.Label("The player has no power slot.");
+                return;
+            }
+
+            PlayerPowerEffects effects = slot.GetComponent<PlayerPowerEffects>();
+            GUILayout.Label($"Held: {(slot.HasPower ? slot.HeldDefinition.DisplayName : "-")}" +
+                            (slot.HasPower ? $"   gauge {slot.Charge}/{slot.RequiredCharge}   {slot.GetUseState()}" : string.Empty));
+            if (effects != null)
+            {
+                string active = (effects.BlastDamageBonus > 0f
+                                    ? $"Star DMG +{effects.BlastDamageBonus:P0} {effects.BlastRemainingSeconds:F1}s  "
+                                    : string.Empty) +
+                                (effects.IsBlanketActive ? $"Blanket {effects.BlanketRemainingSeconds:F1}s  " : string.Empty) +
+                                (effects.IsOverdriveActive ? $"Overdrive {effects.OverdriveRemainingSeconds:F1}s" : string.Empty);
+                if (active.Length > 0) GUILayout.Label(active);
+            }
+
+            GUILayout.BeginHorizontal();
+            if (AssistedButton("+1 charge"))
+                status = slot.AddCharge(1) > 0 ? $"Power gauge {slot.Charge}/{slot.RequiredCharge}." : "No charge added.";
+            if (AssistedButton("Fill gauge"))
+                status = slot.AddCharge(slot.RequiredCharge) > 0 ? "Power gauge filled." : "No charge added.";
+            GUILayout.EndHorizontal();
+#if UNITY_EDITOR
+            powerItems ??= UnityEditor.AssetDatabase.FindAssets("t:ItemDefinition")
+                .Select(guid => UnityEditor.AssetDatabase.LoadAssetAtPath<ItemDefinition>(
+                    UnityEditor.AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(item => item != null && item.IsActivePower && item.IsValid)
+                .OrderBy(item => item.ItemId, System.StringComparer.Ordinal)
+                .ToArray();
+            foreach (ItemDefinition item in powerItems)
+            {
+                if (!AssistedButton($"Drop {item.DisplayName} ({item.ActiveChargeRooms})")) continue;
+                RoomPrefab room = CurrentRoom(assembler);
+                ActivePowerPickup pickup = Instantiate(slot.PickupPrefab,
+                    slot.transform.position + Vector3.left * 1.2f, Quaternion.identity,
+                    room != null ? room.transform : null);
+                pickup.name = $"Active Power ({item.ItemId})";
+                pickup.Configure(item, null, ActivePowerPickup.NoStoredCharge, false);
+                status = $"Dropped {item.DisplayName} next to the player.";
+            }
+#else
+            GUILayout.Label("Power drops are editor-only.");
 #endif
         }
 
@@ -561,8 +659,40 @@ namespace TrickalFanGame.Run
                     ? "Spawned a crumb minion to the right of the player."
                     : "Crumb minion spawn failed.";
             }
+
+            // Enemy-8: 저혈당 요정-활발 three tiles above the player, so its left and right shots miss and the
+            // downward one comes straight at the player.
+            if (AssistedButton("Spawn lively fairy (4-way shots)") && controller != null && player != null)
+            {
+                GameObject fairy = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/LivelyLowBloodSugarFairy.prefab");
+                status = controller.SpawnExtraEnemy(fairy, player.transform.position + Vector3.up * 3f) != null
+                    ? "Spawned a lively fairy above the player."
+                    : "Lively fairy spawn failed.";
+            }
+            GUILayout.Label("Lively fairies " + FindObjectsByType<TrickalFanGame.Enemy.FourWayShooterController>(
+                FindObjectsSortMode.None).Length);
+
+            // Enemy-9: 누루링-요정전사 two tiles to the right of the player. Killing it leaves two small 누루링
+            // that hold the room until they die too.
+            if (AssistedButton("Spawn nururing (splits on death)") && controller != null && player != null)
+            {
+                GameObject nururing = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/NururingFairyWarrior.prefab");
+                status = controller.SpawnExtraEnemy(nururing, player.transform.position + Vector3.right * 2f) != null
+                    ? "Spawned a nururing to the right of the player."
+                    : "Nururing spawn failed.";
+            }
+            int nururingBodies = FindObjectsByType<TrickalFanGame.Enemy.EnemySplitOnDeath>(FindObjectsSortMode.None)
+                .Count(body => body.TryGetComponent(out Health bodyHealth) && !bodyHealth.IsDead);
+            int nururingSplits = FindObjectsByType<TrickalFanGame.Frontend.FairyKingdomArtworkView>(
+                    FindObjectsSortMode.None)
+                .Count(view => view.ArtworkId == "nururing" &&
+                               view.GetComponent<TrickalFanGame.Enemy.EnemySplitOnDeath>() == null &&
+                               view.TryGetComponent(out Health splitHealth) && !splitHealth.IsDead);
+            GUILayout.Label($"Nururing bodies {nururingBodies}, splits {nururingSplits}");
 #else
-            GUILayout.Label("Crumb minion spawn is editor-only.");
+            GUILayout.Label("Crumb minion, lively fairy and nururing spawns are editor-only.");
 #endif
         }
 

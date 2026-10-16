@@ -28,6 +28,8 @@ namespace TrickalFanGame.Player
         private float singleUseRoomCriticalChanceBonus;
         private float singleUseRoomAttackSpeedPercentBonus;
         private float singleUseRoomMoveSpeedPercentBonus;
+        // Jjangsem-2 (이성의 끈): final multiplier of player damage in the room it was used in. 1 = none.
+        private float singleUseRoomDamageMultiplier = 1f;
         private float attackSpeedPercentBonus;
         private float currentRoomAttackSpeedPercentBonus;
         private float criticalChanceBonus;
@@ -72,10 +74,15 @@ namespace TrickalFanGame.Player
         private float killFrenzyBasicAttackDamagePercent;
         private float killFrenzyAttackSpeedPercent;
         private float killFrenzyKnockbackPercent;
+        // 교주의 권능 (Power-1): timed bonuses the 권능 effects own (팝핀 스타, 급발진).
+        private float powerAttackDamagePercentBonus;
+        private float powerAttackSpeedPercentBonus;
+        private float powerMoveSpeedPercentBonus;
 
         public float MaxHealth => baseMaxHealth + maxHealthBonus;
         public float AttackDamage =>
-            (baseAttackDamage + flatAttackDamageBonus) * Mathf.Max(0f, 1f + attackDamagePercentBonus);
+            (baseAttackDamage + flatAttackDamageBonus) *
+            Mathf.Max(0f, 1f + attackDamagePercentBonus + powerAttackDamagePercentBonus);
         public float SkillDamageMultiplier => 1f + skillDamagePercentBonus;
         // Passive-2: PlayerBodySize turns this into the look, the hurtbox and the fixed feet.
         public float PlayerSizeMultiplier => 1f + playerSizePercentBonus;
@@ -83,12 +90,13 @@ namespace TrickalFanGame.Player
         // Trap-0: a 거미줄 under the feet scales the final speed (EnvironmentSlow).
         public float MoveSpeed => (baseMoveSpeed + moveSpeedBonus) *
             Mathf.Max(0f, 1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent +
-                currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus +
+                currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus + powerMoveSpeedPercentBonus +
                 (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f)) *
             EnvironmentSlow.MultiplierOf(this);
         public float AttackSpeed => baseAttackSpeed *
             Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus +
-                             singleUseRoomAttackSpeedPercentBonus + killFrenzyAttackSpeedPercent);
+                             singleUseRoomAttackSpeedPercentBonus + killFrenzyAttackSpeedPercent +
+                             powerAttackSpeedPercentBonus);
         public float BasicAttackRoomDamageMultiplier =>
             1f + basicAttackDamagePercentBonus + currentRoomAttackDamagePercentBonus +
             singleUseRoomAttackDamagePercentBonus + killFrenzyBasicAttackDamagePercent;
@@ -212,6 +220,28 @@ namespace TrickalFanGame.Player
         {
             singleUseRoomAttackSpeedPercentBonus = Mathf.Max(0f, attackSpeed);
             singleUseRoomMoveSpeedPercentBonus = Mathf.Max(0f, moveSpeed);
+        }
+
+        public float SingleUseRoomDamageMultiplier => singleUseRoomDamageMultiplier;
+
+        public void SetSingleUseRoomDamageMultiplier(float multiplier)
+        {
+            singleUseRoomDamageMultiplier = Mathf.Max(1f, multiplier);
+        }
+
+        // 이성의 끈 doubles basic attacks, skills and artifact damage (lightning, aura, explosion). 권능 damage, status
+        // ticks, bombs and jjangsem spell pulses are left out.
+        public static bool IsRoomDamageMultiplierSource(DamageSourceType sourceType) => sourceType is
+            DamageSourceType.PlayerProjectile or DamageSourceType.PlayerAttack or
+            DamageSourceType.PlayerSkillExplosion or DamageSourceType.PlayerUltimateImpact or
+            DamageSourceType.PlayerDamageAura or DamageSourceType.PlayerItemLightning or
+            DamageSourceType.PlayerItemExplosion;
+
+        public void SetPowerBonuses(float attackDamage, float attackSpeed, float moveSpeed)
+        {
+            powerAttackDamagePercentBonus = Mathf.Max(0f, attackDamage);
+            powerAttackSpeedPercentBonus = Mathf.Max(0f, attackSpeed);
+            powerMoveSpeedPercentBonus = Mathf.Max(0f, moveSpeed);
         }
 
         public void SetCurrentRoomAttackSpeedPercent(float amount)
@@ -458,6 +488,12 @@ namespace TrickalFanGame.Player
         // status ticks, auras and bombs do not.
         public DamageContext ApplyTargetBonuses(Health target, DamageContext context)
         {
+            // 이성의 끈 is a final multiplier, so it multiplies with every other bonus.
+            if (singleUseRoomDamageMultiplier > 1f && IsRoomDamageMultiplierSource(context.SourceType))
+            {
+                context = context.WithTargetBonuses(singleUseRoomDamageMultiplier, 0f, 0f);
+            }
+
             if (target == null || context.DeliveryType != DamageDeliveryType.Direct ||
                 (burningTargetDirectDamagePercent <= 0f && shockedTargetSkillDamagePercent <= 0f &&
                  shockedTargetCriticalDamageBonus <= 0f && shockedTargetCriticalChanceBonus <= 0f) ||
@@ -471,7 +507,7 @@ namespace TrickalFanGame.Player
             bool isSkill = context.SourceType is DamageSourceType.PlayerSkillExplosion or
                 DamageSourceType.PlayerUltimateImpact;
             if (!isBasicAttack && !isSkill && context.SourceType is not (DamageSourceType.PlayerItemLightning or
-                    DamageSourceType.PlayerItemExplosion))
+                    DamageSourceType.PlayerItemExplosion or DamageSourceType.PlayerPower))
             {
                 return context;
             }

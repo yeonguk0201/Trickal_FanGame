@@ -55,7 +55,7 @@ namespace TrickalFanGame.Editor
                        table.TryGetThreat(expected.Role, out int score) && score == expected.Score) &&
                    table.ThreatScores.Count == Week19Difficulty1Setup.ThreatScores.Length &&
                    !table.TryGetThreat(EncounterEnemyRole.Boss, out _),
-                "Threat scores must be Chaser 2 / FastChaser 3 / Ranged 3 / Sniper 4 / Charging 4 / Jyubi 1 without Boss.");
+                "Threat scores must be Chaser 2 / FastChaser 3 / Ranged 3 / Sniper 4 / Charging 4 / Jyubi 1 / FourWayShooter 3 / SplittingChaser 4 without Boss.");
             Assert(table.Classify(0) == RoomDifficultyTier.Easy &&
                    table.Classify(11) == RoomDifficultyTier.Easy &&
                    table.Classify(12) == RoomDifficultyTier.Normal &&

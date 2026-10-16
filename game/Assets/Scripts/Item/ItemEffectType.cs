@@ -139,5 +139,48 @@ namespace TrickalFanGame.Item
         // MaximumDistance = their range, ScaleMultiplier = their size as a share of the base shot. They inherit
         // pierces from other items and never split again. Replaces the legacy SplitAfterPierce (16) on item-11.
         SplitOnHit = 64,
+        // Power-1 (교주의 권능, contract 23 §9). Only the 권능 slot runs these, on use; holding one does nothing.
+        // 팝핀 스타: every enemy in the room takes Magnitude x attack damage (ScaleMultiplier x that for non-bosses).
+        // Each enemy hit adds SecondaryMagnitude player damage for DurationSeconds, up to IntegerAmount stacks.
+        PowerRoomBlast = 65,
+        // 애착 담요: for DurationSeconds every hit is reduced by Magnitude HP units (never below half a heart), and
+        // IntegerAmount HP units are healed every IntervalSeconds.
+        PowerProtectiveBlanket = 66,
+        // 찐짜천벌: the enemy with the most health (bosses first) takes Magnitude x attack damage and IntegerAmount
+        // shock stacks (SecondaryMagnitude slow per stack for DurationSeconds).
+        PowerSmite = 67,
+        // 명치 꽂기: every enemy in the room, bosses included, is stunned for DurationSeconds.
+        PowerStunRoomEnemies = 68,
+        // 명치 꽂기: every enemy in the room takes Magnitude more damage for DurationSeconds.
+        PowerRoomEnemyVulnerability = 69,
+        // 날먹보호막: Magnitude HP units of shield, within the 15 heart health + shield limit.
+        PowerGainShield = 70,
+        // 급발진: for DurationSeconds attack speed +Magnitude, move speed +SecondaryMagnitude and the high-grade
+        // skill cooldown runs as if ScaleMultiplier shorter.
+        PowerOverdrive = 71,
+        // 급발진: IntegerAmount full SP at once.
+        PowerRestoreSP = 72,
+        // Jjangsem-2 (짱셈스펠 4종, plan 26 §4.2). Room-bound effects only start in an uncleared combat or boss room.
+        // 파스텔빛: every IntervalSeconds for DurationSeconds each enemy in the room takes Magnitude x attack damage
+        // (no critical, no knockback, credited to the player). Clearing or leaving the room ends it.
+        CurrentRoomPulseDamage = 73,
+        // 파스텔빛: every IntervalSeconds for DurationSeconds IntegerAmount HP units are healed. Ends with the pulse.
+        CurrentRoomPulseHeal = 74,
+        // 수상한 물약: for DurationSeconds every enemy hit taken in the room it was used in loses Magnitude of its
+        // damage, rounded up to half hearts and never below half a heart.
+        CurrentRoomEnemyDamageReduction = 75,
+        // 이성의 끈: player basic attack, skill and artifact damage x Magnitude in the room it was used in.
+        // 권능 damage, status ticks and bombs are excluded. Leaving the room ends it.
+        CurrentRoomDamageMultiplier = 76,
+        // 깜짝상자: IntegerAmount random enemies of the room (bosses included) are stunned for DurationSeconds and
+        // lose Magnitude of their maximum health, which never kills. A boss loses SecondaryMagnitude of its maximum
+        // health instead (0 = the same Magnitude).
+        StunAndCutRandomEnemies = 77,
+        // 파스텔빛: every IntervalSeconds for DurationSeconds IntegerAmount half SP slots are gained. Ends with the
+        // pulse.
+        CurrentRoomPulseSP = 78,
+        // 수상한 물약: every enemy in the room at use gets IntegerAmount poison stacks (up to IntegerAmount), each
+        // dealing Magnitude x attack damage every IntervalSeconds for DurationSeconds.
+        CurrentRoomEnemyPoison = 79,
     }
 }

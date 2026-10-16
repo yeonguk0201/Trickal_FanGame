@@ -117,8 +117,12 @@ namespace TrickalFanGame.Editor
                     Require(renderer.sprite == root.GetComponent<EnemyAttackArtwork>().ProjectileSprite && renderer.color == Color.white &&
                         renderer.sprite.name == (i == 0 ? "CrayonArrow_Projectile" : "CrayonMagic_Projectile"), "Minion firing must emit its own arrow/magic artwork.");
                     Require(shot.Velocity == Vector2.left * sniper.ProjectileSpeed &&
-                        Mathf.Approximately(shot.GetComponent<CircleCollider2D>().bounds.extents.x, ProjectileSizing.WorldCollisionRadius(ProjectileSizing.RangedEnemyScale)),
-                        "Minion projectile artwork must preserve speed and collision size.");
+                        Mathf.Approximately(shot.GetComponent<CircleCollider2D>().bounds.extents.x, ProjectileSizing.WorldCollisionRadius(ProjectileSizing.DrawnEnemyScale)),
+                        "Minion projectile artwork must preserve speed and use the drawn-shot collision size.");
+                    Require(renderer.sprite.pixelsPerUnit == (i == 0 ? EnemyAttackAnimationSetup.ArrowProjectilePixelsPerUnit
+                            : EnemyAttackAnimationSetup.MagicProjectilePixelsPerUnit),
+                        "Minion projectile artwork must use its enlarged import scale.");
+                    VerifyReadableShot(renderer);
                     root.GetComponent<EnemyMovementAnimator>().RenderPose(0f, false);
                     Require(root.GetComponent<SpriteRenderer>().sprite == root.GetComponent<EnemyAttackArtwork>().GetFrame(2), "Release/cast pose must coincide with firing.");
                 }
@@ -148,9 +152,10 @@ namespace TrickalFanGame.Editor
                     "Firing must use the actual onion sprite with original colors.");
                 Require(renderer.sprite.pixelsPerUnit == EnemyAttackAnimationSetup.ProjectilePixelsPerUnit &&
                     Mathf.Approximately(shot.GetComponent<CircleCollider2D>().bounds.extents.x,
-                        ProjectileSizing.WorldCollisionRadius(ProjectileSizing.RangedEnemyScale)),
-                    "Larger onion artwork must keep the original world collision radius.");
-                Require(shot.Velocity == Vector2.right * sniper.ProjectileSpeed && shot.transform.localScale == Vector3.one * ProjectileSizing.RangedEnemyScale &&
+                        ProjectileSizing.WorldCollisionRadius(ProjectileSizing.DrawnEnemyScale)),
+                    "Onion artwork must use the drawn-shot world collision radius.");
+                VerifyReadableShot(renderer);
+                Require(shot.Velocity == Vector2.right * sniper.ProjectileSpeed && shot.transform.localScale == Vector3.one * ProjectileSizing.DrawnEnemyScale &&
                     shot.GetComponent<CircleCollider2D>().radius == ProjectileSizing.BaseColliderRadius,
                     "Onion projectile must preserve speed and collision radius.");
                 Require(Mathf.Abs(Mathf.DeltaAngle(renderer.transform.eulerAngles.z, 180f)) < 0.01f,
@@ -163,6 +168,13 @@ namespace TrickalFanGame.Editor
                 if (shot != null) UnityEngine.Object.DestroyImmediate(shot.gameObject);
                 UnityEngine.Object.DestroyImmediate(root);
             }
+        }
+
+        // Drawn shots were once a third of a tile long; keep the 512px canvas at least one tile wide in the world.
+        private static void VerifyReadableShot(SpriteRenderer renderer)
+        {
+            Require(Mathf.Max(renderer.bounds.size.x, renderer.bounds.size.y) >= 1f,
+                renderer.sprite.name + " must stay large enough to read in combat.");
         }
 
         public static void SetupAndVerifyBatch()

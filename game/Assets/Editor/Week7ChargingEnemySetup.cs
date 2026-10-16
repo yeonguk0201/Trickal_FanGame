@@ -75,14 +75,16 @@ namespace TrickalFanGame.Editor
                 contactDamage.Configure(EnemyDamageTier.Light, 1f);
 
                 ChargingEnemyController charging = contents.GetComponent<ChargingEnemyController>();
+                // An existing controller keeps its tuning: Enemy-3 replaced this stand-and-charge configuration
+                // with the pursuit charge, and re-running this setup must not turn the pursuit off again.
                 if (charging == null)
                 {
                     charging = contents.AddComponent<ChargingEnemyController>();
+                    charging.Configure(7f, 0.65f, Week19Tune1Setup.ChargingDashSpeed, 0.8f, 0.6f, 1.5f,
+                        EnemyDamageTier.Heavy);
                 }
 
                 SetMaxHealth(contents.GetComponent<Health>(), 70);
-                charging.Configure(7f, 0.65f, Week19Tune1Setup.ChargingDashSpeed, 0.8f, 0.6f, 1.5f,
-                    EnemyDamageTier.Heavy);
                 Rigidbody2D body = contents.GetComponent<Rigidbody2D>();
                 if (body != null)
                 {
@@ -91,9 +93,10 @@ namespace TrickalFanGame.Editor
                 }
 
                 SpriteRenderer renderer = contents.GetComponent<SpriteRenderer>();
+                // 저혈당 has its own drawing, so no placeholder tint.
                 if (renderer != null)
                 {
-                    renderer.color = new Color(1f, 0.5f, 0.15f);
+                    renderer.color = Color.white;
                 }
 
                 GameObject prefab = PrefabUtility.SaveAsPrefabAsset(contents, ChargingPrefabPath);

@@ -15,6 +15,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Verify Room-5 Runtime Room Transitions")]
         public static void Verify()
         {
+            Week18Obstacle2Setup.OpenGameScene();
             RoomGraphAssembler assembler = UnityEngine.Object.FindFirstObjectByType<RoomGraphAssembler>();
             GameMinimapView minimap = UnityEngine.Object.FindFirstObjectByType<GameMinimapView>();
             Assert(assembler != null && assembler.Generator != null && assembler.Graph != null,

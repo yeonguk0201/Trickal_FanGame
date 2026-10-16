@@ -3,7 +3,8 @@
 > 작성일: 2026-10-02  
 > 계획: [21-sixth-month-plan.md §4.1 Contract-0, §8 D0](./21-sixth-month-plan.md)  
 > 관련: [06-database.md](./06-database.md), [07-api.md](./07-api.md), [11-artifact-reference.md](./11-artifact-reference.md)  
-> 범위: 여섯째 달 신규 아이템의 분류값·안정 ID·획득 경로·Run 저장·골드 enum 방식
+> 범위: 여섯째 달 신규 아이템의 분류값·안정 ID·획득 경로·Run 저장·골드 enum 방식  
+> 확장: 2026-10-15 Power-0 — 교주의 권능 분류·ID·저장 정책(§9, [26번 §4.4](./26-seventh-month-plan.md))
 
 이 문서는 **계약 결정**이다. 문서 작성 시점에 코드·에셋·API는 바뀌지 않았다. 아래 규칙은 Gold-0,
 Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 기준이며, 각 조각의 검증으로
@@ -38,12 +39,13 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 2 | `SingleUseSpell` | 스펠 | `single-spell-` | Slot-0에서 추가(2026-10-02) |
 | 3 | `JjangsemSpell` | 짱셈스펠 | `jjangsem-` | Slot-0에서 추가(2026-10-02, 첫 짱셈스펠과 함께 사용) |
 | 4 | `Trinket` | 장신구 | `trinket-` | **예약**. 첫 장신구 구현(D7) 때 추가 |
-| 5 | `Active` | 액티브 | `active-` | **예약**. 첫 교주의 권능 구현(D7) 때 추가 |
+| 5 | `Active` | 교주의 권능 | `active-` | Power-0에서 확정(2026-10-15), enum 추가는 Power-1(§9) |
 
 - **아티팩트와 패시브는 같은 분류다.** 아이작의 "패시브"에 해당하는 상시 효과 아이템을 이 게임에서는
   아티팩트라고 부른다. 계획 문서의 "패시브"·"공격 변화 패시브"는 `ItemKind.Artifact`이며 UI 표기도
   "아티팩트"를 유지한다. 별도 `Passive` 값을 만들지 않는다.
-- 예약 값(4·5)은 실제 아이템이 생기기 전까지 enum에 넣지 않는다. 빈 분류가 검증·풀·UI에 노출되지 않게 한다.
+- 예약 값(4)은 실제 아이템이 생기기 전까지 enum에 넣지 않는다. 값 5(`Active`)도 첫 권능 에셋과 같은 조각(Power-1)에서
+  넣는다. 4를 건너뛰어도 값 5를 앞당기지 않는다. 빈 분류가 검증·풀·UI에 노출되지 않게 한다.
 - 접두사는 분류마다 겹치지 않는다. `single-spell-`은 `spell-`로 시작하지 않으므로 레거시 판정과 충돌하지 않는다.
   `IsItemIdValidForKind`에 새 분류의 접두사를 추가하고, 다른 분류의 접두사로 만든 ID는 무효로 처리한다.
 - 황금상자 전용 같은 **획득 경로 제한은 분류값이 아니라 풀 소속으로 표현**한다. 시스트의 가짜 날개는
@@ -103,6 +105,10 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 아이시아의 지갑 | 아티팩트(황금 전용) | `artifact-aisia-wallet` | Artifact-3 |
 | 칸타의 팽이 | 아티팩트 | `artifact-kanta-top` | Passive-3 |
 | 샤샤의 항아리 | 아티팩트 | `artifact-shasha-jar` | Passive-4 |
+| 파스텔빛 | 짱셈스펠 | `jjangsem-pastel-light` | Jjangsem-2 |
+| 수상한 물약 | 짱셈스펠 | `jjangsem-suspicious-potion` | Jjangsem-2 |
+| 이성의 끈 | 짱셈스펠 | `jjangsem-thread-of-reason` | Jjangsem-2 |
+| 깜짝상자 | 짱셈스펠 | `jjangsem-surprise-box` | Jjangsem-2 |
 
 ### 2.4 등급·효과·스택
 
@@ -175,6 +181,19 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
   `Pierce` 1 + `SplitAfterPierce`(16)에서 64 하나(`secondaryMagnitude` 0.5·`maximumDistance` 3·`scaleMultiplier` 0.5)로 바꿨다.
   **기존 ID의 효과를 바꾼 계약 마이그레이션**이며 Unity 에셋·Backend 카탈로그·검증기·문서를 함께 갱신했다. 16번은 번호와
   의미를 그대로 둔 레거시 효과이고 쓰는 아이템이 없다.
+  Power-1(2026-10-15)에서 권능 전용 65~72를 추가했다: `PowerRoomBlast = 65`(팝핀 스타), `PowerProtectiveBlanket = 66`(애착 담요),
+  `PowerSmite = 67`(찐짜천벌), `PowerStunRoomEnemies = 68`·`PowerRoomEnemyVulnerability = 69`(명치 꽂기), `PowerGainShield = 70`
+  (날먹보호막), `PowerOverdrive = 71`·`PowerRestoreSP = 72`(급발진). 필드 의미는 `ItemEffectType` 주석에 있다. 필요 게이지는 효과가
+  아니라 `ItemDefinition.activeChargeRooms`에 둔다(Backend는 설명 문구에만 적는다).
+  Jjangsem-2(2026-10-15)에서 짱셈스펠 4종의 73~77을 추가했다: `CurrentRoomPulseDamage = 73`(`magnitude` = 공격력 비율,
+  `intervalSeconds`, `durationSeconds`)과 `CurrentRoomPulseHeal = 74`(`integerAmount` = 회복 HP 단위, `intervalSeconds`,
+  `durationSeconds`)는 파스텔빛, `CurrentRoomEnemyDamageReduction = 75`(`magnitude` = 감소 비율, `durationSeconds`)는 수상한
+  물약, `CurrentRoomDamageMultiplier = 76`(`magnitude` = 최종 배율)은 이성의 끈, `StunAndCutRandomEnemies = 77`(`magnitude` =
+  최대 체력 기준 감소 비율, `secondaryMagnitude` = 보스의 최대 체력 기준 감소 비율(0이면 `magnitude`), `integerAmount` = 대상 수,
+  `durationSeconds` = 스턴)은 깜짝상자만 쓴다. 같은 날 수치 조정에서 `CurrentRoomPulseSP = 78`(`integerAmount` = SP 반 칸 수,
+  `intervalSeconds`, `durationSeconds`, 파스텔빛)과 `CurrentRoomEnemyPoison = 79`(`magnitude` = 중첩당 틱 공격력 비율,
+  `integerAmount` = 중첩 수, `intervalSeconds`, `durationSeconds`, 수상한 물약)를 더했다. 네 ID(Rare, 최대 1스택)를 Backend
+  카탈로그에도 같은 값으로 기록했다. 피해 출처 `DamageSourceType.PlayerSpell`(파스텔빛·깜짝상자)을 뒤에 추가했다.
 - 일회용 아이템(`SingleUseSpell`, `JjangsemSpell`)은 `maxStacks = 1`이다. 보유 중에는 **효과가 적용되지
   않고**, 사용 성공 시에만 효과를 실행한다. `PlayerInventory`의 상시 효과 적용·아티팩트 HUD·일시정지
   아티팩트 목록에 들어가지 않는다.
@@ -191,6 +210,9 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 황금상자 특별 보상 | 전용 풀만 | **금지** | — | — | 장신구 구현 전에는 전용 아티팩트만 |
 | 다이아몬드 상자 | — | **금지** | 허용 | 허용 | 짱셈스펠은 구현된 유효 ID만 |
 | 개발 패널·테스트 씬 | 허용 | 허용 | 허용 | 허용 | 정상 Run 기록과 분리 |
+
+`Active`(교주의 권능)는 위 공용 풀에 넣지 않는다. 정상 Run에서는 1층 시작 보물방의 보장 칸, 비밀방 3택1과 상점 아이템
+상품의 확률 칸(§9.3)에서 권능 전용 목록으로 추첨하고, 개발 패널·테스트 씬에서 직접 지급한다.
 
 검증기는 정상 Run의 모든 획득 풀에 `ItemKind.Spell`이 있으면 실패해야 하고, 각 풀에 허용되지 않은
 분류나 `IsValid=false` 항목이 있으면 실패해야 한다.
@@ -262,11 +284,73 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | Spell-0~4 | §2.3 ID, Backend 카탈로그·테스트·seed 동시 반영, 레거시 `spell-*` 풀 제거·Backend 활성 유지 |
 | Chest-1·2 | §3 경로별 허용 분류, 유효 ID만 생성. Chest-2(2026-10-05): `ChestContentTable.TryValidate`가 일반·다이아몬드의 특별 보상과 일반·황금의 짱셈스펠 비율을 거부하고, 스펠·짱셈스펠·황금 전용 아티팩트 목록을 분류별로 따로 검사한다 |
 | Flight-0 | 가짜 날개는 `ItemKind.Artifact`, 전용 풀 소속으로만 획득. 풀은 `chest-content-table`의 황금 전용 아티팩트 목록이며, 전 보상 풀을 모으는 Setup(Reward-3)은 `GoldenChestExclusivePool` 목록을 제외한다 |
-| Jjangsem-0·1 | `jjangsem-` 접두사, 일회용 아이템 비복제. Jjangsem-0(2026-10-05): `jjangsem-bigwood-fruit`는 `chest-content-table`의 짱셈스펠 목록(다이아몬드 상자)으로만 획득 |
+| Jjangsem-0·1·2 | `jjangsem-` 접두사, 일회용 아이템 비복제. Jjangsem-0(2026-10-05): `jjangsem-bigwood-fruit`는 `chest-content-table`의 짱셈스펠 목록(다이아몬드 상자)으로만 획득. Jjangsem-2(2026-10-15): 효과 73~77은 뒤에 추가, 네 ID는 짱셈스펠 목록에만 소속(선택 보상·상점 풀 금지, 검증기가 확인), Backend 카탈로그·테스트·seed 동시 반영 |
 | Verify-0 | 풀별 분류 불변조건과 Unity↔Backend 카탈로그 ID·등급 일치 검사 |
 | Range-0 | 효과 33·34는 뒤에 추가, 33은 `artifact-sylla-wind-arrow`만(Artifact-2부터)·34는 `item-15`만 사용(검증기가 확인), 아이템 추가 시 Backend 카탈로그·seed 동시 반영 |
 | Passive-1 | 효과 43·44는 뒤에 추가, 43은 `artifact-kanna-cannon`·44는 `artifact-bibi-snot`만 사용(검증기가 확인), 둘 다 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |
 | Passive-2 | 효과 45·46은 뒤에 추가, 둘 다 `artifact-giant-potion`만 사용(검증기가 확인), 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |
 | Artifact-3 | 효과 61은 뒤에 추가, `artifact-aisia-wallet`은 `GoldenChestExclusivePool` 목록과 `chest-content-table`의 황금 전용 풀에만 소속(선택 보상·상점 풀 금지, 검증기가 확인). 전용 풀은 목록의 모든 에셋으로 구성하므로 Flight-0 Setup을 다시 실행해도 지갑이 빠지지 않는다 |
 | Passive-3·4 | 효과 62·63은 뒤에 추가, 각각 `artifact-kanta-top`·`artifact-shasha-jar`만 사용, 둘 다 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |
+| Power-0 | §9 문서화만. 코드·에셋·Prisma·DTO·Backend 카탈로그 변경 없음 |
+| Power-1 | `ItemKind.Active = 5`·`active-` 접두사 검증 추가, §9.2 ID 6종 에셋과 Backend 카탈로그·테스트·seed 동시 반영, 효과는 65부터 뒤에 추가, 인스턴스 1회 기록, 새 인스턴스 빈 게이지·배출 시 게이지 유지(§9.4), 기존 풀 6곳에 `Active` 없음(검증기가 확인) |
+| Power-2 | 1층 보장 칸·비밀방·상점 확률 칸은 권능 전용 목록(6종)에서 추첨, 공용 풀에 `Active`를 넣지 않음, seed 재현과 재방문 시 같은 후보 |
 | Artifact-2 | 효과 47~60은 뒤에 추가, 14종 모두 `artifact-` 접두사·선택 보상 풀 소속, 화상(51)은 불타활·가지만·감전(52)은 앗땃따건만 사용(검증기가 확인), Backend 카탈로그·seed 동시 반영 |
+
+## 9. 교주의 권능(Power-0, 2026-10-15)
+
+효과·필요 게이지·충전·교체 규칙은 [26번 §4.4 "교주의 권능 6종"](./26-seventh-month-plan.md)이 기준이다. 이 절은 분류·ID·
+저장만 정한다. 작성 시점에 코드·에셋·API는 바뀌지 않았다.
+
+### 9.1 분류
+
+- `ItemKind.Active = 5`, 게임 표기 "교주의 권능"(줄여서 "권능"), 접두사 `active-`. 다른 분류의 접두사와 겹치지 않는다.
+- 보유 수는 1개다. 일회용 슬롯(`PlayerSpellSlot`)과 별도인 **권능 슬롯**에 들어가며, 사용해도 소비되지 않고 게이지만 비운다.
+- 보유 중 상시 효과가 없다. `PlayerInventory`의 상시 효과 적용·아티팩트 HUD·일시정지 아티팩트 목록에 넣지 않는다.
+- `maxStacks = 1`. 등급은 6종 모두 `RARE`(기본값, 바꾸려면 알려 달라). 등급은 경험치(30)에만 쓰이고, 보장 칸은 6종을
+  같은 가중치로 추첨한다.
+
+### 9.2 안정 ID
+
+| 이름 | ID | 필요 게이지 |
+|---|---|---|
+| 팝핀 스타 | `active-poppin-star` | 2방 |
+| 애착 담요 | `active-security-blanket` | 3방 |
+| 찐짜천벌 | `active-divine-punishment` | 3방 |
+| 명치 꽂기 | `active-solar-plexus-strike` | 4방 |
+| 날먹보호막 | `active-freeloader-shield` | 4방 |
+| 급발진 | `active-sudden-acceleration` | 5방 |
+
+일부 권능만 구현하더라도(26번 §축소 순서) 위 ID를 그대로 쓰고 다른 의미로 재사용하지 않는다.
+
+### 9.3 획득 경로
+
+- 1층 시작방 인접 보물방: 3택1 중 **보장 칸 1개**.
+- 모든 층의 비밀방: 3택1 중 1칸이 30% 확률로 권능(사용자 결정 2026-10-15, 확률은 초기값).
+- 상점: 아이템 상품 1칸이 25% 확률로 권능. 가격은 `RARE` 아이템 가격 규칙을 따른다.
+- 위 칸은 `selectionRewardPool`이 아니라 **권능 전용 목록**에서 Run seed로 추첨한다. 나머지 칸은 기존 규칙 그대로다.
+  2~3층 일반 보물방 등장은 조건부 후보로 남긴다.
+- 공용 획득 풀(선택 보상·상점 공유 풀·일반·황금·다이아몬드 상자)에는 넣지 않는다(§3).
+- 개발 패널(`F1`)과 테스트 씬은 6종 모두 직접 지급할 수 있다.
+
+### 9.4 기록과 게이지
+
+- **획득 기록**: 일회용 아이템(§4.1)과 같다. 권능 픽업마다 Run 안에서 유일한 인스턴스 ID를 두고, 그 인스턴스가 처음
+  권능 슬롯에 들어올 때 `RunItem` 1건을 기록하고 등급별 경험치를 받는다. 교체로 바닥에 배출된 권능은 같은 인스턴스 ID를
+  유지하며 다시 주워도 기록하지 않는다. `floor`·`acquiredAt`·`order` 규칙도 §4.1과 같다.
+- **게이지**(사용자 결정 2026-10-15): 인스턴스가 처음 슬롯에 들어오면 **빈 게이지(0칸)**로 시작한다. 배출된 인스턴스는
+  **그 시점의 게이지를 유지**하고, 다시 주우면 유지한 값으로 돌아온다. 게이지는 Run 진행 상태이며 서버에 저장하지 않는다.
+- **사용 기록**: 서버에 저장하지 않는다(§4.2). 사용 횟수는 Unity 로컬 개발 기록(`DevelopmentPlaytestRecord`의
+  `item-uses`)에만 남는다.
+- Prisma·Run 저장 DTO·API·Unity 저장 DTO는 바뀌지 않는다. 권능도 `items[]`의 한 항목으로 전송된다.
+
+### 9.5 Backend·Web·과거 전적 호환
+
+- Backend `ITEM_CATALOG`·카탈로그 테스트·seed에는 **Power-1에서 Unity 에셋과 같은 커밋으로** 6종을 추가한다
+  (`isActive=true`, `maxStacks=1`, `rarity=RARE`, Unity와 같은 효과 타입·수치의 `effectData`). 카탈로그에 없는 ID를 Unity가
+  보내면 `ITEM_NOT_FOUND`로 저장이 실패하므로 Unity만 먼저 반영하지 않는다.
+- 분류 컬럼은 추가하지 않는다(§4.3). Web 전적 상세·통계는 이름·`itemId`·등급으로 권능을 표시하며 화면 변경이 없다.
+- 과거 전적에는 `active-*` 항목이 없고 이전 빌드는 보내지 않으므로 기존 저장·경험치·표시에 영향이 없다.
+  권능 지급을 중단하더라도 카탈로그 항목은 삭제하지 않는다(§5).
+- 효과 타입은 Power-1에서 `ItemEffectType` 64 뒤(65~)에 추가한다. 감전(52)·피해 감소(36)·방어막(37) 등 기존 효과를
+  런타임에서 재사용하더라도 권능 효과는 권능 전용 효과 타입으로 기록해 기존 아이템 검증 불변조건("이 효과는 이 아이템만
+  사용")을 깨지 않는다.

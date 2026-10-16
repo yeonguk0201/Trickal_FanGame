@@ -80,7 +80,9 @@ namespace TrickalFanGame.Frontend
                 SetText(rarityText, RarityLabel(definition.Rarity));
                 SetText(effectText, ArtifactEffectDescription.Build(definition));
                 string maximum = definition.MaxStacks > 0 ? definition.MaxStacks.ToString() : "제한 없음";
-                SetText(stackText, $"현재 스택 {candidate.CurrentStacks} / {maximum}");
+                SetText(stackText, definition.IsActivePower
+                    ? GamePowerHudView.BuildOfferLine(definition)
+                    : $"현재 스택 {candidate.CurrentStacks} / {maximum}");
             }
             else
             {

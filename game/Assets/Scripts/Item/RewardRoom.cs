@@ -15,6 +15,8 @@ namespace TrickalFanGame.Item
         [SerializeField] private RoomController prerequisiteRoom;
         [SerializeField] private ItemRewardSelectionSession rewardSelectionSession;
         [SerializeField] private ItemDefinition[] selectionItemPool = System.Array.Empty<ItemDefinition>();
+        // Power-2: 교주의 권능 one 3택1 card is drawn from; empty when this room offers none.
+        [SerializeField] private ItemDefinition[] powerOfferPool = System.Array.Empty<ItemDefinition>();
         [SerializeField] private GameObject interactionMarker;
         [SerializeField] private GameObject interactionPrompt;
 
@@ -27,6 +29,8 @@ namespace TrickalFanGame.Item
         public bool CanInteract => !HasRewarded && isPlayerInside &&
                                    (prerequisiteRoom == null || prerequisiteRoom.State == RoomState.Cleared) &&
                                    rewardSelectionSession?.IsOpen != true;
+        public bool OffersPower => powerOfferPool.Length > 0;
+        public System.Collections.Generic.IReadOnlyList<ItemDefinition> PowerOfferPool => powerOfferPool;
         public GameObject InteractionMarker => interactionMarker;
         public GameObject InteractionPrompt => interactionPrompt;
 
@@ -60,6 +64,11 @@ namespace TrickalFanGame.Item
             SubscribeSelection();
             SynchronizeCompletedSelection();
             RefreshInteractionVisuals();
+        }
+
+        public void ConfigurePowerOffer(ItemDefinition[] configuredPowerPool)
+        {
+            powerOfferPool = configuredPowerPool ?? System.Array.Empty<ItemDefinition>();
         }
 
         public void ConfigureInteractionVisuals(GameObject configuredMarker, GameObject configuredPrompt)
@@ -175,7 +184,8 @@ namespace TrickalFanGame.Item
             ItemDefinition[] pool = selectionItemPool != null && selectionItemPool.Length > 0
                 ? selectionItemPool
                 : CopyPool(dropSource?.ItemPool);
-            if (rewardSelectionSession.TryOpen(pool, RewardId, out string error))
+            if (rewardSelectionSession.TryOpen(pool, RewardId, powerOfferPool,
+                    transform.position + ActivePowerOffers.RewardDropOffset, transform.parent, out string error))
             {
                 RefreshInteractionVisuals();
                 return true;

@@ -12,6 +12,8 @@ namespace TrickalFanGame.Resource
     {
         private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
 
+        public const string GoldArtworkKey = "gold-pickup";
+
         [SerializeField] private RunResourceType resourceType;
         [SerializeField, Min(1)] private int amount = 1;
         [SerializeField] private RunProgress runProgress;
@@ -28,6 +30,12 @@ namespace TrickalFanGame.Resource
             Rigidbody2D body = GetComponent<Rigidbody2D>();
             body.gravityScale = 0f;
             body.freezeRotation = true;
+            // Keys and bombs keep the tinted placeholder circle until their artwork is supplied.
+            if (resourceType == RunResourceType.Gold)
+            {
+                TrickalFanGame.Frontend.UserArtwork.ApplyResourcePickup(
+                    GetComponentInChildren<SpriteRenderer>(), GoldArtworkKey);
+            }
         }
 
         public void BindRunProgress(RunProgress progress)

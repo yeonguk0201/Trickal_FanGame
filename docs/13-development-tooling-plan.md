@@ -639,3 +639,35 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 ### 샤샤 실시간 물줄기 A/B 검수 (2026-10-12)
 
 사용자 요청으로 샤샤만 비교용 대표 효과로 구현했다. F1 아티팩트 섹션에서 기존 이미지와 메시·셰이더·월드 물방울을 전환한다. `ShashaWaterPrototypeVerification.Verify` 단독 검사와 임시 Preview Scene 정지 비교 렌더 메뉴를 추가했다. C# 컴파일과 2026-10-13 커밋 전 `ShashaWaterPrototypeVerification.VerifyWithRegressionsBatch` 통과(종료 코드 0, `output/shasha-water-precommit.log`). 2026-10-13 사용자 Play 비교에서 개선을 확인하고 실시간 합성 제작 방향을 채택했다. 물다운 표현 보강·미확인 Play 조건의 검수는 남아 있다. [구성·검증 기록](./art-prompts/shasha-realtime-v1/README.md)과 [실행법](./05-development-setup.md)의 샤샤 비교 항목을 따른다.
+
+### 실시간 합성 효과의 Scene 뷰 미리보기 (2026-10-13)
+
+상태: **샤샤 효과 단독 미리보기 1차 구현·UI 수동 확인 대기, 전체 기준 부분 구현**. 사용자는 프레임 시트 외의 새 효과를 전체 합성과 요소별 표시로 실시간 확인하는 방식을 선택했다.
+상세 기준은 [25번 §5.D](./25-combat-effects-guide.md#d-실시간-합성-효과의-scene-뷰-미리보기-2026-10-13-확정)를 따른다.
+
+- [ ] Scene 뷰에서 게임 Play 없이 전체 효과 재생·반복·정지·재시작·속도 조절과 시간 슬라이더를 제공한다.
+- [ ] 본체·물방울·접촉 물보라 등 레이어별 표시/단독 표시와 길이·방향·굵기·시작점·끝점 조절을 제공한다.
+- [ ] 실제 캐릭터·배경 크기와 기존/신규 표현을 동일 조건에서 비교한다.
+- [ ] 런타임과 같은 렌더·방출·시간 제어를 사용하고, 시간 역행/재시작 때 입자를 초기 상태에서 재현한다.
+- [ ] 종료·Play 전환·리로드의 임시 리소스 정리, 원본 에셋 보존, 피해/보상 로직 미실행을 확인한다.
+- [ ] 구현 후 진입점과 실제 조작법을 `docs/05-development-setup.md`에 기록한다.
+
+샤샤는 `Preview Shasha Water`로 효과 단독 Scene 뷰 재생·시간·레이어·길이/방향/굵기·벽 접촉 조절을 구현했다. 같은 런타임 구성과 고정 간격 입자 재시뮬레이션을 사용한다. UI 조작·정리 수동 확인, 실제 캐릭터/배경 합성·시작점 이동·동일 조건 A/B는 남아 있어 위 전체 체크리스트는 완료 처리하지 않는다. 조작법은 `docs/05-development-setup.md`의 샤샤 물결·접촉 포말 미리보기 항목을 따른다.
+
+### 날씨는 맑음 번개 도구 (2026-10-13)
+
+- 구현: `ClearWeatherLightningPreview` 임시 Scene 미리보기(굵기·길이·타격점·시간·반복·속도, 선택 SpriteRenderer 참조 복사).
+- 구현: `ClearWeatherLightningVerification` 화면 상단 경로·끝점·하강·소멸·시간 역행과 기존 카드 규칙 검사.
+- 실제 미리보기 조작과 Play 미술 검수는 대기. 실행 방법은 [개발 환경](05-development-setup.md), 근거는 [효과 기록](art-prompts/clear-weather-lightning.md)에 기록한다.
+
+### 바위 균열 표시 검증 (2026-10-14)
+
+`RockDamageArtworkVerification.Verify` 구현: 3종의 피격 단계별 스프라이트, 색상·크기·바닥 기준점, 충돌 보존과 4회 타격 파괴를 검사한다. 자동 실행 결과는 [작업 기록](art-prompts/rock-damage-frames.md)에 남기며 실제 Play 미술 검수는 별도로 확인한다.
+
+
+### 타격 피드백 도구 (2026-10-14)
+
+- 구현: `HitSparkPreview` 임시 Scene 미리보기(반경·탄 방향·타격점·시간·반복·속도, 선택 SpriteRenderer 참조 복사).
+- 구현: `HitFeedbackVerification` 착탄 스파크 방향·반경·시간 역행·소멸, 히트스톱 복원·간격·일시정지 양보, 카메라 흔들림 상한 검사.
+- 구현: 개발 패널 `— Player —`의 `CRIT 100%` 버튼과 현재 치명타 확률 표시.
+- Play 표시는 2026-10-14 사용자 확인으로 수용. 미리보기 창의 실제 조작 확인은 대기. 실행 방법은 [개발 환경](05-development-setup.md), 근거는 [효과 기록](art-prompts/hit-spark.md)에 기록한다.

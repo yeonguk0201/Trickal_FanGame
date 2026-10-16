@@ -44,9 +44,17 @@ namespace TrickalFanGame.Editor
                 Require(prefab.GetComponentInChildren<Collider2D>() == null && prefab.GetComponent<Health>() == null,
                     "Artwork previews must not invent gameplay: " + entry.id);
             }
-            foreach (string name in new[] { "ChargingEnemy", "RangedEnemy", "QuickRangedFairy", "HighBloodSugarFairy" })
+            foreach (string name in new[] { "ChargingEnemy", "RangedEnemy", "HighBloodSugarFairy" })
                 VerifyKeepsOriginalArt(name);
             VerifyExisting("JyubiEnemy", "jyubi");
+            VerifyExisting("QuickRangedFairy", "sansamo-pure");
+            VerifyExisting("LivelyLowBloodSugarFairy", "low-blood-sugar-fairy");
+            VerifyExisting("NururingFairyWarrior", "nururing");
+            VerifyExisting("NururingSplit", "nururing");
+            SpriteRenderer pureSansamo = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/QuickRangedFairy.prefab")
+                .GetComponent<SpriteRenderer>();
+            Require(pureSansamo != null && pureSansamo.color == Color.white,
+                "산사모-순수 must not keep the placeholder tint over its drawing.");
             VerifyExisting("KeyPickup", "pickup-key");
             VerifyExisting("BombPickup", "pickup-bomb");
             VerifyExisting("SecretPit", "terrain-secret-pit");
@@ -218,6 +226,46 @@ namespace TrickalFanGame.Editor
                 Require(view.Visual.sprite.name == "effect-bomb-explosion", "Bomb explosion sprite mismatch.");
             }
             finally { Object.DestroyImmediate(root); }
+        }
+
+        // The sprite and color of every Prefab bound to its drawing or showing a user drawing, so a setup batch can prove
+        // that re-running older setups left the artwork alone (they once restored placeholder sprites and tints).
+        public static Dictionary<string, string> SnapshotBoundArtwork()
+        {
+            Dictionary<string, string> snapshot = new(StringComparer.Ordinal);
+            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Prefabs", "Assets/Rooms" }))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.StartsWith(FairyKingdomArtworkSetup.DisplayRoot + "/", StringComparison.Ordinal)) continue;
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                foreach (FairyKingdomArtworkView view in prefab.GetComponentsInChildren<FairyKingdomArtworkView>(true))
+                {
+                    SpriteRenderer renderer = view.Visual;
+                    string sprite = renderer != null && renderer.sprite != null
+                        ? AssetDatabase.GetAssetPath(renderer.sprite) + "#" + renderer.sprite.name
+                        : "none";
+                    snapshot[path + ":" + view.name] = sprite + "|" + (renderer != null ? renderer.color : Color.clear);
+                }
+
+                foreach (SpriteRenderer renderer in prefab.GetComponentsInChildren<SpriteRenderer>(true))
+                {
+                    if (!FairyKingdomArtworkSetup.IsUserArtwork(renderer.sprite)) continue;
+                    snapshot[path + ":" + renderer.name + ":user"] = AssetDatabase.GetAssetPath(renderer.sprite) +
+                                                                       "#" + renderer.sprite.name + "|" + renderer.color;
+                }
+            }
+
+            return snapshot;
+        }
+
+        public static void RequireBoundArtworkUnchanged(Dictionary<string, string> before, string setupName)
+        {
+            Dictionary<string, string> after = SnapshotBoundArtwork();
+            foreach (KeyValuePair<string, string> entry in before)
+            {
+                Require(after.TryGetValue(entry.Key, out string now) && now == entry.Value,
+                    $"{setupName} changed the bound artwork of {entry.Key}: {entry.Value} -> {now ?? "missing"}.");
+            }
         }
 
         private static GameObject Instantiate(string name)

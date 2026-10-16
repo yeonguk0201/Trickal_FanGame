@@ -43,6 +43,8 @@ namespace TrickalFanGame.Frontend
             if (item != null) return ResolveItemId(item.Definition);
             var spell = owner.GetComponent<SingleUseItemPickup>();
             if (spell != null) return ResolveItemId(spell.Definition);
+            var power = owner.GetComponent<ActivePowerPickup>();
+            if (power != null) return ResolveItemId(power.Definition);
             var resource = owner.GetComponent<RunResourcePickup>();
             if (resource != null) return resource.ResourceType switch
             {

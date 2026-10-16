@@ -38,11 +38,40 @@ namespace TrickalFanGame.Item
             IReadOnlyList<ItemDefinition> itemPool,
             PlayerInventory inventory,
             int runSeed,
-            string rewardId)
+            string rewardId) => BuildCandidates(itemPool, inventory, runSeed, rewardId, null);
+
+        // Power-2: a non-empty powerPool turns the last card into a 교주의 권능 (ActivePowerOffers) and leaves the
+        // others to artifacts, with the usual healing fallback when too few artifacts are left.
+        public static IReadOnlyList<ItemRewardCandidate> BuildCandidates(
+            IReadOnlyList<ItemDefinition> itemPool,
+            PlayerInventory inventory,
+            int runSeed,
+            string rewardId,
+            IReadOnlyList<ItemDefinition> powerPool)
+        {
+            ItemDefinition power = null;
+            if (ActivePowerOffers.ValidPowers(powerPool).Count > 0)
+            {
+                uint powerHash = Avalanche(Mix(unchecked((uint)runSeed), (rewardId ?? string.Empty) + ":power"));
+                power = ActivePowerOffers.Choose(powerPool, ActivePowerOffers.HeldPower(inventory), powerHash);
+            }
+
+            List<ItemRewardCandidate> result = BuildArtifactCandidates(itemPool, inventory, runSeed, rewardId,
+                power != null ? MaximumCandidateCount - 1 : MaximumCandidateCount);
+            if (power != null) result.Add(ItemRewardCandidate.ForItem(power, 0));
+            return result.ToArray();
+        }
+
+        private static List<ItemRewardCandidate> BuildArtifactCandidates(
+            IReadOnlyList<ItemDefinition> itemPool,
+            PlayerInventory inventory,
+            int runSeed,
+            string rewardId,
+            int count)
         {
             if (itemPool == null || itemPool.Count == 0)
             {
-                return Array.Empty<ItemRewardCandidate>();
+                return new List<ItemRewardCandidate>();
             }
 
             Dictionary<string, ItemDefinition> activeById = new(StringComparer.Ordinal);
@@ -60,7 +89,7 @@ namespace TrickalFanGame.Item
 
             if (activeById.Count == 0)
             {
-                return Array.Empty<ItemRewardCandidate>();
+                return new List<ItemRewardCandidate>();
             }
 
             List<ItemDefinition> candidates = new(activeById.Values);
@@ -76,7 +105,7 @@ namespace TrickalFanGame.Item
             }
 
             List<ItemRewardCandidate> result = new(MaximumCandidateCount);
-            while (result.Count < MaximumCandidateCount && candidates.Count > 0)
+            while (result.Count < count && candidates.Count > 0)
             {
                 ItemDefinition selected = ChooseWeighted(candidates, stateHash);
                 int currentStacks = inventory != null ? inventory.GetStackCount(selected.ItemId) : 0;
@@ -86,12 +115,12 @@ namespace TrickalFanGame.Item
                 stateHash = Avalanche(stateHash ^ unchecked((uint)result.Count));
             }
 
-            if (result.Count < MaximumCandidateCount)
+            if (result.Count < count)
             {
                 result.Add(ItemRewardCandidate.ForHealing(FallbackHealMaxHealthRatio));
             }
 
-            return result.ToArray();
+            return result;
         }
 
         public static int GetWeight(ItemRarity rarity)

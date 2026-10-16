@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Item;
 using TrickalFanGame.Player;
 using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
@@ -43,7 +44,9 @@ namespace TrickalFanGame.Editor
                     Assert(!wall.isTrigger && wall.enabled && !floor.Contains(center), "Invalid inner wall collision.");
                     Assert(wall.gameObject.layer == room.Node.ContentRoot.transform.Find("Top Left Wall").gameObject.layer,
                         "Artwork boundaries must use the existing wall collision layer.");
+                    Assert(PlayerWaterStream.IsStreamBlocker(wall), "Artwork boundaries must stop the Shasha water stream.");
                 }
+                VerifyDoorOpenings(path, boundaries, FairyVillageArtworkSetup.RoomSize(room.Node.ContentRoot.transform), floor);
                 Assert(prefab.GetComponentsInChildren<SpriteRenderer>(true)
                     .Where(r => r.transform.IsChildOf(tiles)).All(r => r.sprite != null &&
                         (r.name.StartsWith(FairyVillageArtworkSetup.ForegroundName) ? r.sortingOrder == 20 &&
@@ -450,6 +453,35 @@ namespace TrickalFanGame.Editor
             SetupAndVerifyBatch();
             Week14Room0RegressionVerification.Verify();
             RenderSpecialDoorsBatch();
+        }
+
+        // The corridor the boundaries leave at each door must be the drawn aperture: just outside it (frame stones,
+        // pillars, the wall below a side door) is wall that stops actors and the water stream, and just inside it is
+        // open, wide enough for the feet.
+        private static void VerifyDoorOpenings(string path, Transform boundaries, Vector2 size, Rect floor)
+        {
+            Rect[] walls = boundaries.GetComponentsInChildren<BoxCollider2D>()
+                .Select(c => new Rect((Vector2)c.transform.localPosition + c.offset - c.size * 0.5f, c.size)).ToArray();
+            bool Blocked(Vector2 point) => walls.Any(r => r.Contains(point));
+            const float Probe = 0.02f;
+            foreach (RoomDoorDirection direction in new[] { RoomDoorDirection.Up, RoomDoorDirection.Down,
+                         RoomDoorDirection.Left, RoomDoorDirection.Right })
+            {
+                Vector2 opening = FairyVillageArtworkSetup.DoorOpening(direction, size);
+                Assert(opening.y - opening.x >= FairyVillageArtworkSetup.MinimumDoorOpening - 0.0001f &&
+                       opening.y - opening.x < RoomLayout.DoorOpeningLength && opening.x < 0f && opening.y > 0f,
+                    $"{path} {direction} door opening must fit the feet, stay inside the layout opening and hold its center.");
+                bool side = direction == RoomDoorDirection.Left || direction == RoomDoorDirection.Right;
+                float depth = direction switch {
+                    RoomDoorDirection.Up => (floor.yMax + size.y / 2) / 2, RoomDoorDirection.Down => (floor.yMin - size.y / 2) / 2,
+                    RoomDoorDirection.Left => (floor.xMin - size.x / 2) / 2, _ => (floor.xMax + size.x / 2) / 2 };
+                Vector2 At(float lateral) => side ? new Vector2(depth, lateral) : new Vector2(lateral, depth);
+                Assert(Blocked(At(opening.x - Probe)) && Blocked(At(opening.y + Probe)),
+                    $"{path} {direction} door frame must be wall just outside the drawn aperture.");
+                Assert(!Blocked(At(opening.x + Probe)) && !Blocked(At(opening.y - Probe)) &&
+                       !Blocked(At((opening.x + opening.y) / 2)),
+                    $"{path} {direction} door must stay open across its drawn aperture.");
+            }
         }
 
         private static string CollisionSnapshot() => string.Join("\n", FairyVillageArtworkSetup.PrefabPaths().Select(path =>

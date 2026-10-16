@@ -23,10 +23,11 @@ namespace TrickalFanGame.Editor
             ItemDefinition[] pool = AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" })
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(AssetDatabase.LoadAssetAtPath<ItemDefinition>)
-                // Single-use spells, retired legacy spells and golden chest exclusive artifacts never join the
-                // selection reward pool (Contract-0 §2.1, §2.2, §3).
+                // Single-use spells, 권능, retired legacy spells and golden chest exclusive artifacts never join the
+                // selection reward pool (contract 23 §2.1, §2.2, §3, §9.3).
                 .Where(definition => definition != null && definition.IsActive && definition.IsValid &&
-                                     !definition.IsSingleUse && !LegacySpellRetirement.IsRetired(definition) &&
+                                     !definition.IsSingleUse && !definition.IsActivePower &&
+                                     !LegacySpellRetirement.IsRetired(definition) &&
                                      !GoldenChestExclusivePool.IsExclusive(definition))
                 .OrderBy(definition => definition.ItemId, StringComparer.Ordinal)
                 .ToArray();

@@ -60,6 +60,13 @@ namespace TrickalFanGame.Item
                 return false;
             }
 
+            if (definition.IsActivePower)
+            {
+                Debug.LogError(
+                    $"[PlayerInventory] {definition.ItemId} is a 권능 and must be held in the 권능 slot.", this);
+                return false;
+            }
+
             stackCounts.TryGetValue(definition.ItemId, out int currentStacks);
             if (definition.MaxStacks > 0 && currentStacks >= definition.MaxStacks)
             {
@@ -83,11 +90,11 @@ namespace TrickalFanGame.Item
             return true;
         }
 
-        // A single-use item is recorded for the Run result once per pickup instance, when it first enters the slot.
-        // Swapping it out and picking the same instance up again does not record it twice (Contract-0 §4.1).
+        // A single-use item or 권능 is recorded for the Run result once per pickup instance, when it first enters its
+        // slot. Swapping it out and picking the same instance up again does not record it twice (contract 23 §4.1, §9.4).
         public bool TryRecordSingleUseAcquisition(ItemDefinition definition, string instanceId)
         {
-            if (definition == null || !definition.IsValid || !definition.IsSingleUse ||
+            if (definition == null || !definition.IsValid || !(definition.IsSingleUse || definition.IsActivePower) ||
                 string.IsNullOrWhiteSpace(instanceId))
             {
                 Debug.LogError("[PlayerInventory] A single-use acquisition needs a valid definition and instance ID.",

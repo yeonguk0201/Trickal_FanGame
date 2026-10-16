@@ -30,6 +30,7 @@ namespace TrickalFanGame.Room
 
         public RoomState State { get; private set; } = RoomState.Waiting;
         public int AliveEnemyCount => enemyDeathHandlers.Count;
+        public IReadOnlyCollection<Health> AliveEnemies => enemyDeathHandlers.Keys;
         public bool HasStarted { get; private set; }
         public bool IsProgressionStopped { get; private set; }
         public int FloorNumber => floorNumber;
@@ -429,6 +430,8 @@ namespace TrickalFanGame.Room
                 ? enemyHealth.GetComponent<EnemyBehaviorContext>()
                 : null;
             behavior?.BeginCombat(playerHealth != null ? playerHealth.transform : null);
+            // Edit-mode verification has no advancing clock, so a grace started there would never end.
+            if (Application.isPlaying) behavior?.BeginSpawnGrace(Time.time);
         }
 
         private void OnEnemyDied(Health enemyHealth)
@@ -474,6 +477,7 @@ namespace TrickalFanGame.Room
         {
             if (State == RoomState.Cleared) return;
             runState?.MarkCleared();
+            runProgress?.RecordRoomCleared(runState?.RoomId);
             ChangeState(RoomState.Cleared);
             SetDoorsLocked(false);
             clearRewardSpawner?.TrySpawn();

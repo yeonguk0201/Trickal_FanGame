@@ -71,3 +71,7 @@ MonoBehaviour:
   jjangsemSpells:
   - {fileID: 11400000, guid: d6a0c03f01455b449b6950eaa713ef73, type: 2}
   - {fileID: 11400000, guid: 5004e021b76121041a3e31621f03ba0d, type: 2}
+  - {fileID: 11400000, guid: 9f3abc1b19587ad45ad8a392268c3a80, type: 2}
+  - {fileID: 11400000, guid: 511629b64eee78b4cb4e9d612de6361a, type: 2}
+  - {fileID: 11400000, guid: f24753196dcec374f93b83e5cff3f9ca, type: 2}
+  - {fileID: 11400000, guid: 72bdd72ecffd68a439efb990fe42f98e, type: 2}
