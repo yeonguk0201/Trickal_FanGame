@@ -61,6 +61,12 @@ namespace TrickalFanGame.Editor
 
             try
             {
+                Assert(Mathf.Approximately(invulnerability.HitDuration, 1f) &&
+                       Mathf.Approximately(invulnerability.HeavyHitDuration, 2f) &&
+                       Mathf.Approximately(invulnerability.HeavyDamageThresholdUnits,
+                           HealthUnits.HeavyDamageThresholdUnits),
+                    "The default post-hit window must be 1s, and 2s for hits of 2 hearts or more.");
+
                 invulnerability.Configure(0.35f);
                 float initialHealth = health.CurrentHealth;
                 health.TakeDamage(new DamageContext(contact, DamageSourceType.EnemyContact, 1f));
@@ -94,6 +100,36 @@ namespace TrickalFanGame.Editor
                 Assert(!health.IsInvulnerable &&
                        !invulnerability.IsHitInvulnerableAt(Time.time),
                     "Resetting player health must clear explicit and post-hit invulnerability.");
+
+                invulnerability.Configure(1.0f, 2.0f, 4.0f);
+                invulnerability.ResetHitWindow();
+                float testTime = 100f;
+                invulnerability.BeginHitWindowForDamage(testTime, 2f);
+                Assert(Mathf.Approximately(invulnerability.HitInvulnerableUntil, 101f),
+                    "Hits below 4 units must trigger the 1s invulnerability window.");
+                invulnerability.ResetHitWindow();
+                invulnerability.BeginHitWindowForDamage(testTime, 4f);
+                Assert(Mathf.Approximately(invulnerability.HitInvulnerableUntil, 102f),
+                    "Hits of 4 units or more must trigger the 2s heavy invulnerability window.");
+
+                invulnerability.ResetHitWindow();
+                health.TakeDamage(new DamageContext(contact, DamageSourceType.EnemyContact, 3f));
+                Assert(Mathf.Approximately(invulnerability.HitInvulnerableUntil, Time.time + 1.0f),
+                    "Taking fewer than 4 damage units through health must activate the 1s invulnerability window.");
+
+                invulnerability.ResetHitWindow();
+                health.TakeDamage(new DamageContext(contact, DamageSourceType.EnemyContact, 4f));
+                Assert(Mathf.Approximately(invulnerability.HitInvulnerableUntil, Time.time + 2.0f),
+                    "Taking 4 or more damage units through health must activate the 2s invulnerability window.");
+
+                invulnerability.ResetHitWindow();
+                float healthBeforeShieldedHit = health.CurrentHealth;
+                health.SetShield(4f);
+                health.TakeDamage(new DamageContext(contact, DamageSourceType.EnemyContact, 4f));
+                Assert(Mathf.Approximately(health.CurrentHealth, healthBeforeShieldedHit) &&
+                       Mathf.Approximately(health.CurrentShield, 0f) &&
+                       Mathf.Approximately(invulnerability.HitInvulnerableUntil, Time.time + 2.0f),
+                    "A heavy hit absorbed by the shield must still activate the 2s invulnerability window.");
             }
             finally
             {

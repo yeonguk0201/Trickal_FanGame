@@ -10,6 +10,8 @@ namespace TrickalFanGame.Combat
         public const int HalfHeartDamageUnits = 1;
         // The player's current health and shield together stop at 15 hearts (사용자 결정, 2026-10-06).
         public const int MaximumHealthAndShieldUnits = 15 * UnitsPerHeart;
+        // Hits of 2 hearts or more grant the longer post-hit invulnerability window (사용자 결정, 2026-10-17).
+        public const int HeavyDamageThresholdUnits = 2 * UnitsPerHeart;
 
         private const float RoundingTolerance = 0.0001f;
 
