@@ -90,3 +90,16 @@ v2 최종 실행 기록: Unity 6000.3.22f1에서 `ShashaWaterPrototypeVerificati
 - 대체 확인: 현재 Unity Bee 응답 파일과 포함된 Roslyn으로 런타임 C#를 별도 출력 위치에 컴파일하여 종료 코드 0. 기존 `TestRunSender.sendAsCleared` 미사용 경고만 확인했다. `git diff --check` 통과. 셰이더 컴파일·실제 렌더·Play 미술 검수는 미확인이다.
 - 수동 확인: Edit Mode의 `Trickal Fan Game > Effects > Preview Shasha Water` → `Open / reset Scene preview` → `Wall contact` 켜고 `Loop playback` 재생. 접촉점에서 빠르게 펼쳐지는 포말과 뒤로 튀는 물방울을 확인한다. 길이 0.02/0.2/5.5, 수평/수직/대각선에서도 벽 바깥으로 핵심 메시가 넘어가지 않아야 한다. `Verify Shasha Realtime Water Prototype` 메뉴의 기대 로그는 `Shasha realtime water prototype verification passed`다.
 - 실제 크기 검수: SampleScene Play → `F1 > — Artifact — > Show artifact drops > Drop 샤샤의 항아리` → `Shasha: realtime water` 켜기. 벽 근처·다중 줄기에서 충돌 타격감과 캐릭터 가림을 확인한다. 현재 상태는 구현 적용·사용자 미술 검수 대기이며 승인 완료로 처리하지 않는다.
+
+## v4: 발사구 분출·물안개·실루엣 보강과 미리보기 합성 (2026-10-18, 미술 검수 대기)
+
+- 발사구 분출: 시작점에 별도 메시·셰이더(`_Muzzle`)로 물 덩어리와 옆으로 갈라지는 꽃잎형 물살을 만든다. 본체보다 한 단계 아래 정렬로 그려 본체 시작을 감싸고, 첫 0.3 구간에 크게 열린 뒤 펌프 박자에 맞춰 숨쉰다. 앞쪽 길이는 경로 길이로 제한해 벽을 넘지 않는다. 커터·팽이의 연결 줄기(transient)는 적에서 시작하므로 표시하지 않는다.
+- 물안개: 물방울과 별도인 World 공간 Particle System(`_Mist`, 최대 32개). 벽 접촉 첫 방출 6개 뒤 2틱마다 1개, 본체에서 3틱마다 1개, 발사구에서 첫 틱 2개. 벽 평면 밖은 자른다. 별도 시드 카운터를 써서 기존 물방울 배치를 바꾸지 않는다.
+- 실루엣: 띠 메시를 판정 폭 기준 1.18배 넓혀(셰이더 `HALO`와 일치) 테두리에 맺혀 흐르는 물방울을 그린다. 물 테두리 자체의 화면 크기는 유지한다. 한쪽에 끊어진 반사광, 양쪽 테두리에 따로 흐르는 굴곡, 둥근 시작부, 자유 끝점의 노이즈 부서짐을 추가했다. 벽 끝은 계속 포말까지 이어진다.
+- 벽 물보라: 충돌 물방울 크기를 판정 폭의 0.24~0.66배에서 0.14~0.42배로 줄였다. 확대 렌더에서 비눗방울처럼 보였기 때문이다.
+- 피해·공격 주기·판정 경로·본체 표시 종료 시점은 바꾸지 않았다. `UnityEngine.Random`은 쓰지 않는다. 기존 PNG·GUID는 유지한다.
+- 미리보기: `Trickal Fan Game > Effects > Preview Shasha Water`에 `Source motion`(이동 속도·방향, 벽은 고정하고 매 단계 경로를 다시 계산), `Nozzle gush`·`Mist` 레이어, `Room floor, wall, Erpin` 배경 합성(요정마을 `floor.png`의 grass, `vertical-walls.png`의 wall-right, `Erpin_Walking`)을 추가했다. 시간 슬라이더는 0~0.6초로 늘려 물안개 소멸까지 본다. 배경은 임시 Preview Scene에만 만들고 저장하지 않는다.
+- 렌더 출력: `Export Shasha Water Comparison`이 기존 `unity-comparison.png` 외에 0.06초 시점의 전체 레이어(`unity-layers.png`), 발사구·벽 확대(`unity-layers-nozzle.png`, `unity-layers-wall.png`), 단독 레이어(`unity-layer-nozzle-gush.png`, `unity-layer-mist.png`)를 `output/art-review/shasha-water/`에 저장한다.
+- 자동 검증: Unity 6000.3.22f1에서 `ShashaWaterPrototypeVerification.Verify` 종료 코드 0과 `Shasha realtime water prototype verification passed` 확인. 발사구 분출의 표시·경로 내 범위·만료·연결 줄기 비표시, 물안개 World 공간·개수 제한·벽 방출, 취소 시 제거를 새로 검사한다. 로그: `output/shasha-water-extras-verify.log`. 렌더 PNG는 직접 확인했다. 물안개는 의도적으로 옅어서 정지 렌더에서는 잘 드러나지 않는다.
+- 미확인: 미리보기 창 조작(이동·배경 토글)과 실제 Play 미술 검수. 확인 경로: Edit Mode `Preview Shasha Water` → `Open / reset Scene preview` → `Move speed` 5, `Loop playback`. Play는 `SampleScene` → `F1 > — Artifact — > Show artifact drops > Drop 샤샤의 항아리` → `Shasha: realtime water` 켜기.
+- 커밋 전 회귀: `ShashaWaterPrototypeVerification.VerifyWithRegressionsBatch` 종료 코드 0, `Shasha realtime water regressions passed` 확인. 로그: `output/shasha-water-extras-precommit.log`. 사용자는 2026-10-18 결과물을 보고 이 수준으로 수용했다.
