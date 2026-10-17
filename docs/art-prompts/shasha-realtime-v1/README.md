@@ -103,3 +103,4 @@ v2 최종 실행 기록: Unity 6000.3.22f1에서 `ShashaWaterPrototypeVerificati
 - 자동 검증: Unity 6000.3.22f1에서 `ShashaWaterPrototypeVerification.Verify` 종료 코드 0과 `Shasha realtime water prototype verification passed` 확인. 발사구 분출의 표시·경로 내 범위·만료·연결 줄기 비표시, 물안개 World 공간·개수 제한·벽 방출, 취소 시 제거를 새로 검사한다. 로그: `output/shasha-water-extras-verify.log`. 렌더 PNG는 직접 확인했다. 물안개는 의도적으로 옅어서 정지 렌더에서는 잘 드러나지 않는다.
 - 미확인: 미리보기 창 조작(이동·배경 토글)과 실제 Play 미술 검수. 확인 경로: Edit Mode `Preview Shasha Water` → `Open / reset Scene preview` → `Move speed` 5, `Loop playback`. Play는 `SampleScene` → `F1 > — Artifact — > Show artifact drops > Drop 샤샤의 항아리` → `Shasha: realtime water` 켜기.
 - 커밋 전 회귀: `ShashaWaterPrototypeVerification.VerifyWithRegressionsBatch` 종료 코드 0, `Shasha realtime water regressions passed` 확인. 로그: `output/shasha-water-extras-precommit.log`. 사용자는 2026-10-18 결과물을 보고 이 수준으로 수용했다.
+- 사용자 수동 확인(2026-10-18): 미리보기와 실제 Play를 포함한 v4 수동 확인 항목을 모두 확인했고, 다중 줄기의 캐릭터 가림 정도도 괜찮다고 확인했다. 샤샤 물줄기의 물다운 보강은 이 v4로 완료한다.
