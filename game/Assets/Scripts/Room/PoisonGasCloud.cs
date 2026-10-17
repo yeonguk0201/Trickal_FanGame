@@ -48,7 +48,8 @@ namespace TrickalFanGame.Room
             cloud.playerStats = configuredPlayer != null ? configuredPlayer.GetComponent<PlayerStats>() : null;
             cloud.EndTime = currentTime + Duration;
             cloud.nextEnemyTickTime = currentTime;
-            Sprite sprite = FairyKingdomArtwork.Fit(ArtworkId, Radius * 2f);
+            Sprite sprite = EnvironmentHazardArtwork.Fit(EnvironmentHazardArtwork.Gas, 0f, Radius * 2f)
+                ?? FairyKingdomArtwork.Fit(ArtworkId, Radius * 2f);
             if (sprite != null)
             {
                 cloud.visual = owner.AddComponent<SpriteRenderer>();
@@ -96,6 +97,9 @@ namespace TrickalFanGame.Room
 
             if (visual != null)
             {
+                Sprite frame = EnvironmentHazardArtwork.Fit(EnvironmentHazardArtwork.Gas,
+                    currentTime - (EndTime - Duration), Radius * 2f);
+                if (frame != null) visual.sprite = frame;
                 Color color = visual.color;
                 color.a = VisualAlpha * Mathf.Clamp01((EndTime - currentTime) / FadeSeconds);
                 visual.color = color;

@@ -671,3 +671,9 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 - 구현: `HitFeedbackVerification` 착탄 스파크 방향·반경·시간 역행·소멸, 히트스톱 복원·간격·일시정지 양보, 카메라 흔들림 상한 검사.
 - 구현: 개발 패널 `— Player —`의 `CRIT 100%` 버튼과 현재 치명타 확률 표시.
 - Play 표시는 2026-10-14 사용자 확인으로 수용. 미리보기 창의 실제 조작 확인은 대기. 실행 방법은 [개발 환경](05-development-setup.md), 근거는 [효과 기록](art-prompts/hit-spark.md)에 기록한다.
+## 환경 함정 표시 검증 추가 (2026-10-17)
+
+- `EnvironmentHazardArtworkVerification.Verify` 구현·배치 통과. 24프레임, 상태별 정지 이미지,
+  가시 상태 전환, 버섯 피격, 나무 발화, 고정 충돌체, 독가스 감쇠·종료를 검사한다.
+- 실행법은 `docs/05-development-setup.md`, 실제 Play 미술 검수 상태는 `docs/art-prompts/environment-hazards-v1/README.md`에 기록한다.
+- 후속 불 함정 검증: 48프레임·타격 단계·소멸 마지막 프레임·무충돌 잔해·피해 거절·방 복원·물/폭탄 소화 검사와 Trap-0 단독 검증을 같은 진입점에서 실행한다. 배치 통과, 상세 기록은 `docs/art-prompts/environment-hazards-v2/README.md`.
