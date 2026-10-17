@@ -2012,3 +2012,14 @@ Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금�
 - 정지 프레임 렌더: `Export Crumb Death Blast Frames` → `output/art-review/crumb-death-blast/unity-frames.png`(위: 원화 포함, 아래: 새 레이어만). 배치는 `VerifyAndExportBatch`이며 `-nographics` 없이 실행한다.
 - 실제 Play: `F1 → — Room — → Spawn crumb minion (explodes on death)`으로 쫄따구를 소환해 처치하고 0.6초 예고 뒤 폭발을 본다.
 - 상세 범위와 미확인 항목: [작업 기록](art-prompts/crumb-death-blast-v1.md).
+
+## 환경 함정 애니메이션 검증 (2026-10-17)
+
+- Unity 메뉴: `Trickal Fan Game/Artwork/Verify Environment Hazard Frames`.
+- 배치 진입점: `TrickalFanGame.Editor.EnvironmentHazardArtworkVerification.Verify` (순수 검사, Setup 재실행 없음).
+- Game Scene Play → F1 → `— Trap —`에서 `Place PeriodicSpikes`, `Place Fire`, `Place PoisonMushroom`으로 확인한다.
+  버섯 첫 타격은 팽창, 두 번째 타격은 독가스 생성이다. 나무는 `— Obstacle —`의
+  `Hold a burn artifact (trees catch fire)`를 켜고 두 번 때리면 발화한다.
+- 원화·프레임 좌표 재생성 및 세부 확인: [환경 함정 에셋 기록](./art-prompts/environment-hazards-v1/README.md).
+- 불 함정: `Place Fire` 후 세 번 때리면 중간 불→잔불→소멸→식은 돌이 된다. 소멸 시작부터 안전하게 통과하며 재방문해도 식은 돌이 남는다. 물줄기·폭탄도 확인한다.
+  새 잔해 자동 검증은 위 메뉴에 포함되어 있다. [불 함정 v2 적용 기록](./art-prompts/environment-hazards-v2/README.md).

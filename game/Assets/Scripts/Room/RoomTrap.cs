@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
+using TrickalFanGame.Frontend;
 using TrickalFanGame.Player;
 using TrickalFanGame.Run;
 using UnityEngine;
@@ -85,6 +86,7 @@ namespace TrickalFanGame.Room
         public bool IsRemoved { get; private set; }
         // The gas the last break of this 독버섯 left, until it ends.
         public PoisonGasCloud LastGas { get; private set; }
+        public ExtinguishedFireArtwork FireRemnant { get; private set; }
 
         public static bool IsFloorKind(RoomTrapKind kind) =>
             kind is RoomTrapKind.FloorSpikes or RoomTrapKind.PeriodicSpikes or RoomTrapKind.DamagePuddle or
@@ -128,6 +130,7 @@ namespace TrickalFanGame.Room
             kind = configuredKind;
             secondPhase = configuredSecondPhase;
             visual = configuredVisual;
+            SubscribeFireBreak();
         }
 
         // The size of the drawing on its cell, so the hit area follows the artwork.
@@ -188,6 +191,9 @@ namespace TrickalFanGame.Room
             player = configuredPlayer;
             playerHealth = configuredPlayer != null ? configuredPlayer.GetComponent<Health>() : null;
             obstacle = GetComponent<DestructibleObstacle>();
+            SubscribeFireBreak();
+            if (kind == RoomTrapKind.Fire && obstacle != null && obstacle.IsBroken)
+                EnsureFireRemnant(currentTime, true);
             RestartCycle(currentTime);
             if (kind == RoomTrapKind.Spiderweb && runState != null && runState.IsTrapRemoved(trapId))
             {
@@ -203,11 +209,29 @@ namespace TrickalFanGame.Room
         }
 
         // The room content is switched off while the player is elsewhere, so entering the room restarts the cycle.
-        private void OnEnable() => RestartCycle(Time.time);
+        private void OnEnable()
+        {
+            RestartCycle(Time.time);
+            SubscribeFireBreak();
+        }
+
+        private void SubscribeFireBreak()
+        {
+            if (obstacle == null) obstacle = GetComponent<DestructibleObstacle>();
+            if (obstacle == null) return;
+            obstacle.Broken -= OnFireBroken;
+            if (kind == RoomTrapKind.Fire) obstacle.Broken += OnFireBroken;
+        }
 
         private void OnDestroy()
         {
             if (obstacle != null) obstacle.Broken -= OnMushroomBroken;
+            if (obstacle != null) obstacle.Broken -= OnFireBroken;
+            if (FireRemnant != null)
+            {
+                if (Application.isPlaying) Destroy(FireRemnant.gameObject);
+                else DestroyImmediate(FireRemnant.gameObject);
+            }
         }
 
         public void RestartCycle(float currentTime)
@@ -238,7 +262,7 @@ namespace TrickalFanGame.Room
         {
             if (IsRemoved || !IsFloorKind(kind)) return;
             PeriodicSpikeState state = StateAt(currentTime);
-            RefreshPeriodicVisual(state);
+            RefreshPeriodicArtwork(state);
             if (state != PeriodicSpikeState.Raised) return;
 
             Vector2 center = transform.position;
@@ -286,6 +310,8 @@ namespace TrickalFanGame.Room
         // the trap hurts as soon as the window ends.
         public bool TryDamagePlayer(Health target, float currentTime)
         {
+            if (!isActiveAndEnabled || IsRemoved ||
+                (TryGetComponent(out DestructibleObstacle ownObstacle) && ownObstacle.IsBroken)) return false;
             if (target == null || target.IsDead || target.IsInvulnerable || IsWaiting(target, currentTime))
                 return false;
             float before = target.CurrentHealth + target.CurrentShield;
@@ -335,6 +361,15 @@ namespace TrickalFanGame.Room
             LastGas = PoisonGasCloud.Spawn(transform.position, transform.parent, player, Time.time);
         }
 
+        private void OnFireBroken(DestructibleObstacle broken) => EnsureFireRemnant(Time.time, false);
+
+        private void EnsureFireRemnant(float currentTime, bool alreadyCold)
+        {
+            if (FireRemnant != null) return;
+            float width = TryGetComponent(out FairyKingdomArtworkView view) ? view.LocalWidth : CellSize;
+            FireRemnant = ExtinguishedFireArtwork.Spawn(transform, visual, width, currentTime, alreadyCold);
+        }
+
         // A 거미줄 survives attacks and being walked through; only a bomb removes it.
         public static int RemoveWebsByBombInCircle(Vector2 center, float radius)
         {
@@ -356,14 +391,19 @@ namespace TrickalFanGame.Room
             return removed;
         }
 
-        private void RefreshPeriodicVisual(PeriodicSpikeState state)
+        public void RefreshPeriodicArtwork(PeriodicSpikeState state)
         {
             if (kind != RoomTrapKind.PeriodicSpikes || visual == null) return;
+            float width = TryGetComponent(out FairyKingdomArtworkView view) ? view.LocalWidth : CellSize;
+            Sprite sprite = state == PeriodicSpikeState.Raised
+                ? FairyKingdomArtwork.Fit(ArtworkIdOf(kind), width)
+                : EnvironmentHazardArtwork.Fit(EnvironmentHazardArtwork.Spikes, 0f, width);
+            if (sprite != null) visual.sprite = sprite;
             float alpha = state switch
             {
                 PeriodicSpikeState.Raised => 1f,
                 PeriodicSpikeState.Warning => 0.65f,
-                _ => 0.3f,
+                _ => 1f,
             };
             Color color = state == PeriodicSpikeState.Warning ? new Color(1f, 0.75f, 0.75f) : Color.white;
             color.a = alpha;
