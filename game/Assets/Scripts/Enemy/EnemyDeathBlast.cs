@@ -18,8 +18,8 @@ namespace TrickalFanGame.Enemy
         // The dead enemy's own burst, shown with the explosion instead of at the moment of death.
         public const string BodyBurstArtwork = "effect-crumb-death";
         public const float BodyBurstDuration = 0.24f;
-        // Placeholder look until the shared explosion artwork is decided (26번 D12): the 폭발 머핀 sprite.
-        public const string ExplosionArtwork = "circular-explosion";
+        // How long the blast object stays after bursting. The pink burst around the body art
+        // (CrumbDeathBlastEffect) is its own object and runs its own length.
         public const float ExplosionVisualDuration = 0.4f;
         // Under actors, over the floor.
         private const int TelegraphSortingOrder = 1;
@@ -131,6 +131,8 @@ namespace TrickalFanGame.Enemy
                     DamageSourceType.EnemyContact, DamageUnits));
             }
 
+            // Sorted from the picture before it hides, so the burst sits around the body art.
+            CrumbDeathBlastEffect.Play(center, Radius, transform.parent, Body != null ? Body : telegraph);
             if (telegraph != null) telegraph.enabled = false;
             if (Body != null)
             {
@@ -139,8 +141,6 @@ namespace TrickalFanGame.Enemy
                 Body.enabled = false;
             }
 
-            CombatSpriteEffect.Play(ExplosionArtwork, center, Radius * 2.2f, Radius * 2.2f, ExplosionVisualDuration,
-                transform, telegraph);
             return true;
         }
     }

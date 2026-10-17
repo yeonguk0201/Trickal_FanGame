@@ -2004,3 +2004,11 @@ Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금�
 - 정지 프레임 렌더: `Export Bomb Burst Frames` → `output/art-review/bomb-burst/unity-frames.png`(위: 원화 포함, 아래: 새 레이어만). 배치는 `VerifyAndExportBatch`이며 `-nographics` 없이 실행한다.
 - 실제 Play: 폭탄을 얻어 `F`로 설치하고 0.75초 뒤 폭발을 본다. 폭발 장애물도 같은 폭발을 쓰므로 함께 확인한다.
 - 상세 범위와 미확인 항목: [작업 기록](art-prompts/bomb-burst-v1.md).
+
+### 쫄따구 사망 폭발 분홍 폭발 (2026-10-18)
+
+- Edit Mode: `Trickal Fan Game/Effects/Preview Crumb Death Blast` → `Open / reset Scene preview`. 분홍 원화(게임과 같은 0.24초 표시·페이드)·섬광·분홍 구름·충격파 링·젤리 방울·부스러기·연기 표시, 피해 반경, 원화 폭, 0~0.6초 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
+- 검사: `Trickal Fan Game/Effects/Verify Crumb Death Blast` (`TrickalFanGame.Editor.CrumbDeathBlastVerification.Verify`). 커밋 전 회귀는 `Verify Crumb Death Blast With Regressions`(`VerifyWithRegressionsBatch`, 2026-10-18 통과).
+- 정지 프레임 렌더: `Export Crumb Death Blast Frames` → `output/art-review/crumb-death-blast/unity-frames.png`(위: 원화 포함, 아래: 새 레이어만). 배치는 `VerifyAndExportBatch`이며 `-nographics` 없이 실행한다.
+- 실제 Play: `F1 → — Room — → Spawn crumb minion (explodes on death)`으로 쫄따구를 소환해 처치하고 0.6초 예고 뒤 폭발을 본다.
+- 상세 범위와 미확인 항목: [작업 기록](art-prompts/crumb-death-blast-v1.md).
