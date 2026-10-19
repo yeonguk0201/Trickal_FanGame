@@ -2088,6 +2088,42 @@ python tools/sfx-synth/render_sfx.py output/sfx --burst=5
 - 소리를 고칠 때는 음원을 다시 구하지 않고 해당 프리셋의 수치(`freq`, `slide`, `decay`, `lpf`, 레이어 `mix`)를
   조절한다. 파라미터 설명은 `tools/sfx-synth/sfx_synth.py`의 docstring에 있다.
 
+## 크레딧 화면 Credits-0 (2026-10-20)
+
+전투 효과음에 CC BY 4.0 음원이 들어오면서 크레딧 표기가 의무가 됐다. 음원 출처와 라이선스를 게임 안에서
+보여주는 화면이며, 표기해야 할 내용은 코드가 아니라 `game/Assets/Resources/Credits.json`이 가진다.
+
+- 들어가는 길은 두 개다. 타이틀 화면 `크레딧` 버튼(프로필 등록 전에도 보인다)과 홈 메뉴 `나가기` 아래의
+  `크레딧` 버튼이다. 두 버튼 모두 같은 화면으로 가고, 화면의 `뒤로`는 들어온 쪽으로 돌아간다.
+- Unity 연결은 적용되어 있다. 재구성: `Trickal Fan Game/Credits/Setup Credits Screen`. Edit Mode에서 실행하며
+  `FrontendScene`을 열어 `CreditsPanel`과 두 버튼을 중복 없이 갱신하고, 데이터에 있는 글자를 Frontend TMP
+  글꼴에 미리 담는다. 새 글꼴 에셋은 만들지 않는다.
+- 단독 검사: `Trickal Fan Game/Credits/Verify Credits Screen`.
+- 배치(Setup 포함): `TrickalFanGame.Editor.CreditsScreenVerification.SetupAndVerifyBatch`.
+  Setup을 두 번 실행해 중복 오브젝트와 Scene GUID를 확인한 뒤 검사한다.
+- 배치(커밋 전 회귀): `TrickalFanGame.Editor.CreditsScreenVerification.VerifyWithRegressionsBatch`.
+  Frontend Flow와 Setting-1A를 함께 돌린다. Credits-0이 타이틀·홈 뷰에 필드를 더하고 Frontend 참조 프레임에
+  패널을 더하기 때문이다. 화면을 실제로 렌더링하므로 `-nographics`를 쓰지 않는다.
+- 검증기가 지키는 핵심 불변조건: CC BY 4.0 음원의 제작자·원본 링크·라이선스 이름·라이선스 링크·`modified`
+  고지가 데이터에 있고, 실제로 만들어진 화면 줄에도 모두 들어 있으며, 그 줄이 상자 폭을 넘지 않는다. 하나라도
+  빠지면 예외로 실패한다. 성공 로그는 `Credits-0 verification passed`다.
+- Play 확인: Frontend Scene Play → 타이틀 `크레딧` → 맨 위 `효과음 - 표기 의무 (CC BY 4.0)` 묶음의 두 줄에
+  제작자·freesound 링크·`Attribution 4.0 (modified)`·라이선스 링크가 모두 보이는지, 목록을 스크롤해 CC0·Pixabay·
+  자체 제작 묶음이 나오는지, `뒤로`로 타이틀에 돌아오는지 본다. 홈에서 들어갔을 때는 홈으로 돌아와야 한다.
+
+### 크레딧 항목 바꾸기
+
+음원을 바꿀 때 화면 코드는 건드리지 않는다.
+
+1. `tools/sfx-synth/import_sources.py`의 `MANIFEST`를 고쳐 음원을 바꾼다.
+2. `game/Assets/Resources/Credits.json`의 해당 항목을 고친다(UTF-8). 한 항목은 `title`, `author`, `source`,
+   `licenseName`, `licenseUrl`, `modified`, `usage`, `attributionRequired`를 가진다. 표기 의무가 있는 음원은
+   `attributionRequired`를 `true`로 두고 빈 칸을 남기지 않는다.
+3. `docs/audio-sources.md`의 라이선스 표를 같이 고친다.
+4. 글꼴에 없는 글자가 생길 수 있으므로 `Setup Credits Screen`을 다시 실행한 뒤 검증을 돌린다. CC BY 음원을
+   더하거나 뺐다면 `CreditsScreenVerification.RequiredAttribution` 표도 같이 고친다. 그 표가 "이 음원은 반드시
+   화면에 있어야 한다"를 뜻하므로, 데이터에서 지우기만 하면 검증이 실패한다.
+
 ## 저혈당 요정 활발 걷기·공격 모션
 
 Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 모션을 재구성한다. `Verify Lively Fairy Motion`은 단독 검증이다. Game Scene Play → F1 → `— Room —` → `Spawn lively fairy (4-way shots)`로 걷기·웅크린 예고·빵을 들어 올리는 발사·회복을 확인한다. 구성과 미술 검수 기준은 [작업 기록](./art-prompts/lively-fairy-motion.md)을 따른다.

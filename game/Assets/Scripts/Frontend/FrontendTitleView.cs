@@ -27,11 +27,20 @@ namespace TrickalFanGame.Frontend
         [Header("Home Screen")]
         [SerializeField] private FrontendHomeView homeView;
 
+        [Header("Credits")]
+        [SerializeField] private GameObject creditsPanel;
+        [SerializeField] private FrontendCreditsView creditsView;
+        [SerializeField] private Button creditsButton;
+
         public Button StartButton => startButton;
         public TMP_Text StatusText => statusText;
         public FrontendNicknameView NicknameView => nicknameView;
         public GameObject TitlePanel => titlePanel;
         public FrontendHomeView HomeView => homeView;
+        public GameObject CreditsPanel => creditsPanel;
+        public FrontendCreditsView CreditsView => creditsView;
+        public Button CreditsButton => creditsButton;
+        public bool CreditsReturnToHome { get; private set; }
 
         public event Action OnHomeRequested;
 
@@ -57,10 +66,20 @@ namespace TrickalFanGame.Frontend
             homeView = view;
         }
 
+        public void ConfigureCredits(GameObject panel, FrontendCreditsView view, Button button)
+        {
+            creditsPanel = panel;
+            creditsView = view;
+            creditsButton = button;
+        }
+
         private void OnEnable()
         {
             if (startButton != null) startButton.onClick.AddListener(RequestStart);
             if (nicknameView != null) nicknameView.OnRegistrationComplete += OnNicknameRegistered;
+            if (creditsButton != null) creditsButton.onClick.AddListener(ShowCreditsFromTitle);
+            if (creditsView != null) creditsView.OnBackRequested += CloseCredits;
+            if (homeView != null) homeView.OnCreditsRequested += ShowCreditsFromHome;
         }
 
         private void Start()
@@ -77,6 +96,9 @@ namespace TrickalFanGame.Frontend
         {
             if (startButton != null) startButton.onClick.RemoveListener(RequestStart);
             if (nicknameView != null) nicknameView.OnRegistrationComplete -= OnNicknameRegistered;
+            if (creditsButton != null) creditsButton.onClick.RemoveListener(ShowCreditsFromTitle);
+            if (creditsView != null) creditsView.OnBackRequested -= CloseCredits;
+            if (homeView != null) homeView.OnCreditsRequested -= ShowCreditsFromHome;
         }
 
         private void InitializeView()
@@ -141,6 +163,7 @@ namespace TrickalFanGame.Frontend
         {
             if (titlePanel != null) titlePanel.SetActive(true);
             if (nicknamePanel != null) nicknamePanel.SetActive(false);
+            if (creditsPanel != null) creditsPanel.SetActive(false);
             if (homeView != null) homeView.Hide();
             if (startButton != null) startButton.gameObject.SetActive(true);
             FocusStart();
@@ -150,6 +173,7 @@ namespace TrickalFanGame.Frontend
         {
             if (titlePanel != null) titlePanel.SetActive(false);
             if (startButton != null) startButton.gameObject.SetActive(false);
+            if (creditsPanel != null) creditsPanel.SetActive(false);
             if (homeView != null) homeView.Hide();
             if (nicknamePanel != null) nicknamePanel.SetActive(true);
             if (nicknameView != null) nicknameView.FocusInput();
@@ -161,7 +185,32 @@ namespace TrickalFanGame.Frontend
 
             if (titlePanel != null) titlePanel.SetActive(false);
             if (nicknamePanel != null) nicknamePanel.SetActive(false);
+            if (creditsPanel != null) creditsPanel.SetActive(false);
             if (homeView != null) homeView.Show(LocalProfile.Nickname);
+        }
+
+        private void ShowCreditsFromTitle() => ShowCredits(false);
+        private void ShowCreditsFromHome() => ShowCredits(true);
+
+        // Credits are reachable from the title screen even before registration: a CC BY 4.0 credit has to
+        // stay findable for anyone running the game, not only for a player who already has a profile.
+        public void ShowCredits(bool returnToHome)
+        {
+            CreditsReturnToHome = returnToHome;
+            if (titlePanel != null) titlePanel.SetActive(false);
+            if (nicknamePanel != null) nicknamePanel.SetActive(false);
+            if (startButton != null) startButton.gameObject.SetActive(false);
+            if (homeView != null) homeView.Hide();
+            if (creditsPanel != null) creditsPanel.SetActive(true);
+            if (creditsView != null) creditsView.Show();
+        }
+
+        public void CloseCredits()
+        {
+            if (creditsPanel != null) creditsPanel.SetActive(false);
+            if (CreditsReturnToHome && LocalProfile.IsRegistered) ShowHomeScreen();
+            else ShowTitleScreen();
+            CreditsReturnToHome = false;
         }
 
         public void FocusStart()

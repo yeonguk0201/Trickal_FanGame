@@ -44,6 +44,9 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private GameObject skillUpgradePanel;
         [SerializeField] private FrontendSkillUpgradeView skillUpgradeView;
 
+        [Header("Credits")]
+        [SerializeField] private Button creditsButton;
+
         public GameObject HomePanel => homePanel;
         public TMP_Text WelcomeText => welcomeText;
         public Button GameStartButton => gameStartButton;
@@ -59,11 +62,13 @@ namespace TrickalFanGame.Frontend
         public FrontendCharacterSelectionView CharacterSelectionView => characterSelectionView;
         public GameObject SkillUpgradePanel => skillUpgradePanel;
         public FrontendSkillUpgradeView SkillUpgradeView => skillUpgradeView;
+        public Button CreditsButton => creditsButton;
         public FrontendDestination? CurrentDestination { get; private set; }
 
         public event Action<FrontendDestination> OnDestinationRequested;
         public event Action OnQuitRequested;
         public event Action<string> OnCharacterConfirmed;
+        public event Action OnCreditsRequested;
 
         public void Configure(
             GameObject home,
@@ -107,6 +112,11 @@ namespace TrickalFanGame.Frontend
             skillUpgradeView = view;
         }
 
+        public void ConfigureCredits(Button button)
+        {
+            creditsButton = button;
+        }
+
         private void OnEnable()
         {
             ApplyHomeArtwork();
@@ -114,6 +124,7 @@ namespace TrickalFanGame.Frontend
             if (skillUpgradeButton != null) skillUpgradeButton.onClick.AddListener(RequestSkillUpgrade);
             if (settingsButton != null) settingsButton.onClick.AddListener(RequestSettings);
             if (quitButton != null) quitButton.onClick.AddListener(RequestQuit);
+            if (creditsButton != null) creditsButton.onClick.AddListener(RequestCredits);
             if (backButton != null) backButton.onClick.AddListener(ReturnHome);
             if (settingsView != null) settingsView.OnBackRequested += ReturnHomeFromSettings;
             if (characterSelectionView != null)
@@ -151,6 +162,7 @@ namespace TrickalFanGame.Frontend
             if (skillUpgradeButton != null) skillUpgradeButton.onClick.RemoveListener(RequestSkillUpgrade);
             if (settingsButton != null) settingsButton.onClick.RemoveListener(RequestSettings);
             if (quitButton != null) quitButton.onClick.RemoveListener(RequestQuit);
+            if (creditsButton != null) creditsButton.onClick.RemoveListener(RequestCredits);
             if (backButton != null) backButton.onClick.RemoveListener(ReturnHome);
             if (settingsView != null) settingsView.OnBackRequested -= ReturnHomeFromSettings;
             if (characterSelectionView != null)
@@ -251,6 +263,11 @@ namespace TrickalFanGame.Frontend
         {
             skillUpgradeView.Hide();
             characterSelectionView.Show(FrontendCharacterSelectionPurpose.UpgradeSkills);
+        }
+
+        public void RequestCredits()
+        {
+            OnCreditsRequested?.Invoke();
         }
 
         public void RequestQuit()

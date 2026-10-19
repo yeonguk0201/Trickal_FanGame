@@ -5,9 +5,13 @@ Trickal Fan Game에 실제로 적용하기로 확정한 음원의 출처와 라�
 | 용도 | 제목 | 제작자 | 라이선스 | 크레딧 표기 | 상업적 이용 | 출처 링크 |
 |---|---|---|---|---|---|---|
 | 홈 화면 BGM | Flowerbed Fields [Loop] | Zane Little Music | CC0 (Public Domain) | 불필요 (선택) | 가능 | https://opengameart.org/content/flowerbed-fields-loop |
-| 전투 BGM | 探検 Exploration | nojisuma | Pixabay Content License | 불필요 | 가능 (제작자가 게임 BGM 상업적 이용 명시적으로 허용) | https://pixabay.com/music/instrumental-探検-exploration-565678/ |
+| 전투 BGM (교체됨) | 探検 Exploration | nojisuma | Pixabay Content License | 불필요 | 가능 (제작자가 게임 BGM 상업적 이용 명시적으로 허용) | https://pixabay.com/music/instrumental-探検-exploration-565678/ |
 | UI 클릭 효과음 | Plop! | Breviceps | CC0 (Public Domain) | 불필요 (선택) | 가능 | https://freesound.org/people/Breviceps/sounds/447910/ |
 | 전투 효과음 (일부) | 자체 합성 (Sound-0) | 프로젝트 자체 제작 | 자체 보유 | 불필요 | 가능 | `tools/sfx-synth` |
+
+> 전투 BGM은 Sound-0(2026-10-20)에서 `openmindaudio - Cartoon Quirky Christmas Gift Unwrapping`(Pixabay #620480)으로
+> 교체됐다. 아래 "외부 음원 라이선스" 표와 게임 내 크레딧 화면은 교체 후 상태를 따른다. 探検 Exploration은 현재
+> 게임에 들어 있지 않으므로 크레딧 화면에도 없다.
 
 ## 외부 음원 라이선스 (2026-10-20, 사용자 확인)
 
@@ -35,16 +39,19 @@ Trickal Fan Game에 실제로 적용하기로 확정한 음원의 출처와 라�
 
 ### 크레딧 표기 의무 — 배포 전 필수
 
-CC BY 4.0 음원 3개가 들어오면서 크레딧 표기가 **권장에서 의무로 바뀌었다.** 기존 CC0·Pixabay 음원만 쓸 때는
-크레딧이 선택이었지만, 아래 세 줄은 게임에 표시하지 않으면 라이선스 위반이다.
+CC BY 4.0 음원이 들어오면서 크레딧 표기가 **권장에서 의무로 바뀌었다.** 기존 CC0·Pixabay 음원만 쓸 때는
+크레딧이 선택이었지만, 아래 두 줄은 게임에 표시하지 않으면 라이선스 위반이다.
+
+표기 의무가 있는 음원은 **2개**다(위 표에서 `필수`로 표시된 두 줄). 스펠 쪽에 쓰려던 세 번째 CC BY 음원은
+CC0 음원으로 교체되어 의무가 없어졌다.
 
 **어디에 적는가**: 게임 내 크레딧 화면이면 충분하다. CC BY 4.0은 "매체에 맞는 합리적인 방식"을 요구하므로,
 소리가 나는 순간에 띄울 필요는 없고 크레딧 화면 하나에 모아두면 된다. 다만 플레이어가 찾아갈 수 있어야 하므로
 타이틀 화면에서 들어갈 수 있는 경로를 둔다. 배포 페이지가 따로 있으면 거기에도 같이 적는 편이 안전하다.
 
 **무엇을 적는가**: 제목, 제작자, 원본 링크, 라이선스 이름과 링크, 그리고 **수정했다는 사실**이다. 마지막 항목을
-빼먹기 쉽다. 이 프로젝트는 세 음원 모두 리샘플링·무음 잘라내기·레벨 조정을 했고 기본 공격은 두 음원을 겹쳤으므로,
-전부 수정에 해당한다. Freesound가 제공하는 기본 문구에는 수정 고지가 없어서 그대로 쓰면 불완전하다.
+빼먹기 쉽다. 이 프로젝트는 두 음원 모두 리샘플링·무음 잘라내기·레벨 조정을 했고 기본 공격은 두 음원을 겹쳤으므로,
+둘 다 수정에 해당한다. Freesound가 제공하는 기본 문구에는 수정 고지가 없어서 그대로 쓰면 불완전하다.
 
 Freesound가 제공하는 문구에 수정 고지를 덧붙인 형태다. 두 줄 모두 확정됐다(2026-10-20 사용자 확인).
 둘 다 기본 공격 발사음에 쓰였다.
@@ -58,11 +65,17 @@ FireSpell3.wav by alonsotm -- https://freesound.org/s/396500/ -- License: Attrib
 - 제작자가 이 게임을 후원하거나 보증한다는 뜻으로 읽힐 표현은 쓰지 않는다(CC BY 4.0이 금지한다).
 - 배포하는 동안 계속 표기해야 한다. 음원을 빼면 해당 줄도 지운다.
 - 해당 음원이 쓰인 곳: 둘 다 기본 공격 발사(두 음원을 겹쳤다). 스펠 쪽은 CC0 음원으로 교체되어 의무가 없다.
-- 크레딧을 넣고 싶지 않다면 그 세 음원을 CC0나 Pixabay 음원으로 교체해야 한다. 교체는
+- 크레딧을 넣고 싶지 않다면 그 두 음원을 CC0나 Pixabay 음원으로 교체해야 한다. 교체는
   `tools/sfx-synth/import_sources.py`의 `MANIFEST`를 고치고 다시 실행하면 된다.
 - 원본 파일은 `MANIFEST`가 상대 경로로 기록하고 있어 어떤 원본이 어떤 역할에 쓰였는지 추적할 수 있다.
   원본 백업을 저장소 밖에 보관하는 것을 권장한다.
-- **현재 이 게임에는 크레딧 화면이 없다.** 배포 전에 만들어야 한다.
+- **크레딧 화면은 구현되어 있다(Credits-0, 2026-10-20).** 타이틀 화면의 `크레딧` 버튼과 홈 메뉴의 `크레딧`
+  버튼에서 들어간다. 표시 내용은 `game/Assets/Resources/Credits.json`이 가지며 화면 코드에 들어 있지 않다.
+  `TrickalFanGame.Editor.CreditsScreenVerification`이 위 두 줄의 제작자·원본 링크·라이선스 이름·라이선스 링크·
+  `modified` 고지가 실제 화면 줄에 모두 들어 있는지 검사하고, 빠지면 실패한다. 실행 방법은
+  [05번 "크레딧 화면 Credits-0"](./05-development-setup.md)에 있다.
+- 음원을 바꾸면 `Credits.json`의 해당 항목도 같이 고친다. CC BY 음원을 더하거나 빼면
+  `CreditsScreenVerification.RequiredAttribution` 표도 같이 고친다.
 
 ## 전투 효과음 (Sound-0, 2026-10-19)
 
@@ -141,7 +154,7 @@ FireSpell3.wav by alonsotm -- https://freesound.org/s/396500/ -- License: Attrib
 
 ## 비고
 
-- **크레딧 화면은 이제 선택이 아니다.** 전투 효과음에 CC BY 4.0 음원 3개가 들어왔다. 위 "크레딧 표기 의무" 절을 본다.
+- **크레딧 화면은 이제 선택이 아니다.** 전투 효과음에 CC BY 4.0 음원 2개가 들어왔다. 화면은 Credits-0에서 구현했다. 위 "크레딧 표기 의무" 절을 본다.
 - 아래 BGM·UI 클릭 세 음원은 크레딧 표기가 필수는 아니지만, CC0 음원(Flowerbed Fields, Plop!)은 제작자가 링크나 후원을 반가워한다고 밝혔으므로 게임 크레딧 페이지에 가볍게 언급하는 걸 권장.
 - Pixabay 음원(探検 Exploration)은 Pixabay Content License 적용이라 Pixabay 자체가 서비스 종료되거나 라이선스 정책이 바뀔 가능성에 대비해, 다운로드한 원본 파일을 프로젝트 저장소에 백업해두는 걸 권장(Pixabay는 사후에 트랙이 내려가도 이미 받은 파일의 라이선스는 유지되는 방식).
 - 파일 포맷: 원본은 Flowerbed Fields(확인 필요, 보통 wav/ogg), 探検 Exploration(mp3) — 게임 리소스 규칙(BGM=ogg, SFX=wav)에 맞춰 변환 후 사용.
