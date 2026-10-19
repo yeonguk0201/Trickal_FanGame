@@ -33,6 +33,7 @@ namespace TrickalFanGame.Resource
         private float destroyAt;
         private bool configured;
         private bool hasExploded;
+        private bool isHidden;
         private Vector3 armedScale;
         private BombFuseFlash fuseFlash;
 
@@ -42,6 +43,8 @@ namespace TrickalFanGame.Resource
         public float SelfDamage => selfDamage;
         public LayerMask EnemyLayers => enemyLayers;
         public bool HasExploded => hasExploded;
+        // A fuseless obstacle explosion waiting on its chain delay shows nothing, not a bomb, until it goes off.
+        public bool IsHidden => isHidden;
         public float ExplodeAt => explodeAt;
         public event Action<PlacedBomb> Exploded;
 
@@ -57,7 +60,7 @@ namespace TrickalFanGame.Resource
         }
 
         // Obstacle-5: an explosion nobody placed (an exploding obstacle). It is the same explosion as a placed bomb
-        // and hurts every player in range the way a placed bomb hurts its owner.
+        // and hurts every player in range the way a placed bomb hurts its owner. This one shows the bomb and fuse.
         public void ConfigureUnowned(float currentTime, float configuredFuseDuration)
         {
             owner = null;
@@ -67,6 +70,21 @@ namespace TrickalFanGame.Resource
             armedScale = transform.localScale;
             if (visual != null) visual.color = armedColor;
             StartFuseFlash(currentTime);
+        }
+
+        // Bomb-Chain: the same unowned explosion without a bomb or fuse. Without a delay it explodes in this call;
+        // with one (an obstacle caught in another explosion) it stays hidden until the delay ends, so chained
+        // obstacles go off one after another.
+        public void ConfigureUnownedBlast(float currentTime, float configuredDelay)
+        {
+            owner = null;
+            ownerHealth = null;
+            explodeAt = currentTime + Mathf.Max(0f, configuredDelay);
+            configured = true;
+            armedScale = transform.localScale;
+            isHidden = true;
+            if (visual != null) visual.enabled = false;
+            if (configuredDelay <= 0f) Explode(currentTime);
         }
 
         // Motion-0: the red blinking that speeds up until the explosion. Play only, like the ground shadow.
@@ -99,13 +117,18 @@ namespace TrickalFanGame.Resource
             if (!hasExploded)
             {
                 if (currentTime < explodeAt) return false;
-                ApplyExplosion();
-                destroyAt = currentTime + ExplosionVisualDuration;
+                Explode(currentTime);
                 return true;
             }
 
             if (currentTime >= destroyAt) Destroy(gameObject);
             return false;
+        }
+
+        private void Explode(float currentTime)
+        {
+            ApplyExplosion();
+            destroyAt = currentTime + ExplosionVisualDuration;
         }
 
         public bool ApplyExplosion()
@@ -143,8 +166,10 @@ namespace TrickalFanGame.Resource
             TreasureChest.OpenByBombInCircle(center, explosionRadius);
             if (fuseFlash != null) fuseFlash.Stop();
             fuseFlash = null;
+            isHidden = false;
             if (visual != null)
             {
+                visual.enabled = true;
                 visual.color = explosionColor;
                 float armedDiameter = visual.sprite != null
                     ? visual.sprite.bounds.size.x * Mathf.Abs(armedScale.x)

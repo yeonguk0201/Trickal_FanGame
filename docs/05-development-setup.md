@@ -1035,14 +1035,15 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Obstacle-6 Remaining Obstacles`, 배치는 Unity `-batchmode
   -nographics -quit -projectPath <game 경로> -executeMethod
   TrickalFanGame.Editor.Week23Obstacle6Verification.SetupAndVerifyBatch -logFile <로그 경로>`다. Setup 2회 GUID, 폭탄
-  반경 2와 폭탄 Prefab 공유, 폭발 상자의 2타·도화선 0.5초·적 30 피해·플레이어 1칸 피해·반경 2 안 장애물만 파괴·금고
+  반경 2와 폭탄 Prefab 공유, 폭발 상자의 2타·즉시 폭발(Bomb-Chain, 폭발에 휘말리면 숨김 상태로 0.12초 뒤 연쇄, 랜덤박스 폭발은 보이는 폭탄·도화선 0.5초 유지)·적 30 피해·플레이어 1칸 피해·반경 2 안 장애물만 파괴·금고
   개봉·연쇄·1회 적용·재구성 시 미폭발, 랜덤박스의 seed 재현과 폭발 25%·쥬비 5마리 15%·지급 약 50%·네 결과의 배타성, 수집품 상자의 픽업
   2개 확정·아티팩트 25%, 비행 중 금고 겹침 개봉(열쇠 1개, 열쇠 없으면 통과), 나무 Layout의 방 계약·512 seed 선택·높은
   장애물 구성과 기존 기둥의 낮은 장애물 유지를 검사한다(나무의 파괴·비행 차단 규칙은 Obstacle-7 검증기). 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-5와 그 안의
   Obstacle-1·2·4, Difficulty-1, Encounter-4, Special-2·3, Terrain-0, 그리고 Flight-0, Chest-0, 개발 패널)다. 2026-10-06 두
   배치가 종료 코드 0으로 통과했다.
   수동 확인: Game Scene Play → 장애물이 있는 전투방에서 `F1` 패널 `— Obstacle —`의 `Make explosive-box`로 바꾼 뒤 2타로
-  부수면 잠깐 뒤 폭발해 가까운 적·플레이어가 피해를 받고 주변 장애물이 부서진다. `Make shady-random-box`는 부술 때마다
+  부수면 폭탄 없이 그 자리에서 바로 폭발해 가까운 적·플레이어가 피해를 받고 주변 장애물이 부서진다. 폭발 상자가 이어진
+  방에서는 한 개를 치면 이웃 상자가 0.12초 간격으로 차례로 터진다. `Make shady-random-box`는 부술 때마다
   폭발·쥬비 5마리·픽업 3개·꽝 중 하나(방과 슬롯마다 고정), `Make mayo-collection-box`는 항상 픽업 2개가 나온다. 폭탄(F)의 폭발
   범위가 전보다 작은지 본다. `Golden exclusive`의 가짜 날개를 얻어 비행한 뒤 `Make sist-vault`와 `+10 Key`로 금고 위를
   지나가면 열쇠 1개가 줄고 열린다. seed를 바꿔 `basic-tree-grove` 방(초록 나무 4그루)을 찾아 걸어서도 비행으로도 나무를

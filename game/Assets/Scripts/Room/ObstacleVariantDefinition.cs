@@ -16,7 +16,9 @@ namespace TrickalFanGame.Room
 
     // One obstacle kind a candidate slot can become. Obstacle-5 adds the break rule, how many pickups a successful
     // drop roll leaves, a rare single item (a spell or an artifact) rolled separately from the drop table, and a
-    // chance to explode like a player bomb instead of dropping anything.
+    // chance to explode like a player bomb instead of dropping anything. Bomb-Chain: a kind without a fuse explodes
+    // at once, and when caught in another explosion waits only a short chain delay, so a row of them goes off in
+    // sequence. A kind with a fuse (Shady's random box, whose explosion is a surprise) leaves a visible bomb instead.
     [CreateAssetMenu(fileName = "ObstacleVariant", menuName = "Trickal Fan Game/Obstacle Variant")]
     public sealed class ObstacleVariantDefinition : ScriptableObject
     {
@@ -35,7 +37,10 @@ namespace TrickalFanGame.Room
         [SerializeField] private ItemPickup artifactPickupPrefab;
         [Tooltip("부서질 때 드롭 대신 폭발할 확률입니다. 폭발은 플레이어 폭탄과 같습니다.")]
         [SerializeField, Range(0f, 1f)] private float explosionChance;
-        [SerializeField, Min(0f)] private float explosionFuse = 0.5f;
+        [Tooltip("0보다 크면 부서진 자리에 폭탄이 나타나 이 시간 뒤 터집니다. 0이면 부서지는 즉시 터집니다.")]
+        [SerializeField, Min(0f)] private float explosionFuse;
+        [Tooltip("도화선이 0인 종류가 다른 폭발에 휘말렸을 때 터지기까지의 짧은 간격입니다.")]
+        [SerializeField, Min(0f)] private float explosionChainDelay = 0.12f;
         [SerializeField] private PlacedBomb explosionPrefab;
         [Tooltip("폭발하지 않았을 때 드롭 대신 적이 나올 확률입니다.")]
         [SerializeField, Range(0f, 1f)] private float enemyChance;
@@ -56,6 +61,7 @@ namespace TrickalFanGame.Room
         public ItemPickup ArtifactPickupPrefab => artifactPickupPrefab;
         public float ExplosionChance => explosionChance;
         public float ExplosionFuse => explosionFuse;
+        public float ExplosionChainDelay => explosionChainDelay;
         public PlacedBomb ExplosionPrefab => explosionPrefab;
         public float EnemyChance => enemyChance;
         public int EnemyCount => Mathf.Max(1, enemyCount);
@@ -88,10 +94,12 @@ namespace TrickalFanGame.Room
             artifactPickupPrefab = configuredArtifactPickupPrefab;
         }
 
-        public void ConfigureExplosion(float configuredChance, float configuredFuse, PlacedBomb configuredPrefab)
+        public void ConfigureExplosion(float configuredChance, float configuredFuse, float configuredChainDelay,
+            PlacedBomb configuredPrefab)
         {
             explosionChance = Mathf.Clamp01(configuredChance);
             explosionFuse = Mathf.Max(0f, configuredFuse);
+            explosionChainDelay = Mathf.Max(0f, configuredChainDelay);
             explosionPrefab = configuredPrefab;
         }
 

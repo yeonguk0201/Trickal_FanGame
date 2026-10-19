@@ -17,6 +17,9 @@ namespace TrickalFanGame.Room
     // Obstacle-7: a tree is a fixed kind that still blocks a flying player until it breaks, drops nothing, and
     // catches fire on its 2nd hit while the player holds a burn artifact. Breaking a burning one is recorded on the
     // Run for a later character unlock.
+    // Bomb-Chain: an exploding obstacle without a fuse explodes the moment it breaks, with no bomb left behind. One
+    // broken by another explosion waits the kind's short chain delay, so a row of them goes off one after another. A
+    // kind with a fuse (Shady's random box) still leaves a visible bomb that explodes after it.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider2D))]
     public sealed class DestructibleObstacle : MonoBehaviour
@@ -85,7 +88,7 @@ namespace TrickalFanGame.Room
         // The first pickup of the last break; LastDrops holds all of them, a rare item last.
         public GameObject LastDrop { get; private set; }
         public IReadOnlyList<GameObject> LastDrops => lastDrops;
-        // The explosion the last break armed instead of dropping, until it goes off.
+        // The explosion the last break set off instead of dropping. A chained one is still waiting on its delay.
         public PlacedBomb LastExplosion { get; private set; }
         // The enemies the last break released instead of dropping.
         public IReadOnlyList<GameObject> LastEnemies => lastEnemies;
@@ -303,7 +306,7 @@ namespace TrickalFanGame.Room
                     : Color.Lerp(intactColor, crackedColor, hitsTaken / (float)RequiredHits);
             }
 
-            if (hitsTaken >= RequiredHits) Break();
+            if (hitsTaken >= RequiredHits) Break(false);
             return true;
         }
 
@@ -346,7 +349,7 @@ namespace TrickalFanGame.Room
             if (isBroken || !isActiveAndEnabled) return false;
             hitsTaken = RequiredHits;
             if (visual != null) visual.color = crackedColor;
-            Break();
+            Break(true);
             return true;
         }
 
@@ -361,7 +364,7 @@ namespace TrickalFanGame.Room
 
             hitsTaken = RequiredHits;
             if (visual != null) visual.color = crackedColor;
-            Break();
+            Break(false);
             return true;
         }
 
@@ -395,14 +398,15 @@ namespace TrickalFanGame.Room
             return FloorGenerator.DeriveSeed(roomContentSeed, unchecked((int)hash), DropSeedSalt);
         }
 
-        private void Break()
+        // byExplosion: a bomb or another obstacle's explosion broke it, which delays its own explosion for the chain.
+        private void Break(bool byExplosion)
         {
             isBroken = true;
             bool firstBreak = runState == null || runState.TryMarkObstacleDestroyed(obstacleId);
             if (firstBreak && isBurning && runProgress != null) runProgress.RecordBurnedObstacle();
             if (firstBreak && TryRollDevelopmentPit(out ResourceDropEntry forcedPit)) SpawnDrop(forcedPit);
             else if (firstBreak && TryForceDevelopmentEnemies()) SpawnEnemies();
-            else if (firstBreak && TryRollExplosion()) SpawnExplosion();
+            else if (firstBreak && TryRollExplosion()) SpawnExplosion(byExplosion);
             else if (firstBreak && TryRollEnemies()) SpawnEnemies();
             else if (firstBreak) SpawnRolledDrops();
 
@@ -463,12 +467,13 @@ namespace TrickalFanGame.Room
             }
         }
 
-        private void SpawnExplosion()
+        private void SpawnExplosion(bool byExplosion)
         {
             LastExplosion = Instantiate(variant.ExplosionPrefab, transform.position, Quaternion.identity,
                 dropParent != null ? dropParent : transform.parent);
             LastExplosion.name = $"Obstacle Explosion - {obstacleId}";
-            LastExplosion.ConfigureUnowned(Time.time, variant.ExplosionFuse);
+            if (variant.ExplosionFuse > 0f) LastExplosion.ConfigureUnowned(Time.time, variant.ExplosionFuse);
+            else LastExplosion.ConfigureUnownedBlast(Time.time, byExplosion ? variant.ExplosionChainDelay : 0f);
         }
 
         private void SpawnRolledDrops()

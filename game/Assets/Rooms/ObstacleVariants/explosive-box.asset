@@ -25,7 +25,8 @@ MonoBehaviour:
   spellPickupPrefab: {fileID: 0}
   artifactPickupPrefab: {fileID: 0}
   explosionChance: 1
-  explosionFuse: 0.5
+  explosionFuse: 0
+  explosionChainDelay: 0.12
   explosionPrefab: {fileID: 1338291427342382308, guid: ab87abf1b99199c42a64c96f3e85cb49, type: 3}
   enemyChance: 0
   enemyCount: 1
