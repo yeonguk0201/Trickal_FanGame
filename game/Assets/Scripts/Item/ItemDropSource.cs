@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Room;
 using UnityEngine;
@@ -88,6 +89,7 @@ namespace TrickalFanGame.Item
             ItemPickup pickup = Instantiate(pickupPrefab, position, Quaternion.identity, dropParent);
             pickup.name = $"Reward - {definition.DisplayName}";
             pickup.Configure(definition);
+            CombatSfx.Play(CombatSfxCue.ItemDrop);
             HasDropped = true;
             LastDroppedDefinition = definition;
             LastFallbackHealAmount = 0f;

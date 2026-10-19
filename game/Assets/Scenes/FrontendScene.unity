@@ -22746,6 +22746,87 @@ MonoBehaviour:
   uiClick: {fileID: 8300000, guid: ab1ccdf5ccabb444f8c347b416af2346, type: 3}
   bgmSource: {fileID: 1711810916}
   sfxSource: {fileID: 1711810915}
+  combatSfx:
+  - cue: 0
+    clip: {fileID: 8300000, guid: 4bbd4ac1502ee9d4ba4030ec5eb8acc8, type: 3}
+    volume: 0.5
+    minimumInterval: 0.03
+  - cue: 1
+    clip: {fileID: 8300000, guid: 00fadfeb4c741494fac7f0d3b6175ef7, type: 3}
+    volume: 0.7
+    minimumInterval: 0.05
+  - cue: 11
+    clip: {fileID: 8300000, guid: ecdc94464de57564e9934977b6353ce5, type: 3}
+    volume: 0.9
+    minimumInterval: 0.05
+  - cue: 10
+    clip: {fileID: 8300000, guid: 628f0f57788e58040ac2f42f24d68212, type: 3}
+    volume: 0.5
+    minimumInterval: 0.12
+  - cue: 2
+    clip: {fileID: 8300000, guid: 15c2149dd276c3e4c91bf427817210c2, type: 3}
+    volume: 0.85
+    minimumInterval: 0.1
+  - cue: 3
+    clip: {fileID: 8300000, guid: 199f95577b08f904bad6d6b6c4abc930, type: 3}
+    volume: 0.95
+    minimumInterval: 0.05
+  - cue: 4
+    clip: {fileID: 8300000, guid: eefeabdf74374a840a1d910a0cecc013, type: 3}
+    volume: 0.62
+    minimumInterval: 0.02
+  - cue: 5
+    clip: {fileID: 8300000, guid: 1c74edf7b8c75b0478b37575f9db045a, type: 3}
+    volume: 0.85
+    minimumInterval: 0.03
+  - cue: 6
+    clip: {fileID: 8300000, guid: 3a92800d506c2f344873c5906c8a79af, type: 3}
+    volume: 0.6
+    minimumInterval: 0.1
+  - cue: 7
+    clip: {fileID: 8300000, guid: 76c9deb18f20fef45928da60cbd59893, type: 3}
+    volume: 0.7
+    minimumInterval: 0.1
+  - cue: 8
+    clip: {fileID: 8300000, guid: b14d9862a65aea44e91ceed5c2329da5, type: 3}
+    volume: 0.7
+    minimumInterval: 0.1
+  - cue: 9
+    clip: {fileID: 8300000, guid: 48474c0894b0a1b4a99cd7576e95e8f9, type: 3}
+    volume: 0.9
+    minimumInterval: 0.1
+  - cue: 12
+    clip: {fileID: 8300000, guid: dd3cbc0343ea8a64da9535ae195edeee, type: 3}
+    volume: 0.8
+    minimumInterval: 0.15
+  - cue: 13
+    clip: {fileID: 8300000, guid: 8e29d9eb8c025c24eb00d5118da9f4ff, type: 3}
+    volume: 0.85
+    minimumInterval: 0.06
+  - cue: 14
+    clip: {fileID: 8300000, guid: 8c94a5873b920294dbe6ac9c4764873b, type: 3}
+    volume: 0.7
+    minimumInterval: 0.06
+  - cue: 15
+    clip: {fileID: 8300000, guid: 2fb3cb160d753ba419d6e9b7fd94ee94, type: 3}
+    volume: 0.9
+    minimumInterval: 0.15
+  - cue: 16
+    clip: {fileID: 8300000, guid: 928331464dab1694cb953d685d65551e, type: 3}
+    volume: 0.7
+    minimumInterval: 0.12
+  - cue: 17
+    clip: {fileID: 8300000, guid: a24b6809b379b5444bb9363feb71009e, type: 3}
+    volume: 0.7
+    minimumInterval: 0.15
+  - cue: 18
+    clip: {fileID: 8300000, guid: f077896f422c69842b20fb272258aee0, type: 3}
+    volume: 0.7
+    minimumInterval: 0.15
+  - cue: 19
+    clip: {fileID: 8300000, guid: ad5803b43890f724b807d93009d641ac, type: 3}
+    volume: 0.75
+    minimumInterval: 0.06
 --- !u!4 &1711810918
 Transform:
   m_ObjectHideFlags: 0

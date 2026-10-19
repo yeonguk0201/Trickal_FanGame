@@ -36,6 +36,7 @@ description: TrickalFanGame Unity 변경에 맞는 현재 Editor 검증기를 �
 | 상태 이상 이펙트 | `StatusEffectAnimationVerification.Verify` | `StatusEffectAnimationVerification.VerifyWithRegressionsBatch` |
 | 검수된 전투 이펙트 | `ReviewedCombatEffectsVerification.Verify` | `ReviewedCombatEffectsVerification.VerifyWithRegressionsBatch` |
 | `DevelopmentGamePanel` | `Week20DevPanelVerification.Verify` | — |
+| 전투 효과음(`CombatSfxSetup`, `PlayerCombatAudio`, `GameAudioController` 큐) | `CombatSfxVerification.Verify` (클립을 바꿔 다시 들여와야 하면 `SetupAndVerifyBatch`, Scene 저장함) | `CombatSfxVerification.VerifyWithRegressionsBatch` |
 | 사용자 제공 원화 연결 | `UserArtworkVerification.Verify` | — |
 | 주차 조각(`Week<NN><조각>Setup`과 그 런타임 코드) | 같은 이름의 `Week<NN><조각>Verification.Verify` | 같은 클래스의 `VerifyWithRegressionsBatch` (있을 때) |
 

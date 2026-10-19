@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
 using UnityEngine;
@@ -65,6 +66,7 @@ namespace TrickalFanGame.Item
         private void Explode(Vector2 center)
         {
             if (stats == null) stats = GetComponent<PlayerStats>();
+            CombatSfx.Play(CombatSfxCue.MuffinExplosion);
             MuffinExplosionEffect.Play(center, radius, transform, GetComponentInChildren<SpriteRenderer>());
             explosionTargets.Clear();
             foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, radius, targetLayers))

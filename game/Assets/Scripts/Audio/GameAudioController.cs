@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TrickalFanGame.Data;
 using UnityEngine;
@@ -11,13 +12,29 @@ namespace TrickalFanGame.Audio
         public const string FrontendSceneName = "FrontendScene";
         public const string GameSceneName = "SampleScene";
 
+        // Sound-0: one combat cue. Volume and the retrigger guard are data, so
+        // the mix can be tuned without touching code. A volume of 0 — which is
+        // what an unfilled entry holds — plays at full level instead of
+        // silently muting the cue; silence a cue by leaving its clip empty.
+        [Serializable]
+        public struct CombatSfxEntry
+        {
+            public CombatSfxCue cue;
+            public AudioClip clip;
+            [Range(0f, 1f)] public float volume;
+            [Min(0f)] public float minimumInterval;
+        }
+
         [SerializeField] private AudioClip homeBgm;
         [SerializeField] private AudioClip combatBgm;
         [SerializeField] private AudioClip uiClick;
         [SerializeField] private AudioSource bgmSource;
         [SerializeField] private AudioSource sfxSource;
+        [SerializeField] private CombatSfxEntry[] combatSfx = Array.Empty<CombatSfxEntry>();
 
         private readonly HashSet<Button> boundButtons = new();
+        private readonly Dictionary<CombatSfxCue, float> nextCueTime = new();
+        private readonly Dictionary<CombatSfxCue, int> cuePlayCounts = new();
         private float nextButtonScanTime;
 
         public static GameAudioController Instance { get; private set; }
@@ -28,6 +45,7 @@ namespace TrickalFanGame.Audio
         public AudioSource SfxSource => sfxSource;
         public AudioClip CurrentBgm => bgmSource != null ? bgmSource.clip : null;
         public int UiClickPlayCount { get; private set; }
+        public IReadOnlyList<CombatSfxEntry> CombatSfx => combatSfx;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
@@ -50,7 +68,7 @@ namespace TrickalFanGame.Audio
         {
             if (Instance != null && Instance != this)
             {
-                Instance.MergeClips(homeBgm, combatBgm, uiClick);
+                Instance.MergeClips(homeBgm, combatBgm, uiClick, combatSfx);
                 Instance.ApplySceneAudio(SceneManager.GetActiveScene().name);
                 Destroy(gameObject);
                 return;
@@ -115,6 +133,52 @@ namespace TrickalFanGame.Audio
             if (sfxSource != null && uiClick != null) sfxSource.PlayOneShot(uiClick);
         }
 
+        public void ConfigureCombatSfx(CombatSfxEntry[] entries)
+        {
+            combatSfx = entries ?? Array.Empty<CombatSfxEntry>();
+            nextCueTime.Clear();
+        }
+
+        public AudioClip GetCombatClip(CombatSfxCue cue)
+        {
+            return TryGetCombatEntry(cue, out CombatSfxEntry entry) ? entry.clip : null;
+        }
+
+        public int GetCombatCuePlayCount(CombatSfxCue cue)
+        {
+            return cuePlayCounts.TryGetValue(cue, out int count) ? count : 0;
+        }
+
+        // Sound-0: a hit sound can be asked for several times in one frame (an
+        // explosion catching four enemies), and identical one-shots stacked on
+        // the same frame read as one loud click rather than four hits. The
+        // per-cue interval drops the repeats; it runs on unscaled time so hit
+        // stop does not hold the guard open.
+        public bool PlayCombatCue(CombatSfxCue cue)
+        {
+            if (!TryGetCombatEntry(cue, out CombatSfxEntry entry) || entry.clip == null) return false;
+            float now = Time.unscaledTime;
+            if (nextCueTime.TryGetValue(cue, out float readyAt) && now < readyAt) return false;
+            nextCueTime[cue] = now + Mathf.Max(0f, entry.minimumInterval);
+            cuePlayCounts[cue] = GetCombatCuePlayCount(cue) + 1;
+            if (sfxSource != null)
+                sfxSource.PlayOneShot(entry.clip, entry.volume > 0f ? Mathf.Clamp01(entry.volume) : 1f);
+            return true;
+        }
+
+        private bool TryGetCombatEntry(CombatSfxCue cue, out CombatSfxEntry entry)
+        {
+            for (int i = 0; i < combatSfx.Length; i++)
+            {
+                if (combatSfx[i].cue != cue) continue;
+                entry = combatSfx[i];
+                return true;
+            }
+
+            entry = default;
+            return false;
+        }
+
         public bool IsButtonBound(Button button)
         {
             return button != null && boundButtons.Contains(button);
@@ -137,11 +201,19 @@ namespace TrickalFanGame.Audio
             boundButtons.Clear();
         }
 
-        private void MergeClips(AudioClip configuredHomeBgm, AudioClip configuredCombatBgm, AudioClip configuredUiClick)
+        private void MergeClips(AudioClip configuredHomeBgm, AudioClip configuredCombatBgm,
+            AudioClip configuredUiClick, CombatSfxEntry[] configuredCombatSfx)
         {
             if (configuredHomeBgm != null) homeBgm = configuredHomeBgm;
             if (configuredCombatBgm != null) combatBgm = configuredCombatBgm;
             if (configuredUiClick != null) uiClick = configuredUiClick;
+            // The surviving controller keeps whichever table has cues, so the
+            // scene that carries the combat sounds can load in either order.
+            if (configuredCombatSfx is { Length: > 0 } && combatSfx.Length == 0)
+            {
+                combatSfx = configuredCombatSfx;
+                nextCueTime.Clear();
+            }
         }
 
         private void ConfigureSources()

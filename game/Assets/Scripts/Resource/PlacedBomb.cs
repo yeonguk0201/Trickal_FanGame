@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Room;
 using UnityEngine;
@@ -135,6 +136,9 @@ namespace TrickalFanGame.Resource
         {
             if (!configured || hasExploded) return false;
             hasExploded = true;
+            // Sound-0: the player's bomb and an exploding box both end up
+            // here, and the user wanted one blast sound for both.
+            CombatSfx.Play(CombatSfxCue.BombExplosion);
             Vector2 center = transform.position;
 
             HashSet<Health> damaged = new();

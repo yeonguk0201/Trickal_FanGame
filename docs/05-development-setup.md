@@ -1876,6 +1876,14 @@ Play 화면 검수:
 - 자동 검증: `UserArtworkVerification.Verify` 배치 통과(종료 코드 0, 2026-10-14).
 - 수동 확인(사용자 확인 완료, 2026-10-14): Game Scene Play에서 금광석·상자·방 클리어 보상으로 바닥에 떨어진 골드가 메달 그림으로 보이고, 밀리기·획득·99 한도 동작이 그대로인지 확인한다.
 
+### 아티팩트·스펠 아트워크 4종 — 2026-10-19
+
+- 사용자가 제공한 원본을 아이템 ID 이름으로 `Assets/Resources/UserArtwork/`에 넣었다: 칸타의 팽이(`artifact-kanta-top`), 칸나의 대포(`artifact-kanna-cannon`)는 투명 배경 아티팩트, 에슈르의 마도서(`single-spell-eshur-grimoire`), 엘리스의 타로카드(`single-spell-ellis-tarot-card`)는 정사각 카드 스펠 그림이다. 코드 변경 없이 `UserArtwork.Load(ItemId)`가 HUD·일시정지 목록·보상 카드·상점·스펠 슬롯·바닥 픽업에 쓴다.
+- 이에 따라 `Verify User Artwork`의 기대 PNG 수는 49개, 그림이 연결된 아이템 정의는 34개다.
+- 스펠 카드 모서리 반경을 한 변의 5.5%에서 12%로 키웠다(`ItemArtwork.shader`의 `radius`, 2026-10-20). 흰 테두리도 같은 곡선을 따르며 모든 스펠 카드에 적용된다. 미리보기: `game/Logs/user-artwork-preview.png`.
+- 자동 검증: `UserArtworkVerification.Verify` 배치 통과(종료 코드 0, 2026-10-19).
+- 수동 확인: Game Scene Play에서 `F1` 개발 패널 `— Artifact —`의 `Drop`으로 칸타의 팽이·칸나의 대포를, `— Spell slot —`의 `Drop`으로 에슈르의 마도서·엘리스의 타로카드를 떨어뜨려 바닥 그림, 획득 후 HUD·스펠 슬롯 그림과 흰 테두리를 확인한다.
+
 ## 요정왕국 신규 에셋 45장 연결 (2026-10-10)
 
 - 나무는 새 세로형 원화를 사용하며 표시 1×2칸, 충돌은 아래 1×1칸 하나다. Layout 가져오기와 Setup 재실행에도 유지한다. [원화 프롬프트·검증 기록](./art-prompts/two-cell-tree.md). 위 검증 메뉴는 나무의 표시 크기·바닥 정렬·상단 통과도 검사한다. 이번 나무 변경의 배치 검증은 기존 Editor 실행 상태에서 종료 코드 1로 미실행되어 Edit Mode 메뉴 실행과 Play 화면 확인이 남아 있다.
@@ -2034,3 +2042,52 @@ Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금�
 - 배치: `TrickalFanGame.Editor.SansamoPureMotionVerification.Verify` (Setup 없이 검사). 최종 종료 코드 0.
 - Play: F1 → `— Room —` → `Spawn pure Sansamo (walk + flower shots)`. 이동 중 꽃 반동·꽃 출발 탄·연사 후 정지를 확인한다.
 - 에셋·프롬프트·검수 대기 항목: [산사모 순수 기록](./art-prompts/sansamo-pure-motion.md).
+## 전투 효과음 Sound-0 (2026-10-19)
+
+에르핀 기본 공격·타격·피격과 저학년·고학년 스킬 효과음 8종. 음원은 외부에서 받지 않고 프로젝트에서 합성한다.
+
+- Unity 연결은 적용되어 있다. 재구성: `Trickal Fan Game/Audio/Setup Combat SFX`.
+- 단독 검사: `Trickal Fan Game/Audio/Verify Combat SFX`.
+- 배치(Setup 포함): `TrickalFanGame.Editor.CombatSfxVerification.SetupAndVerifyBatch`.
+- 배치(커밋 전 회귀): `TrickalFanGame.Editor.CombatSfxVerification.VerifyWithRegressionsBatch`.
+  고학년 돌진(Phase D)·저학년 스킬(Phase C)·사거리(Range-0)를 함께 돌린다. 기본 공격·돌진·유도탄에 이벤트를
+  추가했기 때문이다.
+- Play 확인: 기본 공격을 연타해 명중 폭발이 뭉개지지 않는지, Space로 시전 → 4발 → 폭발이 충분히 크게
+  들리는지, Q 돌진 중 발소리가 끝까지 유지되고 충돌에서 멈추는지, 피격음이 명중음과 구분되는지 듣는다.
+  틱 데미지음은 독이나 피해 오라를 얻어 적에게 지속 피해를 넣으면서 명중 폭발과 구분되는지 확인한다.
+  음량은 설정의 SFX 볼륨을 따른다.
+
+### 외부 음원 반입
+
+받은 음원 파일을 게임 경로로 넣을 때는 직접 복사하지 않고 임포터를 쓴다. 리샘플링·무음 잘라내기·레벨 정리·
+겹치기를 한 번에 처리하며, 어떤 원본이 어떤 역할에 들어갔는지가 `MANIFEST`에 남는다.
+
+```bash
+python tools/sfx-synth/import_sources.py "<원본 폴더>" game/Assets/Audio
+```
+
+- 역할별 원본 지정은 `tools/sfx-synth/import_sources.py`의 `MANIFEST`에 있다. 음원을 바꿀 때는 이 표를 고치고
+  다시 실행한 뒤 `Setup Combat SFX`를 돌린다.
+- `soundfile`(libsndfile 1.2 이상)과 `scipy`가 필요하다. mp3 디코딩과 ogg 인코딩을 libsndfile이 담당하므로
+  ffmpeg는 필요 없다.
+- 라이선스는 임포터가 확인하지 못한다. 새 음원을 넣으면 `docs/audio-sources.md`의 라이선스 표를 직접 채운다.
+
+### 음원 다시 만들기
+
+`tools/sfx-synth`는 파라미터로 WAV를 합성한다. numpy와 scipy가 필요하다.
+
+```bash
+python tools/sfx-synth/render_sfx.py output/sfx --burst=5
+```
+
+- 후보 전체와 5연타 버전, 실제 배치대로 겹친 합성 장면이 `output/sfx/<묶음>/`에 나온다.
+- 청취 페이지: `python tools/sfx-synth/audition_page.py output/sfx output/sfx/audition.html`.
+  WAV를 data URI로 넣은 단일 HTML이라 브라우저로 바로 열어 비교할 수 있다.
+- 채택본을 게임에 설치: `python tools/sfx-synth/render_sfx.py x --install=game/Assets/Audio/SFX`.
+  `render_sfx.py`의 `CHOSEN` 표가 역할 이름 ↔ 후보 대응을 가진다. 설치 후 `Setup Combat SFX`를 다시 실행한다.
+- 소리를 고칠 때는 음원을 다시 구하지 않고 해당 프리셋의 수치(`freq`, `slide`, `decay`, `lpf`, 레이어 `mix`)를
+  조절한다. 파라미터 설명은 `tools/sfx-synth/sfx_synth.py`의 docstring에 있다.
+
+## 저혈당 요정 활발 걷기·공격 모션
+
+Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 모션을 재구성한다. `Verify Lively Fairy Motion`은 단독 검증이다. Game Scene Play → F1 → `— Room —` → `Spawn lively fairy (4-way shots)`로 걷기·웅크린 예고·빵을 들어 올리는 발사·회복을 확인한다. 구성과 미술 검수 기준은 [작업 기록](./art-prompts/lively-fairy-motion.md)을 따른다.

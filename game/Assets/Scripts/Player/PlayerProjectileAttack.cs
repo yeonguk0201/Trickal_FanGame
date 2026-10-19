@@ -1,3 +1,4 @@
+using System;
 using TrickalFanGame.Combat;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -34,6 +35,9 @@ namespace TrickalFanGame.Player
         public float CurrentHealOnKillAmount => stats.HealOnKillAmount;
         public bool CanAttack => !health.IsDead && actionState.CanBasicAttack;
         public float AttackInterval => attackCooldown / stats.AttackSpeed;
+
+        // Sound-0: raised once per volley, for presentation only.
+        public event Action Fired;
 
         public DamageContext CreateDamageContext()
         {
@@ -98,6 +102,10 @@ namespace TrickalFanGame.Player
                 float angle = (index - centerIndex) * multiShotSpreadAngle;
                 SpawnProjectile(Rotate(direction, angle));
             }
+
+            // Sound-0: one shot sound per volley, not one per projectile, so
+            // multi-shot artifacts do not make the attack louder.
+            Fired?.Invoke();
         }
 
         private void SpawnProjectile(Vector2 direction)
