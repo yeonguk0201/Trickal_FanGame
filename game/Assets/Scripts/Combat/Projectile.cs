@@ -270,7 +270,9 @@ namespace TrickalFanGame.Combat
         // The player's shot starts at the body center, above the feet that walls stop. Fired along a wall the feet
         // touch (the wall above), it would start inside that wall and vanish at once, so it is pushed out sideways.
         // A wall ahead of the shot is left alone and still takes it.
-        public void PushOutOfWallsBeside(Vector2 direction)
+        // Shot-0: "ahead" means the line from the firing origin through the shot's front crosses the wall. Hugging an
+        // obstacle, the shot sinks deeper forward than sideways, and judging by the shorter way out alone slid it past.
+        public void PushOutOfWallsBeside(Vector2 direction, Vector2 origin)
         {
             Collider2D ownCollider = GetComponent<Collider2D>();
             int environmentLayer = LayerMask.NameToLayer("Environment");
@@ -285,10 +287,27 @@ namespace TrickalFanGame.Combat
             ContactFilter2D filter = new() { useLayerMask = true, layerMask = 1 << environmentLayer, useTriggers = false };
             List<Collider2D> walls = new();
             ownCollider.Overlap(filter, walls);
+            if (walls.Count == 0)
+            {
+                return;
+            }
+
+            Vector2 front = (Vector2)transform.position + forward * ownCollider.bounds.extents.x;
+            Vector2 path = front - origin;
+            List<RaycastHit2D> ahead = new();
+            if (path.sqrMagnitude > 0.0001f)
+            {
+                Physics2D.Raycast(origin, path.normalized, filter, ahead, path.magnitude);
+            }
 
             float push = 0f;
             foreach (Collider2D wall in walls)
             {
+                if (ahead.Exists(hit => hit.collider == wall))
+                {
+                    continue;
+                }
+
                 ColliderDistance2D gap = ownCollider.Distance(wall);
                 if (!gap.isOverlapped)
                 {
