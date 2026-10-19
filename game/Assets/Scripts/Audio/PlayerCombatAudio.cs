@@ -144,7 +144,13 @@ namespace TrickalFanGame.Audio
 
         private void OnSpRestored() => Play(CombatSfxCue.SpGain);
 
-        private void OnSpellUsed(ItemDefinition definition) => Play(CombatSfxCue.SpellCast);
+        // One slot holds both kinds of spell, so the kind picks the sound.
+        private void OnSpellUsed(ItemDefinition definition)
+        {
+            Play(definition != null && definition.Kind == ItemKind.JjangsemSpell
+                ? CombatSfxCue.JjangsemSpellCast
+                : CombatSfxCue.SpellCast);
+        }
 
         // Damage over time on an enemy: poison, burn, the damage aura, a
         // spell's pulse. They all arrive as Periodic delivery, which is what

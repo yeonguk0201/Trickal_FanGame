@@ -15,9 +15,10 @@ Trickal Fan Game에 실제로 적용하기로 확정한 음원의 출처와 라�
 
 | 파일 | 출처 | 제작자 | 라이선스 | 크레딧 |
 |---|---|---|---|---|
-| `541478__eminyildirim__magic-fire-spell-impact-punch.wav` | Freesound #541478 | eminyildirim | **CC BY 4.0** | **필수** |
+| `541478__eminyildirim__magic-fire-spell-impact-punch.wav` | Freesound #541478 | EminYILDIRIM | **CC BY 4.0** | **필수** |
 | `396500__alonsotm__firespell3.wav` | Freesound #396500 | alonsotm | **CC BY 4.0** | **필수** |
-| `559088__eminyildirim__shadow-spell-dark-magic.wav` | Freesound #559088 | eminyildirim | **CC BY 4.0** | **필수** |
+| `632336__igroglaz__magic-spell-06.wav` | Freesound #632336 | igroglaz | CC0 | 불필요 |
+| `659762__lilmati__magic-spell-05-remastered.wav` | Freesound #659762 | lilmati | CC0 | 불필요 |
 | `249817__spookymodem__magic-missiles.wav` | Freesound #249817 | spookymodem | CC0 | 불필요 |
 | `563542__colorscrimsontears__teleport-rpg.wav` | Freesound #563542 | colorscrimsontears | CC0 | 불필요 |
 | `563536__colorscrimsontears__fire-3-rpg.wav` | Freesound #563536 | colorscrimsontears | CC0 | 불필요 |
@@ -45,19 +46,18 @@ CC BY 4.0 음원 3개가 들어오면서 크레딧 표기가 **권장에서 의�
 빼먹기 쉽다. 이 프로젝트는 세 음원 모두 리샘플링·무음 잘라내기·레벨 조정을 했고 기본 공격은 두 음원을 겹쳤으므로,
 전부 수정에 해당한다. Freesound가 제공하는 기본 문구에는 수정 고지가 없어서 그대로 쓰면 불완전하다.
 
+Freesound가 제공하는 문구에 수정 고지를 덧붙인 형태다. 두 줄 모두 확정됐다(2026-10-20 사용자 확인).
+둘 다 기본 공격 발사음에 쓰였다.
+
 ```
-"Magic Fire Spell Impact Punch" by eminyildirim — https://freesound.org/s/541478/
-  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — modified
-"firespell3" by alonsotm — https://freesound.org/s/396500/
-  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — modified
-"Shadow Spell Dark Magic" by eminyildirim — https://freesound.org/s/559088/
-  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — modified
+Magic Fire Spell Impact & Punch by EminYILDIRIM -- https://freesound.org/s/541478/ -- License: Attribution 4.0 (modified)
+FireSpell3.wav by alonsotm -- https://freesound.org/s/396500/ -- License: Attribution 4.0 (modified)
 ```
 
 - 수정 내용을 자세히 적을 필요는 없다. "modified" 또는 "수정됨" 표시로 충족된다.
 - 제작자가 이 게임을 후원하거나 보증한다는 뜻으로 읽힐 표현은 쓰지 않는다(CC BY 4.0이 금지한다).
 - 배포하는 동안 계속 표기해야 한다. 음원을 빼면 해당 줄도 지운다.
-- 해당 음원이 쓰인 곳: 기본 공격 발사(앞의 두 개를 겹침), 스펠 사용(세 번째).
+- 해당 음원이 쓰인 곳: 둘 다 기본 공격 발사(두 음원을 겹쳤다). 스펠 쪽은 CC0 음원으로 교체되어 의무가 없다.
 - 크레딧을 넣고 싶지 않다면 그 세 음원을 CC0나 Pixabay 음원으로 교체해야 한다. 교체는
   `tools/sfx-synth/import_sources.py`의 `MANIFEST`를 고치고 다시 실행하면 된다.
 - 원본 파일은 `MANIFEST`가 상대 경로로 기록하고 있어 어떤 원본이 어떤 역할에 쓰였는지 추적할 수 있다.
@@ -86,7 +86,8 @@ CC BY 4.0 음원 3개가 들어오면서 크레딧 표기가 **권장에서 의�
 | 다음 층 포탈 진입 | `BossPortal` | `SFX/SFX_Boss_Portal.wav` | 외부: teleport-rpg |
 | 폭탄·폭탄 상자 폭발 | `BombExplosion` | `SFX/SFX_Bomb_Explosion.wav` | 외부: distant-bang + fire-3-rpg (겹침) |
 | 폭발 머핀 폭발 | `MuffinExplosion` | `SFX/SFX_Muffin_Explosion.wav` | 외부: dragon-studio-boom |
-| 스펠 사용 | `SpellCast` | `SFX/SFX_Spell_Cast.wav` | 외부: shadow-spell-dark-magic |
+| 스펠 사용 | `SpellCast` | `SFX/SFX_Spell_Cast.wav` | 외부: igroglaz magic-spell-06 (CC0) |
+| 짱셈 스펠 사용 | `JjangsemSpellCast` | `SFX/SFX_Jjangsem_Spell_Cast.wav` | 외부: lilmati magic-spell-05-remastered (CC0) |
 | SP 획득 | `SpGain` | `SFX/SFX_SP_Gain.wav` | 외부: yodguard-healing-magic-2 |
 | 체력 회복 | `Heal` | `SFX/SFX_Heal.wav` | 외부: yodguard-healing-magic-1 |
 | 잠긴 문 열림 | `DoorOpen` | `SFX/SFX_Door_Open.wav` | 외부: yodguard-locked-door-4 |

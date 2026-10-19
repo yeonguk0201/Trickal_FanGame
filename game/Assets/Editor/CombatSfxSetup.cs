@@ -52,6 +52,7 @@ namespace TrickalFanGame.Editor
             (CombatSfxCue.BombExplosion, "SFX_Bomb_Explosion.wav", 0.85f, 0.06f, 3f),
             (CombatSfxCue.MuffinExplosion, "SFX_Muffin_Explosion.wav", 0.7f, 0.06f, 2f),
             (CombatSfxCue.SpellCast, "SFX_Spell_Cast.wav", 0.9f, 0.15f, 3f),
+            (CombatSfxCue.JjangsemSpellCast, "SFX_Jjangsem_Spell_Cast.wav", 0.95f, 0.15f, 3f),
             (CombatSfxCue.SpGain, "SFX_SP_Gain.wav", 0.7f, 0.12f, 2f),
             (CombatSfxCue.Heal, "SFX_Heal.wav", 0.7f, 0.15f, 2f),
             (CombatSfxCue.DoorOpen, "SFX_Door_Open.wav", 0.7f, 0.15f, 2f),

@@ -70,8 +70,13 @@ MANIFEST = [
     dict(role="SFX/SFX_Muffin_Explosion.wav", peak_db=-1.0, sources=[
         ("폭발/dragon-studio-boom-copyright-free-487662.mp3", 1.0),
     ]),
+    # Both spell kinds go through the same slot, so they are told apart by
+    # the item's kind rather than by two separate systems.
     dict(role="SFX/SFX_Spell_Cast.wav", peak_db=-1.0, sources=[
-        ("스펠/559088__eminyildirim__shadow-spell-dark-magic.wav", 1.0),
+        ("스펠/632336__igroglaz__magic-spell-06.wav", 1.0),
+    ]),
+    dict(role="SFX/SFX_Jjangsem_Spell_Cast.wav", peak_db=-1.0, sources=[
+        ("스펠/659762__lilmati__magic-spell-05-remastered.wav", 1.0),
     ]),
     dict(role="SFX/SFX_SP_Gain.wav", peak_db=-1.0, sources=[
         ("sp업/yodguard-healing-magic-2-378663.mp3", 1.0),

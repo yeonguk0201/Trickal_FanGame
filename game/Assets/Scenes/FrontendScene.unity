@@ -22811,6 +22811,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 2fb3cb160d753ba419d6e9b7fd94ee94, type: 3}
     volume: 0.9
     minimumInterval: 0.15
+  - cue: 20
+    clip: {fileID: 8300000, guid: 68b63c0d9a847944f85d0c1e7359b3da, type: 3}
+    volume: 0.95
+    minimumInterval: 0.15
   - cue: 16
     clip: {fileID: 8300000, guid: 928331464dab1694cb953d685d65551e, type: 3}
     volume: 0.7

@@ -56,7 +56,7 @@ namespace TrickalFanGame.Audio
         // The 폭발 머핀 artifact's blast on a basic attack hit.
         MuffinExplosion,
 
-        // Using a spell from the spell slot.
+        // Using an ordinary spell from the spell slot.
         SpellCast,
 
         // Picking up SP.
@@ -69,8 +69,12 @@ namespace TrickalFanGame.Audio
         DoorOpen,
 
         // An item landing on the floor.
+        ItemDrop,
+
+        // Using a 짱셈 spell. It shares the spell slot with an ordinary
+        // spell, so the two are told apart by the item's kind.
         // New members go after this one: the scenes store a cue as its
         // number, so inserting above would repoint every later cue.
-        ItemDrop,
+        JjangsemSpellCast,
     }
 }
