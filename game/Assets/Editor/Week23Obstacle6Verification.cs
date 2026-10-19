@@ -58,10 +58,10 @@ namespace TrickalFanGame.Editor
             ValidateFlyingVault(vault);
             ValidateTreeLayout(generator);
             Debug.Log("Obstacle-6 verification passed: setup is idempotent, the player bomb and exploding obstacles " +
-                      "share one radius-2 explosion, the exploding box arms a 0.5-second fuse on its 2nd hit or a " +
-                      "bomb, hurts enemies and the player, breaks obstacles, chains to the next box and opens a " +
+                      "share one radius-2 explosion, the exploding box explodes at once on its 2nd hit, " +
+                      "chains hidden after a short delay when caught in a blast, hurts enemies and the player, breaks obstacles, chains to the next box and opens a " +
                       "vault without dropping anything or exploding again after a rebuild, Shady's random box " +
-                      "replays an explosion, five Jyubi, three pickups or nothing per seed, Mayo's collection box always " +
+                      "replays an explosion (a visible bomb with a 0.5-second fuse), five Jyubi, three pickups or nothing per seed, Mayo's collection box always " +
                       "leaves two pickups with an artifact a quarter of the time, a flying player opens a vault " +
                       "by overlapping it with a key, and basic-tree-grove passes the room contract with four " +
                       "trees while the central pillar stays a low obstacle. Obstacle-7 verifies the trees.");
@@ -131,21 +131,15 @@ namespace TrickalFanGame.Editor
                     "The exploding box must need 2 hits, always explode and never roll a drop.");
                 Assert(box.RegisterPlayerHit() && !box.IsBroken && box.LastExplosion == null,
                     "The first hit must not set the exploding box off.");
+                float playerBefore = player.CurrentHealth;
                 Assert(box.RegisterPlayerHit() && box.IsBroken && state.IsObstacleDestroyed("box-01") &&
                        box.LastDrops.Count == 0,
                     "The second hit must break the exploding box without a pickup.");
+                // Bomb-Chain: the box explodes on the breaking hit itself, without leaving a bomb with a fuse.
                 PlacedBomb explosion = box.LastExplosion;
-                Assert(explosion != null && !explosion.HasExploded &&
+                Assert(explosion != null && explosion.HasExploded && !explosion.IsHidden &&
                        Vector2.Distance(explosion.transform.position, box.transform.position) < 0.001f,
-                    "A broken exploding box must arm one explosion on its cell.");
-                float fuse = Week23Obstacle5Setup.ExplosionFuse;
-                Assert(!explosion.Tick(explosion.ExplodeAt - fuse * 0.5f) && !explosion.HasExploded &&
-                       !nearRock.IsBroken && Mathf.Approximately(enemy.CurrentHealth, 100f),
-                    "The exploding box must wait for its fuse before it explodes.");
-
-                float playerBefore = player.CurrentHealth;
-                Assert(explosion.Tick(explosion.ExplodeAt) && explosion.HasExploded,
-                    "The exploding box must explode when its fuse ends.");
+                    "A box broken by a hit must explode on its cell at once.");
                 Assert(Mathf.Approximately(enemy.CurrentHealth, 100f - PlacedBomb.DefaultEnemyDamage) &&
                        Mathf.Approximately(farEnemy.CurrentHealth, 100f),
                     "The obstacle explosion must deal the bomb's enemy damage inside its radius only.");
@@ -155,16 +149,20 @@ namespace TrickalFanGame.Editor
                     "The obstacle explosion must break obstacles inside radius 2 and leave one 2.3 away.");
                 Assert(nearVault.IsBroken && nearVault.LastDrops.Count >= vault.DropCount,
                     "The obstacle explosion must open a vault like a player bomb.");
-                Assert(chained.IsBroken && chained.LastExplosion != null && !chained.LastExplosion.HasExploded &&
-                       chained.LastExplosion != explosion,
-                    "An exploding box caught in an explosion must arm its own explosion.");
                 Assert(!explosion.ApplyExplosion() &&
                        Mathf.Approximately(enemy.CurrentHealth, 100f - PlacedBomb.DefaultEnemyDamage),
                     "An obstacle explosion must apply once.");
 
+                // A box caught in the explosion waits a short chain delay, hidden, so a row goes off in sequence.
                 PlacedBomb second = chained.LastExplosion;
-                Assert(second.Tick(second.ExplodeAt) && second.HasExploded && !farRock.IsBroken,
-                    "The chained box must explode after its own fuse.");
+                float delay = Week23Obstacle5Setup.ExplosionChainDelay;
+                Assert(chained.IsBroken && second != null && second != explosion && !second.HasExploded &&
+                       second.IsHidden && delay > 0f,
+                    "An exploding box caught in an explosion must wait hidden for its own chain delay.");
+                Assert(!second.Tick(second.ExplodeAt - delay * 0.5f) && !second.HasExploded,
+                    "The chained box must not explode before its chain delay ends.");
+                Assert(second.Tick(second.ExplodeAt) && second.HasExploded && !second.IsHidden && !farRock.IsBroken,
+                    "The chained box must explode when its chain delay ends.");
 
                 DestructibleObstacle rebuilt = CreateObstacle(root.transform, explosive, Origin, "box-01");
                 rebuilt.Bind(state, 11, root.transform, progress);
@@ -252,6 +250,13 @@ namespace TrickalFanGame.Editor
                 BreakWithHits(exploding);
                 Assert(exploding.LastExplosion != null && exploding.LastDrops.Count == 0,
                     "A random box that explodes must not also drop pickups.");
+                // Bomb-Chain keeps the surprise explosion fair: a visible bomb with the 0.5 s fuse, not an instant blast.
+                PlacedBomb surprise = exploding.LastExplosion;
+                float fuse = Week23Obstacle5Setup.RandomBoxExplosionFuse;
+                Assert(Mathf.Approximately(random.ExplosionFuse, fuse) && fuse > 0f && !surprise.HasExploded &&
+                       !surprise.IsHidden && !surprise.Tick(surprise.ExplodeAt - fuse * 0.5f) &&
+                       surprise.Tick(surprise.ExplodeAt) && surprise.HasExploded,
+                    "A random box explosion must leave a visible bomb that explodes after its fuse.");
 
                 DestructibleObstacle paying = CreateObstacle(root.transform, random, Origin, "random-01");
                 paying.Bind(new RoomRunState("floor-01-room-04"), jackpotSeed, root.transform, progress);

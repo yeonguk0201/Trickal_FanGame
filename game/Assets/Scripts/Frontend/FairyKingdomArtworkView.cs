@@ -22,7 +22,6 @@ namespace TrickalFanGame.Frontend
         private Health health;
         private string shown;
         private Sprite fitted;
-        private SpriteRenderer burningOverlay;
         private SpriteRenderer treeCanopy;
         // The upper half of a tree drawing, cut once per source sprite.
         private static readonly System.Collections.Generic.Dictionary<Sprite, Sprite> CanopySprites = new();
@@ -99,10 +98,26 @@ namespace TrickalFanGame.Frontend
             int damageStage = rockDamage && obstacle != null
                 ? RockDamageArtwork.Stage(obstacle.HitsTaken, obstacle.RequiredHits) : 0;
             visual.sprite = damageStage > 0 ? RockDamageArtwork.Fit(id, damageStage, localWidth) ?? fitted : fitted;
+            bool authoredHazard = false;
+            string hazard = id == "obstacle-tree" && obstacle != null && obstacle.IsBurning
+                ? EnvironmentHazardArtwork.Tree
+                : id == "trap-fire" ? EnvironmentHazardArtwork.FireStage(obstacle != null ? obstacle.HitsTaken : 0)
+                : id == "trap-poison-mushroom" && obstacle != null && obstacle.HitsTaken > 0
+                    ? EnvironmentHazardArtwork.Mushroom : null;
+            if (hazard != null)
+            {
+                Sprite frame = EnvironmentHazardArtwork.Fit(hazard, Time.time, id == "obstacle-tree" ? 1f : localWidth);
+                if (frame != null) { visual.sprite = frame; authoredHazard = true; }
+            }
+            if (TryGetComponent(out RoomTrap periodic) && periodic.Kind == RoomTrapKind.PeriodicSpikes)
+                periodic.RefreshPeriodicArtwork(periodic.StateAt(Time.time));
             if (id == "obstacle-tree" && visual.transform != transform)
             {
                 // The root marks the lower grid cell. Only the drawing reaches into the cell above it.
-                ConfigureTreeVisual(visual);
+                // Keep the intact transform for all burning frames; never stretch each changing flame silhouette.
+                Vector3 size = fitted.bounds.size;
+                visual.transform.localPosition = new Vector3(0f, 0.5f, 0f);
+                visual.transform.localScale = new Vector3(1f / size.x, 2f / size.y, 1f);
             }
             RefreshTreeCanopy(id == "obstacle-tree" && visual.transform != transform);
             Rigidbody2D movingBody = GetComponent<Rigidbody2D>();
@@ -115,18 +130,9 @@ namespace TrickalFanGame.Frontend
             // Legacy placeholder palettes must not recolor authored art. Hit feedback owns fixed enemy colors.
             if (mode == FairyKingdomArtworkMode.Obstacle)
             {
-                float shade = !rockDamage && obstacle != null ? Mathf.Lerp(1f, 0.7f,
+                float shade = !rockDamage && !authoredHazard && obstacle != null ? Mathf.Lerp(1f, 0.7f,
                     obstacle.HitsTaken / (float)obstacle.RequiredHits) : 1f;
                 visual.color = new Color(shade, shade, shade, 1f);
-                if (obstacle != null && obstacle.IsBurning && burningOverlay == null)
-                {
-                    GameObject child = new("Burning obstacle artwork");
-                    child.transform.SetParent(visual.transform, false);
-                    burningOverlay = child.AddComponent<SpriteRenderer>();
-                    burningOverlay.sprite = FairyKingdomArtwork.Fit("effect-burn", localWidth * 0.55f);
-                    burningOverlay.sortingLayerID = visual.sortingLayerID;
-                    burningOverlay.sortingOrder = visual.sortingOrder + 2;
-                }
             }
             else if (mode == FairyKingdomArtworkMode.Chest || mode == FairyKingdomArtworkMode.Bomb)
                 visual.color = Color.white;

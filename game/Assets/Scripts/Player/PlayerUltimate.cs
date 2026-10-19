@@ -64,6 +64,8 @@ namespace TrickalFanGame.Player
         public UltimateEndReason LastEndReason { get; private set; }
 
         public event Action<UltimateEndReason> DashEnded;
+        // Sound-0: raised when the dash actually starts, for presentation only.
+        public event Action DashStarted;
 
         private void Awake()
         {
@@ -206,6 +208,7 @@ namespace TrickalFanGame.Player
             dashEndTime = currentTime + maximumDuration;
             health.SetInvulnerable(true);
             Debug.Log("[PlayerUltimate] Dash started.", this);
+            DashStarted?.Invoke();
             return true;
         }
 

@@ -1035,14 +1035,15 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Obstacle-6 Remaining Obstacles`, 배치는 Unity `-batchmode
   -nographics -quit -projectPath <game 경로> -executeMethod
   TrickalFanGame.Editor.Week23Obstacle6Verification.SetupAndVerifyBatch -logFile <로그 경로>`다. Setup 2회 GUID, 폭탄
-  반경 2와 폭탄 Prefab 공유, 폭발 상자의 2타·도화선 0.5초·적 30 피해·플레이어 1칸 피해·반경 2 안 장애물만 파괴·금고
+  반경 2와 폭탄 Prefab 공유, 폭발 상자의 2타·즉시 폭발(Bomb-Chain, 폭발에 휘말리면 숨김 상태로 0.12초 뒤 연쇄, 랜덤박스 폭발은 보이는 폭탄·도화선 0.5초 유지)·적 30 피해·플레이어 1칸 피해·반경 2 안 장애물만 파괴·금고
   개봉·연쇄·1회 적용·재구성 시 미폭발, 랜덤박스의 seed 재현과 폭발 25%·쥬비 5마리 15%·지급 약 50%·네 결과의 배타성, 수집품 상자의 픽업
   2개 확정·아티팩트 25%, 비행 중 금고 겹침 개봉(열쇠 1개, 열쇠 없으면 통과), 나무 Layout의 방 계약·512 seed 선택·높은
   장애물 구성과 기존 기둥의 낮은 장애물 유지를 검사한다(나무의 파괴·비행 차단 규칙은 Obstacle-7 검증기). 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-5와 그 안의
   Obstacle-1·2·4, Difficulty-1, Encounter-4, Special-2·3, Terrain-0, 그리고 Flight-0, Chest-0, 개발 패널)다. 2026-10-06 두
   배치가 종료 코드 0으로 통과했다.
   수동 확인: Game Scene Play → 장애물이 있는 전투방에서 `F1` 패널 `— Obstacle —`의 `Make explosive-box`로 바꾼 뒤 2타로
-  부수면 잠깐 뒤 폭발해 가까운 적·플레이어가 피해를 받고 주변 장애물이 부서진다. `Make shady-random-box`는 부술 때마다
+  부수면 폭탄 없이 그 자리에서 바로 폭발해 가까운 적·플레이어가 피해를 받고 주변 장애물이 부서진다. 폭발 상자가 이어진
+  방에서는 한 개를 치면 이웃 상자가 0.12초 간격으로 차례로 터진다. `Make shady-random-box`는 부술 때마다
   폭발·쥬비 5마리·픽업 3개·꽝 중 하나(방과 슬롯마다 고정), `Make mayo-collection-box`는 항상 픽업 2개가 나온다. 폭탄(F)의 폭발
   범위가 전보다 작은지 본다. `Golden exclusive`의 가짜 날개를 얻어 비행한 뒤 `Make sist-vault`와 `+10 Key`로 금고 위를
   지나가면 열쇠 1개가 줄고 열린다. seed를 바꿔 `basic-tree-grove` 방(초록 나무 4그루)을 찾아 걸어서도 비행으로도 나무를
@@ -1875,6 +1876,14 @@ Play 화면 검수:
 - 자동 검증: `UserArtworkVerification.Verify` 배치 통과(종료 코드 0, 2026-10-14).
 - 수동 확인(사용자 확인 완료, 2026-10-14): Game Scene Play에서 금광석·상자·방 클리어 보상으로 바닥에 떨어진 골드가 메달 그림으로 보이고, 밀리기·획득·99 한도 동작이 그대로인지 확인한다.
 
+### 아티팩트·스펠 아트워크 4종 — 2026-10-19
+
+- 사용자가 제공한 원본을 아이템 ID 이름으로 `Assets/Resources/UserArtwork/`에 넣었다: 칸타의 팽이(`artifact-kanta-top`), 칸나의 대포(`artifact-kanna-cannon`)는 투명 배경 아티팩트, 에슈르의 마도서(`single-spell-eshur-grimoire`), 엘리스의 타로카드(`single-spell-ellis-tarot-card`)는 정사각 카드 스펠 그림이다. 코드 변경 없이 `UserArtwork.Load(ItemId)`가 HUD·일시정지 목록·보상 카드·상점·스펠 슬롯·바닥 픽업에 쓴다.
+- 이에 따라 `Verify User Artwork`의 기대 PNG 수는 49개, 그림이 연결된 아이템 정의는 34개다.
+- 스펠 카드 모서리 반경을 한 변의 5.5%에서 12%로 키웠다(`ItemArtwork.shader`의 `radius`, 2026-10-20). 흰 테두리도 같은 곡선을 따르며 모든 스펠 카드에 적용된다. 미리보기: `game/Logs/user-artwork-preview.png`.
+- 자동 검증: `UserArtworkVerification.Verify` 배치 통과(종료 코드 0, 2026-10-19).
+- 수동 확인: Game Scene Play에서 `F1` 개발 패널 `— Artifact —`의 `Drop`으로 칸타의 팽이·칸나의 대포를, `— Spell slot —`의 `Drop`으로 에슈르의 마도서·엘리스의 타로카드를 떨어뜨려 바닥 그림, 획득 후 HUD·스펠 슬롯 그림과 흰 테두리를 확인한다.
+
 ## 요정왕국 신규 에셋 45장 연결 (2026-10-10)
 
 - 나무는 새 세로형 원화를 사용하며 표시 1×2칸, 충돌은 아래 1×1칸 하나다. Layout 가져오기와 Setup 재실행에도 유지한다. [원화 프롬프트·검증 기록](./art-prompts/two-cell-tree.md). 위 검증 메뉴는 나무의 표시 크기·바닥 정렬·상단 통과도 검사한다. 이번 나무 변경의 배치 검증은 기존 Editor 실행 상태에서 종료 코드 1로 미실행되어 Edit Mode 메뉴 실행과 Play 화면 확인이 남아 있다.
@@ -1887,7 +1896,7 @@ Play 화면 검수:
 - 표시용 프리팹: `Assets/Prefabs/FairyKingdomArtwork/`. 누루링은 대응 게임 로직이 아직 없어 이 폴더의 표시용 프리팹으로만 제공된다. 함정 7종과 독가스는 Trap-0부터 `Assets/Prefabs/Traps/`의 게임 Prefab이 같은 원화를 쓴다. 임의의 공격·피해·생성 규칙은 추가하지 않았다.
 - 현재 단일 프레임 연결이다. 부스러기 쫄따구는 3가지 그림을 소환 순서에 따라 사용하고 사망 시 그림 효과만 표시한다. 사망 폭발 피해 규칙은 새로 구현하지 않았다. 새 프레임 추가 전까지 해당 적의 기존 다른 그림용 이동·공격 프레임 컴포넌트는 보존하되 비활성화한다.
 - 돌진형(`ChargingEnemy`)과 원거리·저격형(`RangedEnemy`, `HighBloodSugarFairy`)은 초안 그림을 연결하지 않고 기존 Idle·걷기·공격 에셋을 유지한다. `RangedEnemy`에 표시 컴포넌트를 붙이면 variant인 저격형까지 덮어쓰므로 베이스에도 붙이지 않으며, 전용 검증이 이를 검사한다.
-- 산사모-순수(`QuickRangedFairy`)는 2026-10-13부터 초안 원화 `sansamo-pure`를 단일 프레임으로 쓴다. 표시 컴포넌트는 variant 자신에만 붙이고 임시 파란 색조는 뺐다. 표시 폭은 Prefab의 `FairyKingdomArtworkView.localWidth`(0.7, 산사모-활발과 같은 키 약 1.2)로 조절하며 충돌 영역은 그대로다. 걷기·공격 프레임은 아직 없다. Play 미술 확인 전이다.
+- 산사모-순수(`QuickRangedFairy`)는 2026-10-13부터 초안 원화 `sansamo-pure`를 단일 프레임으로 쓴다. 표시 컴포넌트는 variant 자신에만 붙이고 임시 파란 색조는 뺐다. 표시 폭은 Prefab의 `FairyKingdomArtworkView.localWidth`(0.7, 산사모-활발과 같은 키 약 1.2)로 조절하며 충돌 영역은 그대로다. 2026-10-19에 걷기·꽃 발사 모션을 추가했다(아래 "산사모 순수 걷기·꽃 발사" 절).
 - 자동 실행: `TrickalFanGame.Editor.FairyKingdomArtworkSetup.ApplyAndVerifyBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkVerification.VerifyWithCombatRegressionsBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkPlayVerification.RunBatch` (`-batchmode`, **`-quit` 제외**). Play 검증은 전용 미리보기 씬과 격리된 probe만 사용하고 종료 코드를 반환한다.
 - 상세 결과와 Unity 렌더: `output/asset-integration/`. 자동 검증은 사용자 Play 미술 승인을 대신하지 않는다.
 
@@ -1997,10 +2006,124 @@ Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금�
 - 실제 Play: `F1 → — Artifact — → Show artifact drops → Drop 폭발 머핀` 획득 후 기본 공격 8회 적중.
 - 상세 범위와 미확인 항목: [작업 기록](art-prompts/muffin-explosion-realtime-v1.md).
 
-### 폭탄 폭발 불씨·충격파 (2026-10-16)
+### 폭탄 점멸·폭발 불씨·충격파·그을음 (2026-10-16, v2 2026-10-19)
 
-- Edit Mode: `Trickal Fan Game/Effects/Preview Bomb Burst` → `Open / reset Scene preview`. 폭발 원화(게임과 같은 0.15초 표시)·충격파 링·불씨 표시, 피해 반경, 0~0.8초 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
+- Edit Mode: `Trickal Fan Game/Effects/Preview Bomb Burst` → `Open / reset Scene preview`. 음수 시간은 도화선(도화선 길이 슬라이더, 기본 0.75초)이고 0이 폭발이다. 도화선 점멸·폭발 원화(게임과 같은 0.15초 표시)·충격파 링·불씨·그을음 표시, 피해 반경, 도화선~2.6초 시간 슬라이더·재생 속도·반복·재시작(도화선부터/폭발부터)을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
 - 검사: `Trickal Fan Game/Effects/Verify Bomb Burst` (`TrickalFanGame.Editor.BombBurstVerification.Verify`). 커밋 전 회귀는 `Verify Bomb Burst With Regressions`(`VerifyWithRegressionsBatch`, 2026-10-16 통과).
-- 정지 프레임 렌더: `Export Bomb Burst Frames` → `output/art-review/bomb-burst/unity-frames.png`(위: 원화 포함, 아래: 새 레이어만). 배치는 `VerifyAndExportBatch`이며 `-nographics` 없이 실행한다.
-- 실제 Play: 폭탄을 얻어 `F`로 설치하고 0.75초 뒤 폭발을 본다. 폭발 장애물도 같은 폭발을 쓰므로 함께 확인한다.
+- 정지 프레임 렌더: `Export Bomb Burst Frames` → `output/art-review/bomb-burst/unity-frames.png`(위: 원화 포함, 가운데: 보조 레이어만, 아래: 0.75초 도화선을 12등분한 점멸, 게임보다 크게). 배치는 `VerifyAndExportBatch`이며 `-nographics` 없이 실행한다.
+- 실제 Play: 폭탄을 얻어 `F`로 설치하고 0.75초 동안 빨라지는 점멸, 폭발, 바닥 그을음을 본다. 폭발 장애물(도화선 0.5초)도 같은 폭발을 쓰므로 함께 확인한다.
 - 상세 범위와 미확인 항목: [작업 기록](art-prompts/bomb-burst-v1.md).
+
+### 쫄따구 사망 폭발 분홍 폭발 (2026-10-18)
+
+- Edit Mode: `Trickal Fan Game/Effects/Preview Crumb Death Blast` → `Open / reset Scene preview`. 분홍 원화(게임과 같은 0.24초 표시·페이드)·섬광·분홍 구름·충격파 링·젤리 방울·부스러기·연기 표시, 피해 반경, 원화 폭, 0~0.6초 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
+- 검사: `Trickal Fan Game/Effects/Verify Crumb Death Blast` (`TrickalFanGame.Editor.CrumbDeathBlastVerification.Verify`). 커밋 전 회귀는 `Verify Crumb Death Blast With Regressions`(`VerifyWithRegressionsBatch`, 2026-10-18 통과).
+- 정지 프레임 렌더: `Export Crumb Death Blast Frames` → `output/art-review/crumb-death-blast/unity-frames.png`(위: 원화 포함, 아래: 새 레이어만). 배치는 `VerifyAndExportBatch`이며 `-nographics` 없이 실행한다.
+- 실제 Play: `F1 → — Room — → Spawn crumb minion (explodes on death)`으로 쫄따구를 소환해 처치하고 0.6초 예고 뒤 폭발을 본다.
+- 상세 범위와 미확인 항목: [작업 기록](art-prompts/crumb-death-blast-v1.md).
+
+## 환경 함정 애니메이션 검증 (2026-10-17)
+
+- Unity 메뉴: `Trickal Fan Game/Artwork/Verify Environment Hazard Frames`.
+- 배치 진입점: `TrickalFanGame.Editor.EnvironmentHazardArtworkVerification.Verify` (순수 검사, Setup 재실행 없음).
+- Game Scene Play → F1 → `— Trap —`에서 `Place PeriodicSpikes`, `Place Fire`, `Place PoisonMushroom`으로 확인한다.
+  버섯 첫 타격은 팽창, 두 번째 타격은 독가스 생성이다. 나무는 `— Obstacle —`의
+  `Hold a burn artifact (trees catch fire)`를 켜고 두 번 때리면 발화한다.
+- 원화·프레임 좌표 재생성 및 세부 확인: [환경 함정 에셋 기록](./art-prompts/environment-hazards-v1/README.md).
+- 불 함정: `Place Fire` 후 세 번 때리면 중간 불→잔불→소멸→식은 돌이 된다. 소멸 시작부터 안전하게 통과하며 재방문해도 식은 돌이 남는다. 물줄기·폭탄도 확인한다.
+  새 잔해 자동 검증은 위 메뉴에 포함되어 있다. [불 함정 v2 적용 기록](./art-prompts/environment-hazards-v2/README.md).
+
+## 산사모 순수 걷기·꽃 발사 (2026-10-19)
+
+- 프리팹 연결은 적용되어 있다. 재구성: `Trickal Fan Game/Artwork/Setup Sansamo Pure Motion`.
+- Edit Mode 미리보기: `Trickal Fan Game/Artwork/Preview Sansamo Pure Motion` → `Open / reset Scene preview`.
+  걷기·꽃 반동을 각각 켜고 끄며 시간·속도·발사 방향·좌우 반전을 조절한다. 원본 Scene은 저장하지 않는다.
+- 단독 검사: `Trickal Fan Game/Artwork/Verify Sansamo Pure Motion`.
+- 배치: `TrickalFanGame.Editor.SansamoPureMotionVerification.Verify` (Setup 없이 검사). 최종 종료 코드 0.
+- Play: F1 → `— Room —` → `Spawn pure Sansamo (walk + flower shots)`. 이동 중 꽃 반동·꽃 출발 탄·연사 후 정지를 확인한다.
+- 에셋·프롬프트·검수 대기 항목: [산사모 순수 기록](./art-prompts/sansamo-pure-motion.md).
+## 전투 효과음 Sound-0 (2026-10-19)
+
+에르핀 기본 공격·타격·피격과 저학년·고학년 스킬 효과음 8종. 음원은 외부에서 받지 않고 프로젝트에서 합성한다.
+
+- Unity 연결은 적용되어 있다. 재구성: `Trickal Fan Game/Audio/Setup Combat SFX`.
+- 단독 검사: `Trickal Fan Game/Audio/Verify Combat SFX`.
+- 배치(Setup 포함): `TrickalFanGame.Editor.CombatSfxVerification.SetupAndVerifyBatch`.
+- 배치(커밋 전 회귀): `TrickalFanGame.Editor.CombatSfxVerification.VerifyWithRegressionsBatch`.
+  고학년 돌진(Phase D)·저학년 스킬(Phase C)·사거리(Range-0)를 함께 돌린다. 기본 공격·돌진·유도탄에 이벤트를
+  추가했기 때문이다.
+- Play 확인: 기본 공격을 연타해 명중 폭발이 뭉개지지 않는지, Space로 시전 → 4발 → 폭발이 충분히 크게
+  들리는지, Q 돌진 중 발소리가 끝까지 유지되고 충돌에서 멈추는지, 피격음이 명중음과 구분되는지 듣는다.
+  틱 데미지음은 독이나 피해 오라를 얻어 적에게 지속 피해를 넣으면서 명중 폭발과 구분되는지 확인한다.
+  음량은 설정의 SFX 볼륨을 따른다.
+
+### 외부 음원 반입
+
+받은 음원 파일을 게임 경로로 넣을 때는 직접 복사하지 않고 임포터를 쓴다. 리샘플링·무음 잘라내기·레벨 정리·
+겹치기를 한 번에 처리하며, 어떤 원본이 어떤 역할에 들어갔는지가 `MANIFEST`에 남는다.
+
+```bash
+python tools/sfx-synth/import_sources.py "<원본 폴더>" game/Assets/Audio
+```
+
+- 역할별 원본 지정은 `tools/sfx-synth/import_sources.py`의 `MANIFEST`에 있다. 음원을 바꿀 때는 이 표를 고치고
+  다시 실행한 뒤 `Setup Combat SFX`를 돌린다.
+- `soundfile`(libsndfile 1.2 이상)과 `scipy`가 필요하다. mp3 디코딩과 ogg 인코딩을 libsndfile이 담당하므로
+  ffmpeg는 필요 없다.
+- 라이선스는 임포터가 확인하지 못한다. 새 음원을 넣으면 `docs/audio-sources.md`의 라이선스 표를 직접 채운다.
+
+### 음원 다시 만들기
+
+`tools/sfx-synth`는 파라미터로 WAV를 합성한다. numpy와 scipy가 필요하다.
+
+```bash
+python tools/sfx-synth/render_sfx.py output/sfx --burst=5
+```
+
+- 후보 전체와 5연타 버전, 실제 배치대로 겹친 합성 장면이 `output/sfx/<묶음>/`에 나온다.
+- 청취 페이지: `python tools/sfx-synth/audition_page.py output/sfx output/sfx/audition.html`.
+  WAV를 data URI로 넣은 단일 HTML이라 브라우저로 바로 열어 비교할 수 있다.
+- 채택본을 게임에 설치: `python tools/sfx-synth/render_sfx.py x --install=game/Assets/Audio/SFX`.
+  `render_sfx.py`의 `CHOSEN` 표가 역할 이름 ↔ 후보 대응을 가진다. 설치 후 `Setup Combat SFX`를 다시 실행한다.
+- 소리를 고칠 때는 음원을 다시 구하지 않고 해당 프리셋의 수치(`freq`, `slide`, `decay`, `lpf`, 레이어 `mix`)를
+  조절한다. 파라미터 설명은 `tools/sfx-synth/sfx_synth.py`의 docstring에 있다.
+
+## 크레딧 화면 Credits-0 (2026-10-20)
+
+전투 효과음에 CC BY 4.0 음원이 들어오면서 크레딧 표기가 의무가 됐다. 음원 출처와 라이선스를 게임 안에서
+보여주는 화면이며, 표기해야 할 내용은 코드가 아니라 `game/Assets/Resources/Credits.json`이 가진다.
+
+- 들어가는 길은 두 개다. 타이틀 화면 `크레딧` 버튼(프로필 등록 전에도 보인다)과 홈 메뉴 `나가기` 아래의
+  `크레딧` 버튼이다. 두 버튼 모두 같은 화면으로 가고, 화면의 `뒤로`는 들어온 쪽으로 돌아간다.
+- Unity 연결은 적용되어 있다. 재구성: `Trickal Fan Game/Credits/Setup Credits Screen`. Edit Mode에서 실행하며
+  `FrontendScene`을 열어 `CreditsPanel`과 두 버튼을 중복 없이 갱신하고, 데이터에 있는 글자를 Frontend TMP
+  글꼴에 미리 담는다. 새 글꼴 에셋은 만들지 않는다.
+- 단독 검사: `Trickal Fan Game/Credits/Verify Credits Screen`.
+- 배치(Setup 포함): `TrickalFanGame.Editor.CreditsScreenVerification.SetupAndVerifyBatch`.
+  Setup을 두 번 실행해 중복 오브젝트와 Scene GUID를 확인한 뒤 검사한다.
+- 배치(커밋 전 회귀): `TrickalFanGame.Editor.CreditsScreenVerification.VerifyWithRegressionsBatch`.
+  Frontend Flow와 Setting-1A를 함께 돌린다. Credits-0이 타이틀·홈 뷰에 필드를 더하고 Frontend 참조 프레임에
+  패널을 더하기 때문이다. 화면을 실제로 렌더링하므로 `-nographics`를 쓰지 않는다.
+- 검증기가 지키는 핵심 불변조건: CC BY 4.0 음원의 제작자·원본 링크·라이선스 이름·라이선스 링크·`modified`
+  고지가 데이터에 있고, 실제로 만들어진 화면 줄에도 모두 들어 있으며, 그 줄이 상자 폭을 넘지 않는다. 하나라도
+  빠지면 예외로 실패한다. 성공 로그는 `Credits-0 verification passed`다.
+- Play 확인: Frontend Scene Play → 타이틀 `크레딧` → 맨 위 `효과음 - 표기 의무 (CC BY 4.0)` 묶음의 두 줄에
+  제작자·freesound 링크·`Attribution 4.0 (modified)`·라이선스 링크가 모두 보이는지, 목록을 스크롤해 CC0·Pixabay·
+  자체 제작 묶음이 나오는지, `뒤로`로 타이틀에 돌아오는지 본다. 홈에서 들어갔을 때는 홈으로 돌아와야 한다.
+
+### 크레딧 항목 바꾸기
+
+음원을 바꿀 때 화면 코드는 건드리지 않는다.
+
+1. `tools/sfx-synth/import_sources.py`의 `MANIFEST`를 고쳐 음원을 바꾼다.
+2. `game/Assets/Resources/Credits.json`의 해당 항목을 고친다(UTF-8). 한 항목은 `title`, `author`, `source`,
+   `licenseName`, `licenseUrl`, `modified`, `usage`, `attributionRequired`를 가진다. 표기 의무가 있는 음원은
+   `attributionRequired`를 `true`로 두고 빈 칸을 남기지 않는다.
+3. `docs/audio-sources.md`의 라이선스 표를 같이 고친다.
+4. 글꼴에 없는 글자가 생길 수 있으므로 `Setup Credits Screen`을 다시 실행한 뒤 검증을 돌린다. CC BY 음원을
+   더하거나 뺐다면 `CreditsScreenVerification.RequiredAttribution` 표도 같이 고친다. 그 표가 "이 음원은 반드시
+   화면에 있어야 한다"를 뜻하므로, 데이터에서 지우기만 하면 검증이 실패한다.
+
+## 저혈당 요정 활발 걷기·공격 모션
+
+Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 모션을 재구성한다. `Verify Lively Fairy Motion`은 단독 검증이다. Game Scene Play → F1 → `— Room —` → `Spawn lively fairy (4-way shots)`로 걷기·웅크린 예고·빵을 들어 올리는 발사·회복을 확인한다. 구성과 미술 검수 기준은 [작업 기록](./art-prompts/lively-fairy-motion.md)을 따른다.

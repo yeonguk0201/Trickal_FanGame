@@ -97,8 +97,9 @@ namespace TrickalFanGame.Editor
             Assert(Mathf.Approximately(variant.ExplosionChance, spec.ExplosionChance) &&
                    (spec.ExplosionChance <= 0f ||
                     (variant.ExplosionPrefab != null &&
-                     Mathf.Approximately(variant.ExplosionFuse, Week23Obstacle5Setup.ExplosionFuse))),
-                $"Obstacle kind '{spec.VariantId}' must keep its explosion chance, fuse and bomb Prefab.");
+                     Mathf.Approximately(variant.ExplosionFuse, spec.ExplosionFuse) &&
+                     Mathf.Approximately(variant.ExplosionChainDelay, Week23Obstacle5Setup.ExplosionChainDelay))),
+                $"Obstacle kind '{spec.VariantId}' must keep its explosion chance, fuse, chain delay and bomb Prefab.");
             Assert(Mathf.Approximately(variant.EnemyChance, spec.EnemyChance) &&
                    (spec.EnemyChance <= 0f ||
                     (variant.EnemyCount == spec.EnemyCount && variant.EnemyPrefab ==

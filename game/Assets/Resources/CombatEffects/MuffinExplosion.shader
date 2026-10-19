@@ -2,7 +2,7 @@ Shader "TrickalFanGame/Muffin Explosion"
 {
     Properties
     {
-        _Mode ("0 flash, 1 fireball, 2 ring, 3 spark, 4 smoke, 5 ember", Float) = 0
+        _Mode ("0 flash, 1 fireball, 2 ring, 3 spark, 4 smoke, 5 ember, 6 scorch", Float) = 0
         _Opacity ("Layer opacity", Float) = 1
         _Age ("Normalized layer age", Float) = 0
         _Hole ("Fireball hollow radius", Float) = 0
@@ -97,6 +97,33 @@ Shader "TrickalFanGame/Muffin Explosion"
                     float core=1-smoothstep(0.0,0.55,d);
                     half3 c=lerp(i.color.rgb,half3(1,1,0.9),core*0.8);
                     return half4(c,(1-smoothstep(0.45,1,d))*i.color.a);
+                }
+                if (_Mode>5.5)
+                {
+                    // Scorch: soot burned into the floor. A black blot thrown out into sharp splatter spikes:
+                    // two rings of angular sectors, each peaking to a point whose length comes from a hash.
+                    // Sector edges fall to zero, so neighbours (and the atan2 seam) meet without a step.
+                    // _Age 0 is fresh (a dull red glow in the core cools away); _Erode breaks it up from the
+                    // spike tips inward as it fades.
+                    float2 drift=float2(_Seed*4.1,_Seed*2.9);
+                    float n=Fbm(q*2.4+drift);
+                    float turn=atan2(q.y,q.x)*0.15915494+0.5+_Seed*0.137;
+                    float s1=turn*9.0, s2=turn*17.0+0.5;
+                    float t1=1-abs(2*frac(s1)-1), t2=1-abs(2*frac(s2)-1);
+                    float spikes=pow(t1,3.0)*lerp(0.12,0.5,Hash(float2(fmod(floor(s1),9.0),_Seed)))
+                        +pow(t2,4.0)*lerp(0.0,0.2,Hash(float2(fmod(floor(s2),17.0),_Seed+3.1)));
+                    float boundary=min(0.4+spikes+(n-0.5)*0.12,0.97);
+                    float body=1-smoothstep(boundary-0.025,boundary+0.01,d);
+                    float core=1-smoothstep(0.0,0.42,d);
+                    float grain=Noise(i.world*9.0+_Seed*3.3);
+                    // The core holds out longest, so erosion takes the edge first.
+                    float wear=Noise(q*5.5-drift)*0.6+saturate(d/max(boundary,0.001))*0.55;
+                    body*=1-smoothstep(1.15-_Erode*1.3-0.1,1.15-_Erode*1.3+0.1,wear);
+                    half3 c=lerp(half3(0.05,0.035,0.025),half3(0.008,0.007,0.006),core)*lerp(0.7,1.3,grain);
+                    float hot=(1-_Age)*smoothstep(0.5,0.9,core)*(0.7+0.3*n);
+                    c=lerp(c,half3(0.85,0.26,0.05),hot*0.6);
+                    // Blending is linear, so a dark mark needs near-full alpha to read as black, not grey.
+                    return half4(c,body*(0.9+0.1*core)*(0.94+0.06*grain)*_Opacity);
                 }
                 if (_Mode>4.5)
                 {

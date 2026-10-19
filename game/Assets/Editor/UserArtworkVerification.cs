@@ -15,7 +15,7 @@ namespace TrickalFanGame.Editor
         {
             string[] paths = AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets/Resources/UserArtwork" })
                 .Select(AssetDatabase.GUIDToAssetPath).ToArray();
-            Require(paths.Length == 45, "Expected all 45 supplied PNGs, including the Goldi shop and gold pickup artwork.");
+            Require(paths.Length == 49, "Expected all 49 supplied PNGs, including the Goldi shop and gold pickup artwork.");
             foreach (string path in paths)
             {
                 Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
@@ -54,7 +54,7 @@ namespace TrickalFanGame.Editor
                         "Artwork must retain its colors and the correct frame style: " + item.ItemId);
                     linked++;
                 }
-                Require(linked == 30, "Expected 30 existing item definitions with supplied artwork; got " + linked);
+                Require(linked == 34, "Expected 34 existing item definitions with supplied artwork; got " + linked);
                 Require(!UserArtwork.Apply(image, (ItemDefinition)null) && image.sprite == null && image.material == Graphic.defaultGraphicMaterial,
                     "An empty slot must clear the previous artwork and material.");
                 foreach (string name in new[] { "HealthPickup", "SPPickup" })
@@ -65,7 +65,7 @@ namespace TrickalFanGame.Editor
                     Require(display.sprite == UserArtwork.Load(key) && display.color == Color.white,
                         name + " must use the supplied capsule, including in the shop.");
                 }
-                Debug.Log("User artwork verification passed: 45 PNGs, Goldi shopkeeper, gold pickup, 30 item illustrations, four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
+                Debug.Log("User artwork verification passed: 49 PNGs, Goldi shopkeeper, gold pickup, 34 item illustrations, four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
                 CapturePreview();
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }

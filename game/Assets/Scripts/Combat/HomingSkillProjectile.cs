@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TrickalFanGame.Room;
 using UnityEngine;
@@ -32,6 +33,11 @@ namespace TrickalFanGame.Combat
         public bool DidExplode { get; private set; }
         public bool IsLaunched => owner != null;
         public bool HasAssignedTarget => hasAssignedTarget;
+
+        // Sound-0: raised when the shot explodes, for presentation only. It
+        // fires whether or not the blast found a target, because the
+        // explosion is shown either way.
+        public event Action Exploded;
 
         private void Awake()
         {
@@ -133,6 +139,7 @@ namespace TrickalFanGame.Combat
             DidExplode = true;
             body.linearVelocity = Vector2.zero;
             damagedTargets.Clear();
+            Exploded?.Invoke();
             CombatSpriteEffect.Play("circular-explosion", transform.position,
                 explosionRadius * 2.2f, explosionRadius * 2.2f, 0.4f,
                 owner != null ? owner.transform : transform, GetComponent<SpriteRenderer>());

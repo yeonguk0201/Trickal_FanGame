@@ -23,7 +23,11 @@ namespace TrickalFanGame.Editor
         public const int MarieWeight = 25;
         public const float VaultRareItemChance = 0.05f;
         public const float VaultRareArtifactShare = 0.3f;
-        public const float ExplosionFuse = 0.5f;
+        // Bomb-Chain (2026-10-19): the exploding box goes off when it breaks; this is only the gap before one caught
+        // in another explosion goes off. It replaced a 0.5 s fuse. Shady's random box keeps the visible 0.5 s fuse
+        // because its explosion is a surprise.
+        public const float ExplosionChainDelay = 0.12f;
+        public const float RandomBoxExplosionFuse = 0.5f;
         public const int ExplosiveBoxHits = 2;
         public const float RandomBoxExplosionChance = 0.25f;
         // Enemy-6: of the boxes that do not explode, a fifth release five 쥬비 (15% of all boxes), and 83% of the rest
@@ -39,8 +43,9 @@ namespace TrickalFanGame.Editor
                 float dropChance, int dropCount, (string dropId, int weight)[] dropWeights, Color intactColor,
                 Color crackedColor, float rareItemChance = 0f, float rareArtifactShare = 0f,
                 int requiredHits = DestructibleObstacle.DefaultRequiredHits, float explosionChance = 0f,
-                float enemyChance = 0f, int enemyCount = 1)
+                float enemyChance = 0f, int enemyCount = 1, float explosionFuse = 0f)
             {
+                ExplosionFuse = explosionFuse;
                 RequiredHits = requiredHits;
                 ExplosionChance = explosionChance;
                 EnemyChance = enemyChance;
@@ -71,6 +76,8 @@ namespace TrickalFanGame.Editor
             public float RareArtifactShare { get; }
             public int RequiredHits { get; }
             public float ExplosionChance { get; }
+            // Above zero the explosion leaves a visible bomb for this long; zero explodes at once.
+            public float ExplosionFuse { get; }
             public float EnemyChance { get; }
             public int EnemyCount { get; }
             // A kind that always explodes has no drop table.
@@ -116,7 +123,7 @@ namespace TrickalFanGame.Editor
             new Color(0.35f, 0.38f, 0.5f), new Color(0.15f, 0.16f, 0.22f),
             VaultRareItemChance, VaultRareArtifactShare);
 
-        // Obstacle-6. Two hits or a bomb arm a short fuse, then it explodes exactly like a player bomb: it hurts
+        // Obstacle-6. Two hits or a bomb set it off at once (Bomb-Chain), exactly like a player bomb: it hurts
         // enemies and the player, breaks obstacles (so boxes chain) and opens secret walls, diamond chests and vaults.
         public static readonly VariantSpec ExplosiveBox = new("explosive-box", "폭발 상자", 15,
             ObstacleBreakRule.Hits, 0f, 1, null,
@@ -129,7 +136,7 @@ namespace TrickalFanGame.Editor
             new[] { ("gold", 30), ("heart", 20), ("sp", 20), ("key", 15), ("bomb", 15) },
             new Color(0.5f, 0.3f, 0.7f), new Color(0.22f, 0.12f, 0.34f),
             explosionChance: RandomBoxExplosionChance, enemyChance: RandomBoxEnemyChance,
-            enemyCount: RandomBoxEnemyCount);
+            enemyCount: RandomBoxEnemyCount, explosionFuse: RandomBoxExplosionFuse);
 
         // The rarest kind: always two pickups, and one artifact on top a quarter of the time.
         public static readonly VariantSpec MayoCollectionBox = new("mayo-collection-box", "마요의 수집품 상자", 3,
@@ -205,7 +212,7 @@ namespace TrickalFanGame.Editor
                 : null;
             if (spec.ExplosionChance > 0f && bomb == null)
                 throw new InvalidOperationException($"{spec.VariantId} needs the Special-2 placed bomb Prefab.");
-            variant.ConfigureExplosion(spec.ExplosionChance, ExplosionFuse, bomb);
+            variant.ConfigureExplosion(spec.ExplosionChance, spec.ExplosionFuse, ExplosionChainDelay, bomb);
             variant.ConfigureEnemies(spec.EnemyChance, spec.EnemyCount,
                 spec.EnemyChance > 0f ? Week23Enemy6Setup.EnsurePrefab() : null);
             if (spec.RareItemChance > 0f)

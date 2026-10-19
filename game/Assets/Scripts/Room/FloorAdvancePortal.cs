@@ -1,4 +1,5 @@
 using TrickalFanGame.Player;
+using TrickalFanGame.Audio;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -111,6 +112,8 @@ namespace TrickalFanGame.Room
 
             if (assembler.TryLoadFloor(destinationFloor, player, out string error))
             {
+                // Sound-0: only a portal that actually took the player.
+                CombatSfx.Play(CombatSfxCue.BossPortal);
                 Debug.Log($"[FloorAdvancePortal] Entered floor {destinationFloor}.", this);
                 return true;
             }

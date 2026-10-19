@@ -3,8 +3,9 @@ using UnityEngine;
 namespace TrickalFanGame.Combat
 {
     // Visual only: what a placed bomb leaves around its drawn explosion. A faint shockwave ring whose outer edge
-    // stops at the damage radius, and embers that keep drifting after the 0.15 s explosion drawing is gone.
-    // Shares the MuffinExplosion shader's ring mode and adds its ember mode. Deterministic: never consumes UnityEngine.Random.
+    // stops at the damage radius, embers that keep drifting after the 0.15 s explosion drawing is gone, and a
+    // scorch mark on the floor that cools and crumbles away. Shares the MuffinExplosion shader's ring mode and
+    // adds its ember and scorch modes. Deterministic: never consumes UnityEngine.Random.
     public sealed class BombBurstEffect : MonoBehaviour
     {
         public const float Duration = 0.8f;
@@ -13,11 +14,22 @@ namespace TrickalFanGame.Combat
         public const float RingOpacity = 0.8f;
         public const int EmberCount = 18;
         public const float EmberReach = 0.9f;
+        // The scorch appears under the explosion drawing, so it is already there when the drawing disappears.
+        public const float ScorchStart = 0.04f;
+        public const float ScorchFull = 0.16f;
+        public const float ScorchCooled = 0.9f;
+        public const float ScorchFadeStart = 1.6f;
+        public const float Lifetime = 2.6f;
+        public const float ScorchSize = 0.58f;
+        public const float ScorchOpacity = 1f;
+        // Above room floors (-100), under ground shadows (-50) and everything standing on the floor.
+        public const int ScorchSortingOrder = -60;
 
         private static int nextSeed;
 
         private Mesh quad;
         private MeshRenderer ring;
+        private MeshRenderer scorch;
         private ParticleSystem embers;
         private Material emberMaterial;
         private MaterialPropertyBlock properties;
@@ -32,6 +44,8 @@ namespace TrickalFanGame.Combat
         public float Radius => radius;
         public float RingOuterRadius { get; private set; }
         public MeshRenderer Ring => ring;
+        public MeshRenderer Scorch => scorch;
+        public float ScorchOpacityNow { get; private set; }
         public ParticleSystem Embers => embers;
 
         // owner: followed only to drop the effect on a room teleport; exploding obstacles pass null.
@@ -87,6 +101,17 @@ namespace TrickalFanGame.Combat
             ring.sortingLayerID = layer;
             ring.sortingOrder = order - 2;
 
+            var scorchOwner = new GameObject("Scorch mark");
+            scorchOwner.transform.SetParent(transform, false);
+            scorchOwner.transform.localScale = new Vector3(radius * ScorchSize, radius * ScorchSize, 1f);
+            scorchOwner.AddComponent<MeshFilter>().sharedMesh = quad;
+            scorch = scorchOwner.AddComponent<MeshRenderer>();
+            scorch.sharedMaterial = material;
+            scorch.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            scorch.receiveShadows = false;
+            scorch.sortingLayerID = layer;
+            scorch.sortingOrder = ScorchSortingOrder;
+
             var emberOwner = new GameObject("Embers");
             emberOwner.transform.SetParent(transform, false);
             embers = emberOwner.AddComponent<ParticleSystem>();
@@ -133,6 +158,7 @@ namespace TrickalFanGame.Combat
 
         public void RenderAt(float seconds)
         {
+            RenderScorchAt(seconds);
             ring.enabled = seconds >= RingStart && seconds < RingEnd;
             if (!ring.enabled)
             {
@@ -153,6 +179,22 @@ namespace TrickalFanGame.Combat
             properties.SetFloat("_Opacity", RingOpacity *
                 (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.5f, 1f, progress))));
             ring.SetPropertyBlock(properties);
+        }
+
+        private void RenderScorchAt(float seconds)
+        {
+            float appear = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(ScorchStart, ScorchFull, seconds));
+            float fade = Mathf.InverseLerp(ScorchFadeStart, Lifetime, seconds);
+            ScorchOpacityNow = seconds < Lifetime ? ScorchOpacity * appear * (1f - fade * fade) : 0f;
+            scorch.enabled = ScorchOpacityNow > 0.001f;
+            if (!scorch.enabled) return;
+            properties.Clear();
+            properties.SetFloat("_Mode", 6f);
+            properties.SetFloat("_Age", Mathf.InverseLerp(ScorchFull, ScorchCooled, seconds));
+            properties.SetFloat("_Erode", Mathf.SmoothStep(0f, 1f, fade));
+            properties.SetFloat("_Seed", seed % 13);
+            properties.SetFloat("_Opacity", ScorchOpacityNow);
+            scorch.SetPropertyBlock(properties);
         }
 
         public void EmitAt(float seconds)
@@ -199,9 +241,10 @@ namespace TrickalFanGame.Combat
             RenderAt(seconds);
         }
 
-        public void SetPreviewLayers(bool showRing, bool showEmbers)
+        public void SetPreviewLayers(bool showRing, bool showEmbers, bool showScorch = true)
         {
             ring.enabled &= showRing;
+            scorch.enabled &= showScorch;
             embers.GetComponent<ParticleSystemRenderer>().enabled = showEmbers;
         }
 
@@ -216,7 +259,7 @@ namespace TrickalFanGame.Combat
                 sourcePosition = source.position;
             }
             age += Time.deltaTime;
-            if (age >= Duration) { Destroy(gameObject); return; }
+            if (age >= Lifetime) { Destroy(gameObject); return; }
             RenderAt(age);
         }
 

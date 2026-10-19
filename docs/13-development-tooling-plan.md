@@ -671,3 +671,39 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 - 구현: `HitFeedbackVerification` 착탄 스파크 방향·반경·시간 역행·소멸, 히트스톱 복원·간격·일시정지 양보, 카메라 흔들림 상한 검사.
 - 구현: 개발 패널 `— Player —`의 `CRIT 100%` 버튼과 현재 치명타 확률 표시.
 - Play 표시는 2026-10-14 사용자 확인으로 수용. 미리보기 창의 실제 조작 확인은 대기. 실행 방법은 [개발 환경](05-development-setup.md), 근거는 [효과 기록](art-prompts/hit-spark.md)에 기록한다.
+## 환경 함정 표시 검증 추가 (2026-10-17)
+
+- `EnvironmentHazardArtworkVerification.Verify` 구현·배치 통과. 24프레임, 상태별 정지 이미지,
+  가시 상태 전환, 버섯 피격, 나무 발화, 고정 충돌체, 독가스 감쇠·종료를 검사한다.
+- 실행법은 `docs/05-development-setup.md`, 실제 Play 미술 검수 상태는 `docs/art-prompts/environment-hazards-v1/README.md`에 기록한다.
+- 후속 불 함정 검증: 48프레임·타격 단계·소멸 마지막 프레임·무충돌 잔해·피해 거절·방 복원·물/폭탄 소화 검사와 Trap-0 단독 검증을 같은 진입점에서 실행한다. 배치 통과, 상세 기록은 `docs/art-prompts/environment-hazards-v2/README.md`.
+
+## 산사모 순수 모션 검수 도구 (2026-10-19)
+
+- `SansamoPureMotionPreview`: 격리 Scene에서 런타임 걷기·꽃 반동의 독립 재생, 시간/속도/방향/좌우 조절 구현.
+- `SansamoPureMotionVerification`: 실제 꽃 발사점, 이동 중 공격, 벽 차단, 프레임·반동·정리 단독 검사 구현 및 배치 통과.
+- 개발 패널 Room에 순수 소환 버튼 추가. 미리보기 창 조작과 실제 Play 미술 검수는 사용자가 확인했다(2026-10-19).
+- 실행법은 [개발 환경](05-development-setup.md), 제작·검증 근거는 [작업 기록](art-prompts/sansamo-pure-motion.md).
+## 효과음 합성 도구 (2026-10-19, Sound-0)
+
+Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터로 합성할 수 있다. 외부 음원을 받지 않으므로
+라이선스 관리 대상이 늘지 않고, 수정 요청이 와도 음원을 다시 구하는 대신 수치만 고쳐 다시 렌더한다.
+
+- `tools/sfx-synth/sfx_synth.py`: 엔진. sfxr식 파라미터 한 벌로 WAV를 만든다. 사인·삼각·사각·노이즈,
+  피치 슬라이드·아르페지오·비브라토, 저역/고역 필터와 필터 스윕, 비트 크러시, 에코를 가진다.
+  여러 층을 시간차와 음량을 달리해 겹치는 `layers`가 있어 충돌음(균열 + 저역 몸통 + 파편)을 각각 조절할 수 있다.
+- `tools/sfx-synth/render_sfx.py`: 소리 정의와 실행 진입점. 묶음별 후보, 자주 울리는 소리의 5연타 버전,
+  게임이 실제로 터뜨리는 순서·간격으로 겹친 합성 장면, 채택본 설치(`--install`)를 담당한다.
+- `tools/sfx-synth/audition_page.py`: 후보를 WAV data URI로 넣은 단일 HTML 청취 페이지를 만든다.
+  파형과 재생 위치를 함께 보여줘 후보를 눈과 귀로 같이 비교한다.
+
+판단에 필요한 것은 단독 재생이 아니라 실제 배치였다. 저학년 스킬은 시전 1 + 발사 4(0.08초 간격) + 폭발 4가
+0.9초 안에 겹치는 사건이고, 기본 공격과 타격음은 0.09초 차이로 붙는다. 그래서 합성 장면과 연타 버전을 같이 만든다.
+
+- 채택 조합과 Unity 연결은 [음원 출처](audio-sources.md), 실행법은 [개발 환경](05-development-setup.md)에 기록한다.
+- 한계: 사람 목소리와 실제 악기·현장 녹음은 만들지 못한다. 그런 소리가 필요하면 외부 음원을 받아
+  `audio-sources.md`의 라이선스 표에 추가한다.
+
+### 저혈당 요정 활발 모션 구성·검증 (2026-10-19)
+
+`LivelyFairyMotionSetup`은 단일 프리팹과 모션 시트의 재구성 및 단독 검증을 제공한다. 실행법은 [개발 환경](./05-development-setup.md)의 저혈당 요정 활발 모션 절, 검수 범위는 [작업 기록](./art-prompts/lively-fairy-motion.md)에 기록한다.

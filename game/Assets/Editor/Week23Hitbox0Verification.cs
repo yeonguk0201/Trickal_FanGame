@@ -82,6 +82,7 @@ namespace TrickalFanGame.Editor
                 ValidateEnemiesUseBody();
                 ValidateDoorwayUsesFeet();
                 ValidateShotAlongWallAbove();
+                ValidateShotIntoHuggedObstacle();
             }
             finally
             {
@@ -244,7 +245,7 @@ namespace TrickalFanGame.Editor
                     Collider2D shotCollider = shot.GetComponent<Collider2D>();
                     Assert(shotCollider.Distance(wall).isOverlapped,
                         "The probe must reproduce the bug: a sideways shot from the body center starts in the wall.");
-                    shot.PushOutOfWallsBeside(direction);
+                    shot.PushOutOfWallsBeside(direction, center);
                     Assert(!shotCollider.Distance(wall).isOverlapped,
                         $"A shot fired {(sign > 0f ? "right" : "left")} along the wall above must start clear of it.");
                     Assert(Mathf.Abs(shot.transform.position.x - (center.x + sign * spawnOffset)) < 0.001f &&
@@ -259,11 +260,48 @@ namespace TrickalFanGame.Editor
 
                 Projectile upward = Shot(root, center + Vector2.up * spawnOffset);
                 Vector3 before = upward.transform.position;
-                upward.PushOutOfWallsBeside(Vector2.up);
+                upward.PushOutOfWallsBeside(Vector2.up, center);
                 Assert(upward.transform.position == before &&
                        upward.GetComponent<Collider2D>().Distance(wall).isOverlapped,
                     "A shot fired into the wall must not be moved; the wall still takes it.");
             });
+        }
+
+        // Shot-0 (2026-10-19 play feedback): hugging a 1x1 obstacle off its center, a shot fired into it sank deeper
+        // forward than sideways, so it was pushed out sideways and flew past the obstacle. The line from the body
+        // center crosses the obstacle, so the obstacle is ahead and must take the shot where it starts.
+        private static void ValidateShotIntoHuggedObstacle()
+        {
+            const float spawnOffset = 0.65f;
+            foreach (float offCenter in new[] { 0f, 0.25f, -0.4f })
+            {
+                Run($"shot into hugged obstacle {offCenter:F2}", root =>
+                {
+                    Box(root, "Environment", Origin + new Vector2(offCenter, 2f), Vector2.one);
+                    Rigidbody2D body = Player(root, Origin);
+                    Drive(body, Vector2.up);
+                    Vector2 center = body.position;
+                    Collider2D obstacle = root.GetComponentsInChildren<BoxCollider2D>().Single();
+                    Assert(Mathf.Abs(center.x - Origin.x) < 0.001f && obstacle.bounds.min.y - center.y < 0.2f,
+                        "The probe player must stand against the obstacle below it.");
+
+                    Projectile shot = Shot(root, center + Vector2.up * spawnOffset);
+                    Collider2D shotCollider = shot.GetComponent<Collider2D>();
+                    ColliderDistance2D gap = shotCollider.Distance(obstacle);
+                    Vector2 separation = gap.pointB - gap.pointA;
+                    Assert(gap.isOverlapped, "The probe shot must start inside the hugged obstacle.");
+                    if (Mathf.Abs(offCenter) >= 0.25f)
+                    {
+                        Assert(Mathf.Abs(separation.x) > Mathf.Abs(separation.y),
+                            "The probe must reproduce the bug: the way out sideways is shorter than forward.");
+                    }
+
+                    Vector3 before = shot.transform.position;
+                    shot.PushOutOfWallsBeside(Vector2.up, center);
+                    Assert(shot.transform.position == before && shotCollider.Distance(obstacle).isOverlapped,
+                        $"A shot fired into an obstacle hugged {offCenter:F2} off its center must stay and hit it.");
+                });
+            }
         }
 
         private static Projectile Shot(GameObject root, Vector2 position)

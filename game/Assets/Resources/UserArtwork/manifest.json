@@ -213,5 +213,25 @@
     "source": "명상의 시간.png",
     "resource": "single-spell-meditation-time",
     "connected": true
+  },
+  {
+    "source": "칸타의 팽이.png",
+    "resource": "artifact-kanta-top",
+    "connected": true
+  },
+  {
+    "source": "칸나의 대포.png",
+    "resource": "artifact-kanna-cannon",
+    "connected": true
+  },
+  {
+    "source": "에슈르의 마도서.png",
+    "resource": "single-spell-eshur-grimoire",
+    "connected": true
+  },
+  {
+    "source": "엘리스의 타로카드.png",
+    "resource": "single-spell-ellis-tarot-card",
+    "connected": true
   }
 ]

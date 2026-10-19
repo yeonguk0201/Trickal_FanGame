@@ -7,16 +7,25 @@ namespace TrickalFanGame.Combat
     public sealed class ProceduralWaterStream : MonoBehaviour
     {
         private const int Segments = 80;
+        // Extra strip width past the water edge for beads clinging to it; must match _Halo in the shader.
+        private const float BeadMargin = 1.18f;
+        public const int MaxMist = 32;
         private readonly Vector3[] vertices = new Vector3[(Segments + 1) * 2];
         private readonly Vector2[] uvs = new Vector2[(Segments + 1) * 2];
         private readonly Vector3[] splashVertices = new Vector3[4];
+        private readonly Vector3[] muzzleVertices = new Vector3[4];
         private Mesh mesh;
         private MeshRenderer body;
         private Mesh splashMesh;
         private MeshRenderer splash;
         private Material splashMaterial;
+        private Mesh muzzleMesh;
+        private MeshRenderer muzzle;
+        private Material muzzleMaterial;
         private ParticleSystem droplets;
         private Material dropMaterial;
+        private ParticleSystem mist;
+        private Material mistMaterial;
         private MaterialPropertyBlock properties;
         private GameObject source;
         private Health sourceHealth;
@@ -24,7 +33,7 @@ namespace TrickalFanGame.Combat
         private bool atWall;
         private float started, ends, width;
         private Vector2 start, end, previousSource;
-        private int emission;
+        private int emission, mistEmission, emissionTick;
         private float nextEmission;
         private bool impactEmitted;
 
@@ -35,6 +44,9 @@ namespace TrickalFanGame.Combat
         public ParticleSystem Droplets => droplets;
         public bool SplashVisible => splash != null && splash.enabled;
         public Mesh SplashMesh => splashMesh;
+        public bool MuzzleVisible => muzzle != null && muzzle.enabled;
+        public Mesh MuzzleMesh => muzzleMesh;
+        public ParticleSystem Mist => mist;
 
         public static ProceduralWaterStream Create(GameObject owner, bool isTransient = false)
         {
@@ -71,40 +83,17 @@ namespace TrickalFanGame.Combat
             body.sortingOrder = (sorting != null ? sorting.sortingOrder : 0) - 1;
             body.enabled = false;
 
-            var splashOwner = new GameObject("Contact water fan");
-            splashOwner.transform.SetParent(transform, false);
-            splashMesh = new Mesh { name = "Shasha contact fan" };
-            splashMesh.vertices = new Vector3[4];
-            splashMesh.uv = new[] { new Vector2(0, -1), new Vector2(0, 1),
-                new Vector2(1, -1), new Vector2(1, 1) };
-            splashMesh.triangles = new[] { 0, 1, 2, 2, 1, 3 };
-            splashOwner.AddComponent<MeshFilter>().sharedMesh = splashMesh;
-            splash = splashOwner.AddComponent<MeshRenderer>();
-            splashMaterial = new Material(material) { name = "Shasha contact foam" };
-            splashMaterial.SetFloat("_Splash", 1);
-            splash.sharedMaterial = splashMaterial;
-            splash.sortingLayerID = body.sortingLayerID;
-            splash.sortingOrder = body.sortingOrder + 1;
-            splash.enabled = false;
+            splash = CreateQuad("Contact water fan", material, "_Splash", body.sortingOrder + 1,
+                "Shasha contact fan", out splashMesh, out splashMaterial);
+            // The gush leaving the jar mouth. Drawn under the body so the stream stays continuous.
+            muzzle = CreateQuad("Nozzle water gush", material, "_Muzzle", body.sortingOrder - 1,
+                "Shasha nozzle gush", out muzzleMesh, out muzzleMaterial);
 
-            var dropOwner = new GameObject("World water droplets");
-            dropOwner.transform.SetParent(transform, false);
-            droplets = dropOwner.AddComponent<ParticleSystem>();
-            droplets.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            droplets.useAutoRandomSeed = false;
-            droplets.randomSeed = 37;
+            droplets = CreateParticles("World water droplets", 37, 96, material, "_Droplet",
+                body.sortingOrder + 1, out dropMaterial);
             var main = droplets.main;
-            main.duration = 0.01f;
-            main.playOnAwake = false;
-            main.loop = false;
-            main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.maxParticles = 96;
             main.startLifetime = 0.24f;
-            main.startSpeed = 0f;
             main.startSize3D = true;
-            main.gravityModifier = 0f;
-            var emit = droplets.emission; emit.enabled = false;
-            var shape = droplets.shape; shape.enabled = false;
             var color = droplets.colorOverLifetime;
             color.enabled = true;
             var gradient = new Gradient();
@@ -115,12 +104,71 @@ namespace TrickalFanGame.Combat
             sizeOverLifetime.enabled = true;
             sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1,
                 AnimationCurve.EaseInOut(0, 1, 1, 0.25f));
-            var dropRenderer = droplets.GetComponent<ParticleSystemRenderer>();
-            dropMaterial = new Material(material) { name = "Shasha water droplets" };
-            dropMaterial.SetFloat("_Droplet", 1);
-            dropRenderer.sharedMaterial = dropMaterial;
-            dropRenderer.sortingLayerID = body.sortingLayerID;
-            dropRenderer.sortingOrder = body.sortingOrder + 1;
+
+            // Fine spray haze: soft, slow and short-lived, independent from the bead droplets.
+            mist = CreateParticles("World water mist", 71, MaxMist, material, "_Mist",
+                body.sortingOrder - 1, out mistMaterial);
+            var mistMain = mist.main;
+            mistMain.startLifetime = 0.45f;
+            var mistColor = mist.colorOverLifetime;
+            mistColor.enabled = true;
+            var haze = new Gradient();
+            haze.SetKeys(new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
+                new[] { new GradientAlphaKey(0, 0), new GradientAlphaKey(1, 0.15f),
+                    new GradientAlphaKey(0.55f, 0.55f), new GradientAlphaKey(0, 1) });
+            mistColor.color = haze;
+            var mistSize = mist.sizeOverLifetime;
+            mistSize.enabled = true;
+            mistSize.size = new ParticleSystem.MinMaxCurve(1, AnimationCurve.EaseInOut(0, 0.8f, 1, 1.6f));
+        }
+
+        private MeshRenderer CreateQuad(string name, Material material, string mode, int order, string meshName,
+            out Mesh quad, out Material quadMaterial)
+        {
+            var owner = new GameObject(name);
+            owner.transform.SetParent(transform, false);
+            quad = new Mesh { name = meshName };
+            quad.vertices = new Vector3[4];
+            quad.uv = new[] { new Vector2(0, -1), new Vector2(0, 1),
+                new Vector2(1, -1), new Vector2(1, 1) };
+            quad.triangles = new[] { 0, 1, 2, 2, 1, 3 };
+            owner.AddComponent<MeshFilter>().sharedMesh = quad;
+            var renderer = owner.AddComponent<MeshRenderer>();
+            quadMaterial = new Material(material) { name = meshName };
+            quadMaterial.SetFloat(mode, 1);
+            renderer.sharedMaterial = quadMaterial;
+            renderer.sortingLayerID = body.sortingLayerID;
+            renderer.sortingOrder = order;
+            renderer.enabled = false;
+            return renderer;
+        }
+
+        private ParticleSystem CreateParticles(string name, uint seed, int limit, Material material, string mode,
+            int order, out Material particleMaterial)
+        {
+            var owner = new GameObject(name);
+            owner.transform.SetParent(transform, false);
+            var system = owner.AddComponent<ParticleSystem>();
+            system.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            system.useAutoRandomSeed = false;
+            system.randomSeed = seed;
+            var main = system.main;
+            main.duration = 0.01f;
+            main.playOnAwake = false;
+            main.loop = false;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.maxParticles = limit;
+            main.startSpeed = 0f;
+            main.gravityModifier = 0f;
+            var emit = system.emission; emit.enabled = false;
+            var shape = system.shape; shape.enabled = false;
+            var renderer = system.GetComponent<ParticleSystemRenderer>();
+            particleMaterial = new Material(material) { name = name };
+            particleMaterial.SetFloat(mode, 1);
+            renderer.sharedMaterial = particleMaterial;
+            renderer.sortingLayerID = body.sortingLayerID;
+            renderer.sortingOrder = order;
+            return system;
         }
 
         public void Begin(Vector2 from, Vector2 to, float lineWidth, float now, float duration, bool hitsWall)
@@ -130,10 +178,12 @@ namespace TrickalFanGame.Combat
             width = Mathf.Max(0.001f, lineWidth);
             nextEmission = now;
             impactEmitted = false;
+            emissionTick = 0;
             SetPath(from, to, hitsWall);
             RenderAt(now);
             if (!Application.isPlaying) return;
             droplets.Play();
+            mist.Play();
             EmitAt(now);
         }
 
@@ -142,8 +192,11 @@ namespace TrickalFanGame.Combat
             start = from; end = to; atWall = hitsWall;
             // Keep splash decoration on the playable side of the current wall plane.
             Vector2 forward = (end - start).normalized;
-            dropMaterial.SetVector("_EndPlane", new Vector4(end.x, end.y, forward.x, forward.y));
+            var plane = new Vector4(end.x, end.y, forward.x, forward.y);
+            dropMaterial.SetVector("_EndPlane", plane);
             dropMaterial.SetFloat("_AtWall", atWall ? 1 : 0);
+            mistMaterial.SetVector("_EndPlane", plane);
+            mistMaterial.SetFloat("_AtWall", atWall ? 1 : 0);
         }
 
         public void RenderAt(float now)
@@ -152,6 +205,8 @@ namespace TrickalFanGame.Combat
             float length = offset.magnitude;
             body.enabled = now >= started && now < ends && length > 0.001f;
             splash.enabled = body.enabled && atWall;
+            // Cutter/bounce links start on an enemy, not at the jar.
+            muzzle.enabled = body.enabled && !transient;
             if (!body.enabled) return;
             Vector2 forward = offset / length;
             Vector2 side = new(-forward.y, forward.x);
@@ -167,7 +222,7 @@ namespace TrickalFanGame.Combat
                 float ripple = 1 + 0.20f * Mathf.Sin(phase) +
                                0.07f * Mathf.Sin(x * 19 - now * 57);
                 float nozzle = 0.72f + 0.28f * Mathf.SmoothStep(0, 1, Mathf.Min(1, x / 0.18f));
-                float radius = width * 0.72f * ripple * nozzle * (0.4f + 0.6f * envelope);
+                float radius = width * 0.72f * BeadMargin * ripple * nozzle * (0.4f + 0.6f * envelope);
                 float pin = Mathf.SmoothStep(0, 1, Mathf.Min(x, length - x) / 0.24f);
                 float wave = width * 0.32f * pin * (Mathf.Sin(phase) +
                     0.25f * Mathf.Sin(x * 12 - now * 43));
@@ -185,6 +240,7 @@ namespace TrickalFanGame.Combat
             properties.SetFloat("_Length", length);
             properties.SetFloat("_BurstAge", age);
             properties.SetFloat("_AtWall", atWall ? 1 : 0);
+            properties.SetFloat("_Width", width);
             body.SetPropertyBlock(properties);
             if (splash.enabled)
             {
@@ -203,20 +259,43 @@ namespace TrickalFanGame.Combat
                 splashMesh.RecalculateBounds();
                 splash.SetPropertyBlock(properties);
             }
+            if (muzzle.enabled)
+            {
+                // Opens hard on the first frames, then breathes with the pump pulse. The forward reach
+                // is limited by the path so a wall right in front cannot push the gush through it.
+                float burst = 1 + 0.35f * (1 - Mathf.SmoothStep(0, 1, Mathf.Clamp01(age / 0.3f)));
+                float breathe = 1 + 0.12f * Mathf.Sin(now * 32f);
+                float reach = Mathf.Min(length, width * 2.3f * burst);
+                float behind = Mathf.Min(width * 0.25f, reach);
+                float spread = width * 1.45f * burst * breathe;
+                Vector2 rear = start - forward * behind;
+                Vector2 front = start + forward * reach;
+                muzzleVertices[0] = rear - side * spread;
+                muzzleVertices[1] = rear + side * spread;
+                muzzleVertices[2] = front - side * spread;
+                muzzleVertices[3] = front + side * spread;
+                muzzleMesh.vertices = muzzleVertices;
+                muzzleMesh.RecalculateBounds();
+                muzzle.SetPropertyBlock(properties);
+            }
         }
 
         public void HideBody()
         {
             if (body != null) body.enabled = false;
             if (splash != null) splash.enabled = false;
+            if (muzzle != null) muzzle.enabled = false;
             ends = float.NegativeInfinity;
         }
 
-        public void SetPreviewLayers(bool showBody, bool showDrops, bool showSplash)
+        public void SetPreviewLayers(bool showBody, bool showDrops, bool showSplash, bool showMuzzle = true,
+            bool showMist = true)
         {
             body.enabled &= showBody;
             droplets.GetComponent<ParticleSystemRenderer>().enabled = showDrops;
             splash.enabled &= showSplash;
+            muzzle.enabled &= showMuzzle;
+            mist.GetComponent<ParticleSystemRenderer>().enabled = showMist;
         }
 
         // Shared fixed-step emission for Play and deterministic Editor resimulation.
@@ -225,17 +304,23 @@ namespace TrickalFanGame.Combat
             if (now < started || now >= ends || now < nextEmission) return;
             nextEmission = now + 1f / 60f;
             EmitDrops(false);
+            bool firstImpact = atWall && !impactEmitted;
             if (atWall)
             {
-                EmitDrops(true, !impactEmitted);
+                EmitDrops(true, firstImpact);
                 impactEmitted = true;
             }
+            EmitMist(firstImpact);
+            emissionTick++;
         }
 
         public void ResetPreviewParticles()
         {
             droplets.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            mist.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             emission = 0;
+            mistEmission = 0;
+            emissionTick = 0;
             nextEmission = started;
             impactEmitted = false;
         }
@@ -244,6 +329,7 @@ namespace TrickalFanGame.Combat
         {
             HideBody();
             if (droplets != null) droplets.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            if (mist != null) mist.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 
         private void LateUpdate()
@@ -256,7 +342,7 @@ namespace TrickalFanGame.Combat
             if (Time.timeScale <= 0f) return;
             RenderAt(Time.time);
             EmitAt(Time.time);
-            if (transient && !BodyVisible && !droplets.IsAlive()) Destroy(gameObject);
+            if (transient && !BodyVisible && !droplets.IsAlive() && !mist.IsAlive()) Destroy(gameObject);
         }
 
         private void EmitDrops(bool impact, bool burst = false)
@@ -277,7 +363,8 @@ namespace TrickalFanGame.Combat
                 Vector2 velocity = impact ? (-forward * (0.6f + seed * 1.8f) +
                     side * sign * (1.4f + Seed(emission + 53) * 2.5f)) * (burst ? 1.4f : 0.75f) :
                     forward * (1.8f + seed * 2) + side * sign * (0.3f + seed * 0.7f);
-                float size = width * (impact ? 0.24f + seed * 0.42f : 0.18f + seed * 0.22f);
+                // Impact spray stays fine: large beads at the wall read as soap bubbles.
+                float size = width * (impact ? 0.14f + seed * 0.28f : 0.18f + seed * 0.22f);
                 var particle = new ParticleSystem.EmitParams
                 {
                     position = point,
@@ -291,6 +378,57 @@ namespace TrickalFanGame.Combat
             }
         }
 
+        private void EmitMist(bool firstImpact)
+        {
+            Vector2 delta = end - start;
+            float length = delta.magnitude;
+            if (length < 0.02f) return;
+            Vector2 forward = delta / length;
+            Vector2 side = new(-forward.y, forward.x);
+            // Wall haze is the main cloud; the body sheds a thin trail and the nozzle a puff on the first tick.
+            if (atWall && (firstImpact || emissionTick % 2 == 0))
+                for (int i = 0, count = firstImpact ? 6 : 1; i < count; i++)
+                {
+                    float seed = Seed(++mistEmission);
+                    float sign = (i & 1) == 0 ? 1 : -1;
+                    Vector2 velocity = -forward * (0.25f + seed * 0.55f) +
+                                       side * sign * (0.35f + Seed(mistEmission + 19) * 0.9f);
+                    EmitHaze(end - forward * Mathf.Min(length * 0.5f, width * 0.6f), velocity,
+                        width * (1.4f + seed * 1.1f), seed);
+                }
+            if (emissionTick % 3 == 1 && length > width * 3)
+            {
+                float seed = Seed(++mistEmission);
+                float sign = seed > 0.5f ? 1 : -1;
+                Vector2 point = start + forward * (length * (0.2f + 0.7f * Seed(mistEmission + 7))) +
+                                side * sign * width * 0.4f;
+                EmitHaze(point, forward * (0.4f + seed * 0.5f) + side * sign * (0.2f + seed * 0.3f),
+                    width * (0.9f + seed * 0.6f), seed);
+            }
+            if (emissionTick == 0 && !transient)
+                for (int i = 0; i < 2; i++)
+                {
+                    float seed = Seed(++mistEmission);
+                    float sign = i == 0 ? 1 : -1;
+                    EmitHaze(start + forward * Mathf.Min(length, width * 1.2f),
+                        forward * (0.5f + seed * 0.4f) + side * sign * (0.45f + seed * 0.35f),
+                        width * (1.1f + seed * 0.5f), seed);
+                }
+        }
+
+        private void EmitHaze(Vector2 point, Vector2 velocity, float size, float seed)
+        {
+            mist.Emit(new ParticleSystem.EmitParams
+            {
+                position = point,
+                velocity = velocity,
+                startLifetime = 0.32f + seed * 0.22f,
+                startSize = size,
+                rotation = seed * 360f,
+                startColor = Color.white
+            }, 1);
+        }
+
         private static float Seed(int i) => Mathf.Repeat(Mathf.Sin(i * 78.233f) * 43758.5453f, 1);
 
         private void OnDestroy()
@@ -298,7 +436,10 @@ namespace TrickalFanGame.Combat
             CombatEffectArtwork.Release(mesh);
             CombatEffectArtwork.Release(splashMesh);
             CombatEffectArtwork.Release(splashMaterial);
+            CombatEffectArtwork.Release(muzzleMesh);
+            CombatEffectArtwork.Release(muzzleMaterial);
             CombatEffectArtwork.Release(dropMaterial);
+            CombatEffectArtwork.Release(mistMaterial);
         }
     }
 }

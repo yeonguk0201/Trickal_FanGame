@@ -8,15 +8,20 @@ using UnityEngine.SceneManagement;
 
 namespace TrickalFanGame.Editor
 {
-    // Plays the runtime bomb burst over the explosion drawing in an unsaved Preview Scene.
+    // Plays the lit bomb's fuse flash, then the runtime bomb burst over the explosion drawing, in an unsaved
+    // Preview Scene. Negative time is the fuse; 0 is the explosion.
     public sealed class BombBurstPreview : EditorWindow
     {
         private Scene scene;
         private SceneView view;
         private BombBurstEffect effect;
         private SpriteRenderer drawing;
+        private BombFuseFlash flash;
+        private Sprite bombSprite, explosionSprite;
+        private const float BombWidth = 0.8f;
         private float radius = PlacedBomb.DefaultExplosionRadius, time = 0.2f, speed = 0.25f;
-        private bool playing, showRing = true, showEmbers = true, showDrawing = true;
+        private float fuse = PlacedBomb.DefaultFuseDuration;
+        private bool playing, showRing = true, showEmbers = true, showDrawing = true, showScorch = true, showFlash = true;
         private double lastTick;
 
         [MenuItem("Trickal Fan Game/Effects/Preview Bomb Burst")]
@@ -68,22 +73,27 @@ namespace TrickalFanGame.Editor
 
         private void OnGUI()
         {
-            EditorGUILayout.HelpBox("Edit Mode · runtime VFX in a temporary Scene. The explosion drawing shows for its " +
-                "game time (0.15 s). Radius is the damage radius (placed bomb: 2). Final art review uses SampleScene Play.",
+            EditorGUILayout.HelpBox("Edit Mode · runtime VFX in a temporary Scene. Negative time is the fuse (placed bomb " +
+                "0.75 s, exploding obstacle 0.5 s); the explosion drawing then shows for its game time (0.15 s). " +
+                "Radius is the damage radius (placed bomb: 2). Final art review uses SampleScene Play.",
                 MessageType.Info);
             if (GUILayout.Button("Open / reset Scene preview")) CreatePreview();
             EditorGUI.BeginChangeCheck();
             radius = EditorGUILayout.Slider("Damage radius", radius, 0.5f, 3f);
+            fuse = EditorGUILayout.Slider("Fuse (seconds)", fuse, 0.2f, 1.5f);
             bool radiusChanged = EditorGUI.EndChangeCheck();
             EditorGUI.BeginChangeCheck();
+            showFlash = EditorGUILayout.Toggle("Fuse flash", showFlash);
             showDrawing = EditorGUILayout.Toggle("Explosion drawing", showDrawing);
             showRing = EditorGUILayout.Toggle("Shockwave ring", showRing);
             showEmbers = EditorGUILayout.Toggle("Embers", showEmbers);
-            time = EditorGUILayout.Slider("Time (seconds)", time, 0f, BombBurstEffect.Duration);
+            showScorch = EditorGUILayout.Toggle("Scorch mark", showScorch);
+            time = EditorGUILayout.Slider("Time (seconds)", time, -fuse, BombBurstEffect.Lifetime);
             if (EditorGUI.EndChangeCheck() || radiusChanged) Rebuild(radiusChanged);
             speed = EditorGUILayout.Slider("Playback speed", speed, 0.05f, 1f);
             playing = EditorGUILayout.Toggle("Loop playback", playing);
-            if (GUILayout.Button("Restart")) { time = 0f; Rebuild(false); }
+            if (GUILayout.Button("Restart from fuse")) { time = -fuse; Rebuild(false); }
+            if (GUILayout.Button("Restart from explosion")) { time = 0f; Rebuild(false); }
         }
 
         private void Tick()
@@ -93,7 +103,7 @@ namespace TrickalFanGame.Editor
             lastTick = now;
             if (drawing != null && view == null) { playing = false; Cleanup(); return; }
             if (!playing || view == null) return;
-            time = Mathf.Repeat(time + delta * speed, BombBurstEffect.Duration);
+            time = Mathf.Repeat(time + fuse + delta * speed, fuse + BombBurstEffect.Lifetime) - fuse;
             Rebuild(false);
             Repaint();
         }
@@ -104,14 +114,27 @@ namespace TrickalFanGame.Editor
             if (recreate || effect == null)
             {
                 if (effect != null) DestroyImmediate(effect.gameObject);
-                drawing.sprite = FairyKingdomArtwork.Fit("effect-bomb-explosion", radius * 2f);
+                explosionSprite = FairyKingdomArtwork.Fit("effect-bomb-explosion", radius * 2f);
+                bombSprite = FairyKingdomArtwork.Fit("pickup-bomb", BombWidth);
                 effect = BombBurstEffect.Create(Vector2.zero, radius, drawing, 4);
                 if (effect == null) { Cleanup(); return; }
                 SceneManager.MoveGameObjectToScene(effect.gameObject, scene);
             }
-            effect.SimulateTo(time);
-            effect.SetPreviewLayers(showRing, showEmbers);
-            drawing.enabled = showDrawing && time < PlacedBomb.ExplosionVisualDuration;
+            bool lit = time < 0f;
+            drawing.sprite = lit ? bombSprite : explosionSprite;
+            drawing.enabled = lit || (showDrawing && time < PlacedBomb.ExplosionVisualDuration);
+            if (flash == null) flash = BombFuseFlash.Attach(drawing, 0f, fuse);
+            if (flash != null)
+            {
+                flash.Configure(0f, fuse);
+                flash.RenderAt(lit && showFlash ? time + fuse : fuse);
+            }
+            effect.gameObject.SetActive(!lit);
+            if (!lit)
+            {
+                effect.SimulateTo(time);
+                effect.SetPreviewLayers(showRing, showEmbers, showScorch);
+            }
             view.Repaint();
         }
 
@@ -120,7 +143,7 @@ namespace TrickalFanGame.Editor
             if (view != null) { view.Close(); view = null; }
             if (effect != null) DestroyImmediate(effect.gameObject);
             if (drawing != null) DestroyImmediate(drawing.gameObject);
-            effect = null; drawing = null;
+            effect = null; drawing = null; flash = null;
             if (scene.IsValid()) EditorSceneManager.ClosePreviewScene(scene);
             scene = default;
         }

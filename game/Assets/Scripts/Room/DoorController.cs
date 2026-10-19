@@ -1,3 +1,4 @@
+using TrickalFanGame.Audio;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -63,7 +64,12 @@ namespace TrickalFanGame.Room
         private void RefreshLockState()
         {
             EnsureReferences();
+            bool wasLocked = IsLocked;
             IsLocked = (encounterLocked && !ignoresEncounterLock) || keyLocked;
+            // Sound-0: only the moment it opens, not every refresh. Awake
+            // runs this once with both flags false, which is why the sound
+            // needs the door to have actually been locked beforehand.
+            if (wasLocked && !IsLocked) CombatSfx.Play(CombatSfxCue.DoorOpen);
             blocker.enabled = IsLocked || IsPortalBarrier;
             blocker.isTrigger = false;
             if (interiorBlocker != null) interiorBlocker.enabled = IsLocked;

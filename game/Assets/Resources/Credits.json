@@ -1,0 +1,218 @@
+{
+  "sections": [
+    {
+      "heading": "효과음 - 표기 의무 (CC BY 4.0)",
+      "note": "라이선스가 표기를 요구하는 항목이다. 두 음원 모두 수정해서 사용했다.",
+      "entries": [
+        {
+          "title": "Magic Fire Spell Impact & Punch",
+          "author": "EminYILDIRIM",
+          "source": "https://freesound.org/s/541478/",
+          "licenseName": "Attribution 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "modified": true,
+          "usage": "기본 공격 발사",
+          "attributionRequired": true
+        },
+        {
+          "title": "FireSpell3.wav",
+          "author": "alonsotm",
+          "source": "https://freesound.org/s/396500/",
+          "licenseName": "Attribution 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "modified": true,
+          "usage": "기본 공격 발사",
+          "attributionRequired": true
+        }
+      ]
+    },
+    {
+      "heading": "효과음 · BGM - CC0 (Public Domain)",
+      "note": "표기 의무는 없다. 출처 추적과 제작자 예우를 위해 적는다.",
+      "entries": [
+        {
+          "title": "Flowerbed Fields [Loop]",
+          "author": "Zane Little Music",
+          "source": "https://opengameart.org/content/flowerbed-fields-loop",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": false,
+          "usage": "홈 화면 BGM",
+          "attributionRequired": false
+        },
+        {
+          "title": "Plop!",
+          "author": "Breviceps",
+          "source": "https://freesound.org/people/Breviceps/sounds/447910/",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": false,
+          "usage": "UI 클릭",
+          "attributionRequired": false
+        },
+        {
+          "title": "512 Sound Effects (8-bit style)",
+          "author": "",
+          "source": "https://opengameart.org/content/512-sound-effects-8-bit-style",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": true,
+          "usage": "기본 공격 명중, 치명타",
+          "attributionRequired": false
+        },
+        {
+          "title": "Magic Missiles",
+          "author": "spookymodem",
+          "source": "https://freesound.org/s/249817/",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": true,
+          "usage": "저학년 스킬 시전",
+          "attributionRequired": false
+        },
+        {
+          "title": "Magic Spell 06",
+          "author": "igroglaz",
+          "source": "https://freesound.org/s/632336/",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": true,
+          "usage": "스펠 사용",
+          "attributionRequired": false
+        },
+        {
+          "title": "Magic Spell 05 Remastered",
+          "author": "lilmati",
+          "source": "https://freesound.org/s/659762/",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": true,
+          "usage": "짱셈 스펠 사용",
+          "attributionRequired": false
+        },
+        {
+          "title": "Teleport RPG",
+          "author": "colorscrimsontears",
+          "source": "https://freesound.org/s/563542/",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": true,
+          "usage": "다음 층 포탈 진입",
+          "attributionRequired": false
+        },
+        {
+          "title": "Fire 3 RPG",
+          "author": "colorscrimsontears",
+          "source": "https://freesound.org/s/563536/",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": true,
+          "usage": "폭탄 폭발",
+          "attributionRequired": false
+        }
+      ]
+    },
+    {
+      "heading": "효과음 · BGM - Pixabay Content License",
+      "note": "표기 의무는 없다. Pixabay 번호로 원본을 추적한다.",
+      "entries": [
+        {
+          "title": "Cartoon Quirky Christmas Gift Unwrapping",
+          "author": "openmindaudio",
+          "source": "Pixabay #620480",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "전투 BGM",
+          "attributionRequired": false
+        },
+        {
+          "title": "Magical Spell Cast",
+          "author": "daviddumaisaudio",
+          "source": "Pixabay #190272",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "저학년 스킬 시전",
+          "attributionRequired": false
+        },
+        {
+          "title": "Distant Bang",
+          "author": "dragon-studio",
+          "source": "Pixabay #472364",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "폭탄 폭발",
+          "attributionRequired": false
+        },
+        {
+          "title": "Boom",
+          "author": "dragon-studio",
+          "source": "Pixabay #487662",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "폭발 머핀 폭발",
+          "attributionRequired": false
+        },
+        {
+          "title": "Healing Magic 2",
+          "author": "yodguard",
+          "source": "Pixabay #378663",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "SP 획득",
+          "attributionRequired": false
+        },
+        {
+          "title": "Healing Magic 1",
+          "author": "yodguard",
+          "source": "Pixabay #378665",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "체력 회복",
+          "attributionRequired": false
+        },
+        {
+          "title": "Locked Door 4",
+          "author": "yodguard",
+          "source": "Pixabay #540180",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "잠긴 문 열림",
+          "attributionRequired": false
+        },
+        {
+          "title": "Wine Cork Pop",
+          "author": "universfield",
+          "source": "Pixabay #352295",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "아이템 바닥 드롭",
+          "attributionRequired": false
+        }
+      ]
+    },
+    {
+      "heading": "효과음 - 자체 제작",
+      "note": "외부 음원을 쓰지 않고 파라미터로 합성한다.",
+      "entries": [
+        {
+          "title": "합성 효과음 (sfx-synth)",
+          "author": "프로젝트 자체 제작",
+          "source": "tools/sfx-synth",
+          "licenseName": "자체 보유",
+          "licenseUrl": "",
+          "modified": false,
+          "usage": "틱 데미지, 피격, 유도탄, 돌진 발소리 등",
+          "attributionRequired": false
+        }
+      ]
+    }
+  ]
+}

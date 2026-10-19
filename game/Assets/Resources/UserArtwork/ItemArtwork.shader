@@ -42,8 +42,10 @@ Shader "TrickalFanGame/ItemArtwork"
                 fixed4 c = tex2D(_MainTex, i.uv);
                 if (_Card > 0.5)
                 {
-                    float2 q = abs(i.uv - 0.5) - 0.445;
-                    float d = length(max(q, 0)) + min(max(q.x, q.y), 0) - 0.055;
+                    // Corner radius of the card, as a share of its side (was 0.055 until 2026-10-20).
+                    const float radius = 0.12;
+                    float2 q = abs(i.uv - 0.5) - (0.5 - radius);
+                    float d = length(max(q, 0)) + min(max(q.x, q.y), 0) - radius;
                     float aa = max(fwidth(d), 0.0005);
                     float outer = 1 - smoothstep(-aa, aa, d);
                     // White frame of the card, about 4% of its side.
