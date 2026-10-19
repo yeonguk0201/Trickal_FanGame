@@ -2024,3 +2024,13 @@ Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금�
 - 원화·프레임 좌표 재생성 및 세부 확인: [환경 함정 에셋 기록](./art-prompts/environment-hazards-v1/README.md).
 - 불 함정: `Place Fire` 후 세 번 때리면 중간 불→잔불→소멸→식은 돌이 된다. 소멸 시작부터 안전하게 통과하며 재방문해도 식은 돌이 남는다. 물줄기·폭탄도 확인한다.
   새 잔해 자동 검증은 위 메뉴에 포함되어 있다. [불 함정 v2 적용 기록](./art-prompts/environment-hazards-v2/README.md).
+
+## 산사모 순수 걷기·꽃 발사 (2026-10-19)
+
+- 프리팹 연결은 적용되어 있다. 재구성: `Trickal Fan Game/Artwork/Setup Sansamo Pure Motion`.
+- Edit Mode 미리보기: `Trickal Fan Game/Artwork/Preview Sansamo Pure Motion` → `Open / reset Scene preview`.
+  걷기·꽃 반동을 각각 켜고 끄며 시간·속도·발사 방향·좌우 반전을 조절한다. 원본 Scene은 저장하지 않는다.
+- 단독 검사: `Trickal Fan Game/Artwork/Verify Sansamo Pure Motion`.
+- 배치: `TrickalFanGame.Editor.SansamoPureMotionVerification.Verify` (Setup 없이 검사). 최종 종료 코드 0.
+- Play: F1 → `— Room —` → `Spawn pure Sansamo (walk + flower shots)`. 이동 중 꽃 반동·꽃 출발 탄·연사 후 정지를 확인한다.
+- 에셋·프롬프트·검수 대기 항목: [산사모 순수 기록](./art-prompts/sansamo-pure-motion.md).

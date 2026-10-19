@@ -240,29 +240,38 @@ namespace TrickalFanGame.Enemy
             if (shotsRemaining <= 0)
                 shotsRemaining = SelectBurstShotCount(UnityEngine.Random.value, fourShotChance);
 
-            FirePredictive(currentTime);
+            if (!FirePredictive(currentTime))
+            {
+                nextShotTime = currentTime + Mathf.Min(0.1f, shotInterval);
+                return;
+            }
             shotsRemaining--;
             nextShotTime = currentTime + (shotsRemaining > 0 ? shotInterval : burstRestDuration);
             if (shotsRemaining <= 0) body.linearVelocity = Vector2.zero;
         }
 
-        private void FirePredictive(float currentTime)
+        private bool FirePredictive(float currentTime)
         {
+            SansamoPureMotion flower = GetComponent<SansamoPureMotion>();
+            Vector2 origin = flower != null && flower.isActiveAndEnabled ? flower.LaunchPosition : (Vector2)transform.position;
+            // A visible flower must not shoot through a wall just because the feet have line of sight.
+            if (!EnemyObstacleNavigator.HasLineOfFire(transform.position, origin) ||
+                !EnemyObstacleNavigator.HasLineOfFire(origin, target.position)) return false;
             Rigidbody2D targetBody = target.GetComponent<Rigidbody2D>();
             Vector2 targetVelocity = targetBody != null ? targetBody.linearVelocity : Vector2.zero;
-            Vector2 direction = CalculatePredictiveDirection(transform.position, target.position, targetVelocity,
+            Vector2 direction = CalculatePredictiveDirection(origin, target.position, targetVelocity,
                 projectileSpeed, maximumPredictionTime);
-            Vector2 predictedPoint = (Vector2)transform.position + direction *
-                Vector2.Distance(transform.position, target.position);
-            if (!EnemyObstacleNavigator.HasLineOfFire(transform.position, predictedPoint))
-                direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
+            Vector2 predictedPoint = origin + direction * Vector2.Distance(origin, target.position);
+            if (!EnemyObstacleNavigator.HasLineOfFire(origin, predictedPoint))
+                direction = ((Vector2)target.position - origin).normalized;
 
-            EnemyProjectile projectile = EnemyProjectile.Create(transform.position, direction, gameObject,
+            EnemyProjectile projectile = EnemyProjectile.Create(origin, direction, gameObject,
                 projectileDamageTier, projectileSpeed, projectileLifetime,
                 spriteRenderer != null ? spriteRenderer.sprite : null);
             presentation?.SetPhase(EnemyAttackPhase.Active);
             presentationEndsAt = currentTime + Mathf.Min(0.08f, shotInterval);
             ProjectileFired?.Invoke(projectile);
+            return true;
         }
 
         private static float SmallestPositive(float first, float second)

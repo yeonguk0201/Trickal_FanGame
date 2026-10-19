@@ -666,6 +666,13 @@ namespace TrickalFanGame.Run
                                 .Count(blast => !blast.HasExploded));
 #if UNITY_EDITOR
             PlayerMovement player = assembler.Graph?.Player;
+            if (AssistedButton("Spawn pure Sansamo (walk + flower shots)") && controller != null && player != null)
+            {
+                GameObject sansamo = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/QuickRangedFairy.prefab");
+                status = controller.SpawnExtraEnemy(sansamo, player.transform.position + Vector3.right * 3f) != null
+                    ? "Spawned pure Sansamo to the right of the player." : "Pure Sansamo spawn failed.";
+            }
             if (AssistedButton("Spawn crumb minion (explodes on death)") && controller != null && player != null)
             {
                 GameObject minion = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(

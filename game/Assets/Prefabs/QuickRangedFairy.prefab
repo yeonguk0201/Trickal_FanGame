@@ -90,7 +90,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5820317746190253184}
+    - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8731529225940749817}
   m_SourcePrefab: {fileID: 100100000, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+--- !u!212 &1406660389468762022 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2598891031156092179, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+  m_PrefabInstance: {fileID: 4004944391421821621}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7096289180192387305 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
@@ -150,10 +158,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.FairyKingdomArtworkView
   artworkId: sansamo-pure
   mode: 0
-  visual: {fileID: 2914408135527760391}
+  visual: {fileID: 1406660389468762022}
   localWidth: 0.7
---- !u!212 &2914408135527760391 stripped
-SpriteRenderer:
-  m_CorrespondingSourceObject: {fileID: 2598891031156092179, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
-  m_PrefabInstance: {fileID: 4004944391421821621}
+--- !u!114 &8731529225940749817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7096289180192387305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fecce6f4640b0d49b91b732db16b64e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.SansamoPureMotion
+  walkAtlas: {fileID: 2800000, guid: 962b2af6d910bb345abf793f553d7a1c, type: 3}
+  material: {fileID: 2100000, guid: ab8ab0ec49b0edf469edf1ab0b4d55d7, type: 2}
+  contentRect:
+    serializedVersion: 2
+    x: 0.24561404
+    y: 0.028708134
+    width: 0.5948963
+    height: 0.9553429
+  flowerUv: {x: 0.42, y: 0.91}
+  strideLength: 1.05

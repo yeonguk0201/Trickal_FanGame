@@ -1,0 +1,819 @@
+fileFormatVersion: 2
+guid: 962b2af6d910bb345abf793f553d7a1c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5069840703405213656
+    second: SansamoPure_Walk_0
+  - first:
+      213: 4882341375800456914
+    second: SansamoPure_Walk_1
+  - first:
+      213: 1208517816712348637
+    second: SansamoPure_Walk_2
+  - first:
+      213: 8023114635638841192
+    second: SansamoPure_Walk_3
+  - first:
+      213: 1756276038361944463
+    second: SansamoPure_Walk_4
+  - first:
+      213: -2862112793469194709
+    second: SansamoPure_Walk_5
+  - first:
+      213: -62675004126318989
+    second: SansamoPure_Walk_6
+  - first:
+      213: -1766809494271364966
+    second: SansamoPure_Walk_7
+  - first:
+      213: 6919987031345186823
+    second: SansamoPure_Walk_8
+  - first:
+      213: -8352327497689951736
+    second: SansamoPure_Walk_9
+  - first:
+      213: 7708608199350622277
+    second: SansamoPure_Walk_10
+  - first:
+      213: -2085656927118908309
+    second: SansamoPure_Walk_11
+  - first:
+      213: 6924690702337195719
+    second: SansamoPure_Walk_12
+  - first:
+      213: 6093271366300042959
+    second: SansamoPure_Walk_13
+  - first:
+      213: -1526144765604993519
+    second: SansamoPure_Walk_14
+  - first:
+      213: -4851005957823893141
+    second: SansamoPure_Walk_15
+  - first:
+      213: -3027531039128100569
+    second: SansamoPure_Walk_16
+  - first:
+      213: 3820555074398485324
+    second: SansamoPure_Walk_17
+  - first:
+      213: -1786903258846229630
+    second: SansamoPure_Walk_18
+  - first:
+      213: -8440632397356242624
+    second: SansamoPure_Walk_19
+  - first:
+      213: -6967838136815045515
+    second: SansamoPure_Walk_20
+  - first:
+      213: 2556359065004211634
+    second: SansamoPure_Walk_21
+  - first:
+      213: -5907184207980618081
+    second: SansamoPure_Walk_22
+  - first:
+      213: -82628683111013942
+    second: SansamoPure_Walk_23
+  - first:
+      213: 5965831253310595821
+    second: SansamoPure_Walk_24
+  - first:
+      213: 3890810292827268685
+    second: SansamoPure_Walk_25
+  - first:
+      213: 1574150532414543972
+    second: SansamoPure_Walk_26
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SansamoPure_Walk_0
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 513
+        width: 554
+        height: 734
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d7c8423241bb5640800000000000000
+      internalID: 5069840703405213656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_1
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 827
+        width: 97
+        height: 361
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d637c01d9f81c340800000000000000
+      internalID: 4882341375800456914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_2
+      rect:
+        serializedVersion: 2
+        x: 649
+        y: 1046
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd3ced12d8485c010800000000000000
+      internalID: 1208517816712348637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_3
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 602
+        width: 469
+        height: 645
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86f9d79b044d75f60800000000000000
+      internalID: 8023114635638841192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_4
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 939
+        width: 25
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f81181270cb8f5810800000000000000
+      internalID: 1756276038361944463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_5
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 14
+        width: 478
+        height: 607
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2eea26149bb748d0800000000000000
+      internalID: -2862112793469194709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_6
+      rect:
+        serializedVersion: 2
+        x: 536
+        y: 407
+        width: 78
+        height: 198
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37e21c27a65512ff0800000000000000
+      internalID: -62675004126318989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_7
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 21
+        width: 554
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a90fa2c30280b77e0800000000000000
+      internalID: -1766809494271364966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_8
+      rect:
+        serializedVersion: 2
+        x: 643
+        y: 582
+        width: 100
+        height: 168
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 708c3a59a8bb80060800000000000000
+      internalID: 6919987031345186823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_9
+      rect:
+        serializedVersion: 2
+        x: 745
+        y: 714
+        width: 24
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8029674b462961c80800000000000000
+      internalID: -8352327497689951736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_10
+      rect:
+        serializedVersion: 2
+        x: 747
+        y: 676
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54815fab05a7afa60800000000000000
+      internalID: 7708608199350622277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_11
+      rect:
+        serializedVersion: 2
+        x: 790
+        y: 638
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b64aeb733124e03e0800000000000000
+      internalID: -2085656927118908309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_12
+      rect:
+        serializedVersion: 2
+        x: 794
+        y: 620
+        width: 29
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ce32445181791060800000000000000
+      internalID: 6924690702337195719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_13
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 548
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc68f5c2606af8450800000000000000
+      internalID: 6093271366300042959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_14
+      rect:
+        serializedVersion: 2
+        x: 1196
+        y: 548
+        width: 11
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 116ea4aeb6b02dae0800000000000000
+      internalID: -1526144765604993519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_15
+      rect:
+        serializedVersion: 2
+        x: 651
+        y: 488
+        width: 43
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b617a9878c3cdacb0800000000000000
+      internalID: -4851005957823893141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_16
+      rect:
+        serializedVersion: 2
+        x: 701
+        y: 503
+        width: 14
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 721ec4a7f8c0cf5d0800000000000000
+      internalID: -3027531039128100569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_17
+      rect:
+        serializedVersion: 2
+        x: 715
+        y: 497
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4b76561996550530800000000000000
+      internalID: 3820555074398485324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_18
+      rect:
+        serializedVersion: 2
+        x: 553
+        y: 447
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28b8b7814f4a337e0800000000000000
+      internalID: -1786903258846229630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_19
+      rect:
+        serializedVersion: 2
+        x: 633
+        y: 441
+        width: 55
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0496de31e89dcda80800000000000000
+      internalID: -8440632397356242624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_20
+      rect:
+        serializedVersion: 2
+        x: 1204
+        y: 453
+        width: 23
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57438bab1244d4f90800000000000000
+      internalID: -6967838136815045515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_21
+      rect:
+        serializedVersion: 2
+        x: 619
+        y: 364
+        width: 75
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bdfce386030a7320800000000000000
+      internalID: 2556359065004211634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_22
+      rect:
+        serializedVersion: 2
+        x: 745
+        y: 302
+        width: 10
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9e948ca247750ea0800000000000000
+      internalID: -5907184207980618081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_23
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 280
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac1e8e686a17adef0800000000000000
+      internalID: -82628683111013942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_24
+      rect:
+        serializedVersion: 2
+        x: 723
+        y: 97
+        width: 26
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de26083aae3eac250800000000000000
+      internalID: 5965831253310595821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_25
+      rect:
+        serializedVersion: 2
+        x: 731
+        y: 21
+        width: 60
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d462760d85feef530800000000000000
+      internalID: 3890810292827268685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoPure_Walk_26
+      rect:
+        serializedVersion: 2
+        x: 751
+        y: 85
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4689f8ba19188d510800000000000000
+      internalID: 1574150532414543972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SansamoPure_Walk_0: 5069840703405213656
+      SansamoPure_Walk_1: 4882341375800456914
+      SansamoPure_Walk_10: 7708608199350622277
+      SansamoPure_Walk_11: -2085656927118908309
+      SansamoPure_Walk_12: 6924690702337195719
+      SansamoPure_Walk_13: 6093271366300042959
+      SansamoPure_Walk_14: -1526144765604993519
+      SansamoPure_Walk_15: -4851005957823893141
+      SansamoPure_Walk_16: -3027531039128100569
+      SansamoPure_Walk_17: 3820555074398485324
+      SansamoPure_Walk_18: -1786903258846229630
+      SansamoPure_Walk_19: -8440632397356242624
+      SansamoPure_Walk_2: 1208517816712348637
+      SansamoPure_Walk_20: -6967838136815045515
+      SansamoPure_Walk_21: 2556359065004211634
+      SansamoPure_Walk_22: -5907184207980618081
+      SansamoPure_Walk_23: -82628683111013942
+      SansamoPure_Walk_24: 5965831253310595821
+      SansamoPure_Walk_25: 3890810292827268685
+      SansamoPure_Walk_26: 1574150532414543972
+      SansamoPure_Walk_3: 8023114635638841192
+      SansamoPure_Walk_4: 1756276038361944463
+      SansamoPure_Walk_5: -2862112793469194709
+      SansamoPure_Walk_6: -62675004126318989
+      SansamoPure_Walk_7: -1766809494271364966
+      SansamoPure_Walk_8: 6919987031345186823
+      SansamoPure_Walk_9: -8352327497689951736
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

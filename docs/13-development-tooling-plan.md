@@ -677,3 +677,10 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
   가시 상태 전환, 버섯 피격, 나무 발화, 고정 충돌체, 독가스 감쇠·종료를 검사한다.
 - 실행법은 `docs/05-development-setup.md`, 실제 Play 미술 검수 상태는 `docs/art-prompts/environment-hazards-v1/README.md`에 기록한다.
 - 후속 불 함정 검증: 48프레임·타격 단계·소멸 마지막 프레임·무충돌 잔해·피해 거절·방 복원·물/폭탄 소화 검사와 Trap-0 단독 검증을 같은 진입점에서 실행한다. 배치 통과, 상세 기록은 `docs/art-prompts/environment-hazards-v2/README.md`.
+
+## 산사모 순수 모션 검수 도구 (2026-10-19)
+
+- `SansamoPureMotionPreview`: 격리 Scene에서 런타임 걷기·꽃 반동의 독립 재생, 시간/속도/방향/좌우 조절 구현.
+- `SansamoPureMotionVerification`: 실제 꽃 발사점, 이동 중 공격, 벽 차단, 프레임·반동·정리 단독 검사 구현 및 배치 통과.
+- 개발 패널 Room에 순수 소환 버튼 추가. 미리보기 창 조작과 실제 Play 미술 검수는 대기.
+- 실행법은 [개발 환경](05-development-setup.md), 제작·검증 근거는 [작업 기록](art-prompts/sansamo-pure-motion.md).
