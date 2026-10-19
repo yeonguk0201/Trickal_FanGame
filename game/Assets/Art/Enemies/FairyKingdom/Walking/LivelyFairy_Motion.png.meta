@@ -1,0 +1,637 @@
+fileFormatVersion: 2
+guid: 7b461c9332b8d9c4690821ec12861874
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1484248431483764593
+    second: LivelyFairy_Motion_0
+  - first:
+      213: 5077533979252908290
+    second: LivelyFairy_Motion_1
+  - first:
+      213: -7744726763373962334
+    second: LivelyFairy_Motion_2
+  - first:
+      213: 3178826917555078079
+    second: LivelyFairy_Motion_3
+  - first:
+      213: 4420763207336705008
+    second: LivelyFairy_Motion_4
+  - first:
+      213: 6752655753979256742
+    second: LivelyFairy_Motion_5
+  - first:
+      213: 2600325505765640165
+    second: LivelyFairy_Motion_6
+  - first:
+      213: 3077882407080347916
+    second: LivelyFairy_Motion_7
+  - first:
+      213: 5475494148584845352
+    second: LivelyFairy_Motion_8
+  - first:
+      213: 4535805808065678057
+    second: LivelyFairy_Motion_9
+  - first:
+      213: 6502434393537565657
+    second: LivelyFairy_Motion_10
+  - first:
+      213: 2509292286830241192
+    second: LivelyFairy_Motion_11
+  - first:
+      213: 4394808167966435328
+    second: LivelyFairy_Motion_12
+  - first:
+      213: -370964404475880515
+    second: LivelyFairy_Motion_13
+  - first:
+      213: 8401324292488745820
+    second: LivelyFairy_Motion_14
+  - first:
+      213: -9095383833890190317
+    second: LivelyFairy_Motion_15
+  - first:
+      213: 6590108514680085920
+    second: LivelyFairy_Motion_16
+  - first:
+      213: -5359669462530955707
+    second: LivelyFairy_Motion_17
+  - first:
+      213: 8823282793348943160
+    second: LivelyFairy_Motion_18
+  - first:
+      213: -7119764918636434573
+    second: LivelyFairy_Motion_19
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_0
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 447
+        width: 435
+        height: 434
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17f3505a51c199410800000000000000
+      internalID: 1484248431483764593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_1
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 411
+        width: 408
+        height: 469
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20168509046077640800000000000000
+      internalID: 5077533979252908290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_2
+      rect:
+        serializedVersion: 2
+        x: 915
+        y: 442
+        width: 421
+        height: 436
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ab52a2ca04358490800000000000000
+      internalID: -7744726763373962334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_3
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 684
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb302574d367d1c20800000000000000
+      internalID: 3178826917555078079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_4
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 687
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fbbb6107b4b95d30800000000000000
+      internalID: 4420763207336705008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_5
+      rect:
+        serializedVersion: 2
+        x: 1347
+        y: 444
+        width: 382
+        height: 436
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6af5e6291a046bd50800000000000000
+      internalID: 6752655753979256742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_6
+      rect:
+        serializedVersion: 2
+        x: 443
+        y: 600
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e78c873546361420800000000000000
+      internalID: 2600325505765640165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_7
+      rect:
+        serializedVersion: 2
+        x: 919
+        y: 604
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c09c27eedb5d6ba20800000000000000
+      internalID: 3077882407080347916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_8
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 11
+        width: 443
+        height: 429
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8203120faecdcfb40800000000000000
+      internalID: 5475494148584845352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_9
+      rect:
+        serializedVersion: 2
+        x: 877
+        y: 426
+        width: 15
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ea88e7c95b62fe30800000000000000
+      internalID: 4535805808065678057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_10
+      rect:
+        serializedVersion: 2
+        x: 917
+        y: 13
+        width: 426
+        height: 439
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d3d61a21a94d3a50800000000000000
+      internalID: 6502434393537565657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_11
+      rect:
+        serializedVersion: 2
+        x: 1358
+        y: 12
+        width: 383
+        height: 432
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a5e4224a0cc2d220800000000000000
+      internalID: 2509292286830241192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_12
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 370
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 008ef9b7ebe7dfc30800000000000000
+      internalID: 4394808167966435328
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_13
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 15
+        width: 422
+        height: 396
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbb96eee6d11adaf0800000000000000
+      internalID: -370964404475880515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_14
+      rect:
+        serializedVersion: 2
+        x: 1330
+        y: 376
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c53d6a09eef779470800000000000000
+      internalID: 8401324292488745820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_15
+      rect:
+        serializedVersion: 2
+        x: 1332
+        y: 380
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31c052da794b6c180800000000000000
+      internalID: -9095383833890190317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_16
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 192
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ad98c837c4c47b50800000000000000
+      internalID: 6590108514680085920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_17
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 178
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54665544501ae95b0800000000000000
+      internalID: -5359669462530955707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_18
+      rect:
+        serializedVersion: 2
+        x: 1330
+        y: 178
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83d416ae3f8927a70800000000000000
+      internalID: 8823282793348943160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LivelyFairy_Motion_19
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 168
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37b23645783813d90800000000000000
+      internalID: -7119764918636434573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      LivelyFairy_Motion_0: 1484248431483764593
+      LivelyFairy_Motion_1: 5077533979252908290
+      LivelyFairy_Motion_10: 6502434393537565657
+      LivelyFairy_Motion_11: 2509292286830241192
+      LivelyFairy_Motion_12: 4394808167966435328
+      LivelyFairy_Motion_13: -370964404475880515
+      LivelyFairy_Motion_14: 8401324292488745820
+      LivelyFairy_Motion_15: -9095383833890190317
+      LivelyFairy_Motion_16: 6590108514680085920
+      LivelyFairy_Motion_17: -5359669462530955707
+      LivelyFairy_Motion_18: 8823282793348943160
+      LivelyFairy_Motion_19: -7119764918636434573
+      LivelyFairy_Motion_2: -7744726763373962334
+      LivelyFairy_Motion_3: 3178826917555078079
+      LivelyFairy_Motion_4: 4420763207336705008
+      LivelyFairy_Motion_5: 6752655753979256742
+      LivelyFairy_Motion_6: 2600325505765640165
+      LivelyFairy_Motion_7: 3077882407080347916
+      LivelyFairy_Motion_8: 5475494148584845352
+      LivelyFairy_Motion_9: 4535805808065678057
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

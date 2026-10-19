@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 2148867379612778886}
   - component: {fileID: 5370890949086618526}
   - component: {fileID: 2633805491349008261}
+  - component: {fileID: 5023696619976068168}
+  - component: {fileID: 6743697939268354105}
   m_Layer: 6
   m_Name: LivelyLowBloodSugarFairy
   m_TagString: Untagged
@@ -272,3 +274,40 @@ MonoBehaviour:
   mode: 0
   visual: {fileID: 1023712646625953813}
   localWidth: 1.07
+--- !u!114 &5023696619976068168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4351291127771185126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b78a23fc9130dee4b8d954980e618365, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.LivelyFairyMotion
+  atlas: {fileID: 2800000, guid: 7b461c9332b8d9c4690821ec12861874, type: 3}
+  neutralContent:
+    serializedVersion: 2
+    x: 0.12175874
+    y: 0.03382187
+    width: 0.8410372
+    height: 0.9492672
+--- !u!114 &6743697939268354105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4351291127771185126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: HighBloodSugarFairy
+  useSharedProfile: 1
