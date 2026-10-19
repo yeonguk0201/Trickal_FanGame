@@ -35,20 +35,34 @@ Trickal Fan Game에 실제로 적용하기로 확정한 음원의 출처와 라�
 ### 크레딧 표기 의무 — 배포 전 필수
 
 CC BY 4.0 음원 3개가 들어오면서 크레딧 표기가 **권장에서 의무로 바뀌었다.** 기존 CC0·Pixabay 음원만 쓸 때는
-크레딧이 선택이었지만, 아래 세 줄은 게임에 표시하지 않으면 라이선스 위반이다. 배포 전에 크레딧 화면이나
-문서에 그대로 넣는다.
+크레딧이 선택이었지만, 아래 세 줄은 게임에 표시하지 않으면 라이선스 위반이다.
+
+**어디에 적는가**: 게임 내 크레딧 화면이면 충분하다. CC BY 4.0은 "매체에 맞는 합리적인 방식"을 요구하므로,
+소리가 나는 순간에 띄울 필요는 없고 크레딧 화면 하나에 모아두면 된다. 다만 플레이어가 찾아갈 수 있어야 하므로
+타이틀 화면에서 들어갈 수 있는 경로를 둔다. 배포 페이지가 따로 있으면 거기에도 같이 적는 편이 안전하다.
+
+**무엇을 적는가**: 제목, 제작자, 원본 링크, 라이선스 이름과 링크, 그리고 **수정했다는 사실**이다. 마지막 항목을
+빼먹기 쉽다. 이 프로젝트는 세 음원 모두 리샘플링·무음 잘라내기·레벨 조정을 했고 기본 공격은 두 음원을 겹쳤으므로,
+전부 수정에 해당한다. Freesound가 제공하는 기본 문구에는 수정 고지가 없어서 그대로 쓰면 불완전하다.
 
 ```
-Magic Fire Spell Impact Punch by eminyildirim -- https://freesound.org/s/541478/ -- License: Attribution 4.0
-firespell3 by alonsotm -- https://freesound.org/s/396500/ -- License: Attribution 4.0
-Shadow Spell Dark Magic by eminyildirim -- https://freesound.org/s/559088/ -- License: Attribution 4.0
+"Magic Fire Spell Impact Punch" by eminyildirim — https://freesound.org/s/541478/
+  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — modified
+"firespell3" by alonsotm — https://freesound.org/s/396500/
+  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — modified
+"Shadow Spell Dark Magic" by eminyildirim — https://freesound.org/s/559088/
+  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — modified
 ```
 
+- 수정 내용을 자세히 적을 필요는 없다. "modified" 또는 "수정됨" 표시로 충족된다.
+- 제작자가 이 게임을 후원하거나 보증한다는 뜻으로 읽힐 표현은 쓰지 않는다(CC BY 4.0이 금지한다).
+- 배포하는 동안 계속 표기해야 한다. 음원을 빼면 해당 줄도 지운다.
 - 해당 음원이 쓰인 곳: 기본 공격 발사(앞의 두 개를 겹침), 스펠 사용(세 번째).
 - 크레딧을 넣고 싶지 않다면 그 세 음원을 CC0나 Pixabay 음원으로 교체해야 한다. 교체는
   `tools/sfx-synth/import_sources.py`의 `MANIFEST`를 고치고 다시 실행하면 된다.
 - 원본 파일은 `MANIFEST`가 상대 경로로 기록하고 있어 어떤 원본이 어떤 역할에 쓰였는지 추적할 수 있다.
   원본 백업을 저장소 밖에 보관하는 것을 권장한다.
+- **현재 이 게임에는 크레딧 화면이 없다.** 배포 전에 만들어야 한다.
 
 ## 전투 효과음 (Sound-0, 2026-10-19)
 
