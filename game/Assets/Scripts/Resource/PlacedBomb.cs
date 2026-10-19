@@ -34,6 +34,7 @@ namespace TrickalFanGame.Resource
         private bool configured;
         private bool hasExploded;
         private Vector3 armedScale;
+        private BombFuseFlash fuseFlash;
 
         public float FuseDuration => fuseDuration;
         public float ExplosionRadius => explosionRadius;
@@ -52,6 +53,7 @@ namespace TrickalFanGame.Resource
             configured = owner != null && ownerHealth != null;
             armedScale = transform.localScale;
             if (visual != null) visual.color = armedColor;
+            StartFuseFlash(currentTime);
         }
 
         // Obstacle-5: an explosion nobody placed (an exploding obstacle). It is the same explosion as a placed bomb
@@ -64,6 +66,13 @@ namespace TrickalFanGame.Resource
             configured = true;
             armedScale = transform.localScale;
             if (visual != null) visual.color = armedColor;
+            StartFuseFlash(currentTime);
+        }
+
+        // Motion-0: the red blinking that speeds up until the explosion. Play only, like the ground shadow.
+        private void StartFuseFlash(float currentTime)
+        {
+            if (Application.isPlaying) fuseFlash = BombFuseFlash.Attach(visual, currentTime, explodeAt - currentTime);
         }
 
         public void ConfigureValues(float configuredFuseDuration, float configuredExplosionRadius,
@@ -132,6 +141,8 @@ namespace TrickalFanGame.Resource
             RoomTrap.RemoveWebsByBombInCircle(center, explosionRadius);
             SecretPassageWall.OpenByBombInCircle(center, explosionRadius);
             TreasureChest.OpenByBombInCircle(center, explosionRadius);
+            if (fuseFlash != null) fuseFlash.Stop();
+            fuseFlash = null;
             if (visual != null)
             {
                 visual.color = explosionColor;

@@ -1997,12 +1997,12 @@ Edit Mode: `Trickal Fan Game/Artwork/Verify Rock Damage Frames`. 일반·황금�
 - 실제 Play: `F1 → — Artifact — → Show artifact drops → Drop 폭발 머핀` 획득 후 기본 공격 8회 적중.
 - 상세 범위와 미확인 항목: [작업 기록](art-prompts/muffin-explosion-realtime-v1.md).
 
-### 폭탄 폭발 불씨·충격파 (2026-10-16)
+### 폭탄 점멸·폭발 불씨·충격파·그을음 (2026-10-16, v2 2026-10-19)
 
-- Edit Mode: `Trickal Fan Game/Effects/Preview Bomb Burst` → `Open / reset Scene preview`. 폭발 원화(게임과 같은 0.15초 표시)·충격파 링·불씨 표시, 피해 반경, 0~0.8초 시간 슬라이더·재생 속도·반복·재시작을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
+- Edit Mode: `Trickal Fan Game/Effects/Preview Bomb Burst` → `Open / reset Scene preview`. 음수 시간은 도화선(도화선 길이 슬라이더, 기본 0.75초)이고 0이 폭발이다. 도화선 점멸·폭발 원화(게임과 같은 0.15초 표시)·충격파 링·불씨·그을음 표시, 피해 반경, 도화선~2.6초 시간 슬라이더·재생 속도·반복·재시작(도화선부터/폭발부터)을 조절한다. 값은 임시이며 에셋을 저장하지 않는다.
 - 검사: `Trickal Fan Game/Effects/Verify Bomb Burst` (`TrickalFanGame.Editor.BombBurstVerification.Verify`). 커밋 전 회귀는 `Verify Bomb Burst With Regressions`(`VerifyWithRegressionsBatch`, 2026-10-16 통과).
-- 정지 프레임 렌더: `Export Bomb Burst Frames` → `output/art-review/bomb-burst/unity-frames.png`(위: 원화 포함, 아래: 새 레이어만). 배치는 `VerifyAndExportBatch`이며 `-nographics` 없이 실행한다.
-- 실제 Play: 폭탄을 얻어 `F`로 설치하고 0.75초 뒤 폭발을 본다. 폭발 장애물도 같은 폭발을 쓰므로 함께 확인한다.
+- 정지 프레임 렌더: `Export Bomb Burst Frames` → `output/art-review/bomb-burst/unity-frames.png`(위: 원화 포함, 가운데: 보조 레이어만, 아래: 0.75초 도화선을 12등분한 점멸, 게임보다 크게). 배치는 `VerifyAndExportBatch`이며 `-nographics` 없이 실행한다.
+- 실제 Play: 폭탄을 얻어 `F`로 설치하고 0.75초 동안 빨라지는 점멸, 폭발, 바닥 그을음을 본다. 폭발 장애물(도화선 0.5초)도 같은 폭발을 쓰므로 함께 확인한다.
 - 상세 범위와 미확인 항목: [작업 기록](art-prompts/bomb-burst-v1.md).
 
 ### 쫄따구 사망 폭발 분홍 폭발 (2026-10-18)
