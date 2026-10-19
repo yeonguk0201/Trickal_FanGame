@@ -1888,7 +1888,7 @@ Play 화면 검수:
 - 표시용 프리팹: `Assets/Prefabs/FairyKingdomArtwork/`. 누루링은 대응 게임 로직이 아직 없어 이 폴더의 표시용 프리팹으로만 제공된다. 함정 7종과 독가스는 Trap-0부터 `Assets/Prefabs/Traps/`의 게임 Prefab이 같은 원화를 쓴다. 임의의 공격·피해·생성 규칙은 추가하지 않았다.
 - 현재 단일 프레임 연결이다. 부스러기 쫄따구는 3가지 그림을 소환 순서에 따라 사용하고 사망 시 그림 효과만 표시한다. 사망 폭발 피해 규칙은 새로 구현하지 않았다. 새 프레임 추가 전까지 해당 적의 기존 다른 그림용 이동·공격 프레임 컴포넌트는 보존하되 비활성화한다.
 - 돌진형(`ChargingEnemy`)과 원거리·저격형(`RangedEnemy`, `HighBloodSugarFairy`)은 초안 그림을 연결하지 않고 기존 Idle·걷기·공격 에셋을 유지한다. `RangedEnemy`에 표시 컴포넌트를 붙이면 variant인 저격형까지 덮어쓰므로 베이스에도 붙이지 않으며, 전용 검증이 이를 검사한다.
-- 산사모-순수(`QuickRangedFairy`)는 2026-10-13부터 초안 원화 `sansamo-pure`를 단일 프레임으로 쓴다. 표시 컴포넌트는 variant 자신에만 붙이고 임시 파란 색조는 뺐다. 표시 폭은 Prefab의 `FairyKingdomArtworkView.localWidth`(0.7, 산사모-활발과 같은 키 약 1.2)로 조절하며 충돌 영역은 그대로다. 걷기·공격 프레임은 아직 없다. Play 미술 확인 전이다.
+- 산사모-순수(`QuickRangedFairy`)는 2026-10-13부터 초안 원화 `sansamo-pure`를 단일 프레임으로 쓴다. 표시 컴포넌트는 variant 자신에만 붙이고 임시 파란 색조는 뺐다. 표시 폭은 Prefab의 `FairyKingdomArtworkView.localWidth`(0.7, 산사모-활발과 같은 키 약 1.2)로 조절하며 충돌 영역은 그대로다. 2026-10-19에 걷기·꽃 발사 모션을 추가했다(아래 "산사모 순수 걷기·꽃 발사" 절).
 - 자동 실행: `TrickalFanGame.Editor.FairyKingdomArtworkSetup.ApplyAndVerifyBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkVerification.VerifyWithCombatRegressionsBatch` (`-batchmode -quit`), `TrickalFanGame.Editor.FairyKingdomArtworkPlayVerification.RunBatch` (`-batchmode`, **`-quit` 제외**). Play 검증은 전용 미리보기 씬과 격리된 probe만 사용하고 종료 코드를 반환한다.
 - 상세 결과와 Unity 렌더: `output/asset-integration/`. 자동 검증은 사용자 Play 미술 승인을 대신하지 않는다.
 

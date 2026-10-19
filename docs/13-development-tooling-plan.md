@@ -682,5 +682,5 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 
 - `SansamoPureMotionPreview`: 격리 Scene에서 런타임 걷기·꽃 반동의 독립 재생, 시간/속도/방향/좌우 조절 구현.
 - `SansamoPureMotionVerification`: 실제 꽃 발사점, 이동 중 공격, 벽 차단, 프레임·반동·정리 단독 검사 구현 및 배치 통과.
-- 개발 패널 Room에 순수 소환 버튼 추가. 미리보기 창 조작과 실제 Play 미술 검수는 대기.
+- 개발 패널 Room에 순수 소환 버튼 추가. 미리보기 창 조작과 실제 Play 미술 검수는 사용자가 확인했다(2026-10-19).
 - 실행법은 [개발 환경](05-development-setup.md), 제작·검증 근거는 [작업 기록](art-prompts/sansamo-pure-motion.md).
