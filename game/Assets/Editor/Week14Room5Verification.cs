@@ -115,9 +115,7 @@ namespace TrickalFanGame.Editor
                 "RoomGraphController current room did not update during transition.");
             Assert(graph.Nodes.Count(node => node.IsVisible) == 1 && expectedRoom.IsVisible,
                 "Exactly the destination room must remain visible after transition.");
-            Rigidbody2D playerBody = player.GetComponent<Rigidbody2D>();
-            Vector2 playerPosition = playerBody != null ? playerBody.position : (Vector2)player.transform.position;
-            Assert(Approximately(playerPosition, expectedEntry.position),
+            Assert(Approximately(player.FeetPosition - RoomLayout.ArrivalFeetOffset, expectedEntry.position),
                 "Player was not placed at the destination's opposite safe entry point.");
             Assert(progress.CurrentFloor == expectedRoom.FloorNumber && progress.CurrentRoom == expectedRoom.RoomNumber,
                 "RunProgress did not update to the entered room.");
