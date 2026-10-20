@@ -209,6 +209,7 @@ namespace TrickalFanGame.Room
         // The room content is switched off while the player is elsewhere, so entering the room restarts the cycle.
         private void OnEnable()
         {
+            GroundShadow.AttachDuringPlay(gameObject);
             RestartCycle(Time.time);
             SubscribeFireBreak();
         }

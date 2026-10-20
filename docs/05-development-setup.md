@@ -2176,3 +2176,13 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 `GroundShadowPreviewExporter.ExportBatch`에 `LivelyLowBloodSugarFairy.prefab`의 현재 정지 모습과 실제 그림자 레이어를 추가했다. 현재 목록은 새 아이템을 포함한 81종이며 활발 버전은 81번이다. `output/ground-shadow-review/index.html?asset=LivelyLowBloodSugarFairy` 또는 로컬 서버의 같은 query로 바로 선택한다. 너비·두께·위치·진하기를 조절해 값 요약을 전달할 수 있다. 현재 프리팹의 공유 프로필 `HighBloodSugarFairy` 설정(1.05 / 0.28 / (0.07, -0.15) / 0.60)을 그대로 렌더했으며 게임 값은 변경하지 않았다. Unity 6000.3.22f1 렌더 종료 코드 0 (`output/ground-shadow-lively-preview.log`), 81번의 합성/몸체/그림자/바닥 4개 PNG와 로컬 페이지 HTTP 200을 확인했다. 미술 수치 확정은 사용자 검수 후 진행한다.
 
 - 후속 사용자 확정값: 활발 요정을 전용 `LivelyLowBloodSugarFairy` 프로필로 분리하고 너비 1.05, 두께 0.28, 위치 (-0.02, -0.15), 진하기 0.60을 적용했다. 프리팹 및 두 Setup 재실행 경로의 연결을 보존한다. `GroundShadowProfileSetup.VerifyAndExportBatch` 성공 종료 코드 0 (`output/ground-shadow-lively-adjust.log`), 실제 렌더의 다섯 값 일치와 기존 모든 프로필 불변을 확인했다.
+
+
+### 함정 7종 공용 그림자·미세 조정 (2026-10-20)
+
+- `RoomTrap.OnEnable`에서 공용 그림자를 연결한다. 기존 장애물 경로와 중복 생성되지 않으며 바닥형 4종에도 적용된다. `GroundShadowProfiles.json`의 `trap-*` ID로 7종을 개별 조절하며 초기값은 너비 배율 1.00, 두께 0.28, 위치 (0, 0), 진하기 0.28이다.
+- 바닥형 함정은 기존 `HitSize`를 표시용 기준으로 읽어 주기 가시의 내려감·올라옴에도 그림자가 움직이지 않는다. Collider나 피해/감속 영역은 추가·변경하지 않는다. 제거된 함정·비활성 오브젝트에서는 그림자도 숨긴다.
+- 검수 페이지의 종류 `함정`, 번호 82~88: 바닥 가시·주기 가시·불·피해 장판·거미줄·가시 돌·독버섯. `http://127.0.0.1:8769/?asset=trap-floor-spikes`로 함정 목록을 바로 선택한다. 주기 가시 기본 이미지는 내려간 상태다. `traps-overview.png`는 일곱 종류 모음이다. 조절값은 검수용이며 전달 후 실제 설정에 반영한다.
+- 단독 검증: `Trickal Fan Game/Artwork/Verify Common Ground Shadows`. 렌더 포함 배치: `TrickalFanGame.Editor.GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` (`-batchmode -quit`, 그래픽 필요). 함정별 연결·주기 가시 기준점·피해 영역과 Collider 보존·중복 방지·비활성화를 검사한다. Unity 6000.3.22f1 종료 코드 0 및 88종 렌더 성공, 함정 7종의 28개 PNG 레이어와 비어 있지 않은 그림자를 확인했다 (`output/ground-shadow-traps.log`). 실제 Play 미술 검수와 사용자별 수치 확정은 남아 있다.
+
+- 함정 후속 사용자 검수: 82~88번의 너비·두께·X/Y 위치·진하기를 전달값으로 확정해 `GroundShadowProfiles.json`에 반영했다. 기존 다른 프로필은 유지했다. `GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` 성공 종료 코드 0 (`output/ground-shadow-traps-reviewed.log`), 주기 가시 기준점·충돌 보존과 88종 재렌더를 확인했고 함정 7종의 실제 출력 35필드 일치를 비교했다. 페이지 기본값과 `traps-overview.png`도 갱신했다. 실제 Play 미술 검수는 사용자가 수동 확인을 마쳤다(2026-10-20).

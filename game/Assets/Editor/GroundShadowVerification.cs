@@ -13,6 +13,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Artwork/Verify Common Ground Shadows")]
         public static void Verify()
         {
+            VerifyTraps();
             GameObject root = new("Ground shadow verification");
             try
             {
@@ -89,6 +90,45 @@ namespace TrickalFanGame.Editor
                     "lower tree footprint, sorting, body-scale/movement, independent animation/tint, death and flight.");
             }
             finally { Object.DestroyImmediate(root); }
+        }
+
+        private static void VerifyTraps()
+        {
+            foreach (TrickalFanGame.Room.RoomTrapKind kind in Enum.GetValues(typeof(TrickalFanGame.Room.RoomTrapKind)))
+            {
+                GameObject root = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(Week25Trap0Setup.PrefabPath(kind)));
+                try
+                {
+                    var trap = root.GetComponent<TrickalFanGame.Room.RoomTrap>();
+                    root.GetComponent<FairyKingdomArtworkView>().Refresh();
+                    Vector2 hitSize = trap.HitSize;
+                    Collider2D collider = root.GetComponent<Collider2D>();
+                    Physics2D.SyncTransforms();
+                    Bounds collision = collider != null ? collider.bounds : default;
+                    GroundShadow shadow = GroundShadow.Ensure(root);
+                    shadow.Refresh();
+                    Require(shadow.Visual != null && shadow.Visual.enabled &&
+                        shadow.Visual.sortingOrder < trap.Visual.sortingOrder, "Trap shadow missing/above artwork: " + kind);
+                    Require(GroundShadowProfiles.ResolveId(root, null) == TrickalFanGame.Room.RoomTrap.ArtworkIdOf(kind),
+                        "Trap must select its individual profile: " + kind);
+                    Bounds contact = shadow.Visual.bounds;
+                    if (kind == TrickalFanGame.Room.RoomTrapKind.PeriodicSpikes)
+                    {
+                        trap.RefreshPeriodicArtwork(TrickalFanGame.Room.PeriodicSpikeState.Lowered); shadow.Refresh();
+                        Require(shadow.Visual.bounds == contact, "Lowered spikes moved the shadow.");
+                        trap.RefreshPeriodicArtwork(TrickalFanGame.Room.PeriodicSpikeState.Raised); shadow.Refresh();
+                        Require(shadow.Visual.bounds == contact, "Raised spikes moved the shadow.");
+                    }
+                    Require(trap.HitSize == hitSize && (collider == null ? root.GetComponent<Collider2D>() == null : collider.bounds == collision),
+                        "Shadow changed trap hit area/collision: " + kind);
+                    Require(GroundShadow.Ensure(root) == shadow && root.GetComponents<GroundShadow>().Length == 1,
+                        "Trap shadow attachment duplicated components: " + kind);
+                    root.SetActive(false);
+                    Require(!shadow.Visual.gameObject.activeInHierarchy, "Disabled trap left a visible shadow.");
+                }
+                finally { Object.DestroyImmediate(root); }
+            }
+            Debug.Log("Trap ground shadows passed: seven profiles, stable spike states, unchanged hit areas/colliders, idempotent attachment and disable.");
         }
 
         private static GameObject Body(Transform parent, string name)

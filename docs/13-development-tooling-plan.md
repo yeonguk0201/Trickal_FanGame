@@ -714,3 +714,12 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 - [x] 현재 `LivelyLowBloodSugarFairy` 프리팹의 몸체·그림자를 검수 목록 끝에 추가하고 ID query로 직접 선택할 수 있게 했다. Unity 렌더 성공 종료 코드 0과 4개 출력 레이어를 확인했다 (`output/ground-shadow-lively-preview.log`).
 - [x] 사용자 확정값 (너비 1.05, 두께 0.28, 위치 -0.02/-0.15, 진하기 0.60)을 활발 요정 전용 프로필에 반영했다. Unity 검증·재렌더 종료 코드 0과 실제 값 일치, 기존 프로필 불변을 확인했다 (`output/ground-shadow-lively-adjust.log`).
 - 사용 방법은 `docs/05-development-setup.md`의 저혈당 요정 - 활발 그림자 미세 조정을 따른다.
+
+
+### 함정 그림자 검수 추가 (2026-10-20)
+
+- [x] 실제 함정 프리팹 7종의 공용 그림자 연결, ID별 설정과 미리보기 82~88번·함정 필터·일곱 종류 모음 이미지를 추가했다.
+- [x] Unity 단독 그림자 검증에서 주기 가시 상태별 그림자 기준점, 기존 피해 영역·Collider, 중복 방지·비활성화를 확인했고 88종 실제 렌더를 생성했다 (`output/ground-shadow-traps.log`, 종료 코드 0). 함정 28개 레이어를 확인했다.
+- [x] 사용자 함정 7종 수치를 반영하고 실제 Unity 출력 35필드 일치, 기존 프로필 불변과 단독 그림자 검증/재렌더를 확인했다 (`output/ground-shadow-traps-reviewed.log`, 종료 코드 0).
+- [x] 실제 Play 미술 검수: 사용자 수동 확인 완료(2026-10-20).
+- 실행 및 사용법은 `docs/05-development-setup.md`의 함정 7종 공용 그림자·미세 조정을 따른다.
