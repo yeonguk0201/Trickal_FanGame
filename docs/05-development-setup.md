@@ -1824,6 +1824,18 @@ Resources 원화를 런타임에 불러오므로 Scene/Prefab Setup 재실행 �
 기존 0.8유닛의 넓은 경계 감쇠 대신 0.035유닛의 좁은 경계 처리로 변경했다.
 극히 짧은 경로는 원화 전체를 압축하지 않고 오른쪽 원화 창을 표시하므로 전체 실루엣과는 차이가 있다.
 
+2026-10-20 v22: 위에서 떨어지는 실시간 낙하 섬광 레이어를 추가했다. 빛줄기가 용사용 쪽에서 먼 끝으로 0.05초 안에 순차로
+떨어져 0.14초 안에 바닥에 닿고, 바닥 섬광 뒤 위에서부터 침식되어 0.44초에 사라진다. v21 원화 레이어와 피해 판정은 그대로다.
+
+- Edit Mode 미리보기: `Trickal Fan Game > Effects > Preview Crayon Hero Slam` → `Open / reset Scene preview`.
+  방 크기·보스 위치·방향 프리셋·경고 길이·검광 높이, 낙하 섬광/원화 검광/지면 충격/파편/기준 보스/경고선 레이어,
+  시간 슬라이더와 `Flash falling`·`Impact`·`Erosion`·`Peak hold` 바로가기, 재생 속도·반복·재시작을 조절한다.
+  런타임 경로 계산과 메시·셰이더를 그대로 쓰며 값은 임시다. 낙하 섬광만 끄면 v21과 비교할 수 있다.
+- v22 단독 검사: `Trickal Fan Game > Effects > Verify Reviewed Combat Effects`(`ReviewedCombatEffectsVerification.Verify`).
+  2026-10-20 배치 종료 코드 0, `Slam falling flash v22 passed` 확인(로그 `game/Logs/SlamFallFlashV22Verification.log`).
+- 2026-10-20 사용자 수동 확인 후 수용(세로 방향 포함).
+- 상세 범위: [작업 기록](art-prompts/crayon-hero-slam-v15.md)의 v22 항목.
+
 - 자동 검사: `Trickal Fan Game > Effects > Verify Reviewed Effects With Combat Regressions`.
 - 배치: `TrickalFanGame.Editor.ReviewedCombatEffectsVerification.VerifyWithRegressionsBatch`.
 - 로그: `game/Logs/LayeredSlamV21Verification.log`.

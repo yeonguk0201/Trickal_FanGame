@@ -3,8 +3,9 @@ using UnityEngine;
 
 namespace TrickalFanGame.Combat
 {
-    // Same five original textures and timing as slam-peak-review.html v21.
-    // Local X runs from the far endpoint back toward the sword; local Y always stays upright.
+    // Same five original textures and timing as slam-peak-review.html v21, plus the v22 realtime
+    // falling flash (SlamFallFlash shader). Local X runs from the far endpoint back toward the sword.
+    // The flash beams always fall straight down the screen, so that layer keeps world-upright axes.
     public sealed class LayeredSlamEffect : MonoBehaviour
     {
         public const float PixelsToWorld = 0.02f;
@@ -16,7 +17,18 @@ namespace TrickalFanGame.Combat
         public const string EndArtwork = "slam-end-v21";
         public const string GroundArtwork = "slam-impact-v21";
         public const string DebrisArtwork = "slam-debris-v21";
-        private enum Kind { Main, Middle, End, Ground, Debris }
+        public const string FlashShader = "SlamFallFlash";
+        // Falling flash: every beam reaches the floor before the painted blade lands (FallSeconds).
+        public const float FlashFallSeconds = 0.08f;
+        public const float FlashSweepSeconds = 0.05f;
+        public const float FlashJitterSeconds = 0.01f;
+        public const float FlashLingerSeconds = 0.30f;
+        public const float FlashSeconds = FlashSweepSeconds + FlashJitterSeconds + FlashFallSeconds + FlashLingerSeconds;
+        public const float FlashSpacing = 0.4f;
+        public const float FlashHeightScale = 1.35f;
+        public const float FlashHalfWidth = 0.75f;
+        public const float FlashBelow = 0.7f;
+        private enum Kind { Main, Middle, End, Ground, Debris, Flash }
         private sealed class Piece
         {
             public Kind kind;
@@ -35,6 +47,7 @@ namespace TrickalFanGame.Combat
         private Rect room;
         private Renderer sortingSource;
         private Material material;
+        private bool showBlade = true, showFlash = true, showGround = true, showDebris = true;
         private static readonly Rect[] DebrisCrops =
         {
             new Rect(203,218,331,336), new Rect(787,274,252,244),
@@ -44,17 +57,31 @@ namespace TrickalFanGame.Combat
         public static GameObject Create(Vector2 center, float length, float height, float angle,
             Transform source, Renderer sortingSource, Rect room, bool reverse)
         {
-            if (!Application.isPlaying || source == null || length <= 0.001f || height <= 0f) return null;
-            Material material = CombatEffectArtwork.Material("LayeredSlam");
-            if (material == null) return null;
-            foreach (string name in new[] { MainArtwork, MiddleArtwork, EndArtwork, GroundArtwork, DebrisArtwork })
-                if (Resources.Load<Texture2D>("CombatEffects/" + name) == null) return null;
-            var owner = new GameObject("VFX layered slam v21");
-            owner.transform.SetPositionAndRotation(center, Quaternion.Euler(0,0,angle));
-            var effect = owner.AddComponent<LayeredSlamEffect>();
+            if (!Application.isPlaying || source == null) return null;
+            LayeredSlamEffect effect = Assemble(center, length, height, angle, sortingSource, room, reverse);
+            if (effect == null) return null;
             effect.source = source;
             effect.sourceHealth = source.GetComponent<Health>();
             effect.previousSourcePosition = source.position;
+            return effect.gameObject;
+        }
+
+        // Edit Mode preview entry: same meshes, shaders and clock, without a source or Update-driven lifetime.
+        public static LayeredSlamEffect CreatePreview(Vector2 center, float length, float height, float angle,
+            Rect room, bool reverse, Renderer sortingSource = null) =>
+            Assemble(center, length, height, angle, sortingSource, room, reverse);
+
+        private static LayeredSlamEffect Assemble(Vector2 center, float length, float height, float angle,
+            Renderer sortingSource, Rect room, bool reverse)
+        {
+            if (length <= 0.001f || height <= 0f) return null;
+            Material material = CombatEffectArtwork.Material("LayeredSlam");
+            if (material == null || CombatEffectArtwork.Material(FlashShader) == null) return null;
+            foreach (string name in new[] { MainArtwork, MiddleArtwork, EndArtwork, GroundArtwork, DebrisArtwork })
+                if (Resources.Load<Texture2D>("CombatEffects/" + name) == null) return null;
+            var owner = new GameObject("VFX layered slam v22");
+            owner.transform.SetPositionAndRotation(center, Quaternion.Euler(0,0,angle));
+            var effect = owner.AddComponent<LayeredSlamEffect>();
             effect.length = length;
             effect.sign = reverse ? -1f : 1f;
             effect.room = room;
@@ -62,7 +89,7 @@ namespace TrickalFanGame.Combat
             effect.material = material;
             effect.Build(height);
             effect.RenderAt(0f);
-            return owner;
+            return effect;
         }
 
         public static int MiddleCount(float length, float mainWidth) =>
@@ -111,7 +138,76 @@ namespace TrickalFanGame.Combat
                     0.5f,0.075f*(1f-i/(float)Mathf.Max(1,debrisCount-1)),uv);
                 part.index=i;part.count=debrisCount;
             }
+            BuildFlash(height);
         }
+
+        // One mesh of world-vertical beams standing on the ground line. Per-beam data in UV1/UV2:
+        // (delay, seed, beam height, width scale) and (intensity). No gameplay Random is consumed.
+        private void BuildFlash(float height)
+        {
+            Material flashMaterial=CombatEffectArtwork.Material(FlashShader);
+            if(flashMaterial==null)return;
+            int count=Mathf.Clamp(Mathf.CeilToInt(length/FlashSpacing)+1,3,160);
+            var vertices=new List<Vector3>(count*4);
+            var local=new List<Vector2>(count*4);
+            var data=new List<Vector4>(count*4);
+            var extra=new List<Vector2>(count*4);
+            var triangles=new List<int>(count*6);
+            const float below=FlashBelow;
+            for(int i=0;i<count;i++)
+            {
+                float s=i/(float)(count-1);
+                // x=0 is the far end; the sweep starts on the sword side.
+                Vector3 foot=transform.rotation*new Vector3(sign*(s*length-length*0.5f),-0.04f,0);
+                // Every third beam is a strong, tall one; the rest are thinner fill so it never reads as a comb.
+                bool strong=i%3==0;
+                float beamHeight=height*FlashHeightScale*(strong?0.88f+0.12f*Seed(i*3+40):0.6f+0.25f*Seed(i*3+40));
+                float delay=FlashSweepSeconds*(1f-s)+FlashJitterSeconds*Seed(i*3+43);
+                float widthScale=strong?1.1f+0.4f*Seed(i*3+41):0.55f+0.4f*Seed(i*3+41);
+                float intensity=strong?1f:0.35f+0.35f*Seed(i*3+42);
+                var beam=new Vector4(delay,Seed(i*3+44),beamHeight,widthScale);
+                int first=vertices.Count;
+                foreach(Vector2 corner in new[] {new Vector2(-FlashHalfWidth,-below),new Vector2(FlashHalfWidth,-below),
+                    new Vector2(-FlashHalfWidth,beamHeight),new Vector2(FlashHalfWidth,beamHeight)})
+                {
+                    vertices.Add(foot+(Vector3)corner);local.Add(corner);data.Add(beam);
+                    extra.Add(new Vector2(intensity,0));
+                }
+                triangles.AddRange(new[] {first,first+2,first+1,first+2,first+3,first+1});
+            }
+            var child=new GameObject("Slam "+Kind.Flash);
+            child.transform.SetParent(transform,false);
+            child.transform.rotation=Quaternion.identity;
+            var mesh=new Mesh {name="Slam falling flash"};
+            mesh.SetVertices(vertices);mesh.SetUVs(0,local);mesh.SetUVs(1,data);mesh.SetUVs(2,extra);
+            mesh.SetTriangles(triangles,0);mesh.RecalculateBounds();
+            child.AddComponent<MeshFilter>().sharedMesh=mesh;
+            var renderer=child.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial=flashMaterial;
+            renderer.sortingLayerID=sortingSource!=null?sortingSource.sortingLayerID:0;
+            renderer.sortingOrder=(sortingSource!=null?sortingSource.sortingOrder:0)+2;
+            var properties=new MaterialPropertyBlock();
+            properties.SetVector("_ClipRect",new Vector4(room.xMin,room.yMin,room.xMax,room.yMax));
+            properties.SetFloat("_Fall",FlashFallSeconds);
+            properties.SetFloat("_Linger",FlashLingerSeconds);
+            // Floor flashes lie along the path; beams thin out over the boss so the attacker stays readable.
+            properties.SetVector("_PathDir",(Vector2)(transform.rotation*Vector3.right));
+            properties.SetVector("_Source",(Vector2)transform.TransformPoint(new Vector3(sign*length*0.5f,0.6f,0)));
+            pieces.Add(new Piece {kind=Kind.Flash,transform=child.transform,mesh=mesh,renderer=renderer,
+                properties=properties,count=count});
+        }
+
+        public int FlashBeamCount => pieces.Find(part=>part.kind==Kind.Flash)?.count??0;
+
+        public void SetPreviewLayers(bool blade,bool flash,bool ground,bool debris)
+        {
+            showBlade=blade;showFlash=flash;showGround=ground;showDebris=debris;
+        }
+
+        private bool Visible(Kind kind) => kind switch
+        {
+            Kind.Flash=>showFlash, Kind.Ground=>showGround, Kind.Debris=>showDebris, _=>showBlade
+        };
 
         private Piece Add(Kind kind,string artwork,float x,float y,float width,float height,
             float baseline,float delay,Vector4? uv=null,float cropFade=0)
@@ -153,6 +249,13 @@ namespace TrickalFanGame.Combat
         {
             foreach(Piece part in pieces)
             {
+                if(part.kind==Kind.Flash)
+                {
+                    part.renderer.enabled=showFlash&&seconds>=0&&seconds<FlashSeconds;
+                    part.properties.SetFloat("_Age",seconds);
+                    part.renderer.SetPropertyBlock(part.properties);
+                    continue;
+                }
                 float x=part.x,y=part.y,opacity=0,reveal=1,scale=1,rotation=0;
                 if(part.kind==Kind.Ground)
                 {
@@ -186,7 +289,7 @@ namespace TrickalFanGame.Combat
                 part.transform.localPosition=new Vector3(sign*(x-length*0.5f),y,0);
                 part.transform.localScale=new Vector3(scale,scale,1);
                 part.transform.localRotation=Quaternion.Euler(0,0,sign*rotation);
-                part.renderer.enabled=opacity>0.001f;
+                part.renderer.enabled=opacity>0.001f&&Visible(part.kind);
                 part.properties.SetFloat("_Opacity",opacity);
                 part.properties.SetFloat("_Reveal",reveal);
                 part.renderer.SetPropertyBlock(part.properties);
