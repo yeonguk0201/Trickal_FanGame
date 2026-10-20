@@ -1839,6 +1839,19 @@ Resources 원화를 런타임에 불러오므로 Scene/Prefab Setup 재실행 �
 - 자동 검사: `Trickal Fan Game > Effects > Verify Reviewed Effects With Combat Regressions`.
 - 배치: `TrickalFanGame.Editor.ReviewedCombatEffectsVerification.VerifyWithRegressionsBatch`.
 
+### 날먹보호막 방어막 버블
+
+2026-10-20: `PlayerPowerEffects`가 날먹보호막으로 얻은 방어막 몫을 따라가며 플레이어 그림 위(정렬 +2)에 `ShieldBubble`을
+그린다. 셰이더 `Resources/CombatEffects/ShieldBubble.shader` 하나로 막·가장자리·하이라이트·피격 파문·터짐을 그린다.
+0.25초 동안 부풀어 나타나고, 피격 시 0.45초 파문, 남은 몫이 1칸 이하면 초당 3.5회 점멸, 0이 되면 0.35초 동안 터진다. 2026-10-20 사용자 Play 확인 후 수용.
+
+- Edit Mode 미리보기: `Trickal Fan Game > Effects > Preview Shield Bubble` → `Open / reset Scene preview`.
+  방어막 칸 수·피격 간격, 바닥 배경/막/가장자리/하이라이트/파문 레이어, 시간 슬라이더, 재생 속도를 조절한다.
+- 단독 검사: `Trickal Fan Game > Effects > Verify Shield Bubble`(`ShieldBubbleVerification.Verify`).
+- 회귀: `ShieldBubbleVerification.VerifyWithRegressionsBatch`(Power-1 권능 규칙, 개발 패널 포함).
+- Play 확인: `F1 > — Power (R) — > Drop 날먹보호막 (4)` 획득 → `Fill gauge` → `R`. 패널의 `Freeloader shield` 줄과
+  `Hit 1 heart (shield bubble)` 버튼으로 파문·점멸·터짐을 본다.
+
 ### 광기의 가면 피해 오라 표시
 
 2026-10-20: `PlayerDamageAura`가 플레이어 아래 바닥(정렬 -55, 그림자 아래)에 `DamageAuraField`를 그린다.

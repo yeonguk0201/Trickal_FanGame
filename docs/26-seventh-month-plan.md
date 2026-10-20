@@ -466,6 +466,13 @@ Spells`, 개발 패널은 `F1` → `— Spell slot —`의 `Drop <이름>`이고
   급히 느려져 가장자리에 닿은 곳부터 사라진다. 스택이 늘면 물결이 조금 빨라지고 진해진다.
   `DamageAuraFieldVerification.Verify` 통과, Scene 미리보기(`Trickal Fan Game/Effects/Preview Damage Aura Field`) 제공.
   사용자 수동 확인(Play, `F1 > — Artifact — > Show artifact drops > Drop 광기의 가면`)으로 수용(2026-10-20).
+- 날먹보호막의 방어막 버블(2026-10-20 구현): 권능을 쓰면 플레이어를 감싸는 비눗방울이 부풀어 나타나고, 무지개빛 막·
+  가장자리·하이라이트로 그린다(`ShieldBubble`). 버블은 이 권능으로 얻은 방어막이 남아 있는 동안만 보인다. 방어막 규칙은
+  그대로이며, 공용 방어막 중 권능 이전에 있던 양 위의 몫을 권능 몫으로 본다. 피격으로 그 몫이 줄면 파문이 지나가고, 마지막
+  1칸만 남으면 점멸하며, 0이 되면 물방울로 터져 사라진다. 사망·Run 종료 시 터지지 않고 사라진다.
+  `ShieldBubbleVerification.Verify` 통과, Scene 미리보기(`Trickal Fan Game/Effects/Preview Shield Bubble`) 제공.
+  사용자 수동 확인(Play, `F1 > — Power (R) — > Drop 날먹보호막 (4)` 획득 → `Fill gauge` → `R` → `Hit 1 heart (shield bubble)`)으로
+  수용(2026-10-20).
 - 적별 넉백 무게, 골디 상점의 등급 기준·등장률, 멜룬카드 등급, 자원 특화 장애물 수치 같은 구현 기본값의 조정은
   Balance-0에서 한다.
 

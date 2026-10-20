@@ -319,8 +319,18 @@ namespace TrickalFanGame.Run
                                     ? $"Star DMG +{effects.BlastDamageBonus:P0} {effects.BlastRemainingSeconds:F1}s  "
                                     : string.Empty) +
                                 (effects.IsBlanketActive ? $"Blanket {effects.BlanketRemainingSeconds:F1}s  " : string.Empty) +
-                                (effects.IsOverdriveActive ? $"Overdrive {effects.OverdriveRemainingSeconds:F1}s" : string.Empty);
+                                (effects.IsOverdriveActive ? $"Overdrive {effects.OverdriveRemainingSeconds:F1}s  " : string.Empty) +
+                                (effects.IsFreeloaderShieldActive
+                                    ? $"Freeloader shield {effects.FreeloaderShieldRemaining:0.#}/{effects.FreeloaderShieldGranted:0.#}" +
+                                      (effects.IsFreeloaderShieldLow ? " (blinking)" : string.Empty)
+                                    : string.Empty);
                 if (active.Length > 0) GUILayout.Label(active);
+                // A one-heart hit through the normal damage path: ripples, then blinks and pops the shield bubble.
+                Health health = slot.GetComponent<Health>();
+                if (effects.IsFreeloaderShieldActive && health != null &&
+                    AssistedButton(health.IsInvulnerable ? "Hit 1 heart (wait: invulnerable)" : "Hit 1 heart (shield bubble)") &&
+                    !health.IsInvulnerable)
+                    health.TakeDamage(new DamageContext(null, DamageSourceType.EnemyContact, HealthUnits.UnitsPerHeart));
             }
 
             GUILayout.BeginHorizontal();
