@@ -143,6 +143,9 @@ namespace TrickalFanGame.Editor
                     Capture(owner, "npc-" + key, key == "sist" ? "시스트" : "골디", "상점 NPC", "ShopRoom / Keeper");
                 }
                 Object.DestroyImmediate(shop);
+                // Append new appearances so previously reviewed asset numbers stay stable.
+                Capture(Prefab("LivelyLowBloodSugarFairy"), "LivelyLowBloodSugarFairy", "저혈당 요정 - 활발",
+                    "적·보스", "LivelyLowBloodSugarFairy.prefab");
                 File.WriteAllText(Path.Combine(folder, "manifest.json"), JsonUtility.ToJson(manifest, true),
                     new System.Text.UTF8Encoding(false));
                 Debug.Log($"Ground shadow review exported: {manifest.entries.Count} actual gameplay appearances, " +

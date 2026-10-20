@@ -310,7 +310,7 @@ MonoBehaviour:
   thickness: 0.28
   opacity: 0.28
   offset: {x: 0, y: 0}
-  profileId: HighBloodSugarFairy
+  profileId: LivelyLowBloodSugarFairy
   useSharedProfile: 1
 --- !u!1 &6303825839773785878
 GameObject:

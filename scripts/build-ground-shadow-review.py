@@ -38,7 +38,8 @@ HTML = r'''<!doctype html><html lang="ko"><meta charset="utf-8">
 <p class="note" id="measure"></p><div class="summary"><h3>말씀해 주실 조절값</h3><textarea id="summary" readonly aria-label="변경값 요약"></textarea><div class="buttons"><button id="copy">조절값 복사</button></div><div id="status" role="status"></div></div></aside></main>
 <script>
 const data=__DATA__, key='trickal-ground-shadow-review-reviewed-20261011-spells';let changes={};try{changes=JSON.parse(localStorage.getItem(key)||'{}')}catch{}
-let selected=data.find(x=>x.id==='tree')||data[0], comparison=false, loadVersion=0, layers=null;
+for(const e of data){const v=changes[e.id];if(v&&['widthMultiplier','thickness','offsetX','offsetY','opacity'].every(k=>Math.abs(v[k]-e[k])<.0001))delete changes[e.id]}
+let selected=data.find(x=>x.id===new URLSearchParams(location.search).get('asset'))||data.find(x=>x.id==='tree')||data[0], comparison=false, loadVersion=0, layers=null;
 const $=s=>document.getElementById(s), defs=[['widthMultiplier','너비 배율',.1,3,.01],['thickness','두께 비율',.05,1,.01],['offsetX','위치 X (칸)',-1,1,.01],['offsetY','위치 Y (칸)',-1,1,.01],['opacity','진하기',0,1,.01]];
 const defaults=e=>Object.fromEntries(defs.map(([k])=>[k,e[k]])), settings=e=>({...defaults(e),...(changes[e.id]||{})});
 $('total').textContent=data.length;for(const g of [...new Set(data.map(e=>e.group))]){let o=document.createElement('option');o.value=o.textContent=g;$('group').append(o)}

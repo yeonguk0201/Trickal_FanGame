@@ -2170,3 +2170,9 @@ python tools/sfx-synth/render_sfx.py output/sfx --burst=5
 ## 저혈당 요정 활발 걷기·공격 모션
 
 Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 모션을 재구성한다. `Verify Lively Fairy Motion`은 단독 검증이다. Game Scene Play → F1 → `— Room —` → `Spawn lively fairy (4-way shots)`로 걷기·웅크린 예고·빵을 들어 올리는 발사·회복을 확인한다. 구성과 미술 검수 기준은 [작업 기록](./art-prompts/lively-fairy-motion.md)을 따른다.
+
+### 저혈당 요정 - 활발 그림자 미세 조정 (2026-10-20)
+
+`GroundShadowPreviewExporter.ExportBatch`에 `LivelyLowBloodSugarFairy.prefab`의 현재 정지 모습과 실제 그림자 레이어를 추가했다. 현재 목록은 새 아이템을 포함한 81종이며 활발 버전은 81번이다. `output/ground-shadow-review/index.html?asset=LivelyLowBloodSugarFairy` 또는 로컬 서버의 같은 query로 바로 선택한다. 너비·두께·위치·진하기를 조절해 값 요약을 전달할 수 있다. 현재 프리팹의 공유 프로필 `HighBloodSugarFairy` 설정(1.05 / 0.28 / (0.07, -0.15) / 0.60)을 그대로 렌더했으며 게임 값은 변경하지 않았다. Unity 6000.3.22f1 렌더 종료 코드 0 (`output/ground-shadow-lively-preview.log`), 81번의 합성/몸체/그림자/바닥 4개 PNG와 로컬 페이지 HTTP 200을 확인했다. 미술 수치 확정은 사용자 검수 후 진행한다.
+
+- 후속 사용자 확정값: 활발 요정을 전용 `LivelyLowBloodSugarFairy` 프로필로 분리하고 너비 1.05, 두께 0.28, 위치 (-0.02, -0.15), 진하기 0.60을 적용했다. 프리팹 및 두 Setup 재실행 경로의 연결을 보존한다. `GroundShadowProfileSetup.VerifyAndExportBatch` 성공 종료 코드 0 (`output/ground-shadow-lively-adjust.log`), 실제 렌더의 다섯 값 일치와 기존 모든 프로필 불변을 확인했다.

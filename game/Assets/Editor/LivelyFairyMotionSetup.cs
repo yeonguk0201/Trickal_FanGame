@@ -52,10 +52,10 @@ namespace TrickalFanGame.Editor
                 var motion = root.GetComponent<LivelyFairyMotion>();
                 if (motion == null) motion = root.AddComponent<LivelyFairyMotion>();
                 motion.Configure(texture, content);
-                // Share the sniper fairy's reviewed shadow settings, including future adjustments.
+                // Keep the lively fairy's individually reviewed shadow placement across setup reruns.
                 var shadow = root.GetComponent<GroundShadow>();
                 if (shadow == null) shadow = root.AddComponent<GroundShadow>();
-                shadow.SetProfileId("HighBloodSugarFairy");
+                shadow.SetProfileId("LivelyLowBloodSugarFairy");
                 if (PrefabUtility.SaveAsPrefabAsset(root, Week25Enemy8Setup.PrefabPath) == null)
                     throw new InvalidOperationException("Could not save lively fairy motion.");
             }

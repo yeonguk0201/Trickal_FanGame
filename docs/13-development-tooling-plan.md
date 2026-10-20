@@ -707,3 +707,10 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 ### 저혈당 요정 활발 모션 구성·검증 (2026-10-19)
 
 `LivelyFairyMotionSetup`은 단일 프리팹과 모션 시트의 재구성 및 단독 검증을 제공한다. 실행법은 [개발 환경](./05-development-setup.md)의 저혈당 요정 활발 모션 절, 검수 범위는 [작업 기록](./art-prompts/lively-fairy-motion.md)에 기록한다.
+
+
+### 활발 요정 그림자 검수 추가 (2026-10-20)
+
+- [x] 현재 `LivelyLowBloodSugarFairy` 프리팹의 몸체·그림자를 검수 목록 끝에 추가하고 ID query로 직접 선택할 수 있게 했다. Unity 렌더 성공 종료 코드 0과 4개 출력 레이어를 확인했다 (`output/ground-shadow-lively-preview.log`).
+- [x] 사용자 확정값 (너비 1.05, 두께 0.28, 위치 -0.02/-0.15, 진하기 0.60)을 활발 요정 전용 프로필에 반영했다. Unity 검증·재렌더 종료 코드 0과 실제 값 일치, 기존 프로필 불변을 확인했다 (`output/ground-shadow-lively-adjust.log`).
+- 사용 방법은 `docs/05-development-setup.md`의 저혈당 요정 - 활발 그림자 미세 조정을 따른다.
