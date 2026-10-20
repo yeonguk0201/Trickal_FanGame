@@ -56,6 +56,32 @@ namespace TrickalFanGame.Enemy
             return false;
         }
 
+        // The circle an enemy stands on, in world space. The sprite and its ground shadow stand on the bottom of the
+        // body circle. The feet share that bottom, and an enemy without feet uses a feet-sized circle (or the whole
+        // body, when smaller) resting on the same bottom, so every enemy meets floor traps at its drawn soles.
+        public static void GroundCircle(GameObject enemy, out Vector2 center, out float radius)
+        {
+            EnemyFeet feet = enemy.GetComponentInChildren<EnemyFeet>();
+            if (feet != null && feet.isActiveAndEnabled && feet.Collider != null && feet.Collider.enabled)
+            {
+                center = feet.WorldCenter;
+                radius = feet.WorldRadius;
+                return;
+            }
+
+            if (!TryGetBody(enemy, out CircleCollider2D body))
+            {
+                center = enemy.transform.position;
+                radius = 0f;
+                return;
+            }
+
+            Vector2 bodyCenter = body.transform.TransformPoint(body.offset);
+            float bodyRadius = WorldRadiusOf(body);
+            radius = Mathf.Min(bodyRadius, Radius);
+            center = bodyCenter + Vector2.down * (bodyRadius - radius);
+        }
+
         // Normal walking enemies only: bosses keep one circle, stationary boss props have no behavior, and a body no
         // wider than the feet gains nothing from them.
         public static bool Needs(GameObject enemy)

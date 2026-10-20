@@ -30,7 +30,7 @@ namespace TrickalFanGame.Room
     // - Floor kinds (바닥 가시, 주기 가시, 장판, 거미줄) have no collider. The hit area is the ellipse the drawing
     //   covers, which is smaller than the cell. The player stands on one when any part of the line from the feet
     //   center down to the soles is inside it, so stepping onto the drawing from above hits as soon as the drawn
-    //   feet are on it; an enemy when its center is inside. Both sides are treated alike and flying bodies skip it.
+    //   feet are on it. An enemy uses the same line from its feet (EnemyFeet.GroundCircle). Flying bodies skip it.
     // - Obstacle kinds (불, 가시 돌, 독버섯) sit on a fixed-kind DestructibleObstacle, which gives them the hit count,
     //   the Environment collider that enemies path around and the broken state kept across revisits. 불 and 가시 돌
     //   hurt only the player, on contact.
@@ -277,12 +277,15 @@ namespace TrickalFanGame.Room
             foreach (Collider2D hit in enemyHits)
             {
                 Health enemy = hit != null ? hit.GetComponentInParent<Health>() : null;
-                // An enemy has no feet, so its center is its ground point.
                 if (enemy == null || enemy == playerHealth || enemy.IsDead || !tickedEnemies.Add(enemy) ||
-                    enemy.GetComponent<EnemyFlight>() != null || !Contains(enemy.transform.position))
+                    enemy.GetComponent<EnemyFlight>() != null)
                 {
                     continue;
                 }
+
+                // Like the player: the line from the feet center down to the drawn soles.
+                EnemyFeet.GroundCircle(enemy.gameObject, out Vector2 feetCenter, out float feetRadius);
+                if (!ContainsFeet(feetCenter, feetRadius)) continue;
 
                 Affect(enemy, false, currentTime);
             }
@@ -402,13 +405,15 @@ namespace TrickalFanGame.Room
 
         // The player's sprite stands on the bottom of the feet circle, a feet radius under the feet center. Either
         // point on the drawing counts, and so does the drawing passing between them.
-        public bool ContainsFeet(Vector2 feetCenter)
+        public bool ContainsFeet(Vector2 feetCenter) => ContainsFeet(feetCenter, PlayerFeet.Radius);
+
+        public bool ContainsFeet(Vector2 feetCenter, float feetRadius)
         {
             Vector2 offset = feetCenter - (Vector2)transform.position;
             float x = offset.x / (hitSize.x * 0.5f);
             if (Mathf.Abs(x) > 1f) return false;
             float halfHeight = hitSize.y * 0.5f * Mathf.Sqrt(1f - x * x);
-            return offset.y - PlayerFeet.Radius <= halfHeight && offset.y >= -halfHeight;
+            return offset.y - feetRadius <= halfHeight && offset.y >= -halfHeight;
         }
 
         // Whether a ground point is on the drawing: inside the ellipse inscribed in the hit size.
