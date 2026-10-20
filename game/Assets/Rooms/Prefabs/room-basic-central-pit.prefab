@@ -4117,7 +4117,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 14.5, y: 7.5}
+  m_Size: {x: 13, y: 7}
   m_EdgeRadius: 0
 --- !u!114 &4068188479085368134
 MonoBehaviour:
@@ -6880,6 +6880,7 @@ MonoBehaviour:
   prerequisiteRoom: {fileID: 4068188479085368134}
   rewardSelectionSession: {fileID: 0}
   selectionItemPool: []
+  powerOfferPool: []
   interactionMarker: {fileID: 4683087222752687035}
   interactionPrompt: {fileID: 74855072507638379}
 --- !u!1 &6602681588526074125

@@ -316,8 +316,7 @@ namespace TrickalFanGame.Editor
             // No obstacle or pit of any catalog room may stand on a wall boundary.
             foreach (RoomTemplateDefinition template in generator.RoomTemplates)
             {
-                Rect floor = FairyVillageArtworkSetup.WalkableFloor(
-                    template.Profile.MovementBounds.size + Vector2.one * RoomLayout.WallThickness * 2f);
+                Rect floor = FairyVillageArtworkSetup.WalkableFloor(template.Profile.InteriorSize);
                 Assert(RoomObstacleLayout.TryCollectFootprints(template.RoomPrefabAsset,
                     out List<RoomObstacleFootprint> footprints, out string footprintError), footprintError);
                 foreach (RoomObstacleFootprint footprint in footprints)

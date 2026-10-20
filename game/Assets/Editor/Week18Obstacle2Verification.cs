@@ -187,7 +187,6 @@ namespace TrickalFanGame.Editor
             Assert(RoomObstacleLayout.TryCollectFootprints(template.RoomPrefabAsset,
                     out List<RoomObstacleFootprint> valid, out string error), error);
             RoomProfile profile = template.Profile;
-            RoomTemplateDoor left = template.DoorSlots.Single(door => door.Direction == RoomDoorDirection.Left);
             Vector2 spawn = template.SpawnPoints[0];
             // The last Obstacle-2 authored point; Encounter-4 points after it can sit next to a door passage.
             Vector2 lastSpawn = template.SpawnPoints[Math.Min(2, template.SpawnPoints.Count - 1)];
@@ -196,7 +195,8 @@ namespace TrickalFanGame.Editor
             ExpectFailure(template, valid, "overlap", "overlap",
                 Static("obstacle-90", valid[0].Bounds));
             ExpectFailure(template, valid, "blocked door passage", "required door passage",
-                Unit("obstacle-90", new Vector2(Mathf.Round(left.SafeEntryPosition.x) - 0.5f, 0.5f)));
+                // Against the left wall, on the walkable floor (Grid-1), inside the left door passage.
+                Unit("obstacle-90", new Vector2(movement.xMin + 0.5f, 0.5f)));
             ExpectFailure(template, valid, "covered SpawnPoint", "overlaps obstacle",
                 Static("obstacle-90", new Rect(spawn - Vector2.one * 0.5f, Vector2.one)));
             ExpectFailure(template, valid, "sealed entry", "cut the",
@@ -223,11 +223,10 @@ namespace TrickalFanGame.Editor
                 instance.transform.position = Origin;
                 PrefabUtility.UnpackPrefabInstance(instance, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 RoomPrefab room = instance.GetComponent<RoomPrefab>();
-                RoomTemplateDoor left = source.DoorSlots.Single(door => door.Direction == RoomDoorDirection.Left);
                 DestructibleObstacle blocker = Object.Instantiate(
                     AssetDatabase.LoadAssetAtPath<DestructibleObstacle>(Week18Obstacle1Setup.PrefabPath),
                     room.Node.ContentRoot.transform);
-                blocker.transform.localPosition = new Vector2(Mathf.Round(left.SafeEntryPosition.x) - 0.5f, 0.5f);
+                blocker.transform.localPosition = new Vector2(source.Profile.MovementBounds.xMin + 0.5f, 0.5f);
                 blocker.Configure("obstacle-90", DestructibleObstacle.DefaultRequiredHits, null, null);
 
                 invalid.Configure("large-invalid-blocked-door", source.Profile, instance, new[] { RoomType.Normal },

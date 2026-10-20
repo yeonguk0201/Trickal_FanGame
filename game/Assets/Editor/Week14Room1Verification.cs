@@ -54,8 +54,8 @@ namespace TrickalFanGame.Editor
                    template.TemplateId == Week14Room1Setup.BasicTemplateId && template.Profile == profile,
                 "The Basic profile/template stable IDs or binding changed.");
             Assert(Approximately(profile.InteriorSize, new Vector2(16f, 9f)) &&
-                   Approximately(profile.MovementBounds, new Rect(-7.5f, -4f, 15f, 8f)) &&
-                   Approximately(profile.EncounterBounds, new Rect(-7.25f, -3.75f, 14.5f, 7.5f)) &&
+                   Approximately(profile.MovementBounds, new Rect(-6.5f, -3.5f, 13f, 7f)) &&
+                   Approximately(profile.EncounterBounds, new Rect(-6.5f, -3.5f, 13f, 7f)) &&
                    Mathf.Approximately(profile.CameraOrthographicSize, 5.25f) &&
                    Approximately(profile.CameraBounds, new Rect(0f, 0f, 0f, 0f)),
                 "The Basic profile bounds changed.");

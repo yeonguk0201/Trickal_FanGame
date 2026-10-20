@@ -27,7 +27,8 @@ namespace TrickalFanGame.Room
         public const float FloorExitVerticalOffset = 3.2f;
 
         public static Vector2 RoomSize => new(Width, Height);
-        public static Vector2 EncounterSize => new(14.5f, 7.5f);
+        // Grid-1: the Basic walkable floor.
+        public static Vector2 EncounterSize => new(13f, 7f);
         public static Vector2 RewardTriggerSize => new(10f, 6f);
         public static float HorizontalWallCenter => Width * 0.5f - WallThickness * 0.5f;
         public static float VerticalWallCenter => Height * 0.5f - WallThickness * 0.5f;

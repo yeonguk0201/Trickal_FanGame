@@ -76,12 +76,12 @@ namespace TrickalFanGame.Editor
                 .ToArray();
         }
 
-        public static Rect MovementBounds(Vector2 roomSize) =>
-            new(-roomSize * 0.5f + Vector2.one * RoomLayout.WallThickness,
-                roomSize - Vector2.one * RoomLayout.WallThickness * 2f);
+        // Grid-1: the floor the wall boundaries actually leave, so the profile, the room Layout grid and the
+        // colliders agree.
+        public static Rect MovementBounds(Vector2 roomSize) => FairyVillageArtworkSetup.WalkableFloor(roomSize);
 
-        public static Rect EncounterBounds(Vector2 roomSize) =>
-            new(-roomSize * 0.5f + Vector2.one * 0.75f, roomSize - Vector2.one * 1.5f);
+        // Grid-1: the whole walkable floor. Its 1x1 sight samples then fall on the Layout cell centers.
+        public static Rect EncounterBounds(Vector2 roomSize) => MovementBounds(roomSize);
 
         public static float TransitionCenter(Vector2 roomSize, RoomDoorDirection direction)
         {
