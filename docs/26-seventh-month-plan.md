@@ -461,6 +461,11 @@ Spells`, 개발 패널은 `F1` → `— Spell slot —`의 `Drop <이름>`이고
   무적 시간은 충돌한다. 다 쓴 단도는 HUD와 일시정지 목록에서 회색으로 보인다. `DeathWardGlowVerification` 회귀 배치 통과,
   Scene 미리보기(`Trickal Fan Game/Effects/Preview Dagger Ward Glow`) 제공. 사용자 수동 확인(Play,
   `F1 > — Artifact — > Drop 레비의 단도` 후 `Lethal hit (dagger ward)`)으로 수용(2026-10-20).
+- 광기의 가면의 피해 오라 표시(2026-10-20 구현): 피해 반경 안 바닥에 투명도 높은 빨간 장판, 반경 안쪽에서만 출렁이는
+  가장자리, 바깥으로 흐르는 옅은 물결(`DamageAuraField`). 피해 틱마다 원형 붓질 파동이 반경 43%까지 빠르게 퍼진 뒤
+  급히 느려져 가장자리에 닿은 곳부터 사라진다. 스택이 늘면 물결이 조금 빨라지고 진해진다.
+  `DamageAuraFieldVerification.Verify` 통과, Scene 미리보기(`Trickal Fan Game/Effects/Preview Damage Aura Field`) 제공.
+  사용자 수동 확인(Play, `F1 > — Artifact — > Show artifact drops > Drop 광기의 가면`)으로 수용(2026-10-20).
 - 적별 넉백 무게, 골디 상점의 등급 기준·등장률, 멜룬카드 등급, 자원 특화 장애물 수치 같은 구현 기본값의 조정은
   Balance-0에서 한다.
 

@@ -666,6 +666,12 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 - 런타임 `SlamLightEffect` 경로 계산과 `LayeredSlamEffect.CreatePreview`를 사용한다. 검사는 `ReviewedCombatEffectsVerification`의 v22 낙하 섬광 항목.
 - 사용자 수동 확인 후 효과 수용(2026-10-20). 실행 방법은 [개발 환경](05-development-setup.md), 근거는 [효과 기록](art-prompts/crayon-hero-slam-v15.md)에 기록한다.
 
+### 광기의 가면 피해 오라 미리보기 (2026-10-20)
+
+- 구현: `DamageAuraFieldPreview` 임시 Scene 미리보기(반경·스택·틱 간격, 바닥 배경과 레이어별 표시, 시간·재생·속도).
+- 구현: `DamageAuraFieldVerification` 반경 일치·정렬·틱 링·페이드·사망 시 숨김·Random 미소비 검사. 단독 배치 통과.
+- Play 미술 검수는 사용자 확인으로 수용(2026-10-20). 미리보기 창 조작 확인은 대기. 실행 방법은 [개발 환경](05-development-setup.md)의 광기의 가면 항목.
+
 ### 바위 균열 표시 검증 (2026-10-14)
 
 `RockDamageArtworkVerification.Verify` 구현: 3종의 피격 단계별 스프라이트, 색상·크기·바닥 기준점, 충돌 보존과 4회 타격 파괴를 검사한다. 자동 실행 결과는 [작업 기록](art-prompts/rock-damage-frames.md)에 남기며 실제 Play 미술 검수는 별도로 확인한다.

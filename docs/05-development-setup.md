@@ -1838,6 +1838,20 @@ Resources 원화를 런타임에 불러오므로 Scene/Prefab Setup 재실행 �
 
 - 자동 검사: `Trickal Fan Game > Effects > Verify Reviewed Effects With Combat Regressions`.
 - 배치: `TrickalFanGame.Editor.ReviewedCombatEffectsVerification.VerifyWithRegressionsBatch`.
+
+### 광기의 가면 피해 오라 표시
+
+2026-10-20: `PlayerDamageAura`가 플레이어 아래 바닥(정렬 -55, 그림자 아래)에 `DamageAuraField`를 그린다.
+셰이더 `Resources/CombatEffects/DamageAura.shader` 하나로 채움·물결·출렁이는 가장자리·틱 링을 그리며,
+가장자리는 피해 반경의 0.895~0.985배 사이에서만 움직인다. 0.25초 페이드, 사망·Run 종료 시 사라진다.
+틱 링은 0.8초 동안 원형 붓질로 퍼진다. 앞쪽이 가장 빨갛고 꼬리는 틱마다 다른 붓결로 옅어지며, 반경 43%까지 0.08초에
+퍼진 뒤 급히 느려져 가장자리를 지나며 사라진다. 2026-10-20 사용자 Play 확인 후 수용.
+
+- Edit Mode 미리보기: `Trickal Fan Game > Effects > Preview Damage Aura Field` → `Open / reset Scene preview`.
+  반경·스택·틱 간격, 바닥 배경/채움/물결/가장자리/틱 링 레이어, 시간 슬라이더, 재생 속도를 조절한다.
+- 단독 검사: `Trickal Fan Game > Effects > Verify Damage Aura Field`(`DamageAuraFieldVerification.Verify`).
+- 회귀: `DamageAuraFieldVerification.VerifyWithRegressionsBatch`(Phase G-6 오라 규칙, 개발 패널 포함).
+- Play 확인: `F1 > — Artifact — > Show artifact drops > Drop 광기의 가면`. 패널에 `Mask aura` 줄이 나온다.
 - 로그: `game/Logs/LayeredSlamV21Verification.log`.
 - 2026-10-08 위 배치 실행 종료 코드 0, `Layered slam v21 passed`·`Reviewed effects combat regressions passed.` 확인.
 - 수동 미술 검수: `Trickal Fan Game > Debug > Open Boss Test Room` → Play →

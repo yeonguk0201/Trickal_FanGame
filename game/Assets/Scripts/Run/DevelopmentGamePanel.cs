@@ -441,6 +441,11 @@ namespace TrickalFanGame.Run
                     health.TakeDamage(new DamageContext(null, DamageSourceType.EnemyContact, hearts));
                 }
             }
+            PlayerDamageAura aura = player.GetComponent<PlayerDamageAura>();
+            if (aura != null && aura.StackCount > 0)
+                GUILayout.Label($"Mask aura x{aura.StackCount}  {aura.Radius:0.##}m  next tick " +
+                                $"{Mathf.Max(0f, aura.NextTickTime - Time.time):F1}s  field " +
+                                (aura.Field != null && aura.Field.Field.enabled ? "on" : "off"));
             if (explosion != null) GUILayout.Label($"Muffin hits {explosion.HitProgress}  explosions {explosion.TriggerCount}");
             if (castHeal != null)
                 GUILayout.Label($"Flag casts {castHeal.CastProgress}/{castHeal.RequiredCastCount}");
