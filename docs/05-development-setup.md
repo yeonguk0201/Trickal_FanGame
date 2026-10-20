@@ -1262,6 +1262,26 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   1에서 멈추는지, 커진 채로 1칸 통로와 문을 지나고 다음 방에서 벽에 끼지 않고 서는지, 적과 적 투사체가 커진 몸에 맞는지,
   폭탄이 발밑에 놓이는지, `x1`로 원래대로 돌아오는지, `x0.5`도 같은 자리에 서 있는지 본다.
 
+- Hitbox-2 일반 적 발 콜라이더와 1칸 통로 통과: 메뉴 `Trickal Fan Game > Week 27 > Setup Hitbox-2 Enemy Feet Collider`가
+  `EnemyFeet` 레이어를 빈 사용자 레이어에 만들고 2D 충돌 표에서 `Environment`·`Pit`과만 충돌하게 한 뒤, 루트에 `TestEnemy`가
+  있는 Prefab 중 일반 적(`EnemyBehaviorContext`가 있고 `BossController`가 없으며 몸 반지름이 0.35보다 큰 적)에 자식
+  `Feet`(월드 반지름 0.35, 아래 끝이 몸 아래 끝과 같음)를 넣고 몸 원의 `excludeLayers`에 `Environment`·`Pit`을 넣는다.
+  `Enemy` 레이어의 충돌 표는 바꾸지 않으므로 보스는 몸 하나로 지형에 닿는다. 기반 Prefab을 변형보다 먼저 처리하고, 일반
+  적에서 상속받은 발이 있는 보스 변형(`TestBoss`)은 발을 끄고 몸의 지형 충돌을 되돌린다. 다시 실행해도 바뀌는 Prefab이 없다.
+  구덩이 구성(`Week22Terrain0Setup`)의 충돌 대상에 `EnemyFeet`을 넣었으므로 Terrain-0 Setup보다 먼저 실행한다.
+  길찾기(`EnemyObstacleNavigator`)는 발 원의 중심·반지름으로 계획하고(`ResolveFootprint`), 격자 셀 중심을 월드 0.5
+  격자에 고정해 1칸 통로의 가운데 셀이 적 위치와 관계없이 열린다. 돌진·근접 돌진의 경로 검사도 발 원을 쓴다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 27 > Setup and Verify Hitbox-2 Enemy Feet Collider`, 배치는 Unity `-batchmode
+  -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week27Hitbox2Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. 충돌 표, 적 Prefab별 발 유무(새 적 Prefab은 목록에 넣어야 통과), 발 크기·위치와 몸 반지름 0.5
+  유지, 모든 방의 장애물·구덩이 중심이 0.5 격자 위인지, 물리 시뮬레이션에서 벽·구덩이에 발이 멈추는지와 발 없는 몸은
+  지금처럼 멈추는지, 장애물 사이·장애물과 벽 사이 1칸 통로를 여러 시작 위치에서 계획하고 불효자손·산사모·원거리 적
+  Prefab이 실제로 지나가는지를 검사한다. 회귀는 `VerifyWithRegressionsBatch`(Obstacle-0 적 회귀 묶음과 Obstacle-1·2,
+  Terrain-0, Flight-0, Melee-Lunge, Enemy-6·8, Hitbox-0의 `Verify`)다. Obstacle-0의 갇힌 적 검사는 격자가 고정되어 반 칸
+  다가간 뒤 멈추는 것으로 바꿨다. 2026-10-20 두 배치가 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → 장애물과 벽 사이, 장애물 사이 1칸 통로를 불효자손·산사모·원거리 적이 지나와 쫓아오는지,
+  위쪽 벽에 몸이 0.3쯤 겹치는 모습이 괜찮은지 본다. 사용자 Play 확인 완료(2026-10-20).
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,

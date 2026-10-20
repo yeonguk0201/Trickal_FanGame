@@ -46,7 +46,7 @@ namespace TrickalFanGame.Enemy
         private Rigidbody2D body;
         private LineRenderer lungePath;
         private MeleeWarningVisual lungeWarning;
-        private float bodyRadius;
+        private EnemyObstacleNavigator.TerrainFootprint terrain;
         private float stateEndsAt;
         private float nextAttackTime;
         private bool hitApplied;
@@ -252,7 +252,7 @@ namespace TrickalFanGame.Enemy
 
             Vector2 offset = behavior.Target.position - transform.position;
             return offset.sqrMagnitude <= lungeTriggerRange * lungeTriggerRange &&
-                   EnemyObstacleNavigator.HasClearPath(transform.position, behavior.Target.position, bodyRadius);
+                   EnemyObstacleNavigator.HasClearPath(transform.position, behavior.Target.position, terrain);
         }
 
         private bool IsTargetInHitArea()
@@ -304,8 +304,8 @@ namespace TrickalFanGame.Enemy
         private float ResolveLungeTravel(Vector2 direction)
         {
             float distance = lungeDistance;
-            foreach (RaycastHit2D hit in Physics2D.CircleCastAll(transform.position, bodyRadius, direction, distance,
-                         EnemyObstacleNavigator.ObstacleMask))
+            foreach (RaycastHit2D hit in Physics2D.CircleCastAll(terrain.Center(transform.position), terrain.Radius,
+                         direction, distance, EnemyObstacleNavigator.ObstacleMask))
             {
                 if (hit.collider == null || hit.collider.isTrigger) continue;
                 distance = Mathf.Min(distance, hit.distance);
@@ -450,7 +450,7 @@ namespace TrickalFanGame.Enemy
             behavior = GetComponent<EnemyBehaviorContext>();
             presentation = GetComponent<EnemyAttackPresentation>();
             body = GetComponent<Rigidbody2D>();
-            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
+            terrain = EnemyObstacleNavigator.ResolveFootprint(gameObject);
         }
 
         private void OnDrawGizmosSelected()
