@@ -150,7 +150,7 @@ namespace TrickalFanGame.Editor
                           $"physics={Body.position}, entry={Entry.position}, mismatch={error}";
             if (Source.ContentRoot.activeInHierarchy || !Destination.ContentRoot.activeInHierarchy)
                 Failure = $"{name}: previous room remains active.";
-            if (Vector2.Distance(Body.position, Entry.position) > 0.1f ||
+            if (Vector2.Distance(Body.position + PlayerFeet.LocalPosition - RoomLayout.ArrivalFeetOffset, Entry.position) > 0.1f ||
                 Body.interpolation != RigidbodyInterpolation2D.Interpolate)
                 Failure = $"{name}: safe entry position or smooth movement interpolation was lost.";
             Vector2 cameraLocal = Destination.CameraAnchor.InverseTransformPoint(Graph.RoomCamera.transform.position);

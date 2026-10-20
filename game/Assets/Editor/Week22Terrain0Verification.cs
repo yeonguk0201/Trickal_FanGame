@@ -208,7 +208,8 @@ namespace TrickalFanGame.Editor
             ExpectFailure(template, valid, "door-blocking pit", "pit 'pit-bad' blocks the Up",
                 Pit("pit-bad", Rect.MinMaxRect(-1f, 2.5f, 1f, 3.5f)));
             ExpectFailure(template, valid, "SpawnPoint pit", "overlaps pit",
-                Pit("pit-bad", Rect.MinMaxRect(-5f, 2f, -4f, 3f)));
+                // Against the top wall (Grid-1), so no narrow gap is reported first.
+                Pit("pit-bad", Rect.MinMaxRect(-5f, 2.5f, -4f, 3.5f)));
             ExpectFailure(template, valid, "off-grid pit", "edges on the",
                 Pit("pit-bad", Rect.MinMaxRect(-5.7f, -3f, -4.7f, -2f)));
             ExpectFailure(template, valid, "thin pit", "at least 1x1",

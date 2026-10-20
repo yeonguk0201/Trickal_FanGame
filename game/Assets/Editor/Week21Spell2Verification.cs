@@ -176,7 +176,7 @@ namespace TrickalFanGame.Editor
             Assert(run.Slot.TryUse() == SpellSlotUseResult.Used && !run.Slot.HasItem,
                 "During combat 그건 내 잔상 must be consumed.");
             Assert(run.Graph.CurrentNode == start && run.Progress.CurrentRoom == start.RoomNumber &&
-                   ((Vector2)run.Graph.Player.transform.position - start.InitialSpawnPosition).sqrMagnitude < 0.0001f &&
+                   (run.Graph.Player.FeetPosition - RoomLayout.ArrivalFeetOffset - start.InitialSpawnPosition).sqrMagnitude < 0.0001f &&
                    !room.Node.IsVisible && start.IsVisible,
                 "그건 내 잔상 must move the player to the current floor's start room.");
             Assert(liveEnemies.Count > 0 && liveEnemies.All(enemy => enemy == null) &&

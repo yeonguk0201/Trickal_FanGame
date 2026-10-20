@@ -49,7 +49,7 @@ namespace TrickalFanGame.Enemy
         private EnemyAttackPresentation presentation;
         private SpriteRenderer spriteRenderer;
         private LineRenderer[] warnings;
-        private float bodyRadius;
+        private EnemyObstacleNavigator.TerrainFootprint terrain;
         private float stateEndsAt;
         private Vector2 moveDirection;
 
@@ -194,7 +194,7 @@ namespace TrickalFanGame.Enemy
             Vector2 toward = target != null ? (Vector2)(target.position - transform.position) : Vector2.right;
             Vector2 wanted = ChooseMoveDirection(toward, roll);
             // Turn to the nearest open direction; boxed in on every side, it waits out this move in place.
-            moveDirection = EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, wanted, bodyRadius,
+            moveDirection = EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, wanted, terrain,
                 out Vector2 open)
                 ? open
                 : Vector2.zero;
@@ -208,7 +208,7 @@ namespace TrickalFanGame.Enemy
         {
             if (State != FourWayShooterState.Moving || moveDirection == Vector2.zero) return false;
             moveDirection = EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, -moveDirection,
-                bodyRadius, out Vector2 open)
+                terrain, out Vector2 open)
                 ? open
                 : Vector2.zero;
             return true;
@@ -285,7 +285,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
-            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
+            terrain = EnemyObstacleNavigator.ResolveFootprint(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null) behavior = gameObject.AddComponent<EnemyBehaviorContext>();
             behavior.Initialize();

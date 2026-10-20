@@ -71,10 +71,11 @@ namespace TrickalFanGame.Editor
             Week14Room1Setup.BasicProfileId, Week14Room1Setup.BasicProfilePath, RoomLayout.RoomSize,
             Week8GridFloorSetup.PrefabPath,
             new[] { new Vector2(-4f, 2f), new Vector2(4f, -2f), Vector2.zero },
+            // Grid-1: the outer two touch the top and bottom walls instead of leaving a half-cell gap.
             new[]
             {
-                new Vector2(-3.5f, 0.5f), new Vector2(-2.5f, 2.5f),
-                new Vector2(3.5f, -0.5f), new Vector2(2.5f, -2.5f),
+                new Vector2(-3.5f, 0.5f), new Vector2(-2.5f, 3f),
+                new Vector2(3.5f, -0.5f), new Vector2(2.5f, -3f),
             });
 
         public static readonly LayoutSpec WideTwinCover = new(

@@ -49,7 +49,7 @@ namespace TrickalFanGame.Enemy
         private int relocationSequence;
         private bool strafeThisCycle;
         private readonly EnemyObstacleNavigator navigator = new();
-        private float bodyRadius;
+        private EnemyObstacleNavigator.TerrainFootprint terrain;
 
         public LongRangeSniperState State { get; private set; }
         public Vector2 LockedDirection => lockedDirection;
@@ -241,7 +241,7 @@ namespace TrickalFanGame.Enemy
             if (!EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
             {
                 // Obstacle-0: hold the aim and walk around the obstacle until the line of fire opens.
-                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
+                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, terrain,
                     currentTime) * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
                 return;
             }
@@ -376,7 +376,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
-            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
+            terrain = EnemyObstacleNavigator.ResolveFootprint(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {

@@ -423,7 +423,29 @@ namespace TrickalFanGame.Run
                                 (frenzy.Stacks > 0
                                     ? $"ends in {Mathf.Max(0f, frenzy.EndTime - Time.time):F1}s"
                                     : $"cooldown {Mathf.Max(0f, frenzy.CooldownEndTime - Time.time):F1}s"));
-            if (ward != null) GUILayout.Label($"Dagger ward {(ward.IsSpent ? "spent" : "ready")}");
+            if (ward != null)
+            {
+                float left = ward.InvulnerableUntil - Time.time;
+                GUILayout.Label($"Dagger ward {(ward.IsSpent ? "spent" : "ready")}" +
+                                (left > 0f ? $"  invulnerable {left:F1}s" : string.Empty) +
+                                (player.GetComponent<PlayerHitPassThrough>()?.IsPassingThrough == true
+                                    ? "  passing through" : string.Empty));
+                // Lands a hit of exactly the remaining health + shield through the normal damage path.
+                if (!ward.IsSpent && health != null && !health.IsDead &&
+                    AssistedButton(health.IsInvulnerable ? "Lethal hit (wait: invulnerable)" : "Lethal hit (dagger ward)") &&
+                    !health.IsInvulnerable)
+                {
+                    float hearts = health.UsesHealthUnits
+                        ? HealthUnits.ToHearts(health.CurrentHealth + health.CurrentShield)
+                        : health.CurrentHealth + health.CurrentShield;
+                    health.TakeDamage(new DamageContext(null, DamageSourceType.EnemyContact, hearts));
+                }
+            }
+            PlayerDamageAura aura = player.GetComponent<PlayerDamageAura>();
+            if (aura != null && aura.StackCount > 0)
+                GUILayout.Label($"Mask aura x{aura.StackCount}  {aura.Radius:0.##}m  next tick " +
+                                $"{Mathf.Max(0f, aura.NextTickTime - Time.time):F1}s  field " +
+                                (aura.Field != null && aura.Field.Field.enabled ? "on" : "off"));
             if (explosion != null) GUILayout.Label($"Muffin hits {explosion.HitProgress}  explosions {explosion.TriggerCount}");
             if (castHeal != null)
                 GUILayout.Label($"Flag casts {castHeal.CastProgress}/{castHeal.RequiredCastCount}");

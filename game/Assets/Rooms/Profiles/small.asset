@@ -16,16 +16,16 @@ MonoBehaviour:
   interiorSize: {x: 12, y: 6.75}
   movementBounds:
     serializedVersion: 2
-    x: -5.5
-    y: -2.875
-    width: 11
-    height: 5.75
+    x: -5
+    y: -2.5
+    width: 10
+    height: 5
   encounterBounds:
     serializedVersion: 2
-    x: -5.25
-    y: -2.625
-    width: 10.5
-    height: 5.25
+    x: -5
+    y: -2.5
+    width: 10
+    height: 5
   cameraOrthographicSize: 5.25
   cameraBounds:
     serializedVersion: 2

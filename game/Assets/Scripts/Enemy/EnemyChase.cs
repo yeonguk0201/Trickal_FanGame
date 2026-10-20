@@ -19,7 +19,7 @@ namespace TrickalFanGame.Enemy
         private KnockbackReceiver knockback;
         private EnemyBehaviorContext behavior;
         private readonly EnemyObstacleNavigator navigator = new();
-        private float bodyRadius;
+        private EnemyObstacleNavigator.TerrainFootprint terrain;
 
         public float MoveSpeed => moveSpeed;
         public float DetectionRange => detectionRange;
@@ -97,7 +97,7 @@ namespace TrickalFanGame.Enemy
             // and physics stops it at walls and trees.
             Vector2 direction = flies
                 ? offset / distance
-                : navigator.GetMoveDirection(transform.position, target.position, bodyRadius, Time.time);
+                : navigator.GetMoveDirection(transform.position, target.position, terrain, Time.time);
             // Shock (Passive-0 §4.8) slows ordinary movement only.
             body.linearVelocity = direction * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
         }
@@ -107,7 +107,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
-            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
+            terrain = EnemyObstacleNavigator.ResolveFootprint(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {

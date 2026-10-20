@@ -27,7 +27,7 @@ namespace TrickalFanGame.Enemy
         private EnemyBehaviorContext behavior;
         private float nextAttackTime;
         private readonly EnemyObstacleNavigator navigator = new();
-        private float bodyRadius;
+        private EnemyObstacleNavigator.TerrainFootprint terrain;
 
         public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;
         public float NextAttackTime => nextAttackTime;
@@ -128,13 +128,13 @@ namespace TrickalFanGame.Enemy
             if (distance > maximumAttackDistance ||
                 !EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
             {
-                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
+                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, terrain,
                     currentTime) * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
                 return;
             }
 
             if (distance < minimumAttackDistance &&
-                EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, -direction, bodyRadius,
+                EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, -direction, terrain,
                     out Vector2 retreat))
             {
                 body.linearVelocity = retreat * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
@@ -175,7 +175,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
-            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
+            terrain = EnemyObstacleNavigator.ResolveFootprint(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {

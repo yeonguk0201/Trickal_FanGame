@@ -35,7 +35,7 @@ MonoBehaviour:
   - {x: -7, y: 1}
   - {x: 7, y: -2}
   - {x: 0, y: 0}
-  - {x: -7, y: -2}
+  - {x: -7, y: -1}
   - {x: 7, y: 1}
   spawnPointRoles: 0300000003000000060000000300000003000000
   layoutDifficultyModifier: 1

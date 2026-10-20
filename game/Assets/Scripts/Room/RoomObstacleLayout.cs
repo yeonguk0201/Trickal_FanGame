@@ -37,6 +37,8 @@ namespace TrickalFanGame.Room
         public const float SightSampleSpacing = 1f;
         public const float MinimumSightCoverage = 0.35f;
         public const float GridStep = 0.5f;
+        // Grid-1: the narrowest gap a Layout may leave open between walls, obstacles and pits (one Layout cell).
+        public const float MinimumPassageWidth = 1f;
         // A floor trap keeps this far from every door's safe entry point, so entering a room never lands on one.
         public const float FloorTrapDoorClearance = 1.5f;
         private const float Tolerance = 0.0001f;
@@ -382,8 +384,63 @@ namespace TrickalFanGame.Room
                 }
             }
 
+            return TryValidatePassageWidths(layoutId, movementBounds, footprints, out error);
+        }
+
+        // Grid-1: a gap between the walls, obstacles and pits is either closed or at least one cell wide. A narrower
+        // gap looks passable, but no actor fits through it. Gaps are measured between the GridStep cells each
+        // footprint occupies, so a collider smaller than its cell (a chest) does not open a sliver beside it.
+        private static bool TryValidatePassageWidths(string layoutId, Rect movementBounds,
+            IReadOnlyList<RoomObstacleFootprint> footprints, out string error)
+        {
+            for (int index = 0; index < footprints.Count; index++)
+            {
+                RoomObstacleFootprint footprint = footprints[index];
+                Rect bounds = OccupiedCells(footprint.Bounds);
+                (string wall, float gap)[] walls =
+                {
+                    ("left wall", bounds.xMin - movementBounds.xMin),
+                    ("right wall", movementBounds.xMax - bounds.xMax),
+                    ("bottom wall", bounds.yMin - movementBounds.yMin),
+                    ("top wall", movementBounds.yMax - bounds.yMax),
+                };
+                foreach ((string wall, float gap) in walls)
+                {
+                    if (!IsNarrowGap(gap)) continue;
+                    error = $"Layout '{layoutId}' leaves a {gap:0.##}-unit gap between the {wall} and " +
+                            $"{footprint.Kind} '{footprint.ObstacleId}'; close it or keep it {MinimumPassageWidth} wide.";
+                    return false;
+                }
+
+                for (int other = 0; other < index; other++)
+                {
+                    float gap = Gap(bounds, OccupiedCells(footprints[other].Bounds));
+                    if (!IsNarrowGap(gap)) continue;
+                    error = $"Layout '{layoutId}' leaves a {gap:0.##}-unit gap between {footprints[other].Kind} " +
+                            $"'{footprints[other].ObstacleId}' and {footprint.Kind} '{footprint.ObstacleId}'; close " +
+                            $"it or keep it {MinimumPassageWidth} wide.";
+                    return false;
+                }
+            }
+
             error = null;
             return true;
+        }
+
+        private static Rect OccupiedCells(Rect bounds) => Rect.MinMaxRect(
+            Mathf.Floor(bounds.xMin / GridStep + Tolerance) * GridStep,
+            Mathf.Floor(bounds.yMin / GridStep + Tolerance) * GridStep,
+            Mathf.Ceil(bounds.xMax / GridStep - Tolerance) * GridStep,
+            Mathf.Ceil(bounds.yMax / GridStep - Tolerance) * GridStep);
+
+        private static bool IsNarrowGap(float gap) => gap > Tolerance && gap < MinimumPassageWidth - Tolerance;
+
+        // Shortest distance between two rectangles; 0 when they touch.
+        private static float Gap(Rect first, Rect second)
+        {
+            float dx = Mathf.Max(first.xMin - second.xMax, second.xMin - first.xMax, 0f);
+            float dy = Mathf.Max(first.yMin - second.yMax, second.yMin - first.yMax, 0f);
+            return Mathf.Sqrt(dx * dx + dy * dy);
         }
 
         private static bool TryReadBox(Transform root, GameObject owner, string obstacleId, out Rect bounds,
@@ -493,11 +550,14 @@ namespace TrickalFanGame.Room
             public bool[] FloodFrom(Vector2 start)
             {
                 bool[] reached = new bool[free.Length];
-                int first = Index(start);
-                if (!free[first]) return reached;
                 Stack<int> pending = new();
-                reached[first] = true;
-                pending.Push(first);
+                foreach (int first in Around(start))
+                {
+                    if (!free[first] || reached[first]) continue;
+                    reached[first] = true;
+                    pending.Push(first);
+                }
+
                 while (pending.Count > 0)
                 {
                     int cell = pending.Pop();
@@ -512,7 +572,12 @@ namespace TrickalFanGame.Room
                 return reached;
             }
 
-            public bool IsReachable(bool[] reached, Vector2 point) => reached[Index(point)];
+            public bool IsReachable(bool[] reached, Vector2 point)
+            {
+                foreach (int cell in Around(point))
+                    if (reached[cell]) return true;
+                return false;
+            }
 
             private void Visit(int x, int y, bool[] reached, Stack<int> pending)
             {
@@ -526,11 +591,16 @@ namespace TrickalFanGame.Room
             private Vector2 Center(int x, int y) =>
                 new(bounds.xMin + (x + 0.5f) * ReachabilityCellSize, bounds.yMin + (y + 0.5f) * ReachabilityCellSize);
 
-            private int Index(Vector2 point)
+            // Grid-1: the up to four cells whose centers surround the point. A point exactly ActorRadius from an
+            // obstacle often lies on a cell edge, and the one cell holding it can sit just inside that radius
+            // depending on where the floor starts, so a single cell would judge a legal point by its alignment.
+            private IEnumerable<int> Around(Vector2 point)
             {
-                int x = Mathf.Clamp(Mathf.FloorToInt((point.x - bounds.xMin) / ReachabilityCellSize), 0, width - 1);
-                int y = Mathf.Clamp(Mathf.FloorToInt((point.y - bounds.yMin) / ReachabilityCellSize), 0, height - 1);
-                return y * width + x;
+                int left = Mathf.FloorToInt((point.x - bounds.xMin) / ReachabilityCellSize - 0.5f);
+                int bottom = Mathf.FloorToInt((point.y - bounds.yMin) / ReachabilityCellSize - 0.5f);
+                for (int y = bottom; y <= bottom + 1; y++)
+                for (int x = left; x <= left + 1; x++)
+                    yield return Mathf.Clamp(y, 0, height - 1) * width + Mathf.Clamp(x, 0, width - 1);
             }
         }
     }

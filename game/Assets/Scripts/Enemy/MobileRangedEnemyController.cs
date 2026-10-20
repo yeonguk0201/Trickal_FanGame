@@ -32,7 +32,7 @@ namespace TrickalFanGame.Enemy
         private EnemyAttackPresentation presentation;
         private SpriteRenderer spriteRenderer;
         private readonly EnemyObstacleNavigator navigator = new();
-        private float bodyRadius;
+        private EnemyObstacleNavigator.TerrainFootprint terrain;
         private float nextShotTime;
         private float presentationEndsAt;
         private int shotsRemaining;
@@ -209,7 +209,7 @@ namespace TrickalFanGame.Enemy
             bool hasLineOfFire = EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position);
             if (!hasLineOfFire)
             {
-                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, bodyRadius,
+                body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, terrain,
                     currentTime) * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
                 return false;
             }
@@ -221,7 +221,7 @@ namespace TrickalFanGame.Enemy
             if (distance > preferredDistance + distanceTolerance)
                 radial = direction;
             else if (distance < preferredDistance - distanceTolerance &&
-                     EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, -direction, bodyRadius,
+                     EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, -direction, terrain,
                          out Vector2 retreat))
                 radial = retreat;
 
@@ -288,7 +288,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
-            bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
+            terrain = EnemyObstacleNavigator.ResolveFootprint(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null) behavior = gameObject.AddComponent<EnemyBehaviorContext>();
             behavior.Initialize();

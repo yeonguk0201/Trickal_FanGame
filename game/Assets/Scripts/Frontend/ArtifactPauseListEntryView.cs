@@ -32,7 +32,7 @@ namespace TrickalFanGame.Frontend
             descriptionText = configuredDescriptionText;
         }
 
-        public void Bind(ItemDefinition definition, int stackCount)
+        public void Bind(ItemDefinition definition, int stackCount, bool spent = false)
         {
             Definition = definition;
             StackCount = Mathf.Max(1, stackCount);
@@ -40,7 +40,7 @@ namespace TrickalFanGame.Frontend
                 definition != null ? definition.Rarity : ItemRarity.Common);
             if (stableIdText != null) stableIdText.text = ArtifactHudSlotView.GetShortStableId(
                 definition != null ? definition.ItemId : string.Empty);
-            UserArtwork.Apply(icon, definition, stableIdText);
+            UserArtwork.Apply(icon, definition, stableIdText, spent);
             if (nameText != null) nameText.text = definition != null ? definition.DisplayName : string.Empty;
             if (stackText != null) stackText.text = $"×{StackCount}";
             if (descriptionText != null) descriptionText.text = ArtifactEffectDescription.Build(definition);

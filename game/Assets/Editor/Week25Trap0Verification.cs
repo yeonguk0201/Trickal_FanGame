@@ -50,8 +50,8 @@ namespace TrickalFanGame.Editor
             Debug.Log("Trap-0 verification passed: seven trap Prefabs bound to their drawings; every player hit is " +
                       "half a heart judged by the feet center down to the soles against the drawn ellipse, shares the post-hit window and " +
                       "repeats after 1 " +
-                      "second; floor traps hurt or slow grounded enemies by their center on the drawing without crediting the " +
-                      "kill and ignore flying bodies; periodic spikes run 2s down (0.5s warning) and 2s up in two " +
+                      "second; floor traps hurt or slow grounded enemies by the same line from their feet without crediting the " +
+                      "kill and ignore flying bodies; periodic spikes run 2s down and 2s up with no warning in two " +
                       "opposite phases and restart on entry; fire blocks flight, goes out after 3 hits or one " +
                       "water hit, a spiked rock breaks in 4 and is flown over, a poison mushroom breaks in 2 and " +
                       "leaves a 3s gas that hits the player once and poisons enemies up to 3 stacks as player " +
@@ -187,17 +187,31 @@ namespace TrickalFanGame.Editor
                 roomOwner.transform.SetParent(fixture.Root, false);
                 RoomController room = roomOwner.GetComponent<RoomController>();
                 Health enemy = fixture.CreateEnemy(cell + new Vector2(0.2f, -0.2f), false);
-                // Inside the cell, with its collider over the drawing, but its center off the drawing.
-                Health edgeEnemy = fixture.CreateEnemy(cell + Vector2.up * (half.y + 0.1f), false);
+                // A body no wider than the feet stands on its own bottom, like the player's feet circle: soles on
+                // the drawing's upper edge are hurt although the center is above it, soles above it are not.
+                Health solesEnemy = fixture.CreateEnemy(
+                    cell + Vector2.up * (half.y + Fixture.EnemyRadius - 0.05f), false);
+                Health edgeEnemy = fixture.CreateEnemy(
+                    cell + Vector2.up * (half.y + Fixture.EnemyRadius + 0.02f), false);
                 Health flyingEnemy = fixture.CreateEnemy(cell + new Vector2(-0.2f, 0.2f), true);
+                // A normal enemy with Hitbox-2 feet: the sprite stands on the body bottom, 0.5 under its center.
+                const float feetBody = 0.5f;
+                Health feetEnemy = fixture.CreateFeetEnemy(cell + Vector2.up * (half.y + feetBody - 0.05f), feetBody);
+                Health feetAboveEnemy =
+                    fixture.CreateFeetEnemy(cell + Vector2.up * (half.y + feetBody + 0.02f), feetBody);
                 room.RegisterEnemy(enemy);
                 Physics2D.SyncTransforms();
                 trap.Tick(time + 6f);
                 Assert(Mathf.Approximately(enemy.CurrentHealth, enemy.MaxHealth - RoomTrap.EnemyDamage) &&
+                       Mathf.Approximately(solesEnemy.CurrentHealth, solesEnemy.MaxHealth - RoomTrap.EnemyDamage) &&
                        edgeEnemy.CurrentHealth == edgeEnemy.MaxHealth &&
                        flyingEnemy.CurrentHealth == flyingEnemy.MaxHealth,
-                    "Spikes must take a fixed 5 from a grounded enemy whose center is on the drawing, and nothing " +
-                    "from one whose center is off it or from a flying one.");
+                    "Spikes must take a fixed 5 from a grounded enemy whose soles are on the drawing, and nothing " +
+                    "from one whose soles are above it or from a flying one.");
+                Assert(Mathf.Approximately(feetEnemy.CurrentHealth, feetEnemy.MaxHealth - RoomTrap.EnemyDamage) &&
+                       feetAboveEnemy.CurrentHealth == feetAboveEnemy.MaxHealth,
+                    "An enemy with feet must be hurt once its drawn soles (the body bottom) reach the drawing, " +
+                    "although its center is still above it, and not while its soles are above it.");
                 trap.Tick(time + 6.5f);
                 Assert(Mathf.Approximately(enemy.CurrentHealth, enemy.MaxHealth - RoomTrap.EnemyDamage),
                     "The same spikes must wait 1 second before hurting an enemy again.");
@@ -220,17 +234,16 @@ namespace TrickalFanGame.Editor
                 RoomTrap first = fixture.PlaceTrap(RoomTrapKind.PeriodicSpikes, Origin, "periodic-a");
                 RoomTrap second = fixture.PlaceTrap(RoomTrapKind.PeriodicSpikes, Origin + Vector2.right * 3f,
                     "periodic-b", true);
-                Assert(RoomTrap.PeriodicLoweredSeconds == 2f && RoomTrap.PeriodicRaisedSeconds == 2f &&
-                       RoomTrap.PeriodicWarningSeconds == 0.5f,
-                    "Periodic spikes are 2 seconds down, 2 seconds up, with a 0.5 second warning.");
+                Assert(RoomTrap.PeriodicLoweredSeconds == 2f && RoomTrap.PeriodicRaisedSeconds == 2f,
+                    "Periodic spikes are 2 seconds down, 2 seconds up.");
                 Assert(first.StateAt(time + 0.1f) == PeriodicSpikeState.Lowered &&
                        first.StateAt(time + 1.4f) == PeriodicSpikeState.Lowered &&
-                       first.StateAt(time + 1.6f) == PeriodicSpikeState.Warning &&
+                       first.StateAt(time + 1.9f) == PeriodicSpikeState.Lowered &&
                        first.StateAt(time + 2.1f) == PeriodicSpikeState.Raised &&
                        first.StateAt(time + 3.9f) == PeriodicSpikeState.Raised &&
                        first.StateAt(time + 4.1f) == PeriodicSpikeState.Lowered &&
-                       first.StateAt(time + 5.6f) == PeriodicSpikeState.Warning,
-                    "Phase A must start lowered, warn 0.5 seconds before rising and repeat every 4 seconds.");
+                       first.StateAt(time + 5.9f) == PeriodicSpikeState.Lowered,
+                    "Phase A must start lowered, rise without a warning and repeat every 4 seconds.");
                 for (float offset = 0.1f; offset < 8f; offset += 0.25f)
                 {
                     Assert((first.StateAt(time + offset) == PeriodicSpikeState.Raised) !=
@@ -239,9 +252,12 @@ namespace TrickalFanGame.Editor
                 }
 
                 fixture.StandOn(Origin);
-                first.Tick(time + 1.6f);
-                Assert(fixture.PlayerUnits == 10f && first.Visual.color.a < 1f,
-                    "Warning spikes must not hurt and must not look raised.");
+                first.Tick(time + 0.1f);
+                Sprite loweredSprite = first.Visual.sprite;
+                first.Tick(time + 1.9f);
+                Assert(fixture.PlayerUnits == 10f && first.Visual.color == Color.white &&
+                       first.Visual.sprite == loweredSprite,
+                    "Spikes about to rise must not hurt and must look the same as lowered spikes (no warning tint).");
                 first.Tick(time + 2.1f);
                 Assert(fixture.PlayerUnits == 10f - HalfHeart && first.Visual.color.a == 1f,
                     "Raised spikes must hurt for half a heart.");
@@ -495,6 +511,8 @@ namespace TrickalFanGame.Editor
         // A player with 5 hearts and the feet collider, plus the traps and enemies of one scenario.
         private sealed class Fixture
         {
+            public const float EnemyRadius = 0.3f;
+
             private readonly GameObject root;
             private int creditedKills;
 
@@ -548,7 +566,7 @@ namespace TrickalFanGame.Editor
                 enemy.transform.SetParent(root.transform, false);
                 enemy.transform.position = position;
                 enemy.layer = LayerMask.NameToLayer(RoomTrap.EnemyLayerName);
-                enemy.GetComponent<CircleCollider2D>().radius = 0.3f;
+                enemy.GetComponent<CircleCollider2D>().radius = EnemyRadius;
                 if (flying)
                 {
                     enemy.AddComponent<Rigidbody2D>().gravityScale = 0f;
@@ -557,6 +575,15 @@ namespace TrickalFanGame.Editor
 
                 Health health = enemy.GetComponent<Health>();
                 InvokeAwake(health);
+                return health;
+            }
+
+            // A grounded enemy body with the Hitbox-2 feet child.
+            public Health CreateFeetEnemy(Vector2 position, float bodyRadius)
+            {
+                Health health = CreateEnemy(position, false);
+                health.GetComponent<CircleCollider2D>().radius = bodyRadius;
+                EnemyFeet.Ensure(health.gameObject, out _);
                 return health;
             }
 

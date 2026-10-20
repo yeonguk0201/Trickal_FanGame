@@ -62,8 +62,10 @@ namespace TrickalFanGame.Editor
                 RoomProfile profile = AssetDatabase.LoadAssetAtPath<RoomProfile>(path);
                 Assert(profile != null, $"Missing Boss-0 room profile at {path}.");
                 Assert(profile.TryValidate(out string error), error);
+                // Grid-1 shrank the bounds to the real walkable floor (Basic 8 -> 7 high) without changing the room,
+                // so the share rose from 0.45 to 0.5 to keep the same limit.
                 Assert(maximumCollisionDiameter < Mathf.Min(profile.MovementBounds.width,
-                           profile.MovementBounds.height) * 0.45f,
+                           profile.MovementBounds.height) * 0.5f,
                     $"Boss-0 collision silhouette is too large for room profile '{profile.ProfileId}'.");
             }
         }

@@ -409,7 +409,7 @@ namespace TrickalFanGame.Editor
                 PlayerMovementAt(assembler, pit.transform.position);
                 Assert(pit.TryEnter(assembler.Graph.Player) && assembler.Graph.CurrentNode == secretRoom.Node &&
                        secretState.HasVisited && secret.ConnectedRoomIds.All(secretState.IsSecretPassageOpen) &&
-                       ((Vector2)assembler.Graph.Player.transform.position - secretRoom.Node.InitialSpawnPosition)
+                       (assembler.Graph.Player.FeetPosition - RoomLayout.ArrivalFeetOffset - secretRoom.Node.InitialSpawnPosition)
                        .sqrMagnitude < 0.0001f,
                     "A pit must drop the player into the secret room mid-fight and open every passage.");
                 Assert(sourceRoom.Controller.State == RoomState.Waiting && !sourceRoom.Controller.HasStarted &&

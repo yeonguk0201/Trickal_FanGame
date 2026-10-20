@@ -718,6 +718,20 @@ namespace TrickalFanGame.Editor
                     "The first lethal hit must be cancelled whole (health and shield unchanged) and start invulnerability.");
                 Assert(Near(stats.AttackDamage, 10.8f) && Near(stats.MoveSpeed, baseMove * 1.03f),
                     "The dagger's stats must stay after the ward is spent.");
+                // The cancelled hit starts its own post-hit window (enemy pass-through); the rest of the
+                // invulnerability keeps the body collisions.
+                DamageInvulnerability window = player.GetComponent<DamageInvulnerability>();
+                float now = ward.SpentAt;
+                float lethal = before + 2f;
+                float hitWindow = lethal >= window.HeavyDamageThresholdUnits ? window.HeavyHitDuration : window.HitDuration;
+                Assert(hitWindow < ward.InvulnerabilityDuration &&
+                       window.IsRecoveringFromHitAt(now + hitWindow - 0.01f) &&
+                       !window.IsRecoveringFromHitAt(now + hitWindow + 0.01f) &&
+                       window.IsHitInvulnerableAt(now + ward.InvulnerabilityDuration - 0.01f) &&
+                       !window.IsHitInvulnerableAt(now + ward.InvulnerabilityDuration + 0.01f),
+                    "The ward must pass through enemies only for the cancelled hit's window and stay invulnerable for 5 s.");
+                Assert(player.GetComponent<PlayerInventory>().IsArtifactSpent(Week23Artifact2Setup.DaggerId),
+                    "A spent ward must mark the dagger spent for the HUD.");
 
                 health.TakeDamage(new DamageContext(null, DamageSourceType.EnemyContact, 100f));
                 Assert(!health.IsDead && Near(health.CurrentHealth, before), "The player must be invulnerable after the ward.");

@@ -55,6 +55,7 @@ namespace TrickalFanGame.Enemy
         private bool pursuitTimerStarted;
         private readonly EnemyObstacleNavigator navigator = new();
         private float bodyRadius;
+        private EnemyObstacleNavigator.TerrainFootprint terrain;
 
         public ChargingEnemyState State { get; private set; }
         // A basic attack push does not move the dash (Passive-0 §4.6).
@@ -407,13 +408,13 @@ namespace TrickalFanGame.Enemy
                                     EnemyObstacleNavigator.ResolveBodyRadius(target.gameObject);
             return targetClearance >= minimumChargeDistance &&
                    GetChargePreviewDistance(offset.normalized) >= minimumChargeDistance &&
-                   EnemyObstacleNavigator.HasClearPath(transform.position, target.position, bodyRadius);
+                   EnemyObstacleNavigator.HasClearPath(transform.position, target.position, terrain);
         }
 
         private void MoveAroundObstacles(float currentTime)
         {
             body.linearVelocity = target != null
-                ? navigator.GetMoveDirection(transform.position, target.position, bodyRadius, currentTime) *
+                ? navigator.GetMoveDirection(transform.position, target.position, terrain, currentTime) *
                   (pursuitSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this))
                 : Vector2.zero;
         }
@@ -441,13 +442,13 @@ namespace TrickalFanGame.Enemy
             float distance = dashSpeed * dashDuration;
             // The line describes the initial straight segment, up to the first body contact.
             // Sliding after that contact remains a physical response, not a new aimed direction.
-            foreach (RaycastHit2D hit in Physics2D.CircleCastAll(transform.position, bodyRadius,
+            foreach (RaycastHit2D hit in Physics2D.CircleCastAll(terrain.Center(transform.position), terrain.Radius,
                          direction, distance, EnemyObstacleNavigator.ObstacleMask))
             {
                 if (hit.collider == null || hit.collider.isTrigger) continue;
                 if (hit.distance <= 0.001f)
                 {
-                    ColliderDistance2D separation = GetComponent<Collider2D>().Distance(hit.collider);
+                    ColliderDistance2D separation = terrain.Collider.Distance(hit.collider);
                     if (Vector2.Dot(direction, separation.normal) <= 0f) continue;
                 }
                 distance = Mathf.Min(distance, hit.distance);
@@ -568,6 +569,7 @@ namespace TrickalFanGame.Enemy
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
             bodyRadius = EnemyObstacleNavigator.ResolveBodyRadius(gameObject);
+            terrain = EnemyObstacleNavigator.ResolveFootprint(gameObject);
             behavior = GetComponent<EnemyBehaviorContext>();
             if (behavior == null)
             {

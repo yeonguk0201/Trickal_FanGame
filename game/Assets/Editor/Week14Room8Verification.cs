@@ -310,9 +310,7 @@ namespace TrickalFanGame.Editor
             Assert(graph.CurrentNode == destination && graph.Nodes.Count(node => node.IsVisible) == 1 &&
                    destination.IsVisible,
                 "The transition left a previous room visible beside the destination.");
-            Rigidbody2D body = graph.Player.GetComponent<Rigidbody2D>();
-            Vector2 playerPosition = body != null ? body.position : (Vector2)graph.Player.transform.position;
-            Assert((playerPosition - (Vector2)expectedEntry.position).sqrMagnitude <=
+            Assert((graph.Player.FeetPosition - RoomLayout.ArrivalFeetOffset - (Vector2)expectedEntry.position).sqrMagnitude <=
                    PositionTolerance * PositionTolerance,
                 "The transition did not use the destination safe entry point.");
             Vector2 local = destination.CameraAnchor.InverseTransformPoint(graph.RoomCamera.transform.position);

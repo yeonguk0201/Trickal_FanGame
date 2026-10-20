@@ -25,9 +25,13 @@ namespace TrickalFanGame.Room
         public const float SpawnHorizontalSpacing = 3f;
         public const float SpawnVerticalOffset = 2f;
         public const float FloorExitVerticalOffset = 3.2f;
+        // The feet land this far above an entry or start point; reviewed in Play to line up with side doors.
+        public const float ArrivalFeetLift = 0.1f;
+        public static Vector2 ArrivalFeetOffset => new(0f, ArrivalFeetLift);
 
         public static Vector2 RoomSize => new(Width, Height);
-        public static Vector2 EncounterSize => new(14.5f, 7.5f);
+        // Grid-1: the Basic walkable floor.
+        public static Vector2 EncounterSize => new(13f, 7f);
         public static Vector2 RewardTriggerSize => new(10f, 6f);
         public static float HorizontalWallCenter => Width * 0.5f - WallThickness * 0.5f;
         public static float VerticalWallCenter => Height * 0.5f - WallThickness * 0.5f;

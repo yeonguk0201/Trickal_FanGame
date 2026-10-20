@@ -9,9 +9,29 @@ namespace TrickalFanGame.Enemy
     // on demand around the enemy and its goal instead of baked per room. Terrain-0: walking also avoids pits, while
     // lines of fire only check Environment because projectiles pass over pits. Flight-0 (D3): when the goal cannot be
     // reached on foot (a flying player over a pit or obstacle, or a sealed-off target), the enemy walks to the reachable
-    // cell nearest the goal and holds there instead of pushing into the edge.
+    // cell nearest the goal and holds there instead of pushing into the edge. Hitbox-2: a normal enemy walks on
+    // its feet circle, so terrain queries take a TerrainFootprint and run from the feet center, and the grid cells
+    // sit on the world 0.5 lattice so the middle of every one-cell lane is a cell center.
     public sealed class EnemyObstacleNavigator
     {
+        // The circle that meets terrain: the feet of a normal enemy (Hitbox-2), otherwise the body. Offset is from
+        // the enemy root to that circle's center.
+        public readonly struct TerrainFootprint
+        {
+            public TerrainFootprint(Vector2 offset, float radius, Collider2D collider)
+            {
+                Offset = offset;
+                Radius = radius;
+                Collider = collider;
+            }
+
+            public Vector2 Offset { get; }
+            public float Radius { get; }
+            public Collider2D Collider { get; }
+
+            public Vector2 Center(Vector2 rootPosition) => rootPosition + Offset;
+        }
+
         public const float CellSize = 0.5f;
         public const float RepathInterval = 0.25f;
         public const float SearchMargin = 5f;
@@ -54,6 +74,37 @@ namespace TrickalFanGame.Enemy
             if (collider == null) return 0.25f;
             Vector3 extents = collider.bounds.extents;
             return Mathf.Max(0.05f, Mathf.Max(extents.x, extents.y));
+        }
+
+        // Hitbox-2: the feet circle when the enemy has one, otherwise the body centered on the root.
+        public static TerrainFootprint ResolveFootprint(GameObject owner)
+        {
+            EnemyFeet feet = owner != null ? owner.GetComponentInChildren<EnemyFeet>(true) : null;
+            if (feet != null && feet.gameObject.activeSelf && feet.Collider.enabled)
+            {
+                return new TerrainFootprint(feet.WorldCenter - (Vector2)owner.transform.position, feet.WorldRadius,
+                    feet.Collider);
+            }
+
+            return new TerrainFootprint(Vector2.zero, ResolveBodyRadius(owner),
+                owner != null ? owner.GetComponent<Collider2D>() : null);
+        }
+
+        public static bool HasClearPath(Vector2 from, Vector2 to, TerrainFootprint terrain)
+        {
+            return HasClearPath(terrain.Center(from), terrain.Center(to), terrain.Radius);
+        }
+
+        public static bool TryFindRetreatDirection(Vector2 from, Vector2 away, TerrainFootprint terrain,
+            out Vector2 direction)
+        {
+            return TryFindRetreatDirection(terrain.Center(from), away, terrain.Radius, out direction);
+        }
+
+        // Root positions in, a unit direction out; the plan runs between the feet centers.
+        public Vector2 GetMoveDirection(Vector2 from, Vector2 goal, TerrainFootprint terrain, float currentTime)
+        {
+            return GetMoveDirection(terrain.Center(from), terrain.Center(goal), terrain.Radius, currentTime);
         }
 
         // True when a body of the given radius can travel straight from one point to the other.
@@ -134,8 +185,8 @@ namespace TrickalFanGame.Enemy
                 if (hasNearestPoint && (goal - nearestPointGoal).sqrMagnitude <= CellSize * CellSize &&
                     FindPathOrNearest(from, nearestPoint, bodyRadius, path))
                 {
-                    // Two sides of a pit can be almost equally near, and the grid shifts with the enemy, so choosing
-                    // again on every repath would flip between them. The chosen point stays until the player moves on.
+                    // Two sides of a pit can be almost equally near, so choosing again on every repath would flip
+                    // between them. The chosen point stays until the player moves on.
                     plannedGoalReachable = false;
                 }
                 else
@@ -185,9 +236,11 @@ namespace TrickalFanGame.Enemy
             result.Clear();
             Vector2 min = Vector2.Min(from, goal) - Vector2.one * SearchMargin;
             Vector2 max = Vector2.Max(from, goal) + Vector2.one * SearchMargin;
-            int width = Mathf.Clamp(Mathf.CeilToInt((max.x - min.x) / CellSize), 1, MaximumCellsPerAxis);
-            int height = Mathf.Clamp(Mathf.CeilToInt((max.y - min.y) / CellSize), 1, MaximumCellsPerAxis);
-            Vector2 origin = (min + max) * 0.5f - new Vector2(width, height) * (CellSize * 0.5f);
+            // One spare cell covers the snap below.
+            int width = Mathf.Clamp(Mathf.CeilToInt((max.x - min.x) / CellSize) + 1, 1, MaximumCellsPerAxis);
+            int height = Mathf.Clamp(Mathf.CeilToInt((max.y - min.y) / CellSize) + 1, 1, MaximumCellsPerAxis);
+            Vector2 corner = (min + max) * 0.5f - new Vector2(width, height) * (CellSize * 0.5f);
+            Vector2 origin = new(SnapGridOrigin(corner.x), SnapGridOrigin(corner.y));
 
             Vector2Int start = ToCell(from, origin, width, height);
             Vector2Int target = ToCell(goal, origin, width, height);
@@ -265,8 +318,7 @@ namespace TrickalFanGame.Enemy
                     }
                 }
 
-                // The grid is laid out around the enemy, so cell centers shift as it walks. Once walking cannot get
-                // at least half a cell closer, it holds instead of chasing the shifting cell.
+                // Once walking cannot get at least half a cell closer, it holds instead of stepping between cells.
                 if ((from - goal).magnitude <= Mathf.Sqrt(bestDistance) + CellSize * 0.5f) return false;
             }
 
@@ -278,6 +330,15 @@ namespace TrickalFanGame.Enemy
             result.Reverse();
             if (reachable && result.Count > 0) result[result.Count - 1] = goal;
             return reachable;
+        }
+
+        // Hitbox-2: room layout cells are 1x1 with centers on the world 0.5 lattice (room spacing and the walkable
+        // floor are whole or half units), so a one-cell lane between obstacles, or an obstacle and a wall, has its
+        // middle on that lattice too. Grid origins sit a quarter cell off it, which puts every cell center on it, so
+        // the lane's middle cell is tested at its full 0.5 clearance wherever the enemy and goal stand.
+        private static float SnapGridOrigin(float value)
+        {
+            return Mathf.Round((value - CellSize * 0.5f) / CellSize) * CellSize + CellSize * 0.5f;
         }
 
         private static Vector2Int ToCell(Vector2 point, Vector2 origin, int width, int height)

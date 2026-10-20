@@ -10,7 +10,7 @@ namespace TrickalFanGame.Frontend
     public static class UserArtwork
     {
         private static readonly Dictionary<string, Sprite> sprites = new();
-        private static readonly Dictionary<bool, Material> materials = new();
+        private static readonly Dictionary<(bool, bool), Material> materials = new();
 
         public static Sprite Load(string key)
         {
@@ -38,26 +38,34 @@ namespace TrickalFanGame.Frontend
             return icon;
         }
 
-        public static Material ItemMaterial(bool spell)
+        public static readonly Color SpentPlaceholderColor = new(0.32f, 0.32f, 0.32f, 1f);
+
+        // spent: an artifact whose once-per-Run effect is used up, drawn grey (UI only).
+        public static Material ItemMaterial(bool spell, bool spent = false)
         {
-            if (materials.TryGetValue(spell, out Material material)) return material;
+            if (materials.TryGetValue((spell, spent), out Material material)) return material;
             Shader shader = Resources.Load<Shader>("UserArtwork/ItemArtwork");
             if (shader == null) return null;
-            material = new Material(shader) { name = spell ? "Spell artwork" : "Artifact artwork" };
+            material = new Material(shader)
+                { name = (spell ? "Spell artwork" : "Artifact artwork") + (spent ? " (spent)" : string.Empty) };
             material.SetFloat("_Card", spell ? 1f : 0f);
-            materials[spell] = material;
+            material.SetFloat("_Spent", spent ? 1f : 0f);
+            materials[(spell, spent)] = material;
             return material;
         }
 
-        public static bool Apply(Image image, ItemDefinition definition, TMP_Text placeholder = null)
+        public static bool Apply(Image image, ItemDefinition definition, TMP_Text placeholder = null,
+            bool spent = false)
         {
             Sprite sprite = definition != null ? Load(definition.ItemId) : null;
             if (image != null)
             {
                 image.sprite = sprite;
                 image.preserveAspect = true;
-                image.material = sprite != null ? ItemMaterial(definition.Kind != ItemKind.Artifact) : null;
+                image.material = sprite != null ? ItemMaterial(definition.Kind != ItemKind.Artifact, spent) : null;
                 if (sprite != null) image.color = Color.white;
+                // The placeholder square has no artwork to grey out, so its rarity color goes grey instead.
+                else if (spent) image.color = SpentPlaceholderColor;
             }
             if (placeholder != null) placeholder.gameObject.SetActive(sprite == null);
             return sprite != null;

@@ -660,6 +660,18 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 - 구현: `ClearWeatherLightningVerification` 화면 상단 경로·끝점·하강·소멸·시간 역행과 기존 카드 규칙 검사.
 - 실제 미리보기 조작과 Play 미술 검수는 대기. 실행 방법은 [개발 환경](05-development-setup.md), 근거는 [효과 기록](art-prompts/clear-weather-lightning.md)에 기록한다.
 
+### 용사용 내려찍기 미리보기 (2026-10-20)
+
+- 구현: `CrayonSlamPreview` 임시 Scene 미리보기(방·보스 위치·방향·경고 길이·검광 높이, 레이어별 표시, 시간·반복·속도, 보스 Prefab 그림 복사).
+- 런타임 `SlamLightEffect` 경로 계산과 `LayeredSlamEffect.CreatePreview`를 사용한다. 검사는 `ReviewedCombatEffectsVerification`의 v22 낙하 섬광 항목.
+- 사용자 수동 확인 후 효과 수용(2026-10-20). 실행 방법은 [개발 환경](05-development-setup.md), 근거는 [효과 기록](art-prompts/crayon-hero-slam-v15.md)에 기록한다.
+
+### 광기의 가면 피해 오라 미리보기 (2026-10-20)
+
+- 구현: `DamageAuraFieldPreview` 임시 Scene 미리보기(반경·스택·틱 간격, 바닥 배경과 레이어별 표시, 시간·재생·속도).
+- 구현: `DamageAuraFieldVerification` 반경 일치·정렬·틱 링·페이드·사망 시 숨김·Random 미소비 검사. 단독 배치 통과.
+- Play 미술 검수는 사용자 확인으로 수용(2026-10-20). 미리보기 창 조작 확인은 대기. 실행 방법은 [개발 환경](05-development-setup.md)의 광기의 가면 항목.
+
 ### 바위 균열 표시 검증 (2026-10-14)
 
 `RockDamageArtworkVerification.Verify` 구현: 3종의 피격 단계별 스프라이트, 색상·크기·바닥 기준점, 충돌 보존과 4회 타격 파괴를 검사한다. 자동 실행 결과는 [작업 기록](art-prompts/rock-damage-frames.md)에 남기며 실제 Play 미술 검수는 별도로 확인한다.
@@ -707,3 +719,19 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 ### 저혈당 요정 활발 모션 구성·검증 (2026-10-19)
 
 `LivelyFairyMotionSetup`은 단일 프리팹과 모션 시트의 재구성 및 단독 검증을 제공한다. 실행법은 [개발 환경](./05-development-setup.md)의 저혈당 요정 활발 모션 절, 검수 범위는 [작업 기록](./art-prompts/lively-fairy-motion.md)에 기록한다.
+
+
+### 활발 요정 그림자 검수 추가 (2026-10-20)
+
+- [x] 현재 `LivelyLowBloodSugarFairy` 프리팹의 몸체·그림자를 검수 목록 끝에 추가하고 ID query로 직접 선택할 수 있게 했다. Unity 렌더 성공 종료 코드 0과 4개 출력 레이어를 확인했다 (`output/ground-shadow-lively-preview.log`).
+- [x] 사용자 확정값 (너비 1.05, 두께 0.28, 위치 -0.02/-0.15, 진하기 0.60)을 활발 요정 전용 프로필에 반영했다. Unity 검증·재렌더 종료 코드 0과 실제 값 일치, 기존 프로필 불변을 확인했다 (`output/ground-shadow-lively-adjust.log`).
+- 사용 방법은 `docs/05-development-setup.md`의 저혈당 요정 - 활발 그림자 미세 조정을 따른다.
+
+
+### 함정 그림자 검수 추가 (2026-10-20)
+
+- [x] 실제 함정 프리팹 7종의 공용 그림자 연결, ID별 설정과 미리보기 82~88번·함정 필터·일곱 종류 모음 이미지를 추가했다.
+- [x] Unity 단독 그림자 검증에서 주기 가시 상태별 그림자 기준점, 기존 피해 영역·Collider, 중복 방지·비활성화를 확인했고 88종 실제 렌더를 생성했다 (`output/ground-shadow-traps.log`, 종료 코드 0). 함정 28개 레이어를 확인했다.
+- [x] 사용자 함정 7종 수치를 반영하고 실제 Unity 출력 35필드 일치, 기존 프로필 불변과 단독 그림자 검증/재렌더를 확인했다 (`output/ground-shadow-traps-reviewed.log`, 종료 코드 0).
+- [x] 실제 Play 미술 검수: 사용자 수동 확인 완료(2026-10-20).
+- 실행 및 사용법은 `docs/05-development-setup.md`의 함정 7종 공용 그림자·미세 조정을 따른다.

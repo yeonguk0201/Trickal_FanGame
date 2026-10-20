@@ -1078,7 +1078,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Trap0Verification.Verify -logFile <로그 경로>`다
   (Setup 2회 GUID 확인까지는 `SetupAndVerifyBatch`). Prefab 7개의 구성과 원화 연결, 플레이어 피해 반 칸·발 중심~발바닥 세로선이 그림 타원에 걸칠 때만 판정(위로 0.3 더 넓음, 칸 안이라도 그림 밖이면 미판정)·
   피격 무적 공유·같은 함정 1초 간격, 적 고정 피해 5와 중심의 그림 타원 판정·처치 미귀속·방의 생존 수 감소, 비행 플레이어·비행 적의
-  바닥형 무시, 주기 가시의 2초/2초·0.5초 예고·A/B 반 주기·재진입 시 초기화, 거미줄 감속 40%(피해 없음)와 폭탄 제거,
+  바닥형 무시, 주기 가시의 2초/2초(예고 없음)·A/B 반 주기·재진입 시 초기화, 거미줄 감속 40%(피해 없음)와 폭탄 제거,
   불 3타·물줄기 1타·비행 차단, 가시 돌 4타·비행 통과, 독버섯 2타·드롭 없음과 독가스(반경 1.5·3초·발 중심 기준 플레이어 1회·적 1초마다
   중독 최대 3스택·중독 처치의 플레이어 귀속), 재구성 시 꺼진 불·부서진 가시 돌·독버섯·제거된 거미줄 보존을 검사한다.
   관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-1, Obstacle-7, Enemy-6, Special-2, Passive-4, 상태 이상 이펙트, 요정왕국
@@ -1088,9 +1088,9 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   2026-10-12 최종 판정 기준으로 `Verify`와 `VerifyWithRegressionsBatch`가 종료 코드 0으로 통과했고, 아래 수동 확인도
   사용자가 마쳤다.
   수동 확인: Game Scene Play → `F1` 패널 `— Trap —`. `Place <종류>`는 플레이어 오른쪽 칸에 함정을 놓고, 첫 줄에 가장
-  가까운 함정의 종류·판정 크기(`hit 1x0.37` 형태, 밟은 것으로 판정되면 `ON`)·주기 가시 상태(`Lowered`/`Warning`/`Raised`, A/B)·타수가, 둘째 줄에 `Web slow`와 `gas clouds`가
+  가까운 함정의 종류·판정 크기(`hit 1x0.37` 형태, 밟은 것으로 판정되면 `ON`)·주기 가시 상태(`Lowered`/`Raised`, A/B)·타수가, 둘째 줄에 `Web slow`와 `gas clouds`가
   나온다. (1) `Place FloorSpikes`·`Place DamagePuddle` 위에 서면 1초마다 반 칸씩 깎이고, 적에게 맞은 직후에는 깎이지
-  않는다. (2) `Place PeriodicSpikes`는 흐린 상태에서 0.5초 붉게 예고한 뒤 2초 동안 올라와 그때만 피해를 준다. 토글을 켜고
+  않는다. (2) `Place PeriodicSpikes`는 내려간 상태에서 예고 없이 2초 동안 올라와 그때만 피해를 준다. 토글을 켜고
   하나 더 놓으면 반대로 움직인다. (3) `Place Spiderweb` 위에서 `Web slow x0.6`이 되고 공격으로는 없어지지 않으며 폭탄(F)에
   없어진다. (4) `Place Fire`는 닿으면 반 칸이고 3번 때리면 꺼진다. 샤샤의 항아리(`— Artifact —` Drop)를 얻으면 물줄기 1번에
   꺼진다. (5) `Place SpikedRock`은 닿으면 반 칸, 4번 때리면 부서진다. (6) `Place PoisonMushroom`을 2번 때리면 독가스가
@@ -1261,6 +1261,49 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   수동 확인: Game Scene Play → `F1` 패널 `— Player —`의 `x2`·`x3`를 눌러 몸이 발에서 위로 커지고 표시의 `hurtbox r`이
   1에서 멈추는지, 커진 채로 1칸 통로와 문을 지나고 다음 방에서 벽에 끼지 않고 서는지, 적과 적 투사체가 커진 몸에 맞는지,
   폭탄이 발밑에 놓이는지, `x1`로 원래대로 돌아오는지, `x0.5`도 같은 자리에 서 있는지 본다.
+
+- Hitbox-2 일반 적 발 콜라이더와 1칸 통로 통과: 메뉴 `Trickal Fan Game > Week 27 > Setup Hitbox-2 Enemy Feet Collider`가
+  `EnemyFeet` 레이어를 빈 사용자 레이어에 만들고 2D 충돌 표에서 `Environment`·`Pit`과만 충돌하게 한 뒤, 루트에 `TestEnemy`가
+  있는 Prefab 중 일반 적(`EnemyBehaviorContext`가 있고 `BossController`가 없으며 몸 반지름이 0.35보다 큰 적)에 자식
+  `Feet`(월드 반지름 0.35, 아래 끝이 몸 아래 끝과 같음)를 넣고 몸 원의 `excludeLayers`에 `Environment`·`Pit`을 넣는다.
+  `Enemy` 레이어의 충돌 표는 바꾸지 않으므로 보스는 몸 하나로 지형에 닿는다. 기반 Prefab을 변형보다 먼저 처리하고, 일반
+  적에서 상속받은 발이 있는 보스 변형(`TestBoss`)은 발을 끄고 몸의 지형 충돌을 되돌린다. 다시 실행해도 바뀌는 Prefab이 없다.
+  구덩이 구성(`Week22Terrain0Setup`)의 충돌 대상에 `EnemyFeet`을 넣었으므로 Terrain-0 Setup보다 먼저 실행한다.
+  길찾기(`EnemyObstacleNavigator`)는 발 원의 중심·반지름으로 계획하고(`ResolveFootprint`), 격자 셀 중심을 월드 0.5
+  격자에 고정해 1칸 통로의 가운데 셀이 적 위치와 관계없이 열린다. 돌진·근접 돌진의 경로 검사도 발 원을 쓴다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 27 > Setup and Verify Hitbox-2 Enemy Feet Collider`, 배치는 Unity `-batchmode
+  -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week27Hitbox2Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. 충돌 표, 적 Prefab별 발 유무(새 적 Prefab은 목록에 넣어야 통과), 발 크기·위치와 몸 반지름 0.5
+  유지, 모든 방의 장애물·구덩이 중심이 0.5 격자 위인지, 물리 시뮬레이션에서 벽·구덩이에 발이 멈추는지와 발 없는 몸은
+  지금처럼 멈추는지, 장애물 사이·장애물과 벽 사이 1칸 통로를 여러 시작 위치에서 계획하고 불효자손·산사모·원거리 적
+  Prefab이 실제로 지나가는지를 검사한다. 회귀는 `VerifyWithRegressionsBatch`(Obstacle-0 적 회귀 묶음과 Obstacle-1·2,
+  Terrain-0, Flight-0, Melee-Lunge, Enemy-6·8, Hitbox-0의 `Verify`)다. Obstacle-0의 갇힌 적 검사는 격자가 고정되어 반 칸
+  다가간 뒤 멈추는 것으로 바꿨다. 2026-10-20 두 배치가 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → 장애물과 벽 사이, 장애물 사이 1칸 통로를 불효자손·산사모·원거리 적이 지나와 쫓아오는지,
+  위쪽 벽에 몸이 0.3쯤 겹치는 모습이 괜찮은지 본다. 사용자 Play 확인 완료(2026-10-20).
+
+- Shot-0 장애물에 붙어 쏜 탄: Setup은 없다. `Projectile.PushOutOfWallsBeside`는 사격 원점에서 탄 앞쪽으로 그은 선이 지나는
+  벽·장애물을 앞을 막는 것으로 보고 밀어내지 않는다. 검사는 `Week23Hitbox0Verification`의 `ValidateShotIntoHuggedObstacle`
+  (장애물 가운데·0.25·−0.4 어긋난 위치에 붙어 위로 쏜 탄이 제자리에 남아 장애물에 맞는지)로, Hitbox-0 배치와 같은 방법으로
+  실행한다. 2026-10-20 Hitbox-2 회귀 묶음 안의 Hitbox-0 `Verify`로 통과했다.
+  수동 확인: Game Scene Play → 장애물 정면·모서리에 붙어 위·아래·좌·우로 쏘면 탄이 장애물에 맞는지, 위쪽 벽에 붙어 좌우로
+  쏘면 탄이 사라지지 않고 날아가는지 본다. 사용자 Play 확인 완료(2026-10-20).
+
+- Grid-1 Room Profile 이동 영역 = 걸을 수 있는 바닥: 메뉴 `Trickal Fan Game > Week 27 > Setup Grid-1 Room Profile Walkable
+  Bounds`가 8개 Room Profile의 `movementBounds`·`encounterBounds`를 `FairyVillageArtworkSetup.WalkableFloor`(그린 바닥 안의
+  가장 큰 정수 직사각형, 배치 텍스트 격자와 같음)로 맞추고, 템플릿이 쓰는 방 Prefab의 전투 트리거 크기와 Obstacle-4 방의 장애물
+  위치를 `Week20Obstacle4Setup`의 명세(basic-diamond-cover 바깥 두 개는 위·아래 벽에 붙음)와 맞춘다. 다시 실행해도 바뀌는
+  에셋이 없다. 배치 검증(`RoomObstacleLayout.TryValidate`)은 벽·장애물·구덩이 사이 0 초과 1칸 미만 틈(대각선 포함)을
+  실패시키며, 각 물체가 차지한 0.5 격자 칸 기준으로 잰다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 27 > Setup and Verify Grid-1 Room Profile Walkable Bounds`, 배치는 Unity `-batchmode
+  -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week27Grid1Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. 프로필 영역과 정수 바닥, 배치 텍스트 격자와 프로필 일치, 모든 템플릿의 계약·배치 검증(실패를 한
+  번에 모두 기록), 틈 규칙 표본(벽에 붙음·1칸 통로 통과, 반 칸 틈·대각선 틈·구덩이와의 반 칸 틈 실패)을 검사한다. 회귀는
+  `VerifyWithRegressionsBatch`(Room-0·1·3·5·6·7, Boss-0~3, Obstacle-2, Trap-1의 `Verify`와
+  `RoomLayoutImporterVerification.VerifyWithRegressionsBatch`)다. 2026-10-20 두 배치와
+  `RoomLayoutImporterVerification.ImportAndVerifyBatch`가 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → 방에 들어서자마자 전투가 시작되는지, 부스러기 보스 패턴이 벽 안쪽에서만 나오는지,
+  basic-diamond-cover에서 벽에 붙은 장애물이 어색하지 않은지 본다. 사용자 Play 확인 완료(2026-10-20).
 
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
@@ -1781,8 +1824,34 @@ Resources 원화를 런타임에 불러오므로 Scene/Prefab Setup 재실행 �
 기존 0.8유닛의 넓은 경계 감쇠 대신 0.035유닛의 좁은 경계 처리로 변경했다.
 극히 짧은 경로는 원화 전체를 압축하지 않고 오른쪽 원화 창을 표시하므로 전체 실루엣과는 차이가 있다.
 
+2026-10-20 v22: 위에서 떨어지는 실시간 낙하 섬광 레이어를 추가했다. 빛줄기가 용사용 쪽에서 먼 끝으로 0.05초 안에 순차로
+떨어져 0.14초 안에 바닥에 닿고, 바닥 섬광 뒤 위에서부터 침식되어 0.44초에 사라진다. v21 원화 레이어와 피해 판정은 그대로다.
+
+- Edit Mode 미리보기: `Trickal Fan Game > Effects > Preview Crayon Hero Slam` → `Open / reset Scene preview`.
+  방 크기·보스 위치·방향 프리셋·경고 길이·검광 높이, 낙하 섬광/원화 검광/지면 충격/파편/기준 보스/경고선 레이어,
+  시간 슬라이더와 `Flash falling`·`Impact`·`Erosion`·`Peak hold` 바로가기, 재생 속도·반복·재시작을 조절한다.
+  런타임 경로 계산과 메시·셰이더를 그대로 쓰며 값은 임시다. 낙하 섬광만 끄면 v21과 비교할 수 있다.
+- v22 단독 검사: `Trickal Fan Game > Effects > Verify Reviewed Combat Effects`(`ReviewedCombatEffectsVerification.Verify`).
+  2026-10-20 배치 종료 코드 0, `Slam falling flash v22 passed` 확인(로그 `game/Logs/SlamFallFlashV22Verification.log`).
+- 2026-10-20 사용자 수동 확인 후 수용(세로 방향 포함).
+- 상세 범위: [작업 기록](art-prompts/crayon-hero-slam-v15.md)의 v22 항목.
+
 - 자동 검사: `Trickal Fan Game > Effects > Verify Reviewed Effects With Combat Regressions`.
 - 배치: `TrickalFanGame.Editor.ReviewedCombatEffectsVerification.VerifyWithRegressionsBatch`.
+
+### 광기의 가면 피해 오라 표시
+
+2026-10-20: `PlayerDamageAura`가 플레이어 아래 바닥(정렬 -55, 그림자 아래)에 `DamageAuraField`를 그린다.
+셰이더 `Resources/CombatEffects/DamageAura.shader` 하나로 채움·물결·출렁이는 가장자리·틱 링을 그리며,
+가장자리는 피해 반경의 0.895~0.985배 사이에서만 움직인다. 0.25초 페이드, 사망·Run 종료 시 사라진다.
+틱 링은 0.8초 동안 원형 붓질로 퍼진다. 앞쪽이 가장 빨갛고 꼬리는 틱마다 다른 붓결로 옅어지며, 반경 43%까지 0.08초에
+퍼진 뒤 급히 느려져 가장자리를 지나며 사라진다. 2026-10-20 사용자 Play 확인 후 수용.
+
+- Edit Mode 미리보기: `Trickal Fan Game > Effects > Preview Damage Aura Field` → `Open / reset Scene preview`.
+  반경·스택·틱 간격, 바닥 배경/채움/물결/가장자리/틱 링 레이어, 시간 슬라이더, 재생 속도를 조절한다.
+- 단독 검사: `Trickal Fan Game > Effects > Verify Damage Aura Field`(`DamageAuraFieldVerification.Verify`).
+- 회귀: `DamageAuraFieldVerification.VerifyWithRegressionsBatch`(Phase G-6 오라 규칙, 개발 패널 포함).
+- Play 확인: `F1 > — Artifact — > Show artifact drops > Drop 광기의 가면`. 패널에 `Mask aura` 줄이 나온다.
 - 로그: `game/Logs/LayeredSlamV21Verification.log`.
 - 2026-10-08 위 배치 실행 종료 코드 0, `Layered slam v21 passed`·`Reviewed effects combat regressions passed.` 확인.
 - 수동 미술 검수: `Trickal Fan Game > Debug > Open Boss Test Room` → Play →
@@ -2127,3 +2196,19 @@ python tools/sfx-synth/render_sfx.py output/sfx --burst=5
 ## 저혈당 요정 활발 걷기·공격 모션
 
 Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 모션을 재구성한다. `Verify Lively Fairy Motion`은 단독 검증이다. Game Scene Play → F1 → `— Room —` → `Spawn lively fairy (4-way shots)`로 걷기·웅크린 예고·빵을 들어 올리는 발사·회복을 확인한다. 구성과 미술 검수 기준은 [작업 기록](./art-prompts/lively-fairy-motion.md)을 따른다.
+
+### 저혈당 요정 - 활발 그림자 미세 조정 (2026-10-20)
+
+`GroundShadowPreviewExporter.ExportBatch`에 `LivelyLowBloodSugarFairy.prefab`의 현재 정지 모습과 실제 그림자 레이어를 추가했다. 현재 목록은 새 아이템을 포함한 81종이며 활발 버전은 81번이다. `output/ground-shadow-review/index.html?asset=LivelyLowBloodSugarFairy` 또는 로컬 서버의 같은 query로 바로 선택한다. 너비·두께·위치·진하기를 조절해 값 요약을 전달할 수 있다. 현재 프리팹의 공유 프로필 `HighBloodSugarFairy` 설정(1.05 / 0.28 / (0.07, -0.15) / 0.60)을 그대로 렌더했으며 게임 값은 변경하지 않았다. Unity 6000.3.22f1 렌더 종료 코드 0 (`output/ground-shadow-lively-preview.log`), 81번의 합성/몸체/그림자/바닥 4개 PNG와 로컬 페이지 HTTP 200을 확인했다. 미술 수치 확정은 사용자 검수 후 진행한다.
+
+- 후속 사용자 확정값: 활발 요정을 전용 `LivelyLowBloodSugarFairy` 프로필로 분리하고 너비 1.05, 두께 0.28, 위치 (-0.02, -0.15), 진하기 0.60을 적용했다. 프리팹 및 두 Setup 재실행 경로의 연결을 보존한다. `GroundShadowProfileSetup.VerifyAndExportBatch` 성공 종료 코드 0 (`output/ground-shadow-lively-adjust.log`), 실제 렌더의 다섯 값 일치와 기존 모든 프로필 불변을 확인했다.
+
+
+### 함정 7종 공용 그림자·미세 조정 (2026-10-20)
+
+- `RoomTrap.OnEnable`에서 공용 그림자를 연결한다. 기존 장애물 경로와 중복 생성되지 않으며 바닥형 4종에도 적용된다. `GroundShadowProfiles.json`의 `trap-*` ID로 7종을 개별 조절하며 초기값은 너비 배율 1.00, 두께 0.28, 위치 (0, 0), 진하기 0.28이다.
+- 바닥형 함정은 기존 `HitSize`를 표시용 기준으로 읽어 주기 가시의 내려감·올라옴에도 그림자가 움직이지 않는다. Collider나 피해/감속 영역은 추가·변경하지 않는다. 제거된 함정·비활성 오브젝트에서는 그림자도 숨긴다.
+- 검수 페이지의 종류 `함정`, 번호 82~88: 바닥 가시·주기 가시·불·피해 장판·거미줄·가시 돌·독버섯. `http://127.0.0.1:8769/?asset=trap-floor-spikes`로 함정 목록을 바로 선택한다. 주기 가시 기본 이미지는 내려간 상태다. `traps-overview.png`는 일곱 종류 모음이다. 조절값은 검수용이며 전달 후 실제 설정에 반영한다.
+- 단독 검증: `Trickal Fan Game/Artwork/Verify Common Ground Shadows`. 렌더 포함 배치: `TrickalFanGame.Editor.GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` (`-batchmode -quit`, 그래픽 필요). 함정별 연결·주기 가시 기준점·피해 영역과 Collider 보존·중복 방지·비활성화를 검사한다. Unity 6000.3.22f1 종료 코드 0 및 88종 렌더 성공, 함정 7종의 28개 PNG 레이어와 비어 있지 않은 그림자를 확인했다 (`output/ground-shadow-traps.log`). 실제 Play 미술 검수와 사용자별 수치 확정은 남아 있다.
+
+- 함정 후속 사용자 검수: 82~88번의 너비·두께·X/Y 위치·진하기를 전달값으로 확정해 `GroundShadowProfiles.json`에 반영했다. 기존 다른 프로필은 유지했다. `GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` 성공 종료 코드 0 (`output/ground-shadow-traps-reviewed.log`), 주기 가시 기준점·충돌 보존과 88종 재렌더를 확인했고 함정 7종의 실제 출력 35필드 일치를 비교했다. 페이지 기본값과 `traps-overview.png`도 갱신했다. 실제 Play 미술 검수는 사용자가 수동 확인을 마쳤다(2026-10-20).

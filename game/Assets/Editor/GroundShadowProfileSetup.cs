@@ -13,7 +13,7 @@ namespace TrickalFanGame.Editor
         private static readonly string[] Prefabs = { "ChargingEnemy", "HighBloodSugarFairy", "JyubiEnemy",
             "SansamoEnemy", "BuseureogiCrumbMinion", "CrayonArcherMinion", "CrayonAxeMinion",
             "CrayonMageMinion", "CrayonShieldMinion", "CrayonHeroBoss", "SaemaeumVaultBoss", "TestBoss",
-            "BuseureogiDoughObstacle", "BuseureogiCreamObstacle" };
+            "BuseureogiDoughObstacle", "BuseureogiCreamObstacle", "LivelyLowBloodSugarFairy" };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Reviewed Ground Shadow Profiles")]
         public static void Apply()

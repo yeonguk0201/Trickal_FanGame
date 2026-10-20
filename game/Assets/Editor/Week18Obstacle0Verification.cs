@@ -103,7 +103,8 @@ namespace TrickalFanGame.Editor
                 WalkAndAssertArrival(start, goal, "cup-shaped obstacle");
 
                 // Sealed in: there is no route. Flight-0 (D3) replaced the straight-line fallback: the enemy walks to
-                // the reachable cell nearest the goal and holds there, which here is the cell it already stands in.
+                // the reachable cell nearest the goal and holds there. Hitbox-2 fixed the grid to the world 0.5
+                // lattice, so that cell is half a step toward the goal inside the 2x2 enclosure.
                 foreach (Vector2 cell in new[]
                          {
                              new Vector2(-1.5f, -1.5f), new Vector2(-1.5f, -0.5f), new Vector2(-1.5f, 0.5f),
@@ -114,12 +115,22 @@ namespace TrickalFanGame.Editor
                 }
 
                 Physics2D.SyncTransforms();
+                Assert(!EnemyObstacleNavigator.TryFindPath(start, goal, EnemyRadius, new List<Vector2>()),
+                    "A sealed-in enemy must have no route to the goal.");
                 EnemyObstacleNavigator sealedNavigator = new();
-                Assert(!EnemyObstacleNavigator.TryFindPath(start, goal, EnemyRadius, new List<Vector2>()) &&
-                       sealedNavigator.GetMoveDirection(start, goal, EnemyRadius, 0f).sqrMagnitude < 0.0001f &&
-                       !sealedNavigator.IsGoalReachable,
+                Vector2 held = start;
+                bool holding = false;
+                for (int step = 0; step < 200 && !holding; step++)
+                {
+                    Vector2 direction = sealedNavigator.GetMoveDirection(held, goal, EnemyRadius, step * 0.02f);
+                    holding = direction.sqrMagnitude < 0.0001f;
+                    held += direction * WalkStep;
+                }
+
+                Assert(holding && !sealedNavigator.IsGoalReachable && held.x <= Origin.x + 0.5f + WalkStep &&
+                       Mathf.Abs(held.y - Origin.y) <= 0.5f + WalkStep,
                     "A sealed-in enemy must hold at the reachable point nearest the goal instead of pushing into " +
-                    "the wall.");
+                    $"the wall, but it reached {held - Origin} (holding: {holding}).");
             }
             finally
             {

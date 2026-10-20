@@ -29,10 +29,13 @@ namespace TrickalFanGame.Editor
             }
             foreach (string name in new[] { "sp-mote", "warning-chevron", "landing-shadow" })
                 Assert(CombatEffectArtwork.Frames(name).Length == 1, name + " is missing.");
-            foreach (string name in new[] { "EnemyHitOverlay", "ChargeWarning", "MeleeWarning", "GroundSlam", "SlamLight", "LayeredSlam" })
+            foreach (string name in new[] { "EnemyHitOverlay", "ChargeWarning", "MeleeWarning", "GroundSlam", "SlamLight", "LayeredSlam", LayeredSlamEffect.FlashShader })
             {
                 Material material = CombatEffectArtwork.Material(name);
-                Assert(material != null && !ShaderUtil.ShaderHasError(material.shader), name + " shader failed to import.");
+                string detail = material == null ? "(not loaded from Resources)" : string.Join(" | ", Array.ConvertAll(
+                    ShaderUtil.GetShaderMessages(material.shader), m => m.message + " (line " + m.line + ")"));
+                Assert(material != null && !ShaderUtil.ShaderHasError(material.shader),
+                    name + " shader failed to import. " + detail);
             }
             Shader movement = AssetDatabase.LoadAssetAtPath<Shader>(
                 "Assets/Art/Enemies/FairyKingdom/EnemyMovement.shader");
@@ -45,7 +48,7 @@ namespace TrickalFanGame.Editor
             ValidateSlamLightTiming();
             ValidateLayeredSlam();
             Debug.Log("Reviewed combat effects verification passed: legacy alpha sheets and five layered slam textures, " +
-                      "seven shaders, bounded slam layout, independent light with sustained peak, actual HP/SP recovery events, and no recovery VFX for resets, overheal or spending.");
+                      "eight shaders, falling slam flash, bounded slam layout, independent light with sustained peak, actual HP/SP recovery events, and no recovery VFX for resets, overheal or spending.");
         }
 
         private static void ValidateSlamLightTiming()
@@ -107,13 +110,71 @@ namespace TrickalFanGame.Editor
                         "Floor shock, blade and airborne debris must have independent sorting.");
                     Assert(Mathf.Abs(ground.bounds.size.x-5.184f)<0.001f||length<5f,
                         "Ground size must be independent of the main light and path length.");
+                    MeshRenderer flash=owner.transform.Find("Slam Flash").GetComponent<MeshRenderer>();
+                    Assert(flash.sortingOrder>main.sortingOrder&&flash.sortingOrder<debris.sortingOrder,
+                        "The falling flash must sit in front of the blade and behind airborne debris.");
+                    effect.RenderAt(0.05f);
+                    Assert(flash.enabled,"The falling flash must be visible while it strikes down.");
+                    effect.RenderAt(LayeredSlamEffect.FlashSeconds);
+                    Assert(!flash.enabled&&main.enabled,
+                        "The falling flash must clear before the painted blade's sustained peak ends.");
                     effect.RenderAt(LayeredSlamEffect.Duration);
                     foreach(MeshRenderer renderer in owner.GetComponentsInChildren<MeshRenderer>())
                         Assert(!renderer.enabled,"All independent layers must clear after their lifetime.");
                 }
                 finally {Object.DestroyImmediate(owner);}
             }
+            ValidateFallingFlash();
             Debug.Log("Layered slam v21 passed: five artwork imports, independent height/ground/debris, mirrored UV windows, lifetime and sorting.");
+        }
+
+        private static void ValidateFallingFlash()
+        {
+            Assert(LayeredSlamEffect.FlashSweepSeconds+LayeredSlamEffect.FlashJitterSeconds+
+                LayeredSlamEffect.FlashFallSeconds<=SlamLightEffect.FallSeconds+0.0001f,
+                "Every falling beam must reach the floor before the painted blade lands.");
+            Assert(LayeredSlamEffect.FlashSeconds<SlamLightEffect.FallSeconds+SlamLightEffect.PeakHoldSeconds,
+                "The falling flash must not outlast the blade's sustained peak.");
+            const float length=10f,height=7f;
+            foreach(float angle in new[] {0f,45f,-60f,90f})
+            {
+                Rect room=Rect.MinMaxRect(-50,-50,50,50);
+                LayeredSlamEffect effect=LayeredSlamEffect.CreatePreview(Vector2.zero,length,height,angle,room,angle<0);
+                Assert(effect!=null,"The slam preview entry must build without a source.");
+                try
+                {
+                    Transform flash=effect.transform.Find("Slam Flash");
+                    Assert(Quaternion.Angle(flash.rotation,Quaternion.identity)<0.01f,
+                        "Falling beams must stay world-vertical for every path angle.");
+                    Mesh mesh=flash.GetComponent<MeshFilter>().sharedMesh;
+                    Assert(effect.FlashBeamCount>=3&&mesh.vertexCount==effect.FlashBeamCount*4,
+                        "The flash must place a beam along the whole path.");
+                    Vector3[] vertices=mesh.vertices;
+                    var data=new System.Collections.Generic.List<Vector4>();mesh.GetUVs(1,data);
+                    Vector2 direction=effect.transform.right;
+                    float minDelay=float.MaxValue,maxDelay=0;
+                    for(int beam=0;beam<effect.FlashBeamCount;beam++)
+                    {
+                        // Corner 0 is the beam's lower-left; the foot is FlashBelow above it and FlashHalfWidth to the right.
+                        Vector2 foot=(Vector2)vertices[beam*4]+new Vector2(LayeredSlamEffect.FlashHalfWidth,LayeredSlamEffect.FlashBelow);
+                        Vector2 offset=foot-(Vector2)effect.transform.TransformPoint(new Vector3(0,-0.04f,0));
+                        Assert(Mathf.Abs(Vector2.Dot(offset,new Vector2(-direction.y,direction.x)))<0.001f&&
+                            Mathf.Abs(Vector2.Dot(offset,direction))<=length*0.5f+0.001f,
+                            "Each beam must land on the slam's ground line inside the path.");
+                        Assert(vertices[beam*4+2].y-foot.y>=height*LayeredSlamEffect.FlashHeightScale*0.6f-0.001f,
+                            "Falling beams must start well above the blade so they read as coming from above.");
+                        minDelay=Mathf.Min(minDelay,data[beam*4].x);maxDelay=Mathf.Max(maxDelay,data[beam*4].x);
+                    }
+                    Assert(minDelay>=0&&maxDelay-minDelay>=LayeredSlamEffect.FlashSweepSeconds*0.8f,
+                        "The flash must sweep along the path rather than land everywhere at once.");
+                    effect.SetPreviewLayers(true,false,true,true);
+                    effect.RenderAt(0.05f);
+                    Assert(!flash.GetComponent<MeshRenderer>().enabled,
+                        "The preview layer toggle must hide the flash.");
+                }
+                finally {Object.DestroyImmediate(effect.gameObject);}
+            }
+            Debug.Log("Slam falling flash v22 passed: world-vertical beams on the ground line, sword-to-far sweep, landing before the blade, lifetime and preview toggles.");
         }
 
         private static void ValidateSlamLayout()

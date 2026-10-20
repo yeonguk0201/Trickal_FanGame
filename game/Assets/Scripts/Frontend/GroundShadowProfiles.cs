@@ -55,6 +55,8 @@ namespace TrickalFanGame.Frontend
             if (owner.GetComponent<PlacedBomb>() != null) return "PlacedBomb";
             var chest = owner.GetComponent<TreasureChest>();
             if (chest != null) return "chest-" + chest.Kind + "-" + chest.IsOpened;
+            var trap = owner.GetComponent<RoomTrap>();
+            if (trap != null) return RoomTrap.ArtworkIdOf(trap.Kind);
             var obstacle = owner.GetComponent<DestructibleObstacle>();
             if (obstacle != null && string.IsNullOrEmpty(explicitId))
             {

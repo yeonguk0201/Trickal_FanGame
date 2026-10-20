@@ -223,7 +223,8 @@ namespace TrickalFanGame.Frontend
                     ArtifactPauseListEntryView entry = Instantiate(entryTemplate, entriesRoot);
                     entry.name = "Item Detail " + definition.ItemId;
                     entry.gameObject.SetActive(true);
-                    entry.Bind(definition, inventory.GetStackCount(definition.ItemId));
+                    entry.Bind(definition, inventory.GetStackCount(definition.ItemId),
+                        inventory.IsArtifactSpent(definition.ItemId));
                     entries.Add(entry);
                 }
             }

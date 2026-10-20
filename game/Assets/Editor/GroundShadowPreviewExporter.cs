@@ -34,6 +34,12 @@ namespace TrickalFanGame.Editor
         private static GameObject floor;
         private static Scene review;
 
+        public static void VerifyShadowsAndExportBatch()
+        {
+            GroundShadowVerification.Verify();
+            ExportBatch();
+        }
+
         public static void ExportBatch()
         {
             if (!Application.isBatchMode) throw new InvalidOperationException("Run this exporter in batch mode.");
@@ -143,6 +149,16 @@ namespace TrickalFanGame.Editor
                     Capture(owner, "npc-" + key, key == "sist" ? "시스트" : "골디", "상점 NPC", "ShopRoom / Keeper");
                 }
                 Object.DestroyImmediate(shop);
+                // Append new appearances so previously reviewed asset numbers stay stable.
+                Capture(Prefab("LivelyLowBloodSugarFairy"), "LivelyLowBloodSugarFairy", "저혈당 요정 - 활발",
+                    "적·보스", "LivelyLowBloodSugarFairy.prefab");
+                string[] trapNames = { "바닥 가시", "주기 가시", "불", "피해 장판", "거미줄", "가시 돌", "독버섯" };
+                foreach (RoomTrapKind kind in Enum.GetValues(typeof(RoomTrapKind)))
+                {
+                    string path = Week25Trap0Setup.PrefabPath(kind);
+                    Capture(Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)),
+                        RoomTrap.ArtworkIdOf(kind), trapNames[(int)kind], "함정", path);
+                }
                 File.WriteAllText(Path.Combine(folder, "manifest.json"), JsonUtility.ToJson(manifest, true),
                     new System.Text.UTF8Encoding(false));
                 Debug.Log($"Ground shadow review exported: {manifest.entries.Count} actual gameplay appearances, " +
@@ -178,6 +194,12 @@ namespace TrickalFanGame.Editor
                 foreach (MonoBehaviour behaviour in owner.GetComponentsInChildren<MonoBehaviour>(true)) behaviour.enabled = false;
                 var art = owner.GetComponent<FairyKingdomArtworkView>();
                 if (art != null) art.Refresh();
+                var trap = owner.GetComponent<RoomTrap>();
+                if (trap != null)
+                {
+                    trap.RestartCycle(0f);
+                    trap.RefreshPeriodicArtwork(trap.StateAt(0f));
+                }
                 GroundShadow shadow = GroundShadow.Ensure(owner); shadow.enabled = true;
                 Physics2D.SyncTransforms(); shadow.Refresh();
                 if (shadow.Visual == null || !shadow.Visual.enabled) throw new InvalidOperationException("Missing shadow: " + id);

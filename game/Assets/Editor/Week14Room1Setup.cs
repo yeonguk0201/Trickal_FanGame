@@ -23,8 +23,8 @@ namespace TrickalFanGame.Editor
             profile.Configure(
                 BasicProfileId,
                 RoomLayout.RoomSize,
-                new Rect(-7.5f, -4f, 15f, 8f),
-                new Rect(-RoomLayout.EncounterSize * 0.5f, RoomLayout.EncounterSize),
+                Week14Room3Setup.MovementBounds(RoomLayout.RoomSize),
+                Week14Room3Setup.EncounterBounds(RoomLayout.RoomSize),
                 RoomLayout.CameraOrthographicSize,
                 new Rect(Vector2.zero, Vector2.zero),
                 new[]

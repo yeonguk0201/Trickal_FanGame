@@ -602,6 +602,78 @@
       "offsetX": 0.0,
       "offsetY": -0.05,
       "opacity": 0.58
+    },
+    {
+      "number": 81,
+      "id": "LivelyLowBloodSugarFairy",
+      "widthMultiplier": 1.05,
+      "thickness": 0.28,
+      "offsetX": -0.02,
+      "offsetY": -0.15,
+      "opacity": 0.6
+    },
+    {
+      "number": 82,
+      "id": "trap-floor-spikes",
+      "widthMultiplier": 1.46,
+      "thickness": 0.34,
+      "offsetX": 0,
+      "offsetY": 0.06,
+      "opacity": 0.83
+    },
+    {
+      "number": 83,
+      "id": "trap-periodic-spikes",
+      "widthMultiplier": 1.51,
+      "thickness": 0.36,
+      "offsetX": 0,
+      "offsetY": 0.03,
+      "opacity": 0.74
+    },
+    {
+      "number": 84,
+      "id": "trap-fire",
+      "widthMultiplier": 1.44,
+      "thickness": 0.37,
+      "offsetX": 0,
+      "offsetY": 0,
+      "opacity": 0.28
+    },
+    {
+      "number": 85,
+      "id": "trap-damage-puddle",
+      "widthMultiplier": 1.52,
+      "thickness": 0.23,
+      "offsetX": 0,
+      "offsetY": 0.07,
+      "opacity": 0.54
+    },
+    {
+      "number": 86,
+      "id": "trap-spiderweb",
+      "widthMultiplier": 1.22,
+      "thickness": 0.71,
+      "offsetX": 0,
+      "offsetY": 0.21,
+      "opacity": 0.15
+    },
+    {
+      "number": 87,
+      "id": "trap-spiked-rock",
+      "widthMultiplier": 1.53,
+      "thickness": 0.35,
+      "offsetX": 0,
+      "offsetY": 0.1,
+      "opacity": 0.59
+    },
+    {
+      "number": 88,
+      "id": "trap-poison-mushroom",
+      "widthMultiplier": 1.23,
+      "thickness": 0.38,
+      "offsetX": 0,
+      "offsetY": 0.04,
+      "opacity": 0.43
     }
   ]
 }

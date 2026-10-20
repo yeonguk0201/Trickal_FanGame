@@ -31,6 +31,7 @@ namespace TrickalFanGame.Frontend
         private Health health;
         private PlacedBomb bomb;
         private PlayerFlight flight;
+        private RoomTrap trap;
         private bool floating;
         private bool useSpriteFootprint;
         private bool pickup;
@@ -65,6 +66,7 @@ namespace TrickalFanGame.Frontend
             health = GetComponent<Health>();
             bomb = GetComponent<PlacedBomb>();
             flight = GetComponent<PlayerFlight>();
+            trap = GetComponent<RoomTrap>();
             floating = GetComponent<TrickalFanGame.Enemy.EnemyFlight>() != null;
             pickup = GetComponent<RunResourcePickup>() != null || GetComponent<HealthPickup>() != null ||
                 GetComponent<SPPickup>() != null || GetComponent<TrickalFanGame.Item.ItemPickup>() != null ||
@@ -130,12 +132,20 @@ namespace TrickalFanGame.Frontend
             shadow.enabled = isActiveAndEnabled && source.enabled && source.gameObject.activeInHierarchy &&
                 (health == null || !health.IsDead) && (bomb == null || !bomb.HasExploded) &&
                 (flight == null || !flight.IsFlying);
+            if (trap != null && trap.IsRemoved) shadow.enabled = false;
             if (!shadow.enabled) return;
 
             bool hasFootprint = footprint != null && footprint.enabled;
             Bounds floor = hasFootprint ? footprint.bounds : source.bounds;
             // Use collision footprint, not tree height, animation frame or the shop's talking range.
             if (useSpriteFootprint || !hasFootprint) floor = source.bounds;
+            if (trap != null && trap.IsFloorTrap)
+            {
+                // Spike animation must not move the ground contact or add collision to floor traps.
+                Vector3 scale = transform.lossyScale;
+                floor = new Bounds(transform.position, new Vector3(trap.HitSize.x * Mathf.Abs(scale.x),
+                    trap.HitSize.y * Mathf.Abs(scale.y), 0f));
+            }
             float width = Mathf.Max(0.08f, floor.size.x * (pickup ? 0.8f : 0.95f)) * widthMultiplier;
             float y = floor.min.y + Mathf.Min(0.08f, floor.size.y * 0.1f);
             if (floating) y -= 0.1f;

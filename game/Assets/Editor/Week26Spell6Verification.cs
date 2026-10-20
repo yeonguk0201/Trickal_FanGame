@@ -375,7 +375,7 @@ namespace TrickalFanGame.Editor
             Assert(result == SpellSlotUseResult.Used && !run.Slot.HasItem && run.Graph.CurrentNode == bossRoom.Node &&
                    run.Progress.CurrentRoom == bossNode.RoomNumber && bossRoom.Node.IsVisible &&
                    !combatRoom.Node.IsVisible &&
-                   ((Vector2)run.Graph.Player.transform.position - bossEntry).sqrMagnitude < 0.0001f,
+                   (run.Graph.Player.FeetPosition - RoomLayout.ArrivalFeetOffset - bossEntry).sqrMagnitude < 0.0001f,
                 "티그의 도전장 must move the player to the boss room door's safe entry point.");
             Assert(bossRoom.Controller.State == RoomState.Combat && bossRoom.Controller.HasStarted &&
                    run.Spawned.Any(enemy => enemy != null && enemy.GetComponent<BossController>() != null),
@@ -462,7 +462,7 @@ namespace TrickalFanGame.Editor
                 run.ResetTransitionCooldown();
                 Assert(run.Slot.TryUse() == SpellSlotUseResult.Used && !run.Slot.HasItem &&
                        run.Graph.CurrentNode == secretRoom.Node &&
-                       ((Vector2)run.Graph.Player.transform.position - secretEntry).sqrMagnitude < 0.0001f,
+                       (run.Graph.Player.FeetPosition - RoomLayout.ArrivalFeetOffset - secretEntry).sqrMagnitude < 0.0001f,
                     "골디의 초대장 must move the player into the secret room at a door entry.");
                 ShopRoom shop = secretRoom.Node.ContentRoot.GetComponentInChildren<ShopRoom>(true);
                 ShopStockState stock = run.Progress.GetShopStock(ShopStockBuilder.BuildShopId(secret.RoomId));
