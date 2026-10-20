@@ -1282,6 +1282,29 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   수동 확인: Game Scene Play → 장애물과 벽 사이, 장애물 사이 1칸 통로를 불효자손·산사모·원거리 적이 지나와 쫓아오는지,
   위쪽 벽에 몸이 0.3쯤 겹치는 모습이 괜찮은지 본다. 사용자 Play 확인 완료(2026-10-20).
 
+- Shot-0 장애물에 붙어 쏜 탄: Setup은 없다. `Projectile.PushOutOfWallsBeside`는 사격 원점에서 탄 앞쪽으로 그은 선이 지나는
+  벽·장애물을 앞을 막는 것으로 보고 밀어내지 않는다. 검사는 `Week23Hitbox0Verification`의 `ValidateShotIntoHuggedObstacle`
+  (장애물 가운데·0.25·−0.4 어긋난 위치에 붙어 위로 쏜 탄이 제자리에 남아 장애물에 맞는지)로, Hitbox-0 배치와 같은 방법으로
+  실행한다. 2026-10-20 Hitbox-2 회귀 묶음 안의 Hitbox-0 `Verify`로 통과했다.
+  수동 확인: Game Scene Play → 장애물 정면·모서리에 붙어 위·아래·좌·우로 쏘면 탄이 장애물에 맞는지, 위쪽 벽에 붙어 좌우로
+  쏘면 탄이 사라지지 않고 날아가는지 본다. 사용자 Play 확인 완료(2026-10-20).
+
+- Grid-1 Room Profile 이동 영역 = 걸을 수 있는 바닥: 메뉴 `Trickal Fan Game > Week 27 > Setup Grid-1 Room Profile Walkable
+  Bounds`가 8개 Room Profile의 `movementBounds`·`encounterBounds`를 `FairyVillageArtworkSetup.WalkableFloor`(그린 바닥 안의
+  가장 큰 정수 직사각형, 배치 텍스트 격자와 같음)로 맞추고, 템플릿이 쓰는 방 Prefab의 전투 트리거 크기와 Obstacle-4 방의 장애물
+  위치를 `Week20Obstacle4Setup`의 명세(basic-diamond-cover 바깥 두 개는 위·아래 벽에 붙음)와 맞춘다. 다시 실행해도 바뀌는
+  에셋이 없다. 배치 검증(`RoomObstacleLayout.TryValidate`)은 벽·장애물·구덩이 사이 0 초과 1칸 미만 틈(대각선 포함)을
+  실패시키며, 각 물체가 차지한 0.5 격자 칸 기준으로 잰다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 27 > Setup and Verify Grid-1 Room Profile Walkable Bounds`, 배치는 Unity `-batchmode
+  -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week27Grid1Verification.SetupAndVerifyBatch
+  -logFile <로그 경로>`다. 프로필 영역과 정수 바닥, 배치 텍스트 격자와 프로필 일치, 모든 템플릿의 계약·배치 검증(실패를 한
+  번에 모두 기록), 틈 규칙 표본(벽에 붙음·1칸 통로 통과, 반 칸 틈·대각선 틈·구덩이와의 반 칸 틈 실패)을 검사한다. 회귀는
+  `VerifyWithRegressionsBatch`(Room-0·1·3·5·6·7, Boss-0~3, Obstacle-2, Trap-1의 `Verify`와
+  `RoomLayoutImporterVerification.VerifyWithRegressionsBatch`)다. 2026-10-20 두 배치와
+  `RoomLayoutImporterVerification.ImportAndVerifyBatch`가 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → 방에 들어서자마자 전투가 시작되는지, 부스러기 보스 패턴이 벽 안쪽에서만 나오는지,
+  basic-diamond-cover에서 벽에 붙은 장애물이 어색하지 않은지 본다. 사용자 Play 확인 완료(2026-10-20).
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,
