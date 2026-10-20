@@ -4,6 +4,7 @@ Shader "TrickalFanGame/ItemArtwork"
     {
         [PerRendererData] _MainTex ("Artwork", 2D) = "white" {}
         _Card ("Rounded spell card", Float) = 0
+        _Spent ("Used up (grey)", Float) = 0
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
         _StencilOp ("Stencil Operation", Float) = 0
@@ -32,6 +33,7 @@ Shader "TrickalFanGame/ItemArtwork"
             struct v2f { float4 vertex : SV_POSITION; float2 uv : TEXCOORD0; fixed4 color : COLOR; float4 world : TEXCOORD1; };
             sampler2D _MainTex;
             float _Card;
+            float _Spent;
             float4 _ClipRect;
             v2f vert(appdata v)
             {
@@ -69,6 +71,8 @@ Shader "TrickalFanGame/ItemArtwork"
                     c.rgb = lerp(float3(1,1,1), c.rgb, c.a / max(alpha, 0.001));
                     c.a = alpha;
                 }
+                // A used-up artifact (레비의 단도) turns grey and a little darker, its outline included.
+                if (_Spent > 0.5) c.rgb = dot(c.rgb, float3(0.3, 0.59, 0.11)) * 0.7;
                 c *= i.color;
                 #ifdef UNITY_UI_CLIP_RECT
                 c.a *= UnityGet2DClipping(i.world.xy, _ClipRect);

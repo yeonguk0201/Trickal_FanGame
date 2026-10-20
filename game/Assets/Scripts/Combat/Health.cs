@@ -20,7 +20,7 @@ namespace TrickalFanGame.Combat
         // Jjangsem-2 (수상한 물약): share taken off every enemy hit (contact, melee, projectile) when it lands.
         private float enemyDamageReduction;
         private bool explicitInvulnerability;
-        private Func<bool> lethalDamageGuard;
+        private Func<float, bool> lethalDamageGuard;
         // Current health + shield never exceeds this (the player's 15 hearts). 0 = no limit.
         private float healthAndShieldLimit;
         private DamageInvulnerability damageInvulnerability;
@@ -119,7 +119,8 @@ namespace TrickalFanGame.Combat
             }
 
             // 레비의 단도: a hit that would kill is cancelled whole, so health and shield stay as they were.
-            if (lethalDamageGuard != null && amount - currentShield >= CurrentHealth && lethalDamageGuard())
+            // The guard gets the hit's damage so it can start the same post-hit window that hit would have.
+            if (lethalDamageGuard != null && amount - currentShield >= CurrentHealth && lethalDamageGuard(amount))
             {
                 return;
             }
@@ -262,8 +263,8 @@ namespace TrickalFanGame.Combat
             SetShield(currentShield);
         }
 
-        // The guard is asked only about a hit that would kill. Returning true cancels that hit.
-        public void SetLethalDamageGuard(Func<bool> guard)
+        // The guard is asked only about a hit that would kill, with its damage. Returning true cancels that hit.
+        public void SetLethalDamageGuard(Func<float, bool> guard)
         {
             lethalDamageGuard = guard;
         }

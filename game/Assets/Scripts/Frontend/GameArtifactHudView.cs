@@ -79,7 +79,7 @@ namespace TrickalFanGame.Frontend
             {
                 if (visibleSlots[i].Definition != null && visibleSlots[i].Definition.ItemId == definition.ItemId)
                 {
-                    visibleSlots[i].Bind(definition, stackCount);
+                    visibleSlots[i].Bind(definition, stackCount, inventory.IsArtifactSpent(definition.ItemId));
                     return;
                 }
             }
@@ -101,8 +101,18 @@ namespace TrickalFanGame.Frontend
             ArtifactHudSlotView slot = Instantiate(slotTemplate, slotsRoot);
             slot.name = "Item " + definition.ItemId;
             slot.gameObject.SetActive(true);
-            slot.Bind(definition, stackCount);
+            slot.Bind(definition, stackCount, inventory != null && inventory.IsArtifactSpent(definition.ItemId));
             visibleSlots.Add(slot);
+        }
+
+        private void OnArtifactSpent(string itemId)
+        {
+            foreach (ArtifactHudSlotView slot in visibleSlots)
+            {
+                if (slot == null || slot.Definition == null || slot.Definition.ItemId != itemId) continue;
+                slot.Bind(slot.Definition, slot.StackCount, true);
+                return;
+            }
         }
 
         private void ClearVisibleSlots()
@@ -128,13 +138,18 @@ namespace TrickalFanGame.Frontend
         {
             if (subscribed || inventory == null) return;
             inventory.ItemAcquired += OnItemAcquired;
+            inventory.ArtifactSpent += OnArtifactSpent;
             subscribed = true;
         }
 
         private void Unsubscribe()
         {
             if (!subscribed) return;
-            if (inventory != null) inventory.ItemAcquired -= OnItemAcquired;
+            if (inventory != null)
+            {
+                inventory.ItemAcquired -= OnItemAcquired;
+                inventory.ArtifactSpent -= OnArtifactSpent;
+            }
             subscribed = false;
         }
     }

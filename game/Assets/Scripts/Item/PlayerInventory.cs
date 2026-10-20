@@ -17,6 +17,7 @@ namespace TrickalFanGame.Item
         private readonly List<ItemDefinition> acquiredDefinitions = new();
         private readonly Dictionary<string, int> stackCounts = new();
         private readonly HashSet<string> recordedSingleUseInstanceIds = new(StringComparer.Ordinal);
+        private readonly HashSet<string> spentArtifactIds = new(StringComparer.Ordinal);
         private PlayerStats stats;
         private Health health;
         private PlayerSP playerSP;
@@ -29,6 +30,8 @@ namespace TrickalFanGame.Item
         public bool IsMultiShotPierceSynergyActive { get; private set; }
         public event Action<ItemDefinition, int> ItemAcquired;
         public event Action<string> SynergyActivated;
+        // An artifact whose once-per-Run effect is used up (레비의 단도). Its stats stay; the HUD shows it grey.
+        public event Action<string> ArtifactSpent;
 
         private void Awake()
         {
@@ -119,6 +122,17 @@ namespace TrickalFanGame.Item
                 floor,
                 acquiredItems.Count + 1,
                 Time.realtimeSinceStartup));
+        }
+
+        public bool IsArtifactSpent(string itemId)
+        {
+            return itemId != null && spentArtifactIds.Contains(itemId);
+        }
+
+        public void MarkArtifactSpent(string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId) || GetStackCount(itemId) <= 0 || !spentArtifactIds.Add(itemId)) return;
+            ArtifactSpent?.Invoke(itemId);
         }
 
         public int GetStackCount(string itemId)
@@ -342,7 +356,7 @@ namespace TrickalFanGame.Item
                         stats.AddCriticalDamage(effect.Magnitude);
                         break;
                     case ItemEffectType.NegateLethalDamageOnce:
-                        GetOrAdd<PlayerDeathWard>().Configure(effect.DurationSeconds);
+                        GetOrAdd<PlayerDeathWard>().Configure(effect.DurationSeconds, definition.ItemId);
                         break;
                     case ItemEffectType.KillFrenzy:
                         GetOrAdd<PlayerKillFrenzy>().Configure(

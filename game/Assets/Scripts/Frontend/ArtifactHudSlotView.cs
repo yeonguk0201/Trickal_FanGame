@@ -20,6 +20,7 @@ namespace TrickalFanGame.Frontend
 
         public ItemDefinition Definition { get; private set; }
         public int StackCount { get; private set; }
+        public bool IsSpent { get; private set; }
         public Image Icon => icon;
         public TMP_Text IconText => iconText;
         public Image StackBadge => stackBadge;
@@ -34,13 +35,14 @@ namespace TrickalFanGame.Frontend
             stackText = configuredStackText;
         }
 
-        public void Bind(ItemDefinition definition, int stackCount)
+        public void Bind(ItemDefinition definition, int stackCount, bool spent = false)
         {
             Definition = definition;
             StackCount = Mathf.Max(1, stackCount);
+            IsSpent = spent;
             if (icon != null) icon.color = GetRarityColor(definition != null ? definition.Rarity : ItemRarity.Common);
             if (iconText != null) iconText.text = GetShortStableId(definition != null ? definition.ItemId : string.Empty);
-            UserArtwork.Apply(icon, definition, iconText);
+            UserArtwork.Apply(icon, definition, iconText, spent);
             if (stackText != null) stackText.text = StackCount.ToString();
             if (stackBadge != null) stackBadge.gameObject.SetActive(true);
         }
