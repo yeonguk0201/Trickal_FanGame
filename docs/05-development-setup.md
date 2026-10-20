@@ -1078,7 +1078,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Trap0Verification.Verify -logFile <로그 경로>`다
   (Setup 2회 GUID 확인까지는 `SetupAndVerifyBatch`). Prefab 7개의 구성과 원화 연결, 플레이어 피해 반 칸·발 중심~발바닥 세로선이 그림 타원에 걸칠 때만 판정(위로 0.3 더 넓음, 칸 안이라도 그림 밖이면 미판정)·
   피격 무적 공유·같은 함정 1초 간격, 적 고정 피해 5와 중심의 그림 타원 판정·처치 미귀속·방의 생존 수 감소, 비행 플레이어·비행 적의
-  바닥형 무시, 주기 가시의 2초/2초·0.5초 예고·A/B 반 주기·재진입 시 초기화, 거미줄 감속 40%(피해 없음)와 폭탄 제거,
+  바닥형 무시, 주기 가시의 2초/2초(예고 없음)·A/B 반 주기·재진입 시 초기화, 거미줄 감속 40%(피해 없음)와 폭탄 제거,
   불 3타·물줄기 1타·비행 차단, 가시 돌 4타·비행 통과, 독버섯 2타·드롭 없음과 독가스(반경 1.5·3초·발 중심 기준 플레이어 1회·적 1초마다
   중독 최대 3스택·중독 처치의 플레이어 귀속), 재구성 시 꺼진 불·부서진 가시 돌·독버섯·제거된 거미줄 보존을 검사한다.
   관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-1, Obstacle-7, Enemy-6, Special-2, Passive-4, 상태 이상 이펙트, 요정왕국
@@ -1088,9 +1088,9 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   2026-10-12 최종 판정 기준으로 `Verify`와 `VerifyWithRegressionsBatch`가 종료 코드 0으로 통과했고, 아래 수동 확인도
   사용자가 마쳤다.
   수동 확인: Game Scene Play → `F1` 패널 `— Trap —`. `Place <종류>`는 플레이어 오른쪽 칸에 함정을 놓고, 첫 줄에 가장
-  가까운 함정의 종류·판정 크기(`hit 1x0.37` 형태, 밟은 것으로 판정되면 `ON`)·주기 가시 상태(`Lowered`/`Warning`/`Raised`, A/B)·타수가, 둘째 줄에 `Web slow`와 `gas clouds`가
+  가까운 함정의 종류·판정 크기(`hit 1x0.37` 형태, 밟은 것으로 판정되면 `ON`)·주기 가시 상태(`Lowered`/`Raised`, A/B)·타수가, 둘째 줄에 `Web slow`와 `gas clouds`가
   나온다. (1) `Place FloorSpikes`·`Place DamagePuddle` 위에 서면 1초마다 반 칸씩 깎이고, 적에게 맞은 직후에는 깎이지
-  않는다. (2) `Place PeriodicSpikes`는 흐린 상태에서 0.5초 붉게 예고한 뒤 2초 동안 올라와 그때만 피해를 준다. 토글을 켜고
+  않는다. (2) `Place PeriodicSpikes`는 내려간 상태에서 예고 없이 2초 동안 올라와 그때만 피해를 준다. 토글을 켜고
   하나 더 놓으면 반대로 움직인다. (3) `Place Spiderweb` 위에서 `Web slow x0.6`이 되고 공격으로는 없어지지 않으며 폭탄(F)에
   없어진다. (4) `Place Fire`는 닿으면 반 칸이고 3번 때리면 꺼진다. 샤샤의 항아리(`— Artifact —` Drop)를 얻으면 물줄기 1번에
   꺼진다. (5) `Place SpikedRock`은 닿으면 반 칸, 4번 때리면 부서진다. (6) `Place PoisonMushroom`을 2번 때리면 독가스가

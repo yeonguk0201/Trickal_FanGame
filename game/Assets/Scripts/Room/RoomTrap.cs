@@ -22,7 +22,6 @@ namespace TrickalFanGame.Room
     public enum PeriodicSpikeState
     {
         Lowered,
-        Warning,
         Raised,
     }
 
@@ -46,7 +45,6 @@ namespace TrickalFanGame.Room
         public const float EnemyDamage = 5f;
         public const float PeriodicLoweredSeconds = 2f;
         public const float PeriodicRaisedSeconds = 2f;
-        public const float PeriodicWarningSeconds = 0.5f;
         public const float WebSpeedMultiplier = 0.6f;
         // The slow is renewed every tick and ends this long after the body leaves the web.
         public const float WebSlowLinger = 0.15f;
@@ -245,10 +243,7 @@ namespace TrickalFanGame.Room
             if (kind != RoomTrapKind.PeriodicSpikes) return PeriodicSpikeState.Raised;
             float elapsed = Mathf.Max(0f, currentTime - cycleStartTime) + (secondPhase ? PeriodicLoweredSeconds : 0f);
             float phase = Mathf.Repeat(elapsed, PeriodicLoweredSeconds + PeriodicRaisedSeconds);
-            if (phase >= PeriodicLoweredSeconds) return PeriodicSpikeState.Raised;
-            return phase >= PeriodicLoweredSeconds - PeriodicWarningSeconds
-                ? PeriodicSpikeState.Warning
-                : PeriodicSpikeState.Lowered;
+            return phase >= PeriodicLoweredSeconds ? PeriodicSpikeState.Raised : PeriodicSpikeState.Lowered;
         }
 
         private void Update()
@@ -399,15 +394,7 @@ namespace TrickalFanGame.Room
                 ? FairyKingdomArtwork.Fit(ArtworkIdOf(kind), width)
                 : EnvironmentHazardArtwork.Fit(EnvironmentHazardArtwork.Spikes, 0f, width);
             if (sprite != null) visual.sprite = sprite;
-            float alpha = state switch
-            {
-                PeriodicSpikeState.Raised => 1f,
-                PeriodicSpikeState.Warning => 0.65f,
-                _ => 1f,
-            };
-            Color color = state == PeriodicSpikeState.Warning ? new Color(1f, 0.75f, 0.75f) : Color.white;
-            color.a = alpha;
-            visual.color = color;
+            visual.color = Color.white;
         }
 
         private static bool IsFlying(PlayerMovement body) =>

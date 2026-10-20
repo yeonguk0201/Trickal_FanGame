@@ -51,7 +51,7 @@ namespace TrickalFanGame.Editor
                       "half a heart judged by the feet center down to the soles against the drawn ellipse, shares the post-hit window and " +
                       "repeats after 1 " +
                       "second; floor traps hurt or slow grounded enemies by their center on the drawing without crediting the " +
-                      "kill and ignore flying bodies; periodic spikes run 2s down (0.5s warning) and 2s up in two " +
+                      "kill and ignore flying bodies; periodic spikes run 2s down and 2s up with no warning in two " +
                       "opposite phases and restart on entry; fire blocks flight, goes out after 3 hits or one " +
                       "water hit, a spiked rock breaks in 4 and is flown over, a poison mushroom breaks in 2 and " +
                       "leaves a 3s gas that hits the player once and poisons enemies up to 3 stacks as player " +
@@ -220,17 +220,16 @@ namespace TrickalFanGame.Editor
                 RoomTrap first = fixture.PlaceTrap(RoomTrapKind.PeriodicSpikes, Origin, "periodic-a");
                 RoomTrap second = fixture.PlaceTrap(RoomTrapKind.PeriodicSpikes, Origin + Vector2.right * 3f,
                     "periodic-b", true);
-                Assert(RoomTrap.PeriodicLoweredSeconds == 2f && RoomTrap.PeriodicRaisedSeconds == 2f &&
-                       RoomTrap.PeriodicWarningSeconds == 0.5f,
-                    "Periodic spikes are 2 seconds down, 2 seconds up, with a 0.5 second warning.");
+                Assert(RoomTrap.PeriodicLoweredSeconds == 2f && RoomTrap.PeriodicRaisedSeconds == 2f,
+                    "Periodic spikes are 2 seconds down, 2 seconds up.");
                 Assert(first.StateAt(time + 0.1f) == PeriodicSpikeState.Lowered &&
                        first.StateAt(time + 1.4f) == PeriodicSpikeState.Lowered &&
-                       first.StateAt(time + 1.6f) == PeriodicSpikeState.Warning &&
+                       first.StateAt(time + 1.9f) == PeriodicSpikeState.Lowered &&
                        first.StateAt(time + 2.1f) == PeriodicSpikeState.Raised &&
                        first.StateAt(time + 3.9f) == PeriodicSpikeState.Raised &&
                        first.StateAt(time + 4.1f) == PeriodicSpikeState.Lowered &&
-                       first.StateAt(time + 5.6f) == PeriodicSpikeState.Warning,
-                    "Phase A must start lowered, warn 0.5 seconds before rising and repeat every 4 seconds.");
+                       first.StateAt(time + 5.9f) == PeriodicSpikeState.Lowered,
+                    "Phase A must start lowered, rise without a warning and repeat every 4 seconds.");
                 for (float offset = 0.1f; offset < 8f; offset += 0.25f)
                 {
                     Assert((first.StateAt(time + offset) == PeriodicSpikeState.Raised) !=
@@ -239,9 +238,12 @@ namespace TrickalFanGame.Editor
                 }
 
                 fixture.StandOn(Origin);
-                first.Tick(time + 1.6f);
-                Assert(fixture.PlayerUnits == 10f && first.Visual.color.a < 1f,
-                    "Warning spikes must not hurt and must not look raised.");
+                first.Tick(time + 0.1f);
+                Sprite loweredSprite = first.Visual.sprite;
+                first.Tick(time + 1.9f);
+                Assert(fixture.PlayerUnits == 10f && first.Visual.color == Color.white &&
+                       first.Visual.sprite == loweredSprite,
+                    "Spikes about to rise must not hurt and must look the same as lowered spikes (no warning tint).");
                 first.Tick(time + 2.1f);
                 Assert(fixture.PlayerUnits == 10f - HalfHeart && first.Visual.color.a == 1f,
                     "Raised spikes must hurt for half a heart.");
