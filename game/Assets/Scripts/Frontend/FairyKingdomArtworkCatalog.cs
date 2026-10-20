@@ -24,7 +24,8 @@ namespace TrickalFanGame.Frontend
         {
             width = Mathf.Max(0.01f, width);
             string key = id + ":" + width.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
-            if (fitted.TryGetValue(key, out Sprite cached)) return cached;
+            // Unloading unused assets (a Scene change) destroys a fitted sprite nothing draws; fit it again.
+            if (fitted.TryGetValue(key, out Sprite cached) && cached != null) return cached;
             foreach (Entry entry in entries)
             {
                 if (entry.id != id || entry.sprite == null) continue;
@@ -40,7 +41,7 @@ namespace TrickalFanGame.Frontend
                 Sprite sprite = Sprite.Create(entry.sprite.texture, rect, pivot,
                     rect.width / width, 0, SpriteMeshType.FullRect);
                 sprite.name = id;
-                fitted.Add(key, sprite);
+                fitted[key] = sprite;
                 return sprite;
             }
             return null;
