@@ -1305,6 +1305,28 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   수동 확인: Game Scene Play → 방에 들어서자마자 전투가 시작되는지, 부스러기 보스 패턴이 벽 안쪽에서만 나오는지,
   basic-diamond-cover에서 벽에 붙은 장애물이 어색하지 않은지 본다. 사용자 Play 확인 완료(2026-10-20).
 
+- UX-0 인게임 설정과 사망 종료 연출: 메뉴 `Trickal Fan Game > Week 25 > Setup UX-0 In-game Settings and Game Over`가
+  Game Scene 일시정지 메뉴 버튼을 `게임으로 돌아가기 · 설정 · 처음부터 다시하기 · 홈으로 나가기` 순서로 배치하고, Frontend
+  Scene의 설정 패널을 그대로 복사해 일시정지 오버레이 위 `In-Game Settings` 층에 둔다(같은 `FrontendSettingsView`·같은
+  `LocalSettings`). 다시 실행하면 복사본을 지우고 새로 복사하므로 Frontend 설정 패널을 바꾼 뒤에도 재실행으로 맞출 수 있다.
+  같은 Setup이 `Game Over Canvas`(정렬 60, HUD 위)와 `GameOverSequence`를 만들고 `RunSession`에 연결한다. 사망하면
+  쓰러짐(임시: 캐릭터가 옆으로 넘어짐, `fallDuration` 0.6초) → 5초 대기(`holdAfterFall`) → 플레이어 중심 원형 페이드
+  아웃(`irisDuration` 1.2초) → `GAME OVER` → `결과 보기` 입력 → 결과 화면 순서로 진행하며, 시간만으로는 결과 화면으로
+  넘어가지 않는다. 사망 순간 결과 요청을 로컬 대기열에 넣어 연출 중 종료해도 같은 `clientRunId`로 한 번만 저장된다. 연출 중
+  보스는 멈추고 일시정지는 열리지 않는다. 쓰러짐 원화가 생기면 `GameOverSequence.ApplyFall`의 임시 회전을 그 연출로 바꾸고
+  `fallDuration`을 원화 길이에 맞춘다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 25 > Verify UX-0 In-game Settings and Game Over`, 배치는 Unity `-batchmode -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Ux0Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  Setup 2회 중복 없음·Scene GUID 보존, Frontend와 같은 설정 컨트롤 목록·글꼴, 버튼 순서·겹침·내비게이션, 설정을 연 동안
+  일시정지 유지와 Run 행동 차단, 닫기·재개 복귀, GAME OVER 캔버스 순서·전체 화면·숨김 시작, 쓰러짐→5초 대기→원형 페이드가
+  줄어들기만 하며 완전히 닫힘→확인 입력 표시, 600초가 지나도 자동 전환 없음, 확인 1회만 결과 전환을 검사한다. 회귀는
+  `VerifyWithRegressionsBatch`(HUD-7C·7D, Flow-5의 `Verify`)이고, 실제 사망→GAME OVER 확인→결과 화면 저장 1회는
+  `Week13Flow5PlayVerification.RunBatch`가 확인한다. 2026-10-21 `SetupAndVerifyBatch`와 Flow-5 Play 배치가 종료 코드 0으로
+  통과했다.
+  수동 확인: Game Scene Play → `Esc` → `설정`에서 음량·해상도·전체 화면·상세 스탯을 바꾸고 `뒤로`·`Esc`로 일시정지 메뉴에
+  돌아오는지, 해상도를 바꾼 뒤에도 키보드 포커스가 설정 패널 안에 남는지, 개발 패널(`F1`) `— Room —`의 `Die (GAME OVER sequence)`나 적에게 사망한 뒤 쓰러짐→
+  약 5초→원형 페이드→`GAME OVER`→`결과 보기`(Enter·클릭)→결과 화면이 이어지는지 1920×1080·1280×720에서 본다.
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,

@@ -226,6 +226,17 @@ namespace TrickalFanGame.Editor
 
         private static void VerifyOfflineResultAndRecovery()
         {
+            // UX-0: a death waits on the GAME OVER confirm before the result screen opens.
+            if (SceneManager.GetActiveScene().path == Week13FrontendSetup.GameScenePath)
+            {
+                GameOverSequence gameOver = Object.FindFirstObjectByType<GameOverSequence>();
+                if (gameOver != null && gameOver.IsActive && gameOver.CurrentPhase != GameOverSequence.Phase.Confirmed)
+                {
+                    gameOver.SkipToConfirm();
+                    gameOver.Confirm();
+                }
+                return;
+            }
             if (SceneManager.GetActiveScene().path != Week13FrontendSetup.ScenePath) return;
             FrontendRunResultView view = Object.FindFirstObjectByType<FrontendRunResultView>();
             if (view == null || !view.IsShowing || !view.IsSummaryVisible) return;
