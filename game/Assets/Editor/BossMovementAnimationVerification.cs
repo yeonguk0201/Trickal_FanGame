@@ -179,16 +179,16 @@ namespace TrickalFanGame.Editor
                 runtime.BeginCombat(target.transform, 42, 0f);
                 runtime.OnPatternStateChanged(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 5f);
                 Require(runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence), "Could not start real vault jump.");
-                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 0.02f);
+                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 0.07f);
                 animator.RenderPose(0f, false);
-                Require(animator.Artwork.sprite == animator.GetHopFrame(1), "Real jump preparation must select the drawn pose.");
+                Require(animator.Artwork.sprite == animator.GetJumpCycleFrame(1), "Real jump preparation must select the drawn pose.");
                 Vector3 crouchFloor = animator.Source.transform.TransformPoint(Vector3.up * animator.BodySprite.bounds.min.y);
                 Require(runtime.CurrentVisualScale == Vector3.one, "Vault preparation must keep original proportions while deformation is disabled.");
                 float floorY = root.transform.position.y + animator.BodySprite.bounds.min.y * root.transform.lossyScale.y;
                 Require(Mathf.Abs(crouchFloor.y - floorY) < 0.001f, "Crouching must keep the body bottom grounded.");
                 runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 0.345f);
                 animator.RenderPose(0f, false);
-                Require(animator.Artwork.sprite == animator.GetHopFrame(2), "Real attack flight must select the drawn airborne pose.");
+                Require(animator.Artwork.sprite == animator.GetJumpCycleFrame(3), "Real attack flight must select the drawn airborne pose.");
                 Require(runtime.IsJumping && animator.Source.transform.position.y - root.transform.position.y > 1.9f,
                     "Pattern jump must preserve its authored visual height.");
                 Require(animator.GetTreasure(0).transform.localPosition == Vector3.zero && animator.GetTreasure(1).transform.localPosition == Vector3.zero,
@@ -196,7 +196,7 @@ namespace TrickalFanGame.Editor
                 Require(runtime.CurrentVisualScale.y >= 1f, "Airborne vault must not use crouch/landing compression.");
                 runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 0.69f * 0.86f);
                 animator.RenderPose(0f, false);
-                Require(animator.Artwork.sprite == animator.GetHopFrame(3), "Real attack landing must select the drawn landing pose.");
+                Require(animator.Artwork.sprite == animator.GetJumpCycleFrame(5), "Real attack landing must select the drawn landing pose.");
                 Vector3 landingFloor = animator.Source.transform.TransformPoint(Vector3.up * animator.BodySprite.bounds.min.y);
                 Require(runtime.CurrentVisualScale == Vector3.one && Mathf.Abs(landingFloor.y -
                         (root.transform.position.y + animator.BodySprite.bounds.min.y * root.transform.lossyScale.y)) < 0.001f,

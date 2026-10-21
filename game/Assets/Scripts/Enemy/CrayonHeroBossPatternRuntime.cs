@@ -105,6 +105,9 @@ namespace TrickalFanGame.Enemy
         private GameObject recognitionDebugObject;
         private LineRenderer recognitionDebugLine;
         private int attackPoseIndex = -1;
+        private int summonPoseIndex = -1;
+        private float summonStartedAt, summonTelegraphEndsAt;
+        public int SummonPoseIndex => summonPoseIndex;
         private float attackFollowThroughStartedAt = float.NegativeInfinity;
         private float chargeStartedAt;
         private float chargeImpactAt;
@@ -127,6 +130,7 @@ namespace TrickalFanGame.Enemy
         private void ResetAttackArtwork()
         {
             attackPoseIndex = -1;
+            summonPoseIndex = -1;
             attackFollowThroughStartedAt = float.NegativeInfinity;
             chargingSlash = false;
         }
@@ -332,6 +336,10 @@ namespace TrickalFanGame.Enemy
                 else if (execution == BossPatternExecution.CrayonHeroSummonMinions)
                 {
                     StopMovement();
+                    UpdateAimDirection();
+                    summonStartedAt = lastTickTime;
+                    summonTelegraphEndsAt = stateEndsAt;
+                    summonPoseIndex = 0;
                     ShowSummonTelegraph();
                 }
                 else if (execution == BossPatternExecution.CrayonHeroDashChain)
@@ -347,6 +355,7 @@ namespace TrickalFanGame.Enemy
             if (state == BossActionState.Recovery)
             {
                 chargingSlash = false;
+                summonPoseIndex = execution == BossPatternExecution.CrayonHeroSummonMinions ? 3 : -1;
                 attackPoseIndex = execution == BossPatternExecution.CrayonHeroMapSlash ? 11 : -1;
                 attackFollowThroughStartedAt = lastTickTime;
                 ClearTelegraph();
@@ -404,6 +413,7 @@ namespace TrickalFanGame.Enemy
                 case BossPatternExecution.CrayonHeroSummonMinions:
                     if (!summonAvailable) return false;
                     ClearTelegraph();
+                    summonPoseIndex = 2;
                     SummonMinions();
                     summonAvailable = false;
                     healthAtLastSummon = health != null ? health.CurrentHealth : 0f;
@@ -434,6 +444,8 @@ namespace TrickalFanGame.Enemy
             if (state == BossActionState.Telegraph)
             {
                 UpdateChargeArtwork();
+                if (execution == BossPatternExecution.CrayonHeroSummonMinions)
+                    summonPoseIndex = (now - summonStartedAt) / Mathf.Max(0.001f, summonTelegraphEndsAt - summonStartedAt) < 0.35f ? 0 : 1;
                 if (execution == BossPatternExecution.CrayonHeroMapSlash)
                 {
                     UpdateAimDirection();
@@ -470,7 +482,11 @@ namespace TrickalFanGame.Enemy
 
             if (state == BossActionState.Recovery)
             {
-                if (now - attackFollowThroughStartedAt >= 0.2f) attackPoseIndex = -1;
+                if (now - attackFollowThroughStartedAt >= 0.2f)
+                {
+                    attackPoseIndex = -1;
+                    summonPoseIndex = -1;
+                }
                 if (execution == BossPatternExecution.CrayonHeroApproachSwing)
                     MoveTowardTarget(deltaTime, 1f);
                 return;

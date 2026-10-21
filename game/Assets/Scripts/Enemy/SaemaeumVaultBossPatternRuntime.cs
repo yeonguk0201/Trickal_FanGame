@@ -56,6 +56,8 @@ namespace TrickalFanGame.Enemy
         private bool[] originalTriggerStates;
         private bool jumping;
         private int jumpPoseIndex = -1;
+        private int jumpCycleFrameIndex = -1;
+        public int JumpCycleFrameIndex => jumpCycleFrameIndex;
         private Transform target;
         private Rect arenaBounds;
         private uint randomState;
@@ -87,6 +89,7 @@ namespace TrickalFanGame.Enemy
         public int HealPoseIndex => healPoseIndex;
         public int PhaseTwoMinimumJumps => Mathf.Max(1, phaseTwoMinimumJumps);
         public float JumpDistance => jumpDistance;
+        public float PhaseOneJumpDuration => phaseOneJumpDuration;
         public EnemyDamageTier LandingDamageTier => landingDamageTier;
         public float LandingKnockbackSpeed => landingKnockbackSpeed;
         public float ApproachSpeed => approachSpeed;
@@ -188,6 +191,7 @@ namespace TrickalFanGame.Enemy
                 StopMovement();
                 ApplyScale(jumpCrouchScale);
                 jumpPoseIndex = 1;
+                jumpCycleFrameIndex = 1;
                 return;
             }
             if (state == BossActionState.Telegraph && execution == BossPatternExecution.SaemaeumTreasureHeal)
@@ -296,6 +300,7 @@ namespace TrickalFanGame.Enemy
             }
             jumping = true;
             jumpPoseIndex = 1;
+            jumpCycleFrameIndex = 1;
             ApplyScale(jumpCrouchScale);
             SetVisualHeight(0f);
             int minimum = boss != null && boss.CurrentPhase >= 2 ? phaseTwoMinimumJumps : phaseOneMinimumJumps;
@@ -339,6 +344,9 @@ namespace TrickalFanGame.Enemy
             const float takeoff = 0.16f, contact = 0.82f, compression = 0.90f;
             jumpPoseIndex = jumpProgress < takeoff ? 1 : jumpProgress < contact ? 2 :
                 jumpProgress < 0.96f ? 3 : currentJump == jumpCount - 1 ? 0 : 1;
+            jumpCycleFrameIndex = jumpProgress < 0.04f ? 0 : jumpProgress < takeoff ? 1 :
+                jumpProgress < 0.36f ? 2 : jumpProgress < 0.58f ? 3 : jumpProgress < contact ? 4 :
+                jumpProgress < 0.90f ? 5 : jumpProgress < 0.96f ? 6 : 7;
             float flight = Mathf.Clamp01((jumpProgress - takeoff) / (contact - takeoff));
             Vector2 position = Vector2.Lerp(jumpStart, jumpDestination, Mathf.SmoothStep(0f, 1f, flight));
             if (body != null) body.position = position;
@@ -544,6 +552,7 @@ namespace TrickalFanGame.Enemy
         private void EndJump()
         {
             jumpPoseIndex = -1;
+            jumpCycleFrameIndex = -1;
             if (jumping)
             {
                 for (int index = 0; index < jumpColliders.Length; index++)

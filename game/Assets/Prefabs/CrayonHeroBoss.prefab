@@ -438,6 +438,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5fb0eb48f07b1e34f91adadfca9eaa49, type: 3}
   - {fileID: 21300000, guid: 02853204a17ac11468455902c6321ae2, type: 3}
   - {fileID: 21300000, guid: e86f25c3eabc45140ac8f164536136eb, type: 3}
+  summonFrames:
+  - {fileID: 21300000, guid: 058b5b1cf30f41b79210f0d15fa40d4d, type: 3}
+  - {fileID: 21300000, guid: 668dbeb89c9e4ace9e6ee8d76dc3b8e3, type: 3}
+  - {fileID: 21300000, guid: 92f4c203f7c9496985829a8111cb1731, type: 3}
+  - {fileID: 21300000, guid: 5b08b192709c46c5951c344bc9cdc131, type: 3}
+  goldenSummonFrames:
+  - {fileID: 21300000, guid: 869fabeddf204c70929677d674afe7ba, type: 3}
+  - {fileID: 21300000, guid: e6fff498b2184570b4120f433eb7cd7c, type: 3}
+  - {fileID: 21300000, guid: 71269bfe9be94cd9a7a5c2b9c46fb422, type: 3}
+  - {fileID: 21300000, guid: 654cb031fd8d424780111c1e59f4601c, type: 3}
   groundTreasures: []
   strideLength: 1.6
   hopHeight: 0.42

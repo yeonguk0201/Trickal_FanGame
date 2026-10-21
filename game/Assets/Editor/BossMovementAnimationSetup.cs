@@ -58,11 +58,17 @@ namespace TrickalFanGame.Editor
                     animator.Configure((BossMovementStyle)i, source, i == 1 ? vaultBody : null,
                         i == 2 ? frames : Array.Empty<Sprite>(), treasures,
                         i == 2 ? 1.6f : 1.35f, i == 0 ? 0.48f : 0.42f, i < 2 ? hopFrames[i] : null);
-                    if (i == 1) animator.ConfigureHealing(healFrames);
+                    if (i == 1)
+                    {
+                        animator.ConfigureHealing(healFrames);
+                        animator.ConfigureJumpCycle(ImportSequence("Vault_Jump", 8));
+                    }
                     if (i == 2)
                     {
                         animator.ConfigureCrayonAttacks(attacks);
                         ConfigureGoldenFrames(animator);
+                        animator.ConfigureSummoning(ImportSequence("CrayonHero_Summon", 4),
+                            ImportSequence("CrayonHero_Golden_Summon", 4));
                     }
                     if (PrefabUtility.SaveAsPrefabAsset(root, PrefabPaths[i]) == null)
                         throw new InvalidOperationException("Could not save " + PrefabPaths[i]);
@@ -71,6 +77,13 @@ namespace TrickalFanGame.Editor
             }
             AssetDatabase.SaveAssets();
             Debug.Log("Boss movement configured: Buseureogi hop, separate vault body/ground treasure, Crayon walk with cape and arm poses.");
+        }
+
+        private static Sprite[] ImportSequence(string prefix, int count)
+        {
+            var frames = new Sprite[count];
+            for (int i = 0; i < count; i++) frames[i] = Import($"{Folder}/{prefix}_{i}.png");
+            return frames;
         }
 
         private static SpriteRenderer ConfigureTreasure(Transform parent, string name, Sprite sprite, SpriteRenderer source)

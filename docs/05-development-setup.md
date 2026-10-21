@@ -2225,3 +2225,9 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 단독 검증: `Trickal Fan Game/Artwork/Verify Common Ground Shadows`. 렌더 포함 배치: `TrickalFanGame.Editor.GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` (`-batchmode -quit`, 그래픽 필요). 함정별 연결·주기 가시 기준점·피해 영역과 Collider 보존·중복 방지·비활성화를 검사한다. Unity 6000.3.22f1 종료 코드 0 및 88종 렌더 성공, 함정 7종의 28개 PNG 레이어와 비어 있지 않은 그림자를 확인했다 (`output/ground-shadow-traps.log`). 실제 Play 미술 검수와 사용자별 수치 확정은 남아 있다.
 
 - 함정 후속 사용자 검수: 82~88번의 너비·두께·X/Y 위치·진하기를 전달값으로 확정해 `GroundShadowProfiles.json`에 반영했다. 기존 다른 프로필은 유지했다. `GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` 성공 종료 코드 0 (`output/ground-shadow-traps-reviewed.log`), 주기 가시 기준점·충돌 보존과 88종 재렌더를 확인했고 함정 7종의 실제 출력 35필드 일치를 비교했다. 페이지 기본값과 `traps-overview.png`도 갱신했다. 실제 Play 미술 검수는 사용자가 수동 확인을 마쳤다(2026-10-20).
+
+### 보스 소환·점프 모션 검증 (2026-10-21)
+
+- Edit Mode 메뉴: `Trickal Fan Game > Artwork > Verify Boss Summon And Jump Animations`.
+- 배치: `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.BossSummonJumpAnimationVerification.Verify -logFile <로그 경로>`. 구성 재실행 없이 저장된 Prefab의 일반·황금 소환 4포즈, 새마음금고 공격 점프 8포즈, 실제 패턴 이벤트와 취소 복원을 검사한다.
+- 실제 화면: `Trickal Fan Game > Debug > Open Boss Test Room`에서 Play 후 보스를 선택한다. 크레용사용 일반·황금 소환의 지시·회수와 좌우 방향, 새마음금고 점프 준비·정점·착지·복귀의 발 기준선을 확인한다. 일반 이동의 4포즈는 기존 설정을 사용한다.

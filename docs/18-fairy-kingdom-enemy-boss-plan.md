@@ -499,3 +499,10 @@ Enemy-2 전체 검사의 보스 격리 조건은 이미 별도 공격 표시를 
 - [x] 반복 구성 및 일반 적 전투·보스 이동·Boss-0~3·HUD-5 회귀, Unity 4단계 렌더 확인
   (`EnemyAttackAnimationVerification.ExportMinionPreview`, `game/Logs/crayon-minion-attack-retry.log`, 종료 코드 0)
 - [ ] 새 Run의 크레용사용 소환 전투에서 실제 공격 연결과 난전 가독성 Play Mode 확인
+
+## 소환·공격 점프 Artwork 연결 (2026-10-21)
+
+- [x] 일반·황금 용사용 각 4포즈를 소환 준비·지시·실제 소환·회수에 연결. 취소 시 각 페이즈 기본 그림 복원.
+- [x] 새마음금고 공격 점프 8포즈를 기존 도약·착지 시점에 연결. 이동/피해/점프 시간, 바닥 보물 분리 유지.
+- [x] Unity `BossSummonJumpAnimationVerification.Verify` 통과: 두 페이즈 소환 이벤트·취소, 8포즈 순서·바닥 보물·충돌 복원. `tmp/boss-summon-jump-verification.log`, 종료 코드 0.
+- [ ] `Debug > Open Boss Test Room`의 실제 Play에서 일반·황금 소환과 새마음금고 연속 점프의 크기·연결감 확인.
