@@ -46,6 +46,16 @@ namespace TrickalFanGame.Item
         private float overdriveMoveSpeed;
         private float overdriveCooldownReduction;
 
+        // 날먹보호막: the shield pool is shared, so the power's part is the shield above what was held before it.
+        // Newer shield on top is spent first; the power's part ends when the pool drops to the old amount.
+        private float freeloaderBase;
+        private float freeloaderGranted;
+        private float freeloaderLastRemaining;
+        private float freeloaderShownAt;
+        private float freeloaderHitAt = float.NegativeInfinity;
+        private float freeloaderPoppedAt = float.NegativeInfinity;
+        private ShieldBubble bubble;
+
         public RoomGraphController RoomGraph => roomGraph;
         public float BlastDamageBonus => blastRemainingSeconds > 0f ? blastDamageBonus : 0f;
         public float BlastRemainingSeconds => Mathf.Max(0f, blastRemainingSeconds);
@@ -56,6 +66,15 @@ namespace TrickalFanGame.Item
         public float OverdriveRemainingSeconds => Mathf.Max(0f, overdriveRemainingSeconds);
         public int LastHitCount { get; private set; }
         public Health LastSmiteTarget { get; private set; }
+        public float FreeloaderShieldGranted => freeloaderGranted;
+        public float FreeloaderShieldRemaining => freeloaderGranted > 0f && health != null
+            ? Mathf.Clamp(health.CurrentShield - freeloaderBase, 0f, freeloaderGranted)
+            : 0f;
+        public bool IsFreeloaderShieldActive => FreeloaderShieldRemaining > TickTolerance;
+        // The bubble blinks once only the last heart of the power's shield is left.
+        public bool IsFreeloaderShieldLow => IsFreeloaderShieldActive &&
+            FreeloaderShieldRemaining <= (health.UsesHealthUnits ? HealthUnits.UnitsPerHeart : 1f) + TickTolerance;
+        public ShieldBubble Bubble => bubble;
 
         private void Awake()
         {
@@ -78,7 +97,16 @@ namespace TrickalFanGame.Item
 
         private void Update() => Advance(Time.deltaTime);
 
-        private void OnDisable() => StopAll();
+        private void LateUpdate()
+        {
+            if (Application.isPlaying) UpdateShieldBubble(Time.time);
+        }
+
+        private void OnDisable()
+        {
+            StopAll();
+            if (bubble != null) bubble.Hide();
+        }
 
         public bool CanExecute(ItemDefinition definition, out string reason)
         {
@@ -241,8 +269,7 @@ namespace TrickalFanGame.Item
                         enemy.ApplyIncomingDamageBonus(effect.Magnitude, effect.DurationSeconds);
                     break;
                 case ItemEffectType.PowerGainShield:
-                    float gained = health.GainShield(effect.Magnitude);
-                    Debug.Log($"[PlayerPowerEffects] Shield +{gained}.", this);
+                    ApplyFreeloaderShield(effect, Application.isPlaying ? Time.time : 0f);
                     break;
                 case ItemEffectType.PowerOverdrive:
                     overdriveRemainingSeconds = effect.DurationSeconds;
@@ -256,6 +283,79 @@ namespace TrickalFanGame.Item
                     playerSP.TryAdd(effect.IntegerAmount);
                     break;
             }
+        }
+
+        // A second use while the bubble is up adds to the same bubble instead of blowing a new one.
+        private void ApplyFreeloaderShield(ItemEffectEntry effect, float now)
+        {
+            float before = health.CurrentShield;
+            float remaining = FreeloaderShieldRemaining;
+            float gained = health.GainShield(effect.Magnitude);
+            Debug.Log($"[PlayerPowerEffects] Shield +{gained}.", this);
+            if (gained <= 0f) return;
+            if (remaining > TickTolerance)
+            {
+                freeloaderBase = before - remaining;
+                freeloaderGranted = remaining + gained;
+            }
+            else
+            {
+                freeloaderBase = before;
+                freeloaderGranted = gained;
+                freeloaderShownAt = now;
+                freeloaderHitAt = float.NegativeInfinity;
+            }
+
+            freeloaderPoppedAt = float.NegativeInfinity;
+            freeloaderLastRemaining = FreeloaderShieldRemaining;
+        }
+
+        // Follows the power's shield every frame: a drop is a hit (ripple), reaching zero pops the bubble. Death or
+        // the end of the Run removes it without a pop. Public so the verifier can drive it outside Play Mode.
+        public void UpdateShieldBubble(float now)
+        {
+            EnsureReferences();
+            RunProgress progress = slot != null ? slot.Progress : null;
+            bool stopped = health == null || health.IsDead || (progress != null && progress.IsProgressionStopped);
+            if (stopped)
+            {
+                freeloaderGranted = 0f;
+                freeloaderLastRemaining = 0f;
+                freeloaderPoppedAt = float.NegativeInfinity;
+            }
+            else if (freeloaderGranted > 0f)
+            {
+                float remaining = FreeloaderShieldRemaining;
+                if (remaining <= TickTolerance)
+                {
+                    freeloaderGranted = 0f;
+                    freeloaderPoppedAt = now;
+                }
+                else if (remaining < freeloaderLastRemaining - TickTolerance)
+                {
+                    freeloaderHitAt = now;
+                }
+
+                freeloaderLastRemaining = remaining;
+            }
+
+            bool popping = now - freeloaderPoppedAt < ShieldBubble.PopSeconds;
+            if (freeloaderGranted <= 0f && !popping)
+            {
+                if (bubble != null) bubble.Hide();
+                return;
+            }
+
+            if (bubble == null)
+            {
+                bubble = ShieldBubble.Create(GetComponent<SpriteRenderer>());
+                if (bubble == null) return;
+            }
+
+            if (freeloaderGranted > 0f)
+                bubble.RenderShield(now - freeloaderShownAt, now, IsFreeloaderShieldLow, now - freeloaderHitAt);
+            else
+                bubble.RenderPop(now - freeloaderPoppedAt, now);
         }
 
         // 팝핀 스타: the damage uses the attack before this blast's own bonus is applied.

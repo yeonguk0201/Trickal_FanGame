@@ -37,6 +37,10 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Text confirmationTitle;
         [SerializeField] private TMP_Text confirmationWarning;
         [SerializeField] private TMP_Text confirmationActionLabel;
+        [Header("UX-0 In-game Settings")]
+        [SerializeField] private Button settingsButton;
+        [SerializeField] private GameObject settingsRoot;
+        [SerializeField] private FrontendSettingsView settingsView;
 
         private readonly List<ArtifactPauseListEntryView> entries = new();
         private float previousTimeScale = 1f;
@@ -70,6 +74,10 @@ namespace TrickalFanGame.Frontend
         public TMP_Text ConfirmationTitle => confirmationTitle;
         public TMP_Text ConfirmationWarning => confirmationWarning;
         public TMP_Text ConfirmationActionLabel => confirmationActionLabel;
+        public Button SettingsButton => settingsButton;
+        public GameObject SettingsRoot => settingsRoot;
+        public FrontendSettingsView SettingsView => settingsView;
+        public bool IsSettingsOpen => settingsRoot != null && settingsRoot.activeSelf;
         public IReadOnlyList<ArtifactPauseListEntryView> Entries => entries;
         public bool IsPaused { get; private set; }
         public bool IsConfirmingLeave => pendingRunAction == PendingRunAction.Leave;
@@ -128,11 +136,25 @@ namespace TrickalFanGame.Frontend
             BindRestartButton();
         }
 
+        // UX-0: the same settings panel as the Frontend (same LocalSettings), opened above the pause menu.
+        public void ConfigureSettings(Button configuredSettingsButton, GameObject configuredSettingsRoot,
+            FrontendSettingsView configuredSettingsView)
+        {
+            UnbindSettings();
+            settingsButton = configuredSettingsButton;
+            settingsRoot = configuredSettingsRoot;
+            settingsView = configuredSettingsView;
+            BindSettings();
+            if (settingsRoot != null) settingsRoot.SetActive(false);
+        }
+
         private void Awake()
         {
             BindResumeButton();
             BindLeaveButtons();
             BindRestartButton();
+            BindSettings();
+            if (settingsRoot != null) settingsRoot.SetActive(false);
             ApplyVisibility(false);
             ApplyLeaveConfirmationVisibility(false);
         }
@@ -140,7 +162,8 @@ namespace TrickalFanGame.Frontend
         private void Update()
         {
             if (Keyboard.current?.escapeKey.wasPressedThisFrame != true) return;
-            if (pendingRunAction != PendingRunAction.None) CancelRunActionConfirmation();
+            if (IsSettingsOpen) CloseSettings();
+            else if (pendingRunAction != PendingRunAction.None) CancelRunActionConfirmation();
             else if (IsPaused) Resume();
             else TryPause();
         }
@@ -148,8 +171,13 @@ namespace TrickalFanGame.Frontend
         private void LateUpdate()
         {
             bool confirmingAction = pendingRunAction != PendingRunAction.None;
-            RectTransform activeScope = confirmingAction ? confirmationFocusScope : focusScope;
-            Button fallback = confirmingAction ? cancelLeaveButton : resumeButton;
+            Transform activeScope = confirmingAction ? confirmationFocusScope : focusScope;
+            Selectable fallback = confirmingAction ? cancelLeaveButton : resumeButton;
+            if (IsSettingsOpen)
+            {
+                activeScope = settingsRoot.transform;
+                fallback = settingsView != null ? settingsView.MasterVolumeSlider : null;
+            }
             if (!IsPaused || activeScope == null || fallback == null || EventSystem.current == null) return;
             GameObject selected = EventSystem.current.currentSelectedGameObject;
             if (selected == null || !selected.transform.IsChildOf(activeScope)) Focus(fallback);
@@ -165,11 +193,13 @@ namespace TrickalFanGame.Frontend
             UnbindResumeButton();
             UnbindLeaveButtons();
             UnbindRestartButton();
+            UnbindSettings();
         }
 
         public bool TryPause()
         {
-            if (IsPaused || Time.timeScale <= 0f ||
+            // UX-0: once the Run has ended (death sequence, result transition) the pause menu stays closed.
+            if (IsPaused || Time.timeScale <= 0f || (runSession != null && runSession.HasEnded) ||
                 FindFirstObjectByType<ItemRewardSelectionSession>()?.IsOpen == true ||
                 FindFirstObjectByType<ShopSession>()?.BlocksPause == true) return false;
             previousTimeScale = Time.timeScale;
@@ -191,6 +221,7 @@ namespace TrickalFanGame.Frontend
             if (!IsPaused) return false;
             IsPaused = false;
             pendingRunAction = PendingRunAction.None;
+            if (settingsRoot != null) settingsRoot.SetActive(false);
             ApplyLeaveConfirmationVisibility(false);
             ApplyVisibility(false);
             if (graphicRaycaster != null) graphicRaycaster.enabled = false;
@@ -299,7 +330,7 @@ namespace TrickalFanGame.Frontend
 
         private bool ShowRunActionConfirmation(PendingRunAction action)
         {
-            if (!IsPaused || pendingRunAction != PendingRunAction.None || runSession == null ||
+            if (!IsPaused || IsSettingsOpen || pendingRunAction != PendingRunAction.None || runSession == null ||
                 runSession.HasEnded || action == PendingRunAction.None)
             {
                 return false;
@@ -336,11 +367,56 @@ namespace TrickalFanGame.Frontend
             Focus(resumeButton);
         }
 
-        private static void Focus(Button button)
+        private static void Focus(Selectable target)
         {
-            if (button == null || !button.interactable || EventSystem.current == null) return;
-            EventSystem.current.SetSelectedGameObject(button.gameObject);
+            if (target == null || !target.IsInteractable() || EventSystem.current == null) return;
+            EventSystem.current.SetSelectedGameObject(target.gameObject);
         }
+
+        public bool OpenSettings()
+        {
+            if (!IsPaused || IsSettingsOpen || pendingRunAction != PendingRunAction.None ||
+                settingsRoot == null || settingsView == null)
+            {
+                return false;
+            }
+
+            // FrontendSettingsView reloads LocalSettings and focuses its first slider in OnEnable.
+            settingsRoot.transform.SetAsLastSibling();
+            settingsRoot.SetActive(true);
+            return true;
+        }
+
+        public bool CloseSettings()
+        {
+            if (!IsSettingsOpen) return false;
+            settingsRoot.SetActive(false);
+            Focus(settingsButton);
+            return true;
+        }
+
+        private void BindSettings()
+        {
+            if (settingsButton != null)
+            {
+                settingsButton.onClick.RemoveListener(OnSettingsClicked);
+                settingsButton.onClick.AddListener(OnSettingsClicked);
+            }
+            if (settingsView != null)
+            {
+                settingsView.OnBackRequested -= OnSettingsBackRequested;
+                settingsView.OnBackRequested += OnSettingsBackRequested;
+            }
+        }
+
+        private void UnbindSettings()
+        {
+            if (settingsButton != null) settingsButton.onClick.RemoveListener(OnSettingsClicked);
+            if (settingsView != null) settingsView.OnBackRequested -= OnSettingsBackRequested;
+        }
+
+        private void OnSettingsClicked() => OpenSettings();
+        private void OnSettingsBackRequested() => CloseSettings();
 
         private void BindLeaveButtons()
         {

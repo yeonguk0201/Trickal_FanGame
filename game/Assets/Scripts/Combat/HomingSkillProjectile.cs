@@ -160,6 +160,7 @@ namespace TrickalFanGame.Combat
             }
 
             DestructibleObstacle.HitInCircle(transform.position, explosionRadius, hitObstacles);
+            TrickalFanGame.Enemy.BossSlimePuddle.HitInCircle(transform.position, explosionRadius);
             DestroyProjectile();
         }
 

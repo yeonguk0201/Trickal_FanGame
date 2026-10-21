@@ -13,9 +13,8 @@ namespace TrickalFanGame.Frontend
         public const string KindLabel = "교주의 권능";
         public const string EmptyText = "없음";
         public const string UsableText = "[" + PlayerPowerSlot.UseKeyLabel + "] 사용";
-        public const string ChargingText = "충전 중";
         public const string UnusableText = "[" + PlayerPowerSlot.UseKeyLabel + "] 사용 불가";
-        public const string AllFixedText = KindLabel + EmptyText + UsableText + ChargingText + UnusableText + "/0123456789";
+        public const string AllFixedText = KindLabel + EmptyText + UsableText + UnusableText + "/0123456789";
         // Power-2: the line a 3택1 card or a shop detail shows for a 권능 instead of artifact stacks.
         public const string OfferFixedText = "충전방 · [" + PlayerPowerSlot.UseKeyLabel + "] 사용 · 1개만 보유0123456789";
 
@@ -33,7 +32,7 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Text nameText;
         [SerializeField] private TMP_Text gaugeText;
         [SerializeField] private TMP_Text keyText;
-        // One cell per room to clear, left to right. Cells beyond the held 권능's requirement are hidden.
+        // One cell per room to clear, bottom to top (UX-1 vertical gauge). Cells beyond the held 권능's requirement are hidden.
         [SerializeField] private Image[] gaugeCells = System.Array.Empty<Image>();
 
         private bool subscribed;
@@ -104,9 +103,10 @@ namespace TrickalFanGame.Frontend
             }
             if (keyText != null)
             {
-                keyText.gameObject.SetActive(held != null);
+                // UX-1: while charging the gauge says it all, so the key line only shows once the gauge is full.
+                keyText.gameObject.SetActive(held != null && state != PowerSlotUseResult.NotCharged);
                 bool usable = state == PowerSlotUseResult.Used;
-                keyText.text = usable ? UsableText : state == PowerSlotUseResult.NotCharged ? ChargingText : UnusableText;
+                keyText.text = usable ? UsableText : UnusableText;
                 keyText.color = usable ? UsableKeyColor : UnusableKeyColor;
             }
         }

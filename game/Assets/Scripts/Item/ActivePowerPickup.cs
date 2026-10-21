@@ -7,9 +7,15 @@ namespace TrickalFanGame.Item
     // stored gauge and starts empty. A dropped 권능 ignores the player until they have stepped off it once.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider2D))]
-    public sealed class ActivePowerPickup : MonoBehaviour
+    public sealed class ActivePowerPickup : MonoBehaviour, IDescribedPickup
     {
-        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+        private void OnEnable()
+        {
+            TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+            DescribedPickupRegistry.Register(this);
+        }
+
+        private void OnDisable() => DescribedPickupRegistry.Unregister(this);
 
         public static readonly Color PowerColor = new(1f, 0.78f, 0.28f, 1f);
         public const int NoStoredCharge = -1;
@@ -28,6 +34,8 @@ namespace TrickalFanGame.Item
         private int lastPlayerContactStep;
 
         public ItemDefinition Definition => definition;
+        public Vector3 Position => transform.position;
+        public bool IsAvailable => !isCollected && definition != null;
         public string InstanceId => instanceId;
         public bool HasStoredCharge => storedCharge >= 0;
         public int StoredCharge => storedCharge;

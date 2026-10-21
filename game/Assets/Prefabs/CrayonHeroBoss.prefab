@@ -314,7 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damageTier: 2
+  damageTier: 0
   cooldown: 0.8
   halfHeartDamage: 0
 --- !u!114 &1230439742369051024
@@ -343,21 +343,21 @@ MonoBehaviour:
   summonsPerPattern: 4
   summonRadius: 2.5
   summonReactivationHealthFraction: 0.15
-  approachSpeed: 2.5
+  approachSpeed: 2.2
   phaseTwoSpeedMultiplier: 1.35
   swingRange: 2.4
-  swingWidth: 3.2
+  swingWidth: 3
   swingStartGap: 0.15
   swingWindup: 0.3
   swingInterval: 0.7
   swingDirectionLockDuration: 0.12
-  swingDamageTier: 2
-  swingRecognitionMultiplier: 1.625
+  swingDamageTier: 1
+  swingRecognitionMultiplier: 1.4
   dashSpeed: 15
   dashDuration: 0.17
   dashRetargetDuration: 0.1
   dashWidth: 1.8
-  dashDamageTier: 2
+  dashDamageTier: 0
   pressureActionsBeforeSlash: 3
   slashCooldownPhaseOne: 9
   slashCooldownGolden: 7.5
@@ -438,6 +438,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5fb0eb48f07b1e34f91adadfca9eaa49, type: 3}
   - {fileID: 21300000, guid: 02853204a17ac11468455902c6321ae2, type: 3}
   - {fileID: 21300000, guid: e86f25c3eabc45140ac8f164536136eb, type: 3}
+  summonFrames:
+  - {fileID: 21300000, guid: 058b5b1cf30f41b79210f0d15fa40d4d, type: 3}
+  - {fileID: 21300000, guid: 668dbeb89c9e4ace9e6ee8d76dc3b8e3, type: 3}
+  - {fileID: 21300000, guid: 92f4c203f7c9496985829a8111cb1731, type: 3}
+  - {fileID: 21300000, guid: 5b08b192709c46c5951c344bc9cdc131, type: 3}
+  goldenSummonFrames:
+  - {fileID: 21300000, guid: 869fabeddf204c70929677d674afe7ba, type: 3}
+  - {fileID: 21300000, guid: e6fff498b2184570b4120f433eb7cd7c, type: 3}
+  - {fileID: 21300000, guid: 71269bfe9be94cd9a7a5c2b9c46fb422, type: 3}
+  - {fileID: 21300000, guid: 654cb031fd8d424780111c1e59f4601c, type: 3}
   groundTreasures: []
   strideLength: 1.6
   hopHeight: 0.42

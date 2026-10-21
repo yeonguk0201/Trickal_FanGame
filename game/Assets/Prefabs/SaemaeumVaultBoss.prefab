@@ -200,12 +200,20 @@ MonoBehaviour:
     activeDuration: 1.8
     recoveryDuration: 1.05
     reuseCooldown: 5.5
+  - patternId: saemaeum-slime-scatter
+    execution: 12
+    telegraphDuration: 0.8
+    additionalTelegraphDuration: 0
+    activeDuration: 1.4
+    recoveryDuration: 0.8
+    reuseCooldown: 4.5
   encounterSeed: 1
   attackInterval: 1.2
   projectileSpeed: 4
   projectileDamageTier: 1
   phaseTransitionDuration: 1.1
   phaseTwoTempoMultiplier: 0.88
+  keepsOwnedObjectsOnDefeat: 0
 --- !u!114 &1920493134593096256
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -229,15 +237,32 @@ MonoBehaviour:
   phaseOneMaximumJumps: 5
   phaseTwoMinimumJumps: 4
   phaseTwoMaximumJumps: 6
-  phaseOneJumpDuration: 0.69
-  phaseTwoJumpDuration: 0.62
-  jumpDistance: 4.8
+  phaseOneJumpDuration: 0.76
+  phaseTwoJumpDuration: 0.72
+  phaseOneJumpRest: 0.2
+  phaseTwoJumpRest: 0.15
+  jumpDistance: 5.5
   jumpHeight: 2
   landingRadius: 2.875
   landingDamageTier: 1
   landingKnockbackSpeed: 7
   landingKnockbackDuration: 0.2
-  healPerUse: 150
+  phaseOneLargeSlimes: 1
+  phaseOneSmallSlimes: 4
+  phaseTwoLargeSlimes: 2
+  phaseTwoSmallSlimes: 5
+  slimePuddleRadius: 1.2
+  smallSlimePuddleRadius: 0.5
+  slimeSpeedMultiplier: 0.75
+  slimeRequiredHits: 3
+  maximumSlimePuddles: 14
+  slimeFlightDuration: 0.7
+  slimeLaunchStagger: 0.08
+  slimeArcHeight: 2.4
+  slimeScatterMinimumDistance: 1.6
+  slimeScatterMaximumDistance: 3.6
+  slimeMinimumSpacing: 1
+  healPerUse: 138
   healPulses: 4
   arenaPadding: 0.8
   fallbackHalfExtents: {x: 6.2, y: 5}
@@ -258,7 +283,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damageTier: 2
+  damageTier: 0
   cooldown: 0.8
   halfHeartDamage: 0
 --- !u!114 &6273290692546761168
@@ -289,7 +314,17 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 776fe82496ca449c8f52c2ce65e65559, type: 3}
   crayonAttackFrames: []
   goldenAttackFrames: []
+  goldenWalkFrames: []
   awakeningFrames: []
+  jumpCycleFrames:
+  - {fileID: 21300000, guid: 31f30daf84c54997995d2bb44eaa9fd7, type: 3}
+  - {fileID: 21300000, guid: bef7d77e33d34c3e8ba0b15d55b5444d, type: 3}
+  - {fileID: 21300000, guid: 7a34bca453274b4f8244c411c097d3f6, type: 3}
+  - {fileID: 21300000, guid: cbe95e725f684928bd92fa0f2de1b952, type: 3}
+  - {fileID: 21300000, guid: 30a2f1744c51452f955646aa2e6977f6, type: 3}
+  - {fileID: 21300000, guid: 604cb58d57e04fc5b482cfcfeb58a4f3, type: 3}
+  - {fileID: 21300000, guid: 0b5ad63c50114380929abc6fd0d62a65, type: 3}
+  - {fileID: 21300000, guid: 0303f6df84aa4fd1b83a7c7b243dd7e0, type: 3}
   groundTreasures:
   - {fileID: 4528997289046137425}
   - {fileID: 8512402935366631024}

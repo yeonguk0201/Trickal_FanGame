@@ -36,15 +36,18 @@ namespace TrickalFanGame.Editor
             int group = Undo.GetCurrentGroup();
             Undo.SetCurrentGroupName("Setup HUD-4A Minimap Foundation");
 
-            RectTransform panel = Rect(frame, MinimapPanelName, new Vector2(786, 396), new Vector2(220, 180));
+            RectTransform panel = Rect(frame, MinimapPanelName, Week27Ux1Setup.MinimapPosition,
+                Week27Ux1Setup.MinimapSize);
             Image panelImage = Component<Image>(panel.gameObject);
             panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
             panelImage.raycastTarget = false;
-            TMP_Text title = Text(panel, "Header", "MAP", new Vector2(0, 70), new Vector2(196, 24), 16, font);
+            TMP_Text title = Text(panel, "Header", "MAP", Week27Ux1Setup.MinimapHeaderPosition,
+                Week27Ux1Setup.MinimapHeaderSize, 16, font);
             title.alignment = TextAlignmentOptions.Left;
             title.fontStyle = FontStyles.Bold;
 
-            RectTransform mapRoot = Rect(panel, "Map", new Vector2(0, -10), new Vector2(144, 144));
+            RectTransform mapRoot = Rect(panel, "Map", Week27Ux1Setup.MinimapViewportPosition,
+                Week27Ux1Setup.MinimapViewportSize);
             mapRoot.SetAsFirstSibling();
 
             RectTransform connectionRect = Rect(mapRoot, "Connection Template", Vector2.zero, new Vector2(18, 4));

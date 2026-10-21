@@ -72,24 +72,7 @@ namespace TrickalFanGame.Frontend
             RectTransform markerRect = transform as RectTransform;
             if (markerRect == null) return;
 
-            Vector2 normalizedSize = Vector2.one;
-            if (profile != null && profile.MinimapSilhouette.Count >= 3)
-            {
-                Vector2 minimum = profile.MinimapSilhouette[0];
-                Vector2 maximum = minimum;
-                for (int index = 1; index < profile.MinimapSilhouette.Count; index++)
-                {
-                    minimum = Vector2.Min(minimum, profile.MinimapSilhouette[index]);
-                    maximum = Vector2.Max(maximum, profile.MinimapSilhouette[index]);
-                }
-
-                Vector2 silhouette = maximum - minimum;
-                normalizedSize = new Vector2(
-                    silhouette.x / RoomLayout.Width,
-                    silhouette.y / RoomLayout.Height);
-            }
-
-            SilhouetteSize = Vector2.Scale(new Vector2(30f, 30f), normalizedSize);
+            SilhouetteSize = MinimapRoomShape.From(profile).MarkerSize;
             markerRect.sizeDelta = SilhouetteSize;
         }
 

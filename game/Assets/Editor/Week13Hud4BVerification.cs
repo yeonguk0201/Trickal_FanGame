@@ -213,9 +213,14 @@ namespace TrickalFanGame.Editor
                 }
 
                 RectTransform rect = marker.GetComponent<RectTransform>();
+                // UX-1 keeps the real spacing and lets the mask cut off far rooms, so only the current room has
+                // to be inside the viewport there; the older shrink-to-fit map must fit the whole graph.
+                Vector2 offset = view.CentersOnCurrentRoom ? view.ContentTargetPosition : Vector2.zero;
+                if (view.CentersOnCurrentRoom && !marker.IsCurrent) continue;
                 Vector2 halfSize = rect.sizeDelta * rect.localScale.x * 0.5f;
-                Assert(Mathf.Abs(rect.anchoredPosition.x) + halfSize.x <= view.MapRoot.rect.width * 0.5f + 0.01f &&
-                    Mathf.Abs(rect.anchoredPosition.y) + halfSize.y <= view.MapRoot.rect.height * 0.5f + 0.01f,
+                Vector2 shown = rect.anchoredPosition + offset;
+                Assert(Mathf.Abs(shown.x) + halfSize.x <= view.MapRoot.rect.width * 0.5f + 0.01f &&
+                    Mathf.Abs(shown.y) + halfSize.y <= view.MapRoot.rect.height * 0.5f + 0.01f,
                     "HUD-4B explored graph must fit inside the minimap viewport.");
             }
         }

@@ -80,7 +80,8 @@ namespace TrickalFanGame.Editor
             if (frame == null) throw new InvalidOperationException("Game HUD ReferenceFrame is missing.");
             TMP_FontAsset font = RequireFont();
 
-            RectTransform panel = Rect(frame, HudPanelName, new Vector2(-776, 234), new Vector2(240, 216));
+            RectTransform panel = Rect(frame, HudPanelName, Week27Ux1Setup.DetailedStatsPosition,
+                new Vector2(240, 216));
             Image background = Component<Image>(panel.gameObject);
             background.color = new Color(0.025f, 0.04f, 0.06f, 0.08f);
             background.raycastTarget = false;

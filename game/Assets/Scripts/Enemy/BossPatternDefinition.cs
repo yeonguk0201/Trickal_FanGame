@@ -17,6 +17,7 @@ namespace TrickalFanGame.Enemy
         CrayonHeroSummonMinions,
         CrayonHeroApproachSwing,
         CrayonHeroDashChain,
+        SaemaeumSlimeScatter,
     }
 
     [Serializable]

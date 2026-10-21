@@ -15,6 +15,9 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private Sprite bodySprite;
         [SerializeField] private Sprite[] walkFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] hopFrames = Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] summonFrames = Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] goldenSummonFrames = Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] jumpCycleFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] healFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] crayonAttackFrames = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] goldenAttackFrames = Array.Empty<Sprite>();
@@ -68,6 +71,17 @@ namespace TrickalFanGame.Enemy
         {
             awakeningFrames = transition ?? Array.Empty<Sprite>();
         }
+        public void ConfigureSummoning(Sprite[] normal, Sprite[] golden)
+        {
+            summonFrames = normal ?? Array.Empty<Sprite>();
+            goldenSummonFrames = golden ?? Array.Empty<Sprite>();
+        }
+        public void ConfigureJumpCycle(Sprite[] frames) => jumpCycleFrames = frames ?? Array.Empty<Sprite>();
+        public int SummonFrameCount => summonFrames.Length;
+        public int GoldenSummonFrameCount => goldenSummonFrames.Length;
+        public Sprite GetSummonFrame(int i, bool golden) => golden ? goldenSummonFrames[i] : summonFrames[i];
+        public int JumpCycleFrameCount => jumpCycleFrames.Length;
+        public Sprite GetJumpCycleFrame(int i) => jumpCycleFrames[i];
         public int TreasureCount => groundTreasures.Length;
         public SpriteRenderer GetTreasure(int i) => groundTreasures[i];
         public bool IsAnimating => moving;
@@ -216,6 +230,15 @@ namespace TrickalFanGame.Enemy
                     return;
                 }
                 bool golden = boss.CurrentPhase >= 2 && knight != null && knight.AwakenedSprite != null;
+                Sprite[] summons = golden ? goldenSummonFrames : summonFrames;
+                if (knight != null && knight.SummonPoseIndex >= 0 && summons.Length == 4 &&
+                    !boss.IsActionSuppressed && boss.State != BossActionState.Defeated)
+                {
+                    if (Mathf.Abs(knight.LockedDirection.x) > 0.001f) source.flipX = knight.LockedDirection.x > 0f;
+                    artwork.flipX = source.flipX;
+                    artwork.sprite = summons[knight.SummonPoseIndex];
+                    return;
+                }
                 Sprite[] attacks = golden ? goldenAttackFrames : crayonAttackFrames;
                 if (knight != null && knight.AttackPoseIndex >= 0 && attacks.Length == 14 &&
                     attacks[knight.AttackPoseIndex] != null && !boss.IsActionSuppressed &&
@@ -244,6 +267,12 @@ namespace TrickalFanGame.Enemy
                 !boss.IsActionSuppressed && boss.State != BossActionState.PhaseTransition)
             {
                 artwork.sprite = healFrames[vault.HealPoseIndex];
+                return;
+            }
+            if (style == BossMovementStyle.VaultHop && vault != null && vault.JumpCycleFrameIndex >= 0 &&
+                jumpCycleFrames.Length == 8 && !boss.IsActionSuppressed)
+            {
+                artwork.sprite = jumpCycleFrames[vault.JumpCycleFrameIndex];
                 return;
             }
             if (hopFrames.Length == 4)

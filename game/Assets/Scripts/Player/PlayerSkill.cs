@@ -135,6 +135,15 @@ namespace TrickalFanGame.Player
             return true;
         }
 
+        // HUD only: how much of the current salvo is still to fire, 1 at the cast and 0 once the last shot is out.
+        public float GetFiringRemainingFraction(float currentTime)
+        {
+            if (!IsFiring) return 0f;
+            float duration = shotInterval * Mathf.Max(1, salvoProjectileCount - 1);
+            if (duration <= 0f) return 1f;
+            return Mathf.Clamp01((salvoStartTime + duration - currentTime) / duration);
+        }
+
         public void ApplyProgressionLevel(int level)
         {
             progressionLevel = SkillProgressionRules.ClampLevel(level);

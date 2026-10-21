@@ -23,6 +23,7 @@ namespace TrickalFanGame.Run
         [SerializeField] private PlayerInventory inventory;
         [SerializeField] private PlayerProgressClient playerProgressClient;
         [SerializeField] private GameRunResultTransition resultTransition;
+        [SerializeField] private GameOverSequence gameOverSequence;
 
         [Header("Run identity")]
         [SerializeField] private string userId = "00000000-0000-4000-8000-000000000001";
@@ -40,6 +41,7 @@ namespace TrickalFanGame.Run
         private bool shouldSaveResult = true;
         private bool isSaveInFlight;
         private bool canRetrySave;
+        private bool hasConfirmedGameOver;
         private string clientRunId;
         private CreateRunRequest pendingRequest;
         private IGameApiClient apiClient;
@@ -81,6 +83,7 @@ namespace TrickalFanGame.Run
         public string LastRunId => lastRunId;
         public RunProgress Progress => runProgress;
         public GameRunResultTransition ResultTransition => resultTransition;
+        public GameOverSequence GameOverSequence => gameOverSequence;
         public int RunSeed => runProgress != null && runProgress.HasRunSeed ? runProgress.RunSeed : 0;
 
         public void Configure(Health configuredPlayer, RunProgress configuredProgress, BossController configuredBoss)
@@ -114,6 +117,11 @@ namespace TrickalFanGame.Run
         public void ConfigureResultTransition(GameRunResultTransition configuredTransition)
         {
             resultTransition = configuredTransition;
+        }
+
+        public void ConfigureGameOverSequence(GameOverSequence configuredSequence)
+        {
+            gameOverSequence = configuredSequence;
         }
 
         public void SetApiClient(IGameApiClient configuredApiClient)
@@ -367,7 +375,29 @@ namespace TrickalFanGame.Run
                 return;
             }
 
-            statusMessage = isCleared ? "Run cleared. Saving result..." : "Run ended. Saving result...";
+            // UX-0: a death waits for the GAME OVER sequence and its confirm input before the result screen.
+            // The request is queued locally now, so quitting during the sequence still saves it once later.
+            if (!isCleared && gameOverSequence != null &&
+                gameOverSequence.TryBegin(playerHealth != null ? playerHealth.transform : null, OnGameOverConfirmed))
+            {
+                LocalPendingRunStorage.Save(pendingRequest);
+                statusMessage = "Run ended. GAME OVER.";
+                return;
+            }
+
+            OpenResult();
+        }
+
+        private void OnGameOverConfirmed()
+        {
+            if (hasConfirmedGameOver || pendingRequest == null) return;
+            hasConfirmedGameOver = true;
+            OpenResult();
+        }
+
+        private void OpenResult()
+        {
+            statusMessage = IsCleared ? "Run cleared. Saving result..." : "Run ended. Saving result...";
             if (resultTransition != null && resultTransition.TryTransition(
                     pendingRequest, playerProgressClient != null ? playerProgressClient.AppliedProgress : null,
                     GetValidApiClient()))

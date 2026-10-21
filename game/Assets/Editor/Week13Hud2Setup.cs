@@ -46,8 +46,9 @@ namespace TrickalFanGame.Editor
             panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
             panelImage.raycastTarget = false;
 
-            SkillVisual lower = ConfigureSkill(panel, "Lower Grade", new Vector2(-52, 14), "SPACE", font);
-            SkillVisual high = ConfigureSkill(panel, "High Grade", new Vector2(52, 14), "Q", font);
+            float iconX = Week27Ux1Setup.SkillIconSpacing * 0.5f;
+            SkillVisual lower = ConfigureSkill(panel, "Lower Grade", new Vector2(-iconX, 0), "SPACE", font);
+            SkillVisual high = ConfigureSkill(panel, "High Grade", new Vector2(iconX, 0), "Q", font);
             view.Configure(view.PlayerHealth, view.PlayerSP, lowerSkill, view.HpFill, view.HpValueText,
                 view.HealthFeedback, view.SpSlotsRoot, view.SpSlotTemplate, view.SpValueText, lower.State,
                 lower.Status);
@@ -64,29 +65,60 @@ namespace TrickalFanGame.Editor
             Debug.Log("Week 13 HUD-2 setup complete. Lower/high-grade readiness and high-grade cooldown are connected to the player.");
         }
 
+        // UX-1: both skills are the same rounded tile. The tile masks the artwork, the dark overlay and the key
+        // label, so the high grade portrait and the lower grade emblem read as the same size. No status words.
         private static SkillVisual ConfigureSkill(Transform parent, string name, Vector2 position, string key,
             TMP_FontAsset font)
         {
-            RectTransform root = Rect(parent, name, position, new Vector2(88, 108));
-            Image state = Component<Image>(Rect(root, "Icon", new Vector2(0, 12), new Vector2(72, 72)).gameObject);
-            state.color = new Color(0.25f, 0.3f, 0.36f, 0.7f);
-            state.raycastTarget = false;
+            float size = Week27Ux1Setup.SkillIconSize;
+            RectTransform root = Rect(parent, name, position, Vector2.one * size);
+            Transform status = root.Find("Status");
+            if (status != null) Undo.DestroyObjectImmediate(status.gameObject);
 
-            Image cooldown = Component<Image>(Rect(state.transform, "Cooldown", Vector2.zero, new Vector2(72, 72)).gameObject);
+            RectTransform tileRect = Rect(root, "Icon", Vector2.zero, Vector2.one * size);
+            Image tile = Component<Image>(tileRect.gameObject);
+            tile.sprite = Week13FrontendUiAssets.LoadOrCreateRoundedSquareSprite();
+            tile.type = Image.Type.Simple;
+            tile.preserveAspect = false;
+            tile.color = Week27Ux1Setup.SkillTileColor;
+            tile.raycastTarget = false;
+            Mask mask = Component<Mask>(tileRect.gameObject);
+            mask.showMaskGraphic = true;
+
+            Image art = Component<Image>(Rect(tileRect, "Art", Vector2.zero, Vector2.one * size).gameObject);
+            art.color = Color.white;
+            art.preserveAspect = true;
+            art.raycastTarget = false;
+            art.transform.SetSiblingIndex(0);
+
+            Image cooldown = Component<Image>(Rect(tileRect, "Cooldown", Vector2.zero, Vector2.one * size).gameObject);
+            // A Filled Image needs a sprite: without one Unity ignores the fill and draws the whole square, which
+            // kept both icons fully dark and hid the sweep.
+            cooldown.sprite = tile.sprite;
+            cooldown.preserveAspect = false;
             cooldown.type = Image.Type.Filled;
             cooldown.fillMethod = Image.FillMethod.Radial360;
             cooldown.fillOrigin = (int)Image.Origin360.Top;
+            // Filled counter-clockwise, the overlay's edge sweeps clockwise as the remaining time shrinks.
             cooldown.fillClockwise = false;
-            cooldown.color = new Color(0.02f, 0.03f, 0.06f, 0.78f);
+            cooldown.color = GameHudView.SkillOverlayColor;
             cooldown.raycastTarget = false;
+            cooldown.transform.SetSiblingIndex(1);
 
-            TMP_Text keyText = Text(state.transform, "Key", key, new Vector2(0, 22), new Vector2(68, 24), 16, font);
+            Image keyBacking = Component<Image>(Rect(tileRect, "Key Backing", new Vector2(0, -size * 0.5f + 12),
+                new Vector2(size, 24)).gameObject);
+            keyBacking.color = new Color(0f, 0f, 0f, 0.55f);
+            keyBacking.raycastTarget = false;
+            TMP_Text keyText = Text(tileRect, "Key", key, new Vector2(0, -size * 0.5f + 12), new Vector2(size - 8, 22),
+                16, font);
             keyText.fontStyle = FontStyles.Bold;
-            TMP_Text cooldownText = Text(state.transform, "Cooldown Value", string.Empty, Vector2.zero,
-                new Vector2(68, 34), 24, font);
+            TMP_Text cooldownText = Text(tileRect, "Cooldown Value", string.Empty, new Vector2(0, 6),
+                new Vector2(size - 8, 40), 34, font);
             cooldownText.fontStyle = FontStyles.Bold;
-            TMP_Text status = Text(root, "Status", "사용 불가", new Vector2(0, -42), new Vector2(96, 24), 16, font);
-            return new SkillVisual(state, cooldown, cooldownText, status);
+            keyBacking.transform.SetSiblingIndex(2);
+            keyText.transform.SetAsLastSibling();
+            cooldownText.transform.SetAsLastSibling();
+            return new SkillVisual(art, cooldown, cooldownText, null);
         }
 
         private static T FindSingle<T>(Scene scene, string label) where T : Component

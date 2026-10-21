@@ -6,9 +6,15 @@ namespace TrickalFanGame.Item
     // swaps, dropping the held item here. A dropped item ignores the player until they have stepped off it once.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider2D))]
-    public sealed class SingleUseItemPickup : MonoBehaviour
+    public sealed class SingleUseItemPickup : MonoBehaviour, IDescribedPickup
     {
-        private void OnEnable() => TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+        private void OnEnable()
+        {
+            TrickalFanGame.Frontend.GroundShadow.AttachDuringPlay(gameObject);
+            DescribedPickupRegistry.Register(this);
+        }
+
+        private void OnDisable() => DescribedPickupRegistry.Unregister(this);
 
         public static readonly Color SpellColor = new(0.42f, 0.78f, 1f, 1f);
         public static readonly Color JjangsemSpellColor = new(0.86f, 0.5f, 1f, 1f);
@@ -26,6 +32,8 @@ namespace TrickalFanGame.Item
         private int lastPlayerContactStep;
 
         public ItemDefinition Definition => definition;
+        public Vector3 Position => transform.position;
+        public bool IsAvailable => !isCollected && definition != null;
         public string InstanceId => instanceId;
         public SpriteRenderer Display => display;
         public bool WaitsForPlayerExit => waitsForPlayerExit;

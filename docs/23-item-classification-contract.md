@@ -269,6 +269,8 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 - `RunResourceType.Elif = 0`을 **`Gold = 0`으로 식별자만 바꾼다.** 값 0의 의미 "Run 한정 화폐"는 유지하므로
   픽업 Prefab의 직렬화 값과 GUID가 바뀌지 않는다.
 - 영구 엘리프 픽업이 필요해지면 다음 달에 새 값(`Elif = 3` 등)을 **뒤에 추가**한다. 값 0을 엘리프로 되돌리지 않는다.
+  Elif-0(2026-10-21)에서 `Elif = 3`, 새 Prefab `PermanentElifPickup.prefab`, 드롭 ID `permanent-elif`로 정했다
+  ([27번 §6.3](./27-permanent-elif-contract.md)).
 - `RunResourceType`을 문자열로 저장하는 코드는 없다(2026-10-02 확인). 표시 문자열(HUD, 상점 `NotEnoughElif` 프롬프트,
   개발 패널, 아이템 테스트 씬, 검증기 로그)은 Gold-0에서 "골드"/`GOLD`로 함께 바꾼다.
 - `ShopPurchaseResult.NotEnoughElif` 같은 보조 식별자는 Gold-0에서 `NotEnoughGold`로 바꾼다. 직렬화되지 않는 값이다.

@@ -25,9 +25,12 @@ namespace TrickalFanGame.Editor
         public const string HudPanelName = "Power Slot HUD";
         public const float PickupWorldDiameter = 0.5f;
         public const int MaximumGaugeCells = 5;
-        // Above the Slot-0 spell slot (480, -430, 220 x 112). Final placement belongs to UX-1.
-        public static readonly Vector2 HudPosition = new(480, -300);
-        public static readonly Vector2 HudSize = new(220, 132);
+        // UX-1 vertical gauge: cell 1 is the bottom one.
+        public static readonly Vector2 GaugeColumnPosition = new(-82, 8);
+        public const float GaugeCellStep = 26f;
+        // UX-1: top left, beside the hearts, with a vertical gauge.
+        public static Vector2 HudPosition => Week27Ux1Setup.PowerPosition;
+        public static Vector2 HudSize => Week27Ux1Setup.PowerSize;
         // Contract 23 §9.1: every 권능 is Rare until Balance-0.
         public const ItemRarity PowerRarity = ItemRarity.Rare;
 
@@ -194,39 +197,39 @@ namespace TrickalFanGame.Editor
                 throw new InvalidOperationException("Game Scene save failed during Power-1 setup.");
         }
 
-        private static void BuildHud(RectTransform frame, PlayerPowerSlot slot, TMP_FontAsset font)
+        internal static void BuildHud(RectTransform frame, PlayerPowerSlot slot, TMP_FontAsset font)
         {
             RectTransform panel = Rect(frame, HudPanelName, HudPosition, HudSize);
             Image panelImage = Component<Image>(panel.gameObject);
             panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
             panelImage.raycastTarget = false;
 
-            Image icon = Component<Image>(Rect(panel, "Icon", new Vector2(-74, 20), new Vector2(56, 56)).gameObject);
+            // UX-1: the gauge is a column on the left that fills from the bottom; icon, name and key to its right.
+            Image icon = Component<Image>(Rect(panel, "Icon", new Vector2(22, 16), new Vector2(72, 72)).gameObject);
             icon.raycastTarget = false;
-            TMP_Text kind = Text(panel, "Kind", GamePowerHudView.KindLabel, new Vector2(30, 44), new Vector2(140, 24),
+            TMP_Text kind = Text(panel, "Kind", GamePowerHudView.KindLabel, new Vector2(22, 66), new Vector2(150, 22),
                 16, font);
             kind.color = new Color(1f, 0.86f, 0.5f, 1f);
-            TMP_Text itemName = Text(panel, "Name", GamePowerHudView.EmptyText, new Vector2(30, 18),
-                new Vector2(140, 30), 22, font);
+            TMP_Text itemName = Text(panel, "Name", GamePowerHudView.EmptyText, new Vector2(22, -40),
+                new Vector2(150, 28), 20, font);
             itemName.fontStyle = FontStyles.Bold;
             itemName.overflowMode = TextOverflowModes.Ellipsis;
 
-            RectTransform gauge = Rect(panel, "Gauge", new Vector2(-14, -20), new Vector2(150, 18));
+            RectTransform gauge = Rect(panel, "Gauge", GaugeColumnPosition, new Vector2(30, 128));
             Image[] cells = new Image[MaximumGaugeCells];
-            const float cellWidth = 26f;
-            const float spacing = 4f;
-            float firstX = -(MaximumGaugeCells - 1) * (cellWidth + spacing) * 0.5f;
+            float firstY = -(MaximumGaugeCells - 1) * GaugeCellStep * 0.5f;
             for (int index = 0; index < MaximumGaugeCells; index++)
             {
                 cells[index] = Component<Image>(Rect(gauge, $"Cell {index + 1}",
-                    new Vector2(firstX + index * (cellWidth + spacing), 0), new Vector2(cellWidth, 14)).gameObject);
+                    new Vector2(0, firstY + index * GaugeCellStep), new Vector2(26, 22)).gameObject);
                 cells[index].raycastTarget = false;
                 cells[index].color = GamePowerHudView.EmptyCellColor;
             }
 
-            TMP_Text gaugeText = Text(panel, "Gauge Count", "0/0", new Vector2(84, -20), new Vector2(48, 24), 16, font);
-            TMP_Text key = Text(panel, "Use Key", GamePowerHudView.UsableText, new Vector2(0, -48),
-                new Vector2(200, 26), 18, font);
+            TMP_Text gaugeText = Text(panel, "Gauge Count", "0/0", new Vector2(GaugeColumnPosition.x, -70),
+                new Vector2(52, 22), 16, font);
+            TMP_Text key = Text(panel, "Use Key", GamePowerHudView.UsableText, new Vector2(22, -66),
+                new Vector2(150, 24), 16, font);
 
             GamePowerHudView view = Component<GamePowerHudView>(panel.gameObject);
             view.Configure(slot, icon, itemName, gaugeText, key, cells);

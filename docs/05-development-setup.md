@@ -1305,6 +1305,43 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   수동 확인: Game Scene Play → 방에 들어서자마자 전투가 시작되는지, 부스러기 보스 패턴이 벽 안쪽에서만 나오는지,
   basic-diamond-cover에서 벽에 붙은 장애물이 어색하지 않은지 본다. 사용자 Play 확인 완료(2026-10-20).
 
+- UX-0 인게임 설정과 사망 종료 연출: 메뉴 `Trickal Fan Game > Week 25 > Setup UX-0 In-game Settings and Game Over`가
+  Game Scene 일시정지 메뉴 버튼을 `게임으로 돌아가기 · 설정 · 처음부터 다시하기 · 홈으로 나가기` 순서로 배치하고, Frontend
+  Scene의 설정 패널을 그대로 복사해 일시정지 오버레이 위 `In-Game Settings` 층에 둔다(같은 `FrontendSettingsView`·같은
+  `LocalSettings`). 다시 실행하면 복사본을 지우고 새로 복사하므로 Frontend 설정 패널을 바꾼 뒤에도 재실행으로 맞출 수 있다.
+  같은 Setup이 `Game Over Canvas`(정렬 60, HUD 위)와 `GameOverSequence`를 만들고 `RunSession`에 연결한다. 사망하면
+  쓰러짐(임시: 캐릭터가 옆으로 넘어짐, `fallDuration` 0.6초) → 5초 대기(`holdAfterFall`) → 플레이어 중심 원형 페이드
+  아웃(`irisDuration` 1.2초) → `GAME OVER` → `결과 보기` 입력 → 결과 화면 순서로 진행하며, 시간만으로는 결과 화면으로
+  넘어가지 않는다. 사망 순간 결과 요청을 로컬 대기열에 넣어 연출 중 종료해도 같은 `clientRunId`로 한 번만 저장된다. 연출 중
+  보스는 멈추고 일시정지는 열리지 않는다. 쓰러짐 원화가 생기면 `GameOverSequence.ApplyFall`의 임시 회전을 그 연출로 바꾸고
+  `fallDuration`을 원화 길이에 맞춘다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 25 > Verify UX-0 In-game Settings and Game Over`, 배치는 Unity `-batchmode -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Ux0Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  Setup 2회 중복 없음·Scene GUID 보존, Frontend와 같은 설정 컨트롤 목록·글꼴, 버튼 순서·겹침·내비게이션, 설정을 연 동안
+  일시정지 유지와 Run 행동 차단, 닫기·재개 복귀, GAME OVER 캔버스 순서·전체 화면·숨김 시작, 쓰러짐→5초 대기→원형 페이드가
+  줄어들기만 하며 완전히 닫힘→확인 입력 표시, 600초가 지나도 자동 전환 없음, 확인 1회만 결과 전환을 검사한다. 회귀는
+  `VerifyWithRegressionsBatch`(HUD-7C·7D, Flow-5의 `Verify`)이고, 실제 사망→GAME OVER 확인→결과 화면 저장 1회는
+  `Week13Flow5PlayVerification.RunBatch`가 확인한다. 2026-10-21 `SetupAndVerifyBatch`·`VerifyWithRegressionsBatch`와 Flow-5
+  Play 배치가 종료 코드 0으로 통과했다.
+  수동 확인: Game Scene Play → `Esc` → `설정`에서 음량·해상도·전체 화면·상세 스탯을 바꾸고 `뒤로`·`Esc`로 일시정지 메뉴에
+  돌아오는지, 해상도를 바꾼 뒤에도 키보드 포커스가 설정 패널 안에 남는지, 개발 패널(`F1`) `— Room —`의 `Die (GAME OVER sequence)`나 적에게 사망한 뒤 쓰러짐→
+  약 5초→원형 페이드→`GAME OVER`→`결과 보기`(Enter·클릭)→결과 화면이 이어지는지 1920×1080·1280×720에서 본다. 사용자 Play 확인 완료(2026-10-21).
+
+- UX-1 HUD 재배치·미니맵·획득 전 설명: 메뉴 `Trickal Fan Game > Week 27 > Setup UX-1 Right HUD, Minimap and Pickup
+  Description`이 HUD-1·HUD-2 Setup을 먼저 다시 돌린 뒤 좌상단(교주의 권능 → 체력·SP → 그 아래 골드·열쇠·폭탄), 상세 스탯
+  위치, 우측 열(미니맵 → 아티팩트), 미니맵 마스크·`Content`, 근접 설명 패널(`Pickup Description`)을 구성한다. 위치 상수는
+  `Week27Ux1Setup` 한 곳에 있고 HUD-1·HUD-2·HUD-3A·HUD-4A·Setting-1C·Power-1 Setup도 이 값을 쓴다. 스킬 아이콘 타일
+  마스크는 `Assets/Art/UI/HudRoundedSquare.png`(`Week13FrontendUiAssets.LoadOrCreateRoundedSquareSprite`)다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 27 > Verify UX-1 Right HUD, Minimap and Pickup Description`, 배치는
+  `-executeMethod TrickalFanGame.Editor.Week27Ux1Verification.SetupAndVerifyBatch`다. HUD 패널이 1920×1080·1280×720에서
+  화면 안에 있고 서로 겹치지 않는지, 자원 두 자리 표시와 99 상한, 미니맵 실제 간격·현재 방 중앙·방 이동 시 미끄러짐,
+  가장 가까운 후보만 설명·획득/이탈/일시정지 시 숨김을 검사한다. 회귀는 `VerifyWithRegressionsBatch`(HUD-1·2·3A·4A·4B,
+  Setting-1C, Slot-0, Power-1, Spell-6)이고 HUD-2 검증은 스킬 덮개가 채움 비율만큼만 그려지는지 메시 면적으로 확인한다.
+  2026-10-21 회귀 묶음이 종료 코드 0으로 통과했고 사용자 Play 확인을 마쳤다.
+  수동 확인: Game Scene Play → `F1` → `— Resources —`의 `+10 Gold/Key/Bomb`, `— Artifact —`·`— Spell slot —`·
+  `— Power (R) —`의 `Drop`으로 떨군 아이템에 다가가 설명 표시·전환·숨김, SP 유무에 따른 저학년 덮개, `Q` 뒤 고학년 쿨타임
+  덮개 회전, 방 이동 시 미니맵 이동을 본다.
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,
@@ -1839,6 +1876,19 @@ Resources 원화를 런타임에 불러오므로 Scene/Prefab Setup 재실행 �
 - 자동 검사: `Trickal Fan Game > Effects > Verify Reviewed Effects With Combat Regressions`.
 - 배치: `TrickalFanGame.Editor.ReviewedCombatEffectsVerification.VerifyWithRegressionsBatch`.
 
+### 날먹보호막 방어막 버블
+
+2026-10-20: `PlayerPowerEffects`가 날먹보호막으로 얻은 방어막 몫을 따라가며 플레이어 그림 위(정렬 +2)에 `ShieldBubble`을
+그린다. 셰이더 `Resources/CombatEffects/ShieldBubble.shader` 하나로 막·가장자리·하이라이트·피격 파문·터짐을 그린다.
+0.25초 동안 부풀어 나타나고, 피격 시 0.45초 파문, 남은 몫이 1칸 이하면 초당 3.5회 점멸, 0이 되면 0.35초 동안 터진다. 2026-10-20 사용자 Play 확인 후 수용.
+
+- Edit Mode 미리보기: `Trickal Fan Game > Effects > Preview Shield Bubble` → `Open / reset Scene preview`.
+  방어막 칸 수·피격 간격, 바닥 배경/막/가장자리/하이라이트/파문 레이어, 시간 슬라이더, 재생 속도를 조절한다.
+- 단독 검사: `Trickal Fan Game > Effects > Verify Shield Bubble`(`ShieldBubbleVerification.Verify`).
+- 회귀: `ShieldBubbleVerification.VerifyWithRegressionsBatch`(Power-1 권능 규칙, 개발 패널 포함).
+- Play 확인: `F1 > — Power (R) — > Drop 날먹보호막 (4)` 획득 → `Fill gauge` → `R`. 패널의 `Freeloader shield` 줄과
+  `Hit 1 heart (shield bubble)` 버튼으로 파문·점멸·터짐을 본다.
+
 ### 광기의 가면 피해 오라 표시
 
 2026-10-20: `PlayerDamageAura`가 플레이어 아래 바닥(정렬 -55, 그림자 아래)에 `DamageAuraField`를 그린다.
@@ -2212,3 +2262,9 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 단독 검증: `Trickal Fan Game/Artwork/Verify Common Ground Shadows`. 렌더 포함 배치: `TrickalFanGame.Editor.GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` (`-batchmode -quit`, 그래픽 필요). 함정별 연결·주기 가시 기준점·피해 영역과 Collider 보존·중복 방지·비활성화를 검사한다. Unity 6000.3.22f1 종료 코드 0 및 88종 렌더 성공, 함정 7종의 28개 PNG 레이어와 비어 있지 않은 그림자를 확인했다 (`output/ground-shadow-traps.log`). 실제 Play 미술 검수와 사용자별 수치 확정은 남아 있다.
 
 - 함정 후속 사용자 검수: 82~88번의 너비·두께·X/Y 위치·진하기를 전달값으로 확정해 `GroundShadowProfiles.json`에 반영했다. 기존 다른 프로필은 유지했다. `GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` 성공 종료 코드 0 (`output/ground-shadow-traps-reviewed.log`), 주기 가시 기준점·충돌 보존과 88종 재렌더를 확인했고 함정 7종의 실제 출력 35필드 일치를 비교했다. 페이지 기본값과 `traps-overview.png`도 갱신했다. 실제 Play 미술 검수는 사용자가 수동 확인을 마쳤다(2026-10-20).
+
+### 보스 소환·점프 모션 검증 (2026-10-21)
+
+- Edit Mode 메뉴: `Trickal Fan Game > Artwork > Verify Boss Summon And Jump Animations`.
+- 배치: `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.BossSummonJumpAnimationVerification.Verify -logFile <로그 경로>`. 구성 재실행 없이 저장된 Prefab의 일반·황금 소환 4포즈, 새마음금고 공격 점프 8포즈, 실제 패턴 이벤트와 취소 복원을 검사한다.
+- 실제 화면: `Trickal Fan Game > Debug > Open Boss Test Room`에서 Play 후 보스를 선택한다. 크레용사용 일반·황금 소환의 지시·회수와 좌우 방향, 새마음금고 점프 준비·정점·착지·복귀의 발 기준선을 확인한다. 일반 이동의 4포즈는 기존 설정을 사용한다.

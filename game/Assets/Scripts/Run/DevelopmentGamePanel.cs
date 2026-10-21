@@ -319,8 +319,18 @@ namespace TrickalFanGame.Run
                                     ? $"Star DMG +{effects.BlastDamageBonus:P0} {effects.BlastRemainingSeconds:F1}s  "
                                     : string.Empty) +
                                 (effects.IsBlanketActive ? $"Blanket {effects.BlanketRemainingSeconds:F1}s  " : string.Empty) +
-                                (effects.IsOverdriveActive ? $"Overdrive {effects.OverdriveRemainingSeconds:F1}s" : string.Empty);
+                                (effects.IsOverdriveActive ? $"Overdrive {effects.OverdriveRemainingSeconds:F1}s  " : string.Empty) +
+                                (effects.IsFreeloaderShieldActive
+                                    ? $"Freeloader shield {effects.FreeloaderShieldRemaining:0.#}/{effects.FreeloaderShieldGranted:0.#}" +
+                                      (effects.IsFreeloaderShieldLow ? " (blinking)" : string.Empty)
+                                    : string.Empty);
                 if (active.Length > 0) GUILayout.Label(active);
+                // A one-heart hit through the normal damage path: ripples, then blinks and pops the shield bubble.
+                Health health = slot.GetComponent<Health>();
+                if (effects.IsFreeloaderShieldActive && health != null &&
+                    AssistedButton(health.IsInvulnerable ? "Hit 1 heart (wait: invulnerable)" : "Hit 1 heart (shield bubble)") &&
+                    !health.IsInvulnerable)
+                    health.TakeDamage(new DamageContext(null, DamageSourceType.EnemyContact, HealthUnits.UnitsPerHeart));
             }
 
             GUILayout.BeginHorizontal();
@@ -672,6 +682,16 @@ namespace TrickalFanGame.Run
             RoomController controller = room?.Controller;
             if (AssistedButton("Kill current wave") && controller != null)
                 status = $"Killed {controller.KillAliveEnemiesForDevelopment()} enemies.";
+            // UX-0: dies through the normal damage path to watch the fall → GAME OVER → result sequence.
+            Health playerHealth = assembler.Graph?.Player != null ? assembler.Graph.Player.GetComponent<Health>() : null;
+            if (playerHealth != null && !playerHealth.IsDead && AssistedButton("Die (GAME OVER sequence)"))
+            {
+                playerHealth.TakeDamage(new DamageContext(null, DamageSourceType.Unknown,
+                    playerHealth.MaxHealth + playerHealth.CurrentShield + 9999f));
+                status = playerHealth.IsDead
+                    ? "Player died. GAME OVER sequence started."
+                    : "The hit was blocked (invulnerable or a death ward). Try again.";
+            }
 
             // Enemy-7: this room's Encounter, and a 쫄따구 to kill without reaching 부스러기 (assisted Run). It is
             // an extra enemy of the room, so it never locks a cleared room.

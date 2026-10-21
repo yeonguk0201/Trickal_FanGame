@@ -76,7 +76,7 @@ namespace TrickalFanGame.Editor
                 body.constraints = RigidbodyConstraints2D.FreezeRotation;
                 ContactDamage contact = contents.GetComponent<ContactDamage>();
                 if (contact == null) contact = contents.AddComponent<ContactDamage>();
-                contact.Configure(EnemyDamageTier.Heavy, 0.8f);
+                contact.Configure(EnemyDamageTier.Light, 0.8f);
 
                 SetFloat(contents.GetComponent<Health>(), "maxHealth", 1100f);
                 BossController boss = contents.GetComponent<BossController>();
@@ -104,8 +104,9 @@ namespace TrickalFanGame.Editor
                     Load<GameObject>(AxePrefabPath),
                     Load<GameObject>(ShieldPrefabPath),
                 }, 4, 2.5f, 0.15f);
-                runtime.ConfigureSwing(2.5f, 1.35f, 2.4f, 3.2f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Heavy);
-                runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, EnemyDamageTier.Heavy);
+                runtime.ConfigureSwing(2.2f, 1.35f, 2.4f, 3f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Medium);
+                runtime.ConfigureSwingRecognition(1.4f);
+                runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, EnemyDamageTier.Light);
                 runtime.ConfigureSelection(3, 9f, 7.5f, 45, 30, 10, 15);
 
                 if (PrefabUtility.SaveAsPrefabAsset(contents, BossPrefabPath) == null)

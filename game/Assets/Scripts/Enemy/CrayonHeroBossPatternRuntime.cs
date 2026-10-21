@@ -26,23 +26,23 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Range(0.01f, 1f)] private float summonReactivationHealthFraction = 0.15f;
 
         [Header("Approach swing")]
-        [SerializeField, Min(0f)] private float approachSpeed = 2.5f;
+        [SerializeField, Min(0f)] private float approachSpeed = 2.2f;
         [SerializeField, Min(1f)] private float phaseTwoSpeedMultiplier = 1.35f;
         [SerializeField, Min(0.1f)] private float swingRange = 2.28f;
-        [SerializeField, Min(0.1f)] private float swingWidth = 3.2f;
+        [SerializeField, Min(0.1f)] private float swingWidth = 3f;
         [SerializeField, Min(0f)] private float swingStartGap = 0.15f;
         [SerializeField, Min(0.05f)] private float swingWindup = 0.3f;
         [SerializeField, Min(0.05f)] private float swingInterval = 0.7f;
         [SerializeField, Min(0.01f)] private float swingDirectionLockDuration = 0.12f;
-        [SerializeField] private EnemyDamageTier swingDamageTier = EnemyDamageTier.Heavy;
-        [SerializeField, Min(1f)] private float swingRecognitionMultiplier = 1.625f;
+        [SerializeField] private EnemyDamageTier swingDamageTier = EnemyDamageTier.Medium;
+        [SerializeField, Min(1f)] private float swingRecognitionMultiplier = 1.4f;
 
         [Header("Dash chain")]
         [SerializeField, Min(0.1f)] private float dashSpeed = 15f;
         [SerializeField, Min(0.01f)] private float dashDuration = 0.17f;
         [SerializeField, Min(0.01f)] private float dashRetargetDuration = 0.1f;
         [SerializeField, Min(0.1f)] private float dashWidth = 1.8f;
-        [SerializeField] private EnemyDamageTier dashDamageTier = EnemyDamageTier.Heavy;
+        [SerializeField] private EnemyDamageTier dashDamageTier = EnemyDamageTier.Light;
 
         [Header("Pattern selection")]
         [SerializeField, Min(1)] private int pressureActionsBeforeSlash = 3;
@@ -105,6 +105,9 @@ namespace TrickalFanGame.Enemy
         private GameObject recognitionDebugObject;
         private LineRenderer recognitionDebugLine;
         private int attackPoseIndex = -1;
+        private int summonPoseIndex = -1;
+        private float summonStartedAt, summonTelegraphEndsAt;
+        public int SummonPoseIndex => summonPoseIndex;
         private float attackFollowThroughStartedAt = float.NegativeInfinity;
         private float chargeStartedAt;
         private float chargeImpactAt;
@@ -127,6 +130,7 @@ namespace TrickalFanGame.Enemy
         private void ResetAttackArtwork()
         {
             attackPoseIndex = -1;
+            summonPoseIndex = -1;
             attackFollowThroughStartedAt = float.NegativeInfinity;
             chargingSlash = false;
         }
@@ -152,6 +156,7 @@ namespace TrickalFanGame.Enemy
         public float SwingStartOffset => ResolveBodyRadius() + swingStartGap;
         public float SwingAttackReach => SwingStartOffset + swingRange;
         public float SwingTriggerRange => SwingAttackReach * swingRecognitionMultiplier;
+        public float SwingRecognitionMultiplier => swingRecognitionMultiplier;
         public float SwingWindup => swingWindup;
         public float SwingInterval => swingInterval;
         public float SwingDirectionLockDuration => swingDirectionLockDuration;
@@ -241,6 +246,10 @@ namespace TrickalFanGame.Enemy
             dashWidth = Mathf.Max(0.1f, width);
             dashDamageTier = damageTier;
         }
+
+        // How far beyond its real reach the boss starts a swing (1 = only when the player is already inside).
+        public void ConfigureSwingRecognition(float multiplier) =>
+            swingRecognitionMultiplier = Mathf.Max(1f, multiplier);
 
         public void ConfigureSelection(int pressureBeforeSlash, float phaseOneCooldown, float goldenCooldown,
             int swingWeight, int dashWeight, int summonWeight, int slashWeight)
@@ -332,6 +341,10 @@ namespace TrickalFanGame.Enemy
                 else if (execution == BossPatternExecution.CrayonHeroSummonMinions)
                 {
                     StopMovement();
+                    UpdateAimDirection();
+                    summonStartedAt = lastTickTime;
+                    summonTelegraphEndsAt = stateEndsAt;
+                    summonPoseIndex = 0;
                     ShowSummonTelegraph();
                 }
                 else if (execution == BossPatternExecution.CrayonHeroDashChain)
@@ -347,6 +360,7 @@ namespace TrickalFanGame.Enemy
             if (state == BossActionState.Recovery)
             {
                 chargingSlash = false;
+                summonPoseIndex = execution == BossPatternExecution.CrayonHeroSummonMinions ? 3 : -1;
                 attackPoseIndex = execution == BossPatternExecution.CrayonHeroMapSlash ? 11 : -1;
                 attackFollowThroughStartedAt = lastTickTime;
                 ClearTelegraph();
@@ -404,6 +418,7 @@ namespace TrickalFanGame.Enemy
                 case BossPatternExecution.CrayonHeroSummonMinions:
                     if (!summonAvailable) return false;
                     ClearTelegraph();
+                    summonPoseIndex = 2;
                     SummonMinions();
                     summonAvailable = false;
                     healthAtLastSummon = health != null ? health.CurrentHealth : 0f;
@@ -434,6 +449,8 @@ namespace TrickalFanGame.Enemy
             if (state == BossActionState.Telegraph)
             {
                 UpdateChargeArtwork();
+                if (execution == BossPatternExecution.CrayonHeroSummonMinions)
+                    summonPoseIndex = (now - summonStartedAt) / Mathf.Max(0.001f, summonTelegraphEndsAt - summonStartedAt) < 0.35f ? 0 : 1;
                 if (execution == BossPatternExecution.CrayonHeroMapSlash)
                 {
                     UpdateAimDirection();
@@ -470,7 +487,11 @@ namespace TrickalFanGame.Enemy
 
             if (state == BossActionState.Recovery)
             {
-                if (now - attackFollowThroughStartedAt >= 0.2f) attackPoseIndex = -1;
+                if (now - attackFollowThroughStartedAt >= 0.2f)
+                {
+                    attackPoseIndex = -1;
+                    summonPoseIndex = -1;
+                }
                 if (execution == BossPatternExecution.CrayonHeroApproachSwing)
                     MoveTowardTarget(deltaTime, 1f);
                 return;

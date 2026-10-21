@@ -1,0 +1,27 @@
+fileFormatVersion: 2
+guid: 604cb58d57e04fc5b482cfcfeb58a4f3
+TextureImporter:
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    enableMipMap: 0
+  isReadable: 0
+  textureType: 8
+  spriteMode: 1
+  spritePixelsToUnits: 400
+  spriteAlignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  alphaIsTransparency: 1
+  maxTextureSize: 2048
+  nPOTScale: 0
+  textureCompression: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites: []
+    outline: []
+    physicsShape: []
+    spriteID: 5a10eecc5e9a46b88b861d36a2b3cedc
+    internalID: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

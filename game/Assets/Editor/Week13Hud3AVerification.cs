@@ -63,7 +63,7 @@ namespace TrickalFanGame.Editor
                 grid.constraint == GridLayoutGroup.Constraint.FixedColumnCount && grid.constraintCount == 5,
                 "HUD-3A slots must use the specified five-column, two-row layout.");
             RectTransform panel = view.GetComponent<RectTransform>();
-            Assert(panel.sizeDelta == new Vector2(288, 112) && panel.anchoredPosition == new Vector2(-752, -430),
+            Assert(panel.sizeDelta == Week27Ux1Setup.ArtifactSize && panel.anchoredPosition == Week27Ux1Setup.ArtifactPosition,
                 "Artifact HUD must occupy the specified bottom-left 288x112 region.");
             Assert(!view.GetComponentsInChildren<Graphic>(true).Any(graphic => graphic.raycastTarget),
                 "HUD-3A graphics must not intercept combat input.");

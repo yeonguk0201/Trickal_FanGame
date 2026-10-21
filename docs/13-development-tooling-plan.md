@@ -666,6 +666,12 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 - 런타임 `SlamLightEffect` 경로 계산과 `LayeredSlamEffect.CreatePreview`를 사용한다. 검사는 `ReviewedCombatEffectsVerification`의 v22 낙하 섬광 항목.
 - 사용자 수동 확인 후 효과 수용(2026-10-20). 실행 방법은 [개발 환경](05-development-setup.md), 근거는 [효과 기록](art-prompts/crayon-hero-slam-v15.md)에 기록한다.
 
+### 날먹보호막 방어막 버블 미리보기 (2026-10-20)
+
+- 구현: `ShieldBubblePreview` 임시 Scene 미리보기(방어막 칸 수·피격 간격, 바닥 배경과 레이어별 표시, 시간·재생·속도).
+- 구현: `ShieldBubbleVerification` 크기·중심·정렬, 등장·점멸·파문·터짐 시간, 권능 몫 추적, 사망 시 숨김, Random 미소비 검사. 단독 배치 통과.
+- Play 미술 검수는 사용자 확인으로 수용(2026-10-20). 미리보기 창 조작 확인은 대기. 실행 방법은 [개발 환경](05-development-setup.md)의 날먹보호막 항목.
+
 ### 광기의 가면 피해 오라 미리보기 (2026-10-20)
 
 - 구현: `DamageAuraFieldPreview` 임시 Scene 미리보기(반경·스택·틱 간격, 바닥 배경과 레이어별 표시, 시간·재생·속도).

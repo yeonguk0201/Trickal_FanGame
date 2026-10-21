@@ -36,7 +36,8 @@ namespace TrickalFanGame.Editor
             int group = Undo.GetCurrentGroup();
             Undo.SetCurrentGroupName("Setup HUD-3A Artifact List");
 
-            RectTransform panel = Rect(frame, ArtifactPanelName, new Vector2(-752, -430), new Vector2(288, 112));
+            RectTransform panel = Rect(frame, ArtifactPanelName,
+                Week27Ux1Setup.ArtifactPosition, Week27Ux1Setup.ArtifactSize); // UX-1 moved it under the minimap.
             Image panelImage = Component<Image>(panel.gameObject);
             panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
             panelImage.raycastTarget = false;

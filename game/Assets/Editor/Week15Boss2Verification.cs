@@ -21,8 +21,10 @@ namespace TrickalFanGame.Editor
             ValidateApproachFanVolleys();
             ValidateUnlimitedPhaseOneHealingAndPhaseTwo();
             ValidateLandingDamageAndKnockback();
+            ValidateSlimeScatter();
             ValidateGroundedContact();
             ValidateJumpArcAndCollisionRestoration();
+            ValidateJumpCurveFeel();
             ValidateFinalJumpCompletesBeforeRecovery();
             ValidateWallAndCornerLandings();
             ValidateLandingTelegraphCleanup();
@@ -30,7 +32,7 @@ namespace TrickalFanGame.Editor
             Week15Boss1Verification.Verify();
             Debug.Log("Week 15 Boss-2 verification passed: Saemaeum Vault keeps its own sprite/prefab, " +
                       "fires five five-projectile fan volleys, repeats seeded 3-5 / 4-6 jumps, damages " +
-                      "and knocks back at the locked landing point, heals 15 without a phase-one use cap, " +
+                      "and knocks back at the locked landing point, heals 13.8 without a phase-one use cap, " +
                       "excludes healing in phase two, accelerates, and cleans landing telegraphs.");
         }
 
@@ -68,21 +70,33 @@ namespace TrickalFanGame.Editor
             Assert(Mathf.Approximately(prefab.transform.localScale.x, Week15Boss1Setup.BossScale) &&
                    Mathf.Approximately(prefab.transform.localScale.y, Week15Boss1Setup.BossScale),
                 "Saemaeum Vault must use the doubled boss body scale.");
-            Assert(boss.DisplayName == "새마음금고" && boss.PhaseCount == 2 && boss.Patterns.Count == 3,
-                "Boss-2 HUD identity or its three-pattern/two-phase contract is missing.");
+            Assert(boss.DisplayName == "새마음금고" && boss.PhaseCount == 2 && boss.Patterns.Count == 4,
+                "Boss-2 HUD identity or its four-pattern/two-phase contract is missing.");
             Assert(boss.Patterns.Select(pattern => pattern.Execution).SequenceEqual(new[]
                 {
                     BossPatternExecution.SaemaeumApproachThrow,
                     BossPatternExecution.SaemaeumJumpSequence,
                     BossPatternExecution.SaemaeumTreasureHeal,
+                    BossPatternExecution.SaemaeumSlimeScatter,
                 }), "Boss-2 patterns are not bound in the authored order.");
+            Assert(runtime.LargeSlimeCountThisPhase == 1 && runtime.SmallSlimeCountThisPhase == 4 &&
+                   Mathf.Approximately(runtime.SlimePuddleRadius, 1.2f) &&
+                   Mathf.Approximately(runtime.SmallSlimePuddleRadius, 0.5f) &&
+                   Mathf.Approximately(runtime.SlimeSpeedMultiplier, 0.75f) && runtime.SlimeRequiredHits == 3 &&
+                   runtime.MaximumSlimePuddles == 14,
+                "Boss-2 slime scatter must spit one large (1.2) and four obstacle-sized (0.5) puddles that slow " +
+                "to 0.75x and pop after 3 hits.");
             Assert(runtime.ProjectilesPerVolley == 5 && runtime.VolleysPerPattern == 5 &&
                    Mathf.Approximately(runtime.FanSpreadDegrees, 48f),
                 "Boss-2 approach throw must use five 5-projectile fan volleys.");
-            Assert(Mathf.Approximately(runtime.JumpDistance, 4.8f) &&
-                   runtime.PhaseTwoMinimumJumps == 4 && Mathf.Approximately(runtime.HealPerUse, 150f) &&
+            Assert(Mathf.Approximately(runtime.JumpDistance, 5.5f) &&
+                   Mathf.Approximately(runtime.PhaseOneJumpDuration, 0.76f) &&
+                   Mathf.Approximately(runtime.PhaseTwoJumpDuration, 0.72f) &&
+                   Mathf.Approximately(runtime.PhaseOneJumpRest, 0.20f) &&
+                   Mathf.Approximately(runtime.PhaseTwoJumpRest, 0.15f) &&
+                   runtime.PhaseTwoMinimumJumps == 4 && Mathf.Approximately(runtime.HealPerUse, 138f) &&
                    Mathf.Approximately(GetPrivateField<float>(runtime, "landingRadius"), 2.875f),
-                "Boss-2 jump distance or phase-one healing amount was not rebalanced.");
+                "Boss-2 jump distance, jump timing or phase-one healing amount was not rebalanced.");
             TextureImporter importer = AssetImporter.GetAtPath(Week15Boss2Setup.BossSpritePath) as TextureImporter;
             Assert(importer != null && importer.alphaIsTransparency && importer.mipmapEnabled == false,
                 "Boss-2 sprite must preserve transparency and disable mipmaps.");
@@ -203,7 +217,7 @@ namespace TrickalFanGame.Editor
                 float before = health.CurrentHealth;
                 ExecuteFullHeal(runtime, 0f);
                 Assert(Mathf.Approximately(health.CurrentHealth, before + runtime.HealPerUse),
-                    "One treasure-eating pattern must heal exactly 150 health.");
+                    "One treasure-eating pattern must heal exactly 138 health.");
                 ExecuteFullHeal(runtime, 2f);
                 ExecuteFullHeal(runtime, 4f);
                 Assert(runtime.HealUses == 3 &&
@@ -222,6 +236,89 @@ namespace TrickalFanGame.Editor
             }
             finally
             {
+                UnityEngine.Object.DestroyImmediate(target);
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        private static void ValidateSlimeScatter()
+        {
+            GameObject root = CreateRuntimeBoss(out BossController boss,
+                out SaemaeumVaultBossPatternRuntime runtime, out _, out GameObject target);
+            try
+            {
+                target.transform.position = new Vector2(1.5f, -1f);
+                runtime.ConfigureSlime(1, 4, 2, 5, 1.2f, 0.5f, 0.75f, 3, 6);
+                runtime.BeginCombat(target.transform, 88, 0f);
+                runtime.OnPatternStateChanged(BossActionState.Telegraph,
+                    BossPatternExecution.SaemaeumSlimeScatter, 0.8f);
+                Assert(runtime.JumpCycleFrameIndex == 1, "Slime scatter must gather low during its warning.");
+                runtime.OnPatternStateChanged(BossActionState.Active,
+                    BossPatternExecution.SaemaeumSlimeScatter, 1.4f);
+                Assert(runtime.TryExecute(BossPatternExecution.SaemaeumSlimeScatter),
+                    "Slime scatter did not execute.");
+                List<float> radii = runtime.SlimeRadiiThisPhase();
+                Assert(runtime.SlimeBlobs.Count == 5, "Phase one must spit one large and four small lumps.");
+                Assert(Vector2.Distance(runtime.SlimeBlobs[0].Destination, target.transform.position) < 0.001f,
+                    "The first slime lump must land where the player stands.");
+                for (int a = 0; a < runtime.SlimeBlobs.Count; a++)
+                {
+                    Assert(runtime.SlimeBlobs[a].Mark != null, "Every slime lump must mark its landing spot.");
+                    for (int b = a + 1; b < runtime.SlimeBlobs.Count; b++)
+                        Assert(Vector2.Distance(runtime.SlimeBlobs[a].Destination,
+                                runtime.SlimeBlobs[b].Destination) >=
+                               Mathf.Max(1f, radii[a] + radii[b]) - 0.001f,
+                            "Slime puddles in the open must not overlap each other.");
+                }
+                Assert(runtime.SlimePuddles.Count == 0, "Puddles must not appear before the lumps land.");
+
+                float landed = runtime.SlimeFlightDuration + 4 * runtime.SlimeLaunchStagger + 0.01f;
+                foreach (BossSlimeBlob blob in runtime.SlimeBlobs.ToArray()) blob.Tick(landed);
+                Assert(runtime.SlimePuddles.Count == 5 && BossSlimePuddle.Live.Count == 5,
+                    "Every landed lump must leave one slime puddle.");
+                Assert(Mathf.Approximately(runtime.SlimePuddles[0].Radius, 1.2f) &&
+                       runtime.SlimePuddles.Skip(1).All(item => Mathf.Approximately(item.Radius, 0.5f)),
+                    "The large puddle must land first, on the player, followed by four obstacle-sized ones.");
+                Assert(GameObject.Find(BossSlimeBlob.MarkName) == null,
+                    "Landing marks must disappear once the lumps land.");
+
+                BossSlimePuddle under = runtime.SlimePuddles[0];
+                Assert(under.Contains(target.transform.position), "The first puddle must cover the player.");
+                under.Tick(landed);
+                EnvironmentSlow slow = target.GetComponent<EnvironmentSlow>();
+                Assert(slow != null && Mathf.Approximately(slow.MultiplierAt(landed), 0.75f),
+                    "Standing in a slime puddle must slow the player to 0.75x.");
+                Assert(Mathf.Approximately(slow.MultiplierAt(landed + BossSlimePuddle.SlowLinger + 0.01f), 1f),
+                    "The slime slow must end shortly after the player leaves the puddle.");
+
+                Assert(under.RegisterPlayerHit() && under.RegisterPlayerHit() && !under.IsPopped,
+                    "A slime puddle must survive its first two hits.");
+                Assert(under.RegisterPlayerHit() && under == null && BossSlimePuddle.Live.Count == 4,
+                    "A slime puddle must pop on its third hit.");
+                BossSlimePuddle other = runtime.SlimePuddles.First(item => item != null);
+                Assert(BossSlimePuddle.HitInCircle(other.transform.position, 0.1f) >= 1 && other.HitsTaken == 1,
+                    "Player area attacks must count one hit on a puddle they touch.");
+
+                // A second wave past the cap of six dries up the oldest puddles first.
+                runtime.OnPatternStateChanged(BossActionState.Active,
+                    BossPatternExecution.SaemaeumSlimeScatter, 3f);
+                runtime.TryExecute(BossPatternExecution.SaemaeumSlimeScatter);
+                foreach (BossSlimeBlob blob in runtime.SlimeBlobs.Where(item => item != null).ToArray())
+                    blob.Tick(landed + 1f);
+                Assert(BossSlimePuddle.Live.Count == 6, $"Slime puddles must stop at the cap of six. " +
+                    $"live={BossSlimePuddle.Live.Count}.");
+
+                boss.SetPhase(2);
+                Assert(runtime.LargeSlimeCountThisPhase == 2 && runtime.SmallSlimeCountThisPhase == 5,
+                    "Phase two must spit two large and five small slime lumps.");
+                boss.CancelCombat();
+                Assert(BossSlimePuddle.Live.Count == 0 && GameObject.Find(BossSlimeBlob.ObjectName) == null,
+                    "Leaving the boss fight must remove every slime lump and puddle.");
+            }
+            finally
+            {
+                foreach (BossSlimePuddle puddle in BossSlimePuddle.Live.ToArray())
+                    if (puddle != null) UnityEngine.Object.DestroyImmediate(puddle.gameObject);
                 UnityEngine.Object.DestroyImmediate(target);
                 UnityEngine.Object.DestroyImmediate(root);
             }
@@ -336,10 +433,11 @@ namespace TrickalFanGame.Editor
                 float before = health.CurrentHealth;
                 ContactDamage contact = root.GetComponent<ContactDamage>();
                 Assert(contact != null && contact.TryApplyDamage(health, 0f) &&
-                       contact.DamageTier == EnemyDamageTier.Heavy &&
+                       contact.DamageTier == EnemyDamageTier.Light &&
                        Mathf.Approximately(health.CurrentHealth,
-                           before - HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Heavy, 1)),
-                    "Saemaeum ground contact must deal heavy-tier damage.");
+                           before - HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 1)) &&
+                       HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 2) == HealthUnits.UnitsPerHeart,
+                    "Saemaeum ground contact must deal one heart on its floor.");
                 Assert(!contact.TryApplyDamage(health, 0.79f),
                     "Continuous ground contact must respect its 0.8 second cooldown.");
             }
@@ -385,13 +483,15 @@ namespace TrickalFanGame.Editor
                     new BossPatternDefinition("final-jump-continuity",
                         BossPatternExecution.SaemaeumJumpSequence, 0f, 3.8f, 1.15f, 0f),
                 });
-                runtime.ConfigureJumps(6, 6, 6, 6, 4.8f, 2.875f, EnemyDamageTier.Medium, 7f, 0.2f, 0.69f, 0.62f);
+                runtime.ConfigureJumps(6, 6, 6, 6, 5.5f, 2.875f, EnemyDamageTier.Medium, 7f, 0.2f,
+                    0.76f, 0.72f, 0.20f, 0.15f);
                 boss.SetPhase(2);
                 boss.BeginCombat(target.transform, 99, 0f);
                 float activeStart = boss.StateEndsAt;
                 boss.TickBehavior(activeStart);
 
-                float expectedEnd = activeStart + 6f * 0.62f;
+                // Six phase-two jumps with a rest between each pair, but none after the final landing.
+                float expectedEnd = activeStart + 6f * 0.72f + 5f * 0.15f;
                 Assert(boss.State == BossActionState.Active &&
                        Mathf.Approximately(boss.StateEndsAt, expectedEnd),
                     $"The active state must end at the actual final landing instead of the old fixed duration. " +
@@ -416,6 +516,23 @@ namespace TrickalFanGame.Editor
                 UnityEngine.Object.DestroyImmediate(target);
                 UnityEngine.Object.DestroyImmediate(root);
             }
+        }
+
+        private static void ValidateJumpCurveFeel()
+        {
+            // Launch fast, hang near the apex, then fall faster than the rise into the ground hit.
+            float Height(float flight) => SaemaeumVaultBossPatternRuntime.JumpHeightFraction(flight);
+            float Travel(float flight) => SaemaeumVaultBossPatternRuntime.JumpTravelFraction(flight);
+            Assert(Height(0f) == 0f && Height(1f) == 0f && Mathf.Approximately(Height(0.6f), 1f),
+                "Boss-2 jump must leave and return to the ground with its apex at 60% of the flight.");
+            Assert(Height(0.1f) > 0.3f, "Boss-2 jump must launch quickly instead of easing off the ground.");
+            float launchRate = Height(0.05f) / 0.05f;
+            float landingRate = Height(0.95f) / 0.05f;
+            Assert(landingRate > launchRate * 1.3f,
+                $"Boss-2 jump must slam down faster than it rises. launch={launchRate}, landing={landingRate}.");
+            Assert(Travel(0f) == 0f && Mathf.Approximately(Travel(1f), 1f) && Travel(0.1f) > 0.12f &&
+                   (1f - Travel(0.95f)) / 0.05f > 0.5f,
+                "Boss-2 jump must keep ground momentum from takeoff into the landing.");
         }
 
         private static void ValidateJumpArcAndCollisionRestoration()
@@ -453,8 +570,8 @@ namespace TrickalFanGame.Editor
                     BossPatternExecution.SaemaeumJumpSequence, 3.8f);
                 runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence);
                 target.transform.position = new Vector2(-5f, -4f);
-                float sequenceDuration = runtime.PlannedJumpCount *
-                    GetPrivateField<float>(runtime, "phaseOneJumpDuration");
+                float sequenceDuration = runtime.PlannedJumpCount * runtime.PhaseOneJumpDuration +
+                    (runtime.PlannedJumpCount - 1) * runtime.PhaseOneJumpRest;
                 runtime.TickPattern(BossActionState.Active,
                     BossPatternExecution.SaemaeumJumpSequence, sequenceDuration);
                 float after = target.GetComponent<Health>().CurrentHealth;

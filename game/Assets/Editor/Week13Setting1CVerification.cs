@@ -56,7 +56,7 @@ namespace TrickalFanGame.Editor
             GameDetailedStatsHudView view = FindSingle<GameDetailedStatsHudView>(scene);
             RectTransform panel = view.GetComponent<RectTransform>();
             Assert(panel.parent.name == "ReferenceFrame", "Detailed stats HUD must use the centered 16:9 frame.");
-            Assert(panel.anchoredPosition == new Vector2(-776, 234) && panel.sizeDelta == new Vector2(240, 216),
+            Assert(panel.anchoredPosition == Week27Ux1Setup.DetailedStatsPosition && panel.sizeDelta == new Vector2(240, 216),
                 "Detailed stats HUD must occupy the specified left safe-area slot without entering central combat space.");
             Assert(view.PlayerStats != null && view.Content != null && view.ValuesText != null,
                 "Detailed stats HUD is missing its live PlayerStats or UI references.");
