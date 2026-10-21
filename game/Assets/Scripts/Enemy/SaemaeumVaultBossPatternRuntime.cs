@@ -24,9 +24,12 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(1)] private int phaseOneMaximumJumps = 5;
         [SerializeField, Min(1)] private int phaseTwoMinimumJumps = 4;
         [SerializeField, Min(1)] private int phaseTwoMaximumJumps = 6;
-        [SerializeField, Min(0.1f)] private float phaseOneJumpDuration = 0.69f;
-        [SerializeField, Min(0.1f)] private float phaseTwoJumpDuration = 0.62f;
-        [SerializeField, Min(0.1f)] private float jumpDistance = 4.8f;
+        [SerializeField, Min(0.1f)] private float phaseOneJumpDuration = 0.76f;
+        [SerializeField, Min(0.1f)] private float phaseTwoJumpDuration = 0.72f;
+        // Grounded pause after each landing except the last. The next destination locks when the pause ends.
+        [SerializeField, Min(0f)] private float phaseOneJumpRest = 0.20f;
+        [SerializeField, Min(0f)] private float phaseTwoJumpRest = 0.15f;
+        [SerializeField, Min(0.1f)] private float jumpDistance = 5.5f;
         [SerializeField, Min(0.1f)] private float jumpHeight = 2f;
         [SerializeField, Min(0.1f)] private float landingRadius = 2.875f;
         [SerializeField] private EnemyDamageTier landingDamageTier = EnemyDamageTier.Medium;
@@ -34,7 +37,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float landingKnockbackDuration = 0.2f;
 
         [Header("Treasure heal")]
-        [SerializeField, Min(0.01f)] private float healPerUse = 150f;
+        [SerializeField, Min(0.01f)] private float healPerUse = 138f;
         [SerializeField, Min(1)] private int healPulses = 4;
 
         [Header("Arena and presentation")]
@@ -45,6 +48,9 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private Vector2 jumpCrouchScale = new(1.38f, 0.62f);
         [SerializeField] private Vector2 jumpStretchScale = new(0.72f, 1.42f);
         [SerializeField] private Vector2 landingScale = new(1.28f, 0.72f);
+
+        // Fraction of a jump at which the boss touches the ground and the landing damage resolves.
+        private const float LandingContactProgress = 0.82f;
 
         private BossController boss;
         private Rigidbody2D body;
@@ -90,6 +96,9 @@ namespace TrickalFanGame.Enemy
         public int PhaseTwoMinimumJumps => Mathf.Max(1, phaseTwoMinimumJumps);
         public float JumpDistance => jumpDistance;
         public float PhaseOneJumpDuration => phaseOneJumpDuration;
+        public float PhaseTwoJumpDuration => phaseTwoJumpDuration;
+        public float PhaseOneJumpRest => phaseOneJumpRest;
+        public float PhaseTwoJumpRest => phaseTwoJumpRest;
         public EnemyDamageTier LandingDamageTier => landingDamageTier;
         public float LandingKnockbackSpeed => landingKnockbackSpeed;
         public float ApproachSpeed => approachSpeed;
@@ -107,7 +116,8 @@ namespace TrickalFanGame.Enemy
             body.useFullKinematicContacts = true;
             ContactDamage contact = GetComponent<ContactDamage>();
             if (contact == null) contact = gameObject.AddComponent<ContactDamage>();
-            contact.Configure(EnemyDamageTier.Heavy, 0.8f);
+            // One heart on floors 1-2: max health rarely grows, so a heavier bump punished too hard.
+            contact.Configure(EnemyDamageTier.Light, 0.8f);
             health = GetComponent<Health>();
             visualTransform = GetComponentInChildren<SpriteRenderer>()?.transform;
             if (visualTransform != null) groundedVisualPosition = visualTransform.localPosition;
@@ -131,7 +141,8 @@ namespace TrickalFanGame.Enemy
 
         public void ConfigureJumps(int firstMin, int firstMax, int secondMin, int secondMax,
             float distance, float radius, EnemyDamageTier damageTier, float knockbackSpeed, float knockbackDuration,
-            float firstJumpDuration = 0.69f, float secondJumpDuration = 0.62f)
+            float firstJumpDuration = 0.76f, float secondJumpDuration = 0.72f,
+            float firstJumpRest = 0.20f, float secondJumpRest = 0.15f)
         {
             phaseOneMinimumJumps = Mathf.Max(1, firstMin);
             phaseOneMaximumJumps = Mathf.Max(phaseOneMinimumJumps, firstMax);
@@ -139,6 +150,8 @@ namespace TrickalFanGame.Enemy
             phaseTwoMaximumJumps = Mathf.Max(phaseTwoMinimumJumps, secondMax);
             phaseOneJumpDuration = Mathf.Max(0.1f, firstJumpDuration);
             phaseTwoJumpDuration = Mathf.Max(0.1f, secondJumpDuration);
+            phaseOneJumpRest = Mathf.Max(0f, firstJumpRest);
+            phaseTwoJumpRest = Mathf.Max(0f, secondJumpRest);
             jumpDistance = Mathf.Max(0.1f, distance);
             landingRadius = Mathf.Max(0.1f, radius);
             landingDamageTier = damageTier;
@@ -309,10 +322,7 @@ namespace TrickalFanGame.Enemy
             currentJump = 0;
             resolvedJumpCount = 0;
             jumpSequenceStartTime = lastTickTime;
-            float jumpDuration = boss != null && boss.CurrentPhase >= 2
-                ? phaseTwoJumpDuration
-                : phaseOneJumpDuration;
-            activeEndsAt = jumpSequenceStartTime + jumpCount * jumpDuration;
+            activeEndsAt = jumpSequenceStartTime + JumpSequenceDuration;
             boss?.SynchronizeActiveEndTime(activeEndsAt);
             jumpStart = transform.position;
             LockNextJumpDestination();
@@ -321,12 +331,11 @@ namespace TrickalFanGame.Enemy
         private void TickJumpSequence(float now)
         {
             if (!jumping || jumpCount <= 0) return;
-            float jumpDuration = boss != null && boss.CurrentPhase >= 2 ? phaseTwoJumpDuration : phaseOneJumpDuration;
-            float activeDuration = Mathf.Max(0.01f, jumpCount * jumpDuration);
+            float jumpDuration = CurrentJumpDuration;
+            float cycle = jumpDuration + CurrentJumpRest;
             float elapsed = Mathf.Max(0f, now - jumpSequenceStartTime);
-            float sequenceProgress = Mathf.Clamp01(elapsed / activeDuration);
-            float scaled = sequenceProgress * jumpCount;
-            int jumpIndex = Mathf.Min(jumpCount - 1, Mathf.FloorToInt(scaled));
+            bool sequenceFinished = elapsed >= JumpSequenceDuration;
+            int jumpIndex = Mathf.Min(jumpCount - 1, Mathf.FloorToInt(elapsed / cycle));
             while (jumpIndex > currentJump)
             {
                 if (resolvedJumpCount <= currentJump)
@@ -339,20 +348,21 @@ namespace TrickalFanGame.Enemy
                 jumpStart = jumpDestination;
                 LockNextJumpDestination();
             }
-            float jumpProgress = scaled - jumpIndex;
-            // Crouch on the floor, fly, then compress and recover on the floor. Keep the total cycle duration.
-            const float takeoff = 0.16f, contact = 0.82f, compression = 0.90f;
+            // Progress within the jump itself; it stays at 1 while the boss rests before the next jump.
+            float jumpProgress = Mathf.Clamp01((elapsed - jumpIndex * cycle) / jumpDuration);
+            // Crouch on the floor, fly, then compress and recover on the floor.
+            const float takeoff = 0.16f, contact = LandingContactProgress, compression = 0.90f;
+            bool settlesBeforeNextJump = currentJump == jumpCount - 1 || CurrentJumpRest > 0f;
             jumpPoseIndex = jumpProgress < takeoff ? 1 : jumpProgress < contact ? 2 :
-                jumpProgress < 0.96f ? 3 : currentJump == jumpCount - 1 ? 0 : 1;
+                jumpProgress < 0.96f ? 3 : settlesBeforeNextJump ? 0 : 1;
             jumpCycleFrameIndex = jumpProgress < 0.04f ? 0 : jumpProgress < takeoff ? 1 :
                 jumpProgress < 0.36f ? 2 : jumpProgress < 0.58f ? 3 : jumpProgress < contact ? 4 :
                 jumpProgress < 0.90f ? 5 : jumpProgress < 0.96f ? 6 : 7;
             float flight = Mathf.Clamp01((jumpProgress - takeoff) / (contact - takeoff));
-            Vector2 position = Vector2.Lerp(jumpStart, jumpDestination, Mathf.SmoothStep(0f, 1f, flight));
+            Vector2 position = Vector2.Lerp(jumpStart, jumpDestination, JumpTravelFraction(flight));
             if (body != null) body.position = position;
             else transform.position = position;
-            float arc = Mathf.Sin(flight * Mathf.PI);
-            SetVisualHeight(jumpHeight * arc * arc);
+            SetVisualHeight(jumpHeight * JumpHeightFraction(flight));
             if (jumpProgress < takeoff)
                 ApplyScale(Vector2.Lerp(jumpCrouchScale, jumpStretchScale,
                     Mathf.SmoothStep(0f, 1f, jumpProgress / takeoff)));
@@ -363,7 +373,7 @@ namespace TrickalFanGame.Enemy
                 ApplyScale(Vector2.Lerp(idleScale, landingScale,
                     Mathf.SmoothStep(0f, 1f, (jumpProgress - contact) / (compression - contact))));
             else
-                ApplyScale(Vector2.Lerp(landingScale, currentJump == jumpCount - 1 ? idleScale : jumpCrouchScale,
+                ApplyScale(Vector2.Lerp(landingScale, settlesBeforeNextJump ? idleScale : jumpCrouchScale,
                     Mathf.SmoothStep(0f, 1f, (jumpProgress - compression) / (1f - compression))));
             if (jumpProgress >= contact && resolvedJumpCount <= currentJump)
             {
@@ -371,11 +381,46 @@ namespace TrickalFanGame.Enemy
                 resolvedJumpCount++;
                 ClearLandingTelegraph();
             }
-            if (sequenceProgress >= 1f)
+            if (sequenceFinished)
             {
                 EndJump();
             }
         }
+
+        // Share of the flight spent rising. The shorter fall makes the descent faster than the takeoff.
+        private const float JumpApexFlight = 0.6f;
+
+        // Height as a fraction of the jump height over the flight (0..1): a fast launch that slows into
+        // the apex, then a fall that keeps accelerating until the ground hit.
+        public static float JumpHeightFraction(float flight)
+        {
+            flight = Mathf.Clamp01(flight);
+            if (flight <= JumpApexFlight)
+            {
+                float rise = 1f - flight / JumpApexFlight;
+                return 1f - rise * rise;
+            }
+            float fall = (flight - JumpApexFlight) / (1f - JumpApexFlight);
+            return 1f - fall * fall;
+        }
+
+        // Ground travel over the flight: launches at full speed and only eases slightly before touchdown,
+        // so the boss keeps its momentum into the landing instead of floating down onto the spot.
+        public static float JumpTravelFraction(float flight)
+        {
+            flight = Mathf.Clamp01(flight);
+            float easeOut = 1f - (1f - flight) * (1f - flight);
+            return Mathf.Lerp(flight, easeOut, 0.35f);
+        }
+
+        private float CurrentJumpDuration =>
+            boss != null && boss.CurrentPhase >= 2 ? phaseTwoJumpDuration : phaseOneJumpDuration;
+
+        private float CurrentJumpRest => boss != null && boss.CurrentPhase >= 2 ? phaseTwoJumpRest : phaseOneJumpRest;
+
+        // The final landing ends the sequence, so there is no rest after it.
+        private float JumpSequenceDuration =>
+            Mathf.Max(0.01f, jumpCount * CurrentJumpDuration + Mathf.Max(0, jumpCount - 1) * CurrentJumpRest);
 
         private void LockNextJumpDestination()
         {

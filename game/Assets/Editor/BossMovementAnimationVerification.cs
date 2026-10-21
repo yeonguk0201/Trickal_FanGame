@@ -177,16 +177,17 @@ namespace TrickalFanGame.Editor
                 SaemaeumVaultBossPatternRuntime runtime = root.GetComponent<SaemaeumVaultBossPatternRuntime>();
                 Invoke(runtime, "Awake");
                 runtime.BeginCombat(target.transform, 42, 0f);
+                float jumpDuration = runtime.PhaseOneJumpDuration;
                 runtime.OnPatternStateChanged(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 5f);
                 Require(runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence), "Could not start real vault jump.");
-                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 0.07f);
+                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, jumpDuration * 0.1f);
                 animator.RenderPose(0f, false);
                 Require(animator.Artwork.sprite == animator.GetJumpCycleFrame(1), "Real jump preparation must select the drawn pose.");
                 Vector3 crouchFloor = animator.Source.transform.TransformPoint(Vector3.up * animator.BodySprite.bounds.min.y);
                 Require(runtime.CurrentVisualScale == Vector3.one, "Vault preparation must keep original proportions while deformation is disabled.");
                 float floorY = root.transform.position.y + animator.BodySprite.bounds.min.y * root.transform.lossyScale.y;
                 Require(Mathf.Abs(crouchFloor.y - floorY) < 0.001f, "Crouching must keep the body bottom grounded.");
-                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 0.345f);
+                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, jumpDuration * 0.5f);
                 animator.RenderPose(0f, false);
                 Require(animator.Artwork.sprite == animator.GetJumpCycleFrame(3), "Real attack flight must select the drawn airborne pose.");
                 Require(runtime.IsJumping && animator.Source.transform.position.y - root.transform.position.y > 1.9f,
@@ -194,7 +195,7 @@ namespace TrickalFanGame.Editor
                 Require(animator.GetTreasure(0).transform.localPosition == Vector3.zero && animator.GetTreasure(1).transform.localPosition == Vector3.zero,
                     "Ground treasure must stay on the root trajectory during a real attack jump.");
                 Require(runtime.CurrentVisualScale.y >= 1f, "Airborne vault must not use crouch/landing compression.");
-                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 0.69f * 0.86f);
+                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, jumpDuration * 0.86f);
                 animator.RenderPose(0f, false);
                 Require(animator.Artwork.sprite == animator.GetJumpCycleFrame(5), "Real attack landing must select the drawn landing pose.");
                 Vector3 landingFloor = animator.Source.transform.TransformPoint(Vector3.up * animator.BodySprite.bounds.min.y);
@@ -202,8 +203,14 @@ namespace TrickalFanGame.Editor
                         (root.transform.position.y + animator.BodySprite.bounds.min.y * root.transform.lossyScale.y)) < 0.001f,
                     "Landing must keep original proportions and a fixed bottom while deformation is disabled.");
                 Require(animator.HasLandingImpulse, "Treasure impulse must begin at visible contact.");
-                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 0.7f);
+                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, jumpDuration + 0.01f);
                 Require(animator.HasLandingImpulse, "Actual landing must notify treasure even when the player is outside damage range.");
+                Require(runtime.IsJumping && runtime.CurrentJump == 0 && runtime.JumpPoseIndex == 0,
+                    "The vault must rest on the ground after a landing before locking its next jump.");
+                runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence,
+                    jumpDuration + runtime.PhaseOneJumpRest + 0.01f);
+                Require(runtime.CurrentJump == 1 && runtime.JumpPoseIndex == 1,
+                    "The next jump must start with its crouch once the rest ends.");
                 Invoke(runtime, "OnDisable");
                 Require(!root.GetComponent<Collider2D>().isTrigger, "Motion integration must preserve jump collider restoration.");
             }
@@ -291,14 +298,17 @@ namespace TrickalFanGame.Editor
                 vault.OnPatternStateChanged(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 5f);
                 vault.TryExecute(BossPatternExecution.SaemaeumJumpSequence);
                 roots[1].GetComponent<BossMovementAnimator>().TickLanding(1f);
+                bool previewRecovered = false;
                 for (int frame = 0; frame < 36; frame++)
                 {
                     float now = frame * 0.025f;
-                    if (now < 0.7f) vault.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, now);
-                    else if (frame == 28)
+                    if (now < vault.PhaseOneJumpDuration)
+                        vault.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, now);
+                    else if (!previewRecovered)
                     {
                         vault.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, now);
                         vault.OnPatternStateChanged(BossActionState.Recovery, BossPatternExecution.SaemaeumJumpSequence, now + 1f);
+                        previewRecovered = true;
                     }
                     for (int i = 0; i < roots.Length; i++)
                     {

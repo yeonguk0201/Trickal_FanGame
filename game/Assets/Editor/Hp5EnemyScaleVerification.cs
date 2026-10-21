@@ -14,7 +14,7 @@ namespace TrickalFanGame.Editor
     public static class Hp5EnemyScaleVerification
     {
         private const float PlayerAttackDamage = 10f;
-        private const float SaemaeumHealPerUse = 150f;
+        private const float SaemaeumHealPerUse = 138f;
 
         // D-7: every enemy-side HP value is 10x its pre-HP-5 value, except the Buseureogi obstacles that were
         // retuned to two base-damage hits (20) on 2026-09-30.
@@ -50,12 +50,12 @@ namespace TrickalFanGame.Editor
                 .LoadAssetAtPath<GameObject>("Assets/Prefabs/SaemaeumVaultBoss.prefab")
                 .GetComponent<SaemaeumVaultBossPatternRuntime>();
             Assert(saemaeum != null && Mathf.Approximately(saemaeum.HealPerUse, SaemaeumHealPerUse),
-                "Saemaeum Vault treasure healing must be 150 per use.");
+                "Saemaeum Vault treasure healing must be 138 per use.");
 
             ValidateDefaultPlayerStats();
             ValidateScenePlayerStats();
             Debug.Log("HP-5 enemy scale verification passed: player attack damage is 10 in code and all player " +
-                      "scenes, enemy/boss/obstacle HP is 10x, Saemaeum heals 150, and player HP stays at 10 half-heart units.");
+                      "scenes, enemy/boss/obstacle HP is 10x, Saemaeum heals 138, and player HP stays at 10 half-heart units.");
         }
 
         private static void ValidateDefaultPlayerStats()

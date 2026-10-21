@@ -230,15 +230,17 @@ MonoBehaviour:
   phaseOneMaximumJumps: 5
   phaseTwoMinimumJumps: 4
   phaseTwoMaximumJumps: 6
-  phaseOneJumpDuration: 0.69
-  phaseTwoJumpDuration: 0.62
-  jumpDistance: 4.8
+  phaseOneJumpDuration: 0.76
+  phaseTwoJumpDuration: 0.72
+  phaseOneJumpRest: 0.2
+  phaseTwoJumpRest: 0.15
+  jumpDistance: 5.5
   jumpHeight: 2
   landingRadius: 2.875
   landingDamageTier: 1
   landingKnockbackSpeed: 7
   landingKnockbackDuration: 0.2
-  healPerUse: 150
+  healPerUse: 138
   healPulses: 4
   arenaPadding: 0.8
   fallbackHalfExtents: {x: 6.2, y: 5}
@@ -259,7 +261,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damageTier: 2
+  damageTier: 0
   cooldown: 0.8
   halfHeartDamage: 0
 --- !u!114 &6273290692546761168

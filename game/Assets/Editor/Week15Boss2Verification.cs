@@ -23,6 +23,7 @@ namespace TrickalFanGame.Editor
             ValidateLandingDamageAndKnockback();
             ValidateGroundedContact();
             ValidateJumpArcAndCollisionRestoration();
+            ValidateJumpCurveFeel();
             ValidateFinalJumpCompletesBeforeRecovery();
             ValidateWallAndCornerLandings();
             ValidateLandingTelegraphCleanup();
@@ -30,7 +31,7 @@ namespace TrickalFanGame.Editor
             Week15Boss1Verification.Verify();
             Debug.Log("Week 15 Boss-2 verification passed: Saemaeum Vault keeps its own sprite/prefab, " +
                       "fires five five-projectile fan volleys, repeats seeded 3-5 / 4-6 jumps, damages " +
-                      "and knocks back at the locked landing point, heals 15 without a phase-one use cap, " +
+                      "and knocks back at the locked landing point, heals 13.8 without a phase-one use cap, " +
                       "excludes healing in phase two, accelerates, and cleans landing telegraphs.");
         }
 
@@ -79,10 +80,14 @@ namespace TrickalFanGame.Editor
             Assert(runtime.ProjectilesPerVolley == 5 && runtime.VolleysPerPattern == 5 &&
                    Mathf.Approximately(runtime.FanSpreadDegrees, 48f),
                 "Boss-2 approach throw must use five 5-projectile fan volleys.");
-            Assert(Mathf.Approximately(runtime.JumpDistance, 4.8f) &&
-                   runtime.PhaseTwoMinimumJumps == 4 && Mathf.Approximately(runtime.HealPerUse, 150f) &&
+            Assert(Mathf.Approximately(runtime.JumpDistance, 5.5f) &&
+                   Mathf.Approximately(runtime.PhaseOneJumpDuration, 0.76f) &&
+                   Mathf.Approximately(runtime.PhaseTwoJumpDuration, 0.72f) &&
+                   Mathf.Approximately(runtime.PhaseOneJumpRest, 0.20f) &&
+                   Mathf.Approximately(runtime.PhaseTwoJumpRest, 0.15f) &&
+                   runtime.PhaseTwoMinimumJumps == 4 && Mathf.Approximately(runtime.HealPerUse, 138f) &&
                    Mathf.Approximately(GetPrivateField<float>(runtime, "landingRadius"), 2.875f),
-                "Boss-2 jump distance or phase-one healing amount was not rebalanced.");
+                "Boss-2 jump distance, jump timing or phase-one healing amount was not rebalanced.");
             TextureImporter importer = AssetImporter.GetAtPath(Week15Boss2Setup.BossSpritePath) as TextureImporter;
             Assert(importer != null && importer.alphaIsTransparency && importer.mipmapEnabled == false,
                 "Boss-2 sprite must preserve transparency and disable mipmaps.");
@@ -203,7 +208,7 @@ namespace TrickalFanGame.Editor
                 float before = health.CurrentHealth;
                 ExecuteFullHeal(runtime, 0f);
                 Assert(Mathf.Approximately(health.CurrentHealth, before + runtime.HealPerUse),
-                    "One treasure-eating pattern must heal exactly 150 health.");
+                    "One treasure-eating pattern must heal exactly 138 health.");
                 ExecuteFullHeal(runtime, 2f);
                 ExecuteFullHeal(runtime, 4f);
                 Assert(runtime.HealUses == 3 &&
@@ -336,10 +341,11 @@ namespace TrickalFanGame.Editor
                 float before = health.CurrentHealth;
                 ContactDamage contact = root.GetComponent<ContactDamage>();
                 Assert(contact != null && contact.TryApplyDamage(health, 0f) &&
-                       contact.DamageTier == EnemyDamageTier.Heavy &&
+                       contact.DamageTier == EnemyDamageTier.Light &&
                        Mathf.Approximately(health.CurrentHealth,
-                           before - HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Heavy, 1)),
-                    "Saemaeum ground contact must deal heavy-tier damage.");
+                           before - HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 1)) &&
+                       HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 2) == HealthUnits.UnitsPerHeart,
+                    "Saemaeum ground contact must deal one heart on its floor.");
                 Assert(!contact.TryApplyDamage(health, 0.79f),
                     "Continuous ground contact must respect its 0.8 second cooldown.");
             }
@@ -385,13 +391,15 @@ namespace TrickalFanGame.Editor
                     new BossPatternDefinition("final-jump-continuity",
                         BossPatternExecution.SaemaeumJumpSequence, 0f, 3.8f, 1.15f, 0f),
                 });
-                runtime.ConfigureJumps(6, 6, 6, 6, 4.8f, 2.875f, EnemyDamageTier.Medium, 7f, 0.2f, 0.69f, 0.62f);
+                runtime.ConfigureJumps(6, 6, 6, 6, 5.5f, 2.875f, EnemyDamageTier.Medium, 7f, 0.2f,
+                    0.76f, 0.72f, 0.20f, 0.15f);
                 boss.SetPhase(2);
                 boss.BeginCombat(target.transform, 99, 0f);
                 float activeStart = boss.StateEndsAt;
                 boss.TickBehavior(activeStart);
 
-                float expectedEnd = activeStart + 6f * 0.62f;
+                // Six phase-two jumps with a rest between each pair, but none after the final landing.
+                float expectedEnd = activeStart + 6f * 0.72f + 5f * 0.15f;
                 Assert(boss.State == BossActionState.Active &&
                        Mathf.Approximately(boss.StateEndsAt, expectedEnd),
                     $"The active state must end at the actual final landing instead of the old fixed duration. " +
@@ -416,6 +424,23 @@ namespace TrickalFanGame.Editor
                 UnityEngine.Object.DestroyImmediate(target);
                 UnityEngine.Object.DestroyImmediate(root);
             }
+        }
+
+        private static void ValidateJumpCurveFeel()
+        {
+            // Launch fast, hang near the apex, then fall faster than the rise into the ground hit.
+            float Height(float flight) => SaemaeumVaultBossPatternRuntime.JumpHeightFraction(flight);
+            float Travel(float flight) => SaemaeumVaultBossPatternRuntime.JumpTravelFraction(flight);
+            Assert(Height(0f) == 0f && Height(1f) == 0f && Mathf.Approximately(Height(0.6f), 1f),
+                "Boss-2 jump must leave and return to the ground with its apex at 60% of the flight.");
+            Assert(Height(0.1f) > 0.3f, "Boss-2 jump must launch quickly instead of easing off the ground.");
+            float launchRate = Height(0.05f) / 0.05f;
+            float landingRate = Height(0.95f) / 0.05f;
+            Assert(landingRate > launchRate * 1.3f,
+                $"Boss-2 jump must slam down faster than it rises. launch={launchRate}, landing={landingRate}.");
+            Assert(Travel(0f) == 0f && Mathf.Approximately(Travel(1f), 1f) && Travel(0.1f) > 0.12f &&
+                   (1f - Travel(0.95f)) / 0.05f > 0.5f,
+                "Boss-2 jump must keep ground momentum from takeoff into the landing.");
         }
 
         private static void ValidateJumpArcAndCollisionRestoration()
@@ -453,8 +478,8 @@ namespace TrickalFanGame.Editor
                     BossPatternExecution.SaemaeumJumpSequence, 3.8f);
                 runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence);
                 target.transform.position = new Vector2(-5f, -4f);
-                float sequenceDuration = runtime.PlannedJumpCount *
-                    GetPrivateField<float>(runtime, "phaseOneJumpDuration");
+                float sequenceDuration = runtime.PlannedJumpCount * runtime.PhaseOneJumpDuration +
+                    (runtime.PlannedJumpCount - 1) * runtime.PhaseOneJumpRest;
                 runtime.TickPattern(BossActionState.Active,
                     BossPatternExecution.SaemaeumJumpSequence, sequenceDuration);
                 float after = target.GetComponent<Health>().CurrentHealth;
