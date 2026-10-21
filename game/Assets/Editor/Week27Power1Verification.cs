@@ -461,13 +461,13 @@ namespace TrickalFanGame.Editor
                 hud.RefreshNow();
                 Assert(hud.NameText.text == blanket.DisplayName && hud.GaugeText.text == "0/3" &&
                        hud.GaugeCells.Count(cell => cell.gameObject.activeSelf) == 3 &&
-                       hud.KeyText.text == GamePowerHudView.ChargingText,
-                    "The HUD must show the name, three empty cells and that it is charging.");
+                       !hud.KeyText.gameObject.activeSelf,
+                    "The HUD must show the name and three empty cells, with no key line while charging (UX-1).");
                 rig.Slot.AddCharge(3);
                 hud.RefreshNow();
                 Assert(hud.GaugeText.text == "3/3" &&
                        hud.GaugeCells.Take(3).All(cell => cell.color == GamePowerHudView.FilledCellColor) &&
-                       hud.KeyText.text == GamePowerHudView.UsableText,
+                       hud.KeyText.gameObject.activeSelf && hud.KeyText.text == GamePowerHudView.UsableText,
                     "A full gauge must show filled cells and [R] 사용.");
             }
             finally

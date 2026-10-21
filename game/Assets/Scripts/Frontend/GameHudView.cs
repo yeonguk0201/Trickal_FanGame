@@ -24,7 +24,9 @@ namespace TrickalFanGame.Frontend
         private static readonly Color SpHalfColor = new(0.24f, 0.53f, 0.69f, 0.8f);
         private static readonly Color SpOverchargeColor = new(1f, 0.82f, 0.32f, 1f);
         private static readonly Color SkillReadyColor = new(0.3f, 0.88f, 0.72f, 1f);
-        private static readonly Color SkillUnavailableColor = new(0.25f, 0.3f, 0.36f, 0.7f);
+        // UX-1: the skill artwork always shows; an unusable skill is covered by this dark see-through overlay, and
+        // during a cooldown the overlay shrinks as a clock hand sweeps clockwise from the top.
+        public static readonly Color SkillOverlayColor = new(0.02f, 0.03f, 0.06f, 0.62f);
 
         [SerializeField] private Health playerHealth;
         [SerializeField] private PlayerSP playerSP;
@@ -90,6 +92,7 @@ namespace TrickalFanGame.Frontend
         public bool IsLowerGradeSkillAvailable { get; private set; }
         public bool IsHighGradeSkillAvailable { get; private set; }
         public float HighGradeCooldownRemaining { get; private set; }
+        public float LowerGradeFiringRemaining { get; private set; }
         public float LastHealthDelta { get; private set; }
         public int LastSPDelta { get; private set; }
 
@@ -117,10 +120,14 @@ namespace TrickalFanGame.Frontend
             }
         }
 
-        public void ConfigureHearts(RectTransform configuredHeartRowRoot, RectTransform configuredHeartTemplate)
+        public float MaximumHeartSize => maximumHeartSize;
+
+        public void ConfigureHearts(RectTransform configuredHeartRowRoot, RectTransform configuredHeartTemplate,
+            float configuredMaximumHeartSize = 0f)
         {
             heartRowRoot = configuredHeartRowRoot;
             heartTemplate = configuredHeartTemplate;
+            if (configuredMaximumHeartSize > 0f) maximumHeartSize = Mathf.Max(4f, configuredMaximumHeartSize);
             if (isActiveAndEnabled && Application.isPlaying) RefreshNow();
         }
 
@@ -394,40 +401,43 @@ namespace TrickalFanGame.Frontend
             }
         }
 
+        // UX-1: no status words. The artwork always shows; the dark overlay covers it in full while a skill cannot
+        // be used and sweeps away clockwise while the lower grade fires or the high grade cools down.
         public void RefreshSkillStateAt(float currentTime)
         {
             IsLowerGradeSkillAvailable = lowerGradeSkill != null && lowerGradeSkill.CanCast;
-            if (lowerGradeSkillState != null)
-                lowerGradeSkillState.color = IsLowerGradeSkillAvailable ? Color.white : SkillUnavailableColor;
-            if (lowerGradeSkillText != null)
-                lowerGradeSkillText.text = lowerGradeSkill != null && lowerGradeSkill.IsFiring
-                    ? "발사 중"
-                    : IsLowerGradeSkillAvailable ? "사용 가능" : "사용 불가";
-            if (lowerGradeCooldownFill != null) lowerGradeCooldownFill.fillAmount = 0f;
+            LowerGradeFiringRemaining = lowerGradeSkill != null && lowerGradeSkill.IsFiring
+                ? lowerGradeSkill.GetFiringRemainingFraction(currentTime)
+                : 0f;
+            if (lowerGradeSkillState != null) lowerGradeSkillState.color = Color.white;
+            if (lowerGradeCooldownFill != null)
+                lowerGradeCooldownFill.fillAmount = lowerGradeSkill != null && lowerGradeSkill.IsFiring
+                    ? LowerGradeFiringRemaining
+                    : IsLowerGradeSkillAvailable ? 0f : 1f;
+            HideStatus(lowerGradeSkillText);
 
             HighGradeCooldownRemaining = highGradeSkill != null
                 ? highGradeSkill.GetCooldownRemaining(currentTime)
                 : 0f;
             IsHighGradeSkillAvailable = highGradeSkill != null && highGradeSkill.IsReadyAt(currentTime);
-            if (highGradeSkillState != null)
-                highGradeSkillState.color = IsHighGradeSkillAvailable ? Color.white : SkillUnavailableColor;
+            if (highGradeSkillState != null) highGradeSkillState.color = Color.white;
             if (highGradeCooldownFill != null)
             {
                 float duration = highGradeSkill != null ? Mathf.Max(0.01f, highGradeSkill.Cooldown) : 1f;
-                highGradeCooldownFill.fillAmount = Mathf.Clamp01(HighGradeCooldownRemaining / duration);
+                highGradeCooldownFill.fillAmount = HighGradeCooldownRemaining > 0.001f
+                    ? Mathf.Clamp01(HighGradeCooldownRemaining / duration)
+                    : IsHighGradeSkillAvailable ? 0f : 1f;
             }
             if (highGradeCooldownText != null)
                 highGradeCooldownText.text = HighGradeCooldownRemaining > 0.001f
                     ? Mathf.CeilToInt(HighGradeCooldownRemaining).ToString()
                     : string.Empty;
-            if (highGradeSkillText != null)
-            {
-                highGradeSkillText.text = highGradeSkill != null && highGradeSkill.IsDashing
-                    ? "사용 중"
-                    : HighGradeCooldownRemaining > 0.001f
-                        ? "쿨타임"
-                        : IsHighGradeSkillAvailable ? "사용 가능" : "사용 불가";
-            }
+            HideStatus(highGradeSkillText);
+        }
+
+        private static void HideStatus(TMP_Text status)
+        {
+            if (status != null && status.gameObject.activeSelf) status.gameObject.SetActive(false);
         }
 
         private void SetSlotScale(Vector3 scale)

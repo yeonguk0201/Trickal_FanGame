@@ -56,8 +56,8 @@ namespace TrickalFanGame.Editor
                 view.MarkerTemplate.SymbolText != null,
                 "HUD-4A room template must have fill, current outline, and non-color current marker visuals.");
             RectTransform panel = view.GetComponent<RectTransform>();
-            Assert(panel.sizeDelta == new Vector2(220, 180) && panel.anchoredPosition == new Vector2(786, 396),
-                "Minimap HUD must occupy the specified top-right 220x180 safe region.");
+            Assert(panel.sizeDelta == Week27Ux1Setup.MinimapSize && panel.anchoredPosition == Week27Ux1Setup.MinimapPosition,
+                "Minimap HUD must occupy the UX-1 top-right region.");
             Assert(Mathf.Approximately(view.RoomSpacing, 48f),
                 "HUD-4A room spacing must match its verified directional layout.");
             Assert(!view.GetComponentsInChildren<Graphic>(true).Any(graphic => graphic.raycastTarget),

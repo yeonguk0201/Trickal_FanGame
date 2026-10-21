@@ -17,8 +17,9 @@ namespace TrickalFanGame.Editor
         public const string HudRootName = "Game HUD Canvas";
         public const string HeartRowName = "HP Hearts";
         public const string HeartTemplateName = "Heart Template";
-        public static readonly Vector2 HeartRowPosition = new(0, 34);
-        public static readonly Vector2 HeartRowSize = new(472, 40);
+        // UX-1 enlarged the hearts and SP and owns their layout values.
+        public static Vector2 HeartRowPosition => Week27Ux1Setup.HeartRowPosition;
+        public static Vector2 HeartRowSize => Week27Ux1Setup.HeartRowSize;
 
         [MenuItem("Trickal Fan Game/Week 13/Setup HUD-1 HP and SP")]
         public static void Setup()
@@ -60,7 +61,8 @@ namespace TrickalFanGame.Editor
             frameImage.color = Color.clear;
             frameImage.raycastTarget = false;
 
-            RectTransform panel = Rect(frame, "Survival HUD", new Vector2(-646, 422), new Vector2(500, 128));
+            RectTransform panel = Rect(frame, "Survival HUD", Week27Ux1Setup.SurvivalPosition,
+                Week27Ux1Setup.SurvivalSize);
             Image panelImage = Component<Image>(panel.gameObject);
             panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
             panelImage.raycastTarget = false;
@@ -78,7 +80,8 @@ namespace TrickalFanGame.Editor
             heartLayout.childControlHeight = false;
             heartLayout.childForceExpandWidth = false;
             heartLayout.childForceExpandHeight = false;
-            RectTransform heartTemplate = Rect(heartRow, HeartTemplateName, Vector2.zero, new Vector2(36, 36));
+            RectTransform heartTemplate = Rect(heartRow, HeartTemplateName, Vector2.zero,
+                Vector2.one * Week27Ux1Setup.HeartMaximumSize);
             Image heartBackground = Component<Image>(Rect(heartTemplate, "Background", Vector2.zero,
                 Vector2.zero).gameObject);
             Stretch(heartBackground.rectTransform);
@@ -98,8 +101,8 @@ namespace TrickalFanGame.Editor
             heartFill.raycastTarget = false;
             heartTemplate.gameObject.SetActive(false);
 
-            Text(panel, "SP Label", "SP", new Vector2(-214, -22), new Vector2(44, 40), 20, font);
-            RectTransform slots = Rect(panel, "SP Slots", new Vector2(-58, -22), new Vector2(264, 40));
+            Text(panel, "SP Label", "SP", Week27Ux1Setup.SpLabelPosition, new Vector2(44, 48), 24, font);
+            RectTransform slots = Rect(panel, "SP Slots", Week27Ux1Setup.SpSlotsPosition, Week27Ux1Setup.SpSlotsSize);
             HorizontalLayoutGroup layout = Component<HorizontalLayoutGroup>(slots.gameObject);
             layout.spacing = 8;
             layout.childAlignment = TextAnchor.MiddleLeft;
@@ -107,23 +110,37 @@ namespace TrickalFanGame.Editor
             layout.childControlHeight = false;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
-            Image slotTemplate = Component<Image>(Rect(slots, "SP Slot Template", Vector2.zero, new Vector2(40, 40)).gameObject);
+            Image slotTemplate = Component<Image>(Rect(slots, "SP Slot Template", Vector2.zero,
+                Vector2.one * Week27Ux1Setup.SpSlotSize).gameObject);
             slotTemplate.color = new Color(0.18f, 0.28f, 0.38f, 0.55f);
             slotTemplate.raycastTarget = false;
             slotTemplate.gameObject.SetActive(false);
-            TMP_Text spValue = Text(panel, "SP Value", "SP 0 / 0", new Vector2(118, -22), new Vector2(116, 32), 16, font);
+            TMP_Text spValue = Text(panel, "SP Value", "SP 0 / 0", Week27Ux1Setup.SpValuePosition,
+                new Vector2(140, 36), 20, font);
             spValue.alignment = TextAlignmentOptions.Right;
 
-            RectTransform skillStateRect = Rect(panel, "Lower Skill State", new Vector2(194, -22), new Vector2(76, 48));
-            Image skillState = Component<Image>(skillStateRect.gameObject);
-            skillState.raycastTarget = false;
-            TMP_Text skillText = Text(skillStateRect, "State", "SPACE", Vector2.zero, new Vector2(160, 32), 16, font);
-            skillText.alignment = TextAlignmentOptions.Center;
-
+            // Once HUD-2 owns the skill icons (and UX-1 removed the status words), keep its icon instead of
+            // bringing back the old lower-grade state box.
             GameHudView view = Component<GameHudView>(canvasObject);
+            Image skillState;
+            TMP_Text skillText;
+            if (frame.Find(Week13Hud2Setup.SkillPanelName) != null && view.LowerGradeSkillState != null)
+            {
+                skillState = view.LowerGradeSkillState;
+                skillText = null;
+            }
+            else
+            {
+                RectTransform skillStateRect = Rect(panel, "Lower Skill State", new Vector2(194, -22), new Vector2(76, 48));
+                skillState = Component<Image>(skillStateRect.gameObject);
+                skillState.raycastTarget = false;
+                skillText = Text(skillStateRect, "State", "SPACE", Vector2.zero, new Vector2(160, 32), 16, font);
+                skillText.alignment = TextAlignmentOptions.Center;
+            }
+
             view.Configure(playerHealth, playerSP, playerSkill, null, null, null, slots, slotTemplate,
                 spValue, skillState, skillText);
-            view.ConfigureHearts(heartRow, heartTemplate);
+            view.ConfigureHearts(heartRow, heartTemplate, Week27Ux1Setup.HeartMaximumSize);
 
             foreach (Component component in canvasObject.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using TMPro;
@@ -49,17 +50,40 @@ namespace TrickalFanGame.Editor
                 "Both HUD-2 skill references must point to the same player.");
             Assert(view.LowerGradeSkillState != null && view.LowerGradeCooldownFill != null &&
                 view.HighGradeSkillState != null && view.HighGradeCooldownFill != null &&
-                view.HighGradeCooldownText != null && view.HighGradeSkillText != null,
+                view.HighGradeCooldownText != null && view.HighGradeSkillText == null &&
+                view.LowerGradeSkillText == null,
                 "HUD-2 visual references are missing.");
-            Assert(view.LowerGradeSkillState.rectTransform.sizeDelta == new Vector2(72, 72) &&
-                view.HighGradeSkillState.rectTransform.sizeDelta == new Vector2(72, 72),
-                "HUD-2 must use two 72x72 skill icons.");
+            Vector2 iconSize = Vector2.one * Week27Ux1Setup.SkillIconSize;
+            Assert(view.LowerGradeSkillState.rectTransform.sizeDelta == iconSize &&
+                view.HighGradeSkillState.rectTransform.sizeDelta == iconSize,
+                "HUD-2 must use two equal UX-1 skill icons.");
+            foreach (Image art in new[] { view.LowerGradeSkillState, view.HighGradeSkillState })
+            {
+                Image tile = art.transform.parent.GetComponent<Image>();
+                Mask mask = art.transform.parent.GetComponent<Mask>();
+                Assert(tile != null && mask != null && tile.sprite ==
+                    AssetDatabase.LoadAssetAtPath<Sprite>(Week13FrontendUiAssets.RoundedSquareSpritePath) &&
+                    ((RectTransform)tile.transform).sizeDelta == iconSize,
+                    "UX-1 skill artwork must sit in a rounded tile of the same size.");
+            }
+            Assert(view.LowerGradeCooldownFill.sprite != null && view.HighGradeCooldownFill.sprite != null,
+                "Skill overlays need a sprite; a sprite-less Filled Image ignores fillAmount and covers the icon.");
+            Assert(view.LowerGradeCooldownFill.transform.parent == view.LowerGradeSkillState.transform.parent &&
+                view.HighGradeCooldownFill.transform.parent == view.HighGradeSkillState.transform.parent,
+                "The skill overlay must be clipped by the same rounded tile.");
             Assert(view.LowerGradeCooldownFill.type == Image.Type.Filled &&
                 view.LowerGradeCooldownFill.fillMethod == Image.FillMethod.Radial360 &&
                 view.HighGradeCooldownFill.type == Image.Type.Filled &&
                 view.HighGradeCooldownFill.fillMethod == Image.FillMethod.Radial360 &&
                 !view.HighGradeCooldownFill.fillClockwise,
                 "Skill cooldown overlays must be counter-clockwise radial filled Images.");
+            // Filled counter-clockwise from the top, the overlay's edge moves clockwise as the cooldown runs out.
+            Assert(view.LowerGradeCooldownFill.fillOrigin == (int)Image.Origin360.Top &&
+                view.HighGradeCooldownFill.fillOrigin == (int)Image.Origin360.Top &&
+                !view.LowerGradeCooldownFill.fillClockwise &&
+                view.HighGradeCooldownFill.color == GameHudView.SkillOverlayColor &&
+                view.HighGradeCooldownFill.color.a < 0.9f,
+                "UX-1: the skill overlay must be see-through dark and sweep clockwise from the top.");
             Assert(!view.GetComponentsInChildren<Graphic>(true).Any(graphic => graphic.raycastTarget &&
                 graphic.GetComponentInParent<GamePauseArtifactView>() == null &&
                 graphic.GetComponentInParent<ItemRewardSelectionView>() == null &&
@@ -95,6 +119,13 @@ namespace TrickalFanGame.Editor
             try
             {
                 GameHudView view = hudClone.GetComponent<GameHudView>();
+                if (sp.CurrentSP == 0)
+                {
+                    view.RefreshSkillStateAt(100f);
+                    Assert(!view.IsLowerGradeSkillAvailable && view.LowerGradeSkillState.color == Color.white &&
+                        Mathf.Approximately(view.LowerGradeCooldownFill.fillAmount, 1f),
+                        "UX-1: a lower grade without SP keeps its artwork and is covered by the dark overlay.");
+                }
                 Assert(sp.TryAdd(), "HUD-2 readiness verification could not add SP.");
                 view.RefreshSkillStateAt(100f);
                 Assert(view.IsLowerGradeSkillAvailable && view.IsHighGradeSkillAvailable,
@@ -103,11 +134,16 @@ namespace TrickalFanGame.Editor
                     Mathf.Approximately(view.HighGradeCooldownFill.fillAmount, 0f) &&
                     string.IsNullOrEmpty(view.HighGradeCooldownText.text),
                     "Ready skills must not show a cooldown overlay or countdown.");
+                AssertOverlayDrawsFill(view.LowerGradeCooldownFill);
+                AssertOverlayDrawsFill(view.HighGradeCooldownFill);
 
                 Assert(ultimate.TryActivate(100f), "HUD-2 verification could not activate the high-grade skill.");
                 view.RefreshSkillStateAt(100f);
-                Assert(!view.IsHighGradeSkillAvailable && view.HighGradeSkillText.text == "사용 중",
+                Assert(!view.IsHighGradeSkillAvailable,
                     "Active high-grade skill must be shown as unavailable and in use.");
+                Assert(view.HighGradeSkillState.color == Color.white &&
+                    Mathf.Approximately(view.HighGradeCooldownFill.fillAmount, 1f),
+                    "UX-1: a high grade in use keeps its artwork under a full dark overlay."); 
 
                 float cooldownStart = 100f + ultimate.MaximumDuration;
                 ultimate.Tick(cooldownStart);
@@ -117,7 +153,8 @@ namespace TrickalFanGame.Editor
                 Assert(Mathf.Approximately(view.HighGradeCooldownRemaining, ultimate.Cooldown * 0.5f) &&
                     Mathf.Approximately(view.HighGradeCooldownFill.fillAmount, 0.5f) &&
                     view.HighGradeCooldownText.text == Mathf.CeilToInt(ultimate.Cooldown * 0.5f).ToString() &&
-                    view.HighGradeSkillText.text == "쿨타임" && !view.IsHighGradeSkillAvailable,
+                    !view.IsHighGradeSkillAvailable &&
+                    view.HighGradeSkillState.color == Color.white,
                     "High-grade cooldown countdown does not match PlayerUltimate's actual cooldown.");
 
                 Time.timeScale = 0f;
@@ -132,7 +169,7 @@ namespace TrickalFanGame.Editor
                 Time.timeScale = originalTimeScale;
                 view.RefreshSkillStateAt(cooldownStart + ultimate.Cooldown);
                 Assert(view.IsHighGradeSkillAvailable && Mathf.Approximately(view.HighGradeCooldownRemaining, 0f) &&
-                    view.HighGradeSkillText.text == "사용 가능",
+                    Mathf.Approximately(view.HighGradeCooldownFill.fillAmount, 0f),
                     "High-grade skill HUD did not become ready at the cooldown boundary.");
             }
             finally
@@ -142,6 +179,45 @@ namespace TrickalFanGame.Editor
                 Object.DestroyImmediate(hudClone);
                 sp.TrySpend();
             }
+        }
+
+        // UX-1: what the overlay actually draws. Nothing when empty, a part at half, everything when full; a
+        // sprite-less Filled Image draws the full square at every amount.
+        private static void AssertOverlayDrawsFill(Image overlay)
+        {
+            float original = overlay.fillAmount;
+            try
+            {
+                Assert(MeshArea(overlay, 0f) < 0.001f && MeshArea(overlay, 0.5f) > 0.001f &&
+                    MeshArea(overlay, 0.5f) < MeshArea(overlay, 1f) - 0.001f,
+                    $"{overlay.transform.parent.parent.name} overlay must draw only its fill amount.");
+            }
+            finally
+            {
+                overlay.fillAmount = original;
+            }
+        }
+
+        private static float MeshArea(Image overlay, float amount)
+        {
+            overlay.fillAmount = amount;
+            using UnityEngine.UI.VertexHelper helper = new();
+            MethodInfo populate = typeof(Image).GetMethod("OnPopulateMesh", BindingFlags.Instance | BindingFlags.NonPublic,
+                null, new[] { typeof(UnityEngine.UI.VertexHelper) }, null);
+            populate.Invoke(overlay, new object[] { helper });
+            float area = 0f;
+            UIVertex a = default, b = default, c = default;
+            List<UIVertex> stream = new();
+            helper.GetUIVertexStream(stream);
+            for (int index = 0; index + 2 < stream.Count; index += 3)
+            {
+                a = stream[index];
+                b = stream[index + 1];
+                c = stream[index + 2];
+                area += Mathf.Abs((b.position.x - a.position.x) * (c.position.y - a.position.y) -
+                                  (c.position.x - a.position.x) * (b.position.y - a.position.y)) * 0.5f;
+            }
+            return area;
         }
 
         private static int frameChildCount(Transform panel, string name) => panel.Cast<Transform>()

@@ -53,10 +53,11 @@ namespace TrickalFanGame.Editor
                 "HUD-1 state references must point to the same player.");
             Assert(view.HeartRowRoot != null && view.HeartTemplate != null &&
                 view.SpSlotsRoot != null && view.SpSlotTemplate != null && view.SpValueText != null &&
-                view.LowerGradeSkillState != null && view.LowerGradeSkillText != null,
-                "GameHudView visual references are missing.");
-            Assert(!view.SpSlotTemplate.gameObject.activeSelf && view.SpSlotTemplate.rectTransform.sizeDelta == new Vector2(40, 40),
-                "HUD-1 must use one inactive 40x40 SP slot template.");
+                view.LowerGradeSkillState != null &&
+                (view.LowerGradeSkillText == null) == (view.transform.Find("ReferenceFrame/" + Week13Hud2Setup.SkillPanelName) != null),
+                "GameHudView visual references are missing (UX-1 removed the skill status words).");
+            Assert(!view.SpSlotTemplate.gameObject.activeSelf && view.SpSlotTemplate.rectTransform.sizeDelta == Vector2.one * Week27Ux1Setup.SpSlotSize,
+                "HUD-1 must use one inactive SP slot template of the UX-1 size.");
             ValidateHeartRow(view);
             Assert(!view.GetComponentsInChildren<Graphic>(true).Any(graphic => graphic.raycastTarget &&
                 graphic.GetComponentInParent<GamePauseArtifactView>() == null &&
@@ -77,9 +78,9 @@ namespace TrickalFanGame.Editor
             Assert(raycaster != null && !raycaster.enabled, "HUD-1 GraphicRaycaster must be disabled.");
 
             RectTransform panel = view.transform.Find("ReferenceFrame/Survival HUD") as RectTransform;
-            Assert(panel != null && panel.sizeDelta == new Vector2(500, 128) &&
-                panel.anchoredPosition == new Vector2(-646, 422),
-                "Survival HUD must occupy the specified top-left 500x128 region.");
+            Assert(panel != null && panel.sizeDelta == Week27Ux1Setup.SurvivalSize &&
+                panel.anchoredPosition == Week27Ux1Setup.SurvivalPosition,
+                "Survival HUD must occupy the UX-1 top-left region.");
             Assert(FindAll<PlayerSP>(scene).Length == 1, "HUD-1 setup changed player SP component cardinality.");
         }
 
@@ -133,13 +134,13 @@ namespace TrickalFanGame.Editor
                     "Shield hearts must follow the health hearts.");
 
                 SetMaxHealth(health, 40f);
-                Assert(view.HeartCount == 22 && view.HeartSize < 36f &&
+                Assert(view.HeartCount == 22 && view.HeartSize < Week27Ux1Setup.HeartMaximumSize &&
                     view.HeartSize * view.HeartCount + 4f * (view.HeartCount - 1) <=
                     view.HeartRowRoot.rect.width + 0.01f,
                     "Many hearts must shrink to stay inside the HP row.");
                 SetMaxHealth(health, 12f);
                 health.SetShield(0f);
-                Assert(view.HeartCount == 6 && view.ShieldHeartCount == 0 && Mathf.Approximately(view.HeartSize, 36f),
+                Assert(view.HeartCount == 6 && view.ShieldHeartCount == 0 && Mathf.Approximately(view.HeartSize, Week27Ux1Setup.HeartMaximumSize),
                     "Removing shield and extra max HP must remove surplus hearts and restore the icon size.");
 
                 Assert(sp.TryAdd(2) && view.ActiveSlotCount == 2 && view.LastSPDelta == 2,
@@ -181,7 +182,8 @@ namespace TrickalFanGame.Editor
                 Assert(!view.IsLowerGradeSkillAvailable, "Lower-grade skill must be unavailable at zero SP.");
                 Assert(sp.TryAdd(), "Skill readiness verification could not add SP.");
                 view.RefreshNow();
-                Assert(view.IsLowerGradeSkillAvailable && view.LowerGradeSkillText.text.Contains("사용 가능"),
+                Assert(view.IsLowerGradeSkillAvailable &&
+                    Mathf.Approximately(view.LowerGradeCooldownFill.fillAmount, 0f),
                     "Lower-grade skill readiness did not match the actual cast preconditions.");
                 sp.TrySpend();
             }

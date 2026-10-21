@@ -52,6 +52,67 @@ namespace TrickalFanGame.Editor
             return sprite;
         }
 
+        public const string RoundedSquareSpritePath = "Assets/Art/UI/HudRoundedSquare.png";
+        private const int RoundedSquareSize = 128;
+        private const float RoundedSquareRadius = 26f;
+
+        // UX-1: a white rounded square used as the skill icon mask; corners are anti-aliased.
+        public static Sprite LoadOrCreateRoundedSquareSprite()
+        {
+            if (AssetDatabase.LoadAssetAtPath<Texture2D>(RoundedSquareSpritePath) == null)
+            {
+                if (!AssetDatabase.IsValidFolder("Assets/Art/UI")) AssetDatabase.CreateFolder("Assets/Art", "UI");
+                File.WriteAllBytes(RoundedSquareSpritePath, CreateRoundedSquarePng());
+                AssetDatabase.ImportAsset(RoundedSquareSpritePath, ImportAssetOptions.ForceSynchronousImport);
+            }
+
+            TextureImporter importer = AssetImporter.GetAtPath(RoundedSquareSpritePath) as TextureImporter;
+            if (importer == null)
+                throw new InvalidOperationException("Rounded square importer is missing: " + RoundedSquareSpritePath);
+            if (importer.textureType != TextureImporterType.Sprite ||
+                importer.spriteImportMode != SpriteImportMode.Single ||
+                !importer.alphaIsTransparency || importer.mipmapEnabled)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.alphaIsTransparency = true;
+                importer.mipmapEnabled = false;
+                importer.SaveAndReimport();
+            }
+
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(RoundedSquareSpritePath);
+            if (sprite == null)
+                throw new InvalidOperationException("Rounded square sprite could not be loaded: " + RoundedSquareSpritePath);
+            return sprite;
+        }
+
+        private static byte[] CreateRoundedSquarePng()
+        {
+            Texture2D texture = new(RoundedSquareSize, RoundedSquareSize, TextureFormat.RGBA32, false);
+            try
+            {
+                float half = RoundedSquareSize * 0.5f;
+                float inner = half - RoundedSquareRadius;
+                for (int y = 0; y < RoundedSquareSize; y++)
+                for (int x = 0; x < RoundedSquareSize; x++)
+                {
+                    // Signed distance to the rounded square edge, then a one-pixel soft edge.
+                    float dx = Mathf.Max(Mathf.Abs(x + 0.5f - half) - inner, 0f);
+                    float dy = Mathf.Max(Mathf.Abs(y + 0.5f - half) - inner, 0f);
+                    float distance = Mathf.Sqrt(dx * dx + dy * dy) - RoundedSquareRadius;
+                    float alpha = Mathf.Clamp01(0.5f - distance);
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+
+                texture.Apply();
+                return texture.EncodeToPNG();
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(texture);
+            }
+        }
+
         private static byte[] CreateHeartTexturePng()
         {
             Texture2D texture = new(HeartTextureSize, HeartTextureSize, TextureFormat.RGBA32, false);
