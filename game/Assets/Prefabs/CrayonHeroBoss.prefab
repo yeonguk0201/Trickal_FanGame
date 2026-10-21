@@ -314,7 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damageTier: 2
+  damageTier: 0
   cooldown: 0.8
   halfHeartDamage: 0
 --- !u!114 &1230439742369051024
@@ -343,21 +343,21 @@ MonoBehaviour:
   summonsPerPattern: 4
   summonRadius: 2.5
   summonReactivationHealthFraction: 0.15
-  approachSpeed: 2.5
+  approachSpeed: 2.2
   phaseTwoSpeedMultiplier: 1.35
   swingRange: 2.4
-  swingWidth: 3.2
+  swingWidth: 3
   swingStartGap: 0.15
   swingWindup: 0.3
   swingInterval: 0.7
   swingDirectionLockDuration: 0.12
-  swingDamageTier: 2
-  swingRecognitionMultiplier: 1.625
+  swingDamageTier: 1
+  swingRecognitionMultiplier: 1.4
   dashSpeed: 15
   dashDuration: 0.17
   dashRetargetDuration: 0.1
   dashWidth: 1.8
-  dashDamageTier: 2
+  dashDamageTier: 0
   pressureActionsBeforeSlash: 3
   slashCooldownPhaseOne: 9
   slashCooldownGolden: 7.5
