@@ -104,7 +104,7 @@ namespace TrickalFanGame.Editor
                     Load<GameObject>(AxePrefabPath),
                     Load<GameObject>(ShieldPrefabPath),
                 }, 4, 2.5f, 0.15f);
-                runtime.ConfigureSwing(2.2f, 1.35f, 2.4f, 3f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Medium);
+                runtime.ConfigureSwing(3.2f, 1.35f, 2.4f, 3f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Medium);
                 runtime.ConfigureSwingRecognition(1.4f);
                 runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, EnemyDamageTier.Light);
                 runtime.ConfigureSelection(3, 9f, 7.5f, 45, 30, 10, 15);

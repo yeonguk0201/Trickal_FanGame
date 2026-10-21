@@ -77,7 +77,7 @@ namespace TrickalFanGame.Editor
                    Mathf.Approximately(runtime.SwingWidth, 3f) &&
                    runtime.SwingStartOffset > collider.bounds.extents.x &&
                    Mathf.Approximately(runtime.SwingTriggerRange, runtime.SwingAttackReach * 1.4f) &&
-                   Mathf.Approximately(runtime.CurrentApproachSpeed, 2.2f) &&
+                   Mathf.Approximately(runtime.CurrentApproachSpeed, 3.2f) &&
                    runtime.SwingDamageTier == EnemyDamageTier.Medium &&
                    runtime.DashDamageTier == EnemyDamageTier.Light &&
                    prefab.GetComponent<ContactDamage>()?.DamageTier == EnemyDamageTier.Light &&
@@ -367,7 +367,7 @@ namespace TrickalFanGame.Editor
                 SpriteRenderer renderer = root.GetComponentInChildren<SpriteRenderer>();
                 // The awakened phase has its own drawings now, so the sprite is no longer tinted.
                 Assert(boss.CurrentPhase == 2 && Mathf.Approximately(boss.CurrentTempoMultiplier, 0.78f) &&
-                       !health.IsInvulnerable && runtime.CurrentApproachSpeed > 2.2f,
+                       !health.IsInvulnerable && runtime.CurrentApproachSpeed > 3.2f,
                     "Golden phase must release invulnerability and accelerate tempo/movement.");
 
                 target.GetComponent<DamageInvulnerability>().ResetHitWindow();
@@ -443,7 +443,7 @@ namespace TrickalFanGame.Editor
             boss.ConfigureHud("크레용사용", 2);
             boss.ConfigurePhaseTwo(0.5f, 0.78f);
             runtime.ConfigureSlash(18f, 1.15f, 0.2f, EnemyDamageTier.Critical);
-            runtime.ConfigureSwing(2.2f, 1.35f, 2.4f, 3f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Medium);
+            runtime.ConfigureSwing(3.2f, 1.35f, 2.4f, 3f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Medium);
             runtime.ConfigureSwingRecognition(1.4f);
             runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, EnemyDamageTier.Light);
             runtime.ConfigureSelection(3, 9f, 7.5f, 45, 30, 10, 15);

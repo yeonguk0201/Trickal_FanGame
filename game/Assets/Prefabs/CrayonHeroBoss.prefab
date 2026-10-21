@@ -343,7 +343,7 @@ MonoBehaviour:
   summonsPerPattern: 4
   summonRadius: 2.5
   summonReactivationHealthFraction: 0.15
-  approachSpeed: 2.2
+  approachSpeed: 3.2
   phaseTwoSpeedMultiplier: 1.35
   swingRange: 2.4
   swingWidth: 3
