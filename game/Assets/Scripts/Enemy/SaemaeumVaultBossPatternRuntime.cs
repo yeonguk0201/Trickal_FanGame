@@ -3,6 +3,7 @@ using TrickalFanGame.Debugging;
 using TrickalFanGame.Player;
 using TrickalFanGame.Room;
 using TrickalFanGame.Run;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TrickalFanGame.Enemy
@@ -35,6 +36,27 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private EnemyDamageTier landingDamageTier = EnemyDamageTier.Medium;
         [SerializeField, Min(0f)] private float landingKnockbackSpeed = 7f;
         [SerializeField, Min(0.01f)] private float landingKnockbackDuration = 0.2f;
+
+        [Header("Slime scatter")]
+        // Large puddles land first (the first on the player); small ones are the size of one room obstacle.
+        [SerializeField, Min(0)] private int phaseOneLargeSlimes = 1;
+        [SerializeField, Min(0)] private int phaseOneSmallSlimes = 4;
+        [SerializeField, Min(0)] private int phaseTwoLargeSlimes = 2;
+        [SerializeField, Min(0)] private int phaseTwoSmallSlimes = 5;
+        [SerializeField, Min(0.1f)] private float slimePuddleRadius = 1.2f;
+        [SerializeField, Min(0.1f)] private float smallSlimePuddleRadius = 0.5f;
+        [SerializeField, Range(0f, 1f)] private float slimeSpeedMultiplier = 0.75f;
+        [SerializeField, Min(1)] private int slimeRequiredHits = BossSlimePuddle.DefaultRequiredHits;
+        // Puddles stay until the player pops them; past this many, the oldest one dries up.
+        [SerializeField, Min(1)] private int maximumSlimePuddles = 14;
+        [SerializeField, Min(0.05f)] private float slimeFlightDuration = 0.7f;
+        [SerializeField, Min(0f)] private float slimeLaunchStagger = 0.08f;
+        [SerializeField, Min(0f)] private float slimeArcHeight = 2.4f;
+        // The first lump lands on the player; the rest scatter on a ring this wide around them.
+        [SerializeField, Min(0f)] private float slimeScatterMinimumDistance = 1.6f;
+        [SerializeField, Min(0.1f)] private float slimeScatterMaximumDistance = 3.6f;
+        // Puddles from one throw do not overlap, and never land closer than this between centers.
+        [SerializeField, Min(0f)] private float slimeMinimumSpacing = 1f;
 
         [Header("Treasure heal")]
         [SerializeField, Min(0.01f)] private float healPerUse = 138f;
@@ -82,6 +104,9 @@ namespace TrickalFanGame.Enemy
         private int healPoseIndex = -1;
         private float healReturnEndsAt;
         private GameObject landingTelegraph;
+        private readonly List<BossSlimePuddle> slimePuddles = new();
+        private readonly List<BossSlimeBlob> slimeBlobs = new();
+        private float slimeScatterStartedAt;
 
         public int HealUses => healUses;
         public float HealPerUse => healPerUse;
@@ -104,6 +129,19 @@ namespace TrickalFanGame.Enemy
         public float ApproachSpeed => approachSpeed;
         public float CurrentApproachSpeed => approachSpeed *
             (boss != null && boss.CurrentPhase >= 2 ? phaseTwoSpeedMultiplier : 1f);
+        public int LargeSlimeCountThisPhase => Mathf.Max(0, IsPhaseTwo ? phaseTwoLargeSlimes : phaseOneLargeSlimes);
+        public int SmallSlimeCountThisPhase => Mathf.Max(0, IsPhaseTwo ? phaseTwoSmallSlimes : phaseOneSmallSlimes);
+        public int SlimeCountThisPhase => Mathf.Max(1, LargeSlimeCountThisPhase + SmallSlimeCountThisPhase);
+        public float SlimePuddleRadius => slimePuddleRadius;
+        public float SmallSlimePuddleRadius => smallSlimePuddleRadius;
+        public float SlimeSpeedMultiplier => slimeSpeedMultiplier;
+        public int SlimeRequiredHits => Mathf.Max(1, slimeRequiredHits);
+        public int MaximumSlimePuddles => Mathf.Max(1, maximumSlimePuddles);
+        public float SlimeFlightDuration => slimeFlightDuration;
+        public float SlimeLaunchStagger => slimeLaunchStagger;
+        public IReadOnlyList<BossSlimePuddle> SlimePuddles => slimePuddles;
+        public IReadOnlyList<BossSlimeBlob> SlimeBlobs => slimeBlobs;
+        private bool IsPhaseTwo => boss != null && boss.CurrentPhase >= 2;
         public bool HealIsAvailable => boss != null && boss.CurrentPhase == 1;
         public Vector3 CurrentVisualScale => visualTransform != null ? visualTransform.localScale : Vector3.one;
 
@@ -159,6 +197,20 @@ namespace TrickalFanGame.Enemy
             landingKnockbackDuration = Mathf.Max(0.01f, knockbackDuration);
         }
 
+        public void ConfigureSlime(int firstLarge, int firstSmall, int secondLarge, int secondSmall,
+            float largeRadius, float smallRadius, float speedMultiplier, int requiredHits, int maximumPuddles)
+        {
+            phaseOneLargeSlimes = Mathf.Max(0, firstLarge);
+            phaseOneSmallSlimes = Mathf.Max(0, firstSmall);
+            phaseTwoLargeSlimes = Mathf.Max(0, secondLarge);
+            phaseTwoSmallSlimes = Mathf.Max(0, secondSmall);
+            slimePuddleRadius = Mathf.Max(0.1f, largeRadius);
+            smallSlimePuddleRadius = Mathf.Max(0.1f, smallRadius);
+            slimeSpeedMultiplier = Mathf.Clamp01(speedMultiplier);
+            slimeRequiredHits = Mathf.Max(1, requiredHits);
+            maximumSlimePuddles = Mathf.Max(1, maximumPuddles);
+        }
+
         public void ConfigureHealing(float amountPerUse, int pulseCount)
         {
             healPerUse = Mathf.Max(0.01f, amountPerUse);
@@ -207,6 +259,13 @@ namespace TrickalFanGame.Enemy
                 jumpCycleFrameIndex = 1;
                 return;
             }
+            if (state == BossActionState.Telegraph && execution == BossPatternExecution.SaemaeumSlimeScatter)
+            {
+                // Gathers itself low before spitting.
+                StopMovement();
+                jumpCycleFrameIndex = 1;
+                return;
+            }
             if (state == BossActionState.Telegraph && execution == BossPatternExecution.SaemaeumTreasureHeal)
             {
                 StopMovement();
@@ -233,6 +292,9 @@ namespace TrickalFanGame.Enemy
                     return true;
                 case BossPatternExecution.SaemaeumJumpSequence:
                     StartJumpSequence();
+                    return true;
+                case BossPatternExecution.SaemaeumSlimeScatter:
+                    ScatterSlime();
                     return true;
                 case BossPatternExecution.SaemaeumTreasureHeal:
                     if (!HealIsAvailable) return true;
@@ -263,6 +325,9 @@ namespace TrickalFanGame.Enemy
                     break;
                 case BossPatternExecution.SaemaeumJumpSequence:
                     TickJumpSequence(now);
+                    break;
+                case BossPatternExecution.SaemaeumSlimeScatter:
+                    TickSlimeScatter(now);
                     break;
                 case BossPatternExecution.SaemaeumTreasureHeal:
                     TickHealing(now);
@@ -299,6 +364,108 @@ namespace TrickalFanGame.Enemy
                 nextThrowTime += CurrentThrowInterval;
             }
         }
+
+        private void ScatterSlime()
+        {
+            StopMovement();
+            slimeScatterStartedAt = lastTickTime;
+            slimeBlobs.RemoveAll(item => item == null);
+            Vector2 center = target != null ? ResolveTargetGround() : (Vector2)transform.position + Vector2.down * 2f;
+            List<float> radii = SlimeRadiiThisPhase();
+            List<Vector2> landings = PickSlimeLandings(center, radii);
+            SpriteRenderer source = GetComponentInChildren<SpriteRenderer>();
+            int sortingLayer = source != null ? source.sortingLayerID : 0;
+            int sortingOrder = source != null ? source.sortingOrder + 1 : 1;
+            for (int index = 0; index < landings.Count; index++)
+            {
+                float radius = radii[index];
+                BossSlimeBlob blob = BossSlimeBlob.Launch(transform.position, landings[index],
+                    lastTickTime + index * slimeLaunchStagger, slimeFlightDuration, slimeArcHeight, radius,
+                    BossSlimePuddle.PlaceholderSprite, sortingLayer, sortingOrder,
+                    landing => SpawnSlimePuddle(landing, radius, sortingLayer));
+                slimeBlobs.Add(blob);
+                boss?.RegisterOwnedObject(blob.gameObject);
+                if (blob.Mark != null) boss?.RegisterOwnedObject(blob.Mark);
+            }
+        }
+
+        private void TickSlimeScatter(float now)
+        {
+            StopMovement();
+            // Rises out of the crouch as the lumps leave, then settles back to its walking pose.
+            float elapsed = now - slimeScatterStartedAt;
+            float spitting = (SlimeCountThisPhase - 1) * slimeLaunchStagger + 0.2f;
+            jumpCycleFrameIndex = elapsed < spitting ? 2 : elapsed < spitting + 0.12f ? 7 : -1;
+        }
+
+        private Vector2 ResolveTargetGround()
+        {
+            PlayerMovement player = target.GetComponentInParent<PlayerMovement>();
+            return player != null ? player.FeetPosition : (Vector2)target.position;
+        }
+
+        // Large puddles first, then small ones, in throw order.
+        public List<float> SlimeRadiiThisPhase()
+        {
+            var radii = new List<float>();
+            for (int index = 0; index < LargeSlimeCountThisPhase; index++) radii.Add(slimePuddleRadius);
+            for (int index = 0; index < SmallSlimeCountThisPhase; index++) radii.Add(smallSlimePuddleRadius);
+            if (radii.Count == 0) radii.Add(slimePuddleRadius);
+            return radii;
+        }
+
+        // The first lump lands where the player stands; the others spread around them without overlapping.
+        private List<Vector2> PickSlimeLandings(Vector2 center, IReadOnlyList<float> radii)
+        {
+            Rect area = ShrinkArena();
+            int count = radii.Count;
+            var landings = new List<Vector2> { ClampToArea(center, area) };
+            const int attemptsPerLanding = 24;
+            for (int attempt = 0; attempt < count * attemptsPerLanding && landings.Count < count; attempt++)
+            {
+                float angle = NextRandom01() * Mathf.PI * 2f;
+                float distance = Mathf.Lerp(slimeScatterMinimumDistance, slimeScatterMaximumDistance, NextRandom01());
+                Vector2 candidate = ClampToArea(center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance,
+                    area);
+                float radius = radii[landings.Count];
+                bool crowded = false;
+                for (int other = 0; other < landings.Count && !crowded; other++)
+                {
+                    float spacing = Mathf.Max(slimeMinimumSpacing, radius + radii[other]);
+                    crowded = (landings[other] - candidate).sqrMagnitude < spacing * spacing;
+                }
+                if (crowded) continue;
+                landings.Add(candidate);
+            }
+            // A cramped corner may not fit them all apart; the rest still land, closer together.
+            while (landings.Count < count)
+            {
+                float angle = NextRandom01() * Mathf.PI * 2f;
+                landings.Add(ClampToArea(center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) *
+                    slimeScatterMaximumDistance, area));
+            }
+            return landings;
+        }
+
+        private void SpawnSlimePuddle(Vector2 position, float radius, int sortingLayer)
+        {
+            slimePuddles.RemoveAll(item => item == null || item.IsPopped);
+            while (slimePuddles.Count >= MaximumSlimePuddles)
+            {
+                BossSlimePuddle oldest = slimePuddles[0];
+                slimePuddles.RemoveAt(0);
+                oldest.Pop();
+            }
+            BossSlimePuddle puddle = BossSlimePuddle.Create(position, radius, slimeSpeedMultiplier,
+                SlimeRequiredHits, target, sortingLayer);
+            slimePuddles.Add(puddle);
+            boss?.RegisterOwnedObject(puddle.gameObject);
+        }
+
+        private static Vector2 ClampToArea(Vector2 position, Rect area) =>
+            new(Mathf.Clamp(position.x, area.xMin, area.xMax), Mathf.Clamp(position.y, area.yMin, area.yMax));
+
+        private float NextRandom01() => NextRandom(10000) / 10000f;
 
         private void StartJumpSequence()
         {

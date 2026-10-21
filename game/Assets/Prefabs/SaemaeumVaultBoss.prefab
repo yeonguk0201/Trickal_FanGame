@@ -200,6 +200,13 @@ MonoBehaviour:
     activeDuration: 1.8
     recoveryDuration: 1.05
     reuseCooldown: 5.5
+  - patternId: saemaeum-slime-scatter
+    execution: 12
+    telegraphDuration: 0.8
+    additionalTelegraphDuration: 0
+    activeDuration: 1.4
+    recoveryDuration: 0.8
+    reuseCooldown: 4.5
   encounterSeed: 1
   attackInterval: 1.2
   projectileSpeed: 4
@@ -240,6 +247,21 @@ MonoBehaviour:
   landingDamageTier: 1
   landingKnockbackSpeed: 7
   landingKnockbackDuration: 0.2
+  phaseOneLargeSlimes: 1
+  phaseOneSmallSlimes: 4
+  phaseTwoLargeSlimes: 2
+  phaseTwoSmallSlimes: 5
+  slimePuddleRadius: 1.2
+  smallSlimePuddleRadius: 0.5
+  slimeSpeedMultiplier: 0.75
+  slimeRequiredHits: 3
+  maximumSlimePuddles: 14
+  slimeFlightDuration: 0.7
+  slimeLaunchStagger: 0.08
+  slimeArcHeight: 2.4
+  slimeScatterMinimumDistance: 1.6
+  slimeScatterMaximumDistance: 3.6
+  slimeMinimumSpacing: 1
   healPerUse: 138
   healPulses: 4
   arenaPadding: 0.8

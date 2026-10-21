@@ -39,6 +39,7 @@ namespace TrickalFanGame.Player
 
         private readonly HashSet<Health> impactedTargets = new();
         private readonly HashSet<DestructibleObstacle> impactedObstacles = new();
+        private readonly HashSet<TrickalFanGame.Enemy.BossSlimePuddle> impactedPuddles = new();
         private Health health;
         private PlayerStats stats;
         private PlayerMovement movement;
@@ -204,6 +205,7 @@ namespace TrickalFanGame.Player
 
             hasImpacted = false;
             impactedObstacles.Clear();
+            impactedPuddles.Clear();
             LastEndReason = UltimateEndReason.None;
             dashEndTime = currentTime + maximumDuration;
             health.SetInvulnerable(true);
@@ -274,6 +276,7 @@ namespace TrickalFanGame.Player
             }
 
             DestructibleObstacle.HitInCircle(transform.position, impactRadius, impactedObstacles);
+            TrickalFanGame.Enemy.BossSlimePuddle.HitInCircle(transform.position, impactRadius, impactedPuddles);
         }
 
         private void ApplyToTarget(Health target)

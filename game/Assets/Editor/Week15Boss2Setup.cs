@@ -61,6 +61,8 @@ namespace TrickalFanGame.Editor
                         BossPatternExecution.SaemaeumJumpSequence, 0.95f, 3.8f, 1.15f, 1.8f),
                     new BossPatternDefinition("saemaeum-eat-treasure",
                         BossPatternExecution.SaemaeumTreasureHeal, 0.8f, 1.8f, 1.05f, 5.5f),
+                    new BossPatternDefinition("saemaeum-slime-scatter",
+                        BossPatternExecution.SaemaeumSlimeScatter, 0.8f, 1.4f, 0.8f, 4.5f),
                 });
 
                 SaemaeumVaultBossPatternRuntime runtime =
@@ -71,6 +73,7 @@ namespace TrickalFanGame.Editor
                 runtime.ConfigureJumps(3, 5, 4, 6, 5.5f, 2.875f, EnemyDamageTier.Medium, 7f, 0.2f,
                     0.76f, 0.72f, 0.20f, 0.15f);
                 runtime.ConfigureHealing(138f, 4);
+                runtime.ConfigureSlime(1, 4, 2, 5, 1.2f, 0.5f, 0.75f, 3, 14);
 
                 if (PrefabUtility.SaveAsPrefabAsset(contents, BossPrefabPath) == null)
                     throw new InvalidOperationException("Could not save the Saemaeum Vault boss prefab.");
