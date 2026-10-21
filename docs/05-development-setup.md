@@ -1321,11 +1321,26 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   일시정지 유지와 Run 행동 차단, 닫기·재개 복귀, GAME OVER 캔버스 순서·전체 화면·숨김 시작, 쓰러짐→5초 대기→원형 페이드가
   줄어들기만 하며 완전히 닫힘→확인 입력 표시, 600초가 지나도 자동 전환 없음, 확인 1회만 결과 전환을 검사한다. 회귀는
   `VerifyWithRegressionsBatch`(HUD-7C·7D, Flow-5의 `Verify`)이고, 실제 사망→GAME OVER 확인→결과 화면 저장 1회는
-  `Week13Flow5PlayVerification.RunBatch`가 확인한다. 2026-10-21 `SetupAndVerifyBatch`와 Flow-5 Play 배치가 종료 코드 0으로
-  통과했다.
+  `Week13Flow5PlayVerification.RunBatch`가 확인한다. 2026-10-21 `SetupAndVerifyBatch`·`VerifyWithRegressionsBatch`와 Flow-5
+  Play 배치가 종료 코드 0으로 통과했다.
   수동 확인: Game Scene Play → `Esc` → `설정`에서 음량·해상도·전체 화면·상세 스탯을 바꾸고 `뒤로`·`Esc`로 일시정지 메뉴에
   돌아오는지, 해상도를 바꾼 뒤에도 키보드 포커스가 설정 패널 안에 남는지, 개발 패널(`F1`) `— Room —`의 `Die (GAME OVER sequence)`나 적에게 사망한 뒤 쓰러짐→
-  약 5초→원형 페이드→`GAME OVER`→`결과 보기`(Enter·클릭)→결과 화면이 이어지는지 1920×1080·1280×720에서 본다.
+  약 5초→원형 페이드→`GAME OVER`→`결과 보기`(Enter·클릭)→결과 화면이 이어지는지 1920×1080·1280×720에서 본다. 사용자 Play 확인 완료(2026-10-21).
+
+- UX-1 HUD 재배치·미니맵·획득 전 설명: 메뉴 `Trickal Fan Game > Week 27 > Setup UX-1 Right HUD, Minimap and Pickup
+  Description`이 HUD-1·HUD-2 Setup을 먼저 다시 돌린 뒤 좌상단(교주의 권능 → 체력·SP → 그 아래 골드·열쇠·폭탄), 상세 스탯
+  위치, 우측 열(미니맵 → 아티팩트), 미니맵 마스크·`Content`, 근접 설명 패널(`Pickup Description`)을 구성한다. 위치 상수는
+  `Week27Ux1Setup` 한 곳에 있고 HUD-1·HUD-2·HUD-3A·HUD-4A·Setting-1C·Power-1 Setup도 이 값을 쓴다. 스킬 아이콘 타일
+  마스크는 `Assets/Art/UI/HudRoundedSquare.png`(`Week13FrontendUiAssets.LoadOrCreateRoundedSquareSprite`)다.
+  자동 검증 메뉴는 `Trickal Fan Game > Week 27 > Verify UX-1 Right HUD, Minimap and Pickup Description`, 배치는
+  `-executeMethod TrickalFanGame.Editor.Week27Ux1Verification.SetupAndVerifyBatch`다. HUD 패널이 1920×1080·1280×720에서
+  화면 안에 있고 서로 겹치지 않는지, 자원 두 자리 표시와 99 상한, 미니맵 실제 간격·현재 방 중앙·방 이동 시 미끄러짐,
+  가장 가까운 후보만 설명·획득/이탈/일시정지 시 숨김을 검사한다. 회귀는 `VerifyWithRegressionsBatch`(HUD-1·2·3A·4A·4B,
+  Setting-1C, Slot-0, Power-1, Spell-6)이고 HUD-2 검증은 스킬 덮개가 채움 비율만큼만 그려지는지 메시 면적으로 확인한다.
+  2026-10-21 회귀 묶음이 종료 코드 0으로 통과했고 사용자 Play 확인을 마쳤다.
+  수동 확인: Game Scene Play → `F1` → `— Resources —`의 `+10 Gold/Key/Bomb`, `— Artifact —`·`— Spell slot —`·
+  `— Power (R) —`의 `Drop`으로 떨군 아이템에 다가가 설명 표시·전환·숨김, SP 유무에 따른 저학년 덮개, `Q` 뒤 고학년 쿨타임
+  덮개 회전, 방 이동 시 미니맵 이동을 본다.
 
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
