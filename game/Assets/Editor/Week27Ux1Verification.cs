@@ -156,15 +156,16 @@ namespace TrickalFanGame.Editor
         {
             RunProgress sceneProgress = Week27Ux1Setup.FindSingle<RunProgress>(scene, "RunProgress");
             GameResourceHudView configured = Week27Ux1Setup.FindSingle<GameResourceHudView>(scene, "resource HUD");
-            Assert(configured.Progress == sceneProgress && configured.EntryCount == 3,
-                "The resource HUD must show gold, keys and bombs of the Run's progress.");
-            for (int i = 0; i < 3; i++)
+            int entries = GameResourceHudView.DisplayOrder.Length;
+            Assert(entries == 4 && GameResourceHudView.DisplayOrder[3] == RunResourceType.Elif &&
+                   configured.Progress == sceneProgress && configured.EntryCount == entries,
+                "The resource HUD must show gold, keys, bombs and the permanent elif of the Run's progress.");
+            for (int i = 0; i < entries; i++)
             {
                 Assert(configured.GetIcon(i) != null && configured.GetIcon(i).sprite != null &&
                        configured.GetCountText(i) != null,
                     $"Resource HUD entry {GameResourceHudView.DisplayOrder[i]} needs an icon and a count.");
-                string path = new[] { Week27Ux1Setup.GoldSpritePath, Week27Ux1Setup.KeySpritePath,
-                    Week27Ux1Setup.BombSpritePath }[i];
+                string path = Week27Ux1Setup.ResourceSpritePaths[i];
                 Assert(configured.GetIcon(i).sprite == AssetDatabase.LoadAssetAtPath<Sprite>(path) &&
                        configured.GetIcon(i).color == Color.white &&
                        configured.GetIcon(i).transform.Find("Letter") == null,
@@ -177,12 +178,13 @@ namespace TrickalFanGame.Editor
             {
                 RunProgress progress = progressObject.GetComponent<RunProgress>();
                 GameResourceHudView view = clone.GetComponent<GameResourceHudView>();
-                view.Configure(progress, Enumerable.Range(0, 3).Select(view.GetIcon).ToArray(),
-                    Enumerable.Range(0, 3).Select(view.GetCountText).ToArray());
+                view.Configure(progress, Enumerable.Range(0, entries).Select(view.GetIcon).ToArray(),
+                    Enumerable.Range(0, entries).Select(view.GetCountText).ToArray());
                 view.RefreshNow();
                 Assert(view.GetShownText(RunResourceType.Gold) == "00" &&
                        view.GetShownText(RunResourceType.Key) == "00" &&
-                       view.GetShownText(RunResourceType.Bomb) == "00",
+                       view.GetShownText(RunResourceType.Bomb) == "00" &&
+                       view.GetShownText(RunResourceType.Elif) == "00",
                     "An empty Run must show 00 for every resource.");
                 progress.TryAddResource(RunResourceType.Gold, 7);
                 progress.TryAddResource(RunResourceType.Key, 12);
@@ -196,6 +198,12 @@ namespace TrickalFanGame.Editor
                 progress.TryAddResource(RunResourceType.Gold, 500);
                 view.RefreshNow();
                 Assert(view.GetShownText(RunResourceType.Gold) == "99", "Gold must show the 99 cap.");
+                // Elif-2: the elif cell shows what the Run can spend and has no 99 cap.
+                progress.SetElifStartingBalance(120);
+                progress.TryAddResource(RunResourceType.Elif, 3);
+                view.RefreshNow();
+                Assert(view.GetShownText(RunResourceType.Elif) == "123",
+                    "The elif cell must follow the starting balance plus this Run's gain, past 99.");
             }
             finally
             {

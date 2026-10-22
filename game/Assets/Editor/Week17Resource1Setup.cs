@@ -12,6 +12,8 @@ namespace TrickalFanGame.Editor
         public const string ElifPrefabPath = "Assets/Prefabs/ElifPickup.prefab";
         public const string KeyPrefabPath = "Assets/Prefabs/KeyPickup.prefab";
         public const string BombPrefabPath = "Assets/Prefabs/BombPickup.prefab";
+        // Elif-2: the permanent elif. ElifPickup.prefab is the gold pickup and keeps its path and GUID.
+        public const string PermanentElifPrefabPath = "Assets/Prefabs/PermanentElifPickup.prefab";
         // Unity built-in circle; each resource is told apart by tint and size until final art replaces it.
         public const string PlaceholderSpritePath = "UI/Skin/Knob.psd";
         public const int PickupAmount = 1;
@@ -42,6 +44,8 @@ namespace TrickalFanGame.Editor
             new(RunResourceType.Gold, ElifPrefabPath, "Elif Pickup", new Color(1f, 0.82f, 0.2f), 0.35f),
             new(RunResourceType.Key, KeyPrefabPath, "Key Pickup", new Color(0.75f, 0.85f, 0.95f), 0.4f),
             new(RunResourceType.Bomb, BombPrefabPath, "Bomb Pickup", new Color(0.18f, 0.18f, 0.22f), 0.5f),
+            new(RunResourceType.Elif, PermanentElifPrefabPath, "Permanent Elif Pickup", new Color(0.62f, 0.45f, 1f),
+                0.35f),
         };
 
         [MenuItem("Trickal Fan Game/Week 17/Setup Resource-1 Run Resource Pickups")]
@@ -58,6 +62,19 @@ namespace TrickalFanGame.Editor
                 "Resource-1 pickups ready: gold, key and bomb pickups each grant 1, are held up to 99 per Run, " +
                 "and stay on the floor as pushable bodies once that resource is full. Open the Item Test Room " +
                 "to spawn them from its debug panel.");
+        }
+
+        // Builds or updates one resource's pickup prefab only (Elif-2 adds the permanent elif without touching others).
+        public static RunResourcePickup EnsurePrefab(RunResourceType type, out string error)
+        {
+            PickupSpec spec = Array.Find(Specs, candidate => candidate.Type == type);
+            if (spec == null)
+            {
+                error = $"No Resource-1 pickup spec exists for {type}.";
+                return null;
+            }
+
+            return EnsurePrefab(spec, out error);
         }
 
         public static bool EnsurePrefabs(out string error)

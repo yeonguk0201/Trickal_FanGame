@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
@@ -87,17 +88,23 @@ namespace TrickalFanGame.Editor
             }
         }
 
+        // The Run-only resources the wallet holds: every type except the permanent elif.
+        private static IEnumerable<RunResourceType> RunResources() =>
+            ((RunResourceType[])Enum.GetValues(typeof(RunResourceType))).Where(RunResourceWallet.IsDefined);
+
         private static void ValidateWallet()
         {
             Assert((int)RunResourceType.Gold == 0 && (int)RunResourceType.Key == 1 &&
-                   (int)RunResourceType.Bomb == 2,
+                   (int)RunResourceType.Bomb == 2 && (int)RunResourceType.Elif == 3,
                 "RunResourceType values are serialized in prefabs and must stay stable.");
+            Assert(!RunResourceWallet.IsDefined(RunResourceType.Elif),
+                "The permanent elif is counted by RunProgress, never held in the Run wallet (Elif-2).");
 
             RunResourceWallet wallet = new();
             List<(RunResourceType type, int count)> changes = new();
             wallet.Changed += (type, count) => changes.Add((type, count));
 
-            foreach (RunResourceType type in Enum.GetValues(typeof(RunResourceType)))
+            foreach (RunResourceType type in RunResources())
             {
                 Assert(wallet.GetCount(type) == 0 && wallet.CanAccept(type), $"{type} must start at 0.");
                 Assert(wallet.Add(type, 0) == 0 && wallet.Add(type, -3) == 0 && wallet.GetCount(type) == 0,
@@ -118,7 +125,7 @@ namespace TrickalFanGame.Editor
 
             changes.Clear();
             wallet.Clear();
-            foreach (RunResourceType type in Enum.GetValues(typeof(RunResourceType)))
+            foreach (RunResourceType type in RunResources())
             {
                 Assert(wallet.GetCount(type) == 0, $"Clear must return {type} to 0.");
             }
@@ -186,6 +193,8 @@ namespace TrickalFanGame.Editor
                         $"A {spec.Type} pickup must grant exactly one and disappear.");
                     Assert(!pickup.Collect(progress) && progress.GetResourceCount(spec.Type) == 1,
                         $"A collected {spec.Type} pickup must never grant a second time.");
+                    // Elif-2: the permanent elif has no Run cap, so it is checked by Elif-2 verification instead.
+                    if (spec.Type == RunResourceType.Elif) continue;
 
                     progress.TryAddResource(spec.Type, RunResourceWallet.MaxCount);
                     pickupObject = CreatePickup(spec.Type, out pickup);

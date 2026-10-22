@@ -7,6 +7,7 @@ using TrickalFanGame.Item;
 using TrickalFanGame.Meta;
 using TrickalFanGame.Network;
 using TrickalFanGame.Player;
+using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
 using UnityEngine;
 
@@ -242,6 +243,11 @@ namespace TrickalFanGame.Run
             }
 
             characterId = selectedCharacterId;
+            // Elif-2: the Run spends from the saved balance it started with (contract 27 §4.3). Without a completed
+            // lookup it starts from 0; Elif-3 adds the cached fallback and the pending Runs' spending.
+            runProgress.SetElifStartingBalance(playerProgressClient != null
+                ? playerProgressClient.LoadedElifBalance.GetValueOrDefault()
+                : 0);
             clientRunId = Guid.NewGuid().ToString();
             startedAt = DateTime.UtcNow;
             startedRealtime = Time.realtimeSinceStartup;
@@ -365,7 +371,8 @@ namespace TrickalFanGame.Run
                 isCleared = isCleared,
                 killCount = runProgress != null ? runProgress.KillCount : 0,
                 deathReason = deathReason,
-                items = BuildRunItems(endedAt)
+                items = BuildRunItems(endedAt),
+                elif = BuildRunElif()
             };
 
             if (!shouldSaveResult)
@@ -474,6 +481,20 @@ namespace TrickalFanGame.Run
             canRetrySave = false;
             client.PostRun(pendingRequest, OnSaveSuccess, OnSaveFailure);
         }
+
+        // Development grants stay out of the request. The gain is capped at the Backend's per-Run limit so an
+        // unusual Run still saves its record and experience.
+        public static RunElifDto BuildRunElif(RunProgress progress)
+        {
+            return new RunElifDto
+            {
+                gained = progress != null ? Mathf.Clamp(progress.ElifGained, 0, PermanentElif.RunGainMax) : 0,
+                spent = progress != null ? Mathf.Max(0, progress.ElifSpent) : 0,
+                upgradePurchases = Array.Empty<RunElifUpgradePurchaseDto>()
+            };
+        }
+
+        private RunElifDto BuildRunElif() => BuildRunElif(runProgress);
 
         private RunItemDto[] BuildRunItems(DateTime endedAt)
         {

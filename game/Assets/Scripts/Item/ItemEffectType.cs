@@ -203,5 +203,8 @@ namespace TrickalFanGame.Item
         // (TarotCardDraw holds the odds and amounts). The draw comes from the Run seed and the use count.
         // No value fields are used.
         RandomStatShift = 85,
+        // Elif-2 (아이시아의 지갑): on acquire, rolls 0-4 permanent elif once from the Run seed and the item ID
+        // (PermanentElif.WalletWeights) and adds them to the Run's elif gain. No value fields are used.
+        GainPermanentElifRollOnAcquire = 86,
     }
 }

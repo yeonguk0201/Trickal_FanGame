@@ -30,7 +30,20 @@ MonoBehaviour:
     spreadAngleDegrees: 0
     scaleMultiplier: 0
     durationSeconds: 0
+  - effectType: 86
+    magnitude: 0
+    healthThreshold: 0
+    secondaryMagnitude: 0
+    integerAmount: 0
+    minimumDistance: 0
+    maximumDistance: 0
+    radius: 0
+    intervalSeconds: 0
+    spreadAngleDegrees: 0
+    scaleMultiplier: 0
+    durationSeconds: 0
   effectType: 61
   effectValue: 100
   stackMode: 0
   maxStacks: 1
+  activeChargeRooms: 0

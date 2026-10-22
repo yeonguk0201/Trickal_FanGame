@@ -137,6 +137,7 @@ namespace TrickalFanGame.Frontend
                     $"{Number(effect.IntervalSeconds)}초간 재발동 불가)",
                 ItemEffectType.KillFrenzyKnockbackPercent => $"중첩당 넉백 +{Percent(effect.Magnitude)}",
                 ItemEffectType.GainGoldOnAcquire => $"획득 시 골드 +{Number(effect.Magnitude)} (보유 한도 99까지)",
+                ItemEffectType.GainPermanentElifRollOnAcquire => "획득 시 엘리프 0~4개",
                 ItemEffectType.BounceBetweenEnemies =>
                     $"기본 공격이 적을 맞히면 가까운 다른 적에게 {effect.IntegerAmount}회 튕김 (스택마다 +1회, 같은 적을 " +
                     $"다시 맞히면 피해 {Percent(effect.SecondaryMagnitude)}씩)",

@@ -25,6 +25,8 @@ namespace TrickalFanGame.Meta
         public CharacterProgressDto LastResultProgress { get; private set; }
         public int LastExperienceGained { get; private set; }
         public bool IsOfflineFallback { get; private set; }
+        // Elif-2: the saved permanent elif balance from the last successful profile lookup; null until one succeeds.
+        public int? LoadedElifBalance { get; private set; }
         public bool IsLoading => isLoading;
         public string StatusMessage => statusMessage;
 
@@ -75,6 +77,7 @@ namespace TrickalFanGame.Meta
                 userNickname,
                 response =>
                 {
+                    if (response?.data?.meta != null) LoadedElifBalance = Mathf.Max(0, response.data.meta.elifBalance);
                     CharacterProgressDto progress = FindProgress(response, characterId);
                     if (progress == null)
                     {

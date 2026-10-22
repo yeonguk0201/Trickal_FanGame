@@ -200,6 +200,10 @@ namespace TrickalFanGame.Room
                     pickup.name = $"Chest Drop {entry.DropId} - {site.State.RoomId} {chest.ChestId}";
                     if (pickup.TryGetComponent(out RunResourcePickup resourcePickup))
                         resourcePickup.BindRunProgress(site.Progress);
+                    // Elif-2: each gold pickup in the chest rolls on its own to become a permanent elif.
+                    if (site.Progress != null)
+                        PermanentElif.TryConvertSpawnedGold(pickup, site.Progress.RunSeed, site.Progress.HasRunSeed,
+                            site.State.RoomId, chest.ChestId, index);
                     spawned.Add(pickup);
                     continue;
                 }

@@ -17,13 +17,29 @@ model User {
   id              String   @id @default(uuid()) @db.Uuid
   clientProfileId String   @unique @map("client_profile_id") @db.Uuid
   nickname        String   @unique @db.VarChar(50)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  elifBalance     Int      @default(0) @map("elif_balance")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   runs              Run[]
   characterProgress UserCharacterProgress[]
+  shopUpgrades      UserShopUpgrade[]
 
   @@map("users")
+}
+
+model UserShopUpgrade {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  upgradeId String   @map("upgrade_id") @db.VarChar(64)
+  level     Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, upgradeId], map: "user_shop_upgrades_user_upgrade_key")
+  @@map("user_shop_upgrades")
 }
 
 model Character {
@@ -72,11 +88,16 @@ model Run {
   deathReason        String?  @map("death_reason") @db.VarChar(32)
   experienceGained   Int      @default(0) @map("experience_gained")
   progressSnapshot   Json?    @map("progress_snapshot") @db.JsonB
+  elifGained         Int      @default(0) @map("elif_gained")
+  elifSpent          Int      @default(0) @map("elif_spent")
+  elifShortfall      Int      @default(0) @map("elif_shortfall")
+  elifSnapshot       Json?    @map("elif_snapshot") @db.JsonB
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
-  character Character @relation(fields: [characterId], references: [id], onDelete: Restrict)
-  runItems  RunItem[]
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  character        Character            @relation(fields: [characterId], references: [id], onDelete: Restrict)
+  runItems         RunItem[]
+  upgradePurchases RunUpgradePurchase[]
 
   @@index([userId], map: "runs_user_id_idx")
   @@index([characterId], map: "runs_character_id_idx")
@@ -118,4 +139,18 @@ model RunItem {
   @@unique([runId, itemOrder], map: "run_items_run_id_item_order_key")
   @@index([itemId], map: "run_items_item_id_idx")
   @@map("run_items")
+}
+
+model RunUpgradePurchase {
+  id            String @id @default(uuid()) @db.Uuid
+  runId         String @map("run_id") @db.Uuid
+  upgradeId     String @map("upgrade_id") @db.VarChar(64)
+  level         Int
+  floor         Int
+  purchaseOrder Int    @map("purchase_order")
+
+  run Run @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@unique([runId, purchaseOrder], map: "run_upgrade_purchases_run_id_order_key")
+  @@map("run_upgrade_purchases")
 }

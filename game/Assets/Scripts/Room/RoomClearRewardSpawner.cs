@@ -112,6 +112,8 @@ namespace TrickalFanGame.Room
             if (runProgress != null && reward.TryGetComponent(out RunResourcePickup resourcePickup))
             {
                 resourcePickup.BindRunProgress(runProgress);
+                PermanentElif.TryConvertSpawnedGold(reward, runProgress.RunSeed, runProgress.HasRunSeed,
+                    runState.RoomId, "clear-drop", 0);
             }
 
             LastSpawnedReward = reward;

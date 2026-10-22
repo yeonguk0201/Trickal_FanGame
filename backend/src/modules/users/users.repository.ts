@@ -201,6 +201,11 @@ export class UsersRepository {
       select: {
         id: true,
         nickname: true,
+        elifBalance: true,
+        shopUpgrades: {
+          orderBy: { upgradeId: 'asc' },
+          select: { upgradeId: true, level: true },
+        },
         characterProgress: {
           orderBy: { characterId: 'asc' },
           select: {

@@ -79,7 +79,9 @@ namespace TrickalFanGame.Room
             if (target == null || !target.activeInHierarchy) return false;
             if (target.TryGetComponent(out HealthPickup heart)) return !heart.IsCollected;
             if (target.TryGetComponent(out SPPickup sp)) return !sp.IsCollected;
-            return target.TryGetComponent(out RunResourcePickup resource) && !resource.IsCollected;
+            // Elif-2: 멜룬카드 does not copy a permanent elif (contract 27 §10 default), so it cannot grow the balance.
+            return target.TryGetComponent(out RunResourcePickup resource) && !resource.IsCollected &&
+                   resource.ResourceType != RunResourceType.Elif;
         }
 
         // site and table may be null in a room without chest support; its pickups are still copied.

@@ -9,10 +9,15 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
+import {
+  ELIF_RUN_GAIN_MAX,
+  ELIF_UPGRADE_PURCHASES_MAX,
+} from '../../../contracts/permanent-elif';
 
 export enum DeathReason {
   ENEMY = 'ENEMY',
@@ -36,6 +41,41 @@ export class CreateRunItemDto {
 
   @IsISO8601({ strict: true })
   acquiredAt: string;
+}
+
+export class CreateRunElifUpgradePurchaseDto {
+  @IsString()
+  @MaxLength(64)
+  upgradeId: string;
+
+  @IsInt()
+  @Min(1)
+  level: number;
+
+  @IsInt()
+  @Min(1)
+  floor: number;
+
+  @IsInt()
+  @Min(1)
+  order: number;
+}
+
+export class CreateRunElifDto {
+  @IsInt()
+  @Min(0)
+  @Max(ELIF_RUN_GAIN_MAX)
+  gained: number;
+
+  @IsInt()
+  @Min(0)
+  spent: number;
+
+  @IsArray()
+  @ArrayMaxSize(ELIF_UPGRADE_PURCHASES_MAX)
+  @ValidateNested({ each: true })
+  @Type(() => CreateRunElifUpgradePurchaseDto)
+  upgradePurchases: CreateRunElifUpgradePurchaseDto[];
 }
 
 export class CreateRunDto {
@@ -84,4 +124,10 @@ export class CreateRunDto {
   @ValidateNested({ each: true })
   @Type(() => CreateRunItemDto)
   items: CreateRunItemDto[];
+
+  // Optional for older clients and pending requests; missing means all zero.
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateRunElifDto)
+  elif?: CreateRunElifDto | null;
 }

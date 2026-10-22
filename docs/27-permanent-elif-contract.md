@@ -3,7 +3,8 @@
 > 작성일: 2026-10-21  
 > 계획: [26-seventh-month-plan.md](./26-seventh-month-plan.md) §5, D8  
 > 관련 계약: [23-item-classification-contract.md](./23-item-classification-contract.md) §6(골드 enum), [07-api.md](./07-api.md), [06-database.md](./06-database.md)  
-> 상태: **설계 확정, 구현 전.** 이 문서는 계약을 정할 뿐 Backend·Prisma·Unity 코드를 만들지 않는다. 구현은 §9의 조건부 조각에서 한다.
+> 상태: **설계 확정. Elif-1(Backend·Prisma)·Elif-2(Unity 획득·기록·저장 요청·HUD) 구현 완료(2026-10-22), Elif-3~4 구현 전.**
+> 구현 차이는 §11(Elif-1), §12(Elif-2).
 
 ## 1. 요약
 
@@ -147,7 +148,7 @@ Run 도중 서버를 부르지 않는다. 모든 계산은 Run 시작 때 받은
 }
 ```
 
-- `gained`, `spent`: 0 이상 정수. `gained`는 Run당 상한(구현 기본값 50)을 넘으면 `400`으로 거부한다.
+- `gained`, `spent`: 0 이상 정수. `gained`는 Run당 상한(구현 기본값 50)을 넘으면 거부한다(`422 VALIDATION_ERROR`, §11).
 - `upgradePurchases`: 이번 Run에서 산 업그레이드 단계, `order`는 1부터 연속. 같은 업그레이드는 단계 순서대로만 올 수 있다.
 - 개발 패널로 얻은 엘리프는 `gained`에 넣지 않는다(§7.2).
 
@@ -155,8 +156,8 @@ Run 도중 서버를 부르지 않는다. 모든 계산은 Run 시작 때 받은
 
 1. 기존과 같이 `clientRunId`로 저장된 Run을 찾는다. 있으면 fingerprint를 비교해 같으면 저장된 응답을 그대로 돌려주고, 다르면
    `409 RUN_IDEMPOTENCY_CONFLICT`. 엘리프는 다시 반영하지 않는다.
-2. 업그레이드 검증: 서버 카탈로그(`SHOP_UPGRADE_CATALOG`)에 없는 ID·최대 단계 초과·단계 건너뛰기는 `400`. 각 구매의 비용은
-   서버 카탈로그로 다시 계산하고, `spent`가 업그레이드 비용 합보다 작으면 `400`.
+2. 업그레이드 검증: 서버 카탈로그(`SHOP_UPGRADE_CATALOG`)에 없는 ID·최대 단계 초과·단계 건너뛰기는 거부한다. 각 구매의 비용은
+   서버 카탈로그로 다시 계산하고, `spent`가 업그레이드 비용 합보다 작으면 거부한다(`422`, §11).
 3. 서버에 이미 그 단계 이상이 있으면(다른 Run이 먼저 저장) 그 구매는 건너뛰고 비용을 `spent`에서 뺀다.
 4. 새 잔액 = 기존 잔액 + `gained` − `spent`(상한 9999). 0보다 작아지면 0으로 두고 모자란 양을 `elifShortfall`에 기록한다.
    **잔액 부족으로 Run 저장을 실패시키지 않는다.** 전적·경험치가 사라지는 쪽이 더 나쁘기 때문이다. 정상 흐름(한 PC, 한 번에 한 Run)에서는
@@ -268,9 +269,64 @@ seed 결과가 바뀌므로 Balance-0·Play-2 기록 전에 넣거나, 넣지 �
 
 ## 10. 남은 결정(다음 계획으로 이관)
 
+- 엘리프 아이콘 원화: 사용자 지정 이미지 `game/Assets/Resources/UserArtwork/permanent-elif.png`(2026-10-22). Elif-2에서
+  바닥 픽업·HUD에 연결하고 `UserArtworkVerification`에 등록했다(§12).
+
 - 멜룬카드가 바닥 엘리프 픽업을 복제할 수 있는지. 구현 기본값은 **복제 대상에서 제외**(영구 화폐를 늘리는 경로를 막음).
 - 마요의 수집품 상자·황금돌·시스트의 금고의 전용 엘리프 드롭(26번 §5). 지금은 §3.1의 공통 전환만 적용한다.
 - 업그레이드 비용·엘리프 가격 상품 등장률 25%·전환 확률 7%의 조정(Balance-0 실측 뒤).
 - 상점 업그레이드 이후 후보(시작 골드, 상점 리롤 등)와 상점 밖 사용처.
 - 같은 프로필 동시 Run에서 생긴 `elifShortfall`을 그대로 둘지, 이후 획득에서 갚게 할지.
 - 9층 확장 시 층 구간별 전환 확률.
+
+## 11. Elif-1 구현 기록(2026-10-22)
+
+- 코드: `backend/src/contracts/permanent-elif.ts`(카탈로그·상한·요청 검증·정산), `meta-progression.ts`(fingerprint),
+  `runs`(DTO·서비스·트랜잭션·응답 `meta`·Run 상세 `elif`), `users`(프로필 `meta`). 마이그레이션
+  `20261022000000_add_permanent_elif`.
+- 오류 상태는 §5.2·§5.3에 적은 `400` 대신 기존 Run 검증과 같은 **`422`**를 쓴다. DTO 형식·`gained` 상한 초과는
+  `VALIDATION_ERROR`, 카탈로그·단계·비용·`order`·`floor` 불일치는 `INVALID_ELIF_DATA`.
+- §5.3의 "단계 건너뛰기"는 두 가지로 나눴다. 같은 요청 안의 건너뛰기는 `INVALID_ELIF_DATA`, 서버에 저장된 단계보다
+  2단계 이상 높은 첫 구매는 `ELIF_UPGRADE_LEVEL_GAP`(트랜잭션 안에서 판정). 그래서 Elif-3의 대기 요청은 저장된 순서대로
+  재전송해야 한다.
+- `run_upgrade_purchases`에는 요청한 구매를 모두 남긴다(다른 Run이 먼저 산 단계 포함). `runs.elif_spent`와 응답
+  `meta.elifSpent`는 건너뛴 단계 비용을 뺀 실제 사용량이다.
+- 기존 Run은 마이그레이션에서 `elif_snapshot`을 잔액 0·업그레이드 없음으로 채워 재전송 응답에도 `meta`가 나온다.
+- 검증: `backend`에서 `pnpm test`(21 suites, 173 tests), `pnpm build` 통과. 지문 호환은 엘리프 도입 전 코드로 만든 해시를
+  `meta-progression.spec.ts`에 고정했다. 실제 PostgreSQL 마이그레이션 적용은 아직 실행하지 않았다(§7.3 수동 확인과 함께).
+- Unity DTO·Web 소비 코드는 바꾸지 않았다. 새 필드는 모두 선택·추가 필드라 기존 클라이언트와 호환된다. Unity 카탈로그와의
+  ID·단계·비용 일치 검사는 Unity 카탈로그가 생기는 Elif-2/3에서 contract-drift-check에 더한다.
+
+## 12. Elif-2 구현 기록(2026-10-22)
+
+- 코드: `PermanentElif`(전환 확률 7%·지갑 분포·해시 추첨·Backend 상한 상수), `RunResourceType.Elif = 3`,
+  `RunResourcePickup.ConvertToPermanentElif`, `RunProgress`(시작 잔액·획득·사용·개발용 엘리프, `AvailableElif`),
+  `RunSession`(Run 시작 시 잔액, 저장 요청 `elif`), `PlayerProgressClient.LoadedElifBalance`, Unity DTO
+  (`RunElifDto`·`ElifMetaDto`, Run 저장·프로필 응답의 `meta`), `GameResourceHudView`(엘리프 칸), 개발 패널 `— Elif —`.
+  효과 타입 86 `GainPermanentElifRollOnAcquire`를 아이시아의 지갑에 더했다. Setup은 `Week27Elif2Setup`,
+  검증은 `Week27Elif2Verification`.
+- **전환 방식**: §6.3은 새 픽업 Prefab을 드롭 표에 넣는 방식처럼 적었지만, 실제로는 상자·장애물·방 클리어가 **골드 픽업을
+  만든 직후 그 픽업을 엘리프로 바꾼다**(`PermanentElif.TryConvertSpawnedGold`). 드롭 표와 그 난수열은 그대로라 같은 seed에서
+  골드 자리가 바뀌지 않는다. 생성된 오브젝트 이름은 `... Drop permanent-elif - ...`가 된다. `PermanentElifPickup.prefab`은
+  Resource-1 사양(모든 `RunResourceType`에 Prefab)으로 만들어 두었고, 드롭 경로에서는 쓰지 않는다.
+- 전환 추첨 키: Run seed·방 ID·드롭원 ID(상자 ID, 장애물 ID, 방 클리어는 `clear-drop`)·그 드롭 안의 순번. Run seed가 없는
+  RunProgress(Editor 검증 픽스처 등)에서는 전환하지 않는다.
+- 드롭 콘텐츠 버전: 드롭 전용 버전 값이 코드에 없어 올리지 않았다(방·조우 콘텐츠 버전은 Room 템플릿용). Play 기록을
+  비교할 때 2026-10-22 Elif-2 이후인지로 구분한다.
+- 멜룬카드는 바닥 엘리프를 복제하지 않는다(§10 구현 기본값). 엘리프에는 Run 보유 상한이 없고 골드 99 상한과 무관하다.
+- 저장 요청: `elif.gained`는 Backend 상한 50으로 잘라 보낸다(넘으면 Run 저장 전체가 `422`가 되므로). 개발 패널로 얻은
+  엘리프(`+5 Elif (dev)`, `Drop Elif pickup`, `Next gold drop → Elif`로 바뀐 픽업)는 쓸 수 있지만 `gained`에 넣지 않는다.
+  `upgradePurchases`는 Elif-3 전까지 항상 빈 배열이다. Elif-2 이전에 로컬에 쌓인 대기 요청은 `elif`가 모두 0으로 다시
+  직렬화되어 Backend의 엘리프 도입 전 fingerprint와 같다.
+- 시작 잔액: 프로필 조회가 성공하면 `meta.elifBalance`, 실패하면 0. §4.3의 대기 Run 사용량 차감, 조회 실패 시 캐시와
+  사용 차단, 업그레이드 단계 표시와 `Set upgrade level`은 상점 사용처가 생기는 Elif-3에서 넣는다(Elif-2에는 사용처가 없어
+  `spent`가 늘 0).
+- HUD: UX-1 자원 줄(체력·SP 아래)에 네 번째 칸으로 넣었다(§6.3의 "우측 자원 영역"은 UX-1 이후 좌상단). 칸 너비 96을 유지해
+  패널은 288 → 384, 왼쪽 끝은 그대로다. 두 자리 이상, 99 상한 없음.
+- 검증: `Week27Elif2Verification.VerifyWithRegressionsBatch`가 종료 코드 0으로 통과(Elif-2·UserArtwork·UX-1·Artifact-3·
+  Resource-1/3·Obstacle-1·Gold-0·Chest-0/1/2·Jjangsem-1·Obstacle-5·DevPanel). Gold-0 검증의 "`Elif` 이름 금지"는
+  "`Elif`는 값 3으로만"으로 바꿨다. contract-drift-check의 업그레이드 카탈로그 대조는 Unity 카탈로그가 생기는 Elif-3에서 한다.
+- 수동 확인: 사용자 Play 확인 완료(2026-10-22) — `+5 Elif (dev)`의 HUD 반영, `Drop Elif pickup` 그림과 획득, 아이시아의
+  지갑 추첨 표시와 `gained` 증가, 실제 상자 내용물 경로의 엘리프 그림. 장애물·상자의 골드 드롭 자체가 드물어
+  `— Elif —`에 `Chest with 4 gold (elif path)`(개발 상자를 열고 골드 4개를 상자 내용물 경로로 떨굼, `Next gold drop → Elif`를
+  켜면 첫 개가 반드시 엘리프)를 더해 확인했다. 실제 서버로 사망 후 다시 시작했을 때 잔액이 늘었는지는 §7.3(Elif-3과 함께).

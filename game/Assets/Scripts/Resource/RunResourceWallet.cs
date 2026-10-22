@@ -3,6 +3,7 @@ using System;
 namespace TrickalFanGame.Resource
 {
     // Run-scoped exploration resources. Counts never exceed MaxCount; the part of a grant that does not fit is dropped.
+    // The permanent elif is not a Run resource and is never held here (RunProgress tracks it).
     public sealed class RunResourceWallet
     {
         public const int MaxCount = 99;
@@ -16,7 +17,7 @@ namespace TrickalFanGame.Resource
 
         public static bool IsDefined(RunResourceType type)
         {
-            return Enum.IsDefined(typeof(RunResourceType), type);
+            return type != RunResourceType.Elif && Enum.IsDefined(typeof(RunResourceType), type);
         }
 
         public int GetCount(RunResourceType type)

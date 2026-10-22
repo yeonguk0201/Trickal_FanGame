@@ -483,7 +483,7 @@ namespace TrickalFanGame.Room
             int total = drops.Count + (hasRareItem ? 1 : 0);
             // A secret pit is part of the room, so it stays on the obstacle's cell center.
             for (int index = 0; index < drops.Count; index++)
-                SpawnDrop(drops[index], IsSecretPit(drops[index]) ? Vector2.zero : DropOffset(index, total));
+                SpawnDrop(drops[index], IsSecretPit(drops[index]) ? Vector2.zero : DropOffset(index, total), index);
             if (hasRareItem) SpawnRareItem(rareItem, DropOffset(total - 1, total));
         }
 
@@ -494,7 +494,8 @@ namespace TrickalFanGame.Room
             return new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * DropRingRadius;
         }
 
-        private void SpawnDrop(ResourceDropEntry entry, Vector2 offset = default)
+        // pickupIndex: the drop's place among this break's drops; each gold drop rolls on its own for elif.
+        private void SpawnDrop(ResourceDropEntry entry, Vector2 offset = default, int pickupIndex = 0)
         {
             if (entry?.Prefab == null) return;
             GameObject drop = Instantiate(entry.Prefab, transform.position + (Vector3)offset, Quaternion.identity,
@@ -503,6 +504,8 @@ namespace TrickalFanGame.Room
             if (runProgress != null && drop.TryGetComponent(out RunResourcePickup resourcePickup))
             {
                 resourcePickup.BindRunProgress(runProgress);
+                PermanentElif.TryConvertSpawnedGold(drop, runProgress.RunSeed, runProgress.HasRunSeed,
+                    runState != null ? runState.RoomId : "room", obstacleId, pickupIndex);
             }
 
             if (drop.TryGetComponent(out SecretPit pit))

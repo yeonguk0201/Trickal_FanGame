@@ -28,6 +28,8 @@ namespace TrickalFanGame.Item
         public IReadOnlyList<AcquiredItem> AcquiredItems => acquiredItems;
         public IReadOnlyList<ItemDefinition> AcquiredDefinitions => acquiredDefinitions;
         public bool IsMultiShotPierceSynergyActive { get; private set; }
+        // Elif-2: the permanent elif rolled by the last 아이시아의 지갑 acquired (development panel, verification).
+        public int LastPermanentElifRoll { get; private set; } = -1;
         public event Action<ItemDefinition, int> ItemAcquired;
         public event Action<string> SynergyActivated;
         // An artifact whose once-per-Run effect is used up (레비의 단도). Its stats stay; the HUD shows it grey.
@@ -372,6 +374,14 @@ namespace TrickalFanGame.Item
                     case ItemEffectType.GainGoldOnAcquire:
                         // The wallet drops what does not fit under its limit.
                         runProgress?.TryAddResource(RunResourceType.Gold, Mathf.RoundToInt(effect.Magnitude));
+                        break;
+                    case ItemEffectType.GainPermanentElifRollOnAcquire:
+                        // The wallet holds one stack, so this runs once per Run (contract 27 §3.2).
+                        if (runProgress != null)
+                        {
+                            LastPermanentElifRoll = PermanentElif.RollWallet(runProgress.RunSeed, definition.ItemId);
+                            runProgress.TryAddResource(RunResourceType.Elif, LastPermanentElifRoll);
+                        }
                         break;
                     case ItemEffectType.BounceBetweenEnemies:
                         stats.AddProjectileBounce(

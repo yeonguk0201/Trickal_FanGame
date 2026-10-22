@@ -51,24 +51,72 @@ namespace TrickalFanGame.Room
         public event Action MapChanged;
         public event Action<RunResourceType, int> ResourceChanged
         {
-            add => resources.Changed += value;
-            remove => resources.Changed -= value;
+            add
+            {
+                resources.Changed += value;
+                elifChanged += value;
+            }
+            remove
+            {
+                resources.Changed -= value;
+                elifChanged -= value;
+            }
         }
 
-        public int GetResourceCount(RunResourceType type) => resources.GetCount(type);
+        private Action<RunResourceType, int> elifChanged;
+
+        // Elif-2 (contract 27 §4.3): the permanent elif is not a Run resource. The Run starts from the server balance
+        // (minus what pending earlier Runs spent), adds what it picks up and subtracts what it spends; only the
+        // gained and spent amounts are saved with the Run result. Development grants are usable but never saved.
+        public int ElifStartingBalance { get; private set; }
+        public int ElifGained { get; private set; }
+        public int ElifSpent { get; private set; }
+        public int DevelopmentElif { get; private set; }
+        public int AvailableElif => Mathf.Max(0, ElifStartingBalance + ElifGained + DevelopmentElif - ElifSpent);
+
+        public int GetResourceCount(RunResourceType type) =>
+            type == RunResourceType.Elif ? AvailableElif : resources.GetCount(type);
 
         // Resources are Run-only: nothing is granted after the Run ends, and ResetProgress returns them to zero.
-        public bool CanAcceptResource(RunResourceType type) => !IsProgressionStopped && resources.CanAccept(type);
+        // Elif has no Run cap.
+        public bool CanAcceptResource(RunResourceType type) =>
+            !IsProgressionStopped && (type == RunResourceType.Elif || resources.CanAccept(type));
 
         public int TryAddResource(RunResourceType type, int amount)
         {
-            return IsProgressionStopped ? 0 : resources.Add(type, amount);
+            if (IsProgressionStopped) return 0;
+            if (type != RunResourceType.Elif) return resources.Add(type, amount);
+            if (amount <= 0) return 0;
+            ElifGained += amount;
+            NotifyElifChanged();
+            return amount;
         }
 
         public bool TrySpendResource(RunResourceType type, int amount = 1)
         {
-            return !IsProgressionStopped && resources.TrySpend(type, amount);
+            if (IsProgressionStopped) return false;
+            if (type != RunResourceType.Elif) return resources.TrySpend(type, amount);
+            if (amount <= 0 || AvailableElif < amount) return false;
+            ElifSpent += amount;
+            NotifyElifChanged();
+            return true;
         }
+
+        // Set when the Run starts, before anything is picked up.
+        public void SetElifStartingBalance(int balance)
+        {
+            ElifStartingBalance = Mathf.Clamp(balance, 0, PermanentElif.BalanceMax);
+            NotifyElifChanged();
+        }
+
+        public void AddDevelopmentElif(int amount)
+        {
+            if (IsProgressionStopped || amount <= 0) return;
+            DevelopmentElif += amount;
+            NotifyElifChanged();
+        }
+
+        private void NotifyElifChanged() => elifChanged?.Invoke(RunResourceType.Elif, AvailableElif);
 
         public bool TrySetGeneratedGraph(GeneratedFloorGraph graph, out string error)
         {
@@ -321,6 +369,11 @@ namespace TrickalFanGame.Room
             rewardSelections.Clear();
             shopStocks.Clear();
             resources.Clear();
+            ElifStartingBalance = 0;
+            ElifGained = 0;
+            ElifSpent = 0;
+            DevelopmentElif = 0;
+            NotifyElifChanged();
             RewardSelectionStateChanged?.Invoke();
         }
     }
