@@ -25,8 +25,8 @@ namespace TrickalFanGame.Editor
             ValidateShopText();
             Week17Resource1Verification.Verify();
             Week20Special4Verification.Verify();
-            Debug.Log("Gold-0 verification passed: RunResourceType keeps Gold = 0 / Key = 1 / Bomb = 2 with no Elif " +
-                      "name, the gold pickup Prefab keeps its path, GUID and serialized value, shop prices, prompts " +
+            Debug.Log("Gold-0 verification passed: RunResourceType keeps Gold = 0 / Key = 1 / Bomb = 2 (a permanent " +
+                      "Elif only as 3), the gold pickup Prefab keeps its path, GUID and serialized value, shop prices, prompts " +
                       "and placeholders read gold, and the Resource-1 (99 cap) and Special-4 (shop purchase) " +
                       "regressions pass.");
         }
@@ -35,11 +35,16 @@ namespace TrickalFanGame.Editor
         {
             Assert((int)RunResourceType.Gold == 0 && (int)RunResourceType.Key == 1 && (int)RunResourceType.Bomb == 2,
                 "RunResourceType values are serialized by value and must stay Gold 0, Key 1, Bomb 2.");
-            Assert(!Enum.GetNames(typeof(RunResourceType)).Contains("Elif"),
+            // Elif-2 appended the permanent elif after Bomb; the Run currency at value 0 stays Gold.
+            Assert(Enum.GetName(typeof(RunResourceType), 0) == "Gold" &&
+                   (!Enum.GetNames(typeof(RunResourceType)).Contains("Elif") || (int)RunResourceType.Elif == 3),
                 "The Run currency must be named Gold; a permanent Elif may only be appended after Bomb.");
-            Assert(!Enum.GetNames(typeof(ShopPurchaseResult)).Contains("NotEnoughElif") &&
-                   Enum.IsDefined(typeof(ShopPurchaseResult), "NotEnoughGold"),
-                "ShopPurchaseResult must report NotEnoughGold.");
+            // Elif-3 appended NotEnoughElif for permanent elif offers; gold shortage stays NotEnoughGold.
+            Assert(Enum.IsDefined(typeof(ShopPurchaseResult), "NotEnoughGold") &&
+                   (int)ShopPurchaseResult.NotEnoughGold == 2 &&
+                   (!Enum.GetNames(typeof(ShopPurchaseResult)).Contains("NotEnoughElif") ||
+                    (int)ShopPurchaseResult.NotEnoughElif > (int)ShopPurchaseResult.Unavailable),
+                "ShopPurchaseResult must report NotEnoughGold; a permanent NotEnoughElif may only be appended.");
         }
 
         private static void ValidatePickupPrefab()

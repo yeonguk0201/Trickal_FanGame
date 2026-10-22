@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import type { CreateRunResultContract } from '../../contracts/meta-progression';
 import {
+  normalizeRunElif,
+  settleRunElif,
+  toShopUpgradeLevels,
+  type ElifResultMeta,
+} from '../../contracts/permanent-elif';
+import {
   CHARACTER_MAX_LEVEL,
   createRunRequestFingerprint,
   EXPERIENCE_TO_NEXT_LEVEL,
@@ -26,7 +32,8 @@ export class RunsRepositoryError extends Error {
       | 'CHARACTER_NOT_FOUND'
       | 'ITEM_NOT_FOUND'
       | 'RUN_IDEMPOTENCY_CONFLICT'
-      | 'RUN_RESULT_UNAVAILABLE',
+      | 'RUN_RESULT_UNAVAILABLE'
+      | 'ELIF_UPGRADE_LEVEL_GAP',
     message: string,
   ) {
     super(message);
@@ -51,6 +58,8 @@ export class RunsRepository {
         isCleared: true,
         killCount: true,
         deathReason: true,
+        elifGained: true,
+        elifSpent: true,
         user: {
           select: { id: true, nickname: true },
         },
@@ -105,6 +114,7 @@ export class RunsRepository {
             requestFingerprint: true,
             experienceGained: true,
             progressSnapshot: true,
+            elifSnapshot: true,
           },
         });
 
@@ -114,7 +124,7 @@ export class RunsRepository {
 
         const user = await transaction.user.findUnique({
           where: { id: dto.userId },
-          select: { id: true },
+          select: { id: true, elifBalance: true },
         });
         if (!user) {
           throw new RunsRepositoryError(
@@ -192,6 +202,31 @@ export class RunsRepository {
         );
         const progressSnapshot = { ...progress };
 
+        const elif = normalizeRunElif(dto.elif);
+        const storedUpgrades = await transaction.userShopUpgrade.findMany({
+          where: { userId: dto.userId },
+          select: { upgradeId: true, level: true },
+        });
+        const settlement = settleRunElif({
+          balance: user.elifBalance,
+          ownedLevels: new Map(
+            storedUpgrades.map((upgrade) => [upgrade.upgradeId, upgrade.level]),
+          ),
+          elif,
+        });
+        if (!settlement.ok) {
+          throw new RunsRepositoryError(
+            'ELIF_UPGRADE_LEVEL_GAP',
+            '이전 단계가 저장되지 않은 상점 업그레이드입니다.',
+          );
+        }
+        const elifSnapshot: ElifResultMeta = {
+          elifBalance: settlement.balance,
+          elifGained: elif.gained,
+          elifSpent: settlement.effectiveSpent,
+          shopUpgrades: toShopUpgradeLevels(settlement.levels),
+        };
+
         const run = await transaction.run.create({
           data: {
             clientRunId: dto.clientRunId,
@@ -208,6 +243,16 @@ export class RunsRepository {
             deathReason: dto.deathReason ?? null,
             experienceGained,
             progressSnapshot,
+            elifGained: elif.gained,
+            elifSpent: settlement.effectiveSpent,
+            elifShortfall: settlement.shortfall,
+            elifSnapshot: {
+              ...elifSnapshot,
+              shopUpgrades: elifSnapshot.shopUpgrades.map((upgrade) => ({
+                upgradeId: upgrade.upgradeId,
+                level: upgrade.level,
+              })),
+            },
           },
           select: { id: true },
         });
@@ -221,6 +266,44 @@ export class RunsRepository {
               acquiredAt: new Date(item.acquiredAt),
               itemOrder: item.order,
             })),
+          });
+        }
+
+        // Purchases keep the Run's original request; the applied subset only
+        // shows in the stored levels and elifSpent.
+        if (elif.upgradePurchases.length > 0) {
+          await transaction.runUpgradePurchase.createMany({
+            data: elif.upgradePurchases.map((purchase) => ({
+              runId: run.id,
+              upgradeId: purchase.upgradeId,
+              level: purchase.level,
+              floor: purchase.floor,
+              purchaseOrder: purchase.order,
+            })),
+          });
+        }
+
+        for (const purchase of settlement.appliedPurchases) {
+          await transaction.userShopUpgrade.upsert({
+            where: {
+              userId_upgradeId: {
+                userId: dto.userId,
+                upgradeId: purchase.upgradeId,
+              },
+            },
+            create: {
+              userId: dto.userId,
+              upgradeId: purchase.upgradeId,
+              level: purchase.level,
+            },
+            update: { level: purchase.level },
+          });
+        }
+
+        if (settlement.balance !== user.elifBalance) {
+          await transaction.user.update({
+            where: { id: dto.userId },
+            data: { elifBalance: settlement.balance },
           });
         }
 
@@ -242,6 +325,7 @@ export class RunsRepository {
           runId: run.id,
           experienceGained,
           progress,
+          meta: elifSnapshot,
           created: true,
         };
       },
@@ -256,6 +340,7 @@ function restoreExistingRun(
     requestFingerprint: string;
     experienceGained: number;
     progressSnapshot: Prisma.JsonValue | null;
+    elifSnapshot: Prisma.JsonValue | null;
   },
   requestFingerprint: string,
 ): PersistRunResult {
@@ -265,7 +350,10 @@ function restoreExistingRun(
       '같은 clientRunId에 다른 플레이 데이터가 전송되었습니다.',
     );
   }
-  if (!isProgressSnapshot(existingRun.progressSnapshot)) {
+  if (
+    !isProgressSnapshot(existingRun.progressSnapshot) ||
+    !isElifSnapshot(existingRun.elifSnapshot)
+  ) {
     throw new RunsRepositoryError(
       'RUN_RESULT_UNAVAILABLE',
       '저장된 Run 결과를 복원할 수 없습니다.',
@@ -276,8 +364,38 @@ function restoreExistingRun(
     runId: existingRun.id,
     experienceGained: existingRun.experienceGained,
     progress: existingRun.progressSnapshot,
+    meta: {
+      elifBalance: existingRun.elifSnapshot.elifBalance,
+      elifGained: existingRun.elifSnapshot.elifGained,
+      elifSpent: existingRun.elifSnapshot.elifSpent,
+      shopUpgrades: existingRun.elifSnapshot.shopUpgrades,
+    },
     created: false,
   };
+}
+
+function isElifSnapshot(
+  value: Prisma.JsonValue | null,
+): value is Prisma.JsonObject & ElifResultMeta {
+  if (!value || Array.isArray(value) || typeof value !== 'object') {
+    return false;
+  }
+
+  const upgrades = value.shopUpgrades;
+  return (
+    isNumber(value.elifBalance) &&
+    isNumber(value.elifGained) &&
+    isNumber(value.elifSpent) &&
+    Array.isArray(upgrades) &&
+    upgrades.every(
+      (upgrade) =>
+        !!upgrade &&
+        typeof upgrade === 'object' &&
+        !Array.isArray(upgrade) &&
+        typeof upgrade.upgradeId === 'string' &&
+        isNumber(upgrade.level),
+    )
+  );
 }
 
 function isProgressSnapshot(

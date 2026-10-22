@@ -37,6 +37,24 @@ namespace TrickalFanGame.Frontend
         public const string ConsumableEffect = "구매하면 시스트 앞에 떨어집니다. 주워서 사용합니다.";
         public const string GoldiConsumableEffect = "구매하면 골디 앞에 떨어집니다. 주워서 사용합니다.";
         public const string InputHint = "방향키 이동  ·  Enter 구매  ·  Esc 닫기";
+        // Elif-3 (contract 27 §4): elif offers and the invest screen of the general shop.
+        public const string ElifSuffix = "엘리프";
+        public const string ElifLockedLabel = "사용 불가";
+        public const string NotEnoughElifMessage = "엘리프 부족";
+        public const string ElifLockedMessage = "서버 잔액을 불러오지 못해 이번 Run은 엘리프를 쓸 수 없습니다";
+        public const string ElifOfferNote = "엘리프로만 살 수 있는 상품입니다. 할인은 적용되지 않습니다.";
+        public const string InvestLabel = "투자 [Q]";
+        public const string InvestBackLabel = "상품 보기 [Q]";
+        public const string InvestBuyLabel = "투자";
+        public const string InvestTitle = "상점 투자";
+        public const string InvestKind = "상점 투자";
+        public const string InvestNotice =
+            "투자는 바로 적용되고, 이번 Run 결과가 저장되어야 다음 Run에도 남습니다. 포기하면 사라집니다.";
+        public const string InvestPurchasedMessage = "투자 완료";
+        public const string InvestMaxLevelMessage = "최대 단계입니다";
+        public const string InvestPendingSaveMessage = "저장 대기 중인 이전 Run의 투자가 먼저 저장되어야 합니다";
+        public const string InvestDevelopmentMessage = "개발 패널 단계가 적용 중입니다";
+        public const string MaxLevelLabel = "최대 단계";
 
         public static readonly Color PanelColor = new(0.055f, 0.075f, 0.12f, 1f);
         public static readonly Color PanelOutlineColor = new(0.95f, 0.78f, 0.38f, 0.9f);
@@ -67,6 +85,12 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Text keeperLineText;
         [SerializeField] private Image panelImage;
         [SerializeField] private Outline panelOutline;
+        [SerializeField] private TMP_Text elifText;
+        [SerializeField] private Button investButton;
+        [SerializeField] private TMP_Text investButtonLabel;
+        [SerializeField] private CanvasGroup investPanel;
+        [SerializeField] private ShopUpgradeRowView[] investRows = Array.Empty<ShopUpgradeRowView>();
+        [SerializeField] private TMP_Text investNoticeText;
 
         private bool subscribed;
         private int shownFrame = -1;
@@ -91,9 +115,17 @@ namespace TrickalFanGame.Frontend
         public TMP_Text KeeperLineText => keeperLineText;
         public Image PanelImage => panelImage;
         public Outline PanelOutline => panelOutline;
+        public TMP_Text ElifText => elifText;
+        public Button InvestButton => investButton;
+        public TMP_Text InvestButtonLabel => investButtonLabel;
+        public CanvasGroup InvestPanel => investPanel;
+        public ShopUpgradeRowView[] InvestRows => investRows;
+        public TMP_Text InvestNoticeText => investNoticeText;
         public ShopKind ShownKind { get; private set; }
         public bool IsVisible { get; private set; }
         public int FocusedIndex { get; private set; }
+        public bool IsInvesting { get; private set; }
+        public int InvestFocusedIndex { get; private set; }
 
         public void Configure(ShopSession configuredSession, CanvasGroup configuredOverlay,
             GraphicRaycaster configuredRaycaster, EventSystem configuredEventSystem, Image configuredKeeperPortrait,
@@ -135,6 +167,50 @@ namespace TrickalFanGame.Frontend
             ApplyTheme(ShopKind.General);
         }
 
+        // Elif-3: the elif balance line, the invest button and the invest list that covers the grid while open.
+        public void ConfigureInvest(TMP_Text configuredElifText, Button configuredInvestButton,
+            TMP_Text configuredInvestButtonLabel, CanvasGroup configuredInvestPanel,
+            ShopUpgradeRowView[] configuredRows, TMP_Text configuredNotice)
+        {
+            Unsubscribe();
+            elifText = configuredElifText;
+            investButton = configuredInvestButton;
+            investButtonLabel = configuredInvestButtonLabel;
+            investPanel = configuredInvestPanel;
+            investRows = configuredRows ?? Array.Empty<ShopUpgradeRowView>();
+            investNoticeText = configuredNotice;
+            Subscribe();
+            SetText(investNoticeText, InvestNotice);
+            SetInvesting(false);
+        }
+
+        public static string FormatUpgradeLevel(int level, int maxLevel) => $"{level} / {maxLevel}단계";
+
+        public static string FormatUpgradeNext(ShopUpgradeDefinition definition, int level) =>
+            definition == null ? string.Empty
+            : level >= definition.MaxLevel
+                ? $"{ShopUpgrades.DescribeLevel(definition.UpgradeId, definition.MaxLevel)} (최대)"
+                : $"다음: {ShopUpgrades.DescribeLevel(definition.UpgradeId, level + 1)}";
+
+        public static string FormatUpgradeCost(ShopUpgradeDefinition definition, int level) =>
+            definition == null || level >= definition.MaxLevel
+                ? MaxLevelLabel
+                : $"{definition.GetCost(level + 1)} {ElifSuffix}";
+
+        public static string FormatElifBalance(int available, bool spendingAllowed) =>
+            spendingAllowed ? $"{ElifSuffix} {available}" : $"{ElifSuffix} {available} ({ElifLockedLabel})";
+
+        public static string GetUpgradeMessage(ShopUpgradeStatus status) => status switch
+        {
+            ShopUpgradeStatus.Purchased => InvestPurchasedMessage,
+            ShopUpgradeStatus.MaxLevel => InvestMaxLevelMessage,
+            ShopUpgradeStatus.NotEnoughElif => NotEnoughElifMessage,
+            ShopUpgradeStatus.ElifLocked => ElifLockedMessage,
+            ShopUpgradeStatus.PendingSave => InvestPendingSaveMessage,
+            ShopUpgradeStatus.DevelopmentOverride => InvestDevelopmentMessage,
+            _ => string.Empty,
+        };
+
         public static string GetTitle(ShopKind kind) => kind == ShopKind.Goldi ? GoldiTitle : Title;
         public static string GetKeeperLine(ShopKind kind) => kind == ShopKind.Goldi ? GoldiKeeperLine : KeeperLine;
         public static string GetConsumableEffect(ShopKind kind) =>
@@ -157,14 +233,15 @@ namespace TrickalFanGame.Frontend
             }
         }
 
-        public static string FormatPrice(int price) => price > 0 ? $"{price} {GoldSuffix}" : FreeLabel;
+        public static string FormatPrice(int price, bool elif = false) =>
+            price > 0 ? $"{price} {(elif ? ElifSuffix : GoldSuffix)}" : FreeLabel;
 
-        public static string FormatPriceLabel(ShopOfferStatus status, int price) => status switch
+        public static string FormatPriceLabel(ShopOfferStatus status, int price, bool elif = false) => status switch
         {
             ShopOfferStatus.Empty => string.Empty,
             ShopOfferStatus.SoldOut => SoldOutLabel,
             ShopOfferStatus.ItemUnavailable => ItemUnavailableLabel,
-            _ => FormatPrice(price),
+            _ => FormatPrice(price, elif),
         };
 
         private void Awake()
@@ -191,7 +268,15 @@ namespace TrickalFanGame.Frontend
             if (keyboard == null) return;
             if (keyboard.escapeKey.wasPressedThisFrame)
             {
-                Close();
+                // Escape leaves the invest list first, then closes the shop.
+                if (IsInvesting) SetInvesting(false);
+                else Close();
+                return;
+            }
+
+            if (keyboard.qKey.wasPressedThisFrame)
+            {
+                ToggleInvesting();
                 return;
             }
 
@@ -201,13 +286,69 @@ namespace TrickalFanGame.Frontend
             if (keyboard.downArrowKey.wasPressedThisFrame || keyboard.sKey.wasPressedThisFrame) MoveFocus(0, 1);
             if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame ||
                 keyboard.spaceKey.wasPressedThisFrame || keyboard.eKey.wasPressedThisFrame)
-                TryPurchaseFocused();
+            {
+                if (IsInvesting) TryInvestFocused();
+                else TryPurchaseFocused();
+            }
+        }
+
+        public bool CanInvest => session != null && session.Shop != null && session.Shop.SellsUpgrades &&
+                                 investPanel != null && investRows.Length > 0;
+
+        public bool ToggleInvesting() => SetInvesting(!IsInvesting);
+
+        // Opens or closes the invest list. Only the general shop (시스트) has it.
+        public bool SetInvesting(bool investing)
+        {
+            bool next = investing && IsVisible && CanInvest;
+            bool changed = next != IsInvesting;
+            IsInvesting = next;
+            if (changed)
+            {
+                InvestFocusedIndex = 0;
+                SetFeedback(string.Empty);
+            }
+
+            if (investPanel != null)
+            {
+                investPanel.alpha = next ? 1f : 0f;
+                investPanel.interactable = next;
+                investPanel.blocksRaycasts = next;
+            }
+
+            if (IsVisible) Refresh();
+            return next == investing;
+        }
+
+        public void SetInvestFocus(int rowIndex)
+        {
+            if (!IsInvesting || rowIndex < 0 || rowIndex >= Math.Min(investRows.Length, ShopUpgrades.Catalog.Length))
+                return;
+            if (rowIndex != InvestFocusedIndex) SetFeedback(string.Empty);
+            InvestFocusedIndex = rowIndex;
+            Refresh();
+        }
+
+        public ShopUpgradeStatus TryInvestFocused()
+        {
+            if (!IsInvesting || session == null || InvestFocusedIndex >= ShopUpgrades.Catalog.Length)
+                return ShopUpgradeStatus.Unavailable;
+            ShopUpgradeStatus result = session.TryPurchaseUpgrade(ShopUpgrades.Catalog[InvestFocusedIndex].UpgradeId);
+            SetFeedback(GetUpgradeMessage(result));
+            Refresh();
+            return result;
         }
 
         // Rows grow downward: dy = 1 moves to the row below. The focus stops at the grid edge.
         public void MoveFocus(int dx, int dy)
         {
             if (!IsVisible) return;
+            if (IsInvesting)
+            {
+                if (dy != 0) SetInvestFocus(Mathf.Clamp(InvestFocusedIndex + dy, 0,
+                    Math.Min(investRows.Length, ShopUpgrades.Catalog.Length) - 1));
+                return;
+            }
             int columns = ShopCatalog.GridColumns;
             int column = Mathf.Clamp(FocusedIndex % columns + dx, 0, columns - 1);
             int row = Mathf.Clamp(FocusedIndex / columns + dy, 0, ShopCatalog.GridSlotCount / columns - 1);
@@ -224,12 +365,14 @@ namespace TrickalFanGame.Frontend
 
         public ShopPurchaseResult TryPurchaseFocused()
         {
-            if (!IsVisible || session == null) return ShopPurchaseResult.Unavailable;
+            if (!IsVisible || IsInvesting || session == null) return ShopPurchaseResult.Unavailable;
             ShopPurchaseResult result = session.TryPurchase(FocusedIndex);
             SetFeedback(result switch
             {
                 ShopPurchaseResult.Purchased => PurchasedMessage,
                 ShopPurchaseResult.NotEnoughGold => NotEnoughGoldMessage,
+                ShopPurchaseResult.NotEnoughElif => NotEnoughElifMessage,
+                ShopPurchaseResult.ElifLocked => ElifLockedMessage,
                 ShopPurchaseResult.SoldOut => SoldOutMessage,
                 ShopPurchaseResult.ItemUnavailable => ItemUnavailableMessage,
                 _ => FocusedOffer == null ? EmptyCellMessage : string.Empty,
@@ -251,14 +394,52 @@ namespace TrickalFanGame.Frontend
             for (int index = 0; index < cells.Length; index++)
             {
                 if (cells[index] == null) continue;
-                ShopOffer offer = index < stock.Offers.Count ? stock.Offers[index] : null;
+                ShopOffer offer = stock.GetOffer(index);
                 cells[index].Bind(index, offer, shop.GetStatus(index, session.Inventory), shop.GetPrice(offer),
-                    index == FocusedIndex);
+                    index == FocusedIndex && !IsInvesting);
             }
 
             if (goldText != null && shop.Progress != null)
                 goldText.text = $"보유 {shop.Progress.GetResourceCount(RunResourceType.Gold)} {GoldSuffix}";
+            if (elifText != null && shop.Progress != null)
+                elifText.text = FormatElifBalance(shop.Progress.AvailableElif, shop.Progress.IsElifSpendingAllowed);
+            if (investButton != null) investButton.gameObject.SetActive(CanInvest);
+            if (investButtonLabel != null) investButtonLabel.text = IsInvesting ? InvestBackLabel : InvestLabel;
+            if (IsInvesting)
+            {
+                RefreshInvest(shop);
+                return;
+            }
+
             RefreshDetail(shop, FocusedOffer, shop.GetStatus(FocusedIndex, session.Inventory));
+        }
+
+        private void RefreshInvest(ShopRoom shop)
+        {
+            for (int index = 0; index < investRows.Length; index++)
+            {
+                if (investRows[index] == null) continue;
+                ShopUpgradeDefinition definition =
+                    index < ShopUpgrades.Catalog.Length ? ShopUpgrades.Catalog[index] : null;
+                investRows[index].gameObject.SetActive(definition != null);
+                if (definition == null) continue;
+                investRows[index].Bind(definition, shop.Progress.GetShopUpgradeLevel(definition.UpgradeId),
+                    shop.GetUpgradeStatus(definition.UpgradeId), index == InvestFocusedIndex);
+            }
+
+            ShopUpgradeDefinition focused = ShopUpgrades.Catalog[InvestFocusedIndex];
+            int level = shop.Progress.GetShopUpgradeLevel(focused.UpgradeId);
+            ShopUpgradeStatus status = shop.GetUpgradeStatus(focused.UpgradeId);
+            if (buyButton != null) buyButton.interactable = status == ShopUpgradeStatus.Available;
+            if (buyButtonLabel != null) buyButtonLabel.text = InvestBuyLabel;
+            SetText(detailNameText, focused.DisplayName);
+            SetText(detailKindText, $"{InvestKind}  ·  {FormatUpgradeLevel(level, focused.MaxLevel)}");
+            string blocked = status is ShopUpgradeStatus.ElifLocked or ShopUpgradeStatus.PendingSave or
+                ShopUpgradeStatus.DevelopmentOverride
+                ? $"\n\n{GetUpgradeMessage(status)}"
+                : string.Empty;
+            SetText(detailEffectText, $"{FormatUpgradeNext(focused, level)}{blocked}\n\n{InvestNotice}");
+            SetText(detailPriceText, FormatUpgradeCost(focused, level));
         }
 
         private ShopOffer FocusedOffer
@@ -266,7 +447,7 @@ namespace TrickalFanGame.Frontend
             get
             {
                 ShopStockState stock = session != null && session.Shop != null ? session.Shop.Stock : null;
-                return stock != null && FocusedIndex < stock.Offers.Count ? stock.Offers[FocusedIndex] : null;
+                return stock?.GetOffer(FocusedIndex);
             }
         }
 
@@ -292,9 +473,11 @@ namespace TrickalFanGame.Frontend
                     $"{ItemKindText.GetDisplayName(item.Kind)}  ·  {ItemRewardCardView.RarityLabel(item.Rarity)}");
                 string maximum = item.MaxStacks > 0 ? item.MaxStacks.ToString() : "제한 없음";
                 int stacks = session.Inventory != null ? session.Inventory.GetStackCount(item.ItemId) : 0;
+                string note = offer.IsElifPriced ? $"\n\n{ElifOfferNote}" : string.Empty;
+                if (status == ShopOfferStatus.ElifLocked) note += $"\n{ElifLockedMessage}";
                 SetText(detailEffectText, item.IsActivePower
-                    ? $"{ArtifactEffectDescription.Build(item)}\n\n{GamePowerHudView.BuildOfferLine(item)}"
-                    : $"{ArtifactEffectDescription.Build(item)}\n\n현재 스택 {stacks} / {maximum}");
+                    ? $"{ArtifactEffectDescription.Build(item)}\n\n{GamePowerHudView.BuildOfferLine(item)}{note}"
+                    : $"{ArtifactEffectDescription.Build(item)}\n\n현재 스택 {stacks} / {maximum}{note}");
             }
             else
             {
@@ -302,7 +485,7 @@ namespace TrickalFanGame.Frontend
                 SetText(detailEffectText, GetConsumableEffect(shop.Kind));
             }
 
-            SetText(detailPriceText, FormatPriceLabel(status, shop.GetPrice(offer)));
+            SetText(detailPriceText, FormatPriceLabel(status, shop.GetPrice(offer), offer.IsElifPriced));
         }
 
         private void OnSessionOpened()
@@ -317,11 +500,13 @@ namespace TrickalFanGame.Frontend
             ApplyTheme(session.Shop != null ? session.Shop.Kind : ShopKind.General);
             SetFeedback(string.Empty);
             ApplyVisibility(true);
+            SetInvesting(false);
             Refresh();
         }
 
         private void OnSessionClosed()
         {
+            SetInvesting(false);
             ApplyVisibility(false);
             EventSystem activeEventSystem = ActiveEventSystem;
             if (activeEventSystem != null)
@@ -336,21 +521,34 @@ namespace TrickalFanGame.Frontend
         {
             ShopStockState stock = session != null && session.Shop != null ? session.Shop.Stock : null;
             if (stock == null) return 0;
-            for (int index = 0; index < stock.Offers.Count && index < ShopCatalog.GridSlotCount; index++)
-                if (!stock.IsPurchased(index)) return index;
+            for (int index = 0; index < ShopCatalog.GridSlotCount; index++)
+                if (stock.GetOffer(index) != null && !stock.IsPurchased(index)) return index;
             return 0;
         }
 
         private void OnCellClicked(ShopOfferCellView cell)
         {
             ClearSelection();
-            if (cell != null) SetFocus(cell.CellIndex);
+            if (cell != null && !IsInvesting) SetFocus(cell.CellIndex);
         }
 
         private void OnBuyClicked()
         {
             ClearSelection();
-            TryPurchaseFocused();
+            if (IsInvesting) TryInvestFocused();
+            else TryPurchaseFocused();
+        }
+
+        private void OnInvestClicked()
+        {
+            ClearSelection();
+            ToggleInvesting();
+        }
+
+        private void OnInvestRowClicked(ShopUpgradeRowView row)
+        {
+            ClearSelection();
+            if (row != null) SetInvestFocus(row.RowIndex);
         }
 
         private void OnCloseClicked()
@@ -390,6 +588,9 @@ namespace TrickalFanGame.Frontend
                 if (cells[index] != null) cells[index].Clicked += OnCellClicked;
             if (buyButton != null) buyButton.onClick.AddListener(OnBuyClicked);
             if (closeButton != null) closeButton.onClick.AddListener(OnCloseClicked);
+            if (investButton != null) investButton.onClick.AddListener(OnInvestClicked);
+            foreach (ShopUpgradeRowView row in investRows)
+                if (row != null) row.Clicked += OnInvestRowClicked;
             subscribed = true;
         }
 
@@ -405,6 +606,9 @@ namespace TrickalFanGame.Frontend
                 if (cells[index] != null) cells[index].Clicked -= OnCellClicked;
             if (buyButton != null) buyButton.onClick.RemoveListener(OnBuyClicked);
             if (closeButton != null) closeButton.onClick.RemoveListener(OnCloseClicked);
+            if (investButton != null) investButton.onClick.RemoveListener(OnInvestClicked);
+            foreach (ShopUpgradeRowView row in investRows)
+                if (row != null) row.Clicked -= OnInvestRowClicked;
             subscribed = false;
         }
 

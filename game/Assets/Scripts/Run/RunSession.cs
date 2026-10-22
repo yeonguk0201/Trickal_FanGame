@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Data;
@@ -7,7 +8,9 @@ using TrickalFanGame.Item;
 using TrickalFanGame.Meta;
 using TrickalFanGame.Network;
 using TrickalFanGame.Player;
+using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
+using TrickalFanGame.Shop;
 using UnityEngine;
 
 namespace TrickalFanGame.Run
@@ -207,19 +210,28 @@ namespace TrickalFanGame.Run
                 return started;
             }
 
-            statusMessage = $"Loading progression: {selectedCharacterId}.";
-            return playerProgressClient.LoadAndApply(
-                selectedCharacterId,
-                _ =>
-                {
-                    if (!string.IsNullOrWhiteSpace(playerProgressClient.ResolvedUserId))
-                    {
-                        userId = playerProgressClient.ResolvedUserId;
-                    }
+            // Offline first: the Run starts now from this PC's last confirmed progression and elif. The profile
+            // lookup can take seconds or never answer, so it only refreshes them when it does; a slow or missing
+            // server never delays or blocks play.
+            if (!BeginRun(selectedCharacterId))
+            {
+                onCompleted?.Invoke(false);
+                return false;
+            }
 
-                    bool started = BeginRun(selectedCharacterId);
-                    onCompleted?.Invoke(started);
-                });
+            playerProgressClient.LoadAndApply(selectedCharacterId, _ => OnProgressionLoaded());
+            onCompleted?.Invoke(true);
+            return true;
+        }
+
+        // The lookup answered after the Run started: its skill levels are already applied by PlayerProgressClient;
+        // the server's elif balance and upgrade levels replace the cached ones (elif gained or spent is kept).
+        private void OnProgressionLoaded()
+        {
+            if (hasEnded || playerProgressClient == null) return;
+            if (!string.IsNullOrWhiteSpace(playerProgressClient.ResolvedUserId))
+                userId = playerProgressClient.ResolvedUserId;
+            if (playerProgressClient.HasFreshElifMeta) ApplyElifStart(playerProgressClient.LoadedElifMeta, "server");
         }
 
         public bool BeginRun(string selectedCharacterId)
@@ -242,6 +254,15 @@ namespace TrickalFanGame.Run
             }
 
             characterId = selectedCharacterId;
+            // Elif-3: the Run spends from the saved balance and levels it started with (contract 27 §4.3, §13).
+            // The game plays the same without the server: an offline start uses the last confirmed values.
+            if (playerProgressClient != null && playerProgressClient.HasFreshElifMeta)
+                ApplyElifStart(playerProgressClient.LoadedElifMeta, "server");
+            else
+                ApplyElifStart(playerProgressClient != null
+                    ? playerProgressClient.LoadedElifMeta ??
+                      PlayerProgressClient.LoadCachedElifMeta(playerProgressClient.UserNickname)
+                    : null, "cache");
             clientRunId = Guid.NewGuid().ToString();
             startedAt = DateTime.UtcNow;
             startedRealtime = Time.realtimeSinceStartup;
@@ -365,7 +386,8 @@ namespace TrickalFanGame.Run
                 isCleared = isCleared,
                 killCount = runProgress != null ? runProgress.KillCount : 0,
                 deathReason = deathReason,
-                items = BuildRunItems(endedAt)
+                items = BuildRunItems(endedAt),
+                elif = BuildRunElif()
             };
 
             if (!shouldSaveResult)
@@ -472,8 +494,84 @@ namespace TrickalFanGame.Run
 
             isSaveInFlight = true;
             canRetrySave = false;
-            client.PostRun(pendingRequest, OnSaveSuccess, OnSaveFailure);
+            RunSubmission.Post(client, pendingRequest,
+                playerProgressClient != null ? playerProgressClient.UserNickname : null, OnSaveSuccess, OnSaveFailure);
         }
+
+        // Development grants stay out of the request. The gain is capped at the Backend's per-Run limit so an
+        // unusual Run still saves its record and experience. Upgrade levels bought in the Run go in buying order;
+        // development overrides are never bought, so they never appear.
+        public static RunElifDto BuildRunElif(RunProgress progress)
+        {
+            List<RunElifUpgradePurchaseDto> purchases = new();
+            if (progress != null)
+                foreach (ShopUpgradePurchase purchase in progress.ShopUpgradePurchases)
+                    purchases.Add(new RunElifUpgradePurchaseDto
+                    {
+                        upgradeId = purchase.UpgradeId,
+                        level = purchase.Level,
+                        floor = purchase.Floor,
+                        order = purchase.Order
+                    });
+            return new RunElifDto
+            {
+                gained = progress != null ? Mathf.Clamp(progress.ElifGained, 0, PermanentElif.RunGainMax) : 0,
+                spent = progress != null ? Mathf.Max(0, progress.ElifSpent) : 0,
+                upgradePurchases = purchases.ToArray()
+            };
+        }
+
+        // Sets only the starting balance and levels; elif gained or spent meanwhile is kept, so applying the cached
+        // values first and the server's values later is safe.
+        private void ApplyElifStart(ElifMetaDto saved, string source)
+        {
+            if (runProgress == null) return;
+            List<CreateRunRequest> pendingRuns = LocalPendingRunStorage.LoadAll(userId);
+            ElifRunStart start = ComputeElifStart(saved, pendingRuns);
+            runProgress.ConfigureElifStart(start.Balance, start.UpgradeLevels, null, true);
+            Debug.Log($"[RunSession] Elif start {start.Balance} from {source} " +
+                      $"(saved {(saved != null ? saved.elifBalance.ToString() : "none")}, pending {pendingRuns.Count}).",
+                this);
+        }
+
+        public sealed class ElifRunStart
+        {
+            public int Balance;
+            public Dictionary<string, int> UpgradeLevels = new(StringComparer.Ordinal);
+        }
+
+        // Contract 27 §4.3: start = saved balance (this start's profile lookup, or the last confirmed value cached on
+        // this PC, or 0) − what pending earlier Runs spent (their gains count only once they are saved); levels =
+        // saved levels raised by what pending Runs bought. RunSubmission sends a Run that bought upgrades after
+        // those pending Runs, so its levels never reach the server out of order.
+        public static ElifRunStart ComputeElifStart(ElifMetaDto meta, IReadOnlyList<CreateRunRequest> pendingRequests)
+        {
+            ElifRunStart start = new() { Balance = meta != null ? Mathf.Max(0, meta.elifBalance) : 0 };
+            if (meta?.shopUpgrades != null)
+                foreach (ShopUpgradeLevelDto level in meta.shopUpgrades)
+                    if (level != null && !string.IsNullOrWhiteSpace(level.upgradeId) && level.level > 0)
+                        start.UpgradeLevels[level.upgradeId] = level.level;
+
+            if (pendingRequests != null)
+                foreach (CreateRunRequest request in pendingRequests)
+                {
+                    RunElifDto elif = request?.elif;
+                    if (elif == null) continue;
+                    start.Balance -= Mathf.Max(0, elif.spent);
+                    if (elif.upgradePurchases == null) continue;
+                    foreach (RunElifUpgradePurchaseDto purchase in elif.upgradePurchases)
+                    {
+                        if (purchase == null || string.IsNullOrWhiteSpace(purchase.upgradeId)) continue;
+                        start.UpgradeLevels[purchase.upgradeId] = Mathf.Max(purchase.level,
+                            start.UpgradeLevels.TryGetValue(purchase.upgradeId, out int saved) ? saved : 0);
+                    }
+                }
+
+            start.Balance = Mathf.Clamp(start.Balance, 0, PermanentElif.BalanceMax);
+            return start;
+        }
+
+        private RunElifDto BuildRunElif() => BuildRunElif(runProgress);
 
         private RunItemDto[] BuildRunItems(DateTime endedAt)
         {

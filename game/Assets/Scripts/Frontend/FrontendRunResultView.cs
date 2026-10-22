@@ -148,7 +148,7 @@ namespace TrickalFanGame.Frontend
             saveStatus.text = "";
             stageTitle.text = "결과를 정리하고 있어요";
             stageBody.text = "잠시만 기다려 주세요...";
-            client.PostRun(payload.Request, OnSaveSuccess, ShowSaveFailure);
+            RunSubmission.Post(client, payload.Request, LocalProfile.Nickname, OnSaveSuccess, ShowSaveFailure);
         }
 
         private void OnSaveSuccess(CreateRunResponse response)
@@ -163,6 +163,7 @@ namespace TrickalFanGame.Frontend
             savedResponse = response;
             LocalPendingRunStorage.Remove(payload.Request.clientRunId);
             PlayerProgressClient.StoreConfirmedProgress(LocalProfile.Nickname, response.data.progress);
+            PlayerProgressClient.StoreConfirmedElifMeta(LocalProfile.Nickname, response.data.meta);
             saveStatus.text = "저장 완료";
             if (sequence != null) StopCoroutine(sequence);
             sequence = StartCoroutine(PlaySequence());

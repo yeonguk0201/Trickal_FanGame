@@ -82,6 +82,13 @@ export class UsersService {
         highGradeSkillLevel: progress.highGradeSkillLevel,
         maxSkillLevel: SKILL_MAX_LEVEL,
       })),
+      meta: {
+        elifBalance: user.elifBalance,
+        shopUpgrades: user.shopUpgrades.map((upgrade) => ({
+          upgradeId: upgrade.upgradeId,
+          level: upgrade.level,
+        })),
+      },
     };
   }
 

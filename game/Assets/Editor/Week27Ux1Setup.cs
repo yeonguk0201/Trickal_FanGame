@@ -27,11 +27,16 @@ namespace TrickalFanGame.Editor
         public const string GoldSpritePath = "Assets/Resources/UserArtwork/gold-pickup.png";
         public const string KeySpritePath = "Assets/Art/Drafts/FairyKingdom/Pickups/pickup-key.png";
         public const string BombSpritePath = "Assets/Art/Drafts/FairyKingdom/Pickups/pickup-bomb.png";
+        // Elif-2: the permanent elif the Run can spend, as the fourth cell.
+        public const string ElifSpritePath = "Assets/Resources/UserArtwork/permanent-elif.png";
+        public static readonly string[] ResourceSpritePaths =
+            { GoldSpritePath, KeySpritePath, BombSpritePath, ElifSpritePath };
         public const float MinimapMaskSoftness = 14f;
         public const float DescriptionWidth = 420f;
 
         // Top-left, in the 1920 x 1080 reference frame (centre origin): the 권능 in the corner, hearts and SP to its
-        // right, and gold/key/bomb under the hearts and SP. The detailed stats sit lower on the left.
+        // right, and gold/key/bomb/elif under the hearts and SP (96 per cell, left edge kept where the three-cell row
+        // started). The detailed stats sit lower on the left.
         public static readonly Vector2 SurvivalPosition = new(-432, 420);
         public static readonly Vector2 SurvivalSize = new(560, 168);
         public static readonly Vector2 HeartRowPosition = new(0, 42);
@@ -44,8 +49,8 @@ namespace TrickalFanGame.Editor
         public static readonly Vector2 SpValuePosition = new(196, -34);
         public static readonly Vector2 PowerPosition = new(-830, 420);
         public static readonly Vector2 PowerSize = new(220, 168);
-        public static readonly Vector2 ResourcePosition = new(-568, 296);
-        public static readonly Vector2 ResourceSize = new(288, 56);
+        public static readonly Vector2 ResourcePosition = new(-520, 296);
+        public static readonly Vector2 ResourceSize = new(384, 56);
         public static readonly Vector2 DetailedStatsPosition = new(-780, 140);
 
         // Skill HUD (bottom right): two equal rounded tiles, centre to centre.
@@ -79,7 +84,7 @@ namespace TrickalFanGame.Editor
 
             TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Week13FrontendSetup.FontPath);
             if (font == null) throw new InvalidOperationException("UX-1 requires the Frontend TMP font.");
-            Sprite[] resourceSprites = { LoadSprite(GoldSpritePath), LoadSprite(KeySpritePath), LoadSprite(BombSpritePath) };
+            Sprite[] resourceSprites = ResourceSpritePaths.Select(LoadSprite).ToArray();
 
             Undo.IncrementCurrentGroup();
             int group = Undo.GetCurrentGroup();
@@ -119,7 +124,7 @@ namespace TrickalFanGame.Editor
             if (!EditorSceneManager.SaveScene(scene))
                 throw new InvalidOperationException("Game Scene save failed during UX-1 setup.");
             Undo.CollapseUndoOperations(group);
-            Debug.Log("UX-1 setup complete: right HUD column (minimap, gold/key/bomb, artifacts), current-room " +
+            Debug.Log("UX-1 setup complete: right HUD column (minimap, gold/key/bomb/elif, artifacts), current-room " +
                       "minimap viewport and the nearest floor item description.");
         }
 
@@ -163,7 +168,7 @@ namespace TrickalFanGame.Editor
             return sprite;
         }
 
-        // Gold, key, bomb in GameResourceHudView.DisplayOrder, each with its floor pickup artwork.
+        // Gold, key, bomb, elif in GameResourceHudView.DisplayOrder, each with its floor pickup artwork.
         private static RectTransform BuildResourceHud(RectTransform frame, RunProgress progress, TMP_FontAsset font,
             Sprite[] sprites)
         {

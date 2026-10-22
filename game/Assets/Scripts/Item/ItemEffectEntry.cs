@@ -452,7 +452,8 @@ namespace TrickalFanGame.Item
                    type != ItemEffectType.GainGold &&
                    type != ItemEffectType.TeleportToBossRoom &&
                    type != ItemEffectType.TeleportToGoldiShop &&
-                   type != ItemEffectType.RandomStatShift;
+                   type != ItemEffectType.RandomStatShift &&
+                   type != ItemEffectType.GainPermanentElifRollOnAcquire;
         }
     }
 }

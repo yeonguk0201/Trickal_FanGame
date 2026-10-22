@@ -148,6 +148,8 @@ MVP에서는 다음 테이블을 우선 사용한다.
 | runs | 하나의 게임 플레이 기록 |
 | run_items | Run에서 획득한 아이템 기록 |
 | user_character_progress | 캐릭터별 레벨, 경험치, 스킬 포인트와 스킬 레벨 |
+| user_shop_upgrades | 유저별 영구 상점 업그레이드 단계(§9.2) |
+| run_upgrade_purchases | Run에서 산 상점 업그레이드 기록(§9.2) |
 
 초기에는 이 정도로 시작한다.
 필요한 경우 개발 과정에서 다음 테이블을 추가할 수 있다.
@@ -172,6 +174,7 @@ MVP에서는 다음 테이블을 우선 사용한다.
 | id | UUID | 유저 고유 ID |
 | client_profile_id | UUID | Unity 로컬 프로필 등록 멱등성 키 |
 | nickname | VARCHAR | 유저 닉네임 |
+| elif_balance | INTEGER | 영구 엘리프 잔액. 기본 0, 상한 9999 |
 | created_at | TIMESTAMP | 생성 시간 |
 | updated_at | TIMESTAMP | 수정 시간 |
 
@@ -343,6 +346,10 @@ Database의 핵심 테이블이다.
 | death_reason | VARCHAR | 사망 원인 |
 | experience_gained | INTEGER | 해당 Run에 한 번만 지급된 경험치 |
 | progress_snapshot | JSONB | 최초 지급 직후 API에 반환한 캐릭터 진행 결과 |
+| elif_gained | INTEGER | 이 Run의 엘리프 획득량. 기본 0 |
+| elif_spent | INTEGER | 이 Run의 실제 엘리프 사용량(다른 Run이 먼저 산 업그레이드 단계 비용 제외). 기본 0 |
+| elif_shortfall | INTEGER | 잔액이 0 미만이 되어 차감하지 못한 양. 기본 0 |
+| elif_snapshot | JSONB | 최초 반영 직후 API에 반환한 엘리프 `meta` |
 | created_at | TIMESTAMP | 기록 생성 시간 |
 
 `client_run_id`에는 Unique 제약을 둔다. Unity가 네트워크 실패 후 같은 Run을 재전송하면 Backend는
@@ -351,7 +358,46 @@ Database의 핵심 테이블이다.
 
 지문은 `client_run_id` 자체를 제외한 Run 필드 전체와 `order`로 정렬한 RunItem의 `item_id`,
 `floor`, `item_order`, `acquired_at`을 정규화한 뒤 계산한다. 배열 전송 순서만 다른 같은 내용은
-동일 요청이지만, 획득 순서나 시각을 포함한 실제 내용이 다르면 충돌이다.
+동일 요청이지만, 획득 순서나 시각을 포함한 실제 내용이 다르면 충돌이다. 엘리프 값이 없거나 모두 0인 요청은
+엘리프 도입 전과 같은 지문을 만든다([07번](./07-api.md) §8.5).
+
+### 9.1 영구 엘리프
+
+계약은 [27번](./27-permanent-elif-contract.md)이다. `users.elif_balance`가 잔액이고, Run 저장 Transaction에서만
+바뀐다(§21.1). 마이그레이션 `20261022000000_add_permanent_elif`는 기존 Run의 `elif_snapshot`을 잔액 0·업그레이드
+없음으로 채운다. 마이그레이션 시점에는 모든 잔액이 0이므로 그 재전송 응답이 정확하다.
+
+### 9.2 상점 업그레이드
+
+업그레이드 카탈로그(ID·최대 단계·비용)는 테이블이 아니라 Backend 상수 `SHOP_UPGRADE_CATALOG`다. seed는 바뀌지 않는다.
+업그레이드 ID는 Item ID처럼 안정 키이며 폐지해도 카탈로그에서 지우지 않는다.
+
+#### Schema: user_shop_upgrades
+
+| Column | Type | 설명 |
+|---|---|---|
+| id | UUID | 고유 ID |
+| user_id | UUID | 유저. 유저 삭제 시 Cascade |
+| upgrade_id | VARCHAR(64) | 업그레이드 ID |
+| level | INTEGER | 저장된 단계 |
+| created_at / updated_at | TIMESTAMP | 생성·수정 시간 |
+
+`(user_id, upgrade_id)` Unique.
+
+#### Schema: run_upgrade_purchases
+
+| Column | Type | 설명 |
+|---|---|---|
+| id | UUID | 고유 ID |
+| run_id | UUID | Run. Run 삭제 시 Cascade |
+| upgrade_id | VARCHAR(64) | 업그레이드 ID |
+| level | INTEGER | 산 단계 |
+| floor | INTEGER | 산 층 |
+| purchase_order | INTEGER | Run 안의 구매 순서 |
+
+`(run_id, purchase_order)` Unique. 요청 원본을 그대로 남기므로 다른 Run이 먼저 저장해 건너뛴 구매도 기록된다.
+실제 반영 여부는 `user_shop_upgrades`와 `runs.elif_spent`로 본다. 엘리프 가격 상품 구매는 따로 기록하지 않는다
+(산 아이템은 `run_items`, 사용량은 `elif_spent`).
 
 ## 10. Run 상태
 Run은 기본적으로 다음 두 가지 결과를 가진다.
@@ -575,10 +621,14 @@ client_run_id 조회
       → 필요 경험치를 순서대로 차감하며 최대 Lv.19까지 연속 레벨업
       → 상승한 레벨 수만큼 skill_points 지급
       → 진행 상태 저장
+      → users.elif_balance와 user_shop_upgrades 조회
+      → 이미 저장된 업그레이드 단계는 건너뛰고 비용 환불, 이전 단계가 없으면 ELIF_UPGRADE_LEVEL_GAP
+      → run_upgrade_purchases 저장, user_shop_upgrades 단계 올림
+      → 잔액 = 기존 + gained − 실제 spent (0~9999, 0 미만분은 runs.elif_shortfall)
       → Commit
 ```
 
-Run 저장, 경험치 지급, 스킬 포인트 지급은 하나의 Transaction에서 처리한다. 같은
+Run 저장, 경험치 지급, 스킬 포인트 지급, 엘리프 잔액·업그레이드 반영은 하나의 Transaction에서 처리한다. 같은
 `client_run_id`가 동시에 요청되어도 Unique 제약과 Transaction으로 한 번만 지급되도록 한다.
 
 ### 21.2 아티팩트 선택 보상 저장
@@ -816,6 +866,8 @@ enemies
 | runs | 핵심 | 플레이 기록 |
 | run_items | 핵심 | 아이템 획득 기록 |
 | user_character_progress | 핵심 | 캐릭터 레벨, 경험치, 포인트와 두 스킬 레벨 |
+| user_shop_upgrades | 선택 | 영구 상점 업그레이드 단계 |
+| run_upgrade_purchases | 선택 | Run별 상점 업그레이드 구매 기록 |
 | run_events | 추후 | 상세 플레이 로그 |
 | item_synergies | 추후 | 아이템 시너지 관리 |
 | enemies | 추후 | 몬스터 데이터 관리 |

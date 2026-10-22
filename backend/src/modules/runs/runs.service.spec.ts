@@ -56,6 +56,7 @@ describe('RunsService', () => {
       lowGradeSkillLevel: 1,
       highGradeSkillLevel: 1,
     },
+    meta: { elifBalance: 0, elifGained: 0, elifSpent: 0, shopUpgrades: [] },
     created: true,
   };
 
@@ -74,6 +75,8 @@ describe('RunsService', () => {
         isCleared: true,
         killCount: 100,
         deathReason: null,
+        elifGained: 2,
+        elifSpent: 1,
         runItems: [
           {
             itemId: 'item-01',
@@ -105,6 +108,7 @@ describe('RunsService', () => {
       id: 'run-id',
       user: { nickname: 'test-player' },
       character: { id: 'erpin', name: '에르핀' },
+      elif: { gained: 2, spent: 1 },
       items: [
         {
           itemId: 'item-01',
@@ -194,8 +198,94 @@ describe('RunsService', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
+  it('accepts a valid Elif result and passes it to the repository', async () => {
+    const dto = {
+      ...validDto,
+      elif: {
+        gained: 3,
+        spent: 6,
+        upgradePurchases: [
+          {
+            upgradeId: 'shop-upgrade-discount',
+            level: 1,
+            floor: 1,
+            order: 1,
+          },
+          {
+            upgradeId: 'shop-upgrade-discount',
+            level: 2,
+            floor: 2,
+            order: 2,
+          },
+        ],
+      },
+    };
+
+    await expect(service.create(dto)).resolves.toEqual(persistedResult);
+    expect(repository.create).toHaveBeenCalledWith(dto);
+  });
+
+  it.each([
+    [
+      'an unknown upgrade ID',
+      { upgradeId: 'shop-upgrade-missing', level: 1, floor: 1, order: 1 },
+      5,
+    ],
+    [
+      'a level above the catalog maximum',
+      { upgradeId: 'shop-upgrade-discount', level: 4, floor: 1, order: 1 },
+      5,
+    ],
+    [
+      'a purchase floor above the reached floor',
+      { upgradeId: 'shop-upgrade-discount', level: 1, floor: 4, order: 1 },
+      5,
+    ],
+    [
+      'spent below the upgrade cost',
+      { upgradeId: 'shop-upgrade-discount', level: 1, floor: 1, order: 1 },
+      1,
+    ],
+  ])(
+    'rejects %s before opening a transaction',
+    async (_label, purchase, spent) => {
+      const dto = {
+        ...validDto,
+        elif: { gained: 0, spent, upgradePurchases: [purchase] },
+      };
+
+      await expectApiError(
+        service.create(dto),
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        'INVALID_ELIF_DATA',
+      );
+      expect(repository.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects a level skipped within the same Run', async () => {
+    const dto = {
+      ...validDto,
+      elif: {
+        gained: 0,
+        spent: 10,
+        upgradePurchases: [
+          { upgradeId: 'shop-upgrade-discount', level: 1, floor: 1, order: 1 },
+          { upgradeId: 'shop-upgrade-discount', level: 3, floor: 2, order: 2 },
+        ],
+      },
+    };
+
+    await expectApiError(
+      service.create(dto),
+      HttpStatus.UNPROCESSABLE_ENTITY,
+      'INVALID_ELIF_DATA',
+    );
+  });
+
   it.each([
     ['USER_NOT_FOUND', HttpStatus.NOT_FOUND],
+    ['ELIF_UPGRADE_LEVEL_GAP', HttpStatus.UNPROCESSABLE_ENTITY],
     ['CHARACTER_NOT_FOUND', HttpStatus.NOT_FOUND],
     ['ITEM_NOT_FOUND', HttpStatus.NOT_FOUND],
     ['RUN_IDEMPOTENCY_CONFLICT', HttpStatus.CONFLICT],

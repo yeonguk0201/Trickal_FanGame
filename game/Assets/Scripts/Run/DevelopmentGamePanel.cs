@@ -5,6 +5,7 @@ using TrickalFanGame.Item;
 using TrickalFanGame.Player;
 using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
+using TrickalFanGame.Shop;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -92,6 +93,7 @@ namespace TrickalFanGame.Run
             DrawPowerSection(assembler);
             DrawArtifactSection(assembler);
             DrawResourceSection(progress);
+            DrawElifSection(assembler, progress);
             DrawChestSection(assembler);
             DrawObstacleSection(assembler);
             DrawTrapSection(assembler);
@@ -483,6 +485,159 @@ namespace TrickalFanGame.Run
             if (AssistedButton("+10 Key")) progress.TryAddResource(RunResourceType.Key, 10);
             if (AssistedButton("+10 Gold")) progress.TryAddResource(RunResourceType.Gold, 10);
             GUILayout.EndHorizontal();
+        }
+
+        // Elif-2/3 (contract 27 §7.2): the permanent elif. Elif added here is usable in this Run but is not saved as
+        // the Run's gain. Upgrade levels set here apply to this Run only and are never saved.
+        private void DrawElifSection(RoomGraphAssembler assembler, RunProgress progress)
+        {
+            GUILayout.Label($"— Elif — usable {progress.AvailableElif}  (start {progress.ElifStartingBalance}  " +
+                            $"gained {progress.ElifGained}  spent {progress.ElifSpent}  dev {progress.DevelopmentElif})");
+            PlayerInventory inventory = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<PlayerInventory>()
+                : null;
+            if (inventory != null && inventory.LastPermanentElifRoll >= 0)
+                GUILayout.Label($"Aisia wallet rolled {inventory.LastPermanentElifRoll} elif");
+            GUILayout.BeginHorizontal();
+            if (AssistedButton("+5 Elif (dev)")) progress.AddDevelopmentElif(5);
+            if (AssistedButton("Drop Elif pickup"))
+                status = TryDropElifPickup(assembler, progress, out string message)
+                    ? message
+                    : $"Elif drop failed: {message}";
+            GUILayout.EndHorizontal();
+            PermanentElif.DevelopmentForceNextConversion = GUILayout.Toggle(
+                PermanentElif.DevelopmentForceNextConversion, "Next gold drop → Elif");
+            // Gold drops are rare in obstacles and chests, so this drops gold through the real chest content path
+            // (the same conversion roll as play). With the toggle on, the first one always becomes elif.
+            if (AssistedButton("Chest with 4 gold (elif path)"))
+                status = TrySpawnGoldChest(assembler, out string goldMessage)
+                    ? goldMessage
+                    : $"Gold chest failed: {goldMessage}";
+            if (PermanentElif.DevelopmentForceNextConversion) MarkAssisted("Forced elif conversion");
+            DrawShopUpgradeSection(assembler, progress);
+        }
+
+        // Elif-3: the shop upgrades and elif offers, testable without the server.
+        private void DrawShopUpgradeSection(RoomGraphAssembler assembler, RunProgress progress)
+        {
+            GUILayout.Label(progress.IsElifSpendingAllowed
+                ? "Elif spending: allowed"
+                : "Elif spending: blocked (no fresh server balance)");
+            bool allow = GUILayout.Toggle(progress.IsElifSpendingAllowed, "Allow elif spending (dev)");
+            if (allow != progress.IsElifSpendingAllowed)
+            {
+                progress.SetDevelopmentElifSpendingAllowed(allow);
+                MarkAssisted("Elif spending override");
+            }
+
+            GUILayout.Label("Set upgrade level (this Run only, not saved):");
+            foreach (ShopUpgradeDefinition upgrade in ShopUpgrades.Catalog)
+            {
+                string id = upgrade.UpgradeId;
+                GUILayout.Label($"{id}: Lv {progress.GetShopUpgradeLevel(id)}/{upgrade.MaxLevel} " +
+                                $"(saved {progress.GetSavedShopUpgradeLevel(id)}" +
+                                $"{(progress.HasDevelopmentUpgradeLevel(id) ? ", dev" : string.Empty)}" +
+                                $"{(progress.IsUpgradeWaitingForPendingSave(id) ? ", pending save" : string.Empty)})");
+                GUILayout.BeginHorizontal();
+                for (int level = 0; level <= upgrade.MaxLevel; level++)
+                    if (AssistedButton($"Lv{level}")) progress.SetDevelopmentShopUpgradeLevel(id, level);
+                if (GUILayout.Button("Clear")) progress.SetDevelopmentShopUpgradeLevel(id, -1);
+                GUILayout.EndHorizontal();
+            }
+
+            foreach (ShopUpgradePurchase purchase in progress.ShopUpgradePurchases)
+                GUILayout.Label($"Bought #{purchase.Order}: {purchase.UpgradeId} Lv{purchase.Level} on F{purchase.Floor}");
+            if (AssistedButton("Shop here: first item → elif price"))
+                status = TryMakeElifOffer(assembler, progress, out string message)
+                    ? message
+                    : $"Elif offer failed: {message}";
+        }
+
+        // Makes the first artifact still on sale in the current room's shop an elif offer (the 25% roll, on demand).
+        private static bool TryMakeElifOffer(RoomGraphAssembler assembler, RunProgress progress, out string message)
+        {
+            RoomPrefab room = CurrentRoom(assembler);
+            ShopStockState stock = room != null && room.Node != null
+                ? progress.GetShopStock(ShopStockBuilder.BuildShopId(room.Node.RoomId))
+                : null;
+            if (stock == null)
+            {
+                message = "stand in a shop room first.";
+                return false;
+            }
+
+            ShopOffer offer = stock.Offers.FirstOrDefault(candidate => candidate.Kind == ShopOfferKind.Item &&
+                                                                       !candidate.Item.IsActivePower &&
+                                                                       !candidate.IsElifPriced &&
+                                                                       !stock.IsPurchased(candidate.SlotIndex));
+            if (offer == null || !stock.TryConvertToElifPrice(offer.SlotIndex))
+            {
+                message = "this shop has no artifact left to price in elif.";
+                return false;
+            }
+
+            message = $"{offer.DisplayName} now costs {ShopUpgrades.ElifPriceOf(offer.Price)} elif.";
+            return true;
+        }
+
+        // A normal development chest opened by touch, then four gold drops from it through RoomChestSpawner.
+        private static bool TrySpawnGoldChest(RoomGraphAssembler assembler, out string message)
+        {
+            ChestContentTable table = assembler.ChestContentTable;
+            ResourceDropEntry gold = table?.Consumables.FirstOrDefault(entry => entry?.Prefab != null &&
+                entry.Prefab.TryGetComponent(out RunResourcePickup resource) &&
+                resource.ResourceType == RunResourceType.Gold);
+            PlayerMovement player = assembler.Graph?.Player;
+            if (gold == null || player == null)
+            {
+                message = "needs the player and a gold chest drop.";
+                return false;
+            }
+
+            if (!TrySpawnChest(assembler, ChestKind.Normal, out message)) return false;
+
+            RoomPrefab room = CurrentRoom(assembler);
+            GeneratedRoomNode node = assembler.GeneratedGraph.FindFloor(room.Node.FloorNumber).Nodes
+                .First(candidate => candidate.RoomId == room.Node.RoomId);
+            RoomChestSite site = new(room, node.Template, assembler.Progress.GetRoomState(room.Node.RoomId),
+                assembler.Progress, player.transform);
+            TreasureChest chest = site.Parent.GetComponentsInChildren<TreasureChest>(false)
+                .Where(candidate => candidate.ChestId.StartsWith(RoomChestSpawner.DevelopmentChestPrefix,
+                    System.StringComparison.Ordinal))
+                .OrderByDescending(candidate => candidate.ChestId, System.StringComparer.Ordinal).First();
+            chest.TryOpenByTouch(player);
+            var drops = RoomChestSpawner.SpawnContents(table, chest,
+                new ChestContents(ChestKind.Normal, Enumerable.Repeat(gold, 4).ToArray(), null), site);
+            int elif = drops.Count(drop => drop.TryGetComponent(out RunResourcePickup resource) &&
+                                           resource.ResourceType == RunResourceType.Elif);
+            message = $"Chest {chest.ChestId} dropped 4 gold; {elif} became elif.";
+            return true;
+        }
+
+        // A gold pickup from the chest table, turned into a development elif next to the player.
+        private static bool TryDropElifPickup(RoomGraphAssembler assembler, RunProgress progress, out string message)
+        {
+            Transform player = assembler.Graph?.Player != null ? assembler.Graph.Player.transform : null;
+            GameObject goldPrefab = assembler.ChestContentTable?.Consumables
+                .Select(entry => entry?.Prefab)
+                .FirstOrDefault(prefab => prefab != null &&
+                                          prefab.TryGetComponent(out RunResourcePickup resource) &&
+                                          resource.ResourceType == RunResourceType.Gold);
+            if (player == null || goldPrefab == null)
+            {
+                message = "needs the player and a gold pickup in the chest content table.";
+                return false;
+            }
+
+            RoomPrefab room = CurrentRoom(assembler);
+            GameObject drop = Instantiate(goldPrefab, player.position + Vector3.right * 1.2f, Quaternion.identity,
+                room != null ? room.transform : null);
+            drop.name = $"Development Drop {PermanentElif.DropId}";
+            RunResourcePickup pickup = drop.GetComponent<RunResourcePickup>();
+            pickup.BindRunProgress(progress);
+            pickup.ConvertToPermanentElif(true);
+            message = "Dropped a development elif next to the player.";
+            return true;
         }
 
         // Chest-1: forces a chest of each kind into the current room through the normal chest path (assisted Run).

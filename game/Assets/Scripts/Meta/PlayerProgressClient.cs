@@ -9,6 +9,7 @@ namespace TrickalFanGame.Meta
     public sealed class PlayerProgressClient : MonoBehaviour
     {
         private const string CachePrefix = "TrickalFanGame.CharacterProgress.";
+        public const string ElifCachePrefix = "TrickalFanGame.ElifMeta.";
 
         [SerializeField] private string userNickname = "test-player";
         [SerializeField] private PlayerSkill lowerGradeSkill;
@@ -25,6 +26,11 @@ namespace TrickalFanGame.Meta
         public CharacterProgressDto LastResultProgress { get; private set; }
         public int LastExperienceGained { get; private set; }
         public bool IsOfflineFallback { get; private set; }
+        // Elif-2/3: the saved permanent elif balance and shop upgrade levels. Fresh when this load's profile lookup
+        // returned them; otherwise the last confirmed values cached on this PC (contract 27 §4.3), or null.
+        public ElifMetaDto LoadedElifMeta { get; private set; }
+        public bool HasFreshElifMeta { get; private set; }
+        public int? LoadedElifBalance => LoadedElifMeta != null ? LoadedElifMeta.elifBalance : (int?)null;
         public bool IsLoading => isLoading;
         public string StatusMessage => statusMessage;
 
@@ -62,10 +68,12 @@ namespace TrickalFanGame.Meta
 
             ResolveSkillReferences();
             isLoading = true;
+            HasFreshElifMeta = false;
             statusMessage = $"Loading progression for {characterId}...";
             IGameApiClient client = apiClient ?? ApiClient.Instance;
             if (client == null)
             {
+                LoadedElifMeta = LoadCachedElifMeta(userNickname);
                 ApplyFallback(characterId, "ApiClient is unavailable.");
                 onReady?.Invoke(true);
                 return true;
@@ -75,6 +83,17 @@ namespace TrickalFanGame.Meta
                 userNickname,
                 response =>
                 {
+                    if (response?.data?.meta != null)
+                    {
+                        LoadedElifMeta = NormalizeElifMeta(response.data.meta);
+                        HasFreshElifMeta = true;
+                        StoreConfirmedElifMeta(userNickname, LoadedElifMeta);
+                    }
+                    else
+                    {
+                        LoadedElifMeta = LoadCachedElifMeta(userNickname);
+                    }
+
                     CharacterProgressDto progress = FindProgress(response, characterId);
                     if (progress == null)
                     {
@@ -93,6 +112,7 @@ namespace TrickalFanGame.Meta
                 },
                 error =>
                 {
+                    LoadedElifMeta = LoadCachedElifMeta(userNickname);
                     ApplyFallback(characterId, error);
                     onReady?.Invoke(true);
                 });
@@ -112,6 +132,7 @@ namespace TrickalFanGame.Meta
 
         public void ShowRunResult(RunData result)
         {
+            if (result?.meta != null) StoreConfirmedElifMeta(userNickname, result.meta);
             if (result == null || result.progress == null)
             {
                 statusMessage = "Run saved, but progression result is unavailable.";
@@ -137,6 +158,37 @@ namespace TrickalFanGame.Meta
             PlayerPrefs.SetString($"{CachePrefix}{nickname}.{progress.characterId}", JsonUtility.ToJson(progress));
             PlayerPrefs.Save();
         }
+
+        // The balance and levels from a confirmed Run save or profile lookup, for the next offline start.
+        public static void StoreConfirmedElifMeta(string nickname, ElifMetaDto meta)
+        {
+            if (string.IsNullOrWhiteSpace(nickname) || meta == null) return;
+            PlayerPrefs.SetString(ElifCachePrefix + nickname, JsonUtility.ToJson(NormalizeElifMeta(meta)));
+            PlayerPrefs.Save();
+        }
+
+        public static ElifMetaDto LoadCachedElifMeta(string nickname)
+        {
+            if (string.IsNullOrWhiteSpace(nickname)) return null;
+            string json = PlayerPrefs.GetString(ElifCachePrefix + nickname, string.Empty);
+            if (string.IsNullOrEmpty(json)) return null;
+            try
+            {
+                return NormalizeElifMeta(JsonUtility.FromJson<ElifMetaDto>(json));
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static ElifMetaDto NormalizeElifMeta(ElifMetaDto meta) => meta == null
+            ? null
+            : new ElifMetaDto
+            {
+                elifBalance = Mathf.Max(0, meta.elifBalance),
+                shopUpgrades = meta.shopUpgrades ?? Array.Empty<ShopUpgradeLevelDto>()
+            };
 
         public bool IsAppliedFor(string characterId)
         {

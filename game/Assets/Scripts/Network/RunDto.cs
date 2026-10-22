@@ -18,6 +18,43 @@ namespace TrickalFanGame.Network
         public int killCount;
         public string deathReason;
         public RunItemDto[] items;
+        // Elif-2 (contract 27 §5.2): the permanent elif this Run gained and spent. All zero is the same request as
+        // a client without elif, so its fingerprint does not change.
+        public RunElifDto elif = new();
+    }
+
+    [Serializable]
+    public class RunElifDto
+    {
+        public int gained;
+        public int spent;
+        public RunElifUpgradePurchaseDto[] upgradePurchases = Array.Empty<RunElifUpgradePurchaseDto>();
+    }
+
+    [Serializable]
+    public class RunElifUpgradePurchaseDto
+    {
+        public string upgradeId;
+        public int level;
+        public int floor;
+        public int order;
+    }
+
+    // Saved balance and shop upgrade levels: data.meta of the Run save and the user profile responses.
+    [Serializable]
+    public class ElifMetaDto
+    {
+        public int elifBalance;
+        public int elifGained;
+        public int elifSpent;
+        public ShopUpgradeLevelDto[] shopUpgrades = Array.Empty<ShopUpgradeLevelDto>();
+    }
+
+    [Serializable]
+    public class ShopUpgradeLevelDto
+    {
+        public string upgradeId;
+        public int level;
     }
 
     [Serializable]
@@ -57,6 +94,7 @@ namespace TrickalFanGame.Network
         public string runId;
         public int experienceGained;
         public CharacterProgressDto progress;
+        public ElifMetaDto meta;
     }
 
     [Serializable]
@@ -88,6 +126,7 @@ namespace TrickalFanGame.Network
         public string nickname;
         public UserStatsDto stats;
         public CharacterProgressDto[] characterProgress;
+        public ElifMetaDto meta;
     }
 
     [Serializable]

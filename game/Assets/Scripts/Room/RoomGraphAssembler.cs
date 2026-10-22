@@ -490,8 +490,11 @@ namespace TrickalFanGame.Room
 
             PlayerInventory inventory = graph.Player != null ? graph.Player.GetComponent<PlayerInventory>() : null;
             ShopKind kind = node.IsGoldiShop ? ShopKind.Goldi : ShopKind.General;
+            // Elif-3: elif offers roll only in a seeded Run, like the Elif-2 gold conversion; Editor fixtures
+            // without a Run seed keep gold-only shops.
+            bool rollElifPrice = runProgress != null && runProgress.HasRunSeed;
             ShopStockState Build() => ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog,
-                selectionRewardPool, inventory, kind, powerRewardPool);
+                selectionRewardPool, inventory, kind, powerRewardPool, rollElifPrice);
             ShopStockState stock = runProgress != null
                 ? runProgress.GetOrCreateShopStock(ShopStockBuilder.BuildShopId(node.RoomId), Build)
                 : Build();

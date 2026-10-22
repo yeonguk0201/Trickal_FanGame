@@ -79,6 +79,21 @@ namespace TrickalFanGame.Data
             return null;
         }
 
+        /// <summary>
+        /// Every queued request, oldest first, optionally restricted to one local profile owner.
+        /// </summary>
+        public static List<CreateRunRequest> LoadAll(string userId = null)
+        {
+            var requests = new List<CreateRunRequest>();
+            foreach (PendingRunEntry entry in ReadEntries())
+            {
+                if (string.IsNullOrWhiteSpace(userId) || entry.request.userId == userId)
+                    requests.Add(entry.request);
+            }
+
+            return requests;
+        }
+
         public static bool Contains(string clientRunId)
         {
             if (string.IsNullOrWhiteSpace(clientRunId)) return false;

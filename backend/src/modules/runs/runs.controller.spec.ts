@@ -23,6 +23,12 @@ describe('RunsController', () => {
       lowGradeSkillLevel: 1,
       highGradeSkillLevel: 1,
     },
+    meta: {
+      elifBalance: 3,
+      elifGained: 3,
+      elifSpent: 0,
+      shopUpgrades: [],
+    },
   };
 
   it.each([

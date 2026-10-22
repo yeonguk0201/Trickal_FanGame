@@ -15,7 +15,8 @@ namespace TrickalFanGame.Editor
         {
             string[] paths = AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets/Resources/UserArtwork" })
                 .Select(AssetDatabase.GUIDToAssetPath).ToArray();
-            Require(paths.Length == 49, "Expected all 49 supplied PNGs, including the Goldi shop and gold pickup artwork.");
+            Require(paths.Length == 51,
+                "Expected all 51 supplied PNGs, including the Goldi shop, gold pickup and permanent elif artwork.");
             foreach (string path in paths)
             {
                 Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
@@ -30,6 +31,8 @@ namespace TrickalFanGame.Editor
             Require(UserArtwork.Load("goldi") != null, "Goldi artwork must be available for the Goldi shop (Shop-1).");
             Require(UserArtwork.Load(TrickalFanGame.Resource.RunResourcePickup.GoldArtworkKey) != null,
                 "Gold pickup artwork must be available for the floor gold pickup.");
+            Require(UserArtwork.Load(TrickalFanGame.Resource.PermanentElif.ArtworkKey) != null,
+                "Permanent elif artwork must be available for the converted floor pickup and the HUD (Elif-2).");
             Require(UserArtwork.HudIcon(3) != null &&UserArtwork.HudIcon(3) == UserArtwork.Load("erpin-high-grade"),
                 "High-grade HUD icon must use the supplied Erpin artwork.");
             for (int i = 0; i < 3; i++)
@@ -54,7 +57,7 @@ namespace TrickalFanGame.Editor
                         "Artwork must retain its colors and the correct frame style: " + item.ItemId);
                     linked++;
                 }
-                Require(linked == 34, "Expected 34 existing item definitions with supplied artwork; got " + linked);
+                Require(linked == 35, "Expected 35 existing item definitions with supplied artwork; got " + linked);
                 Require(!UserArtwork.Apply(image, (ItemDefinition)null) && image.sprite == null && image.material == Graphic.defaultGraphicMaterial,
                     "An empty slot must clear the previous artwork and material.");
                 foreach (string name in new[] { "HealthPickup", "SPPickup" })
@@ -65,7 +68,7 @@ namespace TrickalFanGame.Editor
                     Require(display.sprite == UserArtwork.Load(key) && display.color == Color.white,
                         name + " must use the supplied capsule, including in the shop.");
                 }
-                Debug.Log("User artwork verification passed: 49 PNGs, Goldi shopkeeper, gold pickup, 34 item illustrations, four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
+                Debug.Log("User artwork verification passed: 51 PNGs, Goldi shopkeeper, gold pickup, permanent elif, 35 item illustrations, four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
                 CapturePreview();
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }

@@ -1,4 +1,10 @@
 import { createHash } from 'node:crypto';
+import {
+  isEmptyRunElif,
+  normalizeRunElif,
+  type ElifResultMeta,
+  type RunElifInput,
+} from './permanent-elif';
 
 export const CHARACTER_MAX_LEVEL = 19;
 export const SKILL_MAX_LEVEL = 10;
@@ -50,6 +56,13 @@ export const RUN_FINGERPRINT_FIELDS = [
   'killCount',
   'deathReason',
   'items',
+  'elif',
+] as const;
+
+export const RUN_ELIF_FINGERPRINT_FIELDS = [
+  'gained',
+  'spent',
+  'upgradePurchases',
 ] as const;
 
 export const RUN_ITEM_FINGERPRINT_FIELDS = [
@@ -78,6 +91,7 @@ export interface RunFingerprintInput {
   killCount: number;
   deathReason?: string | null;
   items: RunFingerprintItem[];
+  elif?: Partial<RunElifInput> | null;
 }
 
 export interface CharacterProgressSnapshot {
@@ -94,6 +108,7 @@ export interface CreateRunResultContract {
   runId: string;
   experienceGained: number;
   progress: CharacterProgressSnapshot;
+  meta: ElifResultMeta;
 }
 
 export interface UpgradeSkillRequestContract {
@@ -124,7 +139,26 @@ export function createRunRequestFingerprint(
       })),
   };
 
+  // Requests without Elif (or all zero) keep the pre-Elif hash so pending
+  // retransmissions of older runs never turn into 409.
+  const elif = normalizeRunElif(input.elif);
+  const canonical = isEmptyRunElif(elif)
+    ? canonicalRequest
+    : {
+        ...canonicalRequest,
+        elif: {
+          gained: elif.gained,
+          spent: elif.spent,
+          upgradePurchases: elif.upgradePurchases.map((purchase) => ({
+            upgradeId: purchase.upgradeId,
+            level: purchase.level,
+            floor: purchase.floor,
+            order: purchase.order,
+          })),
+        },
+      };
+
   return createHash('sha256')
-    .update(JSON.stringify(canonicalRequest), 'utf8')
+    .update(JSON.stringify(canonical), 'utf8')
     .digest('hex');
 }

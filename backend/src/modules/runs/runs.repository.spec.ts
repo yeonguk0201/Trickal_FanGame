@@ -66,11 +66,29 @@ describe('RunsRepository H-3 transaction and idempotency', () => {
     lowGradeSkillLevel: 1,
     highGradeSkillLevel: 1,
   };
+  const emptyElifMeta = {
+    elifBalance: 0,
+    elifGained: 0,
+    elifSpent: 0,
+    shopUpgrades: [],
+  };
   const expectedResult: PersistRunResult = {
     runId: '20000000-0000-4000-8000-000000000001',
     experienceGained: 840,
     progress: expectedProgress,
+    meta: emptyElifMeta,
     created: true,
+  };
+  const elifDto: CreateRunDto = {
+    ...validDto,
+    elif: {
+      gained: 3,
+      spent: 5,
+      upgradePurchases: [
+        { upgradeId: 'shop-upgrade-discount', level: 1, floor: 1, order: 1 },
+        { upgradeId: 'shop-upgrade-extra-slot', level: 1, floor: 2, order: 2 },
+      ],
+    },
   };
 
   beforeEach(() => {
@@ -116,6 +134,218 @@ describe('RunsRepository H-3 transaction and idempotency', () => {
       );
     },
   );
+
+  it('keeps the balance and writes no Elif rows for a Run without Elif', async () => {
+    await repository.create(validDto);
+
+    expect(transaction.user.update).not.toHaveBeenCalled();
+    expect(transaction.userShopUpgrade.upsert).not.toHaveBeenCalled();
+    expect(transaction.runUpgradePurchase.createMany).not.toHaveBeenCalled();
+    expect(transaction.run.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data: expect.objectContaining({
+          elifGained: 0,
+          elifSpent: 0,
+          elifShortfall: 0,
+          elifSnapshot: emptyElifMeta,
+        }),
+      }),
+    );
+  });
+
+  it('applies Elif gain, spending, and upgrades in the Run transaction', async () => {
+    transaction.user.findUnique.mockResolvedValue({
+      id: validDto.userId,
+      elifBalance: 6,
+    });
+    const meta = {
+      elifBalance: 4,
+      elifGained: 3,
+      elifSpent: 5,
+      shopUpgrades: [
+        { upgradeId: 'shop-upgrade-discount', level: 1 },
+        { upgradeId: 'shop-upgrade-extra-slot', level: 1 },
+      ],
+    };
+
+    await expect(repository.create(elifDto)).resolves.toEqual({
+      ...expectedResult,
+      meta,
+    });
+    expect(transaction.run.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data: expect.objectContaining({
+          elifGained: 3,
+          elifSpent: 5,
+          elifShortfall: 0,
+          elifSnapshot: meta,
+        }),
+      }),
+    );
+    expect(transaction.runUpgradePurchase.createMany).toHaveBeenCalledWith({
+      data: [
+        {
+          runId: expectedResult.runId,
+          upgradeId: 'shop-upgrade-discount',
+          level: 1,
+          floor: 1,
+          purchaseOrder: 1,
+        },
+        {
+          runId: expectedResult.runId,
+          upgradeId: 'shop-upgrade-extra-slot',
+          level: 1,
+          floor: 2,
+          purchaseOrder: 2,
+        },
+      ],
+    });
+    expect(transaction.userShopUpgrade.upsert).toHaveBeenCalledTimes(2);
+    expect(transaction.user.update).toHaveBeenCalledWith({
+      where: { id: validDto.userId },
+      data: { elifBalance: 4 },
+    });
+  });
+
+  it('skips and refunds a level another Run already stored', async () => {
+    transaction.user.findUnique.mockResolvedValue({
+      id: validDto.userId,
+      elifBalance: 6,
+    });
+    transaction.userShopUpgrade.findMany.mockResolvedValue([
+      { upgradeId: 'shop-upgrade-discount', level: 1 },
+    ]);
+
+    const result = await repository.create(elifDto);
+
+    // spent 5 − refunded discount Lv.1 cost 2 = 3; balance 6 + 3 − 3 = 6.
+    expect(result.meta).toEqual({
+      elifBalance: 6,
+      elifGained: 3,
+      elifSpent: 3,
+      shopUpgrades: [
+        { upgradeId: 'shop-upgrade-discount', level: 1 },
+        { upgradeId: 'shop-upgrade-extra-slot', level: 1 },
+      ],
+    });
+    expect(transaction.userShopUpgrade.upsert).toHaveBeenCalledTimes(1);
+    expect(transaction.userShopUpgrade.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        create: expect.objectContaining({
+          upgradeId: 'shop-upgrade-extra-slot',
+          level: 1,
+        }),
+      }),
+    );
+    expect(transaction.user.update).not.toHaveBeenCalled();
+  });
+
+  it('saves the Run and records the shortfall when the balance would go negative', async () => {
+    transaction.user.findUnique.mockResolvedValue({
+      id: validDto.userId,
+      elifBalance: 1,
+    });
+
+    const result = await repository.create(elifDto);
+
+    expect(result.meta.elifBalance).toBe(0);
+    expect(transaction.run.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data: expect.objectContaining({ elifShortfall: 1 }),
+      }),
+    );
+    expect(transaction.user.update).toHaveBeenCalledWith({
+      where: { id: validDto.userId },
+      data: { elifBalance: 0 },
+    });
+  });
+
+  it('caps the stored balance at the server maximum', async () => {
+    transaction.user.findUnique.mockResolvedValue({
+      id: validDto.userId,
+      elifBalance: 9998,
+    });
+
+    const result = await repository.create({
+      ...validDto,
+      elif: { gained: 5, spent: 0, upgradePurchases: [] },
+    });
+
+    expect(result.meta.elifBalance).toBe(9999);
+  });
+
+  it('rejects an upgrade whose previous level is not stored', async () => {
+    await expectRepositoryError(
+      repository.create({
+        ...validDto,
+        elif: {
+          gained: 0,
+          spent: 3,
+          upgradePurchases: [
+            {
+              upgradeId: 'shop-upgrade-discount',
+              level: 2,
+              floor: 1,
+              order: 1,
+            },
+          ],
+        },
+      }),
+      'ELIF_UPGRADE_LEVEL_GAP',
+    );
+    expect(transaction.run.create).not.toHaveBeenCalled();
+    expect(transaction.user.update).not.toHaveBeenCalled();
+  });
+
+  it('returns the stored Elif snapshot once for an identical Elif retransmission', async () => {
+    const meta = {
+      elifBalance: 4,
+      elifGained: 3,
+      elifSpent: 5,
+      shopUpgrades: [{ upgradeId: 'shop-upgrade-discount', level: 1 }],
+    };
+    transaction.run.findUnique.mockResolvedValue({
+      ...createExistingRun(elifDto),
+      elifSnapshot: meta,
+    });
+
+    await expect(repository.create(elifDto)).resolves.toEqual({
+      ...expectedResult,
+      meta,
+      created: false,
+    });
+    expect(transaction.user.update).not.toHaveBeenCalled();
+    expect(transaction.userShopUpgrade.upsert).not.toHaveBeenCalled();
+    expect(transaction.runUpgradePurchase.createMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects changed Elif content for the same clientRunId', async () => {
+    transaction.run.findUnique.mockResolvedValue(createExistingRun(elifDto));
+
+    await expectRepositoryError(
+      repository.create({
+        ...elifDto,
+        elif: { ...elifDto.elif!, gained: 4 },
+      }),
+      'RUN_IDEMPOTENCY_CONFLICT',
+    );
+  });
+
+  it('fails a retransmission whose stored Elif snapshot is missing', async () => {
+    transaction.run.findUnique.mockResolvedValue({
+      ...createExistingRun(validDto),
+      elifSnapshot: null,
+    });
+
+    await expectRepositoryError(
+      repository.create(validDto),
+      'RUN_RESULT_UNAVAILABLE',
+    );
+  });
 
   it('loads a Run detail with items ordered by acquisition order', async () => {
     prisma.run.findUnique.mockResolvedValue({ id: 'run-id', runItems: [] });
@@ -256,7 +486,16 @@ function createTransactionMock() {
     user: {
       findUnique: jest.fn().mockResolvedValue({
         id: '00000000-0000-4000-8000-000000000001',
+        elifBalance: 0,
       }),
+      update: jest.fn().mockResolvedValue({ id: 'user-id' }),
+    },
+    userShopUpgrade: {
+      findMany: jest.fn().mockResolvedValue([]),
+      upsert: jest.fn().mockResolvedValue({ id: 'upgrade-id' }),
+    },
+    runUpgradePurchase: {
+      createMany: jest.fn().mockResolvedValue({ count: 0 }),
     },
     character: {
       findFirst: jest.fn().mockResolvedValue({ id: 'erpin' }),
@@ -293,6 +532,12 @@ function createExistingRun(dto: CreateRunDto) {
       skillPoints: 1,
       lowGradeSkillLevel: 1,
       highGradeSkillLevel: 1,
+    },
+    elifSnapshot: {
+      elifBalance: 0,
+      elifGained: 0,
+      elifSpent: 0,
+      shopUpgrades: [],
     },
   };
 }

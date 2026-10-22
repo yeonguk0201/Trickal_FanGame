@@ -401,7 +401,8 @@ namespace TrickalFanGame.Network
                 reachedFloor = request.reachedFloor,
                 isCleared = request.isCleared,
                 killCount = request.killCount,
-                items = request.items
+                items = request.items,
+                elif = request.elif
             };
 
             return JsonUtility.ToJson(clearRequest);
@@ -421,6 +422,7 @@ namespace TrickalFanGame.Network
             public bool isCleared;
             public int killCount;
             public RunItemDto[] items;
+            public RunElifDto elif;
         }
     }
 }

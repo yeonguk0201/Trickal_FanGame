@@ -242,7 +242,14 @@ POST /api/runs
       "order": 3,
       "acquiredAt": "2026-08-14T20:08:45Z"
     }
-  ]
+  ],
+  "elif": {
+    "gained": 2,
+    "spent": 4,
+    "upgradePurchases": [
+      { "upgradeId": "shop-upgrade-discount", "level": 1, "floor": 2, "order": 1 }
+    ]
+  }
 }
 ```
 
@@ -264,6 +271,7 @@ POST /api/runs
 | `killCount` | integer | O | 총 처치 수 |
 | `deathReason` | string/null | X | 사망 원인 |
 | `items` | array | O | 획득 아이템 목록 |
+| `elif` | object | X | 영구 엘리프 획득·사용·상점 업그레이드 구매(§8.3.1). 없으면 모두 0 |
 
 ---
 
@@ -286,6 +294,38 @@ POST /api/runs
 | `floor` | integer | O | 획득한 층 |
 | `order` | integer | O | 획득 순서 |
 | `acquiredAt` | ISO 8601 string | O | Run 시작 시각과 종료 시각 사이의 UTC 획득 시각 |
+
+# 8.3.1 Elif Request
+
+영구 엘리프 계약은 [27번](./27-permanent-elif-contract.md)이다. 포기·강제 종료 Run은 저장하지 않으므로 그 Run의
+엘리프도 반영되지 않는다.
+
+| Field | Type | Required | 설명 |
+|---|---|---:|---|
+| `gained` | integer | O | 이번 Run에서 얻은 엘리프. 0~50. 개발 패널로 얻은 양은 넣지 않는다 |
+| `spent` | integer | O | 이번 Run에서 쓴 엘리프 전체(엘리프 가격 상품 + 업그레이드). 0 이상 |
+| `upgradePurchases` | array | O | 이번 Run에서 산 상점 업그레이드 단계. 최대 50개 |
+| `upgradePurchases[].upgradeId` | string | O | `shop-upgrade-extra-slot`, `shop-upgrade-discount` |
+| `upgradePurchases[].level` | integer | O | 산 단계(1부터) |
+| `upgradePurchases[].floor` | integer | O | 산 층. `reachedFloor` 이하 |
+| `upgradePurchases[].order` | integer | O | 이번 Run 안의 구매 순서. 1부터 연속 |
+
+상점 업그레이드 카탈로그(Backend `SHOP_UPGRADE_CATALOG`, ID는 Item ID처럼 안정 키):
+
+| `upgradeId` | 최대 단계 | 단계별 비용 |
+|---|---:|---|
+| `shop-upgrade-extra-slot` | 3 | 2 / 3 / 5 |
+| `shop-upgrade-discount` | 3 | 2 / 3 / 4 |
+
+Backend는 같은 Run 트랜잭션에서 다음 순서로 반영한다.
+
+1. 없는 ID, 최대 단계 초과, 같은 업그레이드의 단계 건너뛰기, 연속되지 않은 `order`, `reachedFloor`보다 높은 `floor`,
+   카탈로그로 다시 계산한 업그레이드 비용 합보다 작은 `spent`는 `422 INVALID_ELIF_DATA`.
+2. 서버에 이미 그 단계 이상이 있으면(다른 Run이 먼저 저장) 그 구매는 건너뛰고 비용을 `spent`에서 뺀다.
+3. 서버에 저장된 단계보다 2단계 이상 높은 구매(이전 단계가 저장되지 않음)는 `422 ELIF_UPGRADE_LEVEL_GAP`.
+   대기 중인 Run은 저장된 순서대로 재전송해야 한다.
+4. 새 잔액 = 기존 잔액 + `gained` − 실제 `spent`, 상한 9999. 0보다 작아지면 0으로 두고 모자란 양을 Run의
+   `elif_shortfall`에 기록한다. 잔액 부족으로 Run 저장을 실패시키지 않는다.
 
 ---
 
@@ -357,10 +397,20 @@ HTTP/1.1 201 Created
       "skillPoints": 2,
       "lowGradeSkillLevel": 1,
       "highGradeSkillLevel": 1
+    },
+    "meta": {
+      "elifBalance": 7,
+      "elifGained": 2,
+      "elifSpent": 4,
+      "shopUpgrades": [{ "upgradeId": "shop-upgrade-discount", "level": 1 }]
     }
   }
 }
 ```
+
+`meta`는 이 Run을 반영한 직후의 엘리프 잔액(`elifBalance`), 이 Run의 획득량(`elifGained`), 다른 Run이 먼저 산
+단계를 뺀 실제 사용량(`elifSpent`), 전체 상점 업그레이드 단계(`shopUpgrades`, `upgradeId` 오름차순)다.
+`elif`가 없는 요청도 `meta`를 반환한다.
 
 Unity는 생성된 Run ID와 Backend가 계산한 캐릭터 진행 결과를 표시한다. 한 Run의 경험치가 여러
 레벨 조건을 충족하면 Backend는 최대 Lv.19 또는 경험치 부족 시점까지 연속 레벨업하고, 상승한
@@ -372,9 +422,11 @@ Unity는 생성된 Run ID와 Backend가 계산한 캐릭터 진행 결과를 표
 최초 저장은 `201 Created`를 사용한다.
 
 동일 여부는 `clientRunId`를 제외한 모든 Run 필드와 `order`로 정렬한 아이템의 `itemId`,
-`floor`, `order`, `acquiredAt`으로 계산한 SHA-256 지문으로 판정한다. 재전송에는 이후의 Run이나
-스킬 강화로 바뀐 현재 진행이 아니라 최초 지급 직후 저장한 `experienceGained`와 `progress`
-스냅샷을 반환한다.
+`floor`, `order`, `acquiredAt`으로 계산한 SHA-256 지문으로 판정한다. `elif`가 있고 0이 아닌 값이 하나라도
+있으면 `gained`, `spent`, `order`로 정렬한 `upgradePurchases`도 지문에 넣는다. `elif`가 없거나 모두 0이면
+엘리프 도입 전과 같은 지문이 나오므로, 그 전에 저장되거나 대기 중인 요청의 재전송은 `409`가 되지 않는다.
+재전송에는 이후의 Run이나 스킬 강화로 바뀐 현재 진행이 아니라 최초 지급 직후 저장한 `experienceGained`와
+`progress`, `meta` 스냅샷을 반환하며 엘리프를 다시 반영하지 않는다.
 
 ---
 
@@ -606,10 +658,18 @@ GET /api/users/test-player
         "highGradeSkillLevel": 1,
         "maxSkillLevel": 10
       }
-    ]
+    ],
+    "meta": {
+      "elifBalance": 7,
+      "shopUpgrades": [{ "upgradeId": "shop-upgrade-discount", "level": 1 }]
+    }
   }
 }
 ```
+
+`meta.elifBalance`는 서버에 저장된 영구 엘리프 잔액, `meta.shopUpgrades`는 저장된 상점 업그레이드 단계다
+(`upgradeId` 오름차순, 산 적 없는 업그레이드는 없음). Unity는 Run 시작 때 이 값을 받아 쓴다
+([27번](./27-permanent-elif-contract.md) §4.3). 다른 사람 프로필에도 같은 값이 보인다.
 
 ---
 
@@ -835,6 +895,10 @@ GET /api/runs/run-uuid
     "isCleared": true,
     "killCount": 142,
     "deathReason": null,
+    "elif": {
+      "gained": 2,
+      "spent": 4
+    },
     "items": [
       {
         "itemId": "item-01",
@@ -870,6 +934,8 @@ GET /api/runs/run-uuid
 `RUN_NOT_FOUND`를 반환하며, Database 또는 네트워크 실패와 구분한다.
 
 `deathReason`은 `ENEMY`, `BOSS`, `HAZARD`, `UNKNOWN` 또는 클리어 Run의 `null`을 사용한다.
+
+`elif.gained`와 `elif.spent`는 그 Run의 엘리프 획득량과 실제 사용량이다. 엘리프 도입 전 Run은 0이다.
 
 ---
 
@@ -1004,6 +1070,8 @@ MVP에서 사용할 주요 Error Code:
 | `INVALID_SKILL_TYPE` | `LOW_GRADE`, `HIGH_GRADE`가 아닌 스킬 종류 |
 | `INVALID_SKILL_TARGET_LEVEL` | 현재 레벨과 일치하지 않는 강화 목표 |
 | `INVALID_RUN_DATA` | 잘못된 Run 데이터 |
+| `INVALID_ELIF_DATA` | Run 저장 요청의 `elif`가 업그레이드 카탈로그나 비용과 맞지 않음 |
+| `ELIF_UPGRADE_LEVEL_GAP` | 서버에 저장되지 않은 이전 단계를 건너뛴 상점 업그레이드 |
 | `INTERNAL_SERVER_ERROR` | 서버 내부 오류 |
 
 ---

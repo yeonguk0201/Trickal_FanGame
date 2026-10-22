@@ -26,7 +26,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Range(0.01f, 1f)] private float summonReactivationHealthFraction = 0.15f;
 
         [Header("Approach swing")]
-        [SerializeField, Min(0f)] private float approachSpeed = 2.2f;
+        [SerializeField, Min(0f)] private float approachSpeed = 3.2f;
         [SerializeField, Min(1f)] private float phaseTwoSpeedMultiplier = 1.35f;
         [SerializeField, Min(0.1f)] private float swingRange = 2.28f;
         [SerializeField, Min(0.1f)] private float swingWidth = 3f;

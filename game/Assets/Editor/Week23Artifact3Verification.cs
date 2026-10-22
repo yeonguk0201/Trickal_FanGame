@@ -59,9 +59,11 @@ namespace TrickalFanGame.Editor
             ItemDefinition wallet = LoadItem(Week23Artifact3Setup.WalletId);
             Assert(wallet.DisplayName == Week23Artifact3Setup.WalletName && wallet.Kind == ItemKind.Artifact &&
                    wallet.Rarity == ItemRarity.Rare && wallet.IsActive && wallet.MaxStacks == 1 &&
-                   wallet.Effects.Count == 1 && wallet.Effects[0].EffectType == ItemEffectType.GainGoldOnAcquire &&
-                   Mathf.Approximately(wallet.Effects[0].Magnitude, 100f),
-                "아이시아의 지갑 must be a Rare one-stack artifact that gives 100 gold.");
+                   wallet.Effects.Count == 2 && wallet.Effects[0].EffectType == ItemEffectType.GainGoldOnAcquire &&
+                   Mathf.Approximately(wallet.Effects[0].Magnitude, 100f) &&
+                   wallet.Effects[1].EffectType == ItemEffectType.GainPermanentElifRollOnAcquire,
+                "아이시아의 지갑 must be a Rare one-stack artifact that gives 100 gold and rolls permanent elif " +
+                "(Elif-2).");
             string description = ArtifactEffectDescription.Build(wallet);
             Assert(description == Week23Artifact3Setup.WalletDescription,
                 $"아이시아의 지갑 must read '{Week23Artifact3Setup.WalletDescription}', but reads '{description}'.");

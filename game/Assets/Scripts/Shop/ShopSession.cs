@@ -64,6 +64,9 @@ namespace TrickalFanGame.Shop
         public ShopPurchaseResult TryPurchase(int slotIndex) =>
             IsOpen && Shop != null ? Shop.TryPurchase(slotIndex, Inventory) : ShopPurchaseResult.Unavailable;
 
+        public ShopUpgradeStatus TryPurchaseUpgrade(string upgradeId) =>
+            IsOpen && Shop != null ? Shop.TryPurchaseUpgrade(upgradeId) : ShopUpgradeStatus.Unavailable;
+
         private bool CanStayOpen(ShopRoom shop) =>
             shop != null && shop.Stock != null && shop.Progress != null && !shop.Progress.IsProgressionStopped &&
             (playerHealth == null || !playerHealth.IsDead);

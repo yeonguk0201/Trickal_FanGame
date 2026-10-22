@@ -7,14 +7,14 @@ using UnityEngine.UI;
 
 namespace TrickalFanGame.Frontend
 {
-    // UX-1: gold, keys and bombs under the minimap. Counts are two digits like 07 (the Run cap is 99) and pop
-    // briefly when they change.
+    // UX-1: gold, keys and bombs under the hearts and SP. Counts are two digits like 07 (the Run cap is 99) and pop
+    // briefly when they change. Elif-2 adds the permanent elif the Run can spend (no Run cap, so it can pass 99).
     [DisallowMultipleComponent]
     public sealed class GameResourceHudView : MonoBehaviour
     {
         public static readonly RunResourceType[] DisplayOrder =
-            { RunResourceType.Gold, RunResourceType.Key, RunResourceType.Bomb };
-        public const string AllFixedText = "0123456789골드열쇠폭탄";
+            { RunResourceType.Gold, RunResourceType.Key, RunResourceType.Bomb, RunResourceType.Elif };
+        public const string AllFixedText = "0123456789골드열쇠폭탄엘리프";
 
         private const float PulseScale = 1.25f;
         private const float PulseDuration = 0.25f;
@@ -23,7 +23,7 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private Image[] icons = Array.Empty<Image>();
         [SerializeField] private TMP_Text[] countTexts = Array.Empty<TMP_Text>();
 
-        private readonly float[] pulseUntil = new float[3];
+        private readonly float[] pulseUntil = new float[DisplayOrder.Length];
         private bool subscribed;
 
         public RunProgress Progress => runProgress;
@@ -46,11 +46,16 @@ namespace TrickalFanGame.Frontend
 
         public static string FormatCount(int count) => Mathf.Clamp(count, 0, RunResourceWallet.MaxCount).ToString("00");
 
+        public static string FormatCount(RunResourceType type, int count) => type == RunResourceType.Elif
+            ? Mathf.Clamp(count, 0, PermanentElif.BalanceMax).ToString("00")
+            : FormatCount(count);
+
         public static string LabelOf(RunResourceType type) => type switch
         {
             RunResourceType.Gold => "골드",
             RunResourceType.Key => "열쇠",
             RunResourceType.Bomb => "폭탄",
+            RunResourceType.Elif => "엘리프",
             _ => string.Empty,
         };
 
@@ -87,7 +92,7 @@ namespace TrickalFanGame.Frontend
             {
                 if (countTexts[index] == null) continue;
                 int count = runProgress != null ? runProgress.GetResourceCount(DisplayOrder[index]) : 0;
-                countTexts[index].text = FormatCount(count);
+                countTexts[index].text = FormatCount(DisplayOrder[index], count);
             }
         }
 
@@ -109,7 +114,7 @@ namespace TrickalFanGame.Frontend
         {
             int index = Array.IndexOf(DisplayOrder, type);
             if (index < 0 || index >= countTexts.Length) return;
-            if (countTexts[index] != null) countTexts[index].text = FormatCount(count);
+            if (countTexts[index] != null) countTexts[index].text = FormatCount(type, count);
             if (index < icons.Length && icons[index] != null && Application.isPlaying)
             {
                 icons[index].rectTransform.localScale = Vector3.one * PulseScale;

@@ -1,5 +1,9 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ApiException } from '../../common/exceptions/api.exception';
+import {
+  normalizeRunElif,
+  validateRunElif,
+} from '../../contracts/permanent-elif';
 import type { CreateRunDto } from './dto/create-run.dto';
 import { RunsRepository, RunsRepositoryError } from './runs.repository';
 
@@ -29,6 +33,10 @@ export class RunsService {
       isCleared: run.isCleared,
       killCount: run.killCount,
       deathReason: run.deathReason,
+      elif: {
+        gained: run.elifGained,
+        spent: run.elifSpent,
+      },
       items: run.runItems.map((runItem) => ({
         itemId: runItem.itemId,
         name: runItem.item.name,
@@ -42,6 +50,7 @@ export class RunsService {
 
   async create(dto: CreateRunDto) {
     this.validateRunData(dto);
+    this.validateElifData(dto);
 
     try {
       return await this.runsRepository.create(dto);
@@ -63,6 +72,12 @@ export class RunsService {
           error.code,
           error.message,
         );
+      case 'ELIF_UPGRADE_LEVEL_GAP':
+        return new ApiException(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          error.code,
+          error.message,
+        );
       case 'RUN_IDEMPOTENCY_CONFLICT':
         return new ApiException(HttpStatus.CONFLICT, error.code, error.message);
       case 'RUN_RESULT_UNAVAILABLE':
@@ -71,6 +86,17 @@ export class RunsService {
           error.code,
           error.message,
         );
+    }
+  }
+
+  private validateElifData(dto: CreateRunDto) {
+    const error = validateRunElif(normalizeRunElif(dto.elif), dto.reachedFloor);
+    if (error) {
+      throw new ApiException(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        'INVALID_ELIF_DATA',
+        '유효하지 않은 엘리프 데이터입니다.',
+      );
     }
   }
 

@@ -16,6 +16,11 @@ namespace TrickalFanGame.Room
         private readonly HashSet<string> clearedRoomIds = new(StringComparer.Ordinal);
         // Spell-6 (네티의 지도): floors whose whole map the minimap shows.
         private readonly HashSet<int> revealedMapFloors = new();
+        // Elif-3: shop upgrade levels the Run started with, levels bought in it, and development overrides.
+        private readonly Dictionary<string, int> shopUpgradeStartLevels = new(StringComparer.Ordinal);
+        private readonly List<ShopUpgradePurchase> shopUpgradePurchases = new();
+        private readonly Dictionary<string, int> developmentUpgradeLevels = new(StringComparer.Ordinal);
+        private readonly HashSet<string> pendingSaveUpgradeIds = new(StringComparer.Ordinal);
         private string activeRewardSelectionId;
 
         public int RunSeed { get; private set; }
@@ -51,24 +56,178 @@ namespace TrickalFanGame.Room
         public event Action MapChanged;
         public event Action<RunResourceType, int> ResourceChanged
         {
-            add => resources.Changed += value;
-            remove => resources.Changed -= value;
+            add
+            {
+                resources.Changed += value;
+                elifChanged += value;
+            }
+            remove
+            {
+                resources.Changed -= value;
+                elifChanged -= value;
+            }
         }
 
-        public int GetResourceCount(RunResourceType type) => resources.GetCount(type);
+        private Action<RunResourceType, int> elifChanged;
+
+        // Elif-2 (contract 27 §4.3): the permanent elif is not a Run resource. The Run starts from the server balance
+        // (minus what pending earlier Runs spent), adds what it picks up and subtracts what it spends; only the
+        // gained and spent amounts are saved with the Run result. Development grants are usable but never saved.
+        public int ElifStartingBalance { get; private set; }
+        public int ElifGained { get; private set; }
+        public int ElifSpent { get; private set; }
+        public int DevelopmentElif { get; private set; }
+        public int AvailableElif => Mathf.Max(0, ElifStartingBalance + ElifGained + DevelopmentElif - ElifSpent);
+
+        public int GetResourceCount(RunResourceType type) =>
+            type == RunResourceType.Elif ? AvailableElif : resources.GetCount(type);
 
         // Resources are Run-only: nothing is granted after the Run ends, and ResetProgress returns them to zero.
-        public bool CanAcceptResource(RunResourceType type) => !IsProgressionStopped && resources.CanAccept(type);
+        // Elif has no Run cap.
+        public bool CanAcceptResource(RunResourceType type) =>
+            !IsProgressionStopped && (type == RunResourceType.Elif || resources.CanAccept(type));
 
         public int TryAddResource(RunResourceType type, int amount)
         {
-            return IsProgressionStopped ? 0 : resources.Add(type, amount);
+            if (IsProgressionStopped) return 0;
+            if (type != RunResourceType.Elif) return resources.Add(type, amount);
+            if (amount <= 0) return 0;
+            ElifGained += amount;
+            NotifyElifChanged();
+            return amount;
         }
 
         public bool TrySpendResource(RunResourceType type, int amount = 1)
         {
-            return !IsProgressionStopped && resources.TrySpend(type, amount);
+            if (IsProgressionStopped) return false;
+            if (type != RunResourceType.Elif) return resources.TrySpend(type, amount);
+            if (!IsElifSpendingAllowed || amount <= 0 || AvailableElif < amount) return false;
+            ElifSpent += amount;
+            NotifyElifChanged();
+            return true;
         }
+
+        // Gives back elif spent on a purchase that could not be granted. It is not a gain.
+        public void RefundElif(int amount)
+        {
+            if (amount <= 0) return;
+            ElifSpent = Mathf.Max(0, ElifSpent - amount);
+            NotifyElifChanged();
+        }
+
+        // Elif-3 (contract 27 §4.2-4.3): shop upgrade levels. The Run starts from the saved levels (plus what pending
+        // earlier Runs bought) and adds the levels it buys; only the bought levels are saved with the Run result.
+        // A Run that started without a fresh server balance cannot spend elif at all.
+        public bool IsElifSpendingAllowed { get; private set; } = true;
+        public IReadOnlyList<ShopUpgradePurchase> ShopUpgradePurchases => shopUpgradePurchases;
+        public event Action ShopUpgradesChanged;
+
+        public void ConfigureElifStart(int balance, IReadOnlyDictionary<string, int> upgradeLevels,
+            IEnumerable<string> pendingUpgradeIds, bool spendingAllowed)
+        {
+            ElifStartingBalance = Mathf.Clamp(balance, 0, PermanentElif.BalanceMax);
+            IsElifSpendingAllowed = spendingAllowed;
+            shopUpgradeStartLevels.Clear();
+            pendingSaveUpgradeIds.Clear();
+            if (upgradeLevels != null)
+                foreach (KeyValuePair<string, int> level in upgradeLevels)
+                {
+                    ShopUpgradeDefinition definition = ShopUpgrades.Find(level.Key);
+                    if (definition != null && level.Value > 0)
+                        shopUpgradeStartLevels[level.Key] = Mathf.Min(level.Value, definition.MaxLevel);
+                }
+
+            if (pendingUpgradeIds != null)
+                foreach (string upgradeId in pendingUpgradeIds)
+                    if (!string.IsNullOrWhiteSpace(upgradeId)) pendingSaveUpgradeIds.Add(upgradeId);
+            NotifyElifChanged();
+            ShopUpgradesChanged?.Invoke();
+        }
+
+        // The level the saved record will have: the starting level plus the levels bought in this Run.
+        public int GetSavedShopUpgradeLevel(string upgradeId)
+        {
+            int level = shopUpgradeStartLevels.TryGetValue(upgradeId ?? string.Empty, out int start) ? start : 0;
+            foreach (ShopUpgradePurchase purchase in shopUpgradePurchases)
+                if (purchase.UpgradeId == upgradeId) level = Mathf.Max(level, purchase.Level);
+            return level;
+        }
+
+        // The level the shops apply now; a development override wins for this Run only.
+        public int GetShopUpgradeLevel(string upgradeId) =>
+            developmentUpgradeLevels.TryGetValue(upgradeId ?? string.Empty, out int level)
+                ? level
+                : GetSavedShopUpgradeLevel(upgradeId);
+
+        public bool HasDevelopmentUpgradeLevel(string upgradeId) =>
+            developmentUpgradeLevels.ContainsKey(upgradeId ?? string.Empty);
+
+        public bool IsUpgradeWaitingForPendingSave(string upgradeId) =>
+            pendingSaveUpgradeIds.Contains(upgradeId ?? string.Empty);
+
+        public ShopUpgradeStatus GetShopUpgradeStatus(string upgradeId)
+        {
+            ShopUpgradeDefinition definition = ShopUpgrades.Find(upgradeId);
+            if (definition == null || IsProgressionStopped) return ShopUpgradeStatus.Unavailable;
+            if (HasDevelopmentUpgradeLevel(upgradeId)) return ShopUpgradeStatus.DevelopmentOverride;
+            int next = GetSavedShopUpgradeLevel(upgradeId) + 1;
+            if (next > definition.MaxLevel) return ShopUpgradeStatus.MaxLevel;
+            if (pendingSaveUpgradeIds.Contains(upgradeId)) return ShopUpgradeStatus.PendingSave;
+            if (!IsElifSpendingAllowed) return ShopUpgradeStatus.ElifLocked;
+            return AvailableElif >= definition.GetCost(next)
+                ? ShopUpgradeStatus.Available
+                : ShopUpgradeStatus.NotEnoughElif;
+        }
+
+        // Buys the next level now: the elif is spent, the purchase is recorded for the save request and the shops
+        // apply it at once.
+        public ShopUpgradeStatus TryPurchaseShopUpgrade(string upgradeId)
+        {
+            ShopUpgradeStatus status = GetShopUpgradeStatus(upgradeId);
+            if (status != ShopUpgradeStatus.Available) return status;
+            int level = GetSavedShopUpgradeLevel(upgradeId) + 1;
+            if (!TrySpendResource(RunResourceType.Elif, ShopUpgrades.GetCost(upgradeId, level)))
+                return ShopUpgradeStatus.NotEnoughElif;
+            shopUpgradePurchases.Add(new ShopUpgradePurchase(upgradeId, level, Mathf.Max(1, CurrentFloor),
+                shopUpgradePurchases.Count + 1));
+            ShopUpgradesChanged?.Invoke();
+            return ShopUpgradeStatus.Purchased;
+        }
+
+        // Development panel: applies a level for this Run only; it is never saved. A negative level clears it.
+        public void SetDevelopmentShopUpgradeLevel(string upgradeId, int level)
+        {
+            ShopUpgradeDefinition definition = ShopUpgrades.Find(upgradeId);
+            if (definition == null) return;
+            if (level < 0) developmentUpgradeLevels.Remove(upgradeId);
+            else developmentUpgradeLevels[upgradeId] = Mathf.Min(level, definition.MaxLevel);
+            ShopUpgradesChanged?.Invoke();
+        }
+
+        // Development panel: lets an offline Run test elif spending. The saved spending is still sent.
+        public void SetDevelopmentElifSpendingAllowed(bool allowed)
+        {
+            if (IsElifSpendingAllowed == allowed) return;
+            IsElifSpendingAllowed = allowed;
+            NotifyElifChanged();
+            ShopUpgradesChanged?.Invoke();
+        }
+
+        // Set when the Run starts, before anything is picked up.
+        public void SetElifStartingBalance(int balance)
+        {
+            ElifStartingBalance = Mathf.Clamp(balance, 0, PermanentElif.BalanceMax);
+            NotifyElifChanged();
+        }
+
+        public void AddDevelopmentElif(int amount)
+        {
+            if (IsProgressionStopped || amount <= 0) return;
+            DevelopmentElif += amount;
+            NotifyElifChanged();
+        }
+
+        private void NotifyElifChanged() => elifChanged?.Invoke(RunResourceType.Elif, AvailableElif);
 
         public bool TrySetGeneratedGraph(GeneratedFloorGraph graph, out string error)
         {
@@ -321,6 +480,17 @@ namespace TrickalFanGame.Room
             rewardSelections.Clear();
             shopStocks.Clear();
             resources.Clear();
+            ElifStartingBalance = 0;
+            ElifGained = 0;
+            ElifSpent = 0;
+            DevelopmentElif = 0;
+            IsElifSpendingAllowed = true;
+            shopUpgradeStartLevels.Clear();
+            shopUpgradePurchases.Clear();
+            developmentUpgradeLevels.Clear();
+            pendingSaveUpgradeIds.Clear();
+            NotifyElifChanged();
+            ShopUpgradesChanged?.Invoke();
             RewardSelectionStateChanged?.Invoke();
         }
     }

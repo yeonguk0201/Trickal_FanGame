@@ -45,6 +45,8 @@ describe('UsersService', () => {
       findByNicknameWithProgress: jest.fn().mockResolvedValue({
         id: 'user-id',
         nickname: 'test-player',
+        elifBalance: 7,
+        shopUpgrades: [{ upgradeId: 'shop-upgrade-discount', level: 1 }],
         characterProgress: [
           {
             characterId: 'erpin',
@@ -163,6 +165,10 @@ describe('UsersService', () => {
           maxSkillLevel: 10,
         },
       ],
+      meta: {
+        elifBalance: 7,
+        shopUpgrades: [{ upgradeId: 'shop-upgrade-discount', level: 1 }],
+      },
     });
   });
 
@@ -170,6 +176,8 @@ describe('UsersService', () => {
     repository.findByNicknameWithProgress.mockResolvedValue({
       id: 'user-id',
       nickname: 'new-player',
+      elifBalance: 0,
+      shopUpgrades: [],
       characterProgress: [],
     });
     repository.getRunStats.mockResolvedValue({
@@ -190,6 +198,7 @@ describe('UsersService', () => {
         highestFloor: 0,
       },
       characterProgress: [],
+      meta: { elifBalance: 0, shopUpgrades: [] },
     });
   });
 
