@@ -39,9 +39,12 @@ namespace TrickalFanGame.Editor
             Assert(Enum.GetName(typeof(RunResourceType), 0) == "Gold" &&
                    (!Enum.GetNames(typeof(RunResourceType)).Contains("Elif") || (int)RunResourceType.Elif == 3),
                 "The Run currency must be named Gold; a permanent Elif may only be appended after Bomb.");
-            Assert(!Enum.GetNames(typeof(ShopPurchaseResult)).Contains("NotEnoughElif") &&
-                   Enum.IsDefined(typeof(ShopPurchaseResult), "NotEnoughGold"),
-                "ShopPurchaseResult must report NotEnoughGold.");
+            // Elif-3 appended NotEnoughElif for permanent elif offers; gold shortage stays NotEnoughGold.
+            Assert(Enum.IsDefined(typeof(ShopPurchaseResult), "NotEnoughGold") &&
+                   (int)ShopPurchaseResult.NotEnoughGold == 2 &&
+                   (!Enum.GetNames(typeof(ShopPurchaseResult)).Contains("NotEnoughElif") ||
+                    (int)ShopPurchaseResult.NotEnoughElif > (int)ShopPurchaseResult.Unavailable),
+                "ShopPurchaseResult must report NotEnoughGold; a permanent NotEnoughElif may only be appended.");
         }
 
         private static void ValidatePickupPrefab()

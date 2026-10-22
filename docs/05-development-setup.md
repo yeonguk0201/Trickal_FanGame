@@ -1354,6 +1354,17 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   엘리프와 HUD 엘리프 칸을 보고, `— Chest —`의 `Drop 아이시아의 지갑`으로 지갑 추첨(`Aisia wallet rolled N elif`)을 본다.
   개발 패널로 얻은 엘리프는 `dev`로만 세고 Run 저장 요청의 `gained`에 넣지 않는다.
 
+- Elif-3 상점 엘리프(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Elif-3 Shop Upgrades`가 Game Scene 상점 화면에
+  엘리프 잔액 줄, `투자 [Q]` 버튼, 업그레이드 2종 목록(`Invest Panel`)을 만들고 `ShopView`에 연결한다. 엘리프 가격 칸·할인·
+  상품 칸 추가·잔액 동기화 규칙은 런타임 코드(`ShopUpgrades`, `ShopStockBuilder`, `ShopRoom`, `RunProgress`, `RunSession`)에
+  있다([27번 §13](./27-permanent-elif-contract.md)). 자동 검증 메뉴는 `Trickal Fan Game > Week 27 > Verify Elif-3 Shop
+  Upgrades`, 배치는 `-executeMethod TrickalFanGame.Editor.Week27Elif3Verification.SetupAndVerifyBatch`, 회귀는
+  `VerifyWithRegressionsBatch`(Special-4, Shop-0/1, Spell-4/6, Power-2, Gold-0, Flow-5, Elif-2, DevPanel). 2026-10-22 회귀
+  묶음이 종료 코드 0으로 통과했고 사용자 Play 확인을 마쳤다. 서버 없이도 엘리프를 쓸 수 있다(마지막 확인 잔액 또는 0에서
+  시작). 수동 확인: Game Scene Play → `F1` → `— Elif —`에서 `+5 Elif (dev)`. `— Shop —`의 `Go to shop door`로 상점에 들어가 `Shop here: first item → elif price`로
+  엘리프 가격 칸을 만들고 시스트 화면에서 `N 엘리프` 가격·구매, `Q`(또는 `투자 [Q]`)로 투자 목록을 열어 상품 칸 추가·상점
+  할인을 사고 `Q`/`Esc`로 돌아와 아랫줄 새 칸과 할인 가격을 본다. `Set upgrade level`의 `Lv0~3`은 이번 Run에만 적용된다.
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,

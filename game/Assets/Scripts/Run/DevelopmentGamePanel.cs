@@ -5,6 +5,7 @@ using TrickalFanGame.Item;
 using TrickalFanGame.Player;
 using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
+using TrickalFanGame.Shop;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -486,8 +487,8 @@ namespace TrickalFanGame.Run
             GUILayout.EndHorizontal();
         }
 
-        // Elif-2 (contract 27 §7.2): the permanent elif. Elif added here is usable in this Run but is not saved as
-        // the Run's gain. Shop upgrade levels and their test override arrive with Elif-3.
+        // Elif-2/3 (contract 27 §7.2): the permanent elif. Elif added here is usable in this Run but is not saved as
+        // the Run's gain. Upgrade levels set here apply to this Run only and are never saved.
         private void DrawElifSection(RoomGraphAssembler assembler, RunProgress progress)
         {
             GUILayout.Label($"— Elif — usable {progress.AvailableElif}  (start {progress.ElifStartingBalance}  " +
@@ -513,6 +514,70 @@ namespace TrickalFanGame.Run
                     ? goldMessage
                     : $"Gold chest failed: {goldMessage}";
             if (PermanentElif.DevelopmentForceNextConversion) MarkAssisted("Forced elif conversion");
+            DrawShopUpgradeSection(assembler, progress);
+        }
+
+        // Elif-3: the shop upgrades and elif offers, testable without the server.
+        private void DrawShopUpgradeSection(RoomGraphAssembler assembler, RunProgress progress)
+        {
+            GUILayout.Label(progress.IsElifSpendingAllowed
+                ? "Elif spending: allowed"
+                : "Elif spending: blocked (no fresh server balance)");
+            bool allow = GUILayout.Toggle(progress.IsElifSpendingAllowed, "Allow elif spending (dev)");
+            if (allow != progress.IsElifSpendingAllowed)
+            {
+                progress.SetDevelopmentElifSpendingAllowed(allow);
+                MarkAssisted("Elif spending override");
+            }
+
+            GUILayout.Label("Set upgrade level (this Run only, not saved):");
+            foreach (ShopUpgradeDefinition upgrade in ShopUpgrades.Catalog)
+            {
+                string id = upgrade.UpgradeId;
+                GUILayout.Label($"{id}: Lv {progress.GetShopUpgradeLevel(id)}/{upgrade.MaxLevel} " +
+                                $"(saved {progress.GetSavedShopUpgradeLevel(id)}" +
+                                $"{(progress.HasDevelopmentUpgradeLevel(id) ? ", dev" : string.Empty)}" +
+                                $"{(progress.IsUpgradeWaitingForPendingSave(id) ? ", pending save" : string.Empty)})");
+                GUILayout.BeginHorizontal();
+                for (int level = 0; level <= upgrade.MaxLevel; level++)
+                    if (AssistedButton($"Lv{level}")) progress.SetDevelopmentShopUpgradeLevel(id, level);
+                if (GUILayout.Button("Clear")) progress.SetDevelopmentShopUpgradeLevel(id, -1);
+                GUILayout.EndHorizontal();
+            }
+
+            foreach (ShopUpgradePurchase purchase in progress.ShopUpgradePurchases)
+                GUILayout.Label($"Bought #{purchase.Order}: {purchase.UpgradeId} Lv{purchase.Level} on F{purchase.Floor}");
+            if (AssistedButton("Shop here: first item → elif price"))
+                status = TryMakeElifOffer(assembler, progress, out string message)
+                    ? message
+                    : $"Elif offer failed: {message}";
+        }
+
+        // Makes the first artifact still on sale in the current room's shop an elif offer (the 25% roll, on demand).
+        private static bool TryMakeElifOffer(RoomGraphAssembler assembler, RunProgress progress, out string message)
+        {
+            RoomPrefab room = CurrentRoom(assembler);
+            ShopStockState stock = room != null && room.Node != null
+                ? progress.GetShopStock(ShopStockBuilder.BuildShopId(room.Node.RoomId))
+                : null;
+            if (stock == null)
+            {
+                message = "stand in a shop room first.";
+                return false;
+            }
+
+            ShopOffer offer = stock.Offers.FirstOrDefault(candidate => candidate.Kind == ShopOfferKind.Item &&
+                                                                       !candidate.Item.IsActivePower &&
+                                                                       !candidate.IsElifPriced &&
+                                                                       !stock.IsPurchased(candidate.SlotIndex));
+            if (offer == null || !stock.TryConvertToElifPrice(offer.SlotIndex))
+            {
+                message = "this shop has no artifact left to price in elif.";
+                return false;
+            }
+
+            message = $"{offer.DisplayName} now costs {ShopUpgrades.ElifPriceOf(offer.Price)} elif.";
+            return true;
         }
 
         // A normal development chest opened by touch, then four gold drops from it through RoomChestSpawner.

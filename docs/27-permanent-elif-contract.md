@@ -3,8 +3,10 @@
 > 작성일: 2026-10-21  
 > 계획: [26-seventh-month-plan.md](./26-seventh-month-plan.md) §5, D8  
 > 관련 계약: [23-item-classification-contract.md](./23-item-classification-contract.md) §6(골드 enum), [07-api.md](./07-api.md), [06-database.md](./06-database.md)  
-> 상태: **설계 확정. Elif-1(Backend·Prisma)·Elif-2(Unity 획득·기록·저장 요청·HUD) 구현 완료(2026-10-22), Elif-3~4 구현 전.**
-> 구현 차이는 §11(Elif-1), §12(Elif-2).
+> 상태: **설계 확정. Elif-1(Backend·Prisma)·Elif-2(Unity 획득·기록·저장 요청·HUD) 구현 완료(2026-10-22), Elif-3(상점
+> 엘리프 가격 칸·업그레이드·투자 화면·잔액 동기화) 자동 검증·개발 패널 Play 확인 완료(2026-10-22, 실제 서버 §7.3 확인 전),
+> Elif-4 구현 전.**
+> 구현 차이는 §11(Elif-1), §12(Elif-2), §13(Elif-3).
 
 ## 1. 요약
 
@@ -330,3 +332,56 @@ seed 결과가 바뀌므로 Balance-0·Play-2 기록 전에 넣거나, 넣지 �
   지갑 추첨 표시와 `gained` 증가, 실제 상자 내용물 경로의 엘리프 그림. 장애물·상자의 골드 드롭 자체가 드물어
   `— Elif —`에 `Chest with 4 gold (elif path)`(개발 상자를 열고 골드 4개를 상자 내용물 경로로 떨굼, `Next gold drop → Elif`를
   켜면 첫 개가 반드시 엘리프)를 더해 확인했다. 실제 서버로 사망 후 다시 시작했을 때 잔액이 늘었는지는 §7.3(Elif-3과 함께).
+
+## 13. Elif-3 구현 기록(2026-10-22)
+
+- 코드: `ShopUpgrades`(Unity 업그레이드 카탈로그·할인·환율, Backend `SHOP_UPGRADE_CATALOG`와 같은 ID·비용),
+  `ShopStockBuilder`·`ShopStockState`(엘리프 가격 칸, 추가 칸), `ShopRoom`(통화별 가격·할인·구매, 투자 구매),
+  `RunProgress`(시작 단계·이번 Run 구매 기록·사용 잠금·개발용 단계), `RunSession`(시작 잔액·단계 계산, 저장 요청
+  `upgradePurchases`), `PlayerProgressClient`(엘리프 잔액·단계 캐시), `LocalPendingRunStorage.LoadAll`, `ShopView`·
+  `ShopUpgradeRowView`(투자 화면), 개발 패널. Setup은 `Week27Elif3Setup`, 검증은 `Week27Elif3Verification`.
+- **엘리프 가격 칸**: 상점 seed에서 따로 해시해 25%로 아티팩트 칸 하나를 엘리프 가격으로 바꾼다. 아이템 선택 난수열은
+  그대로라 같은 seed의 진열 아이템·골드 가격은 Elif-3 전과 같다. 교주의 권능 칸과 소모품 칸은 바꾸지 않는다.
+  `ShopOffer.Price`는 골드 표시 가격 그대로 두고 `ElifPrice`를 따로 둔다. Elif-2와 같이 **Run seed가 있는 Run에서만**
+  굴린다(Editor 검증 픽스처의 상점은 골드 가격만).
+- **할인**: `max(1, floor(가격 × (100 − 10 × 단계) / 100))`. 골드 가격(아티팩트·소모품·추가 칸)에만 적용하고 엘리프 가격과
+  무료(멤버십카드)에는 적용하지 않는다. 산 즉시 열린 상점 화면 가격이 바뀐다.
+- **추가 칸**: 아랫줄 6~8번 칸. 칸 k의 아이템은 상점 seed·칸 번호로, 기본 진열 아이템과 앞 추가 칸 아이템을 뺀 풀에서
+  고른다(일반 상점은 선택 보상 풀, 골디 상점은 Rare 이상, 없으면 전체). 보유 한도를 보지 않아 언제 업그레이드했는지와
+  관계없이 같은 결과이고, 보유 한도에 걸린 아이템은 다른 칸처럼 `보유 한도`로 보인다. 산 즉시 열린 상점에 칸이 생기고,
+  이후 만드는 상점은 만들 때 단계를 적용한다. 멤버십카드로 무료가 된 상점은 나중에 생긴 추가 칸도 무료다.
+- **투자 화면**: 일반 상점 화면 오른쪽 아래 `투자 [Q]` 버튼(또는 `Q`)이 격자 위에 업그레이드 2종 목록을 연다. 위아래로
+  고르고 Enter/`투자`로 산다. `Q`·`Esc`·`상품 보기 [Q]`로 격자로 돌아간다. 저장되어야 다음 Run에 남는다는 안내를 목록과
+  상세 설명에 둔다. 골디 상점에는 버튼이 없다(효과는 적용).
+- **잔액 동기화(§4.3)**: 시작 잔액 = 프로필 조회 잔액(실패 시 이 PC에 마지막으로 확인된 값) − 저장 대기 Run들의 `spent`,
+  시작 단계 = 확인된 단계와 대기 Run 구매 단계 중 큰 값. 확인된 값은 프로필 조회 성공, Run 저장 성공(게임·결과 화면·타이틀
+  재전송)마다 PlayerPrefs `TrickalFanGame.ElifMeta.<닉네임>`에 저장한다. 프로필 조회는 수 초 걸릴 수 있어(2026-10-22 로컬
+  측정 2~5초), Game Scene 시작 즉시 캐시 값을 먼저 적용하고 조회가 끝나면 서버 값으로 다시 적용한다. 다시 적용해도 이미
+  주운·쓴 엘리프는 그대로다.
+- **Run 즉시 시작(사용자 결정 2026-10-22)**: `RunSession.PrepareAndBeginRun`은 프로필 조회를 기다리지 않고 캐시한 성장
+  정보·엘리프로 Run을 바로 시작한다. 조회가 끝나면 스킬 단계·사용자 ID·엘리프를 갱신하고, 실패하면 캐시로 계속한다.
+  이전에는 조회가 끝날 때까지(서버가 멈추면 최대 10초) Run이 시작되지 않아 그 사이 죽은 판이 저장되지 않았다.
+  서버 없는 신규 등록은 26번 Offline-0으로 이관했다.
+- **§4.3 변경(사용자 결정 2026-10-22, 서버 없이도 플레이)**: 시작 조회가 실패해도 엘리프 사용을 막지 않는다. 마지막으로
+  확인된 잔액(없으면 0)과 이번 Run에 주운 엘리프로 산다. 서버 저장은 지금처럼 잔액이 모자라도 실패하지 않고
+  `elifShortfall`로 남는다. `RunProgress`의 사용 잠금(`ElifLocked`)과 개발 패널 토글은 남아 있지만 정상 흐름에서는 쓰지
+  않는다.
+- **업그레이드 저장 순서**: 업그레이드를 산 Run은 같은 프로필의 저장 대기 Run들 뒤에 보낸다(`RunSubmission`). 대기
+  열에 넣고 오래된 것부터 보내므로, 오프라인 Run이 쌓여도 서버가 `ELIF_UPGRADE_LEVEL_GAP`(§11)으로 거부하지 않는다.
+  앞 Run이 실패하면 업그레이드 Run도 대기열에 남아 타이틀의 재전송에서 이어 보낸다. 업그레이드를 사지 않은 Run은
+  지금처럼 바로 보낸다. 그래서 대기 Run이 산 업그레이드도 다음 Run에서 이어 살 수 있다.
+- 저장 요청: `upgradePurchases`는 이번 Run에서 산 순서대로(`order` 1부터, `floor`는 산 층). 개발 패널 단계는 넣지 않는다.
+  개발 패널 엘리프로 산 것도 `spent`에 들어가므로, 개발 엘리프를 써서 서버에 저장하면 `elifShortfall`이 생길 수 있다(개발용).
+- 개발 패널 `— Elif —`: `Allow elif spending (dev)`, `Set upgrade level`(업그레이드별 `Lv0~3`·`Clear`, 이번 Run만, 개발
+  단계가 걸린 업그레이드는 투자 불가), 산 단계 목록, `Shop here: first item → elif price`(현재 상점의 첫 아티팩트를 엘리프
+  가격으로).
+- Gold-0 검증의 "`NotEnoughElif` 금지"는 "골드 부족은 `NotEnoughGold`, `NotEnoughElif`는 뒤에 추가된 값만"으로 바꿨다.
+  `ShopPurchaseResult`·`ShopOfferStatus`에 `NotEnoughElif`·`ElifLocked`를 뒤에 추가했다(직렬화하지 않는 값).
+- contract-drift-check: `Week27Elif3Verification`이 `backend/src/contracts/permanent-elif.ts`의 업그레이드 ID·단계·비용과
+  `ELIF_RUN_GAIN_MAX`·`ELIF_BALANCE_MAX`를 직접 읽어 Unity 값과 대조한다. API·Prisma 계약은 바꾸지 않았다.
+- 검증: `Week27Elif3Verification.VerifyWithRegressionsBatch` 종료 코드 0(Elif-3, Special-4, Shop-0/1, Spell-4/6, Power-2,
+  Gold-0, Resource-1, Flow-5, Elif-2, DevPanel).
+- 수동 확인: 사용자 Play 확인 완료(2026-10-22) — 개발 패널 엘리프로 엘리프 가격 칸 구매, 투자(상품 칸 추가·상점 할인)와
+  할인 가격. 남은 것: 실제 서버로 §7.3(사망 뒤 잔액 증가·포기 시 미반영·투자 단계가 다음 Run에 유지·저장 실패 후 재전송
+  1회 반영). Backend에 Elif-1 마이그레이션 적용이 먼저 필요하다(`backend`에서 `pnpm prisma:migrate:deploy`, 2026-10-22
+  `prisma migrate status`로 미적용 확인).

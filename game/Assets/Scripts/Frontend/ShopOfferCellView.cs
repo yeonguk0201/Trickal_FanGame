@@ -16,6 +16,8 @@ namespace TrickalFanGame.Frontend
         private static readonly Color FreeColor = new(0.55f, 1f, 0.7f, 1f);
         private static readonly Color BlockedColor = new(1f, 0.45f, 0.4f, 1f);
         private static readonly Color SoldColor = new(0.6f, 0.65f, 0.72f, 1f);
+        // Elif-3: an elif offer's price reads in the elif HUD color instead of gold.
+        private static readonly Color ElifPriceColor = new(0.72f, 0.88f, 1f, 1f);
 
         [SerializeField] private int cellIndex;
         [SerializeField] private Button button;
@@ -75,13 +77,14 @@ namespace TrickalFanGame.Frontend
             ApplyIcon(Offer);
             if (nameText != null) nameText.text = Offer.DisplayName;
             if (priceText == null) return;
-            priceText.text = ShopView.FormatPriceLabel(Status, price);
+            priceText.text = ShopView.FormatPriceLabel(Status, price, Offer.IsElifPriced);
             priceText.color = Status switch
             {
                 ShopOfferStatus.Free => FreeColor,
                 ShopOfferStatus.SoldOut => SoldColor,
-                ShopOfferStatus.NotEnoughGold or ShopOfferStatus.ItemUnavailable => BlockedColor,
-                _ => PriceColor,
+                ShopOfferStatus.NotEnoughGold or ShopOfferStatus.ItemUnavailable or ShopOfferStatus.NotEnoughElif or
+                    ShopOfferStatus.ElifLocked => BlockedColor,
+                _ => Offer.IsElifPriced ? ElifPriceColor : PriceColor,
             };
         }
 

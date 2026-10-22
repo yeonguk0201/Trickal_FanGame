@@ -148,6 +148,7 @@ namespace TrickalFanGame.Frontend
 
             LocalPendingRunStorage.Remove(request.clientRunId);
             PlayerProgressClient.StoreConfirmedProgress(LocalProfile.Nickname, response.data.progress);
+            PlayerProgressClient.StoreConfirmedElifMeta(LocalProfile.Nickname, response.data.meta);
             pendingRunRecoveryInFlight = false;
             Debug.Log($"[FrontendTitleView] Pending Run recovered successfully: {response.data.runId}");
             RecoverPendingRuns(apiClient);

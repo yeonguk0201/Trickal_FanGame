@@ -16,6 +16,7 @@ description: TrickalFanGame의 Prisma·API DTO·Item·Character·Run 계약 변�
 | Unity 아이템 | `game/Assets/Scripts/Item/ItemDefinition.cs`, ItemKind·ItemRarity·ItemEffectType, `game/Assets/Items/` 하위 에셋과 Editor 카탈로그·Setup |
 | Unity 캐릭터 | `game/Assets/Scripts/Character/CharacterDefinition.cs`, `game/Assets/Characters/` 하위 에셋 |
 | Run API | `backend/src/modules/runs/dto/create-run.dto.ts`, 서비스·저장소, `game/Assets/Scripts/Network/RunDto.cs` |
+| 영구 엘리프·상점 업그레이드 | `backend/src/contracts/permanent-elif.ts`의 SHOP_UPGRADE_CATALOG·상한, `game/Assets/Scripts/Shop/ShopUpgrades.cs`, `game/Assets/Scripts/Resource/PermanentElif.cs`. 업그레이드 ID·단계·비용과 상한은 `Week27Elif3Verification`이 Backend 파일과 직접 대조한다 |
 | Web 소비자 | `web/src/lib/api-client.ts`와 변경 필드·엔드포인트의 실제 소비 코드 |
 | 문서 | `docs/06-database.md`, `docs/07-api.md`, 해당 게임 규칙·실행 계획 |
 

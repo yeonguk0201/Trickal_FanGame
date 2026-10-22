@@ -13,6 +13,9 @@ namespace TrickalFanGame.Shop
         NotEnoughGold,
         ItemUnavailable,
         Unavailable,
+        // Elif-3: an elif offer without enough elif, or a Run that cannot spend elif (contract 27 §4.3).
+        NotEnoughElif,
+        ElifLocked,
     }
 
     // What the shop UI shows for one grid cell. Empty is a cell with no offer.
@@ -24,6 +27,8 @@ namespace TrickalFanGame.Shop
         NotEnoughGold,
         ItemUnavailable,
         SoldOut,
+        NotEnoughElif,
+        ElifLocked,
     }
 
     // Special-4 / Shop-0: the shop room's stock and purchase rules. The player opens the shop UI at the shopkeeper; a
@@ -58,58 +63,88 @@ namespace TrickalFanGame.Shop
         public void Configure(RunProgress configuredProgress, ShopStockState configuredStock,
             Transform configuredDropParent, ShopSession configuredSession = null)
         {
+            if (runProgress != null) runProgress.ShopUpgradesChanged -= ApplyUpgrades;
             runProgress = configuredProgress;
             stock = configuredStock;
             dropParent = configuredDropParent;
             session = configuredSession;
+            if (runProgress != null) runProgress.ShopUpgradesChanged += ApplyUpgrades;
+            ApplyUpgrades();
             if (keeper != null) keeper.Bind(this, session);
         }
 
         private void OnDestroy()
         {
+            if (runProgress != null) runProgress.ShopUpgradesChanged -= ApplyUpgrades;
             // A floor rebuild destroys the room while its UI could still be open.
             if (session != null && session.Shop == this) session.Close();
         }
 
-        public int GetPrice(ShopOffer offer) =>
-            offer == null ? 0 : stock != null ? stock.GetPrice(offer.SlotIndex) : offer.Price;
+        // Elif-3: 상품 칸 추가 opens its last-row slots in this shop at once, even while the screen is open.
+        private void ApplyUpgrades()
+        {
+            if (stock != null && runProgress != null)
+                stock.EnsureExtraSlots(runProgress.GetShopUpgradeLevel(ShopUpgrades.ExtraSlotId));
+        }
+
+        public int DiscountLevel => runProgress != null ? runProgress.GetShopUpgradeLevel(ShopUpgrades.DiscountId) : 0;
+
+        // What a purchase pays now: nothing when free (멤버십카드), the elif price for an elif offer, otherwise the
+        // gold price after the 상점 할인 upgrade.
+        public int GetPrice(ShopOffer offer)
+        {
+            if (offer == null || (stock != null && stock.IsFree)) return 0;
+            return offer.IsElifPriced ? offer.ElifPrice : ShopUpgrades.ApplyDiscount(offer.Price, DiscountLevel);
+        }
+
+        public static RunResourceType CurrencyOf(ShopOffer offer) =>
+            offer != null && offer.IsElifPriced ? RunResourceType.Elif : RunResourceType.Gold;
 
         public bool CanAfford(ShopOffer offer) =>
             offer != null && runProgress != null &&
-            runProgress.GetResourceCount(RunResourceType.Gold) >= GetPrice(offer);
+            runProgress.GetResourceCount(CurrencyOf(offer)) >= GetPrice(offer);
 
         public bool IsSold(ShopOffer offer) => offer == null || stock == null || stock.IsPurchased(offer.SlotIndex);
 
         public ShopOfferStatus GetStatus(int slotIndex, PlayerInventory inventory)
         {
-            if (stock == null || slotIndex < 0 || slotIndex >= stock.Offers.Count) return ShopOfferStatus.Empty;
-            ShopOffer offer = stock.Offers[slotIndex];
+            ShopOffer offer = stock != null ? stock.GetOffer(slotIndex) : null;
+            if (offer == null) return ShopOfferStatus.Empty;
             if (stock.IsPurchased(slotIndex)) return ShopOfferStatus.SoldOut;
             if (offer.Kind == ShopOfferKind.Item && !CanReceive(offer.Item, inventory))
                 return ShopOfferStatus.ItemUnavailable;
-            if (stock.GetPrice(slotIndex) == 0) return ShopOfferStatus.Free;
-            return CanAfford(offer) ? ShopOfferStatus.Available : ShopOfferStatus.NotEnoughGold;
+            if (GetPrice(offer) == 0) return ShopOfferStatus.Free;
+            if (offer.IsElifPriced && runProgress != null && !runProgress.IsElifSpendingAllowed)
+                return ShopOfferStatus.ElifLocked;
+            if (CanAfford(offer)) return ShopOfferStatus.Available;
+            return offer.IsElifPriced ? ShopOfferStatus.NotEnoughElif : ShopOfferStatus.NotEnoughGold;
         }
 
         public ShopPurchaseResult TryPurchase(int slotIndex, PlayerInventory inventory)
         {
             LastDroppedPickup = null;
-            if (stock == null || slotIndex < 0 || slotIndex >= stock.Offers.Count || runProgress == null ||
-                runProgress.IsProgressionStopped || runProgress.IsRewardSelectionPending)
+            ShopOffer offer = stock != null ? stock.GetOffer(slotIndex) : null;
+            if (offer == null || runProgress == null || runProgress.IsProgressionStopped ||
+                runProgress.IsRewardSelectionPending)
                 return ShopPurchaseResult.Unavailable;
 
-            ShopOffer offer = stock.Offers[slotIndex];
             if (stock.IsPurchased(slotIndex)) return ShopPurchaseResult.SoldOut;
             if (offer.Kind == ShopOfferKind.Item && !CanReceive(offer.Item, inventory))
                 return ShopPurchaseResult.ItemUnavailable;
             // A free offer (멤버십카드) spends nothing.
-            int price = stock.GetPrice(slotIndex);
-            if (price > 0 && !runProgress.TrySpendResource(RunResourceType.Gold, price))
-                return ShopPurchaseResult.NotEnoughGold;
+            int price = GetPrice(offer);
+            RunResourceType currency = CurrencyOf(offer);
+            if (price > 0 && currency == RunResourceType.Elif && !runProgress.IsElifSpendingAllowed)
+                return ShopPurchaseResult.ElifLocked;
+            if (price > 0 && !runProgress.TrySpendResource(currency, price))
+                return currency == RunResourceType.Elif
+                    ? ShopPurchaseResult.NotEnoughElif
+                    : ShopPurchaseResult.NotEnoughGold;
 
             if (offer.Kind == ShopOfferKind.Item && !Grant(offer, inventory))
             {
-                if (price > 0) runProgress.TryAddResource(RunResourceType.Gold, price);
+                if (price > 0 && currency == RunResourceType.Elif) runProgress.RefundElif(price);
+                else if (price > 0) runProgress.TryAddResource(RunResourceType.Gold, price);
                 return ShopPurchaseResult.ItemUnavailable;
             }
 
@@ -117,6 +152,22 @@ namespace TrickalFanGame.Shop
             if (offer.Kind == ShopOfferKind.Consumable) LastDroppedPickup = DropPickup(offer, slotIndex);
             Purchased?.Invoke(offer);
             return ShopPurchaseResult.Purchased;
+        }
+
+        // Elif-3: only the general shop (시스트) sells upgrades; both shops apply them.
+        public bool SellsUpgrades => stock != null && stock.Kind == ShopKind.General;
+
+        public ShopUpgradeStatus GetUpgradeStatus(string upgradeId)
+        {
+            if (!SellsUpgrades || runProgress == null || runProgress.IsRewardSelectionPending)
+                return ShopUpgradeStatus.Unavailable;
+            return runProgress.GetShopUpgradeStatus(upgradeId);
+        }
+
+        public ShopUpgradeStatus TryPurchaseUpgrade(string upgradeId)
+        {
+            ShopUpgradeStatus status = GetUpgradeStatus(upgradeId);
+            return status == ShopUpgradeStatus.Available ? runProgress.TryPurchaseShopUpgrade(upgradeId) : status;
         }
 
         // Power-2: a 교주의 권능 goes to the 권능 slot (never the one already held); the held one drops at the offer's
