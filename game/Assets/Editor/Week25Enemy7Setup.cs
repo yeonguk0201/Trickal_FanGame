@@ -176,7 +176,8 @@ namespace TrickalFanGame.Editor
                 }
 
                 Undo.RecordObject(definition, "Configure Enemy-7 Encounter");
-                definition.Configure(Week19Spawn2Setup.EncounterId(spec.ProfileId, Pattern), new[] { profile }, 1, 3,
+                definition.Configure(Week19Spawn2Setup.EncounterId(spec.ProfileId, Pattern), new[] { profile },
+                    Week27Curve1Setup.MinimumFloor(Pattern), Week27Curve1Setup.MaximumFloor,
                     Week14Encounter1Setup.MinimumPlayerDistance,
                     Week14Encounter1Setup.MinimumDoorDistance,
                     new[] { Wave(1, spec.FirstWave), Wave(2, spec.SecondWave) },

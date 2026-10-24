@@ -192,6 +192,10 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
 - 검증: `Week27Curve0Verification.VerifyWithRegressionsBatch`(2026-10-24). Curve-0·HP-1·Enemy-6·Enemy-9·Tune-1과 HP-1 회귀
   25개 중 23개 통과. 실패 2개(`Week7RoomGraph` 방 이동 위치, `Week16Reward2` 권능 카드 표시)는 바뀐 코드를 쓰지 않는 기존
   실패다. 사용자 Play 확인 완료(2026-10-24, 일반 적은 층과 무관하게 같은 횟수에 죽고 보스만 단단함).
+- Curve-1(2026-10-25): 기존 적을 층별로 나눠 등장시키고(새 적 ×1.5, 두 층 아래 ×0.5), `crossfire`·`elite-pair`는 2층부터,
+  산사모-순수는 3발·현재 위치 조준. Encounter 콘텐츠 버전 16. 사양과 결과는 [28번](./28-difficulty-enemies-drops-plan.md)
+  §9·§9.1. 검증: `Week27Curve1Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(11개) 통과(2026-10-25).
+  사용자 Play 확인 완료(2026-10-25, 층별 등장 구성과 산사모-순수 3발·현재 위치 조준).
 
 ## 4. 확정 사양
 

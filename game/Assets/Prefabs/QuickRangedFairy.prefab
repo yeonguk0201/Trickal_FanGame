@@ -138,11 +138,11 @@ MonoBehaviour:
   radialOrbitWeight: 0.35
   shotInterval: 0.4
   burstRestDuration: 1.5
-  fourShotChance: 0.4
+  fourShotChance: 0
   projectileSpeed: 6.5
   projectileDamageTier: 0
   projectileLifetime: 1.4
-  maximumPredictionTime: 0.25
+  maximumPredictionTime: 0
   target: {fileID: 0}
 --- !u!114 &5820317746190253184
 MonoBehaviour:
@@ -170,7 +170,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6fecce6f4640b0d49b91b732db16b64e, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.SansamoPureMotion
   walkAtlas: {fileID: 2800000, guid: 962b2af6d910bb345abf793f553d7a1c, type: 3}
   material: {fileID: 2100000, guid: ab8ab0ec49b0edf469edf1ab0b4d55d7, type: 2}

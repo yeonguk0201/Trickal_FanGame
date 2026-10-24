@@ -15,7 +15,7 @@ MonoBehaviour:
   encounterId: spawn-small-crossfire-v1
   allowedProfiles:
   - {fileID: 11400000, guid: 1ff92c9396d895b4a88f5ddfd322caef, type: 2}
-  minimumFloor: 1
+  minimumFloor: 2
   maximumFloor: 3
   minimumPlayerDistance: 1.5
   minimumDoorDistance: 2

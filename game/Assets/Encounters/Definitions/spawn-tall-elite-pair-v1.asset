@@ -15,7 +15,7 @@ MonoBehaviour:
   encounterId: spawn-tall-elite-pair-v1
   allowedProfiles:
   - {fileID: 11400000, guid: 90d790e5b5de53c4580db588ccac9c58, type: 2}
-  minimumFloor: 1
+  minimumFloor: 2
   maximumFloor: 3
   minimumPlayerDistance: 1.5
   minimumDoorDistance: 2

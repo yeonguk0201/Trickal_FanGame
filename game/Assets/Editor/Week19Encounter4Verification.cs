@@ -189,7 +189,8 @@ namespace TrickalFanGame.Editor
             RoomProfile profile = generator.RoomTemplates.First(template =>
                 template.SupportsRoomType(RoomType.Normal)).Profile;
             EncounterEnemyCandidate[] melee = { new(EncounterEnemyRole.Chaser, 1) };
-            EncounterEnemyCandidate[] rear = { new(EncounterEnemyRole.Ranged, 1) };
+            // Curve-1: the sniper is the rear-firing enemy present from floor 1.
+            EncounterEnemyCandidate[] rear = { new(EncounterEnemyRole.Sniper, 1) };
             (string label, string expected, EncounterSpawnRule[][] waves)[] cases =
             {
                 ("single enemy", "outside the room range", new[] { new[] { Rule(melee, 1) } }),
@@ -247,6 +248,8 @@ namespace TrickalFanGame.Editor
                     {
                         Assert(swarm.TryValidateFor(template, floor, connections, out string error),
                             $"Swarm cannot be placed in '{template.TemplateId}' with doors {mask}. {error}");
+                        // Curve-1: elite-pair starts on floor 2.
+                        if (floor < elite.MinimumFloor) continue;
                         Assert(elite.TryValidateFor(template, floor, connections, out error),
                             $"Elite pair cannot be placed in '{template.TemplateId}' with doors {mask}. {error}");
                     }

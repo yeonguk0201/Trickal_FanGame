@@ -160,6 +160,12 @@ namespace TrickalFanGame.Room
             clearCondition = configuredClearCondition;
         }
 
+        public void ConfigureFloorRange(int configuredMinimumFloor, int configuredMaximumFloor)
+        {
+            minimumFloor = configuredMinimumFloor;
+            maximumFloor = configuredMaximumFloor;
+        }
+
         public void ConfigureDeclaredThreat(int minimum, int maximum)
         {
             declaredMinimumThreat = minimum;
@@ -180,6 +186,18 @@ namespace TrickalFanGame.Room
                 error = $"Encounter '{encounterId}' candidate threat sums {minimum}~{maximum} fall outside the " +
                         $"declared range {declaredMinimumThreat}~{declaredMaximumThreat}.";
                 return false;
+            }
+
+            // Curve-1: each floor drops the enemies it has not introduced yet, so every floor's own sums must fit too.
+            for (int floor = minimumFloor; floor <= maximumFloor; floor++)
+            {
+                if (!table.TryComputeThreatRange(this, floor, out minimum, out maximum, out error)) return false;
+                if (minimum < declaredMinimumThreat || maximum > declaredMaximumThreat)
+                {
+                    error = $"Encounter '{encounterId}' floor {floor} threat sums {minimum}~{maximum} fall outside " +
+                            $"the declared range {declaredMinimumThreat}~{declaredMaximumThreat}.";
+                    return false;
+                }
             }
 
             error = null;
@@ -238,6 +256,16 @@ namespace TrickalFanGame.Room
                                     "duplicated, or non-normal weighted enemy candidate.";
                             return false;
                         }
+                    }
+
+                    // Curve-1: a rule must keep at least one enemy on every floor the Encounter allows.
+                    for (int floor = minimumFloor; floor <= maximumFloor; floor++)
+                    {
+                        if (rule.Candidates.Any(candidate =>
+                                EncounterEnemyFloorPool.IsAvailable(candidate.EnemyRole, floor))) continue;
+                        error = $"Encounter '{encounterId}' wave {wave.WaveNumber} has a spawn rule with no enemy " +
+                                $"introduced by floor {floor}.";
+                        return false;
                     }
                 }
             }
@@ -310,9 +338,11 @@ namespace TrickalFanGame.Room
 
                 for (int instanceIndex = 0; instanceIndex < rule.Count; instanceIndex++)
                 {
-                    EncounterEnemyCandidate[] viable = rule.Candidates.Where(candidate => candidates.Any(index =>
-                            !occupied.Contains(index) && template.SupportsEnemyRole(index, candidate.EnemyRole) &&
-                            IsSafe(template.SpawnPoints[index], activeDoors)))
+                    EncounterEnemyCandidate[] viable = rule.Candidates.Where(candidate =>
+                            EncounterEnemyFloorPool.IsAvailable(candidate.EnemyRole, floorNumber) &&
+                            candidates.Any(index =>
+                                !occupied.Contains(index) && template.SupportsEnemyRole(index, candidate.EnemyRole) &&
+                                IsSafe(template.SpawnPoints[index], activeDoors)))
                         .ToArray();
                     if (viable.Length == 0)
                     {
@@ -326,7 +356,7 @@ namespace TrickalFanGame.Room
 
                     int discriminator = (waveIndex + 1) * 10000 + (ruleIndex + 1) * 100 + instanceIndex + 1;
                     int candidateSeed = FloorGenerator.DeriveSeed(selectionSeed, discriminator, 0x91E10DA5u);
-                    EncounterEnemyRole selectedRole = SelectWeightedRole(viable, candidateSeed);
+                    EncounterEnemyRole selectedRole = SelectWeightedRole(viable, floorNumber, candidateSeed);
                     IEnumerable<int> available = candidates.Where(index => !occupied.Contains(index) &&
                         template.SupportsEnemyRole(index, selectedRole) &&
                         IsSafe(template.SpawnPoints[index], activeDoors));
@@ -350,15 +380,19 @@ namespace TrickalFanGame.Room
             return true;
         }
 
+        // Weights are the authored weights scaled by the floor (Curve-1), so the same rule leans toward the
+        // floor's new enemies.
         private static EncounterEnemyRole SelectWeightedRole(
-            IReadOnlyList<EncounterEnemyCandidate> candidates, int seed)
+            IReadOnlyList<EncounterEnemyCandidate> candidates, int floorNumber, int seed)
         {
-            int totalWeight = candidates.Sum(candidate => candidate.Weight);
+            int totalWeight = candidates.Sum(candidate =>
+                EncounterEnemyFloorPool.EffectiveWeight(candidate, floorNumber));
             int roll = (int)(unchecked((uint)seed) % unchecked((uint)totalWeight));
             foreach (EncounterEnemyCandidate candidate in candidates)
             {
-                if (roll < candidate.Weight) return candidate.EnemyRole;
-                roll -= candidate.Weight;
+                int weight = EncounterEnemyFloorPool.EffectiveWeight(candidate, floorNumber);
+                if (roll < weight) return candidate.EnemyRole;
+                roll -= weight;
             }
 
             throw new InvalidOperationException("A positive weighted enemy candidate list must select a role.");

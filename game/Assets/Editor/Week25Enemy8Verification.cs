@@ -269,13 +269,15 @@ namespace TrickalFanGame.Editor
                     rooms++;
                     fairies += spawns.Length;
                     perFloor[room.FloorNumber]++;
-                    if (runtimeSeed == 0 && room.FloorNumber == 1) runtimeSeed = seed;
+                    if (runtimeSeed == 0 && room.FloorNumber == EncounterEnemyFloorPool.IntroductionFloor(EncounterEnemyRole.FourWayShooter)) runtimeSeed = seed;
                 }
             }
 
-            Assert(rooms > 0 && perFloor[1] > 0 && perFloor[2] > 0 && perFloor[3] > 0,
-                $"{GeneratedSeedCount} seeds must place the lively fairy on every floor.");
-            Assert(runtimeSeed > 0, "No floor-1 lively fairy room was generated for runtime verification.");
+            // Curve-1: it appears from its introduction floor on and never before.
+            int introduction = EncounterEnemyFloorPool.IntroductionFloor(EncounterEnemyRole.FourWayShooter);
+            Assert(rooms > 0 && Enumerable.Range(1, 3).All(floor => (perFloor[floor] > 0) == (floor >= introduction)),
+                $"{GeneratedSeedCount} seeds must place the lively fairy on floors {introduction}~3 only.");
+            Assert(runtimeSeed > 0, $"No floor-{introduction} lively fairy room was generated for runtime verification.");
             return $"{fairies} fairies in {rooms} of {combatRooms} combat rooms, floors " +
                    $"{perFloor[1]}/{perFloor[2]}/{perFloor[3]}";
         }
@@ -283,8 +285,11 @@ namespace TrickalFanGame.Editor
         private static void ValidateRuntimeBinding(RoomGraphAssembler assembler, GameObject prefab, int seed)
         {
             Assert(assembler.TryApplyGeneratedGraphForVerification(seed, out string error), error);
+            int floor = EncounterEnemyFloorPool.IntroductionFloor(EncounterEnemyRole.FourWayShooter);
+            if (floor > 1)
+                Assert(assembler.TryLoadFloor(floor, assembler.Graph.Player, out error), error);
             Dictionary<string, int> expected = assembler.GeneratedGraph.Nodes
-                .Where(node => node.Role == GeneratedRoomRole.Intermediate && node.FloorNumber == 1)
+                .Where(node => node.Role == GeneratedRoomRole.Intermediate && node.FloorNumber == floor)
                 .ToDictionary(node => node.RoomId, node => node.ResolvedEncounterWaves.SelectMany(wave => wave)
                     .Count(spawn => spawn.Role == EncounterEnemyRole.FourWayShooter), StringComparer.Ordinal);
             int bound = 0;

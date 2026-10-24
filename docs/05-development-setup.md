@@ -1373,6 +1373,17 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   회귀 묶음에서 `Week7RoomGraph`·`Week16Reward2` 2개만 기존 실패로 남았고, 같은 날 사용자 Play 확인을 마쳤다. 수동 확인: Game Scene Play → `F1` 개발 패널로 3층까지
   이동해 일반 적이 1층과 같은 횟수에 죽고 보스만 단단해지는지, 3층 피격 피해가 표와 맞는지 본다.
 
+- Curve-1 층별 적 구성(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Curve-1 Floor Enemy Pool`이 `crossfire`·`elite-pair`
+  Encounter 10개를 2~3층으로, `QuickRangedFairy`(산사모-순수)를 4발 확률 0·예측 상한 0으로, Encounter 콘텐츠 버전을 16으로
+  멱등 구성한다. 등장 층과 층별 가중치는 런타임 `EncounterEnemyFloorPool`([28번 §9](./28-difficulty-enemies-drops-plan.md)).
+  배치는 `-executeMethod TrickalFanGame.Editor.Week27Curve1Verification.SetupAndVerifyBatch`(Setup 2회 GUID 보존 포함),
+  단독 검증 `Verify`, 회귀 `VerifyWithRegressionsBatch`(Enemy-7·8·9, Spawn-1·2, Difficulty-1, Encounter-4, Tune-1,
+  Floor-1, 산사모-순수 모션, Curve-0. 실패가 있어도 끝까지 돌고 한 번에 보고). 검사: 역할별 등장 층·반 단위 가중치,
+  카탈로그 층 범위와 층별 위협 범위, 1층 elite-pair 거부, 512 seed에서 등장 전 층 배치 없음과 등장 층부터 모든 층 노출,
+  재생성 결정성, 산사모-순수 3발·현재 위치 조준. 2026-10-25 모두 통과했고 같은 날 사용자 Play 확인을 마쳤다. 수동 확인: Game Scene Play → `F1` 개발 패널로
+  층을 옮기며 1층에 산사모-순수·돌진·저혈당-활발·누루링이 없고, 2층에 앞의 셋이, 3층에 누루링이 나오는지, 산사모-순수가
+  항상 3발을 현재 위치로 쏘는지 본다.
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,

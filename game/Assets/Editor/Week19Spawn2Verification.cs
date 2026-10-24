@@ -54,7 +54,8 @@ namespace TrickalFanGame.Editor
             Debug.Log("Spawn-2 verification passed: the quick ranged placeholder circles while firing " +
                       "predictive 3/4-shot bursts at 60/40 weights with a 1.5-second rest; " +
                       "Small/Basic/Wide/Tall/Large rear slots " +
-                      "select snipers at 10/20/50/50/60 weights; identical seeds persist identical per-point " +
+                      "select snipers at 10/20/50/50/60 weights (floor 2, quick ranged x1.5 by Curve-1); " +
+                      "identical seeds persist identical per-point " +
                       "choices, every candidate appears, 256 generated graphs and runtime binding match stored " +
                       "waves, invalid weights/duplicates/boss candidates fail, and setup preserves all GUIDs.");
         }
@@ -80,12 +81,14 @@ namespace TrickalFanGame.Editor
             Assert(quickController.MoveSpeed > sniper.MoveSpeed &&
                    Approximately(quickController.ShotInterval, Week19Spawn2Setup.QuickShotInterval) &&
                    Approximately(quickController.BurstRestDuration, Week19Spawn2Setup.QuickBurstRestDuration) &&
-                   Approximately(quickController.FourShotChance, Week19Spawn2Setup.QuickFourShotChance) &&
+                   // Curve-1 replaced Spawn-2's 40% four-shot chance and 0.25-second lead with three shots and
+                   // no lead. The pattern checks below still drive the controller with Spawn-2's values.
+                   Approximately(quickController.FourShotChance, Week27Curve1Setup.QuickFourShotChance) &&
                    Approximately(quickController.MaximumPredictionTime,
-                       Week19Spawn2Setup.QuickMaximumPredictionTime) &&
+                       Week27Curve1Setup.QuickMaximumPredictionTime) &&
                    quickController.ProjectileDamageTier == Week19Tune1Setup.QuickRangedProjectileDamageTier &&
                    sniper.ProjectileDamageTier == EnemyDamageTier.Heavy,
-                "Quick ranged must move, predict, and burst-fire with the configured Tune-1 damage contract.");
+                "Quick ranged must move and burst-fire three shots without a lead, with the Tune-1 damage contract.");
             Assert(roster.TryResolve(EncounterEnemyRole.Ranged, out GameObject resolved, out string error) &&
                    resolved == quick, error ?? "The Ranged role must resolve to the new quick ranged Prefab.");
         }
@@ -251,12 +254,14 @@ namespace TrickalFanGame.Editor
                     candidate.EncounterId == Week19Spawn2Setup.EncounterId(spec.ProfileId, "pressure"));
                 RoomTemplateDefinition template = generator.RoomTemplates.First(candidate =>
                     candidate.Profile.ProfileId == spec.ProfileId && candidate.SupportsRoomType(RoomType.Normal));
+                // Curve-1: 산사모-순수 enters on floor 2, where it weighs x1.5 against the floor-1 sniper.
+                const int floor = 2;
                 int sniperCount = 0;
                 for (int seed = 1; seed <= DistributionSeedCount; seed++)
                 {
-                    Assert(definition.TryResolveWave(template, 1, null, 0, seed,
+                    Assert(definition.TryResolveWave(template, floor, null, 0, seed,
                         out ResolvedEncounterSpawn[] first, out string error), error);
-                    Assert(definition.TryResolveWave(template, 1, null, 0, seed,
+                    Assert(definition.TryResolveWave(template, floor, null, 0, seed,
                         out ResolvedEncounterSpawn[] repeat, out error), error);
                     Assert(Signature(first) == Signature(repeat),
                         $"Profile '{spec.ProfileId}' changed candidates for identical seed {seed}.");
@@ -269,7 +274,11 @@ namespace TrickalFanGame.Editor
                 }
 
                 float observed = sniperCount / (float)DistributionSeedCount;
-                float expected = spec.SniperWeight / 100f;
+                int sniperWeight = EncounterEnemyFloorPool.EffectiveWeight(
+                    new EncounterEnemyCandidate(EncounterEnemyRole.Sniper, spec.SniperWeight), floor);
+                int quickWeight = EncounterEnemyFloorPool.EffectiveWeight(
+                    new EncounterEnemyCandidate(EncounterEnemyRole.Ranged, spec.QuickRangedWeight), floor);
+                float expected = sniperWeight / (float)(sniperWeight + quickWeight);
                 Assert(sniperCount > 0 && sniperCount < DistributionSeedCount &&
                        Mathf.Abs(observed - expected) <= 0.025f,
                     $"Profile '{spec.ProfileId}' expected {expected:P0} snipers but observed {observed:P1}.");
