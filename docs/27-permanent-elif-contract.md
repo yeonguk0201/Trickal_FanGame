@@ -4,8 +4,7 @@
 > 계획: [26-seventh-month-plan.md](./26-seventh-month-plan.md) §5, D8  
 > 관련 계약: [23-item-classification-contract.md](./23-item-classification-contract.md) §6(골드 enum), [07-api.md](./07-api.md), [06-database.md](./06-database.md)  
 > 상태: **설계 확정. Elif-1(Backend·Prisma)·Elif-2(Unity 획득·기록·저장 요청·HUD) 구현 완료(2026-10-22), Elif-3(상점
-> 엘리프 가격 칸·업그레이드·투자 화면·잔액 동기화) 자동 검증·개발 패널 Play 확인 완료(2026-10-22, 실제 서버 §7.3 확인 전),
-> Elif-4 구현 전.**
+> 엘리프 가격 칸·업그레이드·투자 화면·잔액 동기화) 구현 완료(2026-10-22, 자동 검증·실제 서버 §7.3 수동 확인), Elif-4 구현 전.**
 > 구현 차이는 §11(Elif-1), §12(Elif-2), §13(Elif-3).
 
 ## 1. 요약
@@ -382,6 +381,6 @@ seed 결과가 바뀌므로 Balance-0·Play-2 기록 전에 넣거나, 넣지 �
 - 검증: `Week27Elif3Verification.VerifyWithRegressionsBatch` 종료 코드 0(Elif-3, Special-4, Shop-0/1, Spell-4/6, Power-2,
   Gold-0, Resource-1, Flow-5, Elif-2, DevPanel).
 - 수동 확인: 사용자 Play 확인 완료(2026-10-22) — 개발 패널 엘리프로 엘리프 가격 칸 구매, 투자(상품 칸 추가·상점 할인)와
-  할인 가격. 남은 것: 실제 서버로 §7.3(사망 뒤 잔액 증가·포기 시 미반영·투자 단계가 다음 Run에 유지·저장 실패 후 재전송
-  1회 반영). Backend에 Elif-1 마이그레이션 적용이 먼저 필요하다(`backend`에서 `pnpm prisma:migrate:deploy`, 2026-10-22
-  `prisma migrate status`로 미적용 확인).
+  할인 가격. 실제 서버(Elif-1 마이그레이션 적용 후, 2026-10-22)로 §7.3 확인 완료 — 사망 뒤 다시 시작하면 잔액 증가, 포기한
+  판은 미반영, 투자 단계가 다음 Run에 유지, 저장 실패 후 재전송이 1회 반영, 서버를 끈 채 시작해도 투자 단계 유지.
+  Web 사용자 화면의 잔액 표시는 Elif-4에서 확인한다.
