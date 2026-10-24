@@ -326,9 +326,10 @@ namespace TrickalFanGame.Editor
                             "A split must be a small nururing next to the body that cannot split again.");
                         Assert(expected.Any(position => (split.transform.position - position).sqrMagnitude < 0.0001f),
                             $"A split must appear 0.5 to the left or right of the body, not at {split.transform.position}.");
+                        // Curve-0: normal enemies, splits included, keep their base health on every floor.
                         Assert(EnemyFloorLevel.Resolve(split.gameObject) == 2 &&
-                               split.MaxHealth > splitPrefab.GetComponent<Health>().MaxHealth,
-                            "A split outside a room must keep the body's floor and its health scaling.");
+                               Mathf.Approximately(split.MaxHealth, splitPrefab.GetComponent<Health>().MaxHealth),
+                            "A split outside a room must keep the body's floor and its base health.");
                         EnemyBehaviorContext behavior = split.GetComponent<EnemyBehaviorContext>();
                         float actionReady = (float)typeof(EnemyBehaviorContext)
                             .GetField("spawnActionReadyTime", BindingFlags.Instance | BindingFlags.NonPublic)

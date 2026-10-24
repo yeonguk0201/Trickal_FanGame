@@ -33,27 +33,35 @@ namespace TrickalFanGame.Editor
 
             Debug.Log(
                 "Phase E-8 floor difficulty scaling verification passed: " +
-                "all normal enemies and bosses gain health on every floor and resolve tiered heart damage, " +
+                "normal enemies keep base health on every floor, only bosses gain the floor health multiplier, " +
+                "all enemies resolve the Curve-0 tiered heart damage, " +
                 "RoomController applies scaling without replacing pattern tuning, and a selected character " +
                 "can clear all nine rooms from floor 1 through the floor 3 final boss.");
         }
 
         private static void VerifyMultiplierValues()
         {
-            Assert(Mathf.Approximately(FloorDifficultyScaler.GetHealthMultiplier(1), 1.0f),
-                "Floor 1 health multiplier must be 1.0.");
-            Assert(Mathf.Approximately(FloorDifficultyScaler.GetHealthMultiplier(2), 1.5f),
-                "Floor 2 health multiplier must be 1.5.");
-            Assert(Mathf.Approximately(FloorDifficultyScaler.GetHealthMultiplier(3), 2.0f),
-                "Floor 3 health multiplier must be 2.0.");
+            // Curve-0: only bosses scale health with the floor.
+            Assert(Mathf.Approximately(FloorDifficultyScaler.NormalEnemyHealthMultiplier, 1.0f),
+                "Normal enemies must keep their base health (x1.0) on every floor.");
+            Assert(Mathf.Approximately(FloorDifficultyScaler.GetBossHealthMultiplier(1), 1.0f),
+                "Floor 1 boss health multiplier must be 1.0.");
+            Assert(Mathf.Approximately(FloorDifficultyScaler.GetBossHealthMultiplier(2), 1.5f),
+                "Floor 2 boss health multiplier must be 1.5.");
+            Assert(Mathf.Approximately(FloorDifficultyScaler.GetBossHealthMultiplier(3), 2.0f),
+                "Floor 3 boss health multiplier must be 2.0.");
+            Assert(!FloorDifficultyScaler.IsBoss(null) &&
+                   Mathf.Approximately(FloorDifficultyScaler.GetHealthMultiplier(null, 3), 1.0f),
+                "A missing enemy must not count as a boss.");
 
             // Half-heart units per tier and floor (docs/idea-implementation/01-player-heart-health.md, section 5).
+            // Curve-0: floors 1-2 share the base row and floor 3 steps up once.
             int[,] expectedUnits =
             {
-                { 2, 2, 3 },
-                { 3, 4, 5 },
-                { 4, 6, 7 },
-                { 6, 7, 8 },
+                { 2, 2, 2 },
+                { 3, 3, 4 },
+                { 4, 4, 6 },
+                { 6, 6, 7 },
             };
             foreach (EnemyDamageTier tier in Enum.GetValues(typeof(EnemyDamageTier)))
             {
@@ -78,7 +86,7 @@ namespace TrickalFanGame.Editor
         private static void VerifyChaserScaling()
         {
             VerifyPrefabScaling(ChaserPrefabPath, "Chaser",
-                prefab => prefab.GetComponent<ContactDamage>().DamageTier, EnemyDamageTier.Heavy);
+                prefab => prefab.GetComponent<ContactDamage>().DamageTier, EnemyDamageTier.Heavy, false);
 
             GameObject prefab = LoadPrefab(ChaserPrefabPath);
             for (int floor = 1; floor <= 3; floor++)
@@ -108,33 +116,36 @@ namespace TrickalFanGame.Editor
         {
             VerifyPrefabScaling(RangedPrefabPath, "Ranged",
                 prefab => prefab.GetComponent<RangedEnemyController>().ProjectileDamageTier,
-                EnemyDamageTier.Heavy);
+                EnemyDamageTier.Heavy, false);
         }
 
         private static void VerifyChargingScaling()
         {
             VerifyPrefabScaling(ChargingPrefabPath, "Charging",
                 prefab => prefab.GetComponent<ChargingEnemyController>().ChargeDamageTier,
-                EnemyDamageTier.Heavy);
+                EnemyDamageTier.Heavy, false);
         }
 
         private static void VerifyBossScaling()
         {
             VerifyPrefabScaling(BossPrefabPath, "Boss",
                 prefab => prefab.GetComponent<BossController>().ProjectileDamageTier,
-                EnemyDamageTier.Medium);
+                EnemyDamageTier.Medium, true);
         }
 
         private static void VerifyPrefabScaling(
             string path,
             string label,
             Func<GameObject, EnemyDamageTier> readTier,
-            EnemyDamageTier expectedTier)
+            EnemyDamageTier expectedTier,
+            bool isBoss)
         {
             GameObject prefab = LoadPrefab(path);
             float baseHealth = prefab.GetComponent<Health>().MaxHealth;
             Assert(readTier(prefab) == expectedTier,
                 $"{label} must use the {expectedTier} damage tier, got {readTier(prefab)}.");
+            Assert(FloorDifficultyScaler.IsBoss(prefab) == isBoss,
+                $"{label} must {(isBoss ? "" : "not ")}be treated as a boss for health scaling.");
 
             for (int floor = 1; floor <= 3; floor++)
             {
@@ -143,7 +154,8 @@ namespace TrickalFanGame.Editor
                 {
                     FloorDifficultyScaler.ApplyScaling(instance, floor);
                     Health health = instance.GetComponent<Health>();
-                    float expectedHealth = baseHealth * FloorDifficultyScaler.GetHealthMultiplier(floor);
+                    float expectedHealth = baseHealth *
+                                           (isBoss ? FloorDifficultyScaler.GetBossHealthMultiplier(floor) : 1.0f);
 
                     Assert(Mathf.Approximately(health.MaxHealth, expectedHealth),
                         $"{label} floor {floor} health must be {expectedHealth}, got {health.MaxHealth}.");

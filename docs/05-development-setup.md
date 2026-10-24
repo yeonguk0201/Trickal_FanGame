@@ -1106,7 +1106,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   자동 검증 메뉴는 `Trickal Fan Game > Week 23 > Verify Enemy-6 Jyubi`, 배치는 Unity `-batchmode -nographics -quit
   -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week23Enemy6Verification.SetupAndVerifyBatch -logFile
   <로그 경로>`다. Setup 2회 GUID, Prefab 구성과 누락 스크립트 없음, 플레이어 기본 속도보다 빠르고 1.25배 이하인 속도,
-  1·3층에서 정확히 반 칸 피해와 접촉 쿨다운, 반 칸 옵션이 없는 접촉 피해의 1칸 유지, 1~3층 체력 배율에서 기본 공격 한
+  1·3층에서 정확히 반 칸 피해와 접촉 쿨다운, 반 칸 옵션이 없는 접촉 피해의 1칸 유지, 1~3층 모두 기본 공격 한
   대 처치, 구덩이·낮은 장애물 무시와 나무·벽·플레이어 충돌 유지, 장애물 너머 대상으로의 직선 이동, 방의 추가 적 등록과
   처치 시 방 상태 불변, 통과 중인 플레이어에 겹친 쥬비의 튕김·멈춤·재추적, 플레이어 몸 안의 적이 탄에 맞고 뒤쪽 적은
   맞지 않음을 검사한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Obstacle-6과 그 회귀 전체, 하트 체력
@@ -1190,8 +1190,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   <로그 경로>`다. Setup 2회 GUID와 컴포넌트 미중복, 두 Prefab의 수치·원화·0.7배 크기, 위협 4·roster·근접 압박 지점,
   `pressure`에만 50/25/15/10으로 들어가고 10~16을 계산·선언하는지, 512개 seed의 선택·재현·배치 지점과 런타임 Prefab 연결,
   공격·폭탄·중독·함정·원인 불명 사망 모두 좌우 0.5에 분열체 2마리를 한 번만 만들고 분열체가 본체의 층·대상을 이어받아
-  0.3초 동안 행동하지 않으며 다시 분열하지 않는지, 개발용 웨이브 처치 뒤에도 분열체 4마리가 웨이브를 붙잡고 층 체력 배율을
-  받으며 마지막 분열체가 죽어야 다음 웨이브와 방 클리어가 오는지 검사한다. 성공 로그는 `Enemy-9 verification passed`로
+  0.3초 동안 행동하지 않으며 다시 분열하지 않는지, 개발용 웨이브 처치 뒤에도 분열체 4마리가 웨이브를 붙잡고(Curve-0부터 층 체력
+  배율 없음) 마지막 분열체가 죽어야 다음 웨이브와 방 클리어가 오는지 검사한다. 성공 로그는 `Enemy-9 verification passed`로
   시작한다. 관련 회귀는 `VerifyWithRegressionsBatch`(Enemy-8, Enemy-7, Spawn-2, Difficulty-1, Encounter-4, 요정왕국 원화의
   `Verify`)다. 2026-10-14 단독 배치가 종료 코드 0으로 통과했다(512개 seed의 전투방 11,709개 중 781개에 818마리, 층별
   221/211/349방). 같은 날 회귀 묶음과 개발 패널 검증(`Week20DevPanelVerification.Verify`)도
@@ -1364,6 +1364,14 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   시작). 수동 확인: Game Scene Play → `F1` → `— Elif —`에서 `+5 Elif (dev)`. `— Shop —`의 `Go to shop door`로 상점에 들어가 `Shop here: first item → elif price`로
   엘리프 가격 칸을 만들고 시스트 화면에서 `N 엘리프` 가격·구매, `Q`(또는 `투자 [Q]`)로 투자 목록을 열어 상품 칸 추가·상점
   할인을 사고 `Q`/`Esc`로 돌아와 아랫줄 새 칸과 할인 가격을 본다. `Set upgrade level`의 `Lv0~3`은 이번 Run에만 적용된다.
+
+- Curve-0 체급 곡선(Unity): Setup 없이 런타임 수치만 바꾼다. 일반 적 체력 배율은 모든 층 ×1.0, 보스(`BossController`)만
+  ×1.0/×1.5/×2.0(`FloorDifficultyScaler`), 적 피해표는 1·2층 기본값과 3층 한 단계(`HealthUnits`,
+  [26번 §3.4](./26-seventh-month-plan.md)). 자동 검증 메뉴는 `Trickal Fan Game > Week 27 > Verify Curve-0 Difficulty
+  Curve`, 배치는 `-executeMethod TrickalFanGame.Editor.Week27Curve0Verification.Verify`, 회귀는
+  `VerifyWithRegressionsBatch`(HP-1 회귀 묶음, Enemy-6, Enemy-9, Tune-1. 실패가 있어도 끝까지 돌고 한 번에 보고). 2026-10-24
+  회귀 묶음에서 `Week7RoomGraph`·`Week16Reward2` 2개만 기존 실패로 남았고, 같은 날 사용자 Play 확인을 마쳤다. 수동 확인: Game Scene Play → `F1` 개발 패널로 3층까지
+  이동해 일반 적이 1층과 같은 횟수에 죽고 보스만 단단해지는지, 3층 피격 피해가 표와 맞는지 본다.
 
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
