@@ -98,7 +98,7 @@
 | Grid-1     | Room Profile 이동 영역을 실제 벽과 일치           | Hitbox-2, Obstacle-2, Room Layout 계약 | 8개 Room Profile의 이동·전투 영역 = 걸을 수 있는 바닥(`WalkableFloor`), 방 Prefab 전투 트리거 동기화, 벽·장애물·구덩이 사이 0 초과 1칸 미만 틈(대각선 포함) 실패, 도달 검사의 격자 정렬 의존 제거 | 완료(2026-10-20, `Week27Grid1Verification.SetupAndVerifyBatch`·`VerifyWithRegressionsBatch`, `RoomLayoutImporterVerification.ImportAndVerifyBatch` 통과와 사용자 Play 확인). basic-diamond-cover 바깥 장애물 2개를 벽에 붙이고 wide-fire-lane 4번 SpawnPoint를 한 칸 올림 |
 | Grid-0     | 벽 그림과 충돌 사이 여백 정리                     | Grid-1                       | 벽에 닿은 장애물·구덩이 그림만 벽 쪽으로 늘려 가짜 틈을 가림(충돌·바닥·격자 불변)                                                                                     | 취소(2026-10-20, 사용자 결정). 구현·자동 검증 뒤 Play에서 벽 쪽 장애물만 세로로 늘어나 같은 장애물끼리 모양이 달라 어색했고, 원래 여백(최대 0.6칸)도 지나갈 수 없는 곳으로 읽혀 되돌림. 아래 §3.3 |
 | Offline-0  | 서버 없이 신규 등록·플레이                        | Elif-3                       | 서버 등록이 실패해도 로컬 프로필로 바로 시작하고, 서버가 살아나면 등록과 쌓인 Run 저장을 이어 함. 닉네임 충돌·로컬 ID와 서버 ID 연결 규칙은 짧은 설계 메모로 먼저 정함. 서버 유지가 끊겨도 기존·신규 사용자 모두 플레이 가능 | 예정(조건부, 2026-10-22 사용자 결정. 선행 작업인 'Run 즉시 시작·성장 정보 나중 반영'은 Elif-3에서 완료, 27번 §13) |
-| Elif-0     | 영구 엘리프 계약 설계 메모                        | D8, §5                       | 획득 확률과 Run당 기대량, 서버 저장과 재전송 중복 방지, 사용처와 환율, 계층별 영향을 문서화. Backend·Prisma 계약은 만들지 않음                                         | 완료(2026-10-21, [27번](./27-permanent-elif-contract.md) 문서화와 사용자 결정. 코드 변경 없음). 구현은 조건부 조각 Elif-1~4(27번 §9). **Elif-1 완료(2026-10-22, Backend Jest·build, 27번 §11)**. **Elif-2 완료(2026-10-22, Unity `Week27Elif2Verification.VerifyWithRegressionsBatch` 통과, 27번 §12. 사용자 Play 확인 완료)**. **Elif-3 완료(2026-10-22, `Week27Elif3Verification.VerifyWithRegressionsBatch` 통과, 27번 §13. 개발 패널 Play 확인 완료, 실제 서버 확인 전)** |
+| Elif-0     | 영구 엘리프 계약 설계 메모                        | D8, §5                       | 획득 확률과 Run당 기대량, 서버 저장과 재전송 중복 방지, 사용처와 환율, 계층별 영향을 문서화. Backend·Prisma 계약은 만들지 않음                                         | 완료(2026-10-21, [27번](./27-permanent-elif-contract.md) 문서화와 사용자 결정. 코드 변경 없음). 구현은 조건부 조각 Elif-1~4(27번 §9). **Elif-1 완료(2026-10-22, Backend Jest·build, 27번 §11)**. **Elif-2 완료(2026-10-22, Unity `Week27Elif2Verification.VerifyWithRegressionsBatch` 통과, 27번 §12. 사용자 Play 확인 완료)**. **Elif-3 완료(2026-10-22, `Week27Elif3Verification.VerifyWithRegressionsBatch` 통과, 27번 §13. 사용자 Play 확인과 실제 서버 수동 확인 완료)** |
 
 Motion-0은 대상마다 독립이라 조각을 나눠 진행해도 된다. 적의 움직임은 Enemy-7~9 직후에 붙이면 화면 확인이 쉽다.
 
@@ -169,6 +169,33 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
 되돌렸다(사용자 결정, 2026-10-20). 바닥을 한 칸 늘리는 안(A)과 방 그림 배율을 조정하는 안(B)도 진행하지 않는다.
 작업 중 발견한 `FairyKingdomArtworkCatalog.Fit` 캐시 문제(Scene 전환으로 파괴된 스프라이트를 돌려줘 장애물 변종 그림이
 바뀌지 않음)는 Grid-0과 별개로 고쳤다.
+
+### 3.4 체급 곡선(Curve-0, 2026-10-16 플레이 피드백)
+
+층마다 적이 너무 강해져 아이템 수급으로 따라잡기 어렵다는 피드백에 따라, 숫자를 부풀리지 않고 적 구성과 패턴으로 난이도를
+올리기로 했다(사용자 결정, 2026-10-16). 그 첫 조각으로 수치만 바꿨다. 후속 조각(Curve-1 층별 적 구성, Enemy-10~13 신규 적
+4종, Variant-0~2 엘리트·챔피언, Pool-0 아이템 풀, Drop-0·1 드롭률, Depth-0 깊이 분리)의 사양과 순서는
+[28번](./28-difficulty-enemies-drops-plan.md) §7~§9에 있다. Curve-1~Variant-2와 Drop-0·1은 Play-2 기록 전에 끝낸다.
+
+| 항목 | 이전 | Curve-0 |
+| ---- | ---- | ------- |
+| 일반 적 체력 배율 | 1층 ×1.0, 2층 ×1.5, 3층 ×2.0 | 모든 층 ×1.0(분열체·추가 적 포함) |
+| 보스 체력 배율 | ×1.0 / ×1.5 / ×2.0 | 유지 |
+| 약 피해(칸) | 1 / 1 / 1.5 | 1 / 1 / 1 |
+| 중 피해 | 1.5 / 2 / 2.5 | 1.5 / 1.5 / 2 |
+| 강 피해 | 2 / 3 / 3.5 | 2 / 2 / 3 |
+| 치명 피해 | 3 / 3.5 / 4 | 3 / 3 / 3.5 |
+
+- 보스 판정은 `BossController`가 붙은 적이다(`FloorDifficultyScaler.IsBoss`).
+- 보스 배율 유지와 3층 "한 단계"를 이전 2층 값으로 둔 것은 초안의 후보값을 구현 기본값으로 고른 것이다. 바꾸려면 알려 달라.
+- 같은 seed의 결과는 바뀌지 않지만 전투 난이도가 바뀌므로 Balance-0·Play-2 기록은 이 변경 뒤의 값을 기준선으로 쓴다.
+- 검증: `Week27Curve0Verification.VerifyWithRegressionsBatch`(2026-10-24). Curve-0·HP-1·Enemy-6·Enemy-9·Tune-1과 HP-1 회귀
+  25개 중 23개 통과. 실패 2개(`Week7RoomGraph` 방 이동 위치, `Week16Reward2` 권능 카드 표시)는 바뀐 코드를 쓰지 않는 기존
+  실패다. 사용자 Play 확인 완료(2026-10-24, 일반 적은 층과 무관하게 같은 횟수에 죽고 보스만 단단함).
+- Curve-1(2026-10-25): 기존 적을 층별로 나눠 등장시키고(새 적 ×1.5, 두 층 아래 ×0.5), `crossfire`·`elite-pair`는 2층부터,
+  산사모-순수는 3발·현재 위치 조준. Encounter 콘텐츠 버전 16. 사양과 결과는 [28번](./28-difficulty-enemies-drops-plan.md)
+  §9·§9.1. 검증: `Week27Curve1Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(11개) 통과(2026-10-25).
+  사용자 Play 확인 완료(2026-10-25, 층별 등장 구성과 산사모-순수 3발·현재 위치 조준).
 
 ## 4. 확정 사양
 

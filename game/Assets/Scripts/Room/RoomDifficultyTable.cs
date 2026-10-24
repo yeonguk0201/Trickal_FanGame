@@ -355,8 +355,13 @@ namespace TrickalFanGame.Room
             return weights;
         }
 
+        // Every candidate regardless of floor.
         public bool TryComputeThreatRange(EncounterDefinition definition, out int minimum, out int maximum,
-            out string error)
+            out string error) => TryComputeThreatRange(definition, 0, out minimum, out maximum, out error);
+
+        // A positive floorNumber counts only the candidates introduced by that floor (Curve-1).
+        public bool TryComputeThreatRange(EncounterDefinition definition, int floorNumber, out int minimum,
+            out int maximum, out string error)
         {
             minimum = 0;
             maximum = 0;
@@ -374,6 +379,8 @@ namespace TrickalFanGame.Room
                     int ruleMaximum = 0;
                     foreach (EncounterEnemyCandidate candidate in rule.Candidates)
                     {
+                        if (floorNumber > 0 && !EncounterEnemyFloorPool.IsAvailable(candidate.EnemyRole, floorNumber))
+                            continue;
                         if (!TryGetThreat(candidate.EnemyRole, out int score))
                         {
                             error = $"Encounter '{definition.EncounterId}' uses role '{candidate.EnemyRole}' " +
@@ -383,6 +390,13 @@ namespace TrickalFanGame.Room
 
                         ruleMinimum = Math.Min(ruleMinimum, score);
                         ruleMaximum = Math.Max(ruleMaximum, score);
+                    }
+
+                    if (ruleMaximum == 0)
+                    {
+                        error = $"Encounter '{definition.EncounterId}' wave {wave.WaveNumber} has a spawn rule " +
+                                $"with no enemy introduced by floor {floorNumber}.";
+                        return false;
                     }
 
                     minimum += ruleMinimum * rule.Count;

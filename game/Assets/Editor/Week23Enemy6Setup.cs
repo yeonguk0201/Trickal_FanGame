@@ -15,7 +15,7 @@ namespace TrickalFanGame.Editor
     {
         public const string PrefabPath = "Assets/Prefabs/JyubiEnemy.prefab";
         public const string PrefabName = "JyubiEnemy";
-        // Dies to any player hit, also after the floor health multiplier (x2 on floor 3).
+        // Dies to any player hit on every floor (Curve-0: normal enemies keep their base health).
         public const float MaxHealth = 1f;
         // The player's base speed is 5. 5.5 at first; slowed a little after a Play check (user decision, 2026-10-14)
         // while staying faster than the player.

@@ -103,7 +103,8 @@ namespace TrickalFanGame.Editor
                 ConfigureVerificationEncounter(pointMismatch, "spawn-role-point-mismatch",
                     source.Profile, new EncounterSpawnRule(EncounterEnemyRole.Charging, 1,
                         RoomTemplateDefinition.SpawnPointId(0), null));
-                Assert(!pointMismatch.TryValidateFor(rangedOnly, 1, out error) &&
+                // Curve-1: the charger enters on floor 2.
+                Assert(!pointMismatch.TryValidateFor(rangedOnly, 2, out error) &&
                        error.Contains("ChargeLane", StringComparison.Ordinal),
                     $"An explicit charger point must reject a non-charge SpawnPoint. {error}");
             }
@@ -118,7 +119,7 @@ namespace TrickalFanGame.Editor
         private static void ConfigureVerificationEncounter(EncounterDefinition definition, string id,
             RoomProfile profile, EncounterSpawnRule rule)
         {
-            definition.Configure(id, new[] { profile }, 1, 3,
+            definition.Configure(id, new[] { profile }, EncounterEnemyFloorPool.IntroductionFloor(rule.EnemyRole), 3,
                 Week14Encounter1Setup.MinimumPlayerDistance,
                 Week14Encounter1Setup.MinimumDoorDistance,
                 new[]

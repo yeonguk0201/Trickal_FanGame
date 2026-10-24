@@ -103,10 +103,12 @@ namespace TrickalFanGame.Editor
         {
             Assert(HealthUnits.UnitsPerHeart == 2 && HealthUnits.MinimumEnemyDamageUnits == 2,
                 "One heart must be two units and the minimum enemy damage must be one heart.");
+            // Curve-0: floors 1-2 share the base row and floor 3 steps up once.
             Assert(HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 1) == 2 &&
-                   HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 3) == 3 &&
-                   HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Medium, 2) == 4 &&
-                   HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Heavy, 3) == 7 &&
+                   HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 3) == 2 &&
+                   HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Medium, 2) == 3 &&
+                   HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Medium, 3) == 4 &&
+                   HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Heavy, 3) == 6 &&
                    HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Critical, 1) == 6,
                 "Tier/floor units do not match the confirmed heart table.");
             Assert(HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 0) ==
@@ -171,14 +173,14 @@ namespace TrickalFanGame.Editor
             {
                 EnemyFloorLevel.Apply(enemy, 3);
                 health.TakeDamage(HealthUnits.CreateEnemyDamageContext(
-                    enemy, DamageSourceType.EnemyContact, EnemyDamageTier.Light));
-                Assert(Mathf.Approximately(health.CurrentHealth, 7f),
-                    "A floor 3 light hit must remove 1.5 hearts (3 units).");
+                    enemy, DamageSourceType.EnemyContact, EnemyDamageTier.Medium));
+                Assert(Mathf.Approximately(health.CurrentHealth, 6f),
+                    "A floor 3 medium hit must remove 2 hearts (4 units).");
 
                 EnemyFloorLevel.Apply(enemy, 1);
                 health.TakeDamage(HealthUnits.CreateEnemyDamageContext(
                     enemy, DamageSourceType.EnemyMelee, EnemyDamageTier.Medium));
-                Assert(Mathf.Approximately(health.CurrentHealth, 4f),
+                Assert(Mathf.Approximately(health.CurrentHealth, 3f),
                     "A floor 1 medium hit must remove 1.5 hearts (3 units).");
 
                 Assert(EnemyFloorLevel.Resolve(null) == 1,

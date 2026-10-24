@@ -1,11 +1,16 @@
 using TrickalFanGame.Combat;
+using TrickalFanGame.Enemy;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
 {
     public static class FloorDifficultyScaler
     {
-        public static float GetHealthMultiplier(int floorNumber)
+        // Curve-0 (사용자 결정, 2026-10-16): normal enemies keep their base health on every floor. Difficulty grows
+        // from the enemy mix and patterns instead; only bosses keep the depth multiplier.
+        public const float NormalEnemyHealthMultiplier = 1.0f;
+
+        public static float GetBossHealthMultiplier(int floorNumber)
         {
             return floorNumber switch
             {
@@ -16,6 +21,16 @@ namespace TrickalFanGame.Room
             };
         }
 
+        public static float GetHealthMultiplier(GameObject enemy, int floorNumber)
+        {
+            return IsBoss(enemy) ? GetBossHealthMultiplier(floorNumber) : NormalEnemyHealthMultiplier;
+        }
+
+        public static bool IsBoss(GameObject enemy)
+        {
+            return enemy != null && enemy.GetComponent<BossController>() != null;
+        }
+
         public static void ApplyScaling(GameObject enemy, int floorNumber)
         {
             if (enemy == null || floorNumber < 1)
@@ -23,7 +38,7 @@ namespace TrickalFanGame.Room
                 return;
             }
 
-            ApplyHealthScaling(enemy, GetHealthMultiplier(floorNumber));
+            ApplyHealthScaling(enemy, GetHealthMultiplier(enemy, floorNumber));
             // Player damage is resolved from each attack's EnemyDamageTier and this floor at hit time.
             EnemyFloorLevel.Apply(enemy, floorNumber);
         }

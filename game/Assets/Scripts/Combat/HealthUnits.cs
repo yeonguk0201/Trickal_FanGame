@@ -15,12 +15,14 @@ namespace TrickalFanGame.Combat
 
         private const float RoundingTolerance = 0.0001f;
 
+        // Curve-0 (사용자 결정, 2026-10-16): damage no longer rises every floor. Floors 1-2 use the base row and
+        // floor 3 steps up once, to the former floor 2 values.
         private static readonly int[,] EnemyDamageUnitsByFloor =
         {
-            { 2, 2, 3 },
-            { 3, 4, 5 },
-            { 4, 6, 7 },
-            { 6, 7, 8 },
+            { 2, 2, 2 },
+            { 3, 3, 4 },
+            { 4, 4, 6 },
+            { 6, 6, 7 },
         };
 
         public static int GetEnemyDamageUnits(EnemyDamageTier tier, int floorNumber)
