@@ -1173,7 +1173,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   수동 확인: (1) Game Scene Play → `F1` 패널 `— Room —`의 `Spawn lively fairy (4-way shots)`로 플레이어 위 3칸에 부른다.
   1.2초쯤 걷다가 멈추고 상하좌우로 경고 화살표가 0.4초 보인 뒤 빵 4개를 쏘고, 빵은 6칸쯤 날아가 사라지며, 맞으면 하트가
   1칸 준다. 0.6초 쉰 뒤 다시 걷고, 걷는 방향은 대체로 플레이어 쪽이다. 예고 중에 때려 밀어내면 그 발사는 나가지 않는다.
-  (2) `— Seed —`의 `Find lively fairy F1` → `Restart Run with this seed`로 이 적이 나오는 방에 들어가 다 잡으면 방이
+  (2) `— Seed —`의 `Find lively fairy F2` → `Restart Run with this seed` 뒤 2층의 이 적이 나오는 방에 들어가 다 잡으면 방이
   클리어되는지 본다.
 
 - Enemy-9 누루링-요정전사: 메뉴 `Trickal Fan Game > Week 25 > Setup Enemy-9 Nururing Fairy Warrior`가 추적형
@@ -1199,8 +1199,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   수동 확인: (1) Game Scene Play → `F1` 패널 `— Room —`의 `Spawn nururing (splits on death)`로 플레이어 오른쪽 2칸에
   부른다. 노란 푸딩 누루링이 다가와 런지하고, 죽이면 그 자리 좌우에 더 작은 누루링 2마리가 생겨 잠깐(0.3초) 멈췄다가 더
   빠르게 쫓아오며, 닿으면 하트 1칸을 잃는다. 작은 누루링을 죽여도 더 갈라지지 않는다. 패널의 `Nururing bodies N, splits M`
-  표시로 수를 본다. 폭탄으로 죽여도 갈라지는지 본다. (2) `— Seed —`의 `Find nururing F1` → `Restart Run with this seed`로
-  이 적이 나오는 방에 들어가, 본체만 잡은 상태에서는 문이 잠겨 있고 분열체까지 다 잡아야 다음 웨이브·방 클리어가 되는지 본다.
+  표시로 수를 본다. 폭탄으로 죽여도 갈라지는지 본다. (2) `— Seed —`의 `Find nururing F3` → `Restart Run with this seed` 뒤
+  3층의 이 적이 나오는 방에 들어가, 본체만 잡은 상태에서는 문이 잠겨 있고 분열체까지 다 잡아야 다음 웨이브·방 클리어가 되는지 본다.
 
 - Passive-1 넉백 교체·칸나의 대포·비비의 콧물: 메뉴 `Trickal Fan Game > Week 23 > Setup Passive-1 Cannon and Snot`이
   `Assets/Items/`에 `artifact-kanna-cannon`(Rare, 최대 2스택, 효과 43 `ProjectileSizePercent` `magnitude` 0.5)과
@@ -1400,6 +1400,9 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   터뜨려 적이 피해를 받고 장애물이 부서지는지 본다. 같은 섹션의 `Self-destruct alive N, warning M` 표시로 살아 있는 수와 예고
   중인 수를 확인한다. 실제 방에서 보려면 `— Seed —`의 `Find self-destruct F2`로 2층에 자폭형 방이 있는 seed를 찾아
   `Restart Run with this seed` 뒤 2층으로 간다.
+- 개발 패널 적 seed 찾기(2026-10-28): `— Seed —`의 `Find lively fairy`·`Find nururing`·`Find self-destruct`는 그 적의 등장 층
+  (`EncounterEnemyFloorPool`)을 찾고 버튼 이름에 층을 붙인다(F2·F3·F2). Curve-1 뒤 1층만 찾던 앞의 두 버튼이 seed를 찾지 못하던
+  문제를 고쳤다. 상태 줄은 `Seed N has a floor-K ...`다.
 
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
