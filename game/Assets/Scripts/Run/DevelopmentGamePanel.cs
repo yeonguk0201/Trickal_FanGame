@@ -148,18 +148,11 @@ namespace TrickalFanGame.Run
                 FindSeed(assembler, node => node.EncounterId != null &&
                                             node.EncounterId.EndsWith("-jyubi-swarm-v1", System.StringComparison.Ordinal),
                     "Jyubi swarm room");
-            // Enemy-8: 저혈당 요정-활발 is one of three melee candidates in pressure and swarm rooms.
-            if (GUILayout.Button("Find lively fairy F1"))
-                FindSeed(assembler, node => node.ResolvedEncounterWaves != null &&
-                                            node.ResolvedEncounterWaves.Any(wave => wave.Any(spawn =>
-                                                spawn.Role == EncounterEnemyRole.FourWayShooter)),
-                    "Lively fairy room");
-            // Enemy-9: 누루링-요정전사 is one of four melee candidates in pressure rooms.
-            if (GUILayout.Button("Find nururing F1"))
-                FindSeed(assembler, node => node.ResolvedEncounterWaves != null &&
-                                            node.ResolvedEncounterWaves.Any(wave => wave.Any(spawn =>
-                                                spawn.Role == EncounterEnemyRole.SplittingChaser)),
-                    "Nururing room");
+            // Enemy-8/9/10: each searches the floor its enemy first appears on (Curve-1 EncounterEnemyFloorPool), so
+            // a button never looks at a floor the enemy cannot reach.
+            FindEnemySeedButton(assembler, EncounterEnemyRole.FourWayShooter, "lively fairy", "Lively fairy room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.SplittingChaser, "nururing", "Nururing room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.SelfDestruct, "self-destruct", "Self-destruct room");
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -910,8 +903,23 @@ namespace TrickalFanGame.Run
                                view.GetComponent<TrickalFanGame.Enemy.EnemySplitOnDeath>() == null &&
                                view.TryGetComponent(out Health splitHealth) && !splitHealth.IsDead);
             GUILayout.Label($"Nururing bodies {nururingBodies}, splits {nururingSplits}");
+
+            // Enemy-10: 자폭형 three tiles to the right of the player. It stops within 1.2 and warns one second
+            // before blowing up; killing it any other way also leaves the blast.
+            if (AssistedButton("Spawn self-destruct (blows up near you)") && controller != null && player != null)
+            {
+                GameObject bomber = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/SelfDestructFairy.prefab");
+                status = controller.SpawnExtraEnemy(bomber, player.transform.position + Vector3.right * 3f) != null
+                    ? "Spawned a self-destruct enemy to the right of the player."
+                    : "Self-destruct spawn failed.";
+            }
+            TrickalFanGame.Enemy.SelfDestructEnemy[] bombers =
+                FindObjectsByType<TrickalFanGame.Enemy.SelfDestructEnemy>(FindObjectsSortMode.None);
+            GUILayout.Label($"Self-destruct alive {bombers.Count(bomber => bomber.TryGetComponent(out Health bomberHealth) && !bomberHealth.IsDead)}, " +
+                            $"warning {bombers.Count(bomber => bomber.IsPrimed)}");
 #else
-            GUILayout.Label("Crumb minion, lively fairy and nururing spawns are editor-only.");
+            GUILayout.Label("Crumb minion, lively fairy, nururing and self-destruct spawns are editor-only.");
 #endif
         }
 
@@ -1085,7 +1093,18 @@ namespace TrickalFanGame.Run
                 Teleport(assembler, shop.DirectionalConnections[0].DestinationRoomId);
         }
 
-        private void FindSeed(RoomGraphAssembler assembler, System.Func<GeneratedRoomNode, bool> match, string label)
+        private void FindEnemySeedButton(RoomGraphAssembler assembler, EncounterEnemyRole role, string buttonName,
+            string label)
+        {
+            int floor = EncounterEnemyFloorPool.IntroductionFloor(role);
+            if (!GUILayout.Button($"Find {buttonName} F{floor}")) return;
+            FindSeed(assembler, node => node.ResolvedEncounterWaves != null &&
+                                        node.ResolvedEncounterWaves.Any(wave => wave.Any(spawn => spawn.Role == role)),
+                label, floor);
+        }
+
+        private void FindSeed(RoomGraphAssembler assembler, System.Func<GeneratedRoomNode, bool> match, string label,
+            int floorNumber = 1)
         {
             if (assembler.Generator == null) return;
             int start = int.TryParse(seedText, out int typed) ? typed + 1 :
@@ -1094,9 +1113,9 @@ namespace TrickalFanGame.Run
             {
                 int seed = unchecked(start + offset);
                 if (!assembler.Generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out _)) continue;
-                if (graph.FindFloor(1)?.Nodes.Any(match) != true) continue;
+                if (graph.FindFloor(floorNumber)?.Nodes.Any(match) != true) continue;
                 seedText = seed.ToString();
-                status = $"Seed {seed} has a floor-1 {label}.";
+                status = $"Seed {seed} has a floor-{floorNumber} {label}.";
                 return;
             }
 

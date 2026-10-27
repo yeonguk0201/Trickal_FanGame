@@ -24,6 +24,7 @@ namespace TrickalFanGame.Room
             EncounterEnemyRole.Ranged => 2,          // 산사모-순수
             EncounterEnemyRole.Charging => 2,        // 저혈당 요정-순수(돌진)
             EncounterEnemyRole.FourWayShooter => 2,  // 저혈당 요정-활발
+            EncounterEnemyRole.SelfDestruct => 2,    // 자폭형 (Enemy-10)
             EncounterEnemyRole.SplittingChaser => 3, // 누루링-요정전사
             EncounterEnemyRole.Boss => 1,
             _ => throw new ArgumentOutOfRangeException(nameof(role), role,

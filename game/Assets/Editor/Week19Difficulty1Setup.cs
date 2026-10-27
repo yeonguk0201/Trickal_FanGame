@@ -34,6 +34,8 @@ namespace TrickalFanGame.Editor
             new(EncounterEnemyRole.FourWayShooter, 3),
             // Enemy-9: 누루링-요정전사. Its two splits are counted in this score.
             new(EncounterEnemyRole.SplittingChaser, 4),
+            // Enemy-10: 자폭형.
+            new(EncounterEnemyRole.SelfDestruct, 3),
         };
 
         public static readonly RoomDifficultyTierBand[] TierBands =

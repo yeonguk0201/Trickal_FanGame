@@ -1173,7 +1173,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   수동 확인: (1) Game Scene Play → `F1` 패널 `— Room —`의 `Spawn lively fairy (4-way shots)`로 플레이어 위 3칸에 부른다.
   1.2초쯤 걷다가 멈추고 상하좌우로 경고 화살표가 0.4초 보인 뒤 빵 4개를 쏘고, 빵은 6칸쯤 날아가 사라지며, 맞으면 하트가
   1칸 준다. 0.6초 쉰 뒤 다시 걷고, 걷는 방향은 대체로 플레이어 쪽이다. 예고 중에 때려 밀어내면 그 발사는 나가지 않는다.
-  (2) `— Seed —`의 `Find lively fairy F1` → `Restart Run with this seed`로 이 적이 나오는 방에 들어가 다 잡으면 방이
+  (2) `— Seed —`의 `Find lively fairy F2` → `Restart Run with this seed` 뒤 2층의 이 적이 나오는 방에 들어가 다 잡으면 방이
   클리어되는지 본다.
 
 - Enemy-9 누루링-요정전사: 메뉴 `Trickal Fan Game > Week 25 > Setup Enemy-9 Nururing Fairy Warrior`가 추적형
@@ -1199,8 +1199,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   수동 확인: (1) Game Scene Play → `F1` 패널 `— Room —`의 `Spawn nururing (splits on death)`로 플레이어 오른쪽 2칸에
   부른다. 노란 푸딩 누루링이 다가와 런지하고, 죽이면 그 자리 좌우에 더 작은 누루링 2마리가 생겨 잠깐(0.3초) 멈췄다가 더
   빠르게 쫓아오며, 닿으면 하트 1칸을 잃는다. 작은 누루링을 죽여도 더 갈라지지 않는다. 패널의 `Nururing bodies N, splits M`
-  표시로 수를 본다. 폭탄으로 죽여도 갈라지는지 본다. (2) `— Seed —`의 `Find nururing F1` → `Restart Run with this seed`로
-  이 적이 나오는 방에 들어가, 본체만 잡은 상태에서는 문이 잠겨 있고 분열체까지 다 잡아야 다음 웨이브·방 클리어가 되는지 본다.
+  표시로 수를 본다. 폭탄으로 죽여도 갈라지는지 본다. (2) `— Seed —`의 `Find nururing F3` → `Restart Run with this seed` 뒤
+  3층의 이 적이 나오는 방에 들어가, 본체만 잡은 상태에서는 문이 잠겨 있고 분열체까지 다 잡아야 다음 웨이브·방 클리어가 되는지 본다.
 
 - Passive-1 넉백 교체·칸나의 대포·비비의 콧물: 메뉴 `Trickal Fan Game > Week 23 > Setup Passive-1 Cannon and Snot`이
   `Assets/Items/`에 `artifact-kanna-cannon`(Rare, 최대 2스택, 효과 43 `ProjectileSizePercent` `magnitude` 0.5)과
@@ -1383,6 +1383,26 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   재생성 결정성, 산사모-순수 3발·현재 위치 조준. 2026-10-25 모두 통과했고 같은 날 사용자 Play 확인을 마쳤다. 수동 확인: Game Scene Play → `F1` 개발 패널로
   층을 옮기며 1층에 산사모-순수·돌진·저혈당-활발·누루링이 없고, 2층에 앞의 셋이, 3층에 누루링이 나오는지, 산사모-순수가
   항상 3발을 현재 위치로 쏘는지 본다.
+
+- Enemy-10 자폭형(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Enemy-10 Self Destruct`가 `SelfDestructFairy` Prefab(추적형
+  복사본, 임시 그림 `crumb-minion-chocolate`), 위협 점수 3, roster의 `SelfDestruct` 역할, pressure·swarm Encounter 10개의 근접
+  후보(가중치 15)와 Encounter 콘텐츠 버전 17을 멱등 구성한다. 사양은 [28번 §8.1](./28-difficulty-enemies-drops-plan.md).
+  배치는 `-executeMethod TrickalFanGame.Editor.Week27Enemy10Verification.SetupAndVerifyBatch`(Setup 2회 GUID·그림 보존 포함),
+  단독 검증 `Verify`, 회귀 `VerifyWithRegressionsBatch`(Curve-1, Enemy-7·8·9, 쫄따구 폭발, Spawn-1·2, Difficulty-1, Encounter-4,
+  Floor-1, 요정왕국 그림, 개발 패널. 실패가 있어도 끝까지 돌고 한 번에 보고). 검사: Prefab 수치와 근접·접촉 피해 없음, 쫄따구
+  폭발 값 유지, 카탈로그 가중치·위협 범위, 512 seed에서 2~3층·pressure/swarm·근접 압박 지점에만 배치와 재생성 결정성, 런타임
+  Prefab 연결, 감지 전·3칸 밖·생성 지연 중 미발동, 1.2 안 1초 예고와 이동 정지, 예고 끝 즉시 폭발(플레이어 층별 중 등급,
+  반경 안 적 30 환경 피해, 장애물 파괴, 밖은 무사), 예고 중 사망은 남은 시간 뒤·예고 전 사망은 1초 뒤 폭발, 연쇄 자폭, 방 클리어.
+  2026-10-27 모두 통과했고 2026-10-28 사용자 Play 확인을 마쳤다. 수동 확인: Game Scene Play → `F1` 개발 패널 `— Room —`의
+  `Spawn self-destruct (blows up near you)`로 플레이어 오른쪽 3칸에 소환한다. (1) 다가와 1.2 안에서 멈추고 붉은 원과 붉어지는
+  몸으로 1초 예고한 뒤 터지는지, 원 안이면 하트가 1.5칸(3층 2칸) 줄고 밖이면 안 주는지 본다. (2) 예고 중 기본공격으로 밀거나
+  잡으면 밀린·죽은 자리에서 남은 시간 뒤 터지는지, 멀리서 먼저 잡아도 1초 뒤 터지는지 본다. (3) 옆에 다른 적·장애물을 두고
+  터뜨려 적이 피해를 받고 장애물이 부서지는지 본다. 같은 섹션의 `Self-destruct alive N, warning M` 표시로 살아 있는 수와 예고
+  중인 수를 확인한다. 실제 방에서 보려면 `— Seed —`의 `Find self-destruct F2`로 2층에 자폭형 방이 있는 seed를 찾아
+  `Restart Run with this seed` 뒤 2층으로 간다.
+- 개발 패널 적 seed 찾기(2026-10-28): `— Seed —`의 `Find lively fairy`·`Find nururing`·`Find self-destruct`는 그 적의 등장 층
+  (`EncounterEnemyFloorPool`)을 찾고 버튼 이름에 층을 붙인다(F2·F3·F2). Curve-1 뒤 1층만 찾던 앞의 두 버튼이 seed를 찾지 못하던
+  문제를 고쳤다. 상태 줄은 `Seed N has a floor-K ...`다.
 
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,

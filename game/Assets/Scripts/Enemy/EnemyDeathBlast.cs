@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Frontend;
+using TrickalFanGame.Room;
 using TrickalFanGame.Run;
 using UnityEngine;
 
@@ -10,10 +11,13 @@ namespace TrickalFanGame.Enemy
     // stays where it stopped and turns red inside a marked circle, then it bursts and hurts every player inside
     // once, a fixed amount on every floor. It has no Health and no collider, so enemies, obstacles and room
     // progress ignore it.
+    // Enemy-10 (자폭형): the blast can also hurt other enemies (not player damage, so no kill credit) and break
+    // obstacles, webs, secret walls and chests the way a bomb does.
     [DisallowMultipleComponent]
     public sealed class EnemyDeathBlast : MonoBehaviour
     {
         public const string PlayerLayerName = "Player";
+        public const string EnemyLayerName = "Enemy";
         public const string DeathReason = "ENEMY";
         // The dead enemy's own burst, shown with the explosion instead of at the moment of death.
         public const string BodyBurstArtwork = "effect-crumb-death";
@@ -29,6 +33,7 @@ namespace TrickalFanGame.Enemy
         private static readonly Color TelegraphEndColor = new(1f, 0.2f, 0.1f, 0.6f);
 
         private readonly HashSet<Health> damaged = new();
+        private readonly HashSet<Health> damagedEnemies = new();
         private GameObject source;
         private SpriteRenderer telegraph;
         private float startTime;
@@ -40,9 +45,18 @@ namespace TrickalFanGame.Enemy
         public bool HasExploded { get; private set; }
         public bool HasEnded { get; private set; }
         public int DamagedPlayerCount => damaged.Count;
+        public bool HitsEnemiesAndObstacles { get; private set; }
+        public float EnemyDamage { get; private set; }
+        public int DamagedEnemyCount => damagedEnemies.Count;
+        public int BrokenObstacleCount { get; private set; }
         public SpriteRenderer Telegraph => telegraph;
         // The stopped copy of the dead enemy's picture. Null when the enemy had none.
         public SpriteRenderer Body { get; private set; }
+
+        public static Color TelegraphColor(float progress) =>
+            Color.Lerp(TelegraphStartColor, TelegraphEndColor, Mathf.Clamp01(progress));
+
+        public static Color BodyColor(float progress) => Color.Lerp(Color.white, BodyEndColor, Mathf.Clamp01(progress));
 
         public static EnemyDeathBlast Spawn(Vector3 position, Transform parent, GameObject source,
             SpriteRenderer sourceVisual, float telegraphDuration, float radius, int damageUnits, float currentTime)
@@ -86,6 +100,20 @@ namespace TrickalFanGame.Enemy
             return blast;
         }
 
+        // Enemy-10: a telegraph that began before the enemy died keeps its colour progress from that start.
+        public void ContinueTelegraphFrom(float telegraphStartTime)
+        {
+            if (HasExploded) return;
+            startTime = Mathf.Min(startTime, telegraphStartTime);
+            ApplyTelegraphProgress(Time.time);
+        }
+
+        public void ConfigureEnemyAndObstacleHits(float configuredEnemyDamage)
+        {
+            HitsEnemiesAndObstacles = true;
+            EnemyDamage = Mathf.Max(0f, configuredEnemyDamage);
+        }
+
         private void Update()
         {
             if (Time.timeScale <= 0f) return;
@@ -99,10 +127,7 @@ namespace TrickalFanGame.Enemy
             {
                 if (currentTime < ExplodeAt)
                 {
-                    float progress = Mathf.InverseLerp(startTime, ExplodeAt, currentTime);
-                    if (telegraph != null)
-                        telegraph.color = Color.Lerp(TelegraphStartColor, TelegraphEndColor, progress);
-                    if (Body != null) Body.color = Color.Lerp(Color.white, BodyEndColor, progress);
+                    ApplyTelegraphProgress(currentTime);
                     return;
                 }
 
@@ -115,6 +140,13 @@ namespace TrickalFanGame.Enemy
             HasEnded = true;
             if (Application.isPlaying) Destroy(gameObject);
             else DestroyImmediate(gameObject);
+        }
+
+        private void ApplyTelegraphProgress(float currentTime)
+        {
+            float progress = ExplodeAt > startTime ? Mathf.InverseLerp(startTime, ExplodeAt, currentTime) : 1f;
+            if (telegraph != null) telegraph.color = TelegraphColor(progress);
+            if (Body != null) Body.color = BodyColor(progress);
         }
 
         public bool Explode()
@@ -131,6 +163,8 @@ namespace TrickalFanGame.Enemy
                     DamageSourceType.EnemyContact, DamageUnits));
             }
 
+            if (HitsEnemiesAndObstacles) HitEnemiesAndObstacles(center);
+
             // Sorted from the picture before it hides, so the burst sits around the body art.
             CrumbDeathBlastEffect.Play(center, Radius, transform.parent, Body != null ? Body : telegraph);
             if (telegraph != null) telegraph.enabled = false;
@@ -142,6 +176,28 @@ namespace TrickalFanGame.Enemy
             }
 
             return true;
+        }
+
+        // The same reach as the player damage. Environment damage, so a kill here is never credited to the player.
+        private void HitEnemiesAndObstacles(Vector2 center)
+        {
+            if (EnemyDamage > 0f)
+            {
+                foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, Radius,
+                             LayerMask.GetMask(EnemyLayerName)))
+                {
+                    Health enemy = hit != null ? hit.GetComponentInParent<Health>() : null;
+                    if (enemy == null || enemy.IsDead || (source != null && enemy.gameObject == source) ||
+                        !damagedEnemies.Add(enemy))
+                        continue;
+                    enemy.TakeDamage(new DamageContext(gameObject, DamageSourceType.Environment, EnemyDamage));
+                }
+            }
+
+            BrokenObstacleCount = DestructibleObstacle.DestroyByBombInCircle(center, Radius);
+            RoomTrap.RemoveWebsByBombInCircle(center, Radius);
+            SecretPassageWall.OpenByBombInCircle(center, Radius);
+            TreasureChest.OpenByBombInCircle(center, Radius);
         }
     }
 }

@@ -89,7 +89,7 @@ namespace TrickalFanGame.Editor
                       "poison, trap) it splits once into two 0.7-scale small nururing 0.5 to its left and right (10 " +
                       "health, speed 3.25, light contact, knockback weight 0.7) that chase its target after the " +
                       "0.3-second spawn delay and never split again. Threat 4 on melee pressure points in the " +
-                      $"pressure melee slots only (50/25/15/10, declared 10~16); {GeneratedSeedCount} seeds select " +
+                      $"pressure melee slots only (50/25/15/10 plus Enemy-10 15, declared 10~16); {GeneratedSeedCount} seeds select " +
                       $"it reproducibly ({counts}), runtime seed {runtimeSeed} binds its Prefab, and a wave or room " +
                       "clears only after the splits die too.");
         }
@@ -195,7 +195,8 @@ namespace TrickalFanGame.Editor
                    SpawnPointPlacementRole.MeleePressure,
                 "The nururing must use melee pressure SpawnPoints.");
 
-            EncounterEnemyCandidate[] expected = Week25Enemy9Setup.PressureMeleeCandidates();
+            // Enemy-10 added 자폭형 to the same slots: 50/25/15/10/15.
+            EncounterEnemyCandidate[] expected = Week27Enemy10Setup.PressureMeleeCandidates();
             int found = 0;
             foreach (EncounterDefinition definition in generator.EncounterDefinitions)
             {
@@ -215,7 +216,8 @@ namespace TrickalFanGame.Editor
                 {
                     Assert(rule.Candidates.Count == expected.Length &&
                            expected.All(candidate => Weight(rule, candidate.EnemyRole) == candidate.Weight),
-                        $"'{definition.EncounterId}' melee slots must weigh 50/25/15/10.");
+                        $"'{definition.EncounterId}' melee slots must weigh " +
+                        string.Join("/", expected.Select(candidate => candidate.Weight)) + ".");
                 }
 
                 Assert(table.TryComputeThreatRange(definition, out int minimum, out int maximum, out error) &&
