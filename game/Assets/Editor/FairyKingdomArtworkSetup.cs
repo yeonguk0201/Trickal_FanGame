@@ -33,6 +33,8 @@ namespace TrickalFanGame.Editor
             // Enemy-9: 누루링-요정전사 and its small splits share one drawing; the split Prefab is scaled down.
             ["NururingFairyWarrior"] = "nururing",
             ["NururingSplit"] = "nururing",
+            // Enemy-10: 자폭형 borrows the chocolate crumb minion drawing until the user's art is ready.
+            ["SelfDestructFairy"] = Week27Enemy10Setup.ArtworkId,
         };
         // First-bind width where the placeholder sprite has a different shape. 0.7 draws 산사모-순수 as tall as
         // 산사모-활발 (about 1.2). A width already tuned on the Prefab is kept.
@@ -44,6 +46,7 @@ namespace TrickalFanGame.Editor
             // The drawing is wider than tall: 1.3 wide stands about 1.05 tall. The split's root scale shrinks it.
             ["NururingFairyWarrior"] = Week25Enemy9Setup.ArtworkWidth,
             ["NururingSplit"] = Week25Enemy9Setup.ArtworkWidth,
+            ["SelfDestructFairy"] = Week27Enemy10Setup.ArtworkWidth,
         };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites")]

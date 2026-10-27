@@ -166,7 +166,8 @@ namespace TrickalFanGame.Editor
                        swarm.Waves.SelectMany(wave => wave.SpawnRules).SelectMany(rule => rule.Candidates)
                            .All(candidate => candidate.EnemyRole == EncounterEnemyRole.Chaser ||
                                              candidate.EnemyRole == EncounterEnemyRole.FastChaser ||
-                                             candidate.EnemyRole == EncounterEnemyRole.FourWayShooter),
+                                             candidate.EnemyRole == EncounterEnemyRole.FourWayShooter ||
+                                             candidate.EnemyRole == EncounterEnemyRole.SelfDestruct),
                     $"Swarm '{swarm.EncounterId}' must hold {spec.FirstWave}+{spec.SecondWave} melee enemies.");
                 Assert(table.TryComputeThreatRange(swarm, out int minimum, out int maximum, out string error) &&
                        minimum == spec.MinimumThreat && maximum == spec.MaximumThreat &&

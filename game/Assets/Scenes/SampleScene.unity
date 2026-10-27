@@ -2748,7 +2748,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c9bc1b0e46146f44697bd426f6149857, type: 2}
   - {fileID: 11400000, guid: f058247391a23904c9ece2d6d6eb5578, type: 2}
   - {fileID: 11400000, guid: 8cbc6bd8ca2b8ee4cb46c4e23b92aa34, type: 2}
-  encounterContentVersion: 16
+  encounterContentVersion: 17
   difficultyTable: {fileID: 11400000, guid: 5e297717d226fb243b795131d80fa24e, type: 2}
   floorSettings:
   - minimumTotalRooms: 8
@@ -14477,7 +14477,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4293646023
   m_fontColor: {r: 0.78, g: 0.84, b: 0.92, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3

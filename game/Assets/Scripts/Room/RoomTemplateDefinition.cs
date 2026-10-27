@@ -130,6 +130,7 @@ namespace TrickalFanGame.Room
                 EncounterEnemyRole.Jyubi => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.FourWayShooter => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.SplittingChaser => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.SelfDestruct => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.Ranged => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Sniper => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Charging => SpawnPointPlacementRole.ChargeLane,

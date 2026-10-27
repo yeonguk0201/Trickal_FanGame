@@ -196,6 +196,10 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
   산사모-순수는 3발·현재 위치 조준. Encounter 콘텐츠 버전 16. 사양과 결과는 [28번](./28-difficulty-enemies-drops-plan.md)
   §9·§9.1. 검증: `Week27Curve1Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(11개) 통과(2026-10-25).
   사용자 Play 확인 완료(2026-10-25, 층별 등장 구성과 산사모-순수 3발·현재 위치 조준).
+- Enemy-10(2026-10-27): 자폭형. 1.2 안에서 멈춰 1초 예고 뒤 자폭(반경 1.5, 플레이어 중 등급, 적 30, 장애물은 폭탄처럼),
+  어떻게 죽어도 그 자리에서 폭발. 2층부터 pressure·swarm 근접 후보(가중치 15), 위협 3, Encounter 콘텐츠 버전 17. 사양은
+  [28번](./28-difficulty-enemies-drops-plan.md) §8.1. 검증: `Week27Enemy10Verification.SetupAndVerifyBatch`와
+  `VerifyWithRegressionsBatch`(12개) 통과(2026-10-27). 사용자 Play 확인 완료(2026-10-28).
 
 ## 4. 확정 사양
 

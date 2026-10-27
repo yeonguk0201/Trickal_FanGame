@@ -35,6 +35,8 @@ MonoBehaviour:
         weight: 25
       - enemyRole: 7
         weight: 15
+      - enemyRole: 9
+        weight: 15
   - waveNumber: 2
     startCondition: 1
     completionCondition: 0
@@ -49,6 +51,8 @@ MonoBehaviour:
       - enemyRole: 4
         weight: 25
       - enemyRole: 7
+        weight: 15
+      - enemyRole: 9
         weight: 15
   clearCondition: 0
   declaredMinimumThreat: 14

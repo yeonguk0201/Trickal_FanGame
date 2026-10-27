@@ -26,6 +26,8 @@ namespace TrickalFanGame.Editor
             (EncounterEnemyRole.Charging, 2),
             (EncounterEnemyRole.FourWayShooter, 2),
             (EncounterEnemyRole.SplittingChaser, 3),
+            // Enemy-10.
+            (EncounterEnemyRole.SelfDestruct, 2),
         };
 
         [MenuItem("Trickal Fan Game/Week 27/Setup and Verify Curve-1 Floor Enemy Pool")]
@@ -139,14 +141,14 @@ namespace TrickalFanGame.Editor
                 }
             }
 
-            // The pressure melee slot: floor 1 keeps only the two chasers, floor 2 leans to 저혈당-활발, and floor 3
-            // leans to 누루링 while the floor-1 chasers halve.
-            EncounterEnemyCandidate[] melee = Week25Enemy9Setup.PressureMeleeCandidates();
+            // The pressure melee slot: floor 1 keeps only the two chasers, floor 2 leans to 저혈당-활발 and 자폭형
+            // (Enemy-10), and floor 3 leans to 누루링 while the floor-1 chasers halve.
+            EncounterEnemyCandidate[] melee = Week27Enemy10Setup.PressureMeleeCandidates();
             int[][] expectedWeights =
             {
-                new[] { 150, 75, 0, 0 },
-                new[] { 100, 50, 45, 0 },
-                new[] { 50, 25, 30, 30 },
+                new[] { 150, 75, 0, 0, 0 },
+                new[] { 100, 50, 45, 0, 45 },
+                new[] { 50, 25, 30, 30, 30 },
             };
             for (int floor = 1; floor <= 3; floor++)
             {

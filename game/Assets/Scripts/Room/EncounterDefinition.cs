@@ -20,6 +20,8 @@ namespace TrickalFanGame.Room
         FourWayShooter,
         // Enemy-9: 누루링-요정전사, which splits into two small 누루링 when it dies.
         SplittingChaser,
+        // Enemy-10: 자폭형, which stops near the player and blows itself up after a telegraph.
+        SelfDestruct,
     }
     public enum EncounterWaveStartCondition { RoomEntered, PreviousWaveCleared }
     public enum EncounterWaveCompletionCondition { AllRequiredEnemiesDefeated }
@@ -364,7 +366,8 @@ namespace TrickalFanGame.Room
                                              selectedRole == EncounterEnemyRole.FastChaser ||
                                              selectedRole == EncounterEnemyRole.Jyubi ||
                                              selectedRole == EncounterEnemyRole.FourWayShooter ||
-                                             selectedRole == EncounterEnemyRole.SplittingChaser;
+                                             selectedRole == EncounterEnemyRole.SplittingChaser ||
+                                             selectedRole == EncounterEnemyRole.SelfDestruct;
                     int selectedIndex = prefersCloseSpawn
                         ? available.OrderBy(index => template.SpawnPoints[index].sqrMagnitude)
                             .ThenBy(index => index).First()
