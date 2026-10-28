@@ -1404,6 +1404,22 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   (`EncounterEnemyFloorPool`)을 찾고 버튼 이름에 층을 붙인다(F2·F3·F2). Curve-1 뒤 1층만 찾던 앞의 두 버튼이 seed를 찾지 못하던
   문제를 고쳤다. 상태 줄은 `Seed N has a floor-K ...`다.
 
+- Enemy-11 대왕쥬비(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Enemy-11 Jyubi King`이 `JyubiKing` Prefab(쥬비 복사본,
+  루트 배율 1, `JyubiKingController`), 위협 점수 6, roster의 `JyubiKing` 역할, 프로필별 `jyubi-nest` Encounter 5개(3층 전용)와
+  Encounter 콘텐츠 버전 18을 멱등 구성한다. 사양은 [28번 §8.2](./28-difficulty-enemies-drops-plan.md). 배치는
+  `-executeMethod TrickalFanGame.Editor.Week27Enemy11Verification.SetupAndVerifyBatch`(Setup 2회 GUID·그림 보존 포함), 단독 검증
+  `Verify`, 회귀 `VerifyWithRegressionsBatch`(Enemy-10, Curve-1, Enemy-6·7·8·9, Passive-1, Spawn-1·2, Difficulty-1, Encounter-4,
+  Floor-1, 요정왕국 그림, 개발 패널. 실패가 있어도 끝까지 돌고 한 번에 보고). 검사: Prefab 수치와 쥬비 Prefab 유지, 카탈로그
+  구성·위협 14~17·nest 외 배치 금지, 512 seed에서 3층 nest에만·후방 지점 배치와 재생성 결정성, 런타임 Prefab 연결, 거리 유지
+  (3칸 안 후퇴·5칸 밖 접근)·속도 상한·방향이 계속 바뀌는 비행, 감지 전·생성 지연 중 정지, 방 안에서 1.5초 뒤 0.6초 예고와
+  좌우 0.7칸 쥬비 2마리, 3초 주기, 8마리 상한에서 건너뜀과 1마리 보충, 대왕쥬비 사망 뒤 쥬비 유지와 방 클리어. 2026-10-28 모두
+  통과했고 2026-10-28 사용자 Play 확인을 마쳤다. 수동 확인: Game Scene Play → `F1` 개발 패널 `— Room —`의 `Spawn Jyubi king (summons Jyubi)`로 플레이어 위 4칸에
+  소환한다. (1) 큰 쥬비가 한자리에 떠 있지 않고 이리저리 꺾이며 날아다니는지, 플레이어가 다가가면 물러나고 멀어지면 따라오는지
+  본다. (2) 3초마다 금색으로 깜빡인 뒤 좌우에 쥬비 2마리가 나오는지, 같은 섹션의 `Jyubi kings N, their Jyubi M, summoning K`
+  표시에서 쥬비 수가 8에서 멈추는지 본다. (3) 대왕쥬비를 먼저 잡아도 쥬비가 남아 방이 끝나지 않고, 쥬비까지 잡아야 끝나는지
+  본다. 실제 방에서 보려면 `— Seed —`의 `Find Jyubi king F3`로 3층에 nest가 있는 seed를 찾아 `Restart Run with this seed` 뒤
+  3층으로 간다.
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,

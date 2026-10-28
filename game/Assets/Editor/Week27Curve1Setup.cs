@@ -21,11 +21,16 @@ namespace TrickalFanGame.Editor
         public const float QuickFourShotChance = 0f;
         public const float QuickMaximumPredictionTime = 0f;
 
-        public static readonly string[] Patterns = { "crossfire", "elite-pair", "jyubi-swarm", "pressure", "swarm" };
+        public static readonly string[] Patterns =
+            { "crossfire", "elite-pair", "jyubi-nest", "jyubi-swarm", "pressure", "swarm" };
         public static readonly string[] FloorTwoPatterns = { "crossfire", "elite-pair" };
+        // Enemy-11: jyubi-nest is built around 대왕쥬비, which enters on floor 3.
+        public static readonly string[] FloorThreePatterns = { "jyubi-nest" };
 
         public static int MinimumFloor(string pattern) =>
-            FloorTwoPatterns.Contains(pattern, StringComparer.Ordinal) ? 2 : 1;
+            FloorThreePatterns.Contains(pattern, StringComparer.Ordinal) ? 3
+            : FloorTwoPatterns.Contains(pattern, StringComparer.Ordinal) ? 2
+            : 1;
 
         public static bool TryResolvePattern(EncounterDefinition definition, out string pattern)
         {

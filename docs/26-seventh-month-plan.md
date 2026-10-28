@@ -200,6 +200,10 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
   어떻게 죽어도 그 자리에서 폭발. 2층부터 pressure·swarm 근접 후보(가중치 15), 위협 3, Encounter 콘텐츠 버전 17. 사양은
   [28번](./28-difficulty-enemies-drops-plan.md) §8.1. 검증: `Week27Enemy10Verification.SetupAndVerifyBatch`와
   `VerifyWithRegressionsBatch`(12개) 통과(2026-10-27). 사용자 Play 확인 완료(2026-10-28).
+- Enemy-11(2026-10-28): 대왕쥬비. 쥬비 2배 크기 비행, 4칸쯤 거리를 두고 벌처럼 날아다니며 3초마다 0.6초 예고 뒤 쥬비 2마리 소환
+  (자기 쥬비 최대 8, 죽어도 쥬비는 남음). 3층 전용 `jyubi-nest`(대왕쥬비+쥬비 2 → 추적형 3, 위협 14~17), 위협 6, Encounter
+  콘텐츠 버전 18. 사양은 [28번](./28-difficulty-enemies-drops-plan.md) §8.2. 검증: `Week27Enemy11Verification.SetupAndVerifyBatch`와
+  `VerifyWithRegressionsBatch`(14개) 통과(2026-10-28). 사용자 Play 확인 완료(2026-10-28).
 
 ## 4. 확정 사양
 

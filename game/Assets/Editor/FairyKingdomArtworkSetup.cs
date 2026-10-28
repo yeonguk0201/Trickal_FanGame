@@ -35,6 +35,8 @@ namespace TrickalFanGame.Editor
             ["NururingSplit"] = "nururing",
             // Enemy-10: 자폭형 borrows the chocolate crumb minion drawing until the user's art is ready.
             ["SelfDestructFairy"] = Week27Enemy10Setup.ArtworkId,
+            // Enemy-11: 대왕쥬비 is the 쥬비 drawing on a bigger body (root scale).
+            ["JyubiKing"] = "jyubi",
         };
         // First-bind width where the placeholder sprite has a different shape. 0.7 draws 산사모-순수 as tall as
         // 산사모-활발 (about 1.2). A width already tuned on the Prefab is kept.

@@ -159,9 +159,11 @@ namespace TrickalFanGame.Editor
                 bool holdsJyubi = definition.Waves.SelectMany(wave => wave.SpawnRules)
                     .SelectMany(rule => rule.Candidates)
                     .Any(candidate => candidate.EnemyRole == EncounterEnemyRole.Jyubi);
-                Assert(holdsJyubi == swarmIds.Contains(definition.EncounterId, StringComparer.Ordinal),
-                    $"Only the {Week25Enemy7Setup.Pattern} Encounters may hold Jyubi, but '{definition.EncounterId}' " +
-                    "does not follow that.");
+                // Enemy-11: 대왕쥬비's jyubi-nest also opens with two Jyubi.
+                Assert(holdsJyubi == (swarmIds.Contains(definition.EncounterId, StringComparer.Ordinal) ||
+                                      Week27Enemy11Setup.IsNest(definition)),
+                    $"Only the {Week25Enemy7Setup.Pattern} and {Week27Enemy11Setup.Pattern} Encounters may hold " +
+                    $"Jyubi, but '{definition.EncounterId}' does not follow that.");
             }
 
             foreach (Week19Encounter4Setup.SwarmSpec spec in Week19Encounter4Setup.Swarms)
@@ -228,6 +230,8 @@ namespace TrickalFanGame.Editor
                     combatRooms++;
                     ResolvedEncounterSpawn[] spawns = room.ResolvedEncounterWaves.SelectMany(wave => wave).ToArray();
                     bool isSwarm = IsJyubiSwarm(room.EncounterId);
+                    // Enemy-11 checks its own nest, which mixes Jyubi with 대왕쥬비 and chasers.
+                    if (Week27Enemy11Setup.IsNest(room.EncounterId)) continue;
                     Assert(isSwarm ? spawns.All(spawn => spawn.Role == EncounterEnemyRole.Jyubi)
                             : spawns.All(spawn => spawn.Role != EncounterEnemyRole.Jyubi),
                         $"Seed {seed} room '{room.RoomId}' mixed Jyubi with other enemies in '{room.EncounterId}'.");
