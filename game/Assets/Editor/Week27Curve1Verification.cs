@@ -28,6 +28,8 @@ namespace TrickalFanGame.Editor
             (EncounterEnemyRole.SplittingChaser, 3),
             // Enemy-10.
             (EncounterEnemyRole.SelfDestruct, 2),
+            // Enemy-11.
+            (EncounterEnemyRole.JyubiKing, 3),
         };
 
         [MenuItem("Trickal Fan Game/Week 27/Setup and Verify Curve-1 Floor Enemy Pool")]
@@ -182,19 +184,22 @@ namespace TrickalFanGame.Editor
                 for (int floor = definition.MinimumFloor; floor <= definition.MaximumFloor; floor++)
                     patternsByFloor[floor].Add(pattern);
 
-                // A floor before the range must leave a fixed floor-2 slot empty, so the Encounter cannot move down.
-                if (minimum == 2)
+                // A floor before the range must leave a fixed later-floor slot empty, so the Encounter cannot move
+                // down.
+                for (int earlier = 1; earlier < minimum; earlier++)
                 {
-                    Assert(!table.TryComputeThreatRange(definition, 1, out _, out _, out error) &&
+                    Assert(!table.TryComputeThreatRange(definition, earlier, out _, out _, out error) &&
                            !string.IsNullOrWhiteSpace(error),
-                        $"'{definition.EncounterId}' must have no floor-1 composition.");
+                        $"'{definition.EncounterId}' must have no floor-{earlier} composition.");
                 }
             }
 
             Assert(patternsByFloor[1].SetEquals(new[] { "jyubi-swarm", "pressure", "swarm" }) &&
-                   patternsByFloor[2].SetEquals(Week27Curve1Setup.Patterns) &&
+                   patternsByFloor[2].SetEquals(Week27Curve1Setup.Patterns
+                       .Except(Week27Curve1Setup.FloorThreePatterns)) &&
                    patternsByFloor[3].SetEquals(Week27Curve1Setup.Patterns),
-                "Floor 1 must offer jyubi-swarm, pressure and swarm; floors 2 and 3 every pattern.");
+                "Floor 1 must offer jyubi-swarm, pressure and swarm; floor 2 every pattern but jyubi-nest (Enemy-11); " +
+                "floor 3 every pattern.");
 
             // An Encounter whose floor range reaches a floor that empties one of its rules must fail validation.
             EncounterDefinition probe = generator.EncounterDefinitions.First(definition =>

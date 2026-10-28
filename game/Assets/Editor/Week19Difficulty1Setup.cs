@@ -36,6 +36,8 @@ namespace TrickalFanGame.Editor
             new(EncounterEnemyRole.SplittingChaser, 4),
             // Enemy-10: 자폭형.
             new(EncounterEnemyRole.SelfDestruct, 3),
+            // Enemy-11: 대왕쥬비. It keeps summoning 쥬비 while it lives, so it weighs like two strong enemies.
+            new(EncounterEnemyRole.JyubiKing, 6),
         };
 
         public static readonly RoomDifficultyTierBand[] TierBands =

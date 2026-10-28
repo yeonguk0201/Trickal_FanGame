@@ -153,6 +153,8 @@ namespace TrickalFanGame.Run
             FindEnemySeedButton(assembler, EncounterEnemyRole.FourWayShooter, "lively fairy", "Lively fairy room");
             FindEnemySeedButton(assembler, EncounterEnemyRole.SplittingChaser, "nururing", "Nururing room");
             FindEnemySeedButton(assembler, EncounterEnemyRole.SelfDestruct, "self-destruct", "Self-destruct room");
+            // Enemy-11: 대왕쥬비 only comes in the floor-3 jyubi-nest Encounter.
+            FindEnemySeedButton(assembler, EncounterEnemyRole.JyubiKing, "Jyubi king", "Jyubi nest room");
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -918,8 +920,26 @@ namespace TrickalFanGame.Run
                 FindObjectsByType<TrickalFanGame.Enemy.SelfDestructEnemy>(FindObjectsSortMode.None);
             GUILayout.Label($"Self-destruct alive {bombers.Count(bomber => bomber.TryGetComponent(out Health bomberHealth) && !bomberHealth.IsDead)}, " +
                             $"warning {bombers.Count(bomber => bomber.IsPrimed)}");
+
+            // Enemy-11: 대왕쥬비 four tiles above the player, its preferred distance. Every 3 s it glows and releases
+            // two 쥬비 until eight of its own are alive; they stay when it dies.
+            if (AssistedButton("Spawn Jyubi king (summons Jyubi)") && controller != null && player != null)
+            {
+                GameObject king = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/JyubiKing.prefab");
+                status = controller.SpawnExtraEnemy(king, player.transform.position + Vector3.up * 4f) != null
+                    ? "Spawned a Jyubi king above the player."
+                    : "Jyubi king spawn failed.";
+            }
+            TrickalFanGame.Enemy.JyubiKingController[] kings =
+                FindObjectsByType<TrickalFanGame.Enemy.JyubiKingController>(FindObjectsSortMode.None);
+            TrickalFanGame.Enemy.JyubiKingController[] livingKings = kings
+                .Where(king => king.TryGetComponent(out Health kingHealth) && !kingHealth.IsDead).ToArray();
+            GUILayout.Label($"Jyubi kings {livingKings.Length}, their Jyubi " +
+                            $"{livingKings.Sum(king => king.AliveSummonCount)}, summoning " +
+                            $"{livingKings.Count(king => king.IsSummoning)}");
 #else
-            GUILayout.Label("Crumb minion, lively fairy, nururing and self-destruct spawns are editor-only.");
+            GUILayout.Label("Crumb minion, lively fairy, nururing, self-destruct and Jyubi king spawns are editor-only.");
 #endif
         }
 

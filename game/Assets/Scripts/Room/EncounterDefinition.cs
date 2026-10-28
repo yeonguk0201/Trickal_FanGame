@@ -22,6 +22,8 @@ namespace TrickalFanGame.Room
         SplittingChaser,
         // Enemy-10: 자폭형, which stops near the player and blows itself up after a telegraph.
         SelfDestruct,
+        // Enemy-11: 대왕쥬비, a big flying 쥬비 that keeps its distance and summons 쥬비. Only in jyubi-nest.
+        JyubiKing,
     }
     public enum EncounterWaveStartCondition { RoomEntered, PreviousWaveCleared }
     public enum EncounterWaveCompletionCondition { AllRequiredEnemiesDefeated }

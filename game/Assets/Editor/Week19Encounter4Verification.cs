@@ -352,8 +352,8 @@ namespace TrickalFanGame.Editor
 
         private static string Pattern(string encounterId)
         {
-            // "jyubi-swarm" (Enemy-7) ends with "swarm" too, so it is matched first.
-            foreach (string pattern in new[] { "elite-pair", "crossfire", "pressure", "jyubi-swarm", "swarm" })
+            // "jyubi-swarm" (Enemy-7) ends with "swarm" too, so it is matched first. jyubi-nest is Enemy-11's.
+            foreach (string pattern in new[] { "elite-pair", "crossfire", "pressure", "jyubi-nest", "jyubi-swarm", "swarm" })
                 if (encounterId.EndsWith($"-{pattern}-v1", StringComparison.Ordinal)) return pattern;
             return encounterId;
         }

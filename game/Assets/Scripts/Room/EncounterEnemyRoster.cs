@@ -79,6 +79,8 @@ namespace TrickalFanGame.Room
                     EncounterEnemyRole.SelfDestruct => binding.Prefab.GetComponent<EnemyChase>() != null &&
                                                        binding.Prefab.GetComponent<SelfDestructEnemy>() != null &&
                                                        binding.Prefab.GetComponent<EnemyDeathExplosion>() != null,
+                    EncounterEnemyRole.JyubiKing => binding.Prefab.GetComponent<JyubiKingController>() != null &&
+                                                    binding.Prefab.GetComponent<EnemyFlight>() != null,
                     EncounterEnemyRole.Boss => true,
                     _ => false,
                 };
