@@ -19,19 +19,20 @@ namespace TrickalFanGame.Editor
     // (a full second later, or with the time left when it was already warning). The blast reaches 1.5, hurts the
     // player at the medium tier of the floor, hurts other enemies like a bomb (30) and breaks obstacles like a bomb.
     // It first appears on floor 2, scores threat 3 and joins the pressure and swarm melee slots at weight 15.
-    // The user's drawing is not ready, so it borrows the chocolate crumb minion drawing for now. Re-running updates
-    // the same Prefab and assets and keeps their GUIDs.
+    // It shows the user's 산사모-광기 drawing (2026-10-30) as a still sprite; its motion comes later. Re-running
+    // updates the same Prefab and assets and keeps their GUIDs.
     public static class Week27Enemy10Setup
     {
         public const int EncounterContentVersion = 17;
         public const string PrefabPath = "Assets/Prefabs/SelfDestructFairy.prefab";
         public const string PrefabName = "SelfDestructFairy";
-        // Working name until the user names it.
-        public const string DisplayName = "자폭형";
-        // Placeholder drawing until the user's art (docs/28 §7).
-        public const string ArtworkId = "crumb-minion-chocolate";
+        // Named after the user's drawing file (2026-10-30).
+        public const string DisplayName = "산사모-광기";
+        // The user's drawing (2026-10-30). Visible area is about 0.6 wide per 1 tall.
+        public const string ArtworkId = "sansamo-madness";
         public const string ArtworkPath = FairyKingdomArtworkSetup.ArtRoot + "/Enemies/" + ArtworkId + ".png";
-        public const float ArtworkWidth = 1.2f;
+        // 0.72 wide stands about 1.2 tall, the height the crumb placeholder had.
+        public const float ArtworkWidth = 0.72f;
 
         // Implementation defaults (2026-10-27): lighter and a little quicker than the chaser so it closes in.
         public const float MaxHealth = 30f;
@@ -124,7 +125,8 @@ namespace TrickalFanGame.Editor
                       $"{generator.EncounterContentVersion}.");
         }
 
-        public static string[] CreatedAssetPaths() => new[] { PrefabPath };
+        public static string[] CreatedAssetPaths() =>
+            new[] { PrefabPath, FairyKingdomArtworkSetup.DisplayRoot + "/" + ArtworkId + ".prefab" };
 
         public static bool IsSwarm(EncounterDefinition definition) =>
             definition != null && definition.EncounterId.EndsWith("-swarm-v1", StringComparison.Ordinal) &&
@@ -163,8 +165,13 @@ namespace TrickalFanGame.Editor
 
                 AssetDatabase.ImportAsset(ArtworkPath, ImportAssetOptions.ForceSynchronousImport);
                 FairyKingdomArtworkCatalog catalog = FairyKingdomArtworkSetup.RefreshCatalog();
+                FairyKingdomArtworkSetup.BuildDisplayPrefab(catalog, ArtworkId);
                 if (!FairyKingdomArtworkSetup.BindPrefabContents(contents, catalog))
                     throw new InvalidOperationException($"Enemy-10 could not bind '{ArtworkId}' to {PrefabPath}.");
+                // Binding keeps a width already on the Prefab, so the placeholder's width is replaced here.
+                FairyKingdomArtworkView view = contents.GetComponent<FairyKingdomArtworkView>();
+                if (view.ArtworkId != ArtworkId || !Mathf.Approximately(view.LocalWidth, ArtworkWidth))
+                    view.Configure(ArtworkId, view.Mode, view.Visual, ArtworkWidth);
                 if (PrefabUtility.SaveAsPrefabAsset(contents, PrefabPath) == null)
                     throw new InvalidOperationException($"Could not save {PrefabPath}.");
             }

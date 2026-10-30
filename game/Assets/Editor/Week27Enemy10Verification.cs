@@ -40,7 +40,10 @@ namespace TrickalFanGame.Editor
                 .Append(Week13FrontendSetup.GameScenePath).ToArray();
             Dictionary<string, string> before = stable.ToDictionary(path => path, AssetDatabase.AssetPathToGUID,
                 StringComparer.Ordinal);
-            Dictionary<string, string> artwork = FairyKingdomArtworkVerification.SnapshotBoundArtwork();
+            // Its own Prefab may move from the placeholder to the user's drawing; nothing else may change.
+            Dictionary<string, string> artwork = FairyKingdomArtworkVerification.SnapshotBoundArtwork()
+                .Where(entry => !entry.Key.StartsWith(Week27Enemy10Setup.PrefabPath + ":", StringComparison.Ordinal))
+                .ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.Ordinal);
             Week27Enemy10Setup.Setup();
             Dictionary<string, string> created = Week27Enemy10Setup.CreatedAssetPaths()
                 .ToDictionary(path => path, AssetDatabase.AssetPathToGUID, StringComparer.Ordinal);
@@ -52,7 +55,7 @@ namespace TrickalFanGame.Editor
                     $"Enemy-10 setup changed or lost the GUID for {entry.Key}.");
             }
 
-            // Only the new Prefab may gain a drawing; every other bound drawing stays as it was.
+            // Every other bound drawing stays as it was.
             FairyKingdomArtworkVerification.RequireBoundArtworkUnchanged(artwork, "Enemy-10 setup");
 
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Week27Enemy10Setup.PrefabPath);
@@ -186,7 +189,7 @@ namespace TrickalFanGame.Editor
                    view.Mode == FairyKingdomArtworkMode.Fixed && renderer != null && renderer.color == Color.white &&
                    Mathf.Approximately(view.LocalWidth, Week27Enemy10Setup.ArtworkWidth) &&
                    AssetDatabase.GetAssetPath(renderer.sprite) == Week27Enemy10Setup.ArtworkPath,
-                $"The self-destruct enemy must show the placeholder '{Week27Enemy10Setup.ArtworkId}' drawing untinted.");
+                $"The self-destruct enemy must show the '{Week27Enemy10Setup.ArtworkId}' drawing untinted at width {Week27Enemy10Setup.ArtworkWidth}.");
 
             // The crumb minion keeps its Enemy-7 blast: 0.6 s, radius 1.2, one heart, the player only.
             EnemyDeathExplosion crumb = AssetDatabase.LoadAssetAtPath<GameObject>(Week15Boss1Setup.MinionPrefabPath)
