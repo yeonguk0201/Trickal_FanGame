@@ -1264,7 +1264,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
 
 - Hitbox-2 일반 적 발 콜라이더와 1칸 통로 통과: 메뉴 `Trickal Fan Game > Week 27 > Setup Hitbox-2 Enemy Feet Collider`가
   `EnemyFeet` 레이어를 빈 사용자 레이어에 만들고 2D 충돌 표에서 `Environment`·`Pit`과만 충돌하게 한 뒤, 루트에 `TestEnemy`가
-  있는 Prefab 중 일반 적(`EnemyBehaviorContext`가 있고 `BossController`가 없으며 몸 반지름이 0.35보다 큰 적)에 자식
+  있는 Prefab 중 일반 적(`EnemyBehaviorContext`가 있고 `BossController`·`EnemyFlight`가 없으며 몸 반지름이 0.35보다 큰 적. 나는 적인 쥬비·대왕쥬비는
+  몸 하나로 지형에 닿는다, 2026-10-30)에 자식
   `Feet`(월드 반지름 0.35, 아래 끝이 몸 아래 끝과 같음)를 넣고 몸 원의 `excludeLayers`에 `Environment`·`Pit`을 넣는다.
   `Enemy` 레이어의 충돌 표는 바꾸지 않으므로 보스는 몸 하나로 지형에 닿는다. 기반 Prefab을 변형보다 먼저 처리하고, 일반
   적에서 상속받은 발이 있는 보스 변형(`TestBoss`)은 발을 끄고 몸의 지형 충돌을 되돌린다. 다시 실행해도 바뀌는 Prefab이 없다.

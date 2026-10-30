@@ -82,12 +82,14 @@ namespace TrickalFanGame.Enemy
             center = bodyCenter + Vector2.down * (bodyRadius - radius);
         }
 
-        // Normal walking enemies only: bosses keep one circle, stationary boss props have no behavior, and a body no
-        // wider than the feet gains nothing from them.
+        // Normal walking enemies only: bosses keep one circle, stationary boss props have no behavior, a body no
+        // wider than the feet gains nothing from them, and a flier (쥬비, 대왕쥬비) meets terrain with its body, which
+        // EnemyFlight lets pass over pits and low obstacles (feet would stop at pits).
         public static bool Needs(GameObject enemy)
         {
             return enemy != null && enemy.GetComponent<EnemyBehaviorContext>() != null &&
-                   enemy.GetComponent<BossController>() == null && TryGetBody(enemy, out CircleCollider2D body) &&
+                   enemy.GetComponent<BossController>() == null && enemy.GetComponent<EnemyFlight>() == null &&
+                   TryGetBody(enemy, out CircleCollider2D body) &&
                    WorldRadiusOf(body) > Radius + 0.001f;
         }
 

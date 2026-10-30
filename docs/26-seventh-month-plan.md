@@ -219,7 +219,9 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
   그대로), 체력·넉백 무게 2배, 피해 한 단계 위, 일반 이동 1.2배, 탄 1.5배, 위협 2배(방 점수와 따로), 처치하면 픽업 1개 확정.
   Encounter 콘텐츠 버전 21. 사양은 [28번](./28-difficulty-enemies-drops-plan.md) §8.5. 검증:
   `Week27Variant0Verification.SetupAndVerifyBatch` 통과, `VerifyWithRegressionsBatch`는 16개 중 Hitbox-2 하나만 실패(Variant-0와
-  무관한 기존 문제: Enemy-10~13 Prefab이 Hitbox-2 목록에 없고 대왕쥬비는 발 충돌체 판정과 어긋남)(2026-10-30). 사용자 Play 확인 완료
+  무관한 기존 문제: Enemy-10~13 Prefab이 Hitbox-2 목록에 없고 대왕쥬비는 발 충돌체 판정과 어긋남)(2026-10-30). 뒤에 고침: 나는 적
+  (쥬비·대왕쥬비, `EnemyFlight`)은 발 없이 몸 하나로 지형을 만난다(사용자 결정, 2026-10-30), 자폭형·곡사형·잠복형은 발 목록에 추가.
+  `Week27Hitbox2Verification.Verify` 통과. 사용자 Play 확인 완료
   (2026-10-30).
 
 ## 4. 확정 사양
