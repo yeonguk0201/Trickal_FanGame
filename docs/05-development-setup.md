@@ -1469,7 +1469,21 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   싸워 처치하면 쓰러진 자리에 픽업 1개와 재지급 없음.
   개발 패널(`F1`): `— Seed —`의 `Find elite F3`로 3층에 엘리트 방이 있는 seed를 찾고 `Restart Run with this seed`. `— Room —`의
   `Make nearest enemy elite`는 지금 방에서 플레이어와 가장 가까운 일반 적을 엘리트로 바꾸고(처치 보상도 연결), 아래 줄에 계획된 엘리트
-  수·살아 있는 엘리트 수·보상 상태를, `Encounter:` 줄에 `+elite N` 추가 위협을 보인다.
+  수·살아 있는 엘리트 수·보상 상태를, `Encounter:` 줄에 `+elite N` 추가 위협을 보인다(Variant-1부터 `+variants N`, 챔피언 포함).
+
+- Variant-1 챔피언(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Variant-1 Champion Enemies`가 Encounter 콘텐츠 버전 22를 멱등
+  구성한다(외곽선 셰이더는 `Assets/Resources/CombatEffects/ChampionOutline.shader`에서 런타임에 읽는다). 런타임 규칙은
+  `EnemyVariant`(종류·색)·`EnemyVariantRules`(층별 확률·성질 배정)·`EnemyChampionDeath`·`EnemyChampionPuddle`·`EnemyChampionVolley`·
+  `EnemyChampionOutline`에 있다. 사양은 [28번 §8.6](./28-difficulty-enemies-drops-plan.md). 배치는
+  `-executeMethod TrickalFanGame.Editor.Week27Variant1Verification.SetupAndVerifyBatch`(Setup 2회 GUID 보존 포함), 단독 검증 `Verify`,
+  회귀 `VerifyWithRegressionsBatch`(Variant-0과 그 회귀 목록). 검사: 층별 확률 0/10/15/20/25%, 성질 목록과 자폭형 자폭 제외, 512 seed에서
+  자리별 굴림 일치·엘리트 불변·1층 없음·2층 약 10%·3층 약 15%·성질 고른 분포·재생성 결정성, 저장 점수 불변과 챔피언 +1 위협, 런타임
+  웨이브의 변형 연결, 모든 일반 적의 성질 적용·색·스탯 불변·중첩 거부, 보스 거부, 외곽선의 스프라이트·메시 추적과 16개 복사본 위치·
+  순서·색, 사망 시 숨김, 장판 무해 구간·발 판정·1초 간격·종료, 탄 예고 뒤 4/8방향·경 등급·보라색, 자폭 쫄따구 값, 방 이동 정리, 실제
+  방에서 챔피언 스폰과 즉시 클리어.
+  개발 패널(`F1`): `— Seed —`의 `Find champion F2`로 2층에 챔피언이 있는 seed를 찾고 `Restart Run with this seed`. `— Room —`의
+  `Make nearest champion` 줄 `Puddle`·`Shots`·`Blast`는 지금 방에서 플레이어와 가장 가까운 일반 적을 그 성질 챔피언으로 바꾸고, 아래 줄에
+  계획된 챔피언 수·살아 있는 챔피언 수·남은 장판 수·쏘기 전 탄 수를 보인다.
 
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,

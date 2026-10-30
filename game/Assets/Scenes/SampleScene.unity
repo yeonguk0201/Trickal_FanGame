@@ -2753,7 +2753,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c9bc1b0e46146f44697bd426f6149857, type: 2}
   - {fileID: 11400000, guid: f058247391a23904c9ece2d6d6eb5578, type: 2}
   - {fileID: 11400000, guid: 8cbc6bd8ca2b8ee4cb46c4e23b92aa34, type: 2}
-  encounterContentVersion: 21
+  encounterContentVersion: 22
   difficultyTable: {fileID: 11400000, guid: 5e297717d226fb243b795131d80fa24e, type: 2}
   floorSettings:
   - minimumTotalRooms: 8

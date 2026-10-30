@@ -408,8 +408,8 @@ namespace TrickalFanGame.Room
             return true;
         }
 
-        // Variant-0: an elite counts its threat twice. This is the extra on top of TryScore, which stays the
-        // Encounter's own score.
+        // Variant-0: an elite counts its threat twice. Variant-1: a champion adds ChampionThreatBonus. This is the
+        // extra on top of TryScore, which stays the Encounter's own score.
         public bool TryScoreVariants(IReadOnlyList<ResolvedEncounterSpawn[]> waves, out int extra, out string error)
         {
             extra = 0;
@@ -417,6 +417,12 @@ namespace TrickalFanGame.Room
             {
                 foreach (ResolvedEncounterSpawn spawn in wave)
                 {
+                    if (TrickalFanGame.Enemy.EnemyVariant.IsChampionKind(spawn.Variant))
+                    {
+                        extra += TrickalFanGame.Enemy.EnemyVariant.ChampionThreatBonus;
+                        continue;
+                    }
+
                     if (spawn.Variant != TrickalFanGame.Enemy.EnemyVariantKind.Elite) continue;
                     if (!TryGetThreat(spawn.Role, out int threat))
                     {

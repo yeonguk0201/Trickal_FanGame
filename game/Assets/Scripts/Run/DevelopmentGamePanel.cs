@@ -163,6 +163,10 @@ namespace TrickalFanGame.Run
             if (GUILayout.Button("Find elite F3"))
                 FindSeed(assembler, node => EnemyVariantRules.CountElites(node.ResolvedEncounterWaves) > 0,
                     "elite room", 3);
+            // Variant-1: champions start on floor 2 (10% of eligible enemies, 15% on floor 3).
+            if (GUILayout.Button("Find champion F2"))
+                FindSeed(assembler, node => EnemyVariantRules.CountChampions(node.ResolvedEncounterWaves) > 0,
+                    "champion room", 2);
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -865,8 +869,9 @@ namespace TrickalFanGame.Run
                             (node != null && node.HasDifficulty
                                 ? $"  score {node.Difficulty.Score} {node.Difficulty.Tier}"
                                 : string.Empty) +
-                            (eliteThreat > 0 ? $"  +elite {eliteThreat}" : string.Empty));
+                            (eliteThreat > 0 ? $"  +variants {eliteThreat}" : string.Empty));
             DrawEliteControls(assembler, room, controller, node);
+            DrawChampionControls(assembler, controller, node);
             GUILayout.Label("Death blasts pending " +
                             FindObjectsByType<TrickalFanGame.Enemy.EnemyDeathBlast>(FindObjectsSortMode.None)
                                 .Count(blast => !blast.HasExploded));
@@ -1199,6 +1204,43 @@ namespace TrickalFanGame.Run
                     : "waiting";
             GUILayout.Label($"Elites planned {EnemyVariantRules.CountElites(node?.ResolvedEncounterWaves)}, " +
                             $"alive {elitesAlive}, reward {reward}");
+        }
+
+        // Variant-1: turns the living enemy nearest to the player into a champion with the chosen death property
+        // (green puddle, purple 4-way shots, yellow 쫄따구 blast). 자폭형 refuses the blast.
+        private void DrawChampionControls(RoomGraphAssembler assembler, RoomController controller,
+            GeneratedRoomNode node)
+        {
+            PlayerMovement player = assembler.Graph?.Player;
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Make nearest champion");
+            foreach ((TrickalFanGame.Enemy.EnemyVariantKind kind, string label) in new[]
+                     {
+                         (TrickalFanGame.Enemy.EnemyVariantKind.ChampionPuddle, "Puddle"),
+                         (TrickalFanGame.Enemy.EnemyVariantKind.ChampionShots, "Shots"),
+                         (TrickalFanGame.Enemy.EnemyVariantKind.ChampionBlast, "Blast"),
+                     })
+            {
+                if (!AssistedButton(label) || controller == null || player == null) continue;
+                Health nearest = controller.AliveEnemies
+                    .Where(enemy => enemy != null && !enemy.IsDead &&
+                                    TrickalFanGame.Enemy.EnemyVariant.CanApply(enemy.gameObject, kind))
+                    .OrderBy(enemy => (enemy.transform.position - player.transform.position).sqrMagnitude)
+                    .FirstOrDefault();
+                status = nearest == null
+                    ? $"No living normal enemy in this room can become a {label.ToLowerInvariant()} champion."
+                    : TrickalFanGame.Enemy.EnemyVariant.Apply(nearest.gameObject, kind)
+                        ? $"{nearest.name} is now a {label.ToLowerInvariant()} champion."
+                        : "That enemy cannot become a champion.";
+            }
+
+            GUILayout.EndHorizontal();
+            int championsAlive = controller == null ? 0 : controller.AliveEnemies.Count(enemy =>
+                enemy != null && !enemy.IsDead && TrickalFanGame.Enemy.EnemyVariant.IsChampionEnemy(enemy.gameObject));
+            GUILayout.Label($"Champions planned {EnemyVariantRules.CountChampions(node?.ResolvedEncounterWaves)}, " +
+                            $"alive {championsAlive}, puddles {TrickalFanGame.Enemy.EnemyChampionPuddle.Live.Count}, " +
+                            "volleys pending " +
+                            TrickalFanGame.Enemy.EnemyChampionVolley.Live.Count(volley => !volley.HasFired));
         }
 
         private void FindEnemySeedButton(RoomGraphAssembler assembler, EncounterEnemyRole role, string buttonName,

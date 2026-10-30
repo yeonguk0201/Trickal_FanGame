@@ -223,6 +223,11 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
   (쥬비·대왕쥬비, `EnemyFlight`)은 발 없이 몸 하나로 지형을 만난다(사용자 결정, 2026-10-30), 자폭형·곡사형·잠복형은 발 목록에 추가.
   `Week27Hitbox2Verification.Verify` 통과. 사용자 Play 확인 완료
   (2026-10-30).
+- Variant-1(2026-10-30): 챔피언. 엘리트가 아닌 대상 적마다 2층 10%·3층 15%로 챔피언(쥬비·보스·엘리트 제외), 성질 1개(죽으면 초록
+  장판·보라 4방향 탄·노랑 쫄따구 자폭, 자폭형은 자폭 제외)와 그 색 외곽선(3px + 약한 발광), 위협 +1. Encounter 콘텐츠 버전 22. 사양은
+  [28번](./28-difficulty-enemies-drops-plan.md) §8.6. 검증: `Week27Variant1Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(17개) 통과(2026-10-30).
+  Play 피드백(2026-10-31): 장판을 독 장판 함정 그림으로 바꾸고 7초로 늘림(단독 `Verify` 통과, 사용자 Play 확인). 탄·자폭 시각 효과와 그 밖의 연출
+  보강은 Pool-0 전 Effect-0으로 묶었다(28번 §7).
 
 ## 4. 확정 사양
 

@@ -572,7 +572,7 @@ namespace TrickalFanGame.Room
 
                 if (table == null)
                 {
-                    node.AssignEncounter(candidate, EnemyVariantRules.AssignElite(resolvedWaves, node.FloorNumber,
+                    node.AssignEncounter(candidate, EnemyVariantRules.AssignVariants(resolvedWaves, node.FloorNumber,
                         node.ContentSeed, contentVersion));
                     error = null;
                     return true;
@@ -599,8 +599,8 @@ namespace TrickalFanGame.Room
             ScoredEncounter selected = pool[(int)(unchecked((uint)seed) % (uint)pool.Length)];
             int availableTierMask = scored.Aggregate(0, (mask, entry) => mask | 1 << (int)entry.Tier);
             // Variant-0: the stored score stays the Encounter's own score (selection and floor range); the elite's
-            // extra threat is read separately with RoomDifficultyTable.TryScoreVariants.
-            node.AssignEncounter(selected.Definition, EnemyVariantRules.AssignElite(selected.Waves, node.FloorNumber,
+            // extra threat is read separately with RoomDifficultyTable.TryScoreVariants. Variant-1 champions too.
+            node.AssignEncounter(selected.Definition, EnemyVariantRules.AssignVariants(selected.Waves, node.FloorNumber,
                     node.ContentSeed, contentVersion),
                 new GeneratedRoomDifficulty(distance, selected.Score, selected.Tier, target, availableTierMask));
             error = null;

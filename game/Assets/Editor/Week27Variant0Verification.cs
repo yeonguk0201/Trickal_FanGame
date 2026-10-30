@@ -186,7 +186,9 @@ namespace TrickalFanGame.Editor
                     ResolvedEncounterSpawn[] spawns = room.ResolvedEncounterWaves.SelectMany(wave => wave).ToArray();
                     ResolvedEncounterSpawn[] elite = spawns.Where(spawn => spawn.Variant == EnemyVariantKind.Elite)
                         .ToArray();
-                    Assert(spawns.All(spawn => spawn.Variant is EnemyVariantKind.None or EnemyVariantKind.Elite),
+                    // Variant-1 adds champions on the other enemies; Week27Variant1Verification checks them.
+                    Assert(spawns.All(spawn => spawn.Variant is EnemyVariantKind.None or EnemyVariantKind.Elite ||
+                                               EnemyVariant.IsChampionKind(spawn.Variant)),
                         $"Seed {seed} room '{room.RoomId}' holds an unknown variant.");
                     Assert(elite.Length <= 1, $"Seed {seed} room '{room.RoomId}' holds {elite.Length} elites.");
                     bool rolled = EnemyVariantRules.RollsElite(floor, room.ContentSeed,
@@ -201,7 +203,9 @@ namespace TrickalFanGame.Editor
                                out int score, out error) && room.HasDifficulty && score == room.Difficulty.Score,
                         $"Seed {seed} room '{room.RoomId}' score must stay the Encounter score. {error}");
                     Assert(table.TryScoreVariants(room.ResolvedEncounterWaves, out int extra, out error) &&
-                           extra == elite.Sum(spawn => table.TryGetThreat(spawn.Role, out int threat) ? threat : -999),
+                           extra == elite.Sum(spawn => table.TryGetThreat(spawn.Role, out int threat) ? threat : -999) +
+                           EnemyVariantRules.CountChampions(room.ResolvedEncounterWaves) *
+                           EnemyVariant.ChampionThreatBonus,
                         $"Seed {seed} room '{room.RoomId}' elite threat must count once more. {error}");
                     if (elite.Length == 0) continue;
                     Assert(EnemyVariantRules.IsEligible(elite[0].Role),
