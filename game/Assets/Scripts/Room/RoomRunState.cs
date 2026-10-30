@@ -12,6 +12,8 @@ namespace TrickalFanGame.Room
         public bool HasClaimedArtifact { get; private set; }
         public int CompletedWaveCount { get; private set; }
         public bool HasGrantedClearReward { get; private set; }
+        // Variant-0: the room's elite drops its reward once per Run, even if an escaped fight brings it back.
+        public bool HasGrantedEliteReward { get; private set; }
         public bool IsKeyLockOpen { get; private set; }
         public IReadOnlyCollection<string> DestroyedObstacleIds => destroyedObstacleIds;
         private readonly HashSet<string> destroyedObstacleIds = new(StringComparer.Ordinal);
@@ -196,6 +198,15 @@ namespace TrickalFanGame.Room
             if (HasGrantedClearReward) return false;
             HasVisited = true;
             HasGrantedClearReward = true;
+            Changed?.Invoke();
+            return true;
+        }
+
+        public bool TryMarkEliteRewardGranted()
+        {
+            if (HasGrantedEliteReward) return false;
+            HasVisited = true;
+            HasGrantedEliteReward = true;
             Changed?.Invoke();
             return true;
         }

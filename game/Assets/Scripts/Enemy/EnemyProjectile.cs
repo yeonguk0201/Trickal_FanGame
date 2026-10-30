@@ -54,8 +54,10 @@ namespace TrickalFanGame.Enemy
             projectileBody.gravityScale = 0f;
             CircleCollider2D collider = projectileObject.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
+            // Variant-0: an elite's shots are 1.5x, drawing and hitbox together.
             ProjectileSizing.Apply(projectileObject.transform, collider,
-                authoredArtwork ? ProjectileSizing.DrawnEnemyScale : ProjectileSizing.RangedEnemyScale);
+                (authoredArtwork ? ProjectileSizing.DrawnEnemyScale : ProjectileSizing.RangedEnemyScale) *
+                EnemyVariant.ProjectileScaleOf(source));
 
             EnemyProjectile projectile = projectileObject.AddComponent<EnemyProjectile>();
             projectile.Launch(direction, source, damageTier, speed, lifetime);

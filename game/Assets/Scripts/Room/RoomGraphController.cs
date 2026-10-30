@@ -351,6 +351,10 @@ namespace TrickalFanGame.Room
             {
                 lob.Cancel();
             }
+
+            // Variant-1: a champion's death puddle and an unfired death volley stay in the room they came from.
+            EnemyChampionPuddle.ClearAll();
+            EnemyChampionVolley.ClearAll();
         }
     }
 }

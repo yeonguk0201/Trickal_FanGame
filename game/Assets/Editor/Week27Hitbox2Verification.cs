@@ -27,12 +27,13 @@ namespace TrickalFanGame.Editor
             "TestEnemy", "SansamoEnemy", "RangedEnemy", "HighBloodSugarFairy", "QuickRangedFairy",
             "LivelyLowBloodSugarFairy", "ChargingEnemy", "NururingFairyWarrior", "CrayonArcherMinion",
             "CrayonAxeMinion", "CrayonMageMinion", "CrayonShieldMinion", "BuseureogiCrumbMinion",
+            "SelfDestructFairy", "LobbingFairy", "AmbushFairy",
         };
 
-        // Bosses, stationary boss props and bodies no wider than the feet keep one circle.
+        // Bosses, stationary boss props, fliers (쥬비, 대왕쥬비) and bodies no wider than the feet keep one circle.
         private static readonly string[] BodyOnlyPrefabs =
         {
-            "CrayonHeroBoss", "SaemaeumVaultBoss", "TestBoss", "JyubiEnemy", "NururingSplit",
+            "CrayonHeroBoss", "SaemaeumVaultBoss", "TestBoss", "JyubiEnemy", "JyubiKing", "NururingSplit",
             "BuseureogiCreamObstacle", "BuseureogiDoughObstacle",
         };
 

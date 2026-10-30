@@ -2753,7 +2753,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c9bc1b0e46146f44697bd426f6149857, type: 2}
   - {fileID: 11400000, guid: f058247391a23904c9ece2d6d6eb5578, type: 2}
   - {fileID: 11400000, guid: 8cbc6bd8ca2b8ee4cb46c4e23b92aa34, type: 2}
-  encounterContentVersion: 20
+  encounterContentVersion: 22
   difficultyTable: {fileID: 11400000, guid: 5e297717d226fb243b795131d80fa24e, type: 2}
   floorSettings:
   - minimumTotalRooms: 8
@@ -2799,6 +2799,7 @@ MonoBehaviour:
   roomPrefab: {fileID: 3035332181880803975, guid: 4c3637cd1a19e3f4883f17715d95367f, type: 3}
   encounterEnemyRoster: {fileID: 11400000, guid: dbd3fb86e3fb0264686c348e9060667b, type: 2}
   encounterClearDropTable: {fileID: 11400000, guid: eea23f72b6b54874cb7d18a125855309, type: 2}
+  eliteKillDropTable: {fileID: 11400000, guid: 2b613792019fcd74b9e96e7a17375a5d, type: 2}
   chestContentTable: {fileID: 11400000, guid: 48012de1a8d9a0d409c734fa4cf5845c, type: 2}
   floorBossPrefabs:
   - {fileID: 421685952657128216, guid: f991af9e6d8bc4e4f869e052eded37e0, type: 3}

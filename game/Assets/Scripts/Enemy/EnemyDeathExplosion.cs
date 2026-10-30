@@ -85,7 +85,8 @@ namespace TrickalFanGame.Enemy
 
         // The player damage this enemy's blast deals now.
         public int ResolveDamageUnits() => usesDamageTier
-            ? HealthUnits.GetEnemyDamageUnits(damageTier, EnemyFloorLevel.Resolve(gameObject))
+            ? HealthUnits.GetEnemyDamageUnits(EnemyVariant.ResolveDamageTier(gameObject, damageTier),
+                EnemyFloorLevel.Resolve(gameObject))
             : damageUnits;
 
         private void Awake()

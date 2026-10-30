@@ -19,6 +19,8 @@ namespace TrickalFanGame.Room
         [SerializeField] private RoomPrefab roomPrefab;
         [SerializeField] private EncounterEnemyRoster encounterEnemyRoster;
         [SerializeField] private ResourceDropTable encounterClearDropTable;
+        // Variant-0: the guaranteed pickup an elite drops when killed.
+        [SerializeField] private ResourceDropTable eliteKillDropTable;
         [SerializeField] private ChestContentTable chestContentTable;
         [SerializeField] private GameObject[] floorBossPrefabs = Array.Empty<GameObject>();
         [SerializeField] private ItemRewardSelectionSession rewardSelectionSession;
@@ -43,6 +45,7 @@ namespace TrickalFanGame.Room
         public RoomPrefab ConfiguredRoomPrefab => roomPrefab;
         public EncounterEnemyRoster EnemyRoster => encounterEnemyRoster;
         public ResourceDropTable EncounterClearDropTable => encounterClearDropTable;
+        public ResourceDropTable EliteKillDropTable => eliteKillDropTable;
         public ChestContentTable ChestContentTable => chestContentTable;
         public IReadOnlyList<GameObject> FloorBossPrefabs => floorBossPrefabs;
         public GeneratedFloorGraph GeneratedGraph => generatedGraph;
@@ -79,6 +82,11 @@ namespace TrickalFanGame.Room
         public void ConfigureEncounterClearDrop(ResourceDropTable configuredTable)
         {
             encounterClearDropTable = configuredTable;
+        }
+
+        public void ConfigureEliteKillDrop(ResourceDropTable configuredTable)
+        {
+            eliteKillDropTable = configuredTable;
         }
 
         // Chest-1: combat room clears roll a chest instead of the old single-pickup drop table.
@@ -670,9 +678,11 @@ namespace TrickalFanGame.Room
 
                     GameObject[] encounterPrefabs = new GameObject[resolved.Length];
                     Transform[] encounterSpawnPoints = new Transform[resolved.Length];
+                    EnemyVariantKind[] encounterVariants = new EnemyVariantKind[resolved.Length];
                     for (int index = 0; index < resolved.Length; index++)
                     {
                         ResolvedEncounterSpawn spawn = resolved[index];
+                        encounterVariants[index] = spawn.Variant;
                         if (!encounterEnemyRoster.TryResolve(spawn.Role, out encounterPrefabs[index], out error))
                         { error = $"Room {node.RoomId} could not resolve role '{spawn.Role}'. {error}"; return false; }
                         if (spawn.SpawnPointIndex < 0 || spawn.SpawnPointIndex >= controller.SpawnPoints.Count)
@@ -680,11 +690,19 @@ namespace TrickalFanGame.Room
                         encounterSpawnPoints[index] = controller.SpawnPoints[spawn.SpawnPointIndex];
                     }
 
-                    waves[waveIndex] = new EncounterRuntimeWave(encounterPrefabs, encounterSpawnPoints);
+                    waves[waveIndex] = new EncounterRuntimeWave(encounterPrefabs, encounterSpawnPoints,
+                        encounterVariants);
                 }
 
                 controller.ConfigurePreplacedEnemies(Array.Empty<Health>());
                 controller.ConfigureEncounterWaves(waves);
+                // Variant-0: without a table (older test scenes) the elite still fights but drops nothing; the
+                // Variant-0 verification requires the Game Scene table.
+                controller.ConfigureEliteReward(EnemyVariantRules.CountElites(node.ResolvedEncounterWaves) > 0 &&
+                                                eliteKillDropTable != null && eliteKillDropTable.TryValidate(out _)
+                    ? new EliteKillReward(eliteKillDropTable, instance.Node.ContentRoot.transform, state,
+                        EliteKillReward.DeriveSeed(node.ContentSeed), runProgress)
+                    : null);
                 if (chestContentTable != null)
                 {
                     if (!chestContentTable.TryValidate(out error))

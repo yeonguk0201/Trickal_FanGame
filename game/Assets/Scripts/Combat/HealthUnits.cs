@@ -39,6 +39,8 @@ namespace TrickalFanGame.Combat
             float multiplier = 1f)
         {
             int floorNumber = EnemyFloorLevel.Resolve(source);
+            // Variant-0: an elite hits one tier higher.
+            tier = TrickalFanGame.Enemy.EnemyVariant.ResolveDamageTier(source, tier);
             return new DamageContext(source, sourceType, GetEnemyDamageUnits(tier, floorNumber), multiplier);
         }
 

@@ -27,6 +27,7 @@ namespace TrickalFanGame.Room
         private Health playerHealth;
         private RoomRunState runState;
         private RoomClearRewardSpawner clearRewardSpawner;
+        private EliteKillReward eliteKillReward;
 
         public RoomState State { get; private set; } = RoomState.Waiting;
         public int AliveEnemyCount => enemyDeathHandlers.Count;
@@ -43,6 +44,7 @@ namespace TrickalFanGame.Room
         public IReadOnlyList<Health> PreplacedEnemies => preplacedEnemies;
 
         public event Action<RoomState> StateChanged;
+        public EliteKillReward EliteKillReward => eliteKillReward;
         public event Action<GameObject> EnemySpawned;
         public event Action<int> WaveStarted;
         public event Action<int> WaveCompleted;
@@ -123,6 +125,11 @@ namespace TrickalFanGame.Room
         public void ConfigureClearReward(RoomClearRewardSpawner configuredSpawner)
         {
             clearRewardSpawner = configuredSpawner;
+        }
+
+        public void ConfigureEliteReward(EliteKillReward configuredReward)
+        {
+            eliteKillReward = configuredReward;
         }
 
         public bool TryValidateEncounterConfiguration(out string error)
@@ -312,6 +319,15 @@ namespace TrickalFanGame.Room
 
             return killed;
         }
+
+        // Development panel only: a room without a generated elite gets the elite reward the panel's elite will drop.
+        public void EnsureEliteRewardForDevelopment(TrickalFanGame.Resource.ResourceDropTable table,
+            Transform rewardParent, int seed)
+        {
+            if (eliteKillReward != null || table == null) return;
+            eliteKillReward = new EliteKillReward(table, rewardParent, runState ?? new RoomRunState(name), seed,
+                runProgress);
+        }
 #endif
 
         public void RegisterEnemy(Health enemyHealth)
@@ -399,10 +415,11 @@ namespace TrickalFanGame.Room
             CurrentWaveNumber = waveIndex + 1;
             WaveStarted?.Invoke(CurrentWaveNumber);
             for (int index = 0; index < wave.EnemyPrefabs.Count; index++)
-                SpawnEnemy(wave.EnemyPrefabs[index], wave.SpawnPoints[index]);
+                SpawnEnemy(wave.EnemyPrefabs[index], wave.SpawnPoints[index], wave.VariantAt(index));
         }
 
-        private void SpawnEnemy(GameObject configuredPrefab, Transform spawnPoint)
+        private void SpawnEnemy(GameObject configuredPrefab, Transform spawnPoint,
+            EnemyVariantKind variant = EnemyVariantKind.None)
         {
             if (configuredPrefab == null || spawnPoint == null)
             {
@@ -419,6 +436,8 @@ namespace TrickalFanGame.Room
             }
 
             FloorDifficultyScaler.ApplyScaling(enemy, floorNumber);
+            // Variant-0: after the floor scaling, so an elite doubles the floor's health.
+            EnemyVariant.Apply(enemy, variant);
             EnemySpawned?.Invoke(enemy);
             AlertEnemy(enemyHealth);
             RegisterEnemy(enemyHealth);
@@ -443,6 +462,8 @@ namespace TrickalFanGame.Room
 
             enemyHealth.Died -= deathHandler;
             runProgress?.RecordKill();
+            if (EnemyVariant.IsEliteEnemy(enemyHealth.gameObject))
+                eliteKillReward?.TrySpawn(enemyHealth.transform.position);
 
             if (State == RoomState.Combat && !IsProgressionStopped && AliveEnemyCount == 0)
             {

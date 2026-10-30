@@ -1264,7 +1264,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
 
 - Hitbox-2 일반 적 발 콜라이더와 1칸 통로 통과: 메뉴 `Trickal Fan Game > Week 27 > Setup Hitbox-2 Enemy Feet Collider`가
   `EnemyFeet` 레이어를 빈 사용자 레이어에 만들고 2D 충돌 표에서 `Environment`·`Pit`과만 충돌하게 한 뒤, 루트에 `TestEnemy`가
-  있는 Prefab 중 일반 적(`EnemyBehaviorContext`가 있고 `BossController`가 없으며 몸 반지름이 0.35보다 큰 적)에 자식
+  있는 Prefab 중 일반 적(`EnemyBehaviorContext`가 있고 `BossController`·`EnemyFlight`가 없으며 몸 반지름이 0.35보다 큰 적. 나는 적인 쥬비·대왕쥬비는
+  몸 하나로 지형에 닿는다, 2026-10-30)에 자식
   `Feet`(월드 반지름 0.35, 아래 끝이 몸 아래 끝과 같음)를 넣고 몸 원의 `excludeLayers`에 `Environment`·`Pit`을 넣는다.
   `Enemy` 레이어의 충돌 표는 바꾸지 않으므로 보스는 몸 하나로 지형에 닿는다. 기반 Prefab을 변형보다 먼저 처리하고, 일반
   적에서 상속받은 발이 있는 보스 변형(`TestBoss`)은 발을 끄고 몸의 지형 충돌을 되돌린다. 다시 실행해도 바뀌는 Prefab이 없다.
@@ -1456,6 +1457,33 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   않는지, (4) 스킬 자동 조준이 매복 중인 적을 노리지 않는지 본다. 같은 섹션의
   `Ambushers alive N, buried B, warning W, up U` 표시로 상태를 본다. 실제 방에서 보려면 `— Seed —`의 `Find ambusher F3`로 3층
   pressure에 잠복형이 있는 seed를 찾아 `Restart Run with this seed` 뒤 3층으로 간다.
+
+- Variant-0 엘리트(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Variant-0 Elite Enemies`가 `Assets/Items/Drops/elite-kill-drop-table.asset`
+  (엘리트 처치 픽업 1개 확정 표), Game Scene `RoomGraphAssembler`의 엘리트 표 연결과 Encounter 콘텐츠 버전 21을 멱등 구성한다. 런타임
+  규칙은 `EnemyVariant`(효과)·`EnemyVariantRules`(층별 확률·제외 역할)·`EliteKillReward`(처치 보상)에 있다. 사양은
+  [28번 §8.5](./28-difficulty-enemies-drops-plan.md). 배치는 `-executeMethod TrickalFanGame.Editor.Week27Variant0Verification.SetupAndVerifyBatch`
+  (Setup 2회 GUID 보존 포함), 단독 검증 `Verify`, 회귀 `VerifyWithRegressionsBatch`(Enemy-10~13, Curve-0·1, Hitbox-2, Enemy-7~9,
+  Spawn-1·2, Difficulty-1, Encounter-4, Floor-1, 개발 패널). 검사: 층별 확률 0/0/20/30/40%, 쥬비·보스 제외, 512 seed에서 방당 최대 1마리·
+  1·2층 없음·3층 약 20%·재생성 결정성, 저장 점수 불변과 엘리트 추가 위협, 런타임 웨이브의 변형·보상 연결, 모든 일반 Encounter 적의
+  체력·크기·넉백 무게·발 크기와 위치·공격 단계 크기 유지·이동 1.2배·피해 한 단계 위, 직선·곡사 탄 1.5배, 보스 거부, 도망친 뒤 다시
+  싸워 처치하면 쓰러진 자리에 픽업 1개와 재지급 없음.
+  개발 패널(`F1`): `— Seed —`의 `Find elite F3`로 3층에 엘리트 방이 있는 seed를 찾고 `Restart Run with this seed`. `— Room —`의
+  `Make nearest enemy elite`는 지금 방에서 플레이어와 가장 가까운 일반 적을 엘리트로 바꾸고(처치 보상도 연결), 아래 줄에 계획된 엘리트
+  수·살아 있는 엘리트 수·보상 상태를, `Encounter:` 줄에 `+elite N` 추가 위협을 보인다(Variant-1부터 `+variants N`, 챔피언 포함).
+
+- Variant-1 챔피언(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Variant-1 Champion Enemies`가 Encounter 콘텐츠 버전 22를 멱등
+  구성한다(외곽선 셰이더는 `Assets/Resources/CombatEffects/ChampionOutline.shader`에서 런타임에 읽는다). 런타임 규칙은
+  `EnemyVariant`(종류·색)·`EnemyVariantRules`(층별 확률·성질 배정)·`EnemyChampionDeath`·`EnemyChampionPuddle`·`EnemyChampionVolley`·
+  `EnemyChampionOutline`에 있다. 사양은 [28번 §8.6](./28-difficulty-enemies-drops-plan.md). 배치는
+  `-executeMethod TrickalFanGame.Editor.Week27Variant1Verification.SetupAndVerifyBatch`(Setup 2회 GUID 보존 포함), 단독 검증 `Verify`,
+  회귀 `VerifyWithRegressionsBatch`(Variant-0과 그 회귀 목록). 검사: 층별 확률 0/10/15/20/25%, 성질 목록과 자폭형 자폭 제외, 512 seed에서
+  자리별 굴림 일치·엘리트 불변·1층 없음·2층 약 10%·3층 약 15%·성질 고른 분포·재생성 결정성, 저장 점수 불변과 챔피언 +1 위협, 런타임
+  웨이브의 변형 연결, 모든 일반 적의 성질 적용·색·스탯 불변·중첩 거부, 보스 거부, 외곽선의 스프라이트·메시 추적과 16개 복사본 위치·
+  순서·색, 사망 시 숨김, 장판 무해 구간·발 판정·1초 간격·종료, 탄 예고 뒤 4/8방향·경 등급·보라색, 자폭 쫄따구 값, 방 이동 정리, 실제
+  방에서 챔피언 스폰과 즉시 클리어.
+  개발 패널(`F1`): `— Seed —`의 `Find champion F2`로 2층에 챔피언이 있는 seed를 찾고 `Restart Run with this seed`. `— Room —`의
+  `Make nearest champion` 줄 `Puddle`·`Shots`·`Blast`는 지금 방에서 플레이어와 가장 가까운 일반 적을 그 성질 챔피언으로 바꾸고, 아래 줄에
+  계획된 챔피언 수·살아 있는 챔피언 수·남은 장판 수·쏘기 전 탄 수를 보인다.
 
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,

@@ -159,6 +159,14 @@ namespace TrickalFanGame.Run
             FindEnemySeedButton(assembler, EncounterEnemyRole.Lobber, "lobber", "Lobber room");
             // Enemy-13: 잠복형 only comes in pressure's melee slots from floor 3.
             FindEnemySeedButton(assembler, EncounterEnemyRole.Ambusher, "ambusher", "Ambusher room");
+            // Variant-0: elites start on floor 3 (20% of combat rooms).
+            if (GUILayout.Button("Find elite F3"))
+                FindSeed(assembler, node => EnemyVariantRules.CountElites(node.ResolvedEncounterWaves) > 0,
+                    "elite room", 3);
+            // Variant-1: champions start on floor 2 (10% of eligible enemies, 15% on floor 3).
+            if (GUILayout.Button("Find champion F2"))
+                FindSeed(assembler, node => EnemyVariantRules.CountChampions(node.ResolvedEncounterWaves) > 0,
+                    "champion room", 2);
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -853,10 +861,17 @@ namespace TrickalFanGame.Run
                 ? assembler.GeneratedGraph?.FindFloor(room.Node.FloorNumber)?.Nodes
                     .FirstOrDefault(candidate => candidate.RoomId == room.Node.RoomId)
                 : null;
+            int eliteThreat = 0;
+            if (node != null && assembler.Generator?.DifficultyTable != null)
+                assembler.Generator.DifficultyTable.TryScoreVariants(node.ResolvedEncounterWaves, out eliteThreat,
+                    out _);
             GUILayout.Label($"Encounter: {node?.EncounterId ?? "-"}" +
                             (node != null && node.HasDifficulty
                                 ? $"  score {node.Difficulty.Score} {node.Difficulty.Tier}"
-                                : string.Empty));
+                                : string.Empty) +
+                            (eliteThreat > 0 ? $"  +variants {eliteThreat}" : string.Empty));
+            DrawEliteControls(assembler, room, controller, node);
+            DrawChampionControls(assembler, controller, node);
             GUILayout.Label("Death blasts pending " +
                             FindObjectsByType<TrickalFanGame.Enemy.EnemyDeathBlast>(FindObjectsSortMode.None)
                                 .Count(blast => !blast.HasExploded));
@@ -1150,6 +1165,82 @@ namespace TrickalFanGame.Run
             GUILayout.Label($"{shop.RoomId} at {shop.GridPosition}, {(state?.IsKeyLockOpen == true ? "unlocked" : "locked")}");
             if (AssistedButton("Go to shop door"))
                 Teleport(assembler, shop.DirectionalConnections[0].DestinationRoomId);
+        }
+
+        // Variant-0: turns the living enemy nearest to the player into an elite (bigger, x2 health, x2 knockback
+        // weight, one damage tier up, x1.2 movement, x1.5 shots). Its kill drops the elite reward once per room.
+        private void DrawEliteControls(RoomGraphAssembler assembler, RoomPrefab room, RoomController controller,
+            GeneratedRoomNode node)
+        {
+            PlayerMovement player = assembler.Graph?.Player;
+            if (AssistedButton("Make nearest enemy elite") && controller != null && player != null)
+            {
+                Health nearest = controller.AliveEnemies
+                    .Where(enemy => enemy != null && !enemy.IsDead &&
+                                    TrickalFanGame.Enemy.EnemyVariant.CanApply(enemy.gameObject))
+                    .OrderBy(enemy => (enemy.transform.position - player.transform.position).sqrMagnitude)
+                    .FirstOrDefault();
+                if (nearest == null)
+                {
+                    status = "No living normal enemy in this room to make elite.";
+                }
+                else
+                {
+                    controller.EnsureEliteRewardForDevelopment(assembler.EliteKillDropTable,
+                        room != null ? room.Node.ContentRoot.transform : controller.transform,
+                        EliteKillReward.DeriveSeed(node?.ContentSeed ?? 0));
+                    status = TrickalFanGame.Enemy.EnemyVariant.Apply(nearest.gameObject,
+                        TrickalFanGame.Enemy.EnemyVariantKind.Elite)
+                        ? $"{nearest.name} is now elite ({nearest.MaxHealth:0} health)."
+                        : "That enemy cannot become elite.";
+                }
+            }
+
+            int elitesAlive = controller == null ? 0 : controller.AliveEnemies.Count(enemy =>
+                enemy != null && !enemy.IsDead && TrickalFanGame.Enemy.EnemyVariant.IsEliteEnemy(enemy.gameObject));
+            string reward = controller?.EliteKillReward == null ? "none"
+                : controller.EliteKillReward.LastSpawnedReward != null
+                    ? $"dropped {controller.EliteKillReward.LastSpawnedReward.name}"
+                    : "waiting";
+            GUILayout.Label($"Elites planned {EnemyVariantRules.CountElites(node?.ResolvedEncounterWaves)}, " +
+                            $"alive {elitesAlive}, reward {reward}");
+        }
+
+        // Variant-1: turns the living enemy nearest to the player into a champion with the chosen death property
+        // (green puddle, purple 4-way shots, yellow 쫄따구 blast). 자폭형 refuses the blast.
+        private void DrawChampionControls(RoomGraphAssembler assembler, RoomController controller,
+            GeneratedRoomNode node)
+        {
+            PlayerMovement player = assembler.Graph?.Player;
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Make nearest champion");
+            foreach ((TrickalFanGame.Enemy.EnemyVariantKind kind, string label) in new[]
+                     {
+                         (TrickalFanGame.Enemy.EnemyVariantKind.ChampionPuddle, "Puddle"),
+                         (TrickalFanGame.Enemy.EnemyVariantKind.ChampionShots, "Shots"),
+                         (TrickalFanGame.Enemy.EnemyVariantKind.ChampionBlast, "Blast"),
+                     })
+            {
+                if (!AssistedButton(label) || controller == null || player == null) continue;
+                Health nearest = controller.AliveEnemies
+                    .Where(enemy => enemy != null && !enemy.IsDead &&
+                                    TrickalFanGame.Enemy.EnemyVariant.CanApply(enemy.gameObject, kind))
+                    .OrderBy(enemy => (enemy.transform.position - player.transform.position).sqrMagnitude)
+                    .FirstOrDefault();
+                status = nearest == null
+                    ? $"No living normal enemy in this room can become a {label.ToLowerInvariant()} champion."
+                    : TrickalFanGame.Enemy.EnemyVariant.Apply(nearest.gameObject, kind)
+                        ? $"{nearest.name} is now a {label.ToLowerInvariant()} champion."
+                        : "That enemy cannot become a champion.";
+            }
+
+            GUILayout.EndHorizontal();
+            int championsAlive = controller == null ? 0 : controller.AliveEnemies.Count(enemy =>
+                enemy != null && !enemy.IsDead && TrickalFanGame.Enemy.EnemyVariant.IsChampionEnemy(enemy.gameObject));
+            GUILayout.Label($"Champions planned {EnemyVariantRules.CountChampions(node?.ResolvedEncounterWaves)}, " +
+                            $"alive {championsAlive}, puddles {TrickalFanGame.Enemy.EnemyChampionPuddle.Live.Count}, " +
+                            "volleys pending " +
+                            TrickalFanGame.Enemy.EnemyChampionVolley.Live.Count(volley => !volley.HasFired));
         }
 
         private void FindEnemySeedButton(RoomGraphAssembler assembler, EncounterEnemyRole role, string buttonName,
