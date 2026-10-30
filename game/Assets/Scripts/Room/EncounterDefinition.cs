@@ -24,6 +24,8 @@ namespace TrickalFanGame.Room
         SelfDestruct,
         // Enemy-11: 대왕쥬비, a big flying 쥬비 that keeps its distance and summons 쥬비. Only in jyubi-nest.
         JyubiKing,
+        // Enemy-12: 곡사형, which lobs projectiles over obstacles at the player's spot. Crossfire rear slots only.
+        Lobber,
     }
     public enum EncounterWaveStartCondition { RoomEntered, PreviousWaveCleared }
     public enum EncounterWaveCompletionCondition { AllRequiredEnemiesDefeated }

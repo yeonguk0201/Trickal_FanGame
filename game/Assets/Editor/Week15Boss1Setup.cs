@@ -201,6 +201,7 @@ namespace TrickalFanGame.Editor
                 runtime.ConfigureLimits(4, 3);
                 runtime.ConfigureObstacleImpact(1.1f, EnemyDamageTier.Light, 7f, 0.2f);
                 runtime.ConfigureMovement(2.25f, 1.35f);
+                runtime.ConfigureProjectileArtwork(BuseureogiCreamProjectileSetup.ConfigureAndLoadFrames());
                 if (PrefabUtility.SaveAsPrefabAsset(contents, Week15Boss0Setup.BossPrefabPath) == null)
                     throw new InvalidOperationException("Could not save the Buseureogi boss prefab.");
             }

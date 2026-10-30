@@ -45,6 +45,10 @@ Thumbs.db
 /.claude/settings.local.json
 /output/
 /nul
+/tmp/
+
+# Bundled art previews: render_preview.py rebuilds them from preview.html and the PNGs.
+docs/art-prompts/**/preview-standalone.html
 
 # ONE Mobile POP: its license forbids redistributing the font file. Keep it local (see game/Assets/Fonts/README.md).
 /game/Assets/Fonts/ONE Mobile POP.ttf

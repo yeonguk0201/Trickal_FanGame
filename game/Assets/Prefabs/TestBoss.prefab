@@ -225,6 +225,10 @@ MonoBehaviour:
   phaseTwoSpeedMultiplier: 1.35
   shotInterval: 0.42
   projectileSpeed: 5
+  projectileFrames:
+  - {fileID: 21300000, guid: 9ac3fd4f29dd46a79798c1ca092bf4ea, type: 3}
+  - {fileID: 21300000, guid: e823325d8bd2451b986599a0d628d0e4, type: 3}
+  - {fileID: 21300000, guid: 7e66d370df314452806241237be4d982, type: 3}
   movementHalfExtents: {x: 6.2, y: 3.2}
 --- !u!114 &700000000000000001
 MonoBehaviour:

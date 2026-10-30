@@ -38,6 +38,8 @@ namespace TrickalFanGame.Editor
             new(EncounterEnemyRole.SelfDestruct, 3),
             // Enemy-11: 대왕쥬비. It keeps summoning 쥬비 while it lives, so it weighs like two strong enemies.
             new(EncounterEnemyRole.JyubiKing, 6),
+            // Enemy-12: 곡사형. Like the sniper it hurts from behind cover, so crossfire's range stays 15~19.
+            new(EncounterEnemyRole.Lobber, 4),
         };
 
         public static readonly RoomDifficultyTierBand[] TierBands =

@@ -27,6 +27,7 @@ namespace TrickalFanGame.Room
             EncounterEnemyRole.SelfDestruct => 2,    // 자폭형 (Enemy-10)
             EncounterEnemyRole.SplittingChaser => 3, // 누루링-요정전사
             EncounterEnemyRole.JyubiKing => 3,       // 대왕쥬비 (Enemy-11)
+            EncounterEnemyRole.Lobber => 3,          // 곡사형 (Enemy-12)
             EncounterEnemyRole.Boss => 1,
             _ => throw new ArgumentOutOfRangeException(nameof(role), role,
                 "Every Encounter enemy role needs an introduction floor."),

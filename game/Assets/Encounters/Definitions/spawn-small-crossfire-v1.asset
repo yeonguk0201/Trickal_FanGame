@@ -33,6 +33,8 @@ MonoBehaviour:
         weight: 90
       - enemyRole: 5
         weight: 10
+      - enemyRole: 11
+        weight: 20
   - waveNumber: 2
     startCondition: 1
     completionCondition: 0

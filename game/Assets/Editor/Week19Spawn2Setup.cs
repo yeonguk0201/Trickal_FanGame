@@ -211,10 +211,9 @@ namespace TrickalFanGame.Editor
                 definitions.Add(CreateOrUpdate(spec.ProfileId, "pressure", profile,
                     Wave(1, pressureMelee, rear),
                     Wave(2, pressureMelee, rear)));
+                // Enemy-12: crossfire's three rear slots also draw 곡사형 (floor 3 only through the floor pool).
                 definitions.Add(CreateOrUpdate(spec.ProfileId, "crossfire", profile,
-                    Wave(1, CandidateRule(3,
-                        new EncounterEnemyCandidate(EncounterEnemyRole.Ranged, spec.QuickRangedWeight),
-                        new EncounterEnemyCandidate(EncounterEnemyRole.Sniper, spec.SniperWeight))),
+                    Wave(1, CandidateRule(3, Week27Enemy12Setup.CrossfireRearCandidates(spec))),
                     Wave(2, melee, charge)));
             }
 

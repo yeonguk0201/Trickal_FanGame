@@ -84,7 +84,8 @@ namespace TrickalFanGame.Editor
                 if (Time.frameCount - startedFrame < 4) return;
                 var preview = Object.FindObjectsByType<FairyKingdomArtworkView>(FindObjectsSortMode.None)
                     .Where(view => view.gameObject.layer == 31).ToArray();
-                Require(preview.Length == 45, "Play preview must render all 45 assets.");
+                Require(preview.Length == FairyKingdomArtworkSetup.ExpectedSpriteCount,
+                    $"Play preview must render all {FairyKingdomArtworkSetup.ExpectedSpriteCount} assets.");
                 foreach (FairyKingdomArtworkView view in preview)
                     Require(view.Visual != null && view.Visual.sprite != null && view.Visual.sprite.name == view.ArtworkId,
                         "Missing live preview artwork: " + view.ArtworkId);
@@ -110,7 +111,7 @@ namespace TrickalFanGame.Editor
                     Require(effect != null && effect.GetComponent<SpriteRenderer>().sprite.name == id,
                         "Single-frame effect did not spawn: " + id);
                 }
-                Debug.Log("Fairy Kingdom Play artwork verification passed: 45 live preview sprites, 9 gameplay " +
+                Debug.Log($"Fairy Kingdom Play artwork verification passed: {FairyKingdomArtworkSetup.ExpectedSpriteCount} live preview sprites, 9 gameplay " +
                     "prefabs, simultaneous poison/burn/shock, scaled water-stream dimensions and transient " +
                     "single-frame effects. Visual art approval pending.");
                 SessionState.SetBool(Pending, false);

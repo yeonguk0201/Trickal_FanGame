@@ -1420,6 +1420,24 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   본다. 실제 방에서 보려면 `— Seed —`의 `Find Jyubi king F3`로 3층에 nest가 있는 seed를 찾아 `Restart Run with this seed` 뒤
   3층으로 간다.
 
+- Enemy-12 곡사형(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Enemy-12 Lobbing Enemy`가 `LobbingFairy` Prefab(`RangedEnemy`
+  언팩 복사본, `LobbingEnemyController`, 사용자 원화 저혈당 요정-광기 `low-blood-sugar-fairy-madness` 정지 그림과 그 표시 Prefab, 투척 모션 `LobbingFairyMotion`과
+  쇠지렛대 투사체), 위협 점수 4, roster의 `Lobber` 역할, crossfire 후방 후보(가중치
+  20)와 Encounter 콘텐츠 버전 19를 멱등 구성한다. 사양은 [28번 §8.3](./28-difficulty-enemies-drops-plan.md). 배치는
+  `-executeMethod TrickalFanGame.Editor.Week27Enemy12Verification.SetupAndVerifyBatch`(Setup 2회 GUID·그림 보존 포함), 단독 검증
+  `Verify`, 회귀 `VerifyWithRegressionsBatch`(Enemy-11·10, Curve-1, Enemy-7·8·9, Passive-1, Spawn-1·2, Difficulty-1, Encounter-4,
+  Floor-1, 요정왕국 그림, 개발 패널. 실패가 있어도 끝까지 돌고 한 번에 보고). 검사: Prefab 수치와 `RangedEnemy` 유지, crossfire에만
+  후보·위협 15~19 유지, 512 seed에서 3층 crossfire 후방 지점에만 배치와 재생성 결정성, 런타임 Prefab 연결, 감지 전·생성 지연 중
+  정지, 0.4초 준비(몸 색 변화 없음) 뒤 그 순간 플레이어 발밑(그림자 자리)으로 던짐, 공중 충돌체 없음, 1.5×0.75 붉은 타원 예고와
+  포물선 높이, 착지 때 층별 중 등급 피해, 장애물 너머로 던지고 장애물은 그대로, 타원 밖(아래 0.5) 플레이어·다른 적 무피해, 던진 뒤 사망해도 착지, 3.5칸 안 후퇴·7칸 밖 접근, 넉백의
+  준비 취소, 방 이동 때 공중 투사체와 예고 원 제거, 방 클리어. 2026-10-30 모두 통과했고 2026-10-30 사용자 Play 확인을 마쳤다. 요정왕국 그림 카탈로그 개수는
+  `FairyKingdomArtworkSetup.ExpectedSpriteCount`(46)가 기준이다. 수동 확인: Game Scene Play → `F1` 개발
+  패널 `— Room —`의 `Spawn lobber (throws over obstacles)`로 플레이어 위 5칸에 소환한다. (1) 저혈당 요정-광기 그림이 보이고, 준비 때 쇠지렛대를 머리 위로 들었다가 팔을 뻗어 던지며(플레이어 쪽을 봄) 쇠지렛대가 돌면서
+  포물선으로 날아오고, 던진 순간 플레이어 그림자 자리에 그림자보다 큰 붉은 타원이 보이며 점점 진해지는지 본다. (2) 장애물 뒤에 숨어도
+  넘어와 맞는지, 타원 밖으로 피하면 맞지 않는지 본다. (3) 다가가면 물러나고 멀어지면 따라오는지 본다. 같은 섹션의 `Lobbers alive N, winding up K, in the air M`
+  표시로 상태를 본다. 실제 방에서 보려면 `— Seed —`의 `Find lobber F3`로 3층 crossfire에 곡사형이 있는 seed를 찾아
+  `Restart Run with this seed` 뒤 3층으로 간다.
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,

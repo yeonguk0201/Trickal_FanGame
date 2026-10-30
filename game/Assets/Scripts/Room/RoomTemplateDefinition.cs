@@ -135,6 +135,8 @@ namespace TrickalFanGame.Room
                 EncounterEnemyRole.Sniper => SpawnPointPlacementRole.RearFiring,
                 // Enemy-11: 대왕쥬비 keeps its distance, so it starts on a far rear point like the shooters.
                 EncounterEnemyRole.JyubiKing => SpawnPointPlacementRole.RearFiring,
+                // Enemy-12: 곡사형 throws from the back like the shooters.
+                EncounterEnemyRole.Lobber => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Charging => SpawnPointPlacementRole.ChargeLane,
                 // Bosses use dedicated room templates and are not selected through the normal Spawn-1 contract.
                 EncounterEnemyRole.Boss => SpawnPointPlacementRole.None,

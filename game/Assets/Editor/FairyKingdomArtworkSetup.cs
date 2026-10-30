@@ -17,6 +17,9 @@ namespace TrickalFanGame.Editor
     public static class FairyKingdomArtworkSetup
     {
         public const string ArtRoot = "Assets/Art/Drafts/FairyKingdom";
+        // Every PNG under ArtRoot. 47 since Enemy-12 added 저혈당 요정-광기 and Enemy-10 added 산사모-광기 (2026-10-30).
+        // The menu names keep "45" so documented menu paths stay valid.
+        public const int ExpectedSpriteCount = 47;
         public const string CatalogPath = "Assets/Resources/FairyKingdomArtwork/Catalog.asset";
         public const string DisplayRoot = "Assets/Prefabs/FairyKingdomArtwork";
         public const string PreviewScenePath = "Assets/Scenes/FairyKingdomArtworkPreview.unity";
@@ -33,10 +36,12 @@ namespace TrickalFanGame.Editor
             // Enemy-9: 누루링-요정전사 and its small splits share one drawing; the split Prefab is scaled down.
             ["NururingFairyWarrior"] = "nururing",
             ["NururingSplit"] = "nururing",
-            // Enemy-10: 자폭형 borrows the chocolate crumb minion drawing until the user's art is ready.
+            // Enemy-10: 자폭형 is the user's 산사모-광기 drawing (2026-10-30).
             ["SelfDestructFairy"] = Week27Enemy10Setup.ArtworkId,
             // Enemy-11: 대왕쥬비 is the 쥬비 drawing on a bigger body (root scale).
             ["JyubiKing"] = "jyubi",
+            // Enemy-12: 곡사형 is the user's 저혈당 요정-광기 drawing (2026-10-30).
+            ["LobbingFairy"] = Week27Enemy12Setup.ArtworkId,
         };
         // First-bind width where the placeholder sprite has a different shape. 0.7 draws 산사모-순수 as tall as
         // 산사모-활발 (about 1.2). A width already tuned on the Prefab is kept.
@@ -49,6 +54,7 @@ namespace TrickalFanGame.Editor
             ["NururingFairyWarrior"] = Week25Enemy9Setup.ArtworkWidth,
             ["NururingSplit"] = Week25Enemy9Setup.ArtworkWidth,
             ["SelfDestructFairy"] = Week27Enemy10Setup.ArtworkWidth,
+            ["LobbingFairy"] = Week27Enemy12Setup.ArtworkWidth,
         };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites")]
@@ -87,7 +93,7 @@ namespace TrickalFanGame.Editor
             BuildDisplayPrefabs(catalog);
             BuildPreview(catalog);
             AssetDatabase.SaveAssets();
-            Debug.Log("Fairy Kingdom artwork applied: 45 catalog entries and display prefabs; existing gameplay " +
+            Debug.Log($"Fairy Kingdom artwork applied: {ExpectedSpriteCount} catalog entries and display prefabs; existing gameplay " +
                 "prefabs/rooms connected. Traps and Nururing are artwork previews only; no new gameplay rules.");
         }
 
@@ -145,7 +151,8 @@ namespace TrickalFanGame.Editor
                     id = Path.GetFileNameWithoutExtension(path), sprite = sprite, visibleRect = VisibleRect(path, sprite),
                 });
             }
-            if (entries.Count != 45) throw new InvalidOperationException("Expected exactly 45 selected PNGs.");
+            if (entries.Count != ExpectedSpriteCount)
+                throw new InvalidOperationException($"Expected exactly {ExpectedSpriteCount} selected PNGs, got {entries.Count}.");
             FairyKingdomArtworkCatalog catalog = AssetDatabase.LoadAssetAtPath<FairyKingdomArtworkCatalog>(CatalogPath);
             if (catalog == null)
             {
@@ -247,7 +254,11 @@ namespace TrickalFanGame.Editor
             return changed;
         }
 
-        private static void BuildDisplayPrefabs(FairyKingdomArtworkCatalog catalog)
+        // For a setup that added one drawing: builds only that drawing's display Prefab.
+        public static void BuildDisplayPrefab(FairyKingdomArtworkCatalog catalog, string id) =>
+            BuildDisplayPrefabs(catalog, id);
+
+        private static void BuildDisplayPrefabs(FairyKingdomArtworkCatalog catalog, string onlyId = null)
         {
             Directory.CreateDirectory(DisplayRoot);
             const string materialPath = "Assets/Resources/FairyKingdomArtwork/PreviewUnlit.mat";
@@ -262,6 +273,7 @@ namespace TrickalFanGame.Editor
             }
             foreach (FairyKingdomArtworkCatalog.Entry entry in catalog.Entries)
             {
+                if (onlyId != null && entry.id != onlyId) continue;
                 string path = DisplayRoot + "/" + entry.id + ".prefab";
                 GameObject owner = File.Exists(path) ? PrefabUtility.LoadPrefabContents(path) : new GameObject(entry.id);
                 bool loaded = File.Exists(path);

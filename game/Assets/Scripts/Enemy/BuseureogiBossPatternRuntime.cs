@@ -51,6 +51,8 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(1f)] private float phaseTwoSpeedMultiplier = 1f;
         [SerializeField, Min(0.05f)] private float shotInterval = 0.42f;
         [SerializeField, Min(0.1f)] private float projectileSpeed = 5f;
+        [Tooltip("Looping cream projectile drawing (head on the right). Empty keeps the tinted boss sprite.")]
+        [SerializeField] private Sprite[] projectileFrames = Array.Empty<Sprite>();
         [SerializeField] private Vector2 movementHalfExtents = new(6.2f, 3.2f);
 
         private readonly List<GameObject> minions = new();
@@ -71,6 +73,7 @@ namespace TrickalFanGame.Enemy
         public IReadOnlyList<Vector2> MinionOffsets => minionOffsets;
         public IReadOnlyList<GameObject> ObstaclePrefabs => obstaclePrefabs;
         public IReadOnlyList<Vector2> ObstacleOffsets => obstacleOffsets;
+        public IReadOnlyList<Sprite> ProjectileFrames => projectileFrames;
         public int MaximumMinions => Mathf.Max(1, maximumMinions);
         public int ObstaclesPerThrowLimit => Mathf.Max(1, obstaclesPerThrowLimit);
         public int LiveMinionCount => PruneAndCount(minions);
@@ -126,6 +129,9 @@ namespace TrickalFanGame.Enemy
             minionOffsets = configuredMinionOffsets ?? Array.Empty<Vector2>();
             obstacleOffsets = configuredObstacleOffsets ?? Array.Empty<Vector2>();
         }
+
+        public void ConfigureProjectileArtwork(Sprite[] frames) =>
+            projectileFrames = frames ?? Array.Empty<Sprite>();
 
         public void ConfigureMovement(float configuredApproachSpeed, float configuredPhaseTwoSpeedMultiplier = 1f)
         {
@@ -362,7 +368,7 @@ namespace TrickalFanGame.Enemy
             Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
             if (direction.sqrMagnitude <= 0f) direction = Vector2.down;
             BossProjectile.Create(transform.position, direction * projectileSpeed, gameObject,
-                boss.ProjectileDamageTier, GetComponentInChildren<SpriteRenderer>()?.sprite);
+                boss.ProjectileDamageTier, GetComponentInChildren<SpriteRenderer>()?.sprite, projectileFrames);
         }
 
         private void StopMovement()
