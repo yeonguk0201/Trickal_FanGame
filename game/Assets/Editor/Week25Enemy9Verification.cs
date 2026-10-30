@@ -195,8 +195,8 @@ namespace TrickalFanGame.Editor
                    SpawnPointPlacementRole.MeleePressure,
                 "The nururing must use melee pressure SpawnPoints.");
 
-            // Enemy-10 added 자폭형 to the same slots: 50/25/15/10/15.
-            EncounterEnemyCandidate[] expected = Week27Enemy10Setup.PressureMeleeCandidates();
+            // Enemy-10 added 자폭형 and Enemy-13 잠복형 to the same slots: 50/25/15/10/15/15.
+            EncounterEnemyCandidate[] expected = Week27Enemy13Setup.PressureMeleeCandidates();
             int found = 0;
             foreach (EncounterDefinition definition in generator.EncounterDefinitions)
             {

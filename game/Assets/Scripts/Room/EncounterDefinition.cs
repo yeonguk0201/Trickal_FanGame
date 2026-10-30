@@ -26,6 +26,9 @@ namespace TrickalFanGame.Room
         JyubiKing,
         // Enemy-12: 곡사형, which lobs projectiles over obstacles at the player's spot. Crossfire rear slots only.
         Lobber,
+        // Enemy-13: 잠복형, which moves under the floor out of reach and bursts out near the player. Pressure melee
+        // slots only.
+        Ambusher,
     }
     public enum EncounterWaveStartCondition { RoomEntered, PreviousWaveCleared }
     public enum EncounterWaveCompletionCondition { AllRequiredEnemiesDefeated }
@@ -371,7 +374,8 @@ namespace TrickalFanGame.Room
                                              selectedRole == EncounterEnemyRole.Jyubi ||
                                              selectedRole == EncounterEnemyRole.FourWayShooter ||
                                              selectedRole == EncounterEnemyRole.SplittingChaser ||
-                                             selectedRole == EncounterEnemyRole.SelfDestruct;
+                                             selectedRole == EncounterEnemyRole.SelfDestruct ||
+                                             selectedRole == EncounterEnemyRole.Ambusher;
                     int selectedIndex = prefersCloseSpawn
                         ? available.OrderBy(index => template.SpawnPoints[index].sqrMagnitude)
                             .ThenBy(index => index).First()

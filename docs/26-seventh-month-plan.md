@@ -209,6 +209,12 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
   후보(가중치 20), 위협 4, Encounter 콘텐츠 버전 19. 사양은 [28번](./28-difficulty-enemies-drops-plan.md) §8.3. 검증:
   `Week27Enemy12Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(14개) 통과(2026-10-30). 사용자 Play 확인 완료
   (2026-10-30). 원화는 저혈당 요정-광기 정지 그림, 모션은 추후.
+- Enemy-13(2026-10-30): 잠복형. 땅속에서 무적으로 플레이어 발밑까지 따라가 2×1 붉은 타원을 0.7초 예고한 뒤 튀어나와, 발이 타원
+  안인 플레이어에게 중 등급 피해. 지상 2초 동안만 맞고(밀리지 않고 넉백 면역, 닿으면 하트 1칸) 다시 가라앉는다. 3층부터 pressure 근접 후보(가중치 15),
+  위협 4, Encounter 콘텐츠 버전 20. 사양은 [28번](./28-difficulty-enemies-drops-plan.md) §8.4. 검증:
+  `Week27Enemy13Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(15개) 통과(2026-10-30). 사용자 Play 확인 완료
+  (2026-10-30).
+  원화는 불효자손-냉정 정지 그림, 매복·공격은 임시 색.
 
 ## 4. 확정 사양
 

@@ -22,6 +22,9 @@ namespace TrickalFanGame.Combat
         [SerializeField, Min(0f)] private float defaultStunDuration = 0.4f;
         [Tooltip("기본 공격 넉백 전용 무게입니다(Rigidbody 질량과 별개). 클수록 덜 밀립니다.")]
         [SerializeField, Min(0.01f)] private float knockbackWeight = 1f;
+        // Enemy-13: an enemy stuck in the ground (잠복형) is never moved by knockback or basic attack pushes.
+        // Stuns still apply.
+        [SerializeField] private bool knockbackImmune;
 
         private Rigidbody2D body;
         private Health health;
@@ -40,6 +43,7 @@ namespace TrickalFanGame.Combat
         public bool IsPushed { get; private set; }
         public Vector2 PushVelocity => IsPushed ? pushVelocity : Vector2.zero;
         public float KnockbackWeight => knockbackWeight;
+        public bool IsKnockbackImmune => knockbackImmune;
         public Vector2 CurrentVelocity => body != null ? body.linearVelocity : Vector2.zero;
 
         // Raised by ApplyStun after the stun starts. A boss cancels the pattern it is running (Jjangsem-2).
@@ -61,6 +65,11 @@ namespace TrickalFanGame.Combat
         public void ConfigureWeight(float configuredWeight)
         {
             knockbackWeight = Mathf.Max(0.01f, configuredWeight);
+        }
+
+        public void ConfigureKnockbackImmunity(bool immune)
+        {
+            knockbackImmune = immune;
         }
 
         public void Tick(float currentTime)
@@ -96,7 +105,7 @@ namespace TrickalFanGame.Combat
                 Awake();
             }
 
-            if (health.IsDead || direction.sqrMagnitude <= 0.001f || speed <= 0f)
+            if (health.IsDead || knockbackImmune || direction.sqrMagnitude <= 0.001f || speed <= 0f)
             {
                 return false;
             }
@@ -150,7 +159,7 @@ namespace TrickalFanGame.Combat
                 Awake();
             }
 
-            if (health.IsDead || IsKnockedBack || direction.sqrMagnitude <= 0.001f || speed <= 0f ||
+            if (health.IsDead || knockbackImmune || IsKnockedBack || direction.sqrMagnitude <= 0.001f || speed <= 0f ||
                 duration <= 0f || IsPushBlocked())
             {
                 return false;

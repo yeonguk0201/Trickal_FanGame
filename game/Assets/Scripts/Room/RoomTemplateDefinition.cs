@@ -131,6 +131,8 @@ namespace TrickalFanGame.Room
                 EncounterEnemyRole.FourWayShooter => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.SplittingChaser => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.SelfDestruct => SpawnPointPlacementRole.MeleePressure,
+                // Enemy-13: 잠복형 closes in under the floor, so it starts on a melee point.
+                EncounterEnemyRole.Ambusher => SpawnPointPlacementRole.MeleePressure,
                 EncounterEnemyRole.Ranged => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Sniper => SpawnPointPlacementRole.RearFiring,
                 // Enemy-11: 대왕쥬비 keeps its distance, so it starts on a far rear point like the shooters.
