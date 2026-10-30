@@ -157,6 +157,14 @@ MonoBehaviour:
       y: 83
       width: 983
       height: 873
+  - id: low-blood-sugar-fairy-madness
+    sprite: {fileID: 21300000, guid: 08869fee28394244586a09cb3698642d, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 37
+      y: 25
+      width: 1191
+      height: 1190
   - id: low-blood-sugar-fairy
     sprite: {fileID: 21300000, guid: c6793bcb0d244973af281a8761fca08b, type: 3}
     visibleRect:

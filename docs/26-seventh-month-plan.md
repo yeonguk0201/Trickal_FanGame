@@ -204,6 +204,11 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
   (자기 쥬비 최대 8, 죽어도 쥬비는 남음). 3층 전용 `jyubi-nest`(대왕쥬비+쥬비 2 → 추적형 3, 위협 14~17), 위협 6, Encounter
   콘텐츠 버전 18. 사양은 [28번](./28-difficulty-enemies-drops-plan.md) §8.2. 검증: `Week27Enemy11Verification.SetupAndVerifyBatch`와
   `VerifyWithRegressionsBatch`(14개) 통과(2026-10-28). 사용자 Play 확인 완료(2026-10-28).
+- Enemy-12(2026-10-30): 곡사형. 3.5~7칸 거리에서 0.4초 준비 뒤 플레이어가 서 있던 자리로 포물선 투사체를 던진다. 장애물에
+  막히지 않고 플레이어 그림자 자리에 붉은 타원 예고(1.5×0.75)가 비행 내내 보이며, 착지 때 발이 타원 안인 플레이어만 중 등급 피해. 3층부터 crossfire 후방
+  후보(가중치 20), 위협 4, Encounter 콘텐츠 버전 19. 사양은 [28번](./28-difficulty-enemies-drops-plan.md) §8.3. 검증:
+  `Week27Enemy12Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(14개) 통과(2026-10-30). 사용자 Play 확인 완료
+  (2026-10-30). 원화는 저혈당 요정-광기 정지 그림, 모션은 추후.
 
 ## 4. 확정 사양
 

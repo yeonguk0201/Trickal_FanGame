@@ -28,8 +28,10 @@ namespace TrickalFanGame.Editor
         {
             FairyKingdomArtworkCatalog catalog = AssetDatabase.LoadAssetAtPath<FairyKingdomArtworkCatalog>(
                 FairyKingdomArtworkSetup.CatalogPath);
-            Require(catalog != null && catalog.Entries.Count == 45, "Missing 45-entry build catalog.");
-            Require(catalog.Entries.Select(entry => entry.id).Distinct().Count() == 45, "Duplicate artwork IDs.");
+            Require(catalog != null && catalog.Entries.Count == FairyKingdomArtworkSetup.ExpectedSpriteCount,
+                $"Missing {FairyKingdomArtworkSetup.ExpectedSpriteCount}-entry build catalog.");
+            Require(catalog.Entries.Select(entry => entry.id).Distinct().Count() == FairyKingdomArtworkSetup.ExpectedSpriteCount,
+                "Duplicate artwork IDs.");
             foreach (var entry in catalog.Entries)
             {
                 Require(entry.sprite != null && entry.visibleRect.width > 0 && entry.visibleRect.height > 0,
@@ -66,7 +68,7 @@ namespace TrickalFanGame.Editor
             VerifyBombChanges();
             Require(AssetDatabase.LoadAssetAtPath<SceneAsset>(FairyKingdomArtworkSetup.PreviewScenePath) != null,
                 "Missing Unity artwork preview scene.");
-            Debug.Log("Fairy Kingdom artwork verification passed: 45 sprites/display prefabs; 3 crumb variants; " +
+            Debug.Log($"Fairy Kingdom artwork verification passed: {FairyKingdomArtworkSetup.ExpectedSpriteCount} sprites/display prefabs; 3 crumb variants; " +
                 "dynamic obstacle kinds, 6 chest states, bomb/explosion; collider and root scale preserved. " +
                 "Play art review and animation frames remain pending.");
         }

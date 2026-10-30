@@ -155,6 +155,8 @@ namespace TrickalFanGame.Run
             FindEnemySeedButton(assembler, EncounterEnemyRole.SelfDestruct, "self-destruct", "Self-destruct room");
             // Enemy-11: 대왕쥬비 only comes in the floor-3 jyubi-nest Encounter.
             FindEnemySeedButton(assembler, EncounterEnemyRole.JyubiKing, "Jyubi king", "Jyubi nest room");
+            // Enemy-12: 곡사형 only comes in crossfire's rear slots from floor 3.
+            FindEnemySeedButton(assembler, EncounterEnemyRole.Lobber, "lobber", "Lobber room");
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -938,8 +940,24 @@ namespace TrickalFanGame.Run
             GUILayout.Label($"Jyubi kings {livingKings.Length}, their Jyubi " +
                             $"{livingKings.Sum(king => king.AliveSummonCount)}, summoning " +
                             $"{livingKings.Count(king => king.IsSummoning)}");
+
+            // Enemy-12: 곡사형 five tiles above the player, inside its 3.5~7 throwing distance. It winds up, then lobs
+            // over obstacles to where the player stood; the landing circle shows for the whole flight.
+            if (AssistedButton("Spawn lobber (throws over obstacles)") && controller != null && player != null)
+            {
+                GameObject lobber = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/LobbingFairy.prefab");
+                status = controller.SpawnExtraEnemy(lobber, player.transform.position + Vector3.up * 5f) != null
+                    ? "Spawned a lobber above the player."
+                    : "Lobber spawn failed.";
+            }
+            TrickalFanGame.Enemy.LobbingEnemyController[] lobbers =
+                FindObjectsByType<TrickalFanGame.Enemy.LobbingEnemyController>(FindObjectsSortMode.None);
+            GUILayout.Label($"Lobbers alive {lobbers.Count(lobber => lobber.TryGetComponent(out Health lobberHealth) && !lobberHealth.IsDead)}, " +
+                            $"winding up {lobbers.Count(lobber => lobber.IsWindingUp)}, in the air " +
+                            $"{FindObjectsByType<TrickalFanGame.Enemy.EnemyLobProjectile>(FindObjectsSortMode.None).Length}");
 #else
-            GUILayout.Label("Crumb minion, lively fairy, nururing, self-destruct and Jyubi king spawns are editor-only.");
+            GUILayout.Label("Crumb minion, lively fairy, nururing, self-destruct, Jyubi king and lobber spawns are editor-only.");
 #endif
         }
 

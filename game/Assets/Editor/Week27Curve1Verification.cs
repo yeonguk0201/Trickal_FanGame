@@ -30,6 +30,8 @@ namespace TrickalFanGame.Editor
             (EncounterEnemyRole.SelfDestruct, 2),
             // Enemy-11.
             (EncounterEnemyRole.JyubiKing, 3),
+            // Enemy-12.
+            (EncounterEnemyRole.Lobber, 3),
         };
 
         [MenuItem("Trickal Fan Game/Week 27/Setup and Verify Curve-1 Floor Enemy Pool")]

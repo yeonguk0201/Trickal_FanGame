@@ -345,6 +345,12 @@ namespace TrickalFanGame.Room
                     projectile.StopAtBoundary();
                 }
             }
+
+            // Enemy-12: a lobbed lump still in the air is removed with its landing mark.
+            foreach (EnemyLobProjectile lob in FindObjectsByType<EnemyLobProjectile>(FindObjectsSortMode.None))
+            {
+                lob.Cancel();
+            }
         }
     }
 }

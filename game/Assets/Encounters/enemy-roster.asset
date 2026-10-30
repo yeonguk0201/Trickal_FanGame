@@ -33,3 +33,5 @@ MonoBehaviour:
     prefab: {fileID: 7432310428319483453, guid: b6c673a4df9fecc4388d3d6d4d8aa988, type: 3}
   - role: 10
     prefab: {fileID: 1429012733893198083, guid: 800939eaa1730404fbd42f607c7b4ae3, type: 3}
+  - role: 11
+    prefab: {fileID: 9176006115792224653, guid: de96e1a04987b544ababf8cc8e3b9b8f, type: 3}
