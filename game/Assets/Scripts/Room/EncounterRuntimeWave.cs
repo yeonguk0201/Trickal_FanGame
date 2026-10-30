@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Enemy;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -9,21 +10,35 @@ namespace TrickalFanGame.Room
     {
         private readonly GameObject[] enemyPrefabs;
         private readonly Transform[] spawnPoints;
+        private readonly EnemyVariantKind[] variants;
 
-        public EncounterRuntimeWave(GameObject[] configuredPrefabs, Transform[] configuredSpawnPoints)
+        // Variant-0: variants are optional and line up with the prefabs; missing entries are plain enemies.
+        public EncounterRuntimeWave(GameObject[] configuredPrefabs, Transform[] configuredSpawnPoints,
+            EnemyVariantKind[] configuredVariants = null)
         {
             enemyPrefabs = configuredPrefabs ?? Array.Empty<GameObject>();
             spawnPoints = configuredSpawnPoints ?? Array.Empty<Transform>();
+            variants = configuredVariants ?? Array.Empty<EnemyVariantKind>();
         }
 
         public IReadOnlyList<GameObject> EnemyPrefabs => enemyPrefabs;
         public IReadOnlyList<Transform> SpawnPoints => spawnPoints;
+        public IReadOnlyList<EnemyVariantKind> Variants => variants;
+
+        public EnemyVariantKind VariantAt(int index) =>
+            index >= 0 && index < variants.Length ? variants[index] : EnemyVariantKind.None;
 
         public bool TryValidate(out string error)
         {
             if (enemyPrefabs.Length == 0 || enemyPrefabs.Length != spawnPoints.Length)
             {
                 error = "An Encounter wave needs matching, non-empty enemy prefab and SpawnPoint lists.";
+                return false;
+            }
+
+            if (variants.Length > enemyPrefabs.Length)
+            {
+                error = "An Encounter wave has more enemy variants than enemy prefabs.";
                 return false;
             }
 

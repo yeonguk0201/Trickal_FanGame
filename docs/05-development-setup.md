@@ -1457,6 +1457,19 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   `Ambushers alive N, buried B, warning W, up U` 표시로 상태를 본다. 실제 방에서 보려면 `— Seed —`의 `Find ambusher F3`로 3층
   pressure에 잠복형이 있는 seed를 찾아 `Restart Run with this seed` 뒤 3층으로 간다.
 
+- Variant-0 엘리트(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Variant-0 Elite Enemies`가 `Assets/Items/Drops/elite-kill-drop-table.asset`
+  (엘리트 처치 픽업 1개 확정 표), Game Scene `RoomGraphAssembler`의 엘리트 표 연결과 Encounter 콘텐츠 버전 21을 멱등 구성한다. 런타임
+  규칙은 `EnemyVariant`(효과)·`EnemyVariantRules`(층별 확률·제외 역할)·`EliteKillReward`(처치 보상)에 있다. 사양은
+  [28번 §8.5](./28-difficulty-enemies-drops-plan.md). 배치는 `-executeMethod TrickalFanGame.Editor.Week27Variant0Verification.SetupAndVerifyBatch`
+  (Setup 2회 GUID 보존 포함), 단독 검증 `Verify`, 회귀 `VerifyWithRegressionsBatch`(Enemy-10~13, Curve-0·1, Hitbox-2, Enemy-7~9,
+  Spawn-1·2, Difficulty-1, Encounter-4, Floor-1, 개발 패널). 검사: 층별 확률 0/0/20/30/40%, 쥬비·보스 제외, 512 seed에서 방당 최대 1마리·
+  1·2층 없음·3층 약 20%·재생성 결정성, 저장 점수 불변과 엘리트 추가 위협, 런타임 웨이브의 변형·보상 연결, 모든 일반 Encounter 적의
+  체력·크기·넉백 무게·발 크기와 위치·공격 단계 크기 유지·이동 1.2배·피해 한 단계 위, 직선·곡사 탄 1.5배, 보스 거부, 도망친 뒤 다시
+  싸워 처치하면 쓰러진 자리에 픽업 1개와 재지급 없음.
+  개발 패널(`F1`): `— Seed —`의 `Find elite F3`로 3층에 엘리트 방이 있는 seed를 찾고 `Restart Run with this seed`. `— Room —`의
+  `Make nearest enemy elite`는 지금 방에서 플레이어와 가장 가까운 일반 적을 엘리트로 바꾸고(처치 보상도 연결), 아래 줄에 계획된 엘리트
+  수·살아 있는 엘리트 수·보상 상태를, `Encounter:` 줄에 `+elite N` 추가 위협을 보인다.
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,

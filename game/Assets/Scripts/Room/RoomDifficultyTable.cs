@@ -408,6 +408,30 @@ namespace TrickalFanGame.Room
             return true;
         }
 
+        // Variant-0: an elite counts its threat twice. This is the extra on top of TryScore, which stays the
+        // Encounter's own score.
+        public bool TryScoreVariants(IReadOnlyList<ResolvedEncounterSpawn[]> waves, out int extra, out string error)
+        {
+            extra = 0;
+            foreach (ResolvedEncounterSpawn[] wave in waves ?? Array.Empty<ResolvedEncounterSpawn[]>())
+            {
+                foreach (ResolvedEncounterSpawn spawn in wave)
+                {
+                    if (spawn.Variant != TrickalFanGame.Enemy.EnemyVariantKind.Elite) continue;
+                    if (!TryGetThreat(spawn.Role, out int threat))
+                    {
+                        error = $"Resolved enemy role '{spawn.Role}' has no threat score.";
+                        return false;
+                    }
+
+                    extra += threat * (TrickalFanGame.Enemy.EnemyVariant.EliteThreatMultiplier - 1);
+                }
+            }
+
+            error = null;
+            return true;
+        }
+
         public bool TryScore(IReadOnlyList<ResolvedEncounterSpawn[]> waves, int layoutModifier, out int score,
             out string error)
         {

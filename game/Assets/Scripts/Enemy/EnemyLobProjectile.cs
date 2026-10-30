@@ -94,7 +94,9 @@ namespace TrickalFanGame.Enemy
             lob.launchTime = now;
             lob.flightDuration = Mathf.Max(0.05f, duration);
             lob.arcHeight = Mathf.Max(0f, height);
-            lob.Radius = Mathf.Max(0.05f, radius);
+            // Variant-0: an elite's lump and landing circle are 1.5x.
+            float variantScale = EnemyVariant.ProjectileScaleOf(source);
+            lob.Radius = Mathf.Max(0.05f, radius) * variantScale;
             lob.startHeight = Mathf.Max(0f, launchHeight);
             // Thrown to the right it turns clockwise, to the left counter-clockwise.
             lob.spinDirection = to.x >= from.x ? -1f : 1f;
@@ -113,14 +115,15 @@ namespace TrickalFanGame.Enemy
             if (sprite != null)
             {
                 Vector2 size = sprite.bounds.size;
-                lump.transform.localScale = Vector3.one * (DrawnSize / Mathf.Max(0.0001f, Mathf.Max(size.x, size.y)));
+                lump.transform.localScale = Vector3.one *
+                    (DrawnSize * variantScale / Mathf.Max(0.0001f, Mathf.Max(size.x, size.y)));
                 lob.Lump.sprite = sprite;
                 lob.Lump.color = Color.white;
                 lob.spins = true;
             }
             else
             {
-                lump.transform.localScale = Vector3.one * LumpDiameter;
+                lump.transform.localScale = Vector3.one * (LumpDiameter * variantScale);
                 lob.Lump.sprite = GroundShadow.SharedSprite;
                 lob.Lump.color = LumpColor;
             }

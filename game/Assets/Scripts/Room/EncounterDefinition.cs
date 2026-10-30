@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TrickalFanGame.Enemy;
 using UnityEngine;
 
 namespace TrickalFanGame.Room
@@ -36,14 +37,21 @@ namespace TrickalFanGame.Room
 
     public readonly struct ResolvedEncounterSpawn
     {
-        public ResolvedEncounterSpawn(EncounterEnemyRole role, int spawnPointIndex)
+        public ResolvedEncounterSpawn(EncounterEnemyRole role, int spawnPointIndex,
+            EnemyVariantKind variant = EnemyVariantKind.None)
         {
             Role = role;
             SpawnPointIndex = spawnPointIndex;
+            Variant = variant;
         }
 
         public EncounterEnemyRole Role { get; }
         public int SpawnPointIndex { get; }
+        // Variant-0: rolled after the Encounter is chosen (EnemyVariantRules), so it never changes the selection.
+        public EnemyVariantKind Variant { get; }
+
+        public ResolvedEncounterSpawn WithVariant(EnemyVariantKind variant) =>
+            new(Role, SpawnPointIndex, variant);
     }
 
     [Serializable]
@@ -564,7 +572,8 @@ namespace TrickalFanGame.Room
 
                 if (table == null)
                 {
-                    node.AssignEncounter(candidate, resolvedWaves);
+                    node.AssignEncounter(candidate, EnemyVariantRules.AssignElite(resolvedWaves, node.FloorNumber,
+                        node.ContentSeed, contentVersion));
                     error = null;
                     return true;
                 }
@@ -589,7 +598,10 @@ namespace TrickalFanGame.Room
                 .Where(entry => Math.Abs((int)entry.Tier - (int)target) == closestGap).ToArray();
             ScoredEncounter selected = pool[(int)(unchecked((uint)seed) % (uint)pool.Length)];
             int availableTierMask = scored.Aggregate(0, (mask, entry) => mask | 1 << (int)entry.Tier);
-            node.AssignEncounter(selected.Definition, selected.Waves,
+            // Variant-0: the stored score stays the Encounter's own score (selection and floor range); the elite's
+            // extra threat is read separately with RoomDifficultyTable.TryScoreVariants.
+            node.AssignEncounter(selected.Definition, EnemyVariantRules.AssignElite(selected.Waves, node.FloorNumber,
+                    node.ContentSeed, contentVersion),
                 new GeneratedRoomDifficulty(distance, selected.Score, selected.Tier, target, availableTierMask));
             error = null;
             return true;

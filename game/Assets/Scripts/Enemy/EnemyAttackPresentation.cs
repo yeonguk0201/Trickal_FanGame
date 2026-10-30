@@ -43,6 +43,14 @@ namespace TrickalFanGame.Enemy
             SetPhase(EnemyAttackPhase.Idle);
         }
 
+        // Variant-0: an elite grows after Awake recorded its idle scale, so the phases keep scaling from the new size.
+        public void MultiplyIdleScale(float factor)
+        {
+            if (idleScale == Vector3.zero) return;
+            idleScale *= factor;
+            SetPhase(Phase);
+        }
+
         public void SetPhase(EnemyAttackPhase phase)
         {
             if (idleScale == Vector3.zero)

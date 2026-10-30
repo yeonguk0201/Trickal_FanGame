@@ -215,6 +215,12 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
   `Week27Enemy13Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(15개) 통과(2026-10-30). 사용자 Play 확인 완료
   (2026-10-30).
   원화는 불효자손-냉정 정지 그림, 매복·공격은 임시 색.
+- Variant-0(2026-10-30): 변형 시스템과 엘리트. 전투방마다 Encounter를 고른 뒤 3층 20%로 엘리트 1마리(쥬비·보스 제외). 몸 1.5배(발
+  그대로), 체력·넉백 무게 2배, 피해 한 단계 위, 일반 이동 1.2배, 탄 1.5배, 위협 2배(방 점수와 따로), 처치하면 픽업 1개 확정.
+  Encounter 콘텐츠 버전 21. 사양은 [28번](./28-difficulty-enemies-drops-plan.md) §8.5. 검증:
+  `Week27Variant0Verification.SetupAndVerifyBatch` 통과, `VerifyWithRegressionsBatch`는 16개 중 Hitbox-2 하나만 실패(Variant-0와
+  무관한 기존 문제: Enemy-10~13 Prefab이 Hitbox-2 목록에 없고 대왕쥬비는 발 충돌체 판정과 어긋남)(2026-10-30). 사용자 Play 확인 완료
+  (2026-10-30).
 
 ## 4. 확정 사양
 
