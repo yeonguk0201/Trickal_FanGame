@@ -212,9 +212,9 @@ namespace TrickalFanGame.Editor
                 found++;
                 bool pressure = definition.EncounterId.EndsWith("-pressure-v1", StringComparison.Ordinal);
                 // Enemy-9 added 누루링-요정전사 to the pressure melee slots (50/25/15/10), and Enemy-10 added 자폭형
-                // to both (pressure 50/25/15/10/15, swarm 60/25/15/15).
+                // to both (pressure 50/25/15/10/15, swarm 60/25/15/15). Enemy-13 added 잠복형 to pressure (…/15).
                 EncounterEnemyCandidate[] expected = pressure
-                    ? Week27Enemy10Setup.PressureMeleeCandidates()
+                    ? Week27Enemy13Setup.PressureMeleeCandidates()
                     : Week27Enemy10Setup.SwarmMeleeCandidates();
                 foreach (EncounterSpawnRule rule in rules.Where(rule => rule.Candidates.Any(candidate =>
                              candidate.EnemyRole == EncounterEnemyRole.FourWayShooter)))

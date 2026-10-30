@@ -1438,6 +1438,25 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   표시로 상태를 본다. 실제 방에서 보려면 `— Seed —`의 `Find lobber F3`로 3층 crossfire에 곡사형이 있는 seed를 찾아
   `Restart Run with this seed` 뒤 3층으로 간다.
 
+- Enemy-13 잠복형(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Enemy-13 Ambush Enemy`가 `AmbushFairy` Prefab(`TestEnemy` 언팩
+  복사본, `AmbushEnemyController`, 사용자 원화 불효자손-냉정 `bulhyojason-cold` 정지 그림과 그 표시 Prefab), 위협 점수 4, roster의
+  `Ambusher` 역할, pressure 근접 후보(가중치 15)와 Encounter 콘텐츠 버전 20을 멱등 구성한다. 사양은
+  [28번 §8.4](./28-difficulty-enemies-drops-plan.md). 배치는 `-executeMethod TrickalFanGame.Editor.Week27Enemy13Verification.SetupAndVerifyBatch`
+  (Setup 2회 GUID·그림 보존 포함), 단독 검증 `Verify`, 회귀 `VerifyWithRegressionsBatch`(Enemy-12·11·10, Curve-1, Enemy-7·8·9,
+  Passive-1, Spawn-1·2, Difficulty-1, Encounter-4, Floor-1, 요정왕국 그림, 개발 패널). 검사: Prefab 수치와 `TestEnemy` 유지, pressure에만
+  후보·위협 10~16 유지, 512 seed에서 3층 pressure 근접 지점에만 배치와 재생성 결정성, 런타임 Prefab 연결, 매복 중 무적·몸 충돌체
+  꺼짐·발 충돌체 유지·흙갈색, 감지 전·생성 지연 중 정지, 3.2 속도 접근, 플레이어 앞(0.8)에서 멈추지 않고 발밑(그림자 0.3 안)까지
+  추적, 발밑이어도 매복 1초 전 대기, 2×1 타원 0.7초 예고 뒤 튀어나와 타원 안 플레이어만 층별 중 등급 피해(타원 밖 플레이어·다른 적
+  무피해), 공격 붉은색·지상 원래 색·피격 가능·Kinematic·넉백과 밀기 무시, 하트 1칸 접촉 피해, 2초 뒤 가라앉아 다시 매복(Dynamic),
+  오래 매복해도 강제 출현 없음, 매복 중 방 클리어 불가·지상에서 처치하면 클리어. 2026-10-30 모두 통과했고 2026-10-30 사용자 Play
+  확인을 마쳤다. 수동 확인: Game Scene Play → `F1`
+  개발 패널 `— Room —`의 `Spawn ambusher (bursts from the floor)`로 플레이어 위 4칸에 소환한다. (1) 흙갈색 반투명으로 다가오는 동안
+  공격이 통과하고 피해가 없는지, (2) 발밑까지 와서 붉은 타원 예고 뒤 붉게 튀어나와 타원 안에서만 맞는지, 계속 움직이면 따라오기만
+  하는지, (3) 지상에 있는 2초 동안 밀어도·때려도 밀리지 않고 닿으면 하트 1칸 피해를 받는지, 맞고 쓰러지는지, 가라앉으면 다시 맞지
+  않는지, (4) 스킬 자동 조준이 매복 중인 적을 노리지 않는지 본다. 같은 섹션의
+  `Ambushers alive N, buried B, warning W, up U` 표시로 상태를 본다. 실제 방에서 보려면 `— Seed —`의 `Find ambusher F3`로 3층
+  pressure에 잠복형이 있는 seed를 찾아 `Restart Run with this seed` 뒤 3층으로 간다.
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,

@@ -53,6 +53,7 @@ namespace TrickalFanGame.Editor
             ("Assets/Prefabs/SelfDestructFairy.prefab", Week27Enemy10Setup.KnockbackWeight),
             ("Assets/Prefabs/JyubiKing.prefab", Week27Enemy11Setup.KnockbackWeight),
             ("Assets/Prefabs/LobbingFairy.prefab", Week27Enemy12Setup.KnockbackWeight),
+            ("Assets/Prefabs/AmbushFairy.prefab", Week27Enemy13Setup.KnockbackWeight),
             ("Assets/Prefabs/CrayonShieldMinion.prefab", 2f),
             ("Assets/Prefabs/TestBoss.prefab", BossKnockbackWeight),
             ("Assets/Prefabs/SaemaeumVaultBoss.prefab", BossKnockbackWeight),

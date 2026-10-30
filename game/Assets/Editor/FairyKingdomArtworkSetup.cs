@@ -17,9 +17,9 @@ namespace TrickalFanGame.Editor
     public static class FairyKingdomArtworkSetup
     {
         public const string ArtRoot = "Assets/Art/Drafts/FairyKingdom";
-        // Every PNG under ArtRoot. 47 since Enemy-12 added 저혈당 요정-광기 and Enemy-10 added 산사모-광기 (2026-10-30).
-        // The menu names keep "45" so documented menu paths stay valid.
-        public const int ExpectedSpriteCount = 47;
+        // Every PNG under ArtRoot. 48 since Enemy-12 added 저혈당 요정-광기, Enemy-10 산사모-광기 and Enemy-13
+        // 불효자손-냉정 (2026-10-30). The menu names keep "45" so documented menu paths stay valid.
+        public const int ExpectedSpriteCount = 48;
         public const string CatalogPath = "Assets/Resources/FairyKingdomArtwork/Catalog.asset";
         public const string DisplayRoot = "Assets/Prefabs/FairyKingdomArtwork";
         public const string PreviewScenePath = "Assets/Scenes/FairyKingdomArtworkPreview.unity";
@@ -42,6 +42,8 @@ namespace TrickalFanGame.Editor
             ["JyubiKing"] = "jyubi",
             // Enemy-12: 곡사형 is the user's 저혈당 요정-광기 drawing (2026-10-30).
             ["LobbingFairy"] = Week27Enemy12Setup.ArtworkId,
+            // Enemy-13: 잠복형 is the user's 불효자손-냉정 drawing (2026-10-30).
+            ["AmbushFairy"] = Week27Enemy13Setup.ArtworkId,
         };
         // First-bind width where the placeholder sprite has a different shape. 0.7 draws 산사모-순수 as tall as
         // 산사모-활발 (about 1.2). A width already tuned on the Prefab is kept.
@@ -55,6 +57,7 @@ namespace TrickalFanGame.Editor
             ["NururingSplit"] = Week25Enemy9Setup.ArtworkWidth,
             ["SelfDestructFairy"] = Week27Enemy10Setup.ArtworkWidth,
             ["LobbingFairy"] = Week27Enemy12Setup.ArtworkWidth,
+            ["AmbushFairy"] = Week27Enemy13Setup.ArtworkWidth,
         };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Fairy Kingdom 45 Sprites")]

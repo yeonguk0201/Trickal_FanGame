@@ -202,7 +202,8 @@ namespace TrickalFanGame.Player
             targets.Clear();
             foreach (Health candidate in FindObjectsByType<Health>(FindObjectsSortMode.None))
             {
-                if (candidate != null && candidate != health && !candidate.IsDead &&
+                // An invulnerable enemy (잠복형 under the floor) is not aimed at.
+                if (candidate != null && candidate != health && !candidate.IsDead && !candidate.IsInvulnerable &&
                     (targetLayers.value & (1 << candidate.gameObject.layer)) != 0 &&
                     candidate.GetComponent<PlayerCombatEvents>() == null)
                 {

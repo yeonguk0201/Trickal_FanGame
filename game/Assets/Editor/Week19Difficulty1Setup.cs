@@ -40,6 +40,9 @@ namespace TrickalFanGame.Editor
             new(EncounterEnemyRole.JyubiKing, 6),
             // Enemy-12: 곡사형. Like the sniper it hurts from behind cover, so crossfire's range stays 15~19.
             new(EncounterEnemyRole.Lobber, 4),
+            // Enemy-13: 잠복형. Out of reach under the floor most of the time, like 누루링 it is a 4-point melee slot,
+            // so pressure keeps 10~16.
+            new(EncounterEnemyRole.Ambusher, 4),
         };
 
         public static readonly RoomDifficultyTierBand[] TierBands =

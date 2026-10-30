@@ -157,6 +157,8 @@ namespace TrickalFanGame.Run
             FindEnemySeedButton(assembler, EncounterEnemyRole.JyubiKing, "Jyubi king", "Jyubi nest room");
             // Enemy-12: 곡사형 only comes in crossfire's rear slots from floor 3.
             FindEnemySeedButton(assembler, EncounterEnemyRole.Lobber, "lobber", "Lobber room");
+            // Enemy-13: 잠복형 only comes in pressure's melee slots from floor 3.
+            FindEnemySeedButton(assembler, EncounterEnemyRole.Ambusher, "ambusher", "Ambusher room");
             if (GUILayout.Button("Restart Run with this seed")) RestartWithSeed();
         }
 
@@ -956,8 +958,27 @@ namespace TrickalFanGame.Run
             GUILayout.Label($"Lobbers alive {lobbers.Count(lobber => lobber.TryGetComponent(out Health lobberHealth) && !lobberHealth.IsDead)}, " +
                             $"winding up {lobbers.Count(lobber => lobber.IsWindingUp)}, in the air " +
                             $"{FindObjectsByType<TrickalFanGame.Enemy.EnemyLobProjectile>(FindObjectsSortMode.None).Length}");
+
+            // Enemy-13: 잠복형 four tiles above the player. It starts under the floor (dim brown, cannot be hit),
+            // closes in, warns with a red ellipse and bursts out (red), then stays up to be hit before sinking.
+            if (AssistedButton("Spawn ambusher (bursts from the floor)") && controller != null && player != null)
+            {
+                GameObject ambusher = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/AmbushFairy.prefab");
+                status = controller.SpawnExtraEnemy(ambusher, player.transform.position + Vector3.up * 4f) != null
+                    ? "Spawned an ambusher above the player."
+                    : "Ambusher spawn failed.";
+            }
+            TrickalFanGame.Enemy.AmbushEnemyController[] ambushers =
+                FindObjectsByType<TrickalFanGame.Enemy.AmbushEnemyController>(FindObjectsSortMode.None)
+                    .Where(ambusher => ambusher.TryGetComponent(out Health ambusherHealth) && !ambusherHealth.IsDead)
+                    .ToArray();
+            GUILayout.Label($"Ambushers alive {ambushers.Length}, buried " +
+                            $"{ambushers.Count(ambusher => ambusher.State == TrickalFanGame.Enemy.AmbushEnemyController.AmbushState.Burrowed)}, " +
+                            $"warning {ambushers.Count(ambusher => ambusher.State == TrickalFanGame.Enemy.AmbushEnemyController.AmbushState.Emerging)}, " +
+                            $"up {ambushers.Count(ambusher => !ambusher.IsBurrowed)}");
 #else
-            GUILayout.Label("Crumb minion, lively fairy, nururing, self-destruct, Jyubi king and lobber spawns are editor-only.");
+            GUILayout.Label("Crumb minion, lively fairy, nururing, self-destruct, Jyubi king, lobber and ambusher spawns are editor-only.");
 #endif
         }
 
