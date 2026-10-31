@@ -213,7 +213,7 @@ namespace TrickalFanGame.Enemy
             }
 
             if (currentTime < nextSummonAt) return;
-            nextSummonAt = currentTime + summonInterval;
+            nextSummonAt = currentTime + EnemyVariant.AttackIntervalOf(this, summonInterval);
             // At the cap it skips this turn and tries again one interval later.
             if (AliveSummonCount >= maxSummons) return;
             telegraphStartedAt = currentTime;

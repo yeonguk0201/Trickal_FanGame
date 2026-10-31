@@ -21,6 +21,9 @@ namespace TrickalFanGame.Combat
         private float enemyDamageReduction;
         private bool explicitInvulnerability;
         private Func<float, bool> lethalDamageGuard;
+        // Variant-2 (불사 챔피언): asked when a hit takes the health to 0. A value above 0 becomes the new health and
+        // the death waits (no kill credit, no Died) until the health runs out again.
+        private Func<DamageContext, float> lethalDeferral;
         // Current health + shield never exceeds this (the player's 15 hearts). 0 = no limit.
         private float healthAndShieldLimit;
         private DamageInvulnerability damageInvulnerability;
@@ -140,14 +143,25 @@ namespace TrickalFanGame.Combat
             {
                 CurrentHealth = 0f;
             }
+            float removedHealth = previousHealth - CurrentHealth;
+            bool deferred = false;
+            if (CurrentHealth <= 0f && lethalDeferral != null)
+            {
+                float restored = lethalDeferral(context);
+                if (restored > 0f)
+                {
+                    CurrentHealth = Mathf.Min(restored, maxHealth);
+                    deferred = true;
+                }
+            }
             if (CurrentHealth > 0f)
             {
                 ResolveDamageInvulnerability()?.BeginHitWindowForDamage(Time.time, result.FinalDamage);
             }
             DamageResolved?.Invoke(context, result);
             AnyDamageResolved?.Invoke(this, context, result);
-            DamageApplied?.Invoke(context, previousHealth - CurrentHealth, CurrentHealth);
-            if (!Mathf.Approximately(previousHealth, CurrentHealth))
+            DamageApplied?.Invoke(context, removedHealth, CurrentHealth);
+            if (deferred || !Mathf.Approximately(previousHealth, CurrentHealth))
             {
                 Damaged?.Invoke(CurrentHealth, MaxHealth);
                 Changed?.Invoke(CurrentHealth, MaxHealth);
@@ -156,18 +170,36 @@ namespace TrickalFanGame.Combat
             if (CurrentHealth > 0f)
             {
                 context.Source?.GetComponent<PlayerCombatEvents>()?
-                    .TryReportBasicAttackHit(this, context, previousHealth - CurrentHealth);
+                    .TryReportBasicAttackHit(this, context, removedHealth);
                 return;
             }
 
+            context.Source?.GetComponent<PlayerCombatEvents>()?.TryReportBasicAttackHit(this, context, removedHealth);
+            Die(context);
+        }
+
+        private void Die(DamageContext killingBlow)
+        {
             IsDead = true;
-            if (context.Source != null)
-            {
-                PlayerCombatEvents combatEvents = context.Source.GetComponent<PlayerCombatEvents>();
-                combatEvents?.TryReportBasicAttackHit(this, context, previousHealth - CurrentHealth);
-                combatEvents?.TryReportEnemyKilled(this, context);
-            }
+            killingBlow.Source?.GetComponent<PlayerCombatEvents>()?.TryReportEnemyKilled(this, killingBlow);
             Died?.Invoke();
+        }
+
+        // Variant-2: the deferral is asked only about a hit that takes the health to 0 (an execution included).
+        public void SetLethalDeferral(Func<DamageContext, float> deferral)
+        {
+            lethalDeferral = deferral;
+        }
+
+        // Variant-2: life running out on its own. Reported as a change only (no damage number, hit flash or hit
+        // window) and ignores invulnerability. At 0 the death goes through with the given blow as the killing blow
+        // (its kill credit included); the deferral is not asked.
+        public void DrainHealth(float amount, DamageContext killingBlow)
+        {
+            if (IsDead || amount <= 0f || CurrentHealth <= 0f) return;
+            CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
+            Changed?.Invoke(CurrentHealth, MaxHealth);
+            if (CurrentHealth <= 0f) Die(killingBlow);
         }
 
         public void ResetHealth()

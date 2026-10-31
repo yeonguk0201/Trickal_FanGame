@@ -182,7 +182,7 @@ namespace TrickalFanGame.Enemy
             // It steers its own shadow onto the player's shadow, so the burst lands under the player's feet.
             Vector2 offset = FeetOffsetToTarget();
             bool underFeet = offset.sqrMagnitude <= emergeRange * emergeRange;
-            if (underFeet && elapsed >= minimumBurrowDuration)
+            if (underFeet && elapsed >= EnemyVariant.AttackIntervalOf(this, minimumBurrowDuration))
             {
                 BeginEmerging(currentTime);
                 return;

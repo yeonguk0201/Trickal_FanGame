@@ -40,11 +40,12 @@ namespace TrickalFanGame.Combat
 
         public static Material Material(string shaderName)
         {
-            if (Materials.TryGetValue(shaderName, out Material cached)) return cached;
+            // A scene load can unload the cached material (it is no asset), so a destroyed one is made again.
+            if (Materials.TryGetValue(shaderName, out Material cached) && cached != null) return cached;
             Shader shader = Resources.Load<Shader>("CombatEffects/" + shaderName);
             if (shader == null) return null;
             var material = new Material(shader) { name = "Combat effect " + shaderName };
-            Materials.Add(shaderName, material);
+            Materials[shaderName] = material;
             return material;
         }
 

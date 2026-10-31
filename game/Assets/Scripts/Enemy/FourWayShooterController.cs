@@ -198,7 +198,7 @@ namespace TrickalFanGame.Enemy
                 out Vector2 open)
                 ? open
                 : Vector2.zero;
-            stateEndsAt = currentTime + moveDuration;
+            stateEndsAt = currentTime + EnemyVariant.AttackIntervalOf(this, moveDuration);
             behavior?.SetControllerMovementSuppressed(false);
             SetState(FourWayShooterState.Moving);
         }
@@ -233,7 +233,7 @@ namespace TrickalFanGame.Enemy
                     projectileDamageTier, projectileSpeed, projectileLifetime, sprite, drawn);
             }
 
-            stateEndsAt = currentTime + recoveryDuration;
+            stateEndsAt = currentTime + EnemyVariant.AttackIntervalOf(this, recoveryDuration);
             SetState(FourWayShooterState.Recovering);
             VolleyFired?.Invoke(volley);
             return volley;

@@ -227,7 +227,11 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
   장판·보라 4방향 탄·노랑 쫄따구 자폭, 자폭형은 자폭 제외)와 그 색 외곽선(3px + 약한 발광), 위협 +1. Encounter 콘텐츠 버전 22. 사양은
   [28번](./28-difficulty-enemies-drops-plan.md) §8.6. 검증: `Week27Variant1Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(17개) 통과(2026-10-30).
   Play 피드백(2026-10-31): 장판을 독 장판 함정 그림으로 바꾸고 7초로 늘림(단독 `Verify` 통과, 사용자 Play 확인). 탄·자폭 시각 효과와 그 밖의 연출
-  보강은 Pool-0 전 Effect-0으로 묶었다(28번 §7).
+  보강은 Pool-0 전 Effect-0으로 묶었다(28번 §7). 외곽선·탄·자폭도 사용자 Play 확인 완료(2026-10-31).
+- Variant-2(2026-10-31): 불사(사이온) 챔피언. 챔피언 성질 4번째(흰 외곽선, 제외 대상 없음). 처음 치명타를 맞으면 최대 체력 85% 불사
+  생명으로 3초 동안 계속 싸우고(이동·공격 30% 빠름, 회색 반투명), 생명은 저절로 줄고 맞으면 더 빨리 준다. 처치 효과·분열·방 클리어는
+  최종 사망 때. Encounter 콘텐츠 버전 23. 사양은 [28번](./28-difficulty-enemies-drops-plan.md) §8.7. 검증:
+  `Week27Variant2Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(18개) 통과(2026-10-31). 사용자 Play 확인 완료(2026-10-31).
 
 ## 4. 확정 사양
 

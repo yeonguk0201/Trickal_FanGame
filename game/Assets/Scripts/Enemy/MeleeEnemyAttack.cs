@@ -183,8 +183,8 @@ namespace TrickalFanGame.Enemy
                     if (currentTime >= stateEndsAt)
                     {
                         EndLunge();
-                        stateEndsAt = currentTime + recoveryDuration;
-                        nextAttackTime = stateEndsAt + attackCooldown;
+                        stateEndsAt = currentTime + EnemyVariant.AttackIntervalOf(this, recoveryDuration);
+                        nextAttackTime = stateEndsAt + EnemyVariant.AttackIntervalOf(this, attackCooldown);
                         SetState(MeleeEnemyAttackState.Recovery);
                     }
 
@@ -415,7 +415,7 @@ namespace TrickalFanGame.Enemy
 
             if (State != MeleeEnemyAttackState.Idle)
             {
-                nextAttackTime = Mathf.Max(nextAttackTime, currentTime + attackCooldown);
+                nextAttackTime = Mathf.Max(nextAttackTime, currentTime + EnemyVariant.AttackIntervalOf(this, attackCooldown));
             }
 
             hitApplied = false;
