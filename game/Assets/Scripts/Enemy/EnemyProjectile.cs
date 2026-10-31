@@ -34,6 +34,7 @@ namespace TrickalFanGame.Enemy
             Sprite sprite,
             bool authoredArtwork = false)
         {
+            position = LaunchOrigin(source, position, authoredArtwork);
             GameObject projectileObject = new("Enemy Projectile");
             if (source != null && source.transform.parent != null)
             {
@@ -63,6 +64,41 @@ namespace TrickalFanGame.Enemy
             projectile.Launch(direction, source, damageTier, speed, lifetime);
             return projectile;
         }
+
+        public static float LaunchRadiusOf(GameObject source, bool authoredArtwork)
+        {
+            float scale = (authoredArtwork ? ProjectileSizing.DrawnEnemyScale : ProjectileSizing.RangedEnemyScale) *
+                          EnemyVariant.ProjectileScaleOf(source);
+            return ProjectileSizing.WorldCollisionRadius(scale);
+        }
+
+        public static Vector2 LaunchOrigin(GameObject shooter, Vector2 desired, bool authoredArtwork)
+        {
+            return ClearLaunchPosition(shooter, desired, LaunchRadiusOf(shooter, authoredArtwork));
+        }
+
+        // Hitbox-2: only the feet meet walls, so the root of an enemy pressed against a wall can sit on or inside
+        // it. A shot born overlapping Environment would vanish on its first frame, so the launch slides toward the
+        // feet center, which always stands clear of walls and is wider than any enemy shot, until the shot fits.
+        public static Vector2 ClearLaunchPosition(GameObject shooter, Vector2 desired, float radius)
+        {
+            int mask = LayerMask.GetMask("Environment");
+            if (Physics2D.OverlapCircle(desired, radius, mask) == null) return desired;
+            EnemyFeet feet = shooter != null ? shooter.GetComponentInChildren<EnemyFeet>() : null;
+            if (feet == null || !feet.isActiveAndEnabled || feet.Collider == null || !feet.Collider.enabled)
+                return desired;
+
+            Vector2 feetCenter = feet.WorldCenter;
+            for (int step = 1; step < LaunchSearchSteps; step++)
+            {
+                Vector2 candidate = Vector2.Lerp(desired, feetCenter, step / (float)LaunchSearchSteps);
+                if (Physics2D.OverlapCircle(candidate, radius, mask) == null) return candidate;
+            }
+
+            return feetCenter;
+        }
+
+        private const int LaunchSearchSteps = 8;
 
         public void Launch(
             Vector2 direction,

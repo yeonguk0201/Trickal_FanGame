@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Room;
 using UnityEditor;
@@ -80,12 +81,13 @@ namespace TrickalFanGame.Editor
             ValidateRoomsOnLattice();
             ValidateTerrainUsesFeet();
             ValidateBossBodyStillMeetsTerrain();
+            ValidateShotsClearWallAbove();
             ValidateLanePlanning();
             ValidateLaneWalks();
             Debug.Log($"Hitbox-2 verification passed: the {EnemyFeet.LayerName} layer collides with terrain only, " +
                       $"{FeetPrefabs.Length} normal enemy Prefabs have one feet circle of radius {EnemyFeet.Radius} " +
                       $"under an unchanged body of radius {BodyRadius} that ignores terrain, bosses keep one circle, " +
-                      "walls stop the feet, and enemies plan and walk through one-cell lanes between obstacles and " +
+                      "walls stop the feet, shots from an enemy pressed under a wall launch clear of it, and enemies plan and walk through one-cell lanes between obstacles and " +
                       "beside a wall from any start offset.");
         }
 
@@ -258,6 +260,51 @@ namespace TrickalFanGame.Editor
                         $"stopped at {body.position.x:F2}.");
                 });
             }
+        }
+
+        // Only the feet stop at a wall above, so the root sits closer to it than the widest enemy shot (an elite's
+        // drawn shot). Such a shot used to be born overlapping the wall and vanish on its first frame.
+        private static void ValidateShotsClearWallAbove()
+        {
+            int environment = LayerMask.GetMask("Environment");
+            float widest = ProjectileSizing.WorldCollisionRadius(ProjectileSizing.DrawnEnemyScale *
+                                                                 EnemyVariant.EliteProjectileScale);
+            Run("shot under wall", root =>
+            {
+                Box(root, "Environment", Origin + new Vector2(0f, 2f), new Vector2(6f, 1f));
+                Rigidbody2D body = Enemy(root, "TestEnemy", Origin);
+                Drive(body, Vector2.up);
+                Physics2D.SyncTransforms();
+                Vector2 rootPosition = body.transform.position;
+                Assert(Physics2D.OverlapCircle(rootPosition, widest, environment) != null,
+                    "The probe must start with the widest enemy shot overlapping the wall at the enemy root.");
+
+                Vector2 launch = EnemyProjectile.ClearLaunchPosition(body.gameObject, rootPosition, widest);
+                Assert(Physics2D.OverlapCircle(launch, widest, environment) == null,
+                    $"A shot of radius {widest:F2} from an enemy under a wall must launch clear of it, but launched " +
+                    $"at {launch} overlapping the wall.");
+                Vector2 feetCenter = body.GetComponentInChildren<EnemyFeet>().WorldCenter;
+                Assert(launch.y <= rootPosition.y + 0.001f && launch.y >= feetCenter.y - 0.001f &&
+                       Mathf.Abs(launch.x - rootPosition.x) < 0.001f,
+                    "The launch must slide from the root toward the feet center, not elsewhere.");
+
+                EnemyProjectile shot = EnemyProjectile.Create(rootPosition, Vector2.down, body.gameObject,
+                    EnemyDamageTier.Light, 5f, 1f, null, true);
+                Physics2D.SyncTransforms();
+                float shotRadius = EnemyProjectile.LaunchRadiusOf(body.gameObject, true);
+                Assert(Physics2D.OverlapCircle(shot.transform.position, shotRadius, environment) == null,
+                    "EnemyProjectile.Create must place the shot clear of a wall the enemy is pressed against.");
+                Assert(EnemyObstacleNavigator.HasLineOfFire(
+                        EnemyProjectile.LaunchOrigin(body.gameObject, rootPosition, false), Origin + Vector2.down * 4f),
+                    "An enemy under a wall must keep its line of fire toward a target below.");
+            });
+            Run("shot in the open", root =>
+            {
+                Rigidbody2D body = Enemy(root, "TestEnemy", Origin);
+                Physics2D.SyncTransforms();
+                Assert(EnemyProjectile.ClearLaunchPosition(body.gameObject, Origin, widest) == Origin,
+                    "A shot with room to spare must launch from the enemy root unchanged.");
+            });
         }
 
         private static void ValidateBossBodyStillMeetsTerrain()

@@ -206,7 +206,8 @@ namespace TrickalFanGame.Enemy
                 return false;
             }
 
-            bool hasLineOfFire = EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position);
+            bool hasLineOfFire = EnemyObstacleNavigator.HasLineOfFire(
+                EnemyProjectile.LaunchOrigin(gameObject, transform.position, false), target.position);
             if (!hasLineOfFire)
             {
                 body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, terrain,
@@ -254,9 +255,10 @@ namespace TrickalFanGame.Enemy
         private bool FirePredictive(float currentTime)
         {
             SansamoPureMotion flower = GetComponent<SansamoPureMotion>();
-            Vector2 origin = flower != null && flower.isActiveAndEnabled ? flower.LaunchPosition : (Vector2)transform.position;
+            Vector2 root = EnemyProjectile.LaunchOrigin(gameObject, transform.position, false);
+            Vector2 origin = flower != null && flower.isActiveAndEnabled ? flower.LaunchPosition : root;
             // A visible flower must not shoot through a wall just because the feet have line of sight.
-            if (!EnemyObstacleNavigator.HasLineOfFire(transform.position, origin) ||
+            if (!EnemyObstacleNavigator.HasLineOfFire(root, origin) ||
                 !EnemyObstacleNavigator.HasLineOfFire(origin, target.position)) return false;
             Rigidbody2D targetBody = target.GetComponent<Rigidbody2D>();
             Vector2 targetVelocity = targetBody != null ? targetBody.linearVelocity : Vector2.zero;

@@ -126,7 +126,8 @@ namespace TrickalFanGame.Enemy
             Vector2 direction = offset / distance;
             // Obstacle-0: with the line of fire blocked the enemy holds fire and walks around toward the target.
             if (distance > maximumAttackDistance ||
-                !EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
+                !EnemyObstacleNavigator.HasLineOfFire(EnemyProjectile.LaunchOrigin(gameObject, transform.position, false),
+                    target.position))
             {
                 body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, terrain,
                     currentTime) * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));

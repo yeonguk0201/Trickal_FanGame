@@ -57,7 +57,10 @@ namespace TrickalFanGame.Enemy
             LastEffect = kind switch
             {
                 EnemyVariantKind.ChampionPuddle => EnemyChampionPuddle.Spawn(position, parent, floor, now)?.gameObject,
-                EnemyVariantKind.ChampionShots => EnemyChampionVolley.Spawn(position, parent, floor,
+                // The volley spawns where the shots fit, off a wall the champion died against (Hitbox-2).
+                EnemyVariantKind.ChampionShots => EnemyChampionVolley.Spawn(
+                    EnemyProjectile.ClearLaunchPosition(gameObject, position,
+                        ProjectileSizing.WorldCollisionRadius(ProjectileSizing.RangedEnemyScale)), parent, floor,
                     VolleyDirectionsFor(gameObject), now)?.gameObject,
                 EnemyVariantKind.ChampionBlast => SpawnBlast(now),
                 _ => null,
