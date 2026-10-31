@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TrickalFanGame.Enemy
 {
     // Variant-1 (docs/28 §8): a champion's death property. Whatever killed it, the property leaves its own object
-    // where it fell (a puddle, a volley or the 쫄따구 blast), so the dead enemy is released from its room at once and
+    // where it fell (a puddle, a volley or a square blast), so the dead enemy is released from its room at once and
     // never holds a clear back. Subscribed from EnemyVariant.Apply, which runs before the room registers the enemy.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Health))]
@@ -68,8 +68,8 @@ namespace TrickalFanGame.Enemy
             if (LastEffect != null) EffectSpawned?.Invoke(LastEffect);
         }
 
-        // The 쫄따구 blast as it is (EnemyDeathExplosion defaults): 0.6 s telegraph, radius 1.2, one heart on every
-        // floor, player only.
+        // Effect-0 (2026-11-01 user decision): instead of the 쫄따구 blast, the area nine bombs on a 3x3 grid reach
+        // flashes for one second, then all nine real bomb explosions go off at once (EnemyChampionBlast).
         private GameObject SpawnBlast(float now)
         {
             TrickalFanGame.Frontend.FairyKingdomArtworkView artwork =
@@ -77,9 +77,7 @@ namespace TrickalFanGame.Enemy
             SpriteRenderer visual = artwork != null && artwork.Visual != null
                 ? artwork.Visual
                 : GetComponentInChildren<SpriteRenderer>();
-            EnemyDeathBlast blast = EnemyDeathBlast.Spawn(transform.position, transform.parent, gameObject, visual,
-                EnemyDeathExplosion.DefaultTelegraphDuration, EnemyDeathExplosion.DefaultRadius,
-                EnemyDeathExplosion.DefaultDamageUnits, now);
+            EnemyChampionBlast blast = EnemyChampionBlast.Spawn(transform.position, transform.parent, visual, now);
             return blast != null ? blast.gameObject : null;
         }
     }

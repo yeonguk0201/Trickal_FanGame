@@ -355,6 +355,8 @@ namespace TrickalFanGame.Room
             // Variant-1: a champion's death puddle and an unfired death volley stay in the room they came from.
             EnemyChampionPuddle.ClearAll();
             EnemyChampionVolley.ClearAll();
+            // Effect-0: and so does a champion blast that has not gone off.
+            EnemyChampionBlast.ClearAll();
         }
     }
 }
