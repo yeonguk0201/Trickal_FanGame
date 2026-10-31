@@ -66,7 +66,7 @@ namespace TrickalFanGame.Enemy
         public void Refresh(Camera view, float now)
         {
             if (health == null) health = GetComponent<Health>();
-            if (source == null) source = ResolveSource();
+            if (source == null) source = ResolveBodySprite(gameObject);
             Material material = CombatEffectArtwork.Material(ShaderName);
             Renderer body = health != null && health.IsDead ? null : ResolveBody();
             CurrentBody = material != null ? body : null;
@@ -83,13 +83,15 @@ namespace TrickalFanGame.Enemy
                 ? view.orthographicSize * 2f / view.pixelHeight
                 : FallbackWorldPerPixel;
 
-        private SpriteRenderer ResolveSource()
+        // The enemy's body sprite (a movement mesh copies its colour). Also used by the undying champion's tint.
+        public static SpriteRenderer ResolveBodySprite(GameObject enemy)
         {
+            if (enemy == null) return null;
             TrickalFanGame.Frontend.FairyKingdomArtworkView artwork =
-                GetComponent<TrickalFanGame.Frontend.FairyKingdomArtworkView>();
+                enemy.GetComponent<TrickalFanGame.Frontend.FairyKingdomArtworkView>();
             if (artwork != null && artwork.Visual != null) return artwork.Visual;
-            if (TryGetComponent(out SpriteRenderer own)) return own;
-            foreach (SpriteRenderer candidate in GetComponentsInChildren<SpriteRenderer>(true))
+            if (enemy.TryGetComponent(out SpriteRenderer own)) return own;
+            foreach (SpriteRenderer candidate in enemy.GetComponentsInChildren<SpriteRenderer>(true))
                 if (!candidate.name.StartsWith(CopyPrefix)) return candidate;
             return null;
         }

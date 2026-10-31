@@ -500,8 +500,8 @@ namespace TrickalFanGame.Enemy
             body.linearVelocity = Vector2.zero;
             slideNormal = Vector2.zero;
             pursuitTimerStarted = false;
-            stateEndsAt = currentTime + recoveryDuration;
-            nextChargeTime = currentTime + chargeCooldown;
+            stateEndsAt = currentTime + EnemyVariant.AttackIntervalOf(this, recoveryDuration);
+            nextChargeTime = currentTime + EnemyVariant.AttackIntervalOf(this, chargeCooldown);
             SetState(ChargingEnemyState.Recovering);
         }
 
@@ -522,7 +522,7 @@ namespace TrickalFanGame.Enemy
             lockedDirection = Vector2.zero;
             slideNormal = Vector2.zero;
             pursuitTimerStarted = false;
-            nextChargeTime = Mathf.Max(nextChargeTime, currentTime + chargeCooldown);
+            nextChargeTime = Mathf.Max(nextChargeTime, currentTime + EnemyVariant.AttackIntervalOf(this, chargeCooldown));
             SetState(ChargingEnemyState.Idle);
         }
 

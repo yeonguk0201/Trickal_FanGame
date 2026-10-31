@@ -194,7 +194,7 @@ namespace TrickalFanGame.Enemy
                     body.linearVelocity = Vector2.zero;
                     if (currentTime >= stateEndsAt)
                     {
-                        stateEndsAt = currentTime + recoveryDuration;
+                        stateEndsAt = currentTime + EnemyVariant.AttackIntervalOf(this, recoveryDuration);
                         SetState(LongRangeSniperState.Recovering);
                     }
                     break;

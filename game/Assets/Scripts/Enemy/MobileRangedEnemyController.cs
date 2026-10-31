@@ -246,7 +246,8 @@ namespace TrickalFanGame.Enemy
                 return;
             }
             shotsRemaining--;
-            nextShotTime = currentTime + (shotsRemaining > 0 ? shotInterval : burstRestDuration);
+            nextShotTime = currentTime +
+                           EnemyVariant.AttackIntervalOf(this, shotsRemaining > 0 ? shotInterval : burstRestDuration);
             if (shotsRemaining <= 0) body.linearVelocity = Vector2.zero;
         }
 

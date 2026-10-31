@@ -1207,7 +1207,7 @@ namespace TrickalFanGame.Run
         }
 
         // Variant-1: turns the living enemy nearest to the player into a champion with the chosen death property
-        // (green puddle, purple 4-way shots, yellow 쫄따구 blast). 자폭형 refuses the blast.
+        // (green puddle, purple 4-way shots, yellow 쫄따구 blast, Variant-2 white undying). 자폭형 refuses the blast.
         private void DrawChampionControls(RoomGraphAssembler assembler, RoomController controller,
             GeneratedRoomNode node)
         {
@@ -1219,6 +1219,7 @@ namespace TrickalFanGame.Run
                          (TrickalFanGame.Enemy.EnemyVariantKind.ChampionPuddle, "Puddle"),
                          (TrickalFanGame.Enemy.EnemyVariantKind.ChampionShots, "Shots"),
                          (TrickalFanGame.Enemy.EnemyVariantKind.ChampionBlast, "Blast"),
+                         (TrickalFanGame.Enemy.EnemyVariantKind.ChampionUndying, "Undying"),
                      })
             {
                 if (!AssistedButton(label) || controller == null || player == null) continue;
@@ -1240,7 +1241,21 @@ namespace TrickalFanGame.Run
             GUILayout.Label($"Champions planned {EnemyVariantRules.CountChampions(node?.ResolvedEncounterWaves)}, " +
                             $"alive {championsAlive}, puddles {TrickalFanGame.Enemy.EnemyChampionPuddle.Live.Count}, " +
                             "volleys pending " +
-                            TrickalFanGame.Enemy.EnemyChampionVolley.Live.Count(volley => !volley.HasFired));
+                            TrickalFanGame.Enemy.EnemyChampionVolley.Live.Count(volley => !volley.HasFired) +
+                            ", undying now " + UndyingStatus(controller));
+        }
+
+        // Variant-2: each undying champion running on undying life, with its life left and seconds left.
+        private static string UndyingStatus(RoomController controller)
+        {
+            if (controller == null) return "0";
+            string[] running = controller.AliveEnemies
+                .Where(enemy => enemy != null && !enemy.IsDead &&
+                                TrickalFanGame.Enemy.EnemyChampionUndying.IsActiveOn(enemy))
+                .Select(enemy => $"{enemy.CurrentHealth:0}/{enemy.MaxHealth:0} " +
+                                 $"{Mathf.Max(0f, enemy.GetComponent<TrickalFanGame.Enemy.EnemyChampionUndying>().EndTime - Time.time):0.0}s")
+                .ToArray();
+            return running.Length == 0 ? "0" : $"{running.Length} ({string.Join(", ", running)})";
         }
 
         private void FindEnemySeedButton(RoomGraphAssembler assembler, EncounterEnemyRole role, string buttonName,

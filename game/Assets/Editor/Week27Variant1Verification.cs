@@ -135,16 +135,21 @@ namespace TrickalFanGame.Editor
                    (int)EnemyVariantKind.ChampionBlast == 4,
                 "Variant kind values are append-only.");
             Assert(EnemyVariant.ChampionThreatBonus == 1, "A champion adds 1 threat (docs/28 §8).");
-            Assert(EnemyVariant.ChampionKinds.Length == 3 && EnemyVariant.ChampionKinds.All(EnemyVariant.IsChampionKind) &&
+            // Variant-2 appends the undying champion; its own checks live in Week27Variant2Verification.
+            EnemyVariantKind[] deathKinds =
+                { EnemyVariantKind.ChampionPuddle, EnemyVariantKind.ChampionShots, EnemyVariantKind.ChampionBlast };
+            Assert(deathKinds.All(EnemyVariant.ChampionKinds.Contains) &&
+                   EnemyVariant.ChampionKinds.All(EnemyVariant.IsChampionKind) &&
                    !EnemyVariant.IsChampionKind(EnemyVariantKind.None) &&
                    !EnemyVariant.IsChampionKind(EnemyVariantKind.Elite),
-                "Variant-1 has exactly the puddle, shots and blast champions.");
+                "Champions must keep the puddle, shots and blast properties.");
             foreach (EncounterEnemyRole role in Enum.GetValues(typeof(EncounterEnemyRole)).Cast<EncounterEnemyRole>())
             {
                 EnemyVariantKind[] kinds = EnemyVariantRules.ChampionKindsFor(role);
                 Assert(role == EncounterEnemyRole.SelfDestruct
-                        ? kinds.Length == 2 && !kinds.Contains(EnemyVariantKind.ChampionBlast)
-                        : kinds.Length == 3,
+                        ? kinds.Length == EnemyVariant.ChampionKinds.Length - 1 &&
+                          !kinds.Contains(EnemyVariantKind.ChampionBlast)
+                        : kinds.Length == EnemyVariant.ChampionKinds.Length,
                     $"{role} must take {(role == EncounterEnemyRole.SelfDestruct ? "every property but the blast" : "every property")}.");
             }
 
@@ -236,7 +241,8 @@ namespace TrickalFanGame.Editor
             Assert(rate3 > 0.13f && rate3 < 0.17f,
                 $"About 15% of floor-3 eligible enemies must be champions ({champions[3]}/{eligible[3]}).");
             int total = kinds.Values.Sum();
-            Assert(kinds.Values.All(count => count > total * 0.25f && count < total * 0.42f),
+            int kindCount = EnemyVariant.ChampionKinds.Length;
+            Assert(kinds.Values.All(count => count > total * 0.75f / kindCount && count < total * 1.3f / kindCount),
                 "Champion properties must be spread about evenly (" +
                 string.Join(", ", kinds.Select(entry => $"{entry.Key} {entry.Value}")) + ").");
             Assert(runtimeSeed > 0, "No floor-2 champion was generated for runtime verification.");
@@ -310,7 +316,10 @@ namespace TrickalFanGame.Editor
                             $"{prefab.name} champion must not stack another variant.");
                         EnemyChampionDeath death = enemy.GetComponent<EnemyChampionDeath>();
                         EnemyChampionOutline outline = enemy.GetComponent<EnemyChampionOutline>();
-                        Assert(death != null && death.Kind == kind && outline != null &&
+                        bool undying = kind == EnemyVariantKind.ChampionUndying;
+                        Assert((undying
+                                   ? death == null && enemy.GetComponent<EnemyChampionUndying>() != null
+                                   : death != null && death.Kind == kind) && outline != null &&
                                outline.Color == EnemyVariant.ChampionColor(kind),
                             $"{prefab.name} {kind} champion needs its death property and outline colour.");
                         Assert(Mathf.Approximately(health.MaxHealth, baseHealth) &&

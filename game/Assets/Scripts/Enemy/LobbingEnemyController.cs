@@ -164,7 +164,7 @@ namespace TrickalFanGame.Enemy
             // Aimed at the player's shadow, so the mark sits on the floor under the player.
             Vector2 landing = target != null ? EnemyLobProjectile.GroundPoint(target) : (Vector2)transform.position;
             CancelWindUp();
-            nextAttackTime = currentTime + attackInterval;
+            nextAttackTime = currentTime + EnemyVariant.AttackIntervalOf(this, attackInterval);
             LastThrowTime = currentTime;
             LastProjectile = EnemyLobProjectile.Launch(gameObject, transform.position, landing, currentTime,
                 flightDuration, arcHeight, landingRadius, damageTier, projectileSprite, launchHeight);

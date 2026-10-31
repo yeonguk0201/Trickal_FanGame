@@ -1485,6 +1485,18 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   `Make nearest champion` 줄 `Puddle`·`Shots`·`Blast`는 지금 방에서 플레이어와 가장 가까운 일반 적을 그 성질 챔피언으로 바꾸고, 아래 줄에
   계획된 챔피언 수·살아 있는 챔피언 수·남은 장판 수·쏘기 전 탄 수를 보인다.
 
+- Variant-2 불사 챔피언(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Variant-2 Undying Champions`가 Encounter 콘텐츠 버전 23을
+  멱등 구성한다. 런타임 규칙은 `EnemyVariant`(`ChampionUndying`·흰색·이동/공격 간격 배율)·`EnemyChampionUndying`(불사 생명·흐름·회색
+  반투명)·`Health`의 치명타 유예(`SetLethalDeferral`)와 생명 소모(`DrainHealth`)에 있다. 사양은
+  [28번 §8.7](./28-difficulty-enemies-drops-plan.md). 배치는
+  `-executeMethod TrickalFanGame.Editor.Week27Variant2Verification.SetupAndVerifyBatch`(Setup 2회 GUID 보존 포함), 단독 검증 `Verify`,
+  회귀 `VerifyWithRegressionsBatch`(Variant-1과 그 회귀 목록, 18개). 검사: 종류 값 5·성질 4종·모든 역할 허용·흰색·수치, 512 seed 성질
+  분포(불사 약 1/4), 모든 일반 적의 불사 진입(85%)·이동 1.3배·공격 간격 1/1.3·최종 사망, 치명타 아닌 피격 무시, 3초 균등 소모·피격 시
+  더 빨리·두 번째 치명타 즉시 사망·사망 1회, 몸 색 한 번만 곱하기, 외곽선 유지, 자폭형 자기 폭발 즉시 사망, 누루링 최종 사망 때 분열,
+  처치 판정은 최종 사망 때 플레이어 마지막 타격으로(환경으로 쓰러뜨리면 없음), 실제 방에서 불사 동안 클리어 대기.
+  개발 패널(`F1`): `— Room —`의 `Make nearest champion` 줄 `Undying`이 가장 가까운 일반 적을 불사 챔피언으로 바꾸고, 아래 줄
+  `undying now N (생명/최대 남은초)`에 불사 중인 적을 보인다. 불사 챔피언이 있는 seed는 `Find champion F2`로 찾는다(성질은 무작위).
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,

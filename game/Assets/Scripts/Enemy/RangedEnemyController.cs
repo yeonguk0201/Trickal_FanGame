@@ -165,7 +165,7 @@ namespace TrickalFanGame.Enemy
                 projectileSpeed,
                 projectileLifetime,
                 projectileSprite);
-            nextAttackTime = currentTime + attackInterval;
+            nextAttackTime = currentTime + EnemyVariant.AttackIntervalOf(this, attackInterval);
             ProjectileFired?.Invoke(projectile);
             return projectile;
         }

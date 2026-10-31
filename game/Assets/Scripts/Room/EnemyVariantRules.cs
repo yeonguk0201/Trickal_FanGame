@@ -8,7 +8,8 @@ namespace TrickalFanGame.Room
     // room) from the room's content seed after its Encounter is chosen, so the same seed keeps the same Encounter and
     // the same elite. The chance rises with depth. 쥬비, split bodies, boss summons and bosses never become variants;
     // only 쥬비 appears in generated spawns, the others are made at runtime and never pass through here.
-    // Variant-1 adds champions with the same exclusions.
+    // Variant-1 adds champions with the same exclusions. Variant-2 adds the undying property; each slot keeps its own
+    // champion roll, so the same enemies stay champions while the property pick now spreads over four.
     public static class EnemyVariantRules
     {
         public const uint EliteRollSalt = 0x6E1A7E01u;
