@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace TrickalFanGame.Resource
 {
-    // A pushable floor heart. It is collected only when its whole heal amount fits under the player's
-    // maximum HP and the 15-heart health + shield limit; otherwise it stays on the floor as a physical body the
-    // player can push around.
+    // A pushable floor heart. It is collected whenever the player is missing any health under the maximum HP and the
+    // 15-heart health + shield limit, healing only what fits (a full heart on half a missing heart heals that half).
+    // At full health it stays on the floor as a physical body the player can push around.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public sealed class HealthPickup : MonoBehaviour
@@ -56,7 +56,7 @@ namespace TrickalFanGame.Resource
             return !isCollected &&
                    playerHealth != null &&
                    !playerHealth.IsDead &&
-                   playerHealth.MissingHealth + MissingHealthTolerance >= HealUnits;
+                   playerHealth.MissingHealth > MissingHealthTolerance;
         }
 
         public bool Collect(Health playerHealth)

@@ -44,9 +44,43 @@ namespace TrickalFanGame.Room
         public bool IsPortalBarrierActive =>
             IsPortalBarrier && blocker != null && blocker.enabled && !blocker.isTrigger;
 
+        public const string PickupBoundaryName = "Pickup Door Boundary";
+
+        private BoxCollider2D pickupBoundary;
+
+        public BoxCollider2D PickupBoundary => pickupBoundary;
+
         private void Awake()
         {
             EnsureReferences();
+            if (Application.isPlaying) EnsurePickupBoundary();
+        }
+
+        // Pushed floor hearts and chests stop at the closed door's inner edge even after the door opens, so they
+        // never plug the doorway the player walks through. The boundary copies the inner blocker's shape on the
+        // Pickup layer and ignores the Player layer, so only pickups and chest pushes meet it.
+        public BoxCollider2D EnsurePickupBoundary()
+        {
+            if (pickupBoundary != null) return pickupBoundary;
+            if (interiorBlocker is not BoxCollider2D source) return null;
+
+            Transform existing = source.transform.Find(PickupBoundaryName);
+            GameObject boundary = existing != null ? existing.gameObject : new GameObject(PickupBoundaryName);
+            boundary.transform.SetParent(source.transform, false);
+            boundary.transform.localPosition = Vector3.zero;
+            boundary.transform.localRotation = Quaternion.identity;
+            boundary.transform.localScale = Vector3.one;
+            boundary.layer = LayerMask.NameToLayer(TrickalFanGame.Resource.HealthPickup.LayerName);
+
+            pickupBoundary = boundary.GetComponent<BoxCollider2D>();
+            if (pickupBoundary == null) pickupBoundary = boundary.AddComponent<BoxCollider2D>();
+            pickupBoundary.size = source.size;
+            pickupBoundary.offset = source.offset;
+            pickupBoundary.edgeRadius = source.edgeRadius;
+            pickupBoundary.isTrigger = false;
+            pickupBoundary.excludeLayers = LayerMask.GetMask("Player");
+            pickupBoundary.enabled = true;
+            return pickupBoundary;
         }
 
         public void SetLocked(bool isLocked)

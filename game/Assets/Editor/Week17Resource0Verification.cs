@@ -36,8 +36,8 @@ namespace TrickalFanGame.Editor
             ValidateCollectRules();
             ValidateColliderFiltering();
             Debug.Log("Resource-0 health pickup verification passed: one pickup heals exactly one heart, is " +
-                      "collected only when the whole heart fits under max HP, stays on the floor at full or " +
-                      "half-missing HP, never grants twice, ignores non-player colliders, and uses a solid " +
+                      "collected whenever any health is missing (healing only what fits), stays on the floor at full " +
+                      "HP, never grants twice, ignores non-player colliders, and uses a solid " +
                       "Pickup-layer body that only collides with the player, walls and other pickups.");
         }
 
@@ -104,10 +104,11 @@ namespace TrickalFanGame.Editor
                     "At full HP the pickup must stay on the floor without healing.");
 
                 SetMissingUnits(health, 1);
-                Assert(!pickup.Collect(health) && pickupObject != null &&
-                       Mathf.Approximately(health.CurrentHealth, 9f),
-                    "With only half a heart missing the pickup must stay on the floor without healing.");
+                Assert(pickup.CanCollect(health) && pickup.Collect(health) && pickupObject == null &&
+                       Mathf.Approximately(health.CurrentHealth, 10f),
+                    "With only half a heart missing the pickup must heal that half and disappear.");
 
+                pickupObject = CreatePickup(out pickup);
                 SetMissingUnits(health, 2);
                 Assert(pickup.Collect(health) && pickupObject == null &&
                        Mathf.Approximately(health.CurrentHealth, 10f),
@@ -151,7 +152,7 @@ namespace TrickalFanGame.Editor
                     "Only the player's collider may collect a health pickup, even when another Health is hurt.");
                 Assert(pickup.TryCollectFrom(player.GetComponent<Collider2D>()) && pickupObject == null &&
                        Mathf.Approximately(health.CurrentHealth, health.MaxHealth),
-                    "Touching the player's collider must collect a pickup whose whole heart fits.");
+                    "Touching the player's collider must collect a pickup while health is missing.");
             }
             finally
             {

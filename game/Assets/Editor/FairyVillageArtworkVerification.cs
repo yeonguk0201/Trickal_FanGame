@@ -117,6 +117,7 @@ namespace TrickalFanGame.Editor
                         binding.Refresh();
                         Sprite open = visual.sprite;
                         Assert(!inner.enabled, "Open door must release its inner boundary.");
+                        VerifyPickupBoundary(slot.Blocker, inner);
                         if (front != null) Assert(front.sprite == open && front.GetComponent<ConnectedRoomPatch>().ForegroundMask.name.StartsWith("door-open"),
                             "Lower open door must preserve a transparent passage.");
                         Assert(open != null && open.name.EndsWith("open") && slot.Blocker.IsPortalBarrierActive,
@@ -179,6 +180,28 @@ namespace TrickalFanGame.Editor
                 finally { UnityEngine.Object.DestroyImmediate(instance); }
             }
             Debug.Log($"Fairy Village artwork verification passed: {paths.Length} templates; floor, walls, door states and portal barriers.");
+        }
+
+        // An open door keeps a pickup-only copy of its inner edge: pushed hearts and chests stop there, the player does not.
+        private static void VerifyPickupBoundary(DoorController door, BoxCollider2D inner)
+        {
+            BoxCollider2D boundary = door.EnsurePickupBoundary();
+            int pickupLayer = LayerMask.NameToLayer(HealthPickup.LayerName);
+            int playerLayer = LayerMask.NameToLayer("Player");
+            Assert(boundary != null && boundary.enabled && !boundary.isTrigger && boundary.gameObject.layer == pickupLayer &&
+                   boundary.transform.parent == inner.transform && door.EnsurePickupBoundary() == boundary &&
+                   inner.transform.Cast<Transform>().Count(child => child.name == DoorController.PickupBoundaryName) == 1,
+                "An open door must keep exactly one solid pickup boundary on the Pickup layer.");
+            Assert((boundary.transform.position - inner.transform.position).sqrMagnitude < 0.000001f &&
+                   (boundary.transform.lossyScale - inner.transform.lossyScale).sqrMagnitude < 0.000001f &&
+                   (boundary.size - inner.size).sqrMagnitude < 0.000001f &&
+                   (boundary.offset - inner.offset).sqrMagnitude < 0.000001f,
+                "The pickup boundary must match the closed door's inner edge.");
+            Assert((boundary.excludeLayers.value & (1 << playerLayer)) != 0 &&
+                   !Physics2D.GetIgnoreLayerCollision(pickupLayer, pickupLayer),
+                "The pickup boundary must stop floor pickups but let the player through.");
+            Assert((TreasureChest.PushBlockMask & (1 << pickupLayer)) != 0,
+                "Chest pushes must stop at the pickup boundary.");
         }
 
         private static void VerifySpecialDoorMasks()
