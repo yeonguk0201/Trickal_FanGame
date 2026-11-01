@@ -377,7 +377,8 @@ namespace TrickalFanGame.Enemy
                 if (runtime.TryExecute(CurrentPattern.Execution)) return;
             if (CurrentPattern.Execution != BossPatternExecution.AimedProjectile) return;
             Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
-            BossProjectile.Create(transform.position, direction * projectileSpeed, gameObject, projectileDamageTier,
+            BossProjectile.Create(BossProjectile.FrontLaunchPoint(gameObject, direction), direction * projectileSpeed,
+                gameObject, projectileDamageTier,
                 GetComponentInChildren<SpriteRenderer>()?.sprite);
         }
 

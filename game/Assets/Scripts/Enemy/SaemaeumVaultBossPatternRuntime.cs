@@ -653,7 +653,8 @@ namespace TrickalFanGame.Enemy
             for (int index = 0; index < ProjectilesPerVolley; index++)
             {
                 Vector2 projectileDirection = Quaternion.Euler(0f, 0f, startAngle + step * index) * direction;
-                BossProjectile.Create(transform.position, projectileDirection * projectileSpeed, gameObject,
+                BossProjectile.Create(BossProjectile.FrontLaunchPoint(gameObject, projectileDirection),
+                    projectileDirection * projectileSpeed, gameObject,
                     boss.ProjectileDamageTier, sprite);
             }
         }

@@ -12,6 +12,10 @@ namespace TrickalFanGame.Enemy
         public const float AuthoredArtworkWorldScale = 0.75f;
         public const float AuthoredFramesPerSecond = 10f;
 
+        // Effect-0: a boss shot leaves the front of the drawn body toward its target, not the middle of it. The
+        // launch sits on an ellipse this fraction of the drawing's half size (the drawings have a little margin).
+        public const float FrontLaunchBodyFraction = 0.8f;
+
         private Vector2 velocity;
         private SpriteRenderer artwork;
         private Sprite[] frames = System.Array.Empty<Sprite>();
@@ -80,6 +84,22 @@ namespace TrickalFanGame.Enemy
             controller.isLaunched = true;
             source?.GetComponent<BossController>()?.RegisterOwnedObject(projectile);
             return controller;
+        }
+
+        public static Vector2 FrontLaunchPoint(GameObject source, Vector2 direction)
+        {
+            if (source == null) return Vector2.zero;
+            Vector2 origin = source.transform.position;
+            SpriteRenderer drawing = source.GetComponentInChildren<SpriteRenderer>();
+            if (drawing == null || drawing.sprite == null || direction.sqrMagnitude <= 0.0001f) return origin;
+            Bounds bounds = drawing.bounds;
+            float halfWidth = bounds.extents.x * FrontLaunchBodyFraction;
+            float halfHeight = bounds.extents.y * FrontLaunchBodyFraction;
+            if (halfWidth <= 0.001f || halfHeight <= 0.001f) return origin;
+            Vector2 unit = direction.normalized;
+            float edge = 1f / Mathf.Sqrt(unit.x * unit.x / (halfWidth * halfWidth) +
+                                         unit.y * unit.y / (halfHeight * halfHeight));
+            return (Vector2)bounds.center + unit * edge;
         }
 
         private void OnTriggerEnter2D(Collider2D other)
