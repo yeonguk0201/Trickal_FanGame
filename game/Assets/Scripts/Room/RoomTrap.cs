@@ -51,6 +51,8 @@ namespace TrickalFanGame.Room
         public const int FireHits = 3;
         public const int SpikedRockHits = DestructibleObstacle.DefaultRequiredHits;
         public const int PoisonMushroomHits = 2;
+        // Effect-0: bubbles rising in a 독 장판 cell (visual only).
+        public const int PuddleBubbleCount = 3;
         public const string FireVariantId = "fire";
         public const string SpikedRockVariantId = "spiked-rock";
         public const string PoisonMushroomVariantId = "poison-mushroom";
@@ -210,6 +212,8 @@ namespace TrickalFanGame.Room
         private void OnEnable()
         {
             GroundShadow.AttachDuringPlay(gameObject);
+            if (kind == RoomTrapKind.DamagePuddle)
+                PoisonPuddleBubbles.Attach(transform, hitSize * 0.5f, PuddleBubbleCount, visual);
             RestartCycle(Time.time);
             SubscribeFireBreak();
         }

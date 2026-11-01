@@ -43,6 +43,7 @@ namespace TrickalFanGame.Enemy
         private Color tint = Color.white;
 
         private float nextHitTime;
+        private PoisonPuddleBubbles bubbles;
 
         public static IReadOnlyList<EnemyChampionPuddle> Live
         {
@@ -61,6 +62,7 @@ namespace TrickalFanGame.Enemy
         public int HitCount { get; private set; }
         public bool HasEnded { get; private set; }
         public SpriteRenderer Visual { get; private set; }
+        public const int BubbleCount = 6;
 
         public bool IsHarmful(float now) => !HasEnded && now >= ArmedAt && now < FadeAt;
 
@@ -91,6 +93,8 @@ namespace TrickalFanGame.Enemy
             }
 
             puddle.Visual.sortingOrder = SortingOrder;
+            puddle.bubbles = PoisonPuddleBubbles.Attach(host.transform, new Vector2(HalfWidth, HalfHeight),
+                BubbleCount, puddle.Visual);
             puddle.ApplyVisual(now);
             if (!live.Contains(puddle)) live.Add(puddle);
             return puddle;
@@ -151,6 +155,11 @@ namespace TrickalFanGame.Enemy
             Color color = (now < ArmedAt ? ArmingColor : ActiveColor) * tint;
             if (now >= FadeAt) color.a *= Mathf.Clamp01((EndTime - now) / FadeDuration);
             Visual.color = color;
+            if (bubbles != null)
+            {
+                bubbles.SetArea(new Vector2(HalfWidth * spread, HalfHeight * spread));
+                bubbles.SetAlpha(color.a);
+            }
         }
 
         private static bool IsFlying(PlayerMovement body) =>
