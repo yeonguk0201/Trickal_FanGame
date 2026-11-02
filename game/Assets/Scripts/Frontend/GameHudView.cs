@@ -17,6 +17,10 @@ namespace TrickalFanGame.Frontend
         private const string HeartBackgroundName = "Background";
         private const string HeartFillName = "Fill";
         private const float HeartPulseScale = 1.2f;
+        // Effect-0 (docs/28): the whole heart row shakes side to side when the player takes a hit (shield hits too).
+        public const float HeartShakeDuration = 0.35f;
+        public const float HeartShakeAmplitude = 6f;
+        private const float HeartShakeFrequency = 7f;
         private static readonly Color HpDamageColor = new(1f, 0.24f, 0.2f, 0.8f);
         private static readonly Color HpHealColor = new(0.35f, 1f, 0.62f, 0.8f);
         private static readonly Color SpActiveColor = new(0.3f, 0.78f, 1f, 1f);
@@ -58,6 +62,8 @@ namespace TrickalFanGame.Frontend
         private bool previousHalfSP;
         private float healthFeedbackUntil;
         private float heartPulseUntil;
+        private float heartShakeStartedAt = float.NegativeInfinity;
+        private bool heartShakeApplied;
         private float spFeedbackUntil;
         private bool subscribed;
 
@@ -85,6 +91,8 @@ namespace TrickalFanGame.Frontend
         public int ShieldHeartCount { get; private set; }
         public float HeartSize { get; private set; }
         public int PulsingHeartCount { get; private set; }
+        public bool IsHeartRowShaking => Time.unscaledTime < heartShakeStartedAt + HeartShakeDuration;
+        public Vector2 HeartShakeOffset { get; private set; }
         public int SlotCount => spSlots.Count;
         public int ActiveSlotCount { get; private set; }
         public bool IsShowingHalfSlot { get; private set; }
@@ -171,6 +179,7 @@ namespace TrickalFanGame.Frontend
             }
 
             if (PulsingHeartCount > 0 && now >= heartPulseUntil) ResetHeartPulse();
+            UpdateHeartShake(now);
 
             if (now >= spFeedbackUntil)
             {
@@ -215,6 +224,7 @@ namespace TrickalFanGame.Frontend
             if (playerHealth != null)
             {
                 playerHealth.Changed += OnHealthChanged;
+                playerHealth.DamageResolved += OnDamageResolved;
                 playerHealth.ShieldChanged += OnShieldChanged;
             }
             if (playerSP != null) playerSP.Changed += OnSPChanged;
@@ -227,6 +237,7 @@ namespace TrickalFanGame.Frontend
             if (playerHealth != null)
             {
                 playerHealth.Changed -= OnHealthChanged;
+                playerHealth.DamageResolved -= OnDamageResolved;
                 playerHealth.ShieldChanged -= OnShieldChanged;
             }
             if (playerSP != null) playerSP.Changed -= OnSPChanged;
@@ -238,6 +249,40 @@ namespace TrickalFanGame.Frontend
             LastHealthDelta = current - previousHealth;
             previousHealth = current;
             RefreshHealth(current, maximum, true);
+        }
+
+        private void OnDamageResolved(DamageContext context, DamageResult result)
+        {
+            if (result.FinalDamage > 0f) heartShakeStartedAt = Time.unscaledTime;
+        }
+
+        // Moves only each heart's images, so the row and its layout keep their positions.
+        private void UpdateHeartShake(float now)
+        {
+            float age = now - heartShakeStartedAt;
+            if (age < 0f || age >= HeartShakeDuration)
+            {
+                if (heartShakeApplied) ApplyHeartShake(Vector2.zero);
+                heartShakeApplied = false;
+                return;
+            }
+
+            float t = age / HeartShakeDuration;
+            float damp = (1f - t) * (1f - t);
+            float phase = age * HeartShakeFrequency * Mathf.PI * 2f;
+            ApplyHeartShake(new Vector2(Mathf.Sin(phase) * HeartShakeAmplitude,
+                Mathf.Sin(phase * 1.7f) * HeartShakeAmplitude * 0.3f) * damp);
+            heartShakeApplied = true;
+        }
+
+        private void ApplyHeartShake(Vector2 offset)
+        {
+            HeartShakeOffset = offset;
+            foreach (HeartIcon heart in hearts)
+            {
+                heart.Background.rectTransform.anchoredPosition = offset;
+                heart.Fill.rectTransform.anchoredPosition = offset;
+            }
         }
 
         private void OnShieldChanged(float shield)

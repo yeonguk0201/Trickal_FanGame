@@ -77,7 +77,21 @@ namespace TrickalFanGame.Combat
         // Only the player's critical hits on an enemy stop the frame and shake the camera.
         private void HandleCritical(DamageContext context, DamageResult result)
         {
-            if (sp != null || !result.IsCritical || result.FinalDamage <= 0f || context.Source == null ||
+            if (sp != null)
+            {
+                // The player's hit burst (Effect-0). Shield hits count too; invulnerable hits never get here.
+                if (result.FinalDamage > 0f && source != null)
+                {
+                    Vector2? from = context.Source != null && context.Source != gameObject
+                        ? (Vector2)context.Source.transform.position : (Vector2?)null;
+                    bool heavy = health.UsesHealthUnits
+                        ? result.FinalDamage >= HealthUnits.HeavyDamageThresholdUnits
+                        : result.FinalDamage >= health.MaxHealth * 0.2f;
+                    PlayerHitBurst.Play(transform, source, from, heavy);
+                }
+                return;
+            }
+            if (!result.IsCritical || result.FinalDamage <= 0f || context.Source == null ||
                 context.Source.GetComponent<PlayerCombatEvents>() == null) return;
             HitStop.Play();
             CameraShake.Play();
