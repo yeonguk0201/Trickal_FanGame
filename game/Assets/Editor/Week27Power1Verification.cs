@@ -452,21 +452,21 @@ namespace TrickalFanGame.Editor
                 rig.Slot.Configure(rig.Progress, LoadPrefab());
                 GamePowerHudView hud = hudClone.GetComponent<GamePowerHudView>();
                 hud.Configure(rig.Slot, hud.Icon, hud.NameText, hud.GaugeText, hud.KeyText, hud.GaugeCells.ToArray());
-                Assert(hud.NameText.text == GamePowerHudView.EmptyText && !hud.KeyText.gameObject.activeSelf &&
+                Assert(hud.Icon.sprite == null && !hud.KeyText.gameObject.activeSelf &&
                        hud.GaugeCells.All(cell => !cell.gameObject.activeSelf),
-                    "An empty 권능 slot must read 없음 without gauge cells or a use key.");
+                    "An empty 권능 slot must show an empty icon without gauge cells or a use key.");
 
                 ItemDefinition blanket = Load(Week27Power1Setup.SecurityBlanketId);
                 Assert(rig.Slot.TryCollect(Spawn(LoadPrefab(), floor, blanket, "power1-hud")), "HUD slot must collect.");
                 hud.RefreshNow();
-                Assert(hud.NameText.text == blanket.DisplayName && hud.GaugeText.text == "0/3" &&
+                Assert(hud.Icon.sprite == UserArtwork.Load(blanket.ItemId) &&
                        hud.GaugeCells.Count(cell => cell.gameObject.activeSelf) == 3 &&
+                       hud.GaugeCells.Take(3).All(cell => cell.color == GamePowerHudView.EmptyCellColor) &&
                        !hud.KeyText.gameObject.activeSelf,
-                    "The HUD must show the name and three empty cells, with no key line while charging (UX-1).");
+                    "The HUD must show the 권능 icon and three empty cells, with no key line while charging (UX-1).");
                 rig.Slot.AddCharge(3);
                 hud.RefreshNow();
-                Assert(hud.GaugeText.text == "3/3" &&
-                       hud.GaugeCells.Take(3).All(cell => cell.color == GamePowerHudView.FilledCellColor) &&
+                Assert(hud.GaugeCells.Take(3).All(cell => cell.color == GamePowerHudView.FilledCellColor) &&
                        hud.KeyText.gameObject.activeSelf && hud.KeyText.text == GamePowerHudView.UsableText,
                     "A full gauge must show filled cells and [R] 사용.");
             }
@@ -518,15 +518,15 @@ namespace TrickalFanGame.Editor
                 "The 권능 executor must reference the scene room graph.");
 
             GamePowerHudView[] huds = FindAll<GamePowerHudView>(scene);
-            Assert(huds.Length == 1 && huds[0].Slot == slots[0] && huds[0].Icon != null && huds[0].NameText != null &&
-                   huds[0].GaugeText != null && huds[0].KeyText != null &&
+            Assert(huds.Length == 1 && huds[0].Slot == slots[0] && huds[0].Icon != null &&
+                   huds[0].KeyText != null &&
                    huds[0].GaugeCells.Count == Week27Power1Setup.MaximumGaugeCells &&
                    huds[0].GaugeCells.All(cell => cell != null),
                 "The Game HUD must have exactly one 권능 view bound to the player slot with five gauge cells.");
             Assert(huds[0].name == Week27Power1Setup.HudPanelName && huds[0].transform.parent != null &&
                    huds[0].transform.parent.name == "ReferenceFrame",
                 "The 권능 HUD must live in the game HUD reference frame.");
-            TMP_FontAsset font = huds[0].NameText.font;
+            TMP_FontAsset font = huds[0].KeyText.font;
             Assert(font != null && font.HasCharacters(GamePowerHudView.AllFixedText) &&
                    Week27Power1Setup.Specs.All(spec => font.HasCharacters(spec.Name)),
                 "The HUD font must contain every fixed label and 권능 name glyph.");

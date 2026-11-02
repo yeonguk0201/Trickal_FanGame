@@ -99,14 +99,22 @@ namespace TrickalFanGame.Editor
                    resources.sizeDelta == Week27Ux1Setup.ResourceSize &&
                    stats.anchoredPosition == Week27Ux1Setup.DetailedStatsPosition,
                 "The top-left HUD must use the UX-1 positions.");
+            Assert(survival.GetComponent<Image>() == null && power.GetComponent<Image>() == null,
+                "The hearts, SP and 권능 must have no dark panel behind them.");
             Assert(Right(power) < Left(survival) && Mathf.Approximately(Top(power), Top(survival)) &&
-                   Left(survival) - Right(power) <= 40f,
-                "The 권능 must sit just left of the hearts and SP, aligned with their top.");
-            Assert(Bottom(survival) > Top(resources) && Left(resources) == Left(survival) &&
-                   Bottom(survival) - Top(resources) <= 24f,
-                "Gold, keys and bombs must sit right under the hearts and SP.");
+                   Left(survival) - Right(power) <= 16f &&
+                   Mathf.Approximately(survival.sizeDelta.y, Week27Power1Setup.IconSize),
+                "The 권능 must sit just left of the hearts and SP, aligned with their top, and the hearts and SP " +
+                "rows together must be as tall as the 권능 icon.");
+            Assert(survival.Find("SP Label") == null && survival.Find("SP Value") == null,
+                "The SP row must have no SP word and no count.");
+            Assert(Bottom(power) > Top(resources) && Bottom(survival) > Top(resources) &&
+                   Mathf.Approximately(Left(resources), Left(power)) && Bottom(power) - Top(resources) <= 24f &&
+                   resources.GetComponent<Image>() == null,
+                "Gold, keys, bombs and elif must sit at the screen's left edge right under the 권능, with no background.");
             VerifySurvivalSizes(frame);
             VerifyPowerGauge(power);
+            VerifyResourceColumn(resources);
             GameArtifactHudView artifactView = artifacts.GetComponent<GameArtifactHudView>();
             Assert(artifactView != null && artifactView.MaximumVisible == 10 && artifactView.OverflowText != null,
                 "The moved artifact HUD must keep its 10 visible slots and +N overflow.");
@@ -448,6 +456,27 @@ namespace TrickalFanGame.Editor
         }
 
         // Cell 1 is at the bottom and each next cell is straight above it.
+        private static void VerifyResourceColumn(RectTransform resources)
+        {
+            GameResourceHudView view = resources.GetComponent<GameResourceHudView>();
+            Assert(view != null, "The resource HUD view is missing.");
+            RectTransform[] cells = GameResourceHudView.DisplayOrder
+                .Select(type => resources.Find(type.ToString()) as RectTransform).ToArray();
+            Assert(cells.All(cell => cell != null), "Every resource needs its cell.");
+            for (int index = 1; index < cells.Length; index++)
+                Assert(Mathf.Approximately(cells[index].anchoredPosition.x, cells[0].anchoredPosition.x) &&
+                       cells[index].anchoredPosition.y < cells[index - 1].anchoredPosition.y,
+                    "Gold, keys, bombs and elif must stand in one column, top to bottom.");
+            foreach (RectTransform cell in cells)
+            {
+                RectTransform icon = cell.Find("Icon") as RectTransform;
+                TMP_Text count = cell.Find("Count")?.GetComponent<TMP_Text>();
+                Assert(icon != null && Mathf.Approximately(icon.sizeDelta.x, Week27Ux1Setup.ResourceIconSize) &&
+                       count != null && Mathf.Approximately(count.fontSize, Week27Ux1Setup.ResourceFontSize),
+                    "Resource icons and counts must use the enlarged UX-1 sizes.");
+            }
+        }
+
         private static void VerifyPowerGauge(RectTransform power)
         {
             GamePowerHudView view = power.GetComponent<GamePowerHudView>();
@@ -462,9 +491,36 @@ namespace TrickalFanGame.Editor
             }
 
             RectTransform icon = view.Icon.rectTransform;
-            RectTransform gauge = (RectTransform)view.GaugeCells[0].transform.parent;
-            Assert(gauge.anchoredPosition.x + gauge.sizeDelta.x * 0.5f < icon.anchoredPosition.x - icon.sizeDelta.x * 0.5f,
-                "The vertical gauge must stand left of the 권능 icon.");
+            RectTransform bar = (RectTransform)view.GaugeCells[0].transform.parent;
+            RectTransform gauge = (RectTransform)bar.parent;
+            Image outline = gauge.GetComponent<Image>();
+            Image barImage = bar.GetComponent<Image>();
+            Assert(gauge.parent == power && outline != null && barImage != null && bar.GetComponent<Mask>() != null &&
+                   outline.type == Image.Type.Sliced && barImage.type == Image.Type.Sliced &&
+                   outline.sprite != null && outline.sprite.border.x > 0f &&
+                   Mathf.Approximately(gauge.sizeDelta.x - bar.sizeDelta.x, GamePowerHudView.GaugeOutline * 2f),
+                "The 권능 gauge must be one round-ended bar with a thin outline, masking its cells.");
+            float gap = Left(gauge) - Right(icon);
+            Assert(gap >= 0f && gap <= 6f && Mathf.Approximately(gauge.sizeDelta.y, icon.sizeDelta.y) &&
+                   Mathf.Approximately(gauge.anchoredPosition.y, icon.anchoredPosition.y),
+                "The vertical gauge must stand right beside the 권능 icon, exactly as tall as it.");
+            Assert(Mathf.Approximately(icon.sizeDelta.x, Week27Power1Setup.IconSize) &&
+                   power.Find("Kind") == null && power.Find("Name") == null && power.Find("Gauge Count") == null &&
+                   view.NameText == null && view.GaugeText == null,
+                "The 권능 HUD must show only the larger icon, the gauge and the use key (no title, name or count).");
+
+            // 3 and 4 room gauges both fill the column from its bottom edge to its top edge.
+            foreach (int required in new[] { 3, 4 })
+            {
+                GamePowerHudView.LayoutGauge(view.GaugeCells, required);
+                RectTransform first = view.GaugeCells[0].rectTransform;
+                RectTransform last = view.GaugeCells[required - 1].rectTransform;
+                float inner = bar.sizeDelta.y * 0.5f;
+                Assert(Mathf.Abs(Bottom(first) + inner) < 0.01f && Mathf.Abs(Top(last) - inner) < 0.01f &&
+                       Mathf.Approximately(first.sizeDelta.x, bar.sizeDelta.x),
+                    $"A {required}-room 권능 gauge must fill the whole bar inside its frame.");
+            }
+            GamePowerHudView.LayoutGauge(view.GaugeCells, view.GaugeCells.Count);
         }
 
         private static float Left(RectTransform rect) => rect.anchoredPosition.x - rect.sizeDelta.x * 0.5f;

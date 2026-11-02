@@ -52,10 +52,11 @@ namespace TrickalFanGame.Editor
                 view.PlayerSP.gameObject == view.LowerGradeSkill.gameObject,
                 "HUD-1 state references must point to the same player.");
             Assert(view.HeartRowRoot != null && view.HeartTemplate != null &&
-                view.SpSlotsRoot != null && view.SpSlotTemplate != null && view.SpValueText != null &&
+                view.SpSlotsRoot != null && view.SpSlotTemplate != null && view.SpValueText == null &&
+                view.transform.Find("ReferenceFrame/Survival HUD/SP Value") == null &&
                 view.LowerGradeSkillState != null &&
                 (view.LowerGradeSkillText == null) == (view.transform.Find("ReferenceFrame/" + Week13Hud2Setup.SkillPanelName) != null),
-                "GameHudView visual references are missing (UX-1 removed the skill status words).");
+                "GameHudView visual references are missing (UX-1 removed the skill status words, Effect-0 the SP number).");
             Assert(!view.SpSlotTemplate.gameObject.activeSelf && view.SpSlotTemplate.rectTransform.sizeDelta == Vector2.one * Week27Ux1Setup.SpSlotSize,
                 "HUD-1 must use one inactive SP slot template of the UX-1 size.");
             ValidateHeartRow(view);
@@ -103,7 +104,7 @@ namespace TrickalFanGame.Editor
                     view.LowerGradeSkillText);
                 view.RefreshNow();
 
-                Assert(view.SlotCount == 3 && view.ActiveSlotCount == 0 && view.SpValueText.text == "SP 0 / 3",
+                Assert(view.SlotCount == 3 && view.ActiveSlotCount == 0,
                     "Initial SP slots do not match current and maximum SP.");
                 // Values are half-heart units: 10 units = 5 hearts.
                 AssertHearts(view, "initial 10/10", 0, 1f, 1f, 1f, 1f, 1f);
@@ -147,8 +148,7 @@ namespace TrickalFanGame.Editor
                     "SP gain did not activate repeated slots.");
                 Assert(sp.TrySpend() && view.ActiveSlotCount == 1 && view.LastSPDelta == -1,
                     "SP spend did not deactivate one slot.");
-                Assert(sp.AddMaxSP() && view.SlotCount == 4 && view.ActiveSlotCount == 1 &&
-                    view.SpValueText.text == "SP 1 / 4",
+                Assert(sp.AddMaxSP() && view.SlotCount == 4 && view.ActiveSlotCount == 1,
                     "Maximum SP growth did not rebuild the repeated slot list.");
             }
             finally

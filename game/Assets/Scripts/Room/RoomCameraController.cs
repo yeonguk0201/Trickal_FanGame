@@ -13,6 +13,7 @@ namespace TrickalFanGame.Room
         private Transform roomAnchor;
         private RoomProfile activeProfile;
         private RoomCameraFrame activeFrame;
+        private float activeAspect;
 
         public Camera RoomCamera => roomCamera;
         public RoomCameraTrackingMode TrackingMode => activeProfile != null
@@ -84,7 +85,10 @@ namespace TrickalFanGame.Room
 
             ApplyOpaqueFrameClear();
 
-            if (!profile.TryCalculateCameraFrame(roomCamera.aspect, out RoomCameraFrame frame, out error))
+            float size = RoomCameraFraming.FitOrthographicSize(profile.InteriorSize, profile.CameraOrthographicSize,
+                roomCamera.aspect);
+            if (!RoomCameraFraming.TryCalculate(profile.InteriorSize, size, roomCamera.aspect,
+                    out RoomCameraFrame frame, out error))
             {
                 return false;
             }
@@ -97,8 +101,9 @@ namespace TrickalFanGame.Room
             roomAnchor = cameraAnchor;
             activeProfile = profile;
             activeFrame = frame;
+            activeAspect = roomCamera.aspect;
             target = followTarget != null ? followTarget : target;
-            roomCamera.orthographicSize = profile.CameraOrthographicSize;
+            roomCamera.orthographicSize = size;
             SnapToTarget();
             error = null;
             return true;
@@ -121,11 +126,24 @@ namespace TrickalFanGame.Room
                 return;
             }
 
+            if (roomCamera != null && !Mathf.Approximately(roomCamera.aspect, activeAspect)) RefitToAspect();
             Vector3 desiredPosition = CalculateDesiredWorldPosition();
             transform.position = Vector3.Lerp(
                 transform.position,
                 desiredPosition,
                 1f - Mathf.Exp(-followSpeed * Time.deltaTime));
+        }
+
+        // The window (or Game view) was resized: fit the room again for the new aspect ratio.
+        private void RefitToAspect()
+        {
+            activeAspect = roomCamera.aspect;
+            float size = RoomCameraFraming.FitOrthographicSize(activeProfile.InteriorSize,
+                activeProfile.CameraOrthographicSize, activeAspect);
+            if (!RoomCameraFraming.TryCalculate(activeProfile.InteriorSize, size, activeAspect,
+                    out RoomCameraFrame frame, out _)) return;
+            activeFrame = frame;
+            roomCamera.orthographicSize = size;
         }
 
         private Vector3 CalculateDesiredWorldPosition()

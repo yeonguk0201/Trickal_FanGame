@@ -22,8 +22,9 @@ namespace TrickalFanGame.Editor
         public const string PickupPrefabPath = "Assets/Prefabs/SingleUseItemPickup.prefab";
         public const string HudPanelName = "Spell Slot HUD";
         public const float PickupWorldDiameter = 0.45f;
-        public static readonly Vector2 HudPosition = new(480, -430);
-        public static readonly Vector2 HudSize = new(220, 112);
+        // UX-1: a third skill-sized tile left of the lower and high grade skills.
+        public static Vector2 HudPosition => Week27Ux1Setup.SpellTilePosition;
+        public static Vector2 HudSize => Vector2.one * Week27Ux1Setup.SkillIconSize;
 
         [MenuItem("Trickal Fan Game/Week 21/Setup Slot-0 Spell Slot")]
         public static void Setup()
@@ -105,26 +106,56 @@ namespace TrickalFanGame.Editor
             return AssetDatabase.LoadAssetAtPath<GameObject>(PickupPrefabPath).GetComponent<SingleUseItemPickup>();
         }
 
-        private static void BuildHud(RectTransform frame, PlayerSpellSlot slot, TMP_FontAsset font)
+        // The same rounded tile as the HUD-2 skills: artwork masked by the tile, "SHIFT" on a dark strip at the
+        // bottom, and a see-through dark overlay while the held spell cannot be used. No name or kind words.
+        internal static void BuildHud(RectTransform frame, PlayerSpellSlot slot, TMP_FontAsset font)
         {
+            float size = Week27Ux1Setup.SkillIconSize;
             RectTransform panel = Rect(frame, HudPanelName, HudPosition, HudSize);
-            Image panelImage = Component<Image>(panel.gameObject);
-            panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
-            panelImage.raycastTarget = false;
+            Image panelImage = panel.GetComponent<Image>();
+            if (panelImage != null) Undo.DestroyObjectImmediate(panelImage);
+            foreach (string obsolete in new[] { "Icon", "Kind", "Name", "Use Key" })
+            {
+                Transform child = panel.Find(obsolete);
+                if (child != null) Undo.DestroyObjectImmediate(child.gameObject);
+            }
 
-            Image icon = Component<Image>(Rect(panel, "Icon", new Vector2(-74, 12), new Vector2(56, 56)).gameObject);
-            icon.raycastTarget = false;
-            TMP_Text kind = Text(panel, "Kind", "스펠", new Vector2(30, 30), new Vector2(140, 24), 18, font);
-            kind.color = new Color(0.76f, 0.84f, 0.92f, 1f);
-            TMP_Text itemName = Text(panel, "Name", GameSpellSlotHudView.EmptyText, new Vector2(30, 4),
-                new Vector2(140, 30), 22, font);
-            itemName.fontStyle = FontStyles.Bold;
-            itemName.overflowMode = TextOverflowModes.Ellipsis;
-            TMP_Text key = Text(panel, "Use Key", GameSpellSlotHudView.UsableText, new Vector2(0, -38),
-                new Vector2(200, 26), 18, font);
+            RectTransform tileRect = Rect(panel, "Tile", Vector2.zero, Vector2.one * size);
+            Image tile = Component<Image>(tileRect.gameObject);
+            tile.sprite = Week13FrontendUiAssets.LoadOrCreateRoundedSquareSprite();
+            tile.type = Image.Type.Simple;
+            tile.preserveAspect = false;
+            tile.color = Week27Ux1Setup.SkillTileColor;
+            tile.raycastTarget = false;
+            Mask mask = Component<Mask>(tileRect.gameObject);
+            mask.showMaskGraphic = true;
+
+            Image art = Component<Image>(Rect(tileRect, "Art", Vector2.zero, Vector2.one * size).gameObject);
+            art.color = Color.white;
+            art.preserveAspect = true;
+            art.raycastTarget = false;
+            art.transform.SetSiblingIndex(0);
+
+            Image overlay = Component<Image>(Rect(tileRect, "Unusable", Vector2.zero, Vector2.one * size).gameObject);
+            overlay.sprite = tile.sprite;
+            overlay.preserveAspect = false;
+            overlay.color = GameHudView.SkillOverlayColor;
+            overlay.raycastTarget = false;
+            overlay.transform.SetSiblingIndex(1);
+
+            Image keyBacking = Component<Image>(Rect(tileRect, "Key Backing", new Vector2(0, -size * 0.5f + 12),
+                new Vector2(size, 24)).gameObject);
+            keyBacking.color = new Color(0f, 0f, 0f, 0.55f);
+            keyBacking.raycastTarget = false;
+            keyBacking.transform.SetSiblingIndex(2);
+            TMP_Text key = Text(tileRect, "Key", GameSpellSlotHudView.KeyLabel, new Vector2(0, -size * 0.5f + 12),
+                new Vector2(size - 8, 22), 16, font);
+            key.fontStyle = FontStyles.Bold;
+            key.color = Color.white;
+            key.transform.SetAsLastSibling();
 
             GameSpellSlotHudView view = Component<GameSpellSlotHudView>(panel.gameObject);
-            view.Configure(slot, icon, itemName, kind, key);
+            view.Configure(slot, art, key, overlay);
             foreach (Component component in panel.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);
         }

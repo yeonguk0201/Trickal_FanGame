@@ -239,22 +239,22 @@ namespace TrickalFanGame.Editor
                 slot.ConfigureExecutor(executor);
 
                 GameSpellSlotHudView hud = hudClone.GetComponent<GameSpellSlotHudView>();
-                hud.Configure(slot, hud.Icon, hud.NameText, hud.KindText, hud.KeyText);
-                Assert(hud.NameText.text == GameSpellSlotHudView.EmptyText && hud.KindText.text == string.Empty &&
-                       !hud.KeyText.gameObject.activeSelf,
-                    "An empty slot must read 비어 있음 without a use key.");
+                hud.Configure(slot, hud.Icon, hud.KeyText, hud.UnusableOverlay);
+                Assert(!hud.IsShowingItem && hud.KeyText.text == GameSpellSlotHudView.KeyLabel &&
+                       !hud.UnusableOverlay.gameObject.activeSelf,
+                    "An empty slot must be an empty tile that only reads SHIFT.");
 
                 Assert(slot.TryCollect(Spawn(AssetDatabase.LoadAssetAtPath<SingleUseItemPickup>(
                         Week21Slot0Setup.PickupPrefabPath), floor, jjangsem, "slot0-hud")),
                     "HUD verification slot must collect.");
                 hud.RefreshNow();
-                Assert(hud.NameText.text == jjangsem.DisplayName && hud.KindText.text == "짱셈스펠" &&
-                       hud.KeyText.gameObject.activeSelf && hud.KeyText.text == GameSpellSlotHudView.UnusableText &&
+                Assert(hud.IsShowingItem && hud.KeyText.text == GameSpellSlotHudView.KeyLabel &&
+                       hud.UnusableOverlay.gameObject.activeSelf &&
                        !hud.IsShowingUsable && hud.Icon.color == SingleUseItemPickup.JjangsemSpellColor,
-                    "The HUD must show the held name, kind and that it cannot be used now.");
+                    "The HUD must show the held spell, dimmed while it cannot be used.");
                 executor.Allow = true;
                 hud.RefreshNow();
-                Assert(hud.KeyText.text == GameSpellSlotHudView.UsableText && hud.IsShowingUsable,
+                Assert(hud.IsShowingUsable && !hud.UnusableOverlay.gameObject.activeSelf,
                     "The HUD must show the item is usable with Shift.");
                 Time.timeScale = 0f;
                 hud.RefreshNow();
@@ -262,7 +262,7 @@ namespace TrickalFanGame.Editor
                 Time.timeScale = 1f;
                 slot.TryUse();
                 hud.RefreshNow();
-                Assert(hud.NameText.text == GameSpellSlotHudView.EmptyText, "The HUD must clear after a use.");
+                Assert(!hud.IsShowingItem, "The HUD must clear after a use.");
             }
             finally
             {
@@ -302,13 +302,19 @@ namespace TrickalFanGame.Editor
                 "The player needs the default single-use executor and the inventory.");
 
             GameSpellSlotHudView[] huds = FindAll<GameSpellSlotHudView>(scene);
-            Assert(huds.Length == 1 && huds[0].Slot == slot && huds[0].Icon != null && huds[0].NameText != null &&
-                   huds[0].KindText != null && huds[0].KeyText != null,
+            Assert(huds.Length == 1 && huds[0].Slot == slot && huds[0].Icon != null &&
+                   huds[0].KeyText != null && huds[0].UnusableOverlay != null,
                 "The Game HUD must have exactly one spell slot view bound to the player slot.");
             Assert(huds[0].name == Week21Slot0Setup.HudPanelName &&
                    huds[0].transform.parent != null && huds[0].transform.parent.name == "ReferenceFrame",
                 "The spell slot HUD must live in the game HUD reference frame.");
-            TMP_FontAsset font = huds[0].NameText.font;
+            RectTransform panel = (RectTransform)huds[0].transform;
+            Assert(panel.sizeDelta == Vector2.one * Week27Ux1Setup.SkillIconSize &&
+                   panel.anchoredPosition == Week27Ux1Setup.SpellTilePosition &&
+                   huds[0].Icon.rectTransform.sizeDelta == Vector2.one * Week27Ux1Setup.SkillIconSize &&
+                   huds[0].KeyText.text == GameSpellSlotHudView.KeyLabel,
+                "The spell slot must be a skill-sized tile left of the skills that reads SHIFT.");
+            TMP_FontAsset font = huds[0].KeyText.font;
             Assert(font != null && font.HasCharacters(GameSpellSlotHudView.AllFixedText),
                 "The HUD font must contain every fixed slot label glyph.");
             Assert(huds[0].GetComponentsInChildren<Graphic>(true).All(graphic => !graphic.raycastTarget),

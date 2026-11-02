@@ -34,28 +34,33 @@ namespace TrickalFanGame.Editor
         public const float MinimapMaskSoftness = 14f;
         public const float DescriptionWidth = 420f;
 
-        // Top-left, in the 1920 x 1080 reference frame (centre origin): the 권능 in the corner, hearts and SP to its
-        // right, and gold/key/bomb/elif under the hearts and SP (96 per cell, left edge kept where the three-cell row
-        // started). The detailed stats sit lower on the left.
-        public static readonly Vector2 SurvivalPosition = new(-432, 420);
-        public static readonly Vector2 SurvivalSize = new(560, 168);
-        public static readonly Vector2 HeartRowPosition = new(0, 42);
-        public static readonly Vector2 HeartRowSize = new(532, 52);
-        public const float HeartMaximumSize = 48f;
-        public const float SpSlotSize = 48f;
-        public static readonly Vector2 SpLabelPosition = new(-248, -34);
-        public static readonly Vector2 SpSlotsPosition = new(-86, -34);
-        public static readonly Vector2 SpSlotsSize = new(272, 48);
-        public static readonly Vector2 SpValuePosition = new(196, -34);
-        public static readonly Vector2 PowerPosition = new(-830, 420);
-        public static readonly Vector2 PowerSize = new(220, 168);
-        public static readonly Vector2 ResourcePosition = new(-520, 296);
-        public static readonly Vector2 ResourceSize = new(384, 56);
-        public static readonly Vector2 DetailedStatsPosition = new(-780, 140);
+        // Top-left, in the 1920 x 1080 reference frame (centre origin): the 권능 icon in the corner (20 from the left
+        // and top edges) with its gauge right beside it, then the hearts over the SP right after the gauge, both rows
+        // together as tall as the 권능 icon. Gold/key/bomb/elif stand in a column at the left edge under the 권능. No
+        // dark panels. The detailed stats sit lower on the left.
+        public static readonly Vector2 PowerPosition = new(-875, 452);
+        public static readonly Vector2 PowerSize = new(130, 136);
+        public static readonly Vector2 SurvivalPosition = new(-518, 466);
+        public static readonly Vector2 SurvivalSize = new(560, 108);
+        public static readonly Vector2 HeartRowPosition = new(-10, 25);
+        public static readonly Vector2 HeartRowSize = new(540, 58);
+        public const float HeartMaximumSize = 58f;
+        public const float SpSlotSize = 46f;
+        public static readonly Vector2 SpSlotsPosition = new(-130, -31);
+        public static readonly Vector2 SpSlotsSize = new(300, 46);
+        public static readonly Vector2 ResourcePosition = new(-870, 276);
+        public static readonly Vector2 ResourceSize = new(140, 200);
+        public const float ResourceIconSize = 44f;
+        public const float ResourceFontSize = 34f;
+        public static readonly Vector2 DetailedStatsPosition = new(-780, 40);
 
-        // Skill HUD (bottom right): two equal rounded tiles, centre to centre.
+        // Skill HUD (bottom right): two equal rounded tiles, centre to centre, with the spell slot as a third tile of
+        // the same size left of them. No dark panel behind the tiles.
         public const float SkillIconSize = 104f;
         public const float SkillIconSpacing = 124f;
+        public static readonly Vector2 SkillPanelPosition = new(746, -428);
+        public static readonly Vector2 SkillPanelSize = new(SkillIconSpacing + SkillIconSize, SkillIconSize);
+        public static readonly Vector2 SpellTilePosition = new(746 - SkillIconSpacing * 1.5f, -428);
         public static readonly Color SkillTileColor = new(0.08f, 0.1f, 0.15f, 1f);
 
         // Right column, top to bottom.
@@ -67,8 +72,6 @@ namespace TrickalFanGame.Editor
         public static readonly Vector2 MinimapViewportSize = new(264, 184);
         public static readonly Vector2 ArtifactPosition = new(796, 236);
         public static readonly Vector2 ArtifactSize = new(288, 112);
-
-        private static readonly Color PanelColor = new(0.035f, 0.055f, 0.09f, 0.88f);
 
         [MenuItem("Trickal Fan Game/Week 27/Setup UX-1 Right HUD, Minimap and Pickup Description")]
         public static void Setup()
@@ -106,6 +109,9 @@ namespace TrickalFanGame.Editor
             PlayerPowerSlot powerSlot = player.GetComponent<PlayerPowerSlot>();
             if (powerSlot == null) throw new InvalidOperationException("Run Power-1 setup before UX-1 setup.");
             Week27Power1Setup.BuildHud(frame, powerSlot, font);
+            PlayerSpellSlot spellSlot = player.GetComponent<PlayerSpellSlot>();
+            if (spellSlot == null) throw new InvalidOperationException("Run Slot-0 setup before UX-1 setup.");
+            Week21Slot0Setup.BuildHud(frame, spellSlot, font);
             RectTransform stats = frame.Find(Week13Setting1CSetup.HudPanelName) as RectTransform;
             if (stats == null) throw new InvalidOperationException("Run Setting-1C setup before UX-1 setup.");
             Place(stats, DetailedStatsPosition, stats.sizeDelta);
@@ -135,6 +141,7 @@ namespace TrickalFanGame.Editor
                 .Select(guid => AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid)))
                 .Where(item => item != null).ToArray();
             return PickupDescriptionView.AllFixedText + GameResourceHudView.AllFixedText +
+                   GameSpellSlotHudView.AllFixedText +
                    string.Concat(items.Select(item => item.DisplayName + ArtifactEffectDescription.Build(item) +
                                                      PickupDescriptionView.DetailLine(item)));
         }
@@ -173,20 +180,25 @@ namespace TrickalFanGame.Editor
             Sprite[] sprites)
         {
             RectTransform panel = Rect(frame, ResourcePanelName, ResourcePosition, ResourceSize);
-            Image background = Component<Image>(panel.gameObject);
-            background.color = PanelColor;
-            background.raycastTarget = false;
+            // Earlier UX-1 builds drew a dark panel behind the row.
+            Image background = panel.GetComponent<Image>();
+            if (background != null) Undo.DestroyObjectImmediate(background);
 
             int count = GameResourceHudView.DisplayOrder.Length;
             Image[] icons = new Image[count];
             TMP_Text[] texts = new TMP_Text[count];
-            float cellWidth = ResourceSize.x / count;
+            // One row per resource, top to bottom: icon on the left, count right after it.
+            float cellHeight = ResourceSize.y / count;
+            float iconX = -ResourceSize.x * 0.5f + 4f + ResourceIconSize * 0.5f;
+            const float textWidth = 80f;
+            float textX = iconX + ResourceIconSize * 0.5f + 8f + textWidth * 0.5f;
             for (int i = 0; i < count; i++)
             {
                 RunResourceType type = GameResourceHudView.DisplayOrder[i];
-                RectTransform cell = Rect(panel, type.ToString(), new Vector2((i - (count - 1) * 0.5f) * cellWidth, 0),
-                    new Vector2(cellWidth, ResourceSize.y));
-                icons[i] = Component<Image>(Rect(cell, "Icon", new Vector2(-22, 0), new Vector2(34, 34)).gameObject);
+                RectTransform cell = Rect(panel, type.ToString(),
+                    new Vector2(0, ((count - 1) * 0.5f - i) * cellHeight), new Vector2(ResourceSize.x, cellHeight));
+                icons[i] = Component<Image>(Rect(cell, "Icon", new Vector2(iconX, 0),
+                    Vector2.one * ResourceIconSize).gameObject);
                 icons[i].raycastTarget = false;
                 icons[i].preserveAspect = true;
                 icons[i].sprite = sprites[i];
@@ -197,7 +209,8 @@ namespace TrickalFanGame.Editor
                 Transform letter = icons[i].transform.Find("Letter");
                 if (letter != null) Undo.DestroyObjectImmediate(letter.gameObject);
 
-                texts[i] = Text(cell, "Count", "00", new Vector2(20, 0), new Vector2(46, 34), 26, font);
+                texts[i] = Text(cell, "Count", "00", new Vector2(textX, 0), new Vector2(textWidth, cellHeight),
+                    ResourceFontSize, font);
                 texts[i].fontStyle = FontStyles.Bold;
                 texts[i].alignment = TextAlignmentOptions.Left;
             }

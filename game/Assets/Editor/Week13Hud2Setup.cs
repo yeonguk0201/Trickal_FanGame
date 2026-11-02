@@ -41,10 +41,11 @@ namespace TrickalFanGame.Editor
             Transform obsolete = frame.Find("Survival HUD/Lower Skill State");
             if (obsolete != null) Undo.DestroyObjectImmediate(obsolete.gameObject);
 
-            RectTransform panel = Rect(frame, SkillPanelName, new Vector2(746, -428), new Vector2(300, 128));
-            Image panelImage = Component<Image>(panel.gameObject);
-            panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
-            panelImage.raycastTarget = false;
+            RectTransform panel = Rect(frame, SkillPanelName, Week27Ux1Setup.SkillPanelPosition,
+                Week27Ux1Setup.SkillPanelSize);
+            // The skill tiles stand alone like the spell tile beside them (earlier builds drew a dark panel).
+            Image panelImage = panel.GetComponent<Image>();
+            if (panelImage != null) Undo.DestroyObjectImmediate(panelImage);
 
             float iconX = Week27Ux1Setup.SkillIconSpacing * 0.5f;
             SkillVisual lower = ConfigureSkill(panel, "Lower Grade", new Vector2(-iconX, 0), "SPACE", font);

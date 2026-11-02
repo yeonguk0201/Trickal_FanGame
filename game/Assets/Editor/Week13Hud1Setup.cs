@@ -63,9 +63,9 @@ namespace TrickalFanGame.Editor
 
             RectTransform panel = Rect(frame, "Survival HUD", Week27Ux1Setup.SurvivalPosition,
                 Week27Ux1Setup.SurvivalSize);
-            Image panelImage = Component<Image>(panel.gameObject);
-            panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
-            panelImage.raycastTarget = false;
+            // The hearts and SP sit on the floor with no dark panel behind them (earlier builds drew one).
+            Image panelImage = panel.GetComponent<Image>();
+            if (panelImage != null) Undo.DestroyObjectImmediate(panelImage);
 
             // HP-2 replaced the HP gauge with a half-heart icon row (docs/idea-implementation/01, D-4).
             RemoveChild(panel, "HP Label");
@@ -101,7 +101,8 @@ namespace TrickalFanGame.Editor
             heartFill.raycastTarget = false;
             heartTemplate.gameObject.SetActive(false);
 
-            Text(panel, "SP Label", "SP", Week27Ux1Setup.SpLabelPosition, new Vector2(44, 48), 24, font);
+            // The SP slots read on their own, so the "SP" word was removed.
+            RemoveChild(panel, "SP Label");
             RectTransform slots = Rect(panel, "SP Slots", Week27Ux1Setup.SpSlotsPosition, Week27Ux1Setup.SpSlotsSize);
             HorizontalLayoutGroup layout = Component<HorizontalLayoutGroup>(slots.gameObject);
             layout.spacing = 8;
@@ -115,9 +116,8 @@ namespace TrickalFanGame.Editor
             slotTemplate.color = new Color(0.18f, 0.28f, 0.38f, 0.55f);
             slotTemplate.raycastTarget = false;
             slotTemplate.gameObject.SetActive(false);
-            TMP_Text spValue = Text(panel, "SP Value", "SP 0 / 0", Week27Ux1Setup.SpValuePosition,
-                new Vector2(140, 36), 20, font);
-            spValue.alignment = TextAlignmentOptions.Right;
+            // The slots already show current and maximum SP, so the "SP 0 / 3" number was removed.
+            RemoveChild(panel, "SP Value");
 
             // Once HUD-2 owns the skill icons (and UX-1 removed the status words), keep its icon instead of
             // bringing back the old lower-grade state box.
@@ -139,7 +139,7 @@ namespace TrickalFanGame.Editor
             }
 
             view.Configure(playerHealth, playerSP, playerSkill, null, null, null, slots, slotTemplate,
-                spValue, skillState, skillText);
+                null, skillState, skillText);
             view.ConfigureHearts(heartRow, heartTemplate, Week27Ux1Setup.HeartMaximumSize);
 
             foreach (Component component in canvasObject.GetComponentsInChildren<Component>(true))

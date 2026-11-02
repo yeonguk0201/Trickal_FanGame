@@ -123,7 +123,8 @@ namespace TrickalFanGame.Editor
             RoomCameraController camera = graph.RoomCamera;
             Assert(camera != null && camera.RoomCamera != null &&
                    Mathf.Approximately(camera.RoomCamera.orthographicSize,
-                       expectedRoom.Profile.CameraOrthographicSize),
+                       RoomCameraFraming.FitOrthographicSize(expectedRoom.Profile.InteriorSize,
+                           expectedRoom.Profile.CameraOrthographicSize, camera.RoomCamera.aspect)),
                 "Camera did not apply the destination Room Profile.");
             Vector2 cameraLocal = expectedRoom.CameraAnchor.InverseTransformPoint(camera.transform.position);
             Rect bounds = camera.ActiveCenterBounds;
