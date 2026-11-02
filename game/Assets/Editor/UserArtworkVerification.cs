@@ -15,8 +15,8 @@ namespace TrickalFanGame.Editor
         {
             string[] paths = AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets/Resources/UserArtwork" })
                 .Select(AssetDatabase.GUIDToAssetPath).ToArray();
-            Require(paths.Length == 51,
-                "Expected all 51 supplied PNGs, including the Goldi shop, gold pickup and permanent elif artwork.");
+            Require(paths.Length == 57,
+                "Expected all 57 supplied PNGs, including the Goldi shop, gold pickup, permanent elif and six 권능.");
             foreach (string path in paths)
             {
                 Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
@@ -47,7 +47,7 @@ namespace TrickalFanGame.Editor
             try
             {
                 Image image = root.GetComponent<Image>();
-                int linked = 0;
+                int linked = 0, powers = 0;
                 foreach (string guid in AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" }))
                 {
                     ItemDefinition item = AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid));
@@ -56,8 +56,11 @@ namespace TrickalFanGame.Editor
                         image.material.GetFloat("_Card") == (item.Kind == ItemKind.Artifact ? 0f : 1f),
                         "Artwork must retain its colors and the correct frame style: " + item.ItemId);
                     linked++;
+                    if (item.Kind == ItemKind.Active) powers++;
                 }
-                Require(linked == 35, "Expected 35 existing item definitions with supplied artwork; got " + linked);
+                Require(linked == 41, "Expected 41 existing item definitions with supplied artwork; got " + linked);
+                // Every 교주의 권능 has its own rectangular card artwork.
+                Require(powers == 6, "Expected all six 권능 to have supplied artwork; got " + powers);
                 Require(!UserArtwork.Apply(image, (ItemDefinition)null) && image.sprite == null && image.material == Graphic.defaultGraphicMaterial,
                     "An empty slot must clear the previous artwork and material.");
                 foreach (string name in new[] { "HealthPickup", "SPPickup" })
@@ -68,7 +71,7 @@ namespace TrickalFanGame.Editor
                     Require(display.sprite == UserArtwork.Load(key) && display.color == Color.white,
                         name + " must use the supplied capsule, including in the shop.");
                 }
-                Debug.Log("User artwork verification passed: 51 PNGs, Goldi shopkeeper, gold pickup, permanent elif, 35 item illustrations, four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
+                Debug.Log("User artwork verification passed: 57 PNGs, Goldi shopkeeper, gold pickup, permanent elif, 41 item illustrations (six 권능 cards), four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
                 CapturePreview();
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }
