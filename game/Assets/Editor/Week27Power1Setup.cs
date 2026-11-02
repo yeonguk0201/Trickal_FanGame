@@ -25,9 +25,13 @@ namespace TrickalFanGame.Editor
         public const string HudPanelName = "Power Slot HUD";
         public const float PickupWorldDiameter = 0.5f;
         public const int MaximumGaugeCells = 5;
-        // UX-1 vertical gauge: cell 1 is the bottom one.
-        public static readonly Vector2 GaugeColumnPosition = new(-82, 8);
-        public const float GaugeCellStep = 26f;
+        // UX-1: the icon sits in the corner and the vertical gauge stands right beside it at the icon's height.
+        // The gauge cells split that height evenly whatever the room count (GamePowerHudView lays them out).
+        public const float IconSize = 108f;
+        public static readonly Vector2 IconPosition = new(-11, 14);
+        public static readonly Vector2 GaugeColumnPosition = new(57, 14);
+        public static readonly Vector2 GaugeColumnSize = new(20, IconSize);
+        public static readonly Vector2 KeyPosition = new(-11, -54);
         // UX-1: top left, beside the hearts, with a vertical gauge.
         public static Vector2 HudPosition => Week27Ux1Setup.PowerPosition;
         public static Vector2 HudSize => Week27Ux1Setup.PowerSize;
@@ -200,41 +204,64 @@ namespace TrickalFanGame.Editor
         internal static void BuildHud(RectTransform frame, PlayerPowerSlot slot, TMP_FontAsset font)
         {
             RectTransform panel = Rect(frame, HudPanelName, HudPosition, HudSize);
-            Image panelImage = Component<Image>(panel.gameObject);
-            panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
-            panelImage.raycastTarget = false;
+            // No dark panel behind the 권능 (earlier builds drew one).
+            Image panelImage = panel.GetComponent<Image>();
+            if (panelImage != null) Undo.DestroyObjectImmediate(panelImage);
 
-            // UX-1: the gauge is a column on the left that fills from the bottom; icon, name and key to its right.
-            Image icon = Component<Image>(Rect(panel, "Icon", new Vector2(22, 16), new Vector2(72, 72)).gameObject);
+            // The icon alone says which 권능 is held: the "교주의 권능" title, the name and the "0/4" count are gone.
+            RemoveChild(panel, "Kind");
+            RemoveChild(panel, "Name");
+            RemoveChild(panel, "Gauge Count");
+            Image icon = Component<Image>(Rect(panel, "Icon", IconPosition, Vector2.one * IconSize).gameObject);
             icon.raycastTarget = false;
-            TMP_Text kind = Text(panel, "Kind", GamePowerHudView.KindLabel, new Vector2(22, 66), new Vector2(150, 22),
-                16, font);
-            kind.color = new Color(1f, 0.86f, 0.5f, 1f);
-            TMP_Text itemName = Text(panel, "Name", GamePowerHudView.EmptyText, new Vector2(22, -40),
-                new Vector2(150, 28), 20, font);
-            itemName.fontStyle = FontStyles.Bold;
-            itemName.overflowMode = TextOverflowModes.Ellipsis;
+            icon.preserveAspect = true;
 
-            RectTransform gauge = Rect(panel, "Gauge", GaugeColumnPosition, new Vector2(30, 128));
+            // One pill-shaped bar: a thin outline, and inside it the bar that masks the cells to its round ends.
+            Sprite pill = Week13FrontendUiAssets.LoadOrCreatePillSprite();
+            RectTransform gauge = Rect(panel, "Gauge", GaugeColumnPosition, GaugeColumnSize);
+            ConfigurePill(Component<Image>(gauge.gameObject), pill, GaugeColumnSize.x);
+            Vector2 innerSize = GaugeColumnSize - Vector2.one * (GamePowerHudView.GaugeOutline * 2f);
+            RectTransform bar = Rect(gauge, "Bar", Vector2.zero, innerSize);
+            ConfigurePill(Component<Image>(bar.gameObject), pill, innerSize.x);
+            Component<Mask>(bar.gameObject).showMaskGraphic = true;
+
             Image[] cells = new Image[MaximumGaugeCells];
-            float firstY = -(MaximumGaugeCells - 1) * GaugeCellStep * 0.5f;
             for (int index = 0; index < MaximumGaugeCells; index++)
             {
-                cells[index] = Component<Image>(Rect(gauge, $"Cell {index + 1}",
-                    new Vector2(0, firstY + index * GaugeCellStep), new Vector2(26, 22)).gameObject);
+                string cellName = $"Cell {index + 1}";
+                // Earlier builds kept the cells straight under the gauge.
+                Transform loose = gauge.Find(cellName);
+                if (loose != null) Undo.SetTransformParent(loose, bar, "Move " + cellName);
+                cells[index] = Component<Image>(Rect(bar, cellName, Vector2.zero, Vector2.zero).gameObject);
                 cells[index].raycastTarget = false;
                 cells[index].color = GamePowerHudView.EmptyCellColor;
             }
+            GamePowerHudView.LayoutGauge(cells, MaximumGaugeCells);
 
-            TMP_Text gaugeText = Text(panel, "Gauge Count", "0/0", new Vector2(GaugeColumnPosition.x, -70),
-                new Vector2(52, 22), 16, font);
-            TMP_Text key = Text(panel, "Use Key", GamePowerHudView.UsableText, new Vector2(22, -66),
-                new Vector2(150, 24), 16, font);
+            TMP_Text key = Text(panel, "Use Key", GamePowerHudView.UsableText, KeyPosition,
+                new Vector2(Week27Ux1Setup.PowerSize.x, 24), 16, font);
 
             GamePowerHudView view = Component<GamePowerHudView>(panel.gameObject);
-            view.Configure(slot, icon, itemName, gaugeText, key, cells);
+            view.Configure(slot, icon, null, null, key, cells);
             foreach (Component component in panel.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);
+        }
+
+        // A 9-sliced pill whose round ends are exactly half the bar's width.
+        private static void ConfigurePill(Image image, Sprite pill, float width)
+        {
+            image.sprite = pill;
+            image.type = Image.Type.Sliced;
+            image.fillCenter = true;
+            image.pixelsPerUnitMultiplier = Week13FrontendUiAssets.PillBorder / (width * 0.5f);
+            image.color = GamePowerHudView.GaugeFrameColor;
+            image.raycastTarget = false;
+        }
+
+        private static void RemoveChild(Transform parent, string name)
+        {
+            Transform child = parent.Find(name);
+            if (child != null) Undo.DestroyObjectImmediate(child.gameObject);
         }
 
         internal static void EnsureGlyphs(TMP_FontAsset font, string characters)

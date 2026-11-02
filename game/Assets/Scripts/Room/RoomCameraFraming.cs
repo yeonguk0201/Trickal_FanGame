@@ -38,6 +38,17 @@ namespace TrickalFanGame.Room
     {
         public const float DesignAspectRatio = 16f / 9f;
         private const float AxisTolerance = 0.0001f;
+        // World units of floor shown beyond the room's outer edge when a room is zoomed to fill the screen.
+        public const float FillMargin = 0.25f;
+
+        // A room smaller than the profile's view is zoomed in until it fills the screen (with FillMargin around
+        // it), so small rooms leave no wide empty border. Larger rooms keep the profile size and scroll.
+        public static float FitOrthographicSize(Vector2 roomSize, float maximumSize, float aspectRatio)
+        {
+            if (roomSize.x <= 0f || roomSize.y <= 0f || maximumSize <= 0f || aspectRatio <= 0f) return maximumSize;
+            float fit = Mathf.Max(roomSize.y * 0.5f + FillMargin, (roomSize.x + FillMargin * 2f) / (2f * aspectRatio));
+            return Mathf.Min(maximumSize, fit);
+        }
 
         public static bool TryCalculate(
             Vector2 roomSize,

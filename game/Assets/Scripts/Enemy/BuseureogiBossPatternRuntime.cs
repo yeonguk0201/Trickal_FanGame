@@ -114,6 +114,10 @@ namespace TrickalFanGame.Enemy
             ? pendingObstaclePositions[0]
             : Vector2.zero;
         public IReadOnlyList<Vector2> PendingObstaclePositions => pendingObstaclePositions;
+        public IEnumerable<BossFallingObstacleView> PendingFallingObstacles => pendingObstacleTelegraphs
+            .Where(item => item != null)
+            .Select(item => item.GetComponentInChildren<BossFallingObstacleView>())
+            .Where(item => item != null);
 
         private void Awake()
         {
@@ -175,15 +179,19 @@ namespace TrickalFanGame.Enemy
             if (state == BossActionState.Telegraph && execution != BossPatternExecution.BuseureogiApproachVolley)
             {
                 StopMovement();
-                if (execution == BossPatternExecution.BuseureogiThrowObstacle)
-                    PrepareObstacleTelegraph(ObstaclesPerThrow);
+                if (execution == BossPatternExecution.BuseureogiThrowObstacle &&
+                    PrepareObstacleTelegraph(ObstaclesPerThrow))
+                    AttachFallingObstacles(stateEndsAt);
             }
             else if (state != BossActionState.Active)
             {
                 StopMovement();
                 // Enemy-7: the boss's objects outlive it, but a landing it never throws must not stay marked. A stun
-                // (Jjangsem-2) also cancels the throw; the restarted telegraph marks new landings.
-                if (state == BossActionState.Defeated || state == BossActionState.Idle) ClearPendingObstacleTelegraph();
+                // (Jjangsem-2) also cancels the throw; the restarted telegraph marks new landings. The phase-two pause
+                // cancels it as well, so no obstacle is left falling onto a mark that never lands (Effect-0).
+                if (state == BossActionState.Defeated || state == BossActionState.Idle ||
+                    state == BossActionState.PhaseTransition)
+                    ClearPendingObstacleTelegraph();
             }
         }
 
@@ -338,6 +346,7 @@ namespace TrickalFanGame.Enemy
                 ResolveObstacleImpact(position);
                 GameObject instance = Instantiate(prefab, position, Quaternion.identity);
                 instance.name = prefab.name;
+                PlayLandingDust(instance, position);
                 obstacles.Add(instance);
                 boss?.RegisterOwnedObject(instance);
                 spawned++;
@@ -367,8 +376,9 @@ namespace TrickalFanGame.Enemy
             if (target == null || boss == null) return;
             Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
             if (direction.sqrMagnitude <= 0f) direction = Vector2.down;
-            BossProjectile.Create(transform.position, direction * projectileSpeed, gameObject,
-                boss.ProjectileDamageTier, GetComponentInChildren<SpriteRenderer>()?.sprite, projectileFrames);
+            BossProjectile.Create(BossProjectile.FrontLaunchPoint(gameObject, direction), direction * projectileSpeed,
+                gameObject, boss.ProjectileDamageTier, GetComponentInChildren<SpriteRenderer>()?.sprite,
+                projectileFrames);
         }
 
         private void StopMovement()
@@ -417,6 +427,27 @@ namespace TrickalFanGame.Enemy
             pendingObstacleTelegraphs.Clear();
             pendingObstaclePrefabs.Clear();
             pendingObstaclePositions.Clear();
+        }
+
+        // Effect-0: each marked obstacle drops from the sky to touch down when the throw lands (the telegraph end).
+        public void AttachFallingObstacles(float landsAt)
+        {
+            for (int index = 0; index < pendingObstacleTelegraphs.Count; index++)
+            {
+                GameObject telegraph = pendingObstacleTelegraphs[index];
+                if (telegraph == null) continue;
+                BossFallingObstacleView.Create(telegraph.transform, pendingObstaclePrefabs[index],
+                    pendingObstaclePositions[index], landsAt);
+            }
+        }
+
+        private void PlayLandingDust(GameObject landed, Vector2 position)
+        {
+            SpriteRenderer renderer = landed.GetComponent<SpriteRenderer>();
+            if (renderer == null || renderer.sprite == null) return;
+            Vector2 groundPoint = position +
+                                  (Vector2)BossFallingObstacleView.BaseOffset(renderer.sprite, landed.transform.localScale);
+            LandingDustEffect.Play(groundPoint, renderer.bounds.size.x * 0.85f, transform, renderer);
         }
 
         private void AddPendingObstacle(Vector2 position)

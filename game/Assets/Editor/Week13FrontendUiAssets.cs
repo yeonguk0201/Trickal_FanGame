@@ -86,6 +86,64 @@ namespace TrickalFanGame.Editor
             return sprite;
         }
 
+        public const string PillSpritePath = "Assets/Art/UI/HudPill.png";
+        private const int PillSize = 64;
+        // Sliced with borders just under half the texture, a stretched Image keeps fully round ends (a pill). The
+        // Image's pixelsPerUnitMultiplier sets the end radius in HUD units: PillBorder / multiplier.
+        public const int PillBorder = 31;
+
+        // A white circle imported as a 9-sliced sprite, for bars with round ends.
+        public static Sprite LoadOrCreatePillSprite()
+        {
+            if (AssetDatabase.LoadAssetAtPath<Texture2D>(PillSpritePath) == null)
+            {
+                if (!AssetDatabase.IsValidFolder("Assets/Art/UI")) AssetDatabase.CreateFolder("Assets/Art", "UI");
+                File.WriteAllBytes(PillSpritePath, CreateCirclePng());
+                AssetDatabase.ImportAsset(PillSpritePath, ImportAssetOptions.ForceSynchronousImport);
+            }
+
+            TextureImporter importer = AssetImporter.GetAtPath(PillSpritePath) as TextureImporter;
+            if (importer == null) throw new InvalidOperationException("Pill importer is missing: " + PillSpritePath);
+            Vector4 border = Vector4.one * PillBorder;
+            if (importer.textureType != TextureImporterType.Sprite ||
+                importer.spriteImportMode != SpriteImportMode.Single || importer.spriteBorder != border ||
+                !importer.alphaIsTransparency || importer.mipmapEnabled)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.spriteBorder = border;
+                importer.alphaIsTransparency = true;
+                importer.mipmapEnabled = false;
+                importer.SaveAndReimport();
+            }
+
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PillSpritePath);
+            if (sprite == null) throw new InvalidOperationException("Pill sprite could not be loaded: " + PillSpritePath);
+            return sprite;
+        }
+
+        private static byte[] CreateCirclePng()
+        {
+            Texture2D texture = new(PillSize, PillSize, TextureFormat.RGBA32, false);
+            try
+            {
+                float half = PillSize * 0.5f;
+                for (int y = 0; y < PillSize; y++)
+                for (int x = 0; x < PillSize; x++)
+                {
+                    float distance = new Vector2(x + 0.5f - half, y + 0.5f - half).magnitude - half;
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, Mathf.Clamp01(0.5f - distance)));
+                }
+
+                texture.Apply();
+                return texture.EncodeToPNG();
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(texture);
+            }
+        }
+
         private static byte[] CreateRoundedSquarePng()
         {
             Texture2D texture = new(RoundedSquareSize, RoundedSquareSize, TextureFormat.RGBA32, false);

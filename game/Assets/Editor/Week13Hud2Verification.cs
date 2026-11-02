@@ -91,9 +91,9 @@ namespace TrickalFanGame.Editor
                 "HUD-2 graphics must not intercept combat input.");
 
             RectTransform panel = view.transform.Find("ReferenceFrame/" + Week13Hud2Setup.SkillPanelName) as RectTransform;
-            Assert(panel != null && panel.sizeDelta == new Vector2(300, 128) &&
-                panel.anchoredPosition == new Vector2(746, -428),
-                "Skill HUD must occupy the specified bottom-right 300x128 region.");
+            Assert(panel != null && panel.sizeDelta == Week27Ux1Setup.SkillPanelSize &&
+                panel.anchoredPosition == Week27Ux1Setup.SkillPanelPosition && panel.GetComponent<Image>() == null,
+                "Skill HUD must hug its two tiles at the bottom right with no dark panel.");
             Assert(panel.Find("Lower Grade/Icon/Key").GetComponent<TMP_Text>().text == "SPACE" &&
                 panel.Find("High Grade/Icon/Key").GetComponent<TMP_Text>().text == "Q",
                 "HUD-2 skill icons must show their actual input keys.");

@@ -179,7 +179,7 @@ namespace TrickalFanGame.Enemy
                     body.linearVelocity = Vector2.zero;
                     TrackTargetDuringAim();
                     if (currentTime >= stateEndsAt &&
-                        !EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
+                        !EnemyObstacleNavigator.HasLineOfFire(ShotOrigin, target.position))
                     {
                         // Obstacle-0: never fire into an obstacle; go back to finding a clear line.
                         EnterRelocating(currentTime);
@@ -238,7 +238,7 @@ namespace TrickalFanGame.Enemy
         private void TickRelocating(float currentTime)
         {
             behavior.SetControllerMovementSuppressed(false);
-            if (!EnemyObstacleNavigator.HasLineOfFire(transform.position, target.position))
+            if (!EnemyObstacleNavigator.HasLineOfFire(ShotOrigin, target.position))
             {
                 // Obstacle-0: hold the aim and walk around the obstacle until the line of fire opens.
                 body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, terrain,
@@ -289,6 +289,10 @@ namespace TrickalFanGame.Enemy
             stateEndsAt = currentTime + aimDuration;
             SetState(LongRangeSniperState.Aiming);
         }
+
+        // The shot leaves from here, slid off a wall the enemy is pressed against (Hitbox-2).
+        private Vector2 ShotOrigin => EnemyProjectile.LaunchOrigin(gameObject, transform.position,
+            GetComponent<EnemyAttackArtwork>()?.ProjectileSprite != null);
 
         private void Fire(float currentTime)
         {

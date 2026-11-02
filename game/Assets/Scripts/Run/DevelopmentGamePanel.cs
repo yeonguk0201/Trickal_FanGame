@@ -1207,7 +1207,7 @@ namespace TrickalFanGame.Run
         }
 
         // Variant-1: turns the living enemy nearest to the player into a champion with the chosen death property
-        // (green puddle, purple 4-way shots, yellow 쫄따구 blast, Variant-2 white undying). 자폭형 refuses the blast.
+        // (green puddle, purple 4-way shots, yellow nine bombs at once (Effect-0), Variant-2 white undying). 자폭형 refuses the blast.
         private void DrawChampionControls(RoomGraphAssembler assembler, RoomController controller,
             GeneratedRoomNode node)
         {
@@ -1242,6 +1242,8 @@ namespace TrickalFanGame.Run
                             $"alive {championsAlive}, puddles {TrickalFanGame.Enemy.EnemyChampionPuddle.Live.Count}, " +
                             "volleys pending " +
                             TrickalFanGame.Enemy.EnemyChampionVolley.Live.Count(volley => !volley.HasFired) +
+                            ", blasts pending " +
+                            TrickalFanGame.Enemy.EnemyChampionBlast.Live.Count(blast => !blast.HasStarted) +
                             ", undying now " + UndyingStatus(controller));
         }
 

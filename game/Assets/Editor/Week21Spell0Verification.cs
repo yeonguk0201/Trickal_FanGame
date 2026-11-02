@@ -222,13 +222,13 @@ namespace TrickalFanGame.Editor
                 view.RefreshNow();
 
                 Assert(sp.TryAdd() && sp.TryAddHalf() && view.SlotCount == 3 && view.ActiveSlotCount == 1 &&
-                       view.IsShowingHalfSlot && view.OverchargeSlotCount == 0 && view.SpValueText.text == "SP 1.5 / 3",
-                    "The HUD must show a half slot as SP 1.5 / 3.");
+                       view.IsShowingHalfSlot && view.OverchargeSlotCount == 0,
+                    "The HUD must show a half slot after the full one.");
                 Assert(sp.TryFillWithOvercharge(1) && view.SlotCount == 4 && view.ActiveSlotCount == 4 &&
-                       !view.IsShowingHalfSlot && view.OverchargeSlotCount == 1 && view.SpValueText.text == "SP 4 / 3",
-                    "The HUD must add an overcharge slot and show SP 4 / 3.");
+                       !view.IsShowingHalfSlot && view.OverchargeSlotCount == 1,
+                    "The HUD must add an overcharge slot.");
                 Assert(sp.TrySpend() && view.SlotCount == 3 && view.ActiveSlotCount == 3 &&
-                       view.OverchargeSlotCount == 0 && view.SpValueText.text == "SP 3 / 3",
+                       view.OverchargeSlotCount == 0,
                     "Spending the overcharge must remove its slot.");
             }
             finally

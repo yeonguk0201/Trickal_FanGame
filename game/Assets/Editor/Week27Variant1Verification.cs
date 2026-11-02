@@ -68,7 +68,8 @@ namespace TrickalFanGame.Editor
                       "outline follows the sprite or the movement mesh with 8 line and 8 glow copies behind the body " +
                       "and hides on death. The puddle arms, hurts feet inside once per second at the light tier and " +
                       "ends; the volley fires 4 ways (8 for 저혈당 요정-활발) after its flash; the blast is the " +
-                      "쫄따구 blast; room transitions clear puddles and volleys.");
+                      "nine bombs on a 3x3 grid going off at once after a one second telegraph; room transitions clear puddles, volleys " +
+                      "and blasts.");
         }
 
         [MenuItem("Trickal Fan Game/Week 27/Verify Variant-1 With Regressions")]
@@ -512,20 +513,70 @@ namespace TrickalFanGame.Editor
                     foreach (EnemyProjectile shot in volley.Shots) Object.DestroyImmediate(shot.gameObject);
                 }
 
-                // Blast: the 쫄따구 blast where it died.
+                // Blast (Effect-0): the area nine bombs on a 3x3 grid reach flashes for one second, then all nine
+                // real bomb explosions go off at once; together they reach the bomb radius around the 3x3 square.
                 GameObject blaster = Champion(chaser, root.transform, EnemyVariantKind.ChampionBlast,
                     Vector2.right * 40f, floor);
                 Vector2 blastAt = blaster.transform.position;
+                TrickalFanGame.Resource.PlacedBomb bombPrefab = EnemyChampionBlast.ResolveBombPrefab();
+                Assert(bombPrefab != null, "The Game scene player must hold the placed bomb prefab.");
+                float reach = bombPrefab.ExplosionRadius;
+                // Past the square's side but inside the edge bombs' reach, just outside it, and outside a rounded corner.
+                Vector2 sideAt = blastAt + Vector2.right * (1f + reach - 0.4f);
+                Vector2 beyondAt = blastAt + Vector2.left * (1f + reach + 0.6f);
+                Vector2 cornerAt = blastAt + Vector2.one * (1f + reach * 0.85f);
+                Health side = CreatePlayer(root.transform, sideAt);
+                Health beyond = CreatePlayer(root.transform, beyondAt);
+                Health cornerBeyond = CreatePlayer(root.transform, cornerAt);
                 Kill(blaster);
-                EnemyDeathBlast blast = blaster.GetComponent<EnemyChampionDeath>().LastEffect
-                    ?.GetComponent<EnemyDeathBlast>();
-                Assert(blast != null && !blast.HasExploded &&
+                EnemyChampionBlast blast = blaster.GetComponent<EnemyChampionDeath>().LastEffect
+                    ?.GetComponent<EnemyChampionBlast>();
+                Vector2[] positions = EnemyChampionBlast.BombPositions(blastAt);
+                Assert(blast != null && !blast.HasStarted && blast.transform.parent == root.transform &&
                        ((Vector2)blast.transform.position - blastAt).sqrMagnitude < 0.0001f &&
-                       Mathf.Approximately(blast.Radius, EnemyDeathExplosion.DefaultRadius) &&
-                       blast.DamageUnits == EnemyDeathExplosion.DefaultDamageUnits && !blast.HitsEnemiesAndObstacles,
-                    "A blast champion must leave the 쫄따구 blast (radius 1.2, one heart, player only).");
-                Assert(blaster.GetComponent<EnemyDeathExplosion>() == null,
-                    "The blast champion must not add a second explosion component.");
+                       Mathf.Approximately(blast.ExplodeAt - Time.time, 1f) &&
+                       Mathf.Approximately(blast.BombRadius, reach) &&
+                       positions.Length == 9 && positions.Distinct().Count() == 9 &&
+                       positions.All(spot => Mathf.Abs(spot.x - blastAt.x) <= 1.001f &&
+                                             Mathf.Abs(spot.y - blastAt.y) <= 1.001f) &&
+                       blast.Area != null && blast.Area.enabled &&
+                       blast.Area.sprite.bounds.size.x >= (1f + reach) * 2f - 0.05f && blast.Body != null &&
+                       blast.GetComponentsInChildren<SpriteRenderer>(true).Length == 2,
+                    "A blast champion must leave a one second telegraph of the reached area (no cell marks).");
+                Assert(EnemyChampionBlast.Reaches(blastAt, sideAt, reach) &&
+                       !EnemyChampionBlast.Reaches(blastAt, beyondAt, reach) &&
+                       !EnemyChampionBlast.Reaches(blastAt, cornerAt, reach),
+                    "The reached area must be the bomb radius around the 3x3 square, rounded at the corners.");
+                Assert(blaster.GetComponent<EnemyDeathExplosion>() == null &&
+                       root.GetComponentsInChildren<EnemyDeathBlast>(true).Length == 0,
+                    "The blast champion must not leave the 쫄따구 blast.");
+                blast.Tick(blast.ExplodeAt - 0.01f);
+                Assert(!blast.HasStarted && blast.Bombs.Count == 0 && blast.TelegraphOpacity > 0f,
+                    "The blast must flash before the bombs go off.");
+                Physics2D.SyncTransforms();
+                float sideBefore = side.CurrentHealth;
+                float beyondBefore = beyond.CurrentHealth;
+                float cornerBefore = cornerBeyond.CurrentHealth;
+                blast.Tick(blast.ExplodeAt);
+                Assert(blast.HasStarted && blast.Bombs.Count == 9 &&
+                       blast.Bombs.All(bomb => bomb != null && bomb.HasExploded &&
+                                               bomb.transform.parent == root.transform &&
+                                               Mathf.Approximately(bomb.ExplosionRadius, reach)) &&
+                       blast.Bombs.Select(bomb => (Vector2)bomb.transform.position).Distinct().Count() == 9 &&
+                       !blast.Area.enabled,
+                    "All nine bombs must go off together when the telegraph ends.");
+                Assert(side.CurrentHealth <= sideBefore - bombPrefab.SelfDamage + 0.001f &&
+                       Mathf.Approximately(beyondBefore, beyond.CurrentHealth) &&
+                       Mathf.Approximately(cornerBefore, cornerBeyond.CurrentHealth),
+                    "The bombs must hurt a player past the square's side within the bomb radius and miss players " +
+                    $"outside the rounded area (side {sideBefore}->{side.CurrentHealth}, beyond " +
+                    $"{beyondBefore}->{beyond.CurrentHealth}, corner {cornerBefore}->{cornerBeyond.CurrentHealth}).");
+                blast.Tick(blast.ExplodeAt + EnemyChampionBlast.LingerAfterBombs);
+                Assert(blast == null || blast.HasEnded, "The blast must end after its bombs.");
+                Assert(!EnemyChampionBlast.Live.Any(item => item != null && item.HasStarted),
+                    "A finished blast must leave the live list.");
+                foreach (Transform child in root.transform.Cast<Transform>().ToArray())
+                    if (child.name.StartsWith(EnemyChampionBlast.BombName)) Object.DestroyImmediate(child.gameObject);
 
                 // Room transitions remove what is left.
                 GameObject lingering = Champion(chaser, root.transform, EnemyVariantKind.ChampionPuddle,
@@ -534,18 +585,25 @@ namespace TrickalFanGame.Editor
                 GameObject lateShooter = Champion(chaser, root.transform, EnemyVariantKind.ChampionShots,
                     Vector2.right * 70f, floor);
                 Kill(lateShooter);
-                Assert(EnemyChampionPuddle.Live.Count > 0 && EnemyChampionVolley.Live.Any(volley => !volley.HasFired),
-                    "The transition fixture must hold a puddle and an unfired volley.");
+                GameObject lateBlaster = Champion(chaser, root.transform, EnemyVariantKind.ChampionBlast,
+                    Vector2.right * 80f, floor);
+                Kill(lateBlaster);
+                Assert(EnemyChampionPuddle.Live.Count > 0 && EnemyChampionVolley.Live.Any(volley => !volley.HasFired) &&
+                       EnemyChampionBlast.Live.Any(item => !item.HasStarted),
+                    "The transition fixture must hold a puddle, an unfired volley and a pending blast.");
                 EnemyChampionPuddle.ClearAll();
                 EnemyChampionVolley.ClearAll();
-                Assert(EnemyChampionPuddle.Live.Count == 0 && EnemyChampionVolley.Live.Count == 0,
-                    "Room transitions must clear champion puddles and volleys.");
+                EnemyChampionBlast.ClearAll();
+                Assert(EnemyChampionPuddle.Live.Count == 0 && EnemyChampionVolley.Live.Count == 0 &&
+                       EnemyChampionBlast.Live.Count == 0,
+                    "Room transitions must clear champion puddles, volleys and blasts.");
             }
             finally
             {
                 Object.DestroyImmediate(root);
                 EnemyChampionPuddle.ClearAll();
                 EnemyChampionVolley.ClearAll();
+                EnemyChampionBlast.ClearAll();
                 Physics2D.SyncTransforms();
             }
         }
@@ -593,6 +651,7 @@ namespace TrickalFanGame.Editor
                 Object.DestroyImmediate(root);
                 EnemyChampionPuddle.ClearAll();
                 EnemyChampionVolley.ClearAll();
+                EnemyChampionBlast.ClearAll();
                 Physics2D.SyncTransforms();
             }
         }

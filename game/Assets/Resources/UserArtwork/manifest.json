@@ -233,5 +233,35 @@
     "source": "엘리스의 타로카드.png",
     "resource": "single-spell-ellis-tarot-card",
     "connected": true
+  },
+  {
+    "source": "보호막.png",
+    "resource": "active-freeloader-shield",
+    "connected": true
+  },
+  {
+    "source": "천벌.png",
+    "resource": "active-divine-punishment",
+    "connected": true
+  },
+  {
+    "source": "팝핀스타.png",
+    "resource": "active-poppin-star",
+    "connected": true
+  },
+  {
+    "source": "명치.png",
+    "resource": "active-solar-plexus-strike",
+    "connected": true
+  },
+  {
+    "source": "애착.png",
+    "resource": "active-security-blanket",
+    "connected": true
+  },
+  {
+    "source": "급발진.png",
+    "resource": "active-sudden-acceleration",
+    "connected": true
   }
 ]

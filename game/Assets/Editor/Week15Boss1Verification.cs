@@ -25,6 +25,7 @@ namespace TrickalFanGame.Editor
             ValidateBossBreaksObstacle();
             ValidateThreePatternExecution();
             ValidateSeededPlacementAndLimits();
+            ValidateFrontLaunchAndFallingObstacles();
             Week15Boss0Verification.Verify();
             Debug.Log("Week 15 Boss-1 verification passed: supplied Buseureogi/obstacle/Erpin art is bound, " +
                       "the boss chases and deals contact damage without being easily pushed, all three patterns execute, " +
@@ -32,7 +33,8 @@ namespace TrickalFanGame.Editor
                       "obstacles use seeded-random positions and damage/knock back players caught at impact, " +
                       "obstacles block minions but break on boss contact, the floor-one room stays Basic-sized, " +
                       "phase two pauses then accelerates seeded-random patterns, Erpin uses the corrected flip direction, " +
-                      "and summon/obstacle caps and owned-object cleanup hold.");
+                      "summon/obstacle caps and owned-object cleanup hold, boss shots leave the front of the body, " +
+                      "and thrown obstacles fall from above to land exactly when the impact is dealt.");
         }
 
         public static void SetupAndVerifyBatch()
@@ -386,6 +388,104 @@ namespace TrickalFanGame.Editor
             {
                 UnityEngine.Object.DestroyImmediate(target);
                 if (instance != null) UnityEngine.Object.DestroyImmediate(instance);
+            }
+        }
+
+        // Effect-0 (docs/28): shots start at the front edge of the drawn body, and thrown obstacles fall onto their
+        // landing marks during the telegraph without moving the impact time or place.
+        private static void ValidateFrontLaunchAndFallingObstacles()
+        {
+            foreach (string prefabPath in new[] { Week15Boss0Setup.BossPrefabPath, Week15Boss2Setup.BossPrefabPath })
+            {
+                GameObject shooter = PrefabUtility.InstantiatePrefab(Load<GameObject>(prefabPath)) as GameObject;
+                try
+                {
+                    Bounds drawing = shooter.GetComponentInChildren<SpriteRenderer>().bounds;
+                    foreach (Vector2 direction in new[] { Vector2.right, Vector2.down, new Vector2(-1f, 1f).normalized })
+                    {
+                        Vector2 launch = BossProjectile.FrontLaunchPoint(shooter, direction);
+                        Vector2 fromCenter = launch - (Vector2)drawing.center;
+                        float ellipse = Mathf.Pow(fromCenter.x / drawing.extents.x, 2f) +
+                                        Mathf.Pow(fromCenter.y / drawing.extents.y, 2f);
+                        Assert(Vector2.Dot(fromCenter.normalized, direction) > 0.999f &&
+                               Mathf.Abs(Mathf.Sqrt(ellipse) - BossProjectile.FrontLaunchBodyFraction) < 0.01f,
+                            $"Boss shots must start at the front edge of the drawn body, not its middle: {prefabPath} " +
+                            $"toward {direction} launched at {launch}.");
+                    }
+                }
+                finally
+                {
+                    if (shooter != null) UnityEngine.Object.DestroyImmediate(shooter);
+                }
+            }
+
+            GameObject root = CreateRuntimeBoss(out BossController boss, out BuseureogiBossPatternRuntime runtime,
+                out GameObject target, 3301);
+            try
+            {
+                target.transform.position = (Vector2)boss.transform.position + new Vector2(5f, 0f);
+                foreach (BossProjectile old in UnityEngine.Object.FindObjectsByType<BossProjectile>(
+                             FindObjectsInactive.Include, FindObjectsSortMode.None))
+                    UnityEngine.Object.DestroyImmediate(old.gameObject);
+                runtime.TickPattern(BossActionState.Telegraph, BossPatternExecution.BuseureogiApproachVolley, 10f);
+                BossProjectile[] shots = UnityEngine.Object.FindObjectsByType<BossProjectile>(
+                    FindObjectsInactive.Include, FindObjectsSortMode.None);
+                Vector2 expectedLaunch = BossProjectile.FrontLaunchPoint(boss.gameObject, Vector2.right);
+                Assert(shots.Length == 1 &&
+                       ((Vector2)shots[0].transform.position - expectedLaunch).sqrMagnitude < 0.0001f &&
+                       shots[0].transform.position.x - boss.transform.position.x > 0.3f,
+                    "Buseureogi's approach volley must fire from the front of its body toward the player.");
+                UnityEngine.Object.DestroyImmediate(shots[0].gameObject);
+
+                const float landsAt = 20f;
+                runtime.OnPatternStateChanged(BossActionState.Telegraph, BossPatternExecution.BuseureogiThrowObstacle,
+                    landsAt);
+                BossFallingObstacleView[] falls = runtime.PendingFallingObstacles.ToArray();
+                Vector2[] landings = runtime.PendingObstaclePositions.ToArray();
+                Assert(falls.Length == BuseureogiBossPatternRuntime.ObstaclesPerThrow &&
+                       falls.Select((fall, index) => Mathf.Approximately(fall.LandsAt, landsAt) &&
+                                                     (fall.Landing - landings[index]).sqrMagnitude < 0.0001f)
+                           .All(match => match),
+                    "Every marked obstacle must get a falling drawing that lands on its mark at the telegraph end.");
+                foreach (BossFallingObstacleView fall in falls)
+                {
+                    fall.Render(landsAt - BossFallingObstacleView.FallDuration - 0.05f);
+                    Assert(!fall.Body.enabled && (fall.Shadow == null || !fall.Shadow.enabled),
+                        "A falling obstacle must stay hidden until its fall starts.");
+                    fall.Render(landsAt - BossFallingObstacleView.FallDuration * 0.5f);
+                    Assert(fall.Body.enabled && fall.CurrentHeight > 0.5f &&
+                           fall.CurrentHeight < BossFallingObstacleView.FallHeight &&
+                           fall.Body.transform.position.y > fall.Landing.y + 0.5f && fall.Shadow != null &&
+                           fall.Shadow.enabled,
+                        "Halfway through the fall, the obstacle must be above its mark with a shadow under it.");
+                    fall.Render(landsAt);
+                    Assert(Mathf.Approximately(fall.CurrentHeight, 0f) &&
+                           ((Vector2)fall.Body.transform.position - fall.Landing).sqrMagnitude < 0.0001f &&
+                           Mathf.Abs(fall.Body.transform.lossyScale.x - 1f) < 0.001f,
+                        "The falling obstacle must touch down on its mark at the real obstacle's size.");
+                }
+
+                Assert(runtime.CommitPendingObstacle() && !runtime.PendingFallingObstacles.Any() &&
+                       runtime.LiveObstacles.Select(item => (Vector2)item.transform.position)
+                           .Zip(landings, (placed, landing) => (placed - landing).sqrMagnitude < 0.0001f)
+                           .All(match => match),
+                    "Landing must swap each falling drawing for the real obstacle in the same place.");
+
+                runtime.OnPatternStateChanged(BossActionState.Telegraph, BossPatternExecution.BuseureogiThrowObstacle,
+                    landsAt + 5f);
+                Assert(runtime.PendingFallingObstacles.Count() == BuseureogiBossPatternRuntime.ObstaclesPerThrow,
+                    "A second throw must drop new obstacles.");
+                runtime.OnPatternStateChanged(BossActionState.Idle, BossPatternExecution.BuseureogiThrowObstacle,
+                    float.PositiveInfinity);
+                Assert(!runtime.PendingFallingObstacles.Any() && !runtime.HasPendingObstacleTelegraph,
+                    "A stun must remove obstacles still in the air.");
+                Assert(CombatEffectArtwork.Material("MuffinExplosion") != null,
+                    "Landing dust needs the MuffinExplosion shader's smoke mode.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(target);
+                UnityEngine.Object.DestroyImmediate(root);
             }
         }
 

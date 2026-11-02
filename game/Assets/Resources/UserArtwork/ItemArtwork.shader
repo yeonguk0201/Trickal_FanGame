@@ -44,9 +44,13 @@ Shader "TrickalFanGame/ItemArtwork"
                 fixed4 c = tex2D(_MainTex, i.uv);
                 if (_Card > 0.5)
                 {
-                    // Corner radius of the card, as a share of its side (was 0.055 until 2026-10-20).
+                    // Corner radius of the card, as a share of its shorter side (was 0.055 until 2026-10-20).
+                    // A 권능 card is a rectangle: its on-screen width / height comes from how fast u and v change,
+                    // so the corners stay round and the frame stays even. A square card is unchanged.
                     const float radius = 0.12;
-                    float2 q = abs(i.uv - 0.5) - (0.5 - radius);
+                    float aspect = fwidth(i.uv.y) / max(fwidth(i.uv.x), 1e-6);
+                    float2 scale = aspect >= 1 ? float2(aspect, 1) : float2(1, 1 / aspect);
+                    float2 q = abs(i.uv - 0.5) * scale - (0.5 * scale - radius);
                     float d = length(max(q, 0)) + min(max(q.x, q.y), 0) - radius;
                     float aa = max(fwidth(d), 0.0005);
                     float outer = 1 - smoothstep(-aa, aa, d);

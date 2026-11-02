@@ -1479,11 +1479,11 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   회귀 `VerifyWithRegressionsBatch`(Variant-0과 그 회귀 목록). 검사: 층별 확률 0/10/15/20/25%, 성질 목록과 자폭형 자폭 제외, 512 seed에서
   자리별 굴림 일치·엘리트 불변·1층 없음·2층 약 10%·3층 약 15%·성질 고른 분포·재생성 결정성, 저장 점수 불변과 챔피언 +1 위협, 런타임
   웨이브의 변형 연결, 모든 일반 적의 성질 적용·색·스탯 불변·중첩 거부, 보스 거부, 외곽선의 스프라이트·메시 추적과 16개 복사본 위치·
-  순서·색, 사망 시 숨김, 장판 무해 구간·발 판정·1초 간격·종료, 탄 예고 뒤 4/8방향·경 등급·보라색, 자폭 쫄따구 값, 방 이동 정리, 실제
+  순서·색, 사망 시 숨김, 장판 무해 구간·발 판정·1초 간격·종료, 탄 예고 뒤 4/8방향·경 등급·보라색, 자폭은 1초 예고 뒤 3x3 자리 폭탄 9개 동시 폭발(`EnemyChampionBlast`, 칸 표시 없음·둥근 범위, Effect-0), 방 이동 정리, 실제
   방에서 챔피언 스폰과 즉시 클리어.
   개발 패널(`F1`): `— Seed —`의 `Find champion F2`로 2층에 챔피언이 있는 seed를 찾고 `Restart Run with this seed`. `— Room —`의
   `Make nearest champion` 줄 `Puddle`·`Shots`·`Blast`는 지금 방에서 플레이어와 가장 가까운 일반 적을 그 성질 챔피언으로 바꾸고, 아래 줄에
-  계획된 챔피언 수·살아 있는 챔피언 수·남은 장판 수·쏘기 전 탄 수를 보인다.
+  계획된 챔피언 수·살아 있는 챔피언 수·남은 장판 수·쏘기 전 탄 수·터지기 전 자폭 수(`blasts pending`)를 보인다.
 
 - Variant-2 불사 챔피언(Unity): 메뉴 `Trickal Fan Game > Week 27 > Setup Variant-2 Undying Champions`가 Encounter 콘텐츠 버전 23을
   멱등 구성한다. 런타임 규칙은 `EnemyVariant`(`ChampionUndying`·흰색·이동/공격 간격 배율)·`EnemyChampionUndying`(불사 생명·흐름·회색
