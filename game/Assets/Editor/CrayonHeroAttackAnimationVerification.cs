@@ -104,7 +104,9 @@ namespace TrickalFanGame.Editor
                     components.Add(count);
                 }
                 components.Sort((a, b) => b.CompareTo(a));
-                Require(components.Count > 0 && (components.Count == 1 || components[1] <= 24),
+                // Drawn sparks and embers float free of the body; a piece of a neighbouring pose from the sheet is
+                // far larger than 2% of the body.
+                Require(components.Count > 0 && (components.Count == 1 || components[1] <= components[0] * 0.02f),
                     "Detached fragment from another pose in " + frame.name);
             }
             finally { UnityEngine.Object.DestroyImmediate(texture); }
