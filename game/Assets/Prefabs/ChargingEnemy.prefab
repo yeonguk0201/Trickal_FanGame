@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 380581064173092314}
   - component: {fileID: 8100401765257524831}
   - component: {fileID: 915516978997981696}
+  - component: {fileID: 6064551029721902097}
   m_Layer: 6
   m_Name: ChargingEnemy
   m_TagString: Untagged
@@ -212,6 +213,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 1.5
+  knockbackImmune: 0
 --- !u!114 &7559610857830055514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -447,6 +449,24 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: ChargingEnemy
   useSharedProfile: 1
+--- !u!114 &6064551029721902097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 940017362510908874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 0ff7bdd86525444692b8e95afcb5ef79, type: 3}
+  - {fileID: 21300000, guid: 920122fbbb0d405c81fa5eabfe3f8549, type: 3}
+  - {fileID: 21300000, guid: 36b751e78ef244438ccb894898451b36, type: 3}
+  - {fileID: 21300000, guid: 98d71ac876f740c59d08e78fabfbb7c0, type: 3}
+  sizeMultiplier: 0.98567694
 --- !u!1 &7184141713900137968
 GameObject:
   m_ObjectHideFlags: 0

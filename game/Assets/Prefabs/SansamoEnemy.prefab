@@ -151,6 +151,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1923137235884895029}
+    - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3063440855103875687}
   m_SourcePrefab: {fileID: 100100000, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
 --- !u!1 &4653349662447937955 stripped
 GameObject:
@@ -167,7 +170,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
   widthMultiplier: 1
   thickness: 0.28
@@ -175,3 +178,21 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: SansamoEnemy
   useSharedProfile: 1
+--- !u!114 &3063440855103875687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4653349662447937955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 062a4cff5d414524ac9b4966ee5da35b, type: 3}
+  - {fileID: 21300000, guid: fa27bf0d3c4b4c3da69115078abd623b, type: 3}
+  - {fileID: 21300000, guid: 6033a61f47aa4fb9979676d7eb258390, type: 3}
+  - {fileID: 21300000, guid: f4054d043c194b2c93104d370b8b134b, type: 3}
+  sizeMultiplier: 1.0130596
