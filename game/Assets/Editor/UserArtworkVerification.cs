@@ -58,7 +58,7 @@ namespace TrickalFanGame.Editor
                     linked++;
                     if (item.Kind == ItemKind.Active) powers++;
                 }
-                Require(linked == 57, "Expected 57 existing item definitions with supplied artwork; got " + linked);
+                Require(linked == 61, "Expected 61 existing item definitions with supplied artwork; got " + linked);
                 // Every 교주의 권능 has its own rectangular card artwork.
                 Require(powers == 6, "Expected all six 권능 to have supplied artwork; got " + powers);
                 Require(!UserArtwork.Apply(image, (ItemDefinition)null) && image.sprite == null && image.material == Graphic.defaultGraphicMaterial,
@@ -71,7 +71,7 @@ namespace TrickalFanGame.Editor
                     Require(display.sprite == UserArtwork.Load(key) && display.color == Color.white,
                         name + " must use the supplied capsule, including in the shop.");
                 }
-                Debug.Log("User artwork verification passed: 73 PNGs, Goldi shopkeeper, gold pickup, permanent elif, 57 item illustrations (six 권능 cards), four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
+                Debug.Log("User artwork verification passed: 73 PNGs, Goldi shopkeeper, gold pickup, permanent elif, 61 item illustrations (six 권능 cards), four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
                 CapturePreview();
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }

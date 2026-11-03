@@ -36,18 +36,18 @@
   },
   {
     "source": "이성의 끈.png",
-    "resource": "reserved-5",
-    "connected": false
+    "resource": "jjangsem-thread-of-reason",
+    "connected": true
   },
   {
     "source": "깜짝 상자.png",
-    "resource": "reserved-6",
-    "connected": false
+    "resource": "jjangsem-surprise-box",
+    "connected": true
   },
   {
     "source": "수상한 물약.png",
-    "resource": "reserved-7",
-    "connected": false
+    "resource": "jjangsem-suspicious-potion",
+    "connected": true
   },
   {
     "source": "거대화 물약.png",
@@ -206,8 +206,8 @@
   },
   {
     "source": "파스텔빛 소풍.png",
-    "resource": "reserved-38",
-    "connected": false
+    "resource": "jjangsem-pastel-light",
+    "connected": true
   },
   {
     "source": "명상의 시간.png",
