@@ -15,8 +15,8 @@ namespace TrickalFanGame.Editor
         {
             string[] paths = AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets/Resources/UserArtwork" })
                 .Select(AssetDatabase.GUIDToAssetPath).ToArray();
-            Require(paths.Length == 57,
-                "Expected all 57 supplied PNGs, including the Goldi shop, gold pickup, permanent elif and six 권능.");
+            Require(paths.Length == 73,
+                "Expected all 73 supplied PNGs, including the Goldi shop, gold pickup, permanent elif and six 권능.");
             foreach (string path in paths)
             {
                 Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
@@ -58,7 +58,7 @@ namespace TrickalFanGame.Editor
                     linked++;
                     if (item.Kind == ItemKind.Active) powers++;
                 }
-                Require(linked == 41, "Expected 41 existing item definitions with supplied artwork; got " + linked);
+                Require(linked == 57, "Expected 57 existing item definitions with supplied artwork; got " + linked);
                 // Every 교주의 권능 has its own rectangular card artwork.
                 Require(powers == 6, "Expected all six 권능 to have supplied artwork; got " + powers);
                 Require(!UserArtwork.Apply(image, (ItemDefinition)null) && image.sprite == null && image.material == Graphic.defaultGraphicMaterial,
@@ -71,7 +71,7 @@ namespace TrickalFanGame.Editor
                     Require(display.sprite == UserArtwork.Load(key) && display.color == Color.white,
                         name + " must use the supplied capsule, including in the shop.");
                 }
-                Debug.Log("User artwork verification passed: 57 PNGs, Goldi shopkeeper, gold pickup, permanent elif, 41 item illustrations (six 권능 cards), four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
+                Debug.Log("User artwork verification passed: 73 PNGs, Goldi shopkeeper, gold pickup, permanent elif, 57 item illustrations (six 권능 cards), four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
                 CapturePreview();
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }

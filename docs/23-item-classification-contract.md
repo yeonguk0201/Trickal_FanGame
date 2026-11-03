@@ -86,7 +86,7 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 랜덤코인 | 스펠 | `single-spell-random-coin` | Spell-5 |
 | 회심의 일격 | 스펠 | `single-spell-decisive-strike` | Spell-5 |
 | 칸나의 대포 | 아티팩트 | `artifact-kanna-cannon` | Passive-1 |
-| 비비의 콧물 | 아티팩트 | `artifact-bibi-snot` | Passive-1 |
+| 비비의 수은 | 아티팩트 | `artifact-bibi-snot` | Passive-1 |
 | 거대화 물약 | 아티팩트 | `artifact-giant-potion` | Passive-2 |
 | 네르의 엘드르 깃발 | 아티팩트 | `artifact-ner-eldr-flag` | Artifact-2 |
 | 긴급 보호 벨트 | 아티팩트 | `artifact-emergency-protection-belt` | Artifact-2 |

@@ -74,7 +74,7 @@ namespace TrickalFanGame.Item
         // Passive-1 (칸나의 대포): Magnitude = basic attack shot size bonus. The look and the collision radius grow
         // together; damage, shot speed and range do not change.
         ProjectileSizePercent = 43,
-        // Passive-1 (비비의 콧물): a basic attack hit may poison the enemy. Magnitude = chance per hit,
+        // Passive-1 (비비의 수은): a basic attack hit may poison the enemy. Magnitude = chance per hit,
         // SecondaryMagnitude = share of attack damage each poison stack deals per tick, DurationSeconds,
         // IntervalSeconds = tick interval, IntegerAmount = maximum poison stacks on one enemy.
         BasicAttackPoison = 44,

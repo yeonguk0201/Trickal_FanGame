@@ -428,7 +428,7 @@ namespace TrickalFanGame.Editor
                 Assert(PoisonGasCloud.Radius == 1.5f && PoisonGasCloud.Duration == 3f &&
                        PoisonGasCloud.Poison.MaximumStacks == 3 && PoisonGasCloud.Poison.DurationSeconds == 4f &&
                        PoisonGasCloud.Poison.IntervalSeconds == 1f && PoisonGasCloud.Poison.TickDamageRatio == 0.15f,
-                    "The gas is radius 1.5 for 3 seconds and poisons with the 비비의 콧물 values.");
+                    "The gas is radius 1.5 for 3 seconds and poisons with the 비비의 수은 values.");
 
                 fixture.StandOn(Origin + Vector2.left * 1.6f);
                 Assert(obstacle.RegisterPlayerHit() && !obstacle.IsBroken && mushroom.LastGas == null,

@@ -263,5 +263,85 @@
     "source": "급발진.png",
     "resource": "active-sudden-acceleration",
     "connected": true
+  },
+  {
+    "source": "보물지도와 고양이 밀랍 인장.png",
+    "resource": "single-spell-netti-map",
+    "connected": true
+  },
+  {
+    "source": "햇살 아래 도전장을 꽂은 게시판.png",
+    "resource": "single-spell-tig-challenge",
+    "connected": true
+  },
+  {
+    "source": "황금빛 사과 캐릭터 게임 아이콘.png",
+    "resource": "jjangsem-bigwood-fruit",
+    "connected": true
+  },
+  {
+    "source": "멜론 카드와 민트 소녀.png",
+    "resource": "jjangsem-melune-card",
+    "connected": true
+  },
+  {
+    "source": "황금빛 글디 인증서 카드와 리본.png",
+    "resource": "single-spell-goldi-invitation",
+    "connected": true
+  },
+  {
+    "source": "클로버 왕국의 초대장.png",
+    "resource": "single-spell-armor-festival-invitation",
+    "connected": true
+  },
+  {
+    "source": "달려가는 소녀와 소용돌이 껍질.png",
+    "resource": "single-spell-final-sprint",
+    "connected": true
+  },
+  {
+    "source": "아이시아 블루 골드 크리스탈 지갑.png",
+    "resource": "artifact-aisia-wallet",
+    "connected": true
+  },
+  {
+    "source": "하트 후광 속 달빛 봉투.png",
+    "resource": "single-spell-amelia-love-letter",
+    "connected": true
+  },
+  {
+    "source": "귀여운 박쥐 날개 하네스.png",
+    "resource": "artifact-sist-fake-wings",
+    "connected": true
+  },
+  {
+    "source": "고딕풍 수은 포션 병.png",
+    "resource": "artifact-bibi-snot",
+    "connected": true
+  },
+  {
+    "source": "나무 손잡이 송곳 도구-Photoroom.png",
+    "resource": "item-12",
+    "connected": true
+  },
+  {
+    "source": "나무 곤봉 일러스트-Photoroom.png",
+    "resource": "item-01",
+    "connected": true
+  },
+  {
+    "source": "가시 돋친 보라색 드릴 창-Photoroom.png",
+    "resource": "artifact-atta-sword",
+    "connected": true
+  },
+  {
+    "source": "금속 창끝과 깃털 장식 투창-Photoroom.png",
+    "resource": "item-04",
+    "connected": true
+  },
+  {
+    "source": "광택 나는 레드 핸들의 케틀벨 30.png",
+    "resource": "artifact-30kg-kettlebell",
+    "connected": true
   }
 ]

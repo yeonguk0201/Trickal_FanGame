@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 
 namespace TrickalFanGame.Editor
 {
-    // Passive-1: creates 칸나의 대포 (bigger basic attack shots) and 비비의 콧물 (poison on basic attack hits), adds both
+    // Passive-1: creates 칸나의 대포 (bigger basic attack shots) and 비비의 수은 (poison on basic attack hits), adds both
     // to the selection reward pool, and gives every enemy Prefab its own basic attack knockback weight (Passive-0
     // §4.6). Re-running updates the same assets, keeps their GUIDs and leaves configured Prefabs and the pool unchanged.
     public static class Week23Passive1Setup
@@ -23,7 +23,7 @@ namespace TrickalFanGame.Editor
         public const int CannonMaxStacks = 2;
 
         public const string SnotId = "artifact-bibi-snot";
-        public const string SnotName = "비비의 콧물";
+        public const string SnotName = "비비의 수은";
         public const float PoisonChance = 0.15f;
         public const float PoisonTickDamageRatio = 0.15f;
         public const float PoisonDurationSeconds = 4f;
