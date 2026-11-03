@@ -13,7 +13,8 @@ namespace TrickalFanGame.Enemy
     // ellipse takes the floor's damage once. It stays up for a while, stuck in the ground (Kinematic, so the player
     // cannot push it, and knockback-immune) and hurts on touch, then sinks and starts over. A player who keeps moving
     // can lead it around; it never bursts out away from the player.
-    // The user will draw buried, emerging and attacking art later; until then plain colours tell the states apart.
+    // With the user's drawn frames (AmbushEnemyMotion, 2026-11-04) the art tells the states apart; without them
+    // plain colours do.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(Health), typeof(KnockbackReceiver))]
     public sealed class AmbushEnemyController : MonoBehaviour
@@ -52,6 +53,7 @@ namespace TrickalFanGame.Enemy
         private Health health;
         private EnemyBehaviorContext behavior;
         private SpriteRenderer visual;
+        private AmbushEnemyMotion motion;
         private Collider2D[] rootColliders = Array.Empty<Collider2D>();
         private readonly EnemyObstacleNavigator navigator = new();
         private EnemyObstacleNavigator.TerrainFootprint terrain;
@@ -162,7 +164,7 @@ namespace TrickalFanGame.Enemy
                     break;
                 case AmbushState.Burrowing:
                     HoldStill();
-                    if (visual != null)
+                    if (visual != null && !HasDrawnFrames)
                         visual.color = Color.Lerp(Color.white, BurrowedColor,
                             burrowDuration > 0f ? elapsed / burrowDuration : 1f);
                     if (elapsed >= burrowDuration) EnterBurrowed(currentTime);
@@ -269,6 +271,12 @@ namespace TrickalFanGame.Enemy
             State = state;
             stateStartedAt = currentTime;
             if (visual == null) return;
+            // The drawn mound and burst frames (AmbushEnemyMotion) tell the states apart on their own.
+            if (HasDrawnFrames)
+            {
+                visual.color = Color.white;
+                return;
+            }
             visual.color = state switch
             {
                 AmbushState.Burrowed or AmbushState.Emerging => BurrowedColor,
@@ -299,6 +307,8 @@ namespace TrickalFanGame.Enemy
             body.linearVelocity = Vector2.zero;
             body.bodyType = anchored ? RigidbodyType2D.Kinematic : RigidbodyType2D.Dynamic;
         }
+
+        private bool HasDrawnFrames => motion != null && motion.HasFrames;
 
         public bool IsAnchored => body != null && body.bodyType == RigidbodyType2D.Kinematic;
 
@@ -338,6 +348,7 @@ namespace TrickalFanGame.Enemy
             visual = artwork != null && artwork.Visual != null ? artwork.Visual : GetComponentInChildren<SpriteRenderer>();
             // Only the root's colliders; the feet on their own child stay on.
             rootColliders = GetComponents<Collider2D>();
+            motion = GetComponent<AmbushEnemyMotion>();
             initialized = true;
         }
 

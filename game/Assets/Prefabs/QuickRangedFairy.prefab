@@ -203,3 +203,4 @@ MonoBehaviour:
   - {fileID: 21300000, guid: c0435e714845472786fa539320a9f9dd, type: 3}
   - {fileID: 21300000, guid: 7e79687beb2542eb8115551f51fbeabb, type: 3}
   sizeMultiplier: 1.0121951
+  knockScale: 1

@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 6288058990234899946}
   - component: {fileID: 3867958198554548248}
   - component: {fileID: 2279147732071030210}
+  - component: {fileID: 9106537188078233161}
   m_Layer: 6
   m_Name: AmbushFairy
   m_TagString: Untagged
@@ -274,6 +275,23 @@ MonoBehaviour:
   damageTier: 0
   cooldown: 1
   halfHeartDamage: 0
+--- !u!114 &9106537188078233161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5470415676887288762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a75aa740ffe8be48a3d5bea09321a42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.AmbushEnemyMotion
+  frames:
+  - {fileID: 21300000, guid: 8e855178875b4b7e8401bcf1294c6104, type: 3}
+  - {fileID: 21300000, guid: 1dc123b2292b4a15b0ae51dc4ef69164, type: 3}
+  - {fileID: 21300000, guid: fc5e157f2003485684182d5f89222fff, type: 3}
+  - {fileID: 21300000, guid: 9a56e9401cfb44ffa9aaa95f0fce47e8, type: 3}
 --- !u!1 &6556195461114167901
 GameObject:
   m_ObjectHideFlags: 0

@@ -19,12 +19,15 @@ namespace TrickalFanGame.Enemy
         // Visible body height / visible height of the first frame, measured by the Editor setup, so the fallen
         // character matches the standing one even when a thrown prop makes the frame taller.
         [SerializeField, Min(0.1f)] private float sizeMultiplier = 1f;
+        // Share of the full knock distance. A boss bursts or slumps where it stood instead of flying away.
+        [SerializeField, Range(0f, 1f)] private float knockScale = 1f;
 
         private Health health;
         private Vector2? lastHitFrom;
 
         public Sprite[] Frames => frames;
         public float SizeMultiplier => sizeMultiplier;
+        public float KnockScale => knockScale;
 
         private void Awake()
         {

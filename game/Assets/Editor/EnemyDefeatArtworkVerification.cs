@@ -14,8 +14,9 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Artwork/Verify Enemy Defeat Frames")]
         public static void Verify()
         {
-            foreach (var (prefabName, frames) in EnemyDefeatArtworkSetup.Bindings)
+            foreach (EnemyDefeatArtworkSetup.Binding binding in EnemyDefeatArtworkSetup.Bindings)
             {
+                string prefabName = binding.Prefab, frames = binding.Frames;
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/" + prefabName + ".prefab");
                 Require(prefab != null, "Missing enemy Prefab: " + prefabName);
                 Require(prefab.GetComponents<EnemyDefeatAnimation>().Length == 1,
@@ -24,14 +25,16 @@ namespace TrickalFanGame.Editor
                 Require(sprites.Length == EnemyDefeatArtworkSetup.FrameCount, prefabName + " must have four defeat frames.");
                 for (int i = 0; i < sprites.Length; i++)
                 {
-                    Require(sprites[i] == AssetDatabase.LoadAssetAtPath<Sprite>(EnemyDefeatArtworkSetup.FramePath(frames, i)),
+                    Require(sprites[i] == AssetDatabase.LoadAssetAtPath<Sprite>(binding.FramePath(i)),
                         $"{prefabName} defeat frame {i} must be {frames}_Death_{i}.");
                     Require(Mathf.Abs(sprites[i].pivot.y) < 0.5f && Mathf.Abs(sprites[i].pivot.x - sprites[i].rect.width / 2f) < 1f,
                         $"{frames}_Death_{i} must stand on a bottom-centre pivot.");
                 }
+                Require(Mathf.Approximately(prefab.GetComponent<EnemyDefeatAnimation>().KnockScale, binding.KnockScale),
+                    prefabName + " must use its configured knock share.");
                 CheckPicture(prefab, prefabName);
             }
-            Debug.Log($"Defeat-0 verification passed: {EnemyDefeatArtworkSetup.Bindings.Length} enemy Prefabs leave a " +
+            Debug.Log($"Defeat verification passed: {EnemyDefeatArtworkSetup.Bindings.Length} enemy and boss Prefabs leave a " +
                 "collider-free defeat picture that starts at the body's feet and height, is knocked away from the hit " +
                 "and stops short of walls, mirrors when knocked left, plays four frames, fades out and removes itself.");
         }
@@ -65,21 +68,41 @@ namespace TrickalFanGame.Editor
                 float fallen = view.bounds.size.y * EnemyDefeatArtworkSetup.VisibleShare(defeat.Frames[0]);
                 Require(Mathf.Abs(view.bounds.min.y - bounds.min.y) < 0.02f && Mathf.Abs(fallen - standing) < 0.02f,
                     name + ": the first frame must stand on the body's feet as tall as the visible body.");
-                Require(Mathf.Abs(left.KnockOffset.x + EnemyDefeatView.KnockDistance) < 0.001f,
+                Require(Mathf.Abs(left.KnockOffset.x + EnemyDefeatView.KnockDistance * defeat.KnockScale) < 0.001f,
                     name + ": an open floor must allow the full knock distance.");
+
+                SpriteRenderer shadow = left.Shadow;
+                Require(shadow != null && shadow.transform.parent == room.transform &&
+                        shadow.GetComponent<Collider2D>() == null && shadow.color.a > 0.1f,
+                    name + ": the picture must leave a collider-free floor shadow in the room.");
+                Require(Mathf.Abs(shadow.transform.position.x - bounds.center.x) < 0.02f &&
+                        shadow.transform.position.y >= bounds.min.y - 0.001f &&
+                        shadow.transform.position.y < bounds.min.y + 0.2f &&
+                        shadow.sortingOrder < view.sortingOrder,
+                    name + ": the shadow must start under the feet, below the picture.");
+                Vector3 shadowStart = shadow.transform.position;
+                float shadowAlpha = shadow.color.a;
 
                 Vector3 start = left.transform.position;
                 Sprite[] frames = defeat.Frames;
                 left.Advance(EnemyDefeatView.FrameSeconds * 1.5f);
                 Require(view.sprite == frames[1], name + ": the second frame must follow the first.");
+                Vector3 drift = left.transform.position - start;
+                Require(drift.y > 0.01f && Mathf.Abs(shadow.transform.position.y - shadowStart.y) < 0.001f &&
+                        Mathf.Abs(shadow.transform.position.x - shadowStart.x - drift.x) < 0.001f,
+                    name + ": the shadow must slide with the (sideways) knock but stay on the floor during the hop.");
                 left.Advance(EnemyDefeatView.FrameSeconds * (frames.Length - 1.5f));
                 Require(view.sprite == frames[^1] && (left.transform.position - (start + left.KnockOffset)).sqrMagnitude < 0.0001f,
                     name + ": the knock must end on the last frame at its full offset.");
                 Require(view.color.a > 0.99f, name + ": the picture must stay opaque until the fade.");
                 left.Advance(EnemyDefeatView.HoldSeconds + EnemyDefeatView.FadeSeconds * 0.5f);
                 Require(view.color.a < 0.6f && view.color.a > 0.4f, name + ": the picture must fade out.");
+                Require(Mathf.Abs(shadow.color.a - shadowAlpha * view.color.a) < 0.02f,
+                    name + ": the shadow must fade with the picture.");
                 left.Advance(EnemyDefeatView.FadeSeconds);
                 Require(left == null, name + ": the picture must remove itself after fading.");
+                Require(room.transform.Find(EnemyDefeatView.ShadowObjectName) == null,
+                    name + ": the shadow must go with the picture.");
 
                 // A wall just to the right stops the knock short of it.
                 wall = new GameObject("Defeat verification wall", typeof(BoxCollider2D)) { layer = 0 };
@@ -90,7 +113,8 @@ namespace TrickalFanGame.Editor
                 EnemyDefeatView right = defeat.SpawnView(Vector2.right);
                 Require(!right.GetComponent<SpriteRenderer>().flipX, name + ": a defeat knocked right keeps the drawing.");
                 if (wallBlocks)
-                    Require(right.KnockOffset.x < 0.5f, name + ": the knock must stop short of a wall.");
+                    Require(right.KnockOffset.x < Mathf.Min(0.5f, EnemyDefeatView.KnockDistance * defeat.KnockScale) + 0.001f,
+                        name + ": the knock must stop short of a wall.");
                 Object.DestroyImmediate(right.gameObject);
             }
             finally

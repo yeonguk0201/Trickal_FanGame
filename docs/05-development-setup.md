@@ -2430,3 +2430,10 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 검증 메뉴: `Trickal Fan Game > Artwork > Verify Enemy Defeat Frames`. 배치(연결 포함): `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.EnemyDefeatArtworkSetup.ApplyAndVerifyBatch -logFile <로그 경로>`. 프리팹을 저장한다. 처음 실행은 새 텍스처를 가져오느라 10분 넘게 걸릴 수 있다.
 - 새 시트를 넣을 때: 4프레임 가로 시트를 `Art/Enemies/FairyKingdom/Death/<이름>_Death_0~3.png`로 자르고(각 프레임 그림 덩어리만, 바닥 가운데 기준) 원본은 `Death/Source/<이름>_Death_Sheet.png`에 둔 뒤 `EnemyDefeatArtworkSetup.Bindings`에 프리팹을 추가한다.
 - 실제 화면: Game Scene Play → `F1` → `Spawn pure Sansamo`, `Spawn lively fairy`, `Spawn lobber`, `Spawn Jyubi king`(쥬비 소환)으로 적을 불러 처치한다. 맞은 반대쪽으로 밀려나며 네 장이 재생되고 사라지는지, 벽 앞에서 멈추는지, 쓰러지는 동안 몸에 닿아도 피해가 없는지 본다. 돌격형·저격형·산사모-활발은 일반 방에서 확인한다.
+
+### 보스·에르핀 쓰러짐과 산사모-광기·잠복형 모션 (Defeat-1, 2026-11-04)
+
+- 연결 재실행 메뉴: `Trickal Fan Game > Artwork > Apply Enemy Defeat Frames`(보스 2종 포함 프리팹 10개)와 `Trickal Fan Game > Artwork > Apply Defeat-1 Motions`(산사모-광기 걷기, 잠복형 흙더미·튀어나옴, 에르핀 쓰러짐 프레임 크기). 프레임 크기와 발 위치는 가져오기 설정(픽셀/유닛, 기준점)으로 정지 그림에 맞춘다. 다시 실행해도 컴포넌트가 늘지 않는다.
+- 검증 메뉴: `Trickal Fan Game > Artwork > Verify Defeat-1 Motions`. 배치(연결 포함): `-executeMethod TrickalFanGame.Editor.Defeat1MotionSetup.ApplyAndVerifyBatch`. 커밋 전 회귀 묶음: `-executeMethod TrickalFanGame.Editor.Defeat1MotionSetup.VerifyWithRegressionsBatch`.
+- 크레용 용사 황금 걷기 프레임(`Art/Bosses/FairyKingdom/Movement/CrayonHero_Golden_Walk_0~7.png`)은 천사 기사 시트(`Art/Enemies/FairyKingdom/Walking/Source/AngelKnight_Walk_Sheet.png`)로 덮어쓴 시험판이다. 되돌리려면 `git restore`로 8장을 이전 커밋 상태로 돌린다(GUID·가져오기 설정은 그대로).
+- 실제 화면: `F1` → `Spawn self-destruct (blows up near you)`로 산사모-광기가 걸어오는지, `Spawn ambusher (bursts from the floor)`로 흙더미가 다가와 세 단계로 튀어나오고 다시 들어가는지 본다. `— Boss room —`의 `Boss F1~F3`(층마다 보스가 다를 수 있다)으로 부스러기·새마음금고를 잡아 쓰러짐 그림을, 크레용 용사는 각성 뒤 황금 걷기를 확인한다(보스 테스트 씬에서도 볼 수 있다). 에르핀은 체력이 다 닳으면 네 장으로 쓰러진 뒤 GAME OVER로 넘어가는지, 그동안 그림자가 남는지 본다. 적·보스 쓰러짐 그림의 그림자는 튀어오를 때 바닥에 남고 그림과 함께 사라져야 한다.

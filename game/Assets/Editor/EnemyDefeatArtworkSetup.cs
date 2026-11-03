@@ -14,36 +14,50 @@ namespace TrickalFanGame.Editor
     public static class EnemyDefeatArtworkSetup
     {
         public const string FrameRoot = "Assets/Art/Enemies/FairyKingdom/Death";
+        public const string BossFrameRoot = "Assets/Art/Bosses/FairyKingdom/Death";
         public const int FrameCount = 4;
+        // Bosses burst or slump where they stood; a short knock still shows which way the last hit went.
+        public const float BossKnockScale = 0.3f;
 
-        // Prefab name → frame set name. 대왕쥬비 shares the 쥬비 drawings at its own size.
-        public static readonly (string Prefab, string Frames)[] Bindings =
+        public readonly struct Binding
         {
-            ("JyubiEnemy", "Jyubi"),
-            ("JyubiKing", "Jyubi"),
-            ("QuickRangedFairy", "SansamoPure"),
-            ("SansamoEnemy", "Sansamo"),
-            ("HighBloodSugarFairy", "HighBloodSugarFairy"),
-            ("ChargingEnemy", "LowBloodSugarFairy"),
-            ("LobbingFairy", "LowBloodSugarMadness"),
-            ("LivelyLowBloodSugarFairy", "LivelyFairy"),
-        };
+            public readonly string Prefab, Frames, Folder;
+            public readonly float KnockScale;
+            public Binding(string prefab, string frames, string folder = FrameRoot, float knockScale = 1f)
+            { Prefab = prefab; Frames = frames; Folder = folder; KnockScale = knockScale; }
+            public string FramePath(int index) => $"{Folder}/{Frames}_Death_{index}.png";
+        }
 
-        public static string FramePath(string frames, int index) => $"{FrameRoot}/{frames}_Death_{index}.png";
+        // Prefab name → frame set. 대왕쥬비 shares the 쥬비 drawings at its own size. Defeat-1 (2026-11-04) adds
+        // 부스러기 (TestBoss) and 새마음금고.
+        public static readonly Binding[] Bindings =
+        {
+            new("JyubiEnemy", "Jyubi"),
+            new("JyubiKing", "Jyubi"),
+            new("QuickRangedFairy", "SansamoPure"),
+            new("SansamoEnemy", "Sansamo"),
+            new("HighBloodSugarFairy", "HighBloodSugarFairy"),
+            new("ChargingEnemy", "LowBloodSugarFairy"),
+            new("LobbingFairy", "LowBloodSugarMadness"),
+            new("LivelyLowBloodSugarFairy", "LivelyFairy"),
+            new("TestBoss", "Buseureogi", BossFrameRoot, BossKnockScale),
+            new("SaemaeumVaultBoss", "Vault", BossFrameRoot, BossKnockScale),
+        };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Enemy Defeat Frames")]
         public static void Apply()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");
-            foreach (string frames in Bindings.Select(binding => binding.Frames).Distinct())
-                for (int i = 0; i < FrameCount; i++) ImportFrame(FramePath(frames, i));
-            foreach (var (prefab, frames) in Bindings)
+            foreach (string path in Bindings.SelectMany(binding => Enumerable.Range(0, FrameCount)
+                         .Select(binding.FramePath)).Distinct())
+                ImportFrame(path);
+            foreach (Binding binding in Bindings)
             {
                 Sprite[] sprites = Enumerable.Range(0, FrameCount)
-                    .Select(i => AssetDatabase.LoadAssetAtPath<Sprite>(FramePath(frames, i))).ToArray();
+                    .Select(i => AssetDatabase.LoadAssetAtPath<Sprite>(binding.FramePath(i))).ToArray();
                 if (sprites.Any(sprite => sprite == null))
-                    throw new InvalidOperationException("Missing defeat frames: " + frames);
-                string path = "Assets/Prefabs/" + prefab + ".prefab";
+                    throw new InvalidOperationException("Missing defeat frames: " + binding.Frames);
+                string path = "Assets/Prefabs/" + binding.Prefab + ".prefab";
                 GameObject root = PrefabUtility.LoadPrefabContents(path);
                 try
                 {
@@ -54,13 +68,14 @@ namespace TrickalFanGame.Editor
                     list.arraySize = sprites.Length;
                     for (int i = 0; i < sprites.Length; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = sprites[i];
                     serialized.FindProperty("sizeMultiplier").floatValue = SizeMultiplier(root, sprites[0]);
+                    serialized.FindProperty("knockScale").floatValue = binding.KnockScale;
                     serialized.ApplyModifiedPropertiesWithoutUndo();
                     PrefabUtility.SaveAsPrefabAsset(root, path);
                 }
                 finally { PrefabUtility.UnloadPrefabContents(root); }
             }
             AssetDatabase.SaveAssets();
-            Debug.Log($"Defeat-0 setup complete: {Bindings.Length} enemy Prefabs use the supplied four-frame defeat drawings.");
+            Debug.Log($"Defeat setup complete: {Bindings.Length} enemy and boss Prefabs use the supplied four-frame defeat drawings.");
         }
 
         public static void ApplyAndVerifyBatch()

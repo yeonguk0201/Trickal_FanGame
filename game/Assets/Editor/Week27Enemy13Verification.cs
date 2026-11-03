@@ -391,7 +391,7 @@ namespace TrickalFanGame.Editor
                     $"Bursting out must hurt the player on the ellipse once for floor 3's medium damage " +
                     $"({expectedUnits} units).");
                 Assert(!health.IsInvulnerable && bodyCircle.enabled && ambusher.Mark == null &&
-                       ambusher.Visual.color == AmbushEnemyController.AttackColor,
+                       ambusher.Visual.color == StateColor(ambusher, AmbushEnemyController.AttackColor),
                     "A bursting ambusher must be hittable, drop its mark and show the attack colour.");
                 KnockbackReceiver knockback = health.GetComponent<KnockbackReceiver>();
                 Assert(ambusher.IsAnchored && !knockback.Apply(Vector2.left, 6f, 0.3f, 0f) &&
@@ -530,8 +530,15 @@ namespace TrickalFanGame.Editor
         {
             Assert(ambusher.IsBurrowed && health.IsInvulnerable && !bodyCircle.enabled &&
                    feet != null && feet.Collider.enabled &&
-                   ambusher.Visual.color == AmbushEnemyController.BurrowedColor,
+                   ambusher.Visual.color == StateColor(ambusher, AmbushEnemyController.BurrowedColor),
                 $"{subject} must be buried: invulnerable, body circle off, feet on and tinted dim brown.");
+        }
+
+        // The placeholder tint, or plain white once the drawn frames tell the states apart.
+        private static Color StateColor(AmbushEnemyController ambusher, Color placeholder)
+        {
+            AmbushEnemyMotion motion = ambusher.GetComponent<AmbushEnemyMotion>();
+            return motion != null && motion.HasFrames ? Color.white : placeholder;
         }
 
         private static Health Spawn(GameObject prefab, Transform parent, Vector2 position)

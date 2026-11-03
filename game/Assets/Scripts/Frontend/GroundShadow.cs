@@ -31,6 +31,8 @@ namespace TrickalFanGame.Frontend
         private Health health;
         private PlacedBomb bomb;
         private PlayerFlight flight;
+        // A player with drawn defeat poses keeps the shadow under the fall (Defeat-1).
+        private PlayerWalkAnimator drawnFall;
         private RoomTrap trap;
         private bool floating;
         private bool useSpriteFootprint;
@@ -66,6 +68,7 @@ namespace TrickalFanGame.Frontend
             health = GetComponent<Health>();
             bomb = GetComponent<PlacedBomb>();
             flight = GetComponent<PlayerFlight>();
+            drawnFall = GetComponent<PlayerWalkAnimator>();
             trap = GetComponent<RoomTrap>();
             floating = GetComponent<TrickalFanGame.Enemy.EnemyFlight>() != null;
             pickup = GetComponent<RunResourcePickup>() != null || GetComponent<HealthPickup>() != null ||
@@ -130,7 +133,8 @@ namespace TrickalFanGame.Frontend
             // The existing flight shadow retains its elevated sorting and bobbing; never draw two shadows.
             if (flight == null) flight = GetComponent<PlayerFlight>();
             shadow.enabled = isActiveAndEnabled && source.enabled && source.gameObject.activeInHierarchy &&
-                (health == null || !health.IsDead) && (bomb == null || !bomb.HasExploded) &&
+                (health == null || !health.IsDead || (drawnFall != null && drawnFall.HasDefeatFrames)) &&
+                (bomb == null || !bomb.HasExploded) &&
                 (flight == null || !flight.IsFlying);
             if (trap != null && trap.IsRemoved) shadow.enabled = false;
             if (!shadow.enabled) return;

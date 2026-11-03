@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 3719322455293178396}
   - component: {fileID: 6273290692546761168}
   - component: {fileID: 8251726036317173873}
+  - component: {fileID: 2917638869135839854}
   m_Layer: 6
   m_Name: SaemaeumVaultBoss
   m_TagString: Untagged
@@ -152,6 +153,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 4
+  knockbackImmune: 0
 --- !u!114 &1317982636753869925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -307,15 +309,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 776a428bfd756ac4892c6b78830f9cd6, type: 3}
   - {fileID: 21300000, guid: afe5adb9cd269fb44b15d0a51b15da08, type: 3}
   - {fileID: 21300000, guid: 6549066feb43f5f49819e28a7f9f77f7, type: 3}
-  healFrames:
-  - {fileID: 21300000, guid: fce24f47841d43d3b51b6a8491aa33e7, type: 3}
-  - {fileID: 21300000, guid: 2a124abd324d4724b512283494980a04, type: 3}
-  - {fileID: 21300000, guid: f15204ef6bc744a89fc541e9edf8f165, type: 3}
-  - {fileID: 21300000, guid: 776fe82496ca449c8f52c2ce65e65559, type: 3}
-  crayonAttackFrames: []
-  goldenAttackFrames: []
-  goldenWalkFrames: []
-  awakeningFrames: []
+  summonFrames: []
+  goldenSummonFrames: []
   jumpCycleFrames:
   - {fileID: 21300000, guid: 31f30daf84c54997995d2bb44eaa9fd7, type: 3}
   - {fileID: 21300000, guid: bef7d77e33d34c3e8ba0b15d55b5444d, type: 3}
@@ -325,6 +320,15 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 604cb58d57e04fc5b482cfcfeb58a4f3, type: 3}
   - {fileID: 21300000, guid: 0b5ad63c50114380929abc6fd0d62a65, type: 3}
   - {fileID: 21300000, guid: 0303f6df84aa4fd1b83a7c7b243dd7e0, type: 3}
+  healFrames:
+  - {fileID: 21300000, guid: fce24f47841d43d3b51b6a8491aa33e7, type: 3}
+  - {fileID: 21300000, guid: 2a124abd324d4724b512283494980a04, type: 3}
+  - {fileID: 21300000, guid: f15204ef6bc744a89fc541e9edf8f165, type: 3}
+  - {fileID: 21300000, guid: 776fe82496ca449c8f52c2ce65e65559, type: 3}
+  crayonAttackFrames: []
+  goldenAttackFrames: []
+  goldenWalkFrames: []
+  awakeningFrames: []
   groundTreasures:
   - {fileID: 4528997289046137425}
   - {fileID: 8512402935366631024}
@@ -340,7 +344,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
   widthMultiplier: 1
   thickness: 0.28
@@ -348,6 +352,25 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: SaemaeumVaultBoss
   useSharedProfile: 1
+--- !u!114 &2917638869135839854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2406316834951311537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 5fa2cca7e0ed4f7d94df0f356805bce3, type: 3}
+  - {fileID: 21300000, guid: 869ffd1c3c1b459e8f79f010d0f2c061, type: 3}
+  - {fileID: 21300000, guid: a4db7d5bc6ac48529e5fbdc770c3ed8f, type: 3}
+  - {fileID: 21300000, guid: d2e47e9e4a41497b8a752a42ed10066b, type: 3}
+  sizeMultiplier: 1.0630932
+  knockScale: 0.3
 --- !u!1 &3403650608797451574
 GameObject:
   m_ObjectHideFlags: 0
