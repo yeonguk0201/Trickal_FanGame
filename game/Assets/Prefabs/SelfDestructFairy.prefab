@@ -101,6 +101,8 @@ GameObject:
   - component: {fileID: 6388306413602102779}
   - component: {fileID: 6721198676040085354}
   - component: {fileID: 4064119436500713578}
+  - component: {fileID: 7777663805749961984}
+  - component: {fileID: 6288121902481178433}
   m_Layer: 6
   m_Name: SelfDestructFairy
   m_TagString: Untagged
@@ -307,6 +309,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 0.8
+  knockbackImmune: 0
 --- !u!114 &1254475764350344347
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -367,3 +370,39 @@ MonoBehaviour:
   mode: 0
   visual: {fileID: 7723453703024836750}
   localWidth: 0.72
+--- !u!114 &7777663805749961984
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7432310428319483453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02e329a4e7113394c929bc50ea077391, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyWalkFrames
+  frames:
+  - {fileID: 21300000, guid: e404c3a9bb75471e91b3fa18c973f67b, type: 3}
+  - {fileID: 21300000, guid: 6909f969faf749e086c2c10cc1b1da93, type: 3}
+  - {fileID: 21300000, guid: 1e84498b06d74877892a06eb29d396c1, type: 3}
+  - {fileID: 21300000, guid: 2c739ce6e2de4235adac11e35e24a829, type: 3}
+  strideLength: 0.9
+--- !u!114 &6288121902481178433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7432310428319483453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: SelfDestructFairy
+  useSharedProfile: 1

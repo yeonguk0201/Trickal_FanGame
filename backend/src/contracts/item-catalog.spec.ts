@@ -699,7 +699,7 @@ describe('Item catalog', () => {
     expect(
       ITEM_CATALOG.find((item) => item.id === 'artifact-bibi-snot'),
     ).toMatchObject({
-      name: '비비의 콧물',
+      name: '비비의 수은',
       rarity: 'RARE',
       isActive: true,
       maxStacks: 2,

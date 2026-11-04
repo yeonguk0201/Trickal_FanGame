@@ -10,18 +10,29 @@ namespace TrickalFanGame.Editor
 {
     public static class GroundShadowProfileSetup
     {
-        private static readonly string[] Prefabs = { "ChargingEnemy", "HighBloodSugarFairy", "JyubiEnemy",
+        // A base Prefab comes before its variants: 불효자손 (TestEnemy) is the base of SansamoEnemy and TestBoss.
+        private static readonly string[] Prefabs = { "TestEnemy", "ChargingEnemy", "HighBloodSugarFairy", "JyubiEnemy",
             "SansamoEnemy", "BuseureogiCrumbMinion", "CrayonArcherMinion", "CrayonAxeMinion",
             "CrayonMageMinion", "CrayonShieldMinion", "CrayonHeroBoss", "SaemaeumVaultBoss", "TestBoss",
-            "BuseureogiDoughObstacle", "BuseureogiCreamObstacle", "LivelyLowBloodSugarFairy" };
+            "BuseureogiDoughObstacle", "BuseureogiCreamObstacle", "LivelyLowBloodSugarFairy",
+            // Reviewed 2026-11-04. 잠복형 uses one profile for the mound and the surfaced body.
+            "QuickRangedFairy", "LobbingFairy", "SelfDestructFairy", "AmbushFairy",
+            "NururingFairyWarrior", "NururingSplit" };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Reviewed Ground Shadow Profiles")]
         public static void Apply()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");
+            // A variant that added its own shadow before its base was bound would end up with two; it keeps the
+            // base's shadow instead and overrides only the profile below.
+            foreach (string id in Prefabs) RemoveAddedShadowUnderBoundBase(id);
             foreach (string id in Prefabs)
             {
                 string path = "Assets/Prefabs/" + id + ".prefab";
+                // Already bound: do not re-save, which would only reserialize unrelated fields.
+                GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (asset.GetComponents<GroundShadow>().Length == 1 && asset.GetComponent<GroundShadow>().ProfileId == id)
+                    continue;
                 GameObject root = PrefabUtility.LoadPrefabContents(path);
                 try
                 {
@@ -29,6 +40,7 @@ namespace TrickalFanGame.Editor
                     var shadow = root.GetComponent<GroundShadow>();
                     if (shadow == null) shadow = root.AddComponent<GroundShadow>();
                     shadow.SetProfileId(id);
+                    if (PrefabUtility.IsPartOfPrefabInstance(shadow)) PrefabUtility.RecordPrefabInstancePropertyModifications(shadow);
                     EditorUtility.SetDirty(shadow);
                     PrefabUtility.SaveAsPrefabAsset(root, path);
                 }
@@ -36,9 +48,28 @@ namespace TrickalFanGame.Editor
             }
         }
 
+        private static void RemoveAddedShadowUnderBoundBase(string id)
+        {
+            string path = "Assets/Prefabs/" + id + ".prefab";
+            GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            GameObject source = PrefabUtility.GetCorrespondingObjectFromSource(asset);
+            if (source == null || Array.IndexOf(Prefabs, source.name) < 0) return;
+            GroundShadow added = asset.GetComponent<GroundShadow>();
+            if (added == null || !PrefabUtility.IsAddedComponentOverride(added)) return;
+            GameObject root = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                UnityEngine.Object.DestroyImmediate(root.GetComponent<GroundShadow>());
+                PrefabUtility.SaveAsPrefabAsset(root, path);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
+
         public static void ApplyAndVerifyBatch()
         {
             Apply();
+            Apply(); // Running twice must not add or remove anything.
+            Verify();
             GroundShadowVerification.Verify();
             GroundShadowPreviewExporter.ExportBatch();
         }
@@ -83,17 +114,43 @@ namespace TrickalFanGame.Editor
                     state.TryOpenChest(chest.ChestId);
                     AssertSettings(shadow, "chest-" + kind + "-True");
                 }
+                VerifyAmbushStates();
                 foreach (string id in Prefabs)
                 {
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/" + id + ".prefab");
                     if (prefab.GetComponent<GroundShadow>()?.ProfileId != id)
                         throw new InvalidOperationException("Missing stable prefab shadow binding: " + id);
+                    if (prefab.GetComponents<GroundShadow>().Length != 1)
+                        throw new InvalidOperationException("Prefab has more than one ground shadow: " + id);
+                    if (!GroundShadowProfiles.TryGet(id, out _))
+                        throw new InvalidOperationException("Bound prefab has no reviewed profile: " + id);
                     if (prefab.transform.Find(GroundShadow.ObjectName) != null)
                         throw new InvalidOperationException("Procedural shadow child was saved in prefab: " + id);
                 }
                 Debug.Log("Reviewed ground shadow profiles passed: stable prefab bindings, three live crumb colors, six live chest states and manual override.");
             }
             finally { UnityEngine.Object.DestroyImmediate(crumb); UnityEngine.Object.DestroyImmediate(chestObject); }
+        }
+
+        // 잠복형 switches between the mound and surfaced shadows with its state.
+        private static void VerifyAmbushStates()
+        {
+            GameObject owner = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Prefabs/AmbushFairy.prefab"));
+            try
+            {
+                var controller = owner.GetComponent<TrickalFanGame.Enemy.AmbushEnemyController>();
+                MethodInfo setState = typeof(TrickalFanGame.Enemy.AmbushEnemyController).GetMethod("SetState",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                GroundShadow shadow = GroundShadow.Ensure(owner);
+                foreach (var state in (TrickalFanGame.Enemy.AmbushEnemyController.AmbushState[])
+                    Enum.GetValues(typeof(TrickalFanGame.Enemy.AmbushEnemyController.AmbushState)))
+                {
+                    setState.Invoke(controller, new object[] { state, 0f });
+                    AssertSettings(shadow, controller.IsBurrowed ? GroundShadowProfiles.AmbushBurrowedProfileId : "AmbushFairy");
+                }
+            }
+            finally { UnityEngine.Object.DestroyImmediate(owner); }
         }
 
         private static void VerifySpellProfiles()

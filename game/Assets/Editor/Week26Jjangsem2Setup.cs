@@ -36,7 +36,7 @@ namespace TrickalFanGame.Editor
         public const int PastelSPHalves = 1;
         public const float PastelSPIntervalSeconds = 6f;
         // 수상한 물약: enemy hits -50% for 10 seconds, and (2026-10-15) three poison stacks on every enemy in the room,
-        // each dealing 15% attack damage every second for 10 seconds (the 비비의 콧물 tick rate).
+        // each dealing 15% attack damage every second for 10 seconds (the 비비의 수은 tick rate).
         public const float PotionReduction = 0.5f;
         public const float PotionDurationSeconds = 10f;
         public const int PotionPoisonStacks = 3;

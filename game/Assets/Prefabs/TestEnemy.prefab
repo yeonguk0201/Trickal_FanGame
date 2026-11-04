@@ -103,6 +103,8 @@ GameObject:
   - component: {fileID: 4511758983444437158}
   - component: {fileID: 2311666414337553906}
   - component: {fileID: 6354528119158790540}
+  - component: {fileID: 1472532024305283932}
+  - component: {fileID: 6272522787524356244}
   m_Layer: 6
   m_Name: TestEnemy
   m_TagString: Untagged
@@ -324,6 +326,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 1
+  knockbackImmune: 0
 --- !u!114 &1581259518379177213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -411,3 +414,40 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d82ec4d98662a9141a16f561fee8311f, type: 3}
   - {fileID: 21300000, guid: 69d30dda2db55d84ea054c94a2255c3d, type: 3}
   projectileSprite: {fileID: 0}
+--- !u!114 &1472532024305283932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5213069529628479123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: TestEnemy
+  useSharedProfile: 1
+--- !u!114 &6272522787524356244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5213069529628479123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 20961902669eb7747af7fb600c2ec6ae, type: 3}
+  - {fileID: 21300000, guid: be4be4e5dee20914eb739d91edb62dcb, type: 3}
+  - {fileID: 21300000, guid: 5437447f1dd25604b94254c35f5075b3, type: 3}
+  - {fileID: 21300000, guid: 1267dac3f0a5efd4ab1e4f721a1027a3, type: 3}
+  sizeMultiplier: 1.1583254
+  knockScale: 1

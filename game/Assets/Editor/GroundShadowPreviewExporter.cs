@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using TrickalFanGame.Enemy;
 using TrickalFanGame.Frontend;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
@@ -159,6 +160,18 @@ namespace TrickalFanGame.Editor
                     Capture(Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)),
                         RoomTrap.ArtworkIdOf(kind), trapNames[(int)kind], "함정", path);
                 }
+                // Enemies still on the default shadow (2026-11-04). Appended so earlier numbers stay stable.
+                const string added = "적 · 그림자 추가";
+                Capture(Prefab("TestEnemy"), "TestEnemy", "불효자손", added, "TestEnemy.prefab");
+                Capture(Prefab("LobbingFairy"), "LobbingFairy", "곡사형 · 저혈당 요정-광기", added, "LobbingFairy.prefab");
+                Capture(Prefab("SelfDestructFairy"), "SelfDestructFairy", "자폭형 · 산사모-광기", added, "SelfDestructFairy.prefab");
+                Capture(Prefab("AmbushFairy"), "AmbushFairy", "잠복형 · 나온 모습", added, "AmbushFairy.prefab",
+                    owner => AmbushPose(owner, AmbushEnemyMotion.SurfacedFrame));
+                Capture(Prefab("AmbushFairy"), "AmbushFairy-burrowed", "잠복형 · 흙더미", added, "AmbushFairy.prefab",
+                    owner => AmbushPose(owner, AmbushEnemyMotion.MoundFrame));
+                Capture(Prefab("NururingFairyWarrior"), "NururingFairyWarrior", "누루링-요정전사", added,
+                    "NururingFairyWarrior.prefab");
+                Capture(Prefab("NururingSplit"), "NururingSplit", "누루링 분열체", added, "NururingSplit.prefab");
                 File.WriteAllText(Path.Combine(folder, "manifest.json"), JsonUtility.ToJson(manifest, true),
                     new System.Text.UTF8Encoding(false));
                 Debug.Log($"Ground shadow review exported: {manifest.entries.Count} actual gameplay appearances, " +
@@ -186,7 +199,26 @@ namespace TrickalFanGame.Editor
             "BuseureogiCrumbMinion" => "부스러기 · 분홍", "CrayonHeroBoss" => "크레용사용",
             "SaemaeumVaultBoss" => "새마음금고", _ => name,
         };
-        private static void Capture(GameObject owner, string id, string name, string group, string sourcePath)
+        // 잠복형's drawn frame and state. Under the floor its root body circle is off, as in play
+        // (AmbushEnemyController.SetHidden), so the shadow falls back to the drawn mound like in the game.
+        private static void AmbushPose(GameObject owner, int frame)
+        {
+            AmbushEnemyController controller = owner.GetComponent<AmbushEnemyController>();
+            foreach (Collider2D collider in owner.GetComponents<Collider2D>())
+                collider.enabled = frame != AmbushEnemyMotion.MoundFrame;
+            typeof(AmbushEnemyController).GetMethod("SetState", BindingFlags.NonPublic | BindingFlags.Instance)
+                .Invoke(controller, new object[] { frame == AmbushEnemyMotion.MoundFrame
+                    ? AmbushEnemyController.AmbushState.Burrowed : AmbushEnemyController.AmbushState.Surfaced, 0f });
+            AmbushEnemyMotion motion = owner.GetComponent<AmbushEnemyMotion>();
+            if (motion == null || !motion.HasFrames || motion.Frames[frame] == null)
+                throw new InvalidOperationException("Missing 잠복형 frame: " + frame);
+            FairyKingdomArtworkView view = owner.GetComponent<FairyKingdomArtworkView>();
+            SpriteRenderer visual = view != null && view.Visual != null ? view.Visual : owner.GetComponentInChildren<SpriteRenderer>();
+            visual.sprite = motion.Frames[frame];
+            visual.color = Color.white;
+        }
+        private static void Capture(GameObject owner, string id, string name, string group, string sourcePath,
+            Action<GameObject> pose = null)
         {
             try
             {
@@ -194,6 +226,7 @@ namespace TrickalFanGame.Editor
                 foreach (MonoBehaviour behaviour in owner.GetComponentsInChildren<MonoBehaviour>(true)) behaviour.enabled = false;
                 var art = owner.GetComponent<FairyKingdomArtworkView>();
                 if (art != null) art.Refresh();
+                pose?.Invoke(owner);
                 var trap = owner.GetComponent<RoomTrap>();
                 if (trap != null)
                 {

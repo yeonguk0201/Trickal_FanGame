@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 8392679841437909941}
   - component: {fileID: 3348534805829953870}
   - component: {fileID: 9074860351931137074}
+  - component: {fileID: 2475716754556480815}
   m_Layer: 6
   m_Name: JyubiEnemy
   m_TagString: Untagged
@@ -242,6 +243,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 0.5
+  knockbackImmune: 0
 --- !u!114 &8430337977897414036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -315,3 +317,22 @@ MonoBehaviour:
   distance: 0.85
   duration: 0.18
   pause: 0.3
+--- !u!114 &2475716754556480815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440243880890223438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 3455bd05b1a84923aaba6c6d7d39f495, type: 3}
+  - {fileID: 21300000, guid: 4e12a41943b6432bb410da1544464105, type: 3}
+  - {fileID: 21300000, guid: 326c7a4c740b44debc5fe9bbf1051f94, type: 3}
+  - {fileID: 21300000, guid: f23a0df101b2464d9ab0c14c09763b9c, type: 3}
+  sizeMultiplier: 0.8638171
+  knockScale: 1

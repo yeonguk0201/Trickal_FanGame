@@ -404,7 +404,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'artifact-bibi-snot',
-    name: '비비의 콧물',
+    name: '비비의 수은',
     description:
       '기본 공격이 적중하면 스택당 15% 확률로 적을 중독시킵니다. 중독은 4초 동안 1초마다 공격력의 15%씩 피해를 주며 3번까지 중첩되고, 다시 걸리면 지속 시간이 갱신됩니다.',
     rarity: 'RARE',

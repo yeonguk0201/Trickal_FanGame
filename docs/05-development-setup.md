@@ -2417,9 +2417,25 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 단독 검증: `Trickal Fan Game/Artwork/Verify Common Ground Shadows`. 렌더 포함 배치: `TrickalFanGame.Editor.GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` (`-batchmode -quit`, 그래픽 필요). 함정별 연결·주기 가시 기준점·피해 영역과 Collider 보존·중복 방지·비활성화를 검사한다. Unity 6000.3.22f1 종료 코드 0 및 88종 렌더 성공, 함정 7종의 28개 PNG 레이어와 비어 있지 않은 그림자를 확인했다 (`output/ground-shadow-traps.log`). 실제 Play 미술 검수와 사용자별 수치 확정은 남아 있다.
 
 - 함정 후속 사용자 검수: 82~88번의 너비·두께·X/Y 위치·진하기를 전달값으로 확정해 `GroundShadowProfiles.json`에 반영했다. 기존 다른 프로필은 유지했다. `GroundShadowPreviewExporter.VerifyShadowsAndExportBatch` 성공 종료 코드 0 (`output/ground-shadow-traps-reviewed.log`), 주기 가시 기준점·충돌 보존과 88종 재렌더를 확인했고 함정 7종의 실제 출력 35필드 일치를 비교했다. 페이지 기본값과 `traps-overview.png`도 갱신했다. 실제 Play 미술 검수는 사용자가 수동 확인을 마쳤다(2026-10-20).
+- 적 7종 추가(2026-11-04): 미리보기 116~122번(불효자손, 곡사형, 자폭형, 잠복형 나온 모습·흙더미, 누루링-요정전사, 누루링 분열체)을 끝에 붙였다. 페이지는 파일로 직접 열면 크롬이 그림 픽셀 읽기를 막으므로 `output/ground-shadow-review`에서 `python -m http.server 8765 --bind 127.0.0.1`로 띄워 `http://127.0.0.1:8765/index.html`로 연다. 적 프리팹 연결은 `TrickalFanGame.Editor.GroundShadowProfileSetup.ApplyAndVerifyBatch`(`-batchmode -quit`, 그래픽 필요)가 연결 두 번, 연결·프로필 검증, 공용 그림자 검증, 미리보기 렌더까지 한다. 원본 프리팹을 연결하면 그 변형이 따로 붙인 그림자는 지우고 물려받은 그림자에 프로필 이름만 덮어쓴다.
 
 ### 보스 소환·점프 모션 검증 (2026-10-21)
 
 - Edit Mode 메뉴: `Trickal Fan Game > Artwork > Verify Boss Summon And Jump Animations`.
 - 배치: `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.BossSummonJumpAnimationVerification.Verify -logFile <로그 경로>`. 구성 재실행 없이 저장된 Prefab의 일반·황금 소환 4포즈, 새마음금고 공격 점프 8포즈, 실제 패턴 이벤트와 취소 복원을 검사한다.
 - 실제 화면: `Trickal Fan Game > Debug > Open Boss Test Room`에서 Play 후 보스를 선택한다. 크레용사용 일반·황금 소환의 지시·회수와 좌우 방향, 새마음금고 점프 준비·정점·착지·복귀의 발 기준선을 확인한다. 일반 이동의 4포즈는 기존 설정을 사용한다.
+
+### 적 쓰러짐 그림 연결·검증 (Defeat-0, 2026-11-03)
+
+- 연결 재실행 메뉴: `Trickal Fan Game > Artwork > Apply Enemy Defeat Frames`. 프레임 가져오기 설정(스프라이트, 바닥 가운데 기준)을 맞추고 일반 적 프리팹 8개에 `EnemyDefeatAnimation` 하나와 프레임 네 장을 연결한다. 다시 실행해도 컴포넌트가 늘지 않는다.
+- 검증 메뉴: `Trickal Fan Game > Artwork > Verify Enemy Defeat Frames`. 배치(연결 포함): `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.EnemyDefeatArtworkSetup.ApplyAndVerifyBatch -logFile <로그 경로>`. 프리팹을 저장한다. 처음 실행은 새 텍스처를 가져오느라 10분 넘게 걸릴 수 있다.
+- 새 시트를 넣을 때: 4프레임 가로 시트를 `Art/Enemies/FairyKingdom/Death/<이름>_Death_0~3.png`로 자르고(각 프레임 그림 덩어리만, 바닥 가운데 기준) 원본은 `Death/Source/<이름>_Death_Sheet.png`에 둔 뒤 `EnemyDefeatArtworkSetup.Bindings`에 프리팹을 추가한다.
+- 실제 화면: Game Scene Play → `F1` → `Spawn pure Sansamo`, `Spawn lively fairy`, `Spawn lobber`, `Spawn Jyubi king`(쥬비 소환)으로 적을 불러 처치한다. 맞은 반대쪽으로 밀려나며 네 장이 재생되고 사라지는지, 벽 앞에서 멈추는지, 쓰러지는 동안 몸에 닿아도 피해가 없는지 본다. 돌격형·저격형·산사모-활발은 일반 방에서 확인한다.
+
+### 보스·에르핀 쓰러짐과 산사모-광기·잠복형 모션 (Defeat-1, 2026-11-04)
+
+- 연결 재실행 메뉴: `Trickal Fan Game > Artwork > Apply Enemy Defeat Frames`(보스 2종 포함 프리팹 10개)와 `Trickal Fan Game > Artwork > Apply Defeat-1 Motions`(산사모-광기 걷기, 잠복형 흙더미·튀어나옴, 에르핀 쓰러짐 프레임 크기). 프레임 크기와 발 위치는 가져오기 설정(픽셀/유닛, 기준점)으로 정지 그림에 맞춘다. 다시 실행해도 컴포넌트가 늘지 않는다.
+- 검증 메뉴: `Trickal Fan Game > Artwork > Verify Defeat-1 Motions`. 배치(연결 포함): `-executeMethod TrickalFanGame.Editor.Defeat1MotionSetup.ApplyAndVerifyBatch`. 커밋 전 회귀 묶음: `-executeMethod TrickalFanGame.Editor.Defeat1MotionSetup.VerifyWithRegressionsBatch`.
+- 크레용 용사 황금 걷기 프레임(`Art/Bosses/FairyKingdom/Movement/CrayonHero_Golden_Walk_0~7.png`)은 천사 기사 시트(`Art/Enemies/FairyKingdom/Walking/Source/AngelKnight_Walk_Sheet.png`)로 덮어쓴 시험판이다. 되돌리려면 `git restore`로 8장을 이전 커밋 상태로 돌린다(GUID·가져오기 설정은 그대로).
+- Defeat-2(2026-11-05): 불효자손 쓰러짐과 잠복형 흙더미 이동 네 장을 같은 메뉴(`Apply Enemy Defeat Frames`, `Apply Defeat-1 Motions`)가 연결한다. 시트를 다시 받으면 `python scripts/split-ambush-move-and-bulhyojason-death.py <이동 시트> <쓰러짐 시트>`로 자른 뒤 메뉴를 다시 실행한다. 실제 화면: `F1` → `Spawn Bulhyojason (hops, drawn defeat)`로 불효자손을 잡아 쓰러짐 네 장을, `Spawn ambusher (bursts from the floor)`로 흙더미가 다가오는 동안 이동 네 장이 재생되고(패널 `moving` 1) 멈추면 정지 흙더미로 돌아오는지, 그동안 그림자가 흔들리지 않는지 본다. 발밑에 멈추면 붉은 타원 없이 흙더미가 0.7초 동안 좌우로 떨리고(패널 `warning` 1, 그림자는 고정), 이어 단숨에 튀어나오는지 본다.
+- 실제 화면: `F1` → `Spawn self-destruct (blows up near you)`로 산사모-광기가 걸어오는지, `Spawn ambusher (bursts from the floor)`로 흙더미가 다가와 세 단계로 튀어나오고 다시 들어가는지 본다. `— Boss room —`의 `Boss F1~F3`(층마다 보스가 다를 수 있다)으로 부스러기·새마음금고를 잡아 쓰러짐 그림을, 크레용 용사는 각성 뒤 황금 걷기를 확인한다(보스 테스트 씬에서도 볼 수 있다). 에르핀은 체력이 다 닳으면 네 장으로 쓰러진 뒤 GAME OVER로 넘어가는지, 그동안 그림자가 남는지 본다. 적·보스 쓰러짐 그림의 그림자는 튀어오를 때 바닥에 남고 그림과 함께 사라져야 한다.

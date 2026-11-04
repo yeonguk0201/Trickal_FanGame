@@ -1,5 +1,6 @@
 using System;
 using TrickalFanGame.Enemy;
+using TrickalFanGame.Player;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -35,7 +36,8 @@ namespace TrickalFanGame.Run
         [SerializeField] private GraphicRaycaster graphicRaycaster;
 
         [Header("Timing (seconds, unscaled)")]
-        // Placeholder fall until the character fall artwork exists; then this becomes that clip's length.
+        // Length of the fall. With drawn defeat poses it matches PlayerWalkAnimator.DefeatDuration (4 x 0.15 s);
+        // without them the character tilts over as a placeholder.
         [SerializeField, Min(0f)] private float fallDuration = 0.6f;
         [SerializeField, Min(0f)] private float holdAfterFall = 5f;
         [SerializeField, Min(0.01f)] private float irisDuration = 1.2f;
@@ -46,6 +48,8 @@ namespace TrickalFanGame.Run
         private Camera focusCamera;
         private Quaternion fallStartRotation;
         private float fallAngle;
+        // The drawn defeat poses replace the placeholder tilt when the character has them.
+        private bool drawnFall;
         private float phaseElapsed;
         private Action confirmed;
         private Texture2D holeTexture;
@@ -54,6 +58,7 @@ namespace TrickalFanGame.Run
         public bool IsActive => CurrentPhase != Phase.Idle;
         public bool IsAwaitingConfirm => CurrentPhase == Phase.AwaitingConfirm;
         public float FallDuration => fallDuration;
+        public bool UsesDrawnFall => drawnFall;
         public float HoldAfterFall => holdAfterFall;
         public float IrisDuration => irisDuration;
         public float IrisRadius { get; private set; }
@@ -114,7 +119,10 @@ namespace TrickalFanGame.Run
                 SpriteRenderer sprite = focusTarget.GetComponent<SpriteRenderer>();
                 // Falls backwards from the facing direction (flipX = facing right in the player artwork).
                 fallAngle = sprite != null && sprite.flipX ? 90f : -90f;
+                PlayerWalkAnimator walk = focusTarget.GetComponent<PlayerWalkAnimator>();
+                drawnFall = walk != null && walk.HasDefeatFrames;
             }
+            else drawnFall = false;
             SetPhase(Phase.Falling);
             return true;
         }
@@ -203,7 +211,7 @@ namespace TrickalFanGame.Run
         // Placeholder fall: the character tips over. Replace with the fall artwork when it exists.
         private void ApplyFall(float t)
         {
-            if (focusTarget == null) return;
+            if (focusTarget == null || drawnFall) return;
             float eased = 1f - (1f - t) * (1f - t);
             focusTarget.rotation = fallStartRotation * Quaternion.Euler(0f, 0f, fallAngle * eased);
             // Keep the body in step so physics interpolation does not write the old pose back.

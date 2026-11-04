@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TrickalFanGame.Combat
 {
-    // Passive-0 §4.8: poison that a basic attack hit may put on an enemy (비비의 콧물).
+    // Passive-0 §4.8: poison that a basic attack hit may put on an enemy (비비의 수은).
     public readonly struct PoisonSettings
     {
         public PoisonSettings(

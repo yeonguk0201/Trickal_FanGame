@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 2633805491349008261}
   - component: {fileID: 5023696619976068168}
   - component: {fileID: 6743697939268354105}
+  - component: {fileID: 3820682214053585849}
   m_Layer: 6
   m_Name: LivelyLowBloodSugarFairy
   m_TagString: Untagged
@@ -210,6 +211,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 1.5
+  knockbackImmune: 0
 --- !u!114 &7375691177170415146
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -312,6 +314,25 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: LivelyLowBloodSugarFairy
   useSharedProfile: 1
+--- !u!114 &3820682214053585849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4351291127771185126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 6b92cea3d541430bbaf6aa81902c8ae3, type: 3}
+  - {fileID: 21300000, guid: 546b6e9fff604321bc616d1fb3b74eeb, type: 3}
+  - {fileID: 21300000, guid: 8e3404b666024737b5f9e2870d998a4d, type: 3}
+  - {fileID: 21300000, guid: 8b15c414ed754b03924067232587d4cf, type: 3}
+  sizeMultiplier: 0.99785537
+  knockScale: 1
 --- !u!1 &6303825839773785878
 GameObject:
   m_ObjectHideFlags: 0

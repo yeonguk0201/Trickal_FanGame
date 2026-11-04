@@ -13,6 +13,13 @@ namespace TrickalFanGame.Player
         private const int FrameCount = 4;
         private const int SkillFrameCount = 4;
         private const string HighGradeResourcePath = "Characters/Erpin_HighGrade";
+        // Defeat-1 (user drawing, 2026-11-04): four falling poses played once on death, the last one held.
+        private const string DefeatResourcePath = "Characters/Erpin_Death";
+        public const int DefeatFrameCount = 4;
+        public const float DefeatFrameSeconds = 0.15f;
+        private readonly Sprite[] defeatFrames = new Sprite[DefeatFrameCount];
+        private bool hasDefeatFrames;
+        private float diedAt = float.NaN;
         private readonly Sprite[] highGradeFrames = new Sprite[8];
         private PlayerActionState actionState;
         private PlayerUltimate ultimate;
@@ -41,6 +48,9 @@ namespace TrickalFanGame.Player
         private float skillElapsed;
 
         public bool IsPlayingSkill => isPlayingSkill;
+        public bool HasDefeatFrames => hasDefeatFrames;
+        public float DefeatDuration => DefeatFrameCount * DefeatFrameSeconds;
+        public Sprite GetDefeatFrame(int index) => defeatFrames[index];
         public Sprite IdleSprite => idleSprite;
 
         private void Awake()
@@ -53,6 +63,14 @@ namespace TrickalFanGame.Player
             actionState = GetComponent<PlayerActionState>();
             ultimate = GetComponent<PlayerUltimate>();
             health = GetComponent<Health>();
+            Sprite[] deathSprites = Resources.LoadAll<Sprite>(DefeatResourcePath);
+            hasDefeatFrames = true;
+            for (int i = 0; i < DefeatFrameCount; i++)
+            {
+                defeatFrames[i] = FindSprite(deathSprites, $"Erpin_Death_{i}");
+                hasDefeatFrames &= defeatFrames[i] != null;
+            }
+            if (health != null) health.Died += OnDied;
             Sprite[] highGradeSprites = Resources.LoadAll<Sprite>(HighGradeResourcePath);
             hasHighGradeFrames = true;
             for (int i = 0; i < highGradeFrames.Length; i++)
@@ -71,8 +89,25 @@ namespace TrickalFanGame.Player
             }
         }
 
+        private void OnDied()
+        {
+            diedAt = Time.unscaledTime;
+            isPlayingSkill = false;
+        }
+
+        // Unscaled, like the GAME OVER sequence that waits on it, so a stopped game clock cannot freeze the fall.
+        public bool TickDefeat(float secondsSinceDeath)
+        {
+            if (!hasDefeatFrames || health == null || !health.IsDead) return false;
+            int frame = Mathf.Clamp(Mathf.FloorToInt(Mathf.Max(0f, secondsSinceDeath) / DefeatFrameSeconds), 0,
+                DefeatFrameCount - 1);
+            spriteRenderer.sprite = defeatFrames[frame];
+            return true;
+        }
+
         private void OnDestroy()
         {
+            if (health != null) health.Died -= OnDied;
             if (skill != null)
             {
                 skill.SalvoStarted -= PlaySkill;
@@ -97,6 +132,7 @@ namespace TrickalFanGame.Player
                 return;
             }
 
+            if (TickDefeat(float.IsNaN(diedAt) ? 0f : Time.unscaledTime - diedAt)) return;
             if (TickHighGrade(Time.deltaTime)) return;
 
             if (isPlayingSkill && TickSkill(Time.deltaTime))

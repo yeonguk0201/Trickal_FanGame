@@ -16,7 +16,7 @@ using Object = UnityEngine.Object;
 namespace TrickalFanGame.Editor
 {
     // Passive-1: the basic attack knockback formula replaces the physical shove (Passive-0 §4.6), 칸나의 대포 grows the
-    // basic attack shot (§4.1) and 비비의 콧물 poisons enemies on basic attack hits (§4.7·§4.8).
+    // basic attack shot (§4.1) and 비비의 수은 poisons enemies on basic attack hits (§4.7·§4.8).
     public static class Week23Passive1Verification
     {
         // Far from every authored scene so the verification objects never meet scene content.
@@ -59,7 +59,7 @@ namespace TrickalFanGame.Editor
             ValidatePoisonStats();
             ValidatePoisonStatus();
             ValidatePoisonFromProjectile();
-            Debug.Log("Passive-1 verification passed: effect types 43 and 44 are appended, 칸나의 대포 and 비비의 콧물 " +
+            Debug.Log("Passive-1 verification passed: effect types 43 and 44 are appended, 칸나의 대포 and 비비의 수은 " +
                       "are Rare two-stack artifacts in the selection reward pool, basic attack shots are triggers " +
                       "that push only by the knockback formula (0.2 at the base, shot speed ratio limited to " +
                       "0.5~2.0, divided by each enemy Prefab's knockback weight, bosses at weight 4) without " +
@@ -134,12 +134,12 @@ namespace TrickalFanGame.Editor
                    Mathf.Approximately(snot.Effects[0].SecondaryMagnitude, 0.15f) &&
                    Mathf.Approximately(snot.Effects[0].DurationSeconds, 4f) &&
                    Mathf.Approximately(snot.Effects[0].IntervalSeconds, 1f) && snot.Effects[0].IntegerAmount == 3,
-                "비비의 콧물 must be a Rare artifact with two stacks of a 15% poison chance (4s, 1s ticks, 15%, 3 stacks).");
+                "비비의 수은 must be a Rare artifact with two stacks of a 15% poison chance (4s, 1s ticks, 15%, 3 stacks).");
             Assert(ArtifactEffectDescription.Build(cannon) == "투사체 크기 +50%",
                 "칸나의 대포 must describe its shot size bonus.");
             Assert(ArtifactEffectDescription.Build(snot) ==
                    "기본 공격 적중 시 15% 확률로 중독 (4초간 1초마다 공격력의 15% 피해, 최대 3중첩)",
-                "비비의 콧물 must describe its poison.");
+                "비비의 수은 must describe its poison.");
 
             ItemDefinition[] assets = AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" })
                 .Select(guid => AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid)))
@@ -148,7 +148,7 @@ namespace TrickalFanGame.Editor
                        .SequenceEqual(new[] { Week23Passive1Setup.CannonId }) &&
                    UsersOf(assets, ItemEffectType.BasicAttackPoison)
                        .SequenceEqual(new[] { Week23Passive1Setup.SnotId }),
-                "Only 칸나의 대포 may use the shot size effect and only 비비의 콧물 the poison effect.");
+                "Only 칸나의 대포 may use the shot size effect and only 비비의 수은 the poison effect.");
 
             RoomGraphAssembler assembler = Object.FindFirstObjectByType<RoomGraphAssembler>(FindObjectsInactive.Include);
             Assert(assembler != null && assembler.SelectionRewardPool.Contains(cannon) &&
@@ -509,20 +509,20 @@ namespace TrickalFanGame.Editor
                 PlayerStats stats = player.GetComponent<PlayerStats>();
                 Assert(!stats.BasicAttackPoison.IsEnabled && stats.BasicAttackHitEffects.AppliesKnockback &&
                        !stats.BasicAttackHitEffects.Poison.IsEnabled,
-                    "Without 비비의 콧물 a basic attack only carries the knockback.");
+                    "Without 비비의 수은 a basic attack only carries the knockback.");
 
-                Assert(inventory.TryAcquire(snot), "비비의 콧물 must be acquirable.");
+                Assert(inventory.TryAcquire(snot), "비비의 수은 must be acquirable.");
                 PoisonSettings one = stats.BasicAttackHitEffects.Poison;
                 Assert(one.IsEnabled && Mathf.Approximately(one.Chance, 0.15f) &&
                        Mathf.Approximately(one.TickDamageRatio, 0.15f) &&
                        Mathf.Approximately(one.DurationSeconds, 4f) && Mathf.Approximately(one.IntervalSeconds, 1f) &&
                        one.MaximumStacks == 3,
-                    "One 비비의 콧물 must give a 15% poison chance (4s, 1s ticks, 15% per stack, 3 stacks).");
+                    "One 비비의 수은 must give a 15% poison chance (4s, 1s ticks, 15% per stack, 3 stacks).");
                 Assert(inventory.TryAcquire(snot) && Mathf.Approximately(stats.BasicAttackPoison.Chance, 0.3f) &&
                        stats.BasicAttackPoison.MaximumStacks == 3 &&
                        Mathf.Approximately(stats.BasicAttackPoison.TickDamageRatio, 0.15f),
-                    "A second 비비의 콧물 must add its chance (30%) without changing the poison itself.");
-                Assert(!inventory.TryAcquire(snot), "비비의 콧물 must stop at two stacks.");
+                    "A second 비비의 수은 must add its chance (30%) without changing the poison itself.");
+                Assert(!inventory.TryAcquire(snot), "비비의 수은 must stop at two stacks.");
 
                 stats.AddBasicAttackPoison(5f, 0.15f, 4f, 1f, 3);
                 Assert(Mathf.Approximately(stats.BasicAttackPoison.Chance, 1f), "The poison chance must stop at 100%.");

@@ -93,6 +93,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8731529225940749817}
+    - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3566873441221346852}
+    - targetCorrespondingSourceObject: {fileID: 6192307500632814172, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6644149692991128352}
   m_SourcePrefab: {fileID: 100100000, guid: 618d6fa026a4ad44b9d1a0228c18340e, type: 3}
 --- !u!212 &1406660389468762022 stripped
 SpriteRenderer:
@@ -182,3 +188,40 @@ MonoBehaviour:
     height: 0.9553429
   flowerUv: {x: 0.42, y: 0.91}
   strideLength: 1.05
+--- !u!114 &3566873441221346852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7096289180192387305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 49c04138718145588ebc509f17ec793f, type: 3}
+  - {fileID: 21300000, guid: cd2632a1f3a04d48a5193862cd7f237e, type: 3}
+  - {fileID: 21300000, guid: c0435e714845472786fa539320a9f9dd, type: 3}
+  - {fileID: 21300000, guid: 7e79687beb2542eb8115551f51fbeabb, type: 3}
+  sizeMultiplier: 1.0121951
+  knockScale: 1
+--- !u!114 &6644149692991128352
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7096289180192387305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: QuickRangedFairy
+  useSharedProfile: 1

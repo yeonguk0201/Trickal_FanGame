@@ -179,12 +179,12 @@ namespace TrickalFanGame.Editor
                    Mathf.Approximately(controller.MinimumBurrowDuration, 1f) &&
                    Mathf.Approximately(controller.EmergeTelegraphDuration, 0.7f) &&
                    Mathf.Approximately(controller.AttackDuration, 0.3f) &&
-                   Mathf.Approximately(controller.SurfacedDuration, 2f) &&
+                   Mathf.Approximately(controller.SurfacedDuration, Week27Enemy13Setup.SurfacedDuration) &&
                    Mathf.Approximately(controller.BurrowDuration, 0.4f) &&
                    Mathf.Approximately(controller.HitRadius, 1f) &&
                    controller.DamageTier == EnemyDamageTier.Medium,
                 "The ambusher must move at 3.2 buried, detect at 12, burst within 0.3 of the feet after 1 s buried, warn " +
-                "0.7 s, hit a radius-1 medium ellipse, stay up 0.3 + 2 s and sink in 0.4 s.");
+                "0.7 s, hit a radius-1 medium ellipse, stay up 0.3 + 1.5 s and sink in 0.4 s.");
 
             FairyKingdomArtworkView view = prefab.GetComponent<FairyKingdomArtworkView>();
             SpriteRenderer renderer = view != null ? view.Visual : null;
@@ -370,13 +370,19 @@ namespace TrickalFanGame.Editor
                 Assert(ambusher.State == AmbushState.Burrowed && ambusher.Velocity == Vector2.zero,
                     "Under the feet but buried under 1 s, the ambusher must wait under the floor.");
                 ambusher.TickBehavior(start + 1f + Step);
-                Assert(ambusher.State == AmbushState.Emerging && ambusher.Mark != null && ambusher.Mark.enabled &&
-                       Vector2.Distance(ambusher.Mark.transform.position, ambusher.EmergePoint) < 0.001f &&
-                       Vector2.Distance(ambusher.EmergePoint, at) < 0.001f &&
-                       Mathf.Abs(ambusher.Mark.bounds.size.x - 2f) < 0.01f &&
-                       Mathf.Abs(ambusher.Mark.bounds.size.y - 1f) < 0.01f &&
-                       ambusher.Mark.color == EnemyLobProjectile.MarkColor(0f),
-                    "Under the feet after 1 s buried, the ambusher must stop and show a 2 x 1 red ellipse where it is.");
+                // With the drawn frames the mound rattles (Defeat1MotionVerification) instead of the placeholder
+                // 2 x 1 red ellipse.
+                bool drawn = ambusher.GetComponent<AmbushEnemyMotion>() is { HasFrames: true };
+                Assert(ambusher.State == AmbushState.Emerging && Vector2.Distance(ambusher.EmergePoint, at) < 0.001f &&
+                       (drawn
+                           ? ambusher.Mark == null
+                           : ambusher.Mark != null && ambusher.Mark.enabled &&
+                             Vector2.Distance(ambusher.Mark.transform.position, ambusher.EmergePoint) < 0.001f &&
+                             Mathf.Abs(ambusher.Mark.bounds.size.x - 2f) < 0.01f &&
+                             Mathf.Abs(ambusher.Mark.bounds.size.y - 1f) < 0.01f &&
+                             ambusher.Mark.color == EnemyLobProjectile.MarkColor(0f)),
+                    "Under the feet after 1 s buried, the ambusher must stop where it is and warn (drawn: no red " +
+                    "ellipse; placeholder: a 2 x 1 red ellipse).");
                 RequireBuried(ambusher, health, bodyCircle, feet, "A warning ambusher");
 
                 float emergeStart = ambusher.StateStartedAt;
@@ -391,7 +397,7 @@ namespace TrickalFanGame.Editor
                     $"Bursting out must hurt the player on the ellipse once for floor 3's medium damage " +
                     $"({expectedUnits} units).");
                 Assert(!health.IsInvulnerable && bodyCircle.enabled && ambusher.Mark == null &&
-                       ambusher.Visual.color == AmbushEnemyController.AttackColor,
+                       ambusher.Visual.color == StateColor(ambusher, AmbushEnemyController.AttackColor),
                     "A bursting ambusher must be hittable, drop its mark and show the attack colour.");
                 KnockbackReceiver knockback = health.GetComponent<KnockbackReceiver>();
                 Assert(ambusher.IsAnchored && !knockback.Apply(Vector2.left, 6f, 0.3f, 0f) &&
@@ -406,11 +412,12 @@ namespace TrickalFanGame.Editor
                 Assert(Mathf.Approximately(health.CurrentHealth, health.MaxHealth - 5f),
                     "A surfaced ambusher must take damage.");
                 float surfacedStart = ambusher.StateStartedAt;
-                ambusher.TickBehavior(surfacedStart + 1.99f);
-                Assert(ambusher.State == AmbushState.Surfaced, "The ambusher must stay up for 2 s.");
-                ambusher.TickBehavior(surfacedStart + 2f + Step);
+                float up = Week27Enemy13Setup.SurfacedDuration;
+                ambusher.TickBehavior(surfacedStart + up - 0.01f);
+                Assert(ambusher.State == AmbushState.Surfaced, $"The ambusher must stay up for {up} s.");
+                ambusher.TickBehavior(surfacedStart + up + Step);
                 Assert(ambusher.State == AmbushState.Burrowing && !health.IsInvulnerable,
-                    "After 2 s up it must start sinking, still hittable.");
+                    $"After {up} s up it must start sinking, still hittable.");
                 ambusher.TickBehavior(ambusher.StateStartedAt + 0.4f + Step);
                 RequireBuried(ambusher, health, bodyCircle, feet, "A sunk ambusher");
                 Assert(!ambusher.IsAnchored, "A sunk ambusher must be Dynamic again so walls stop its feet.");
@@ -530,8 +537,15 @@ namespace TrickalFanGame.Editor
         {
             Assert(ambusher.IsBurrowed && health.IsInvulnerable && !bodyCircle.enabled &&
                    feet != null && feet.Collider.enabled &&
-                   ambusher.Visual.color == AmbushEnemyController.BurrowedColor,
+                   ambusher.Visual.color == StateColor(ambusher, AmbushEnemyController.BurrowedColor),
                 $"{subject} must be buried: invulnerable, body circle off, feet on and tinted dim brown.");
+        }
+
+        // The placeholder tint, or plain white once the drawn frames tell the states apart.
+        private static Color StateColor(AmbushEnemyController ambusher, Color placeholder)
+        {
+            AmbushEnemyMotion motion = ambusher.GetComponent<AmbushEnemyMotion>();
+            return motion != null && motion.HasFrames ? Color.white : placeholder;
         }
 
         private static Health Spawn(GameObject prefab, Transform parent, Vector2 position)

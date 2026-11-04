@@ -8,7 +8,7 @@ using UnityEngine;
 namespace TrickalFanGame.Room
 {
     // Trap-0: the gas a broken 독버섯 leaves for 3 seconds. The player takes half a heart from one cloud once.
-    // Every enemy inside gains a poison stack each second with the 비비의 콧물 values, and because the player broke
+    // Every enemy inside gains a poison stack each second with the 비비의 수은 values, and because the player broke
     // the mushroom the poison is the player's damage and its kills are credited. Flying bodies are hit too.
     [DisallowMultipleComponent]
     public sealed class PoisonGasCloud : MonoBehaviour

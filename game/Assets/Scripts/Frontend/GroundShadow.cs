@@ -31,7 +31,10 @@ namespace TrickalFanGame.Frontend
         private Health health;
         private PlacedBomb bomb;
         private PlayerFlight flight;
+        // A player with drawn defeat poses keeps the shadow under the fall (Defeat-1).
+        private PlayerWalkAnimator drawnFall;
         private RoomTrap trap;
+        private TrickalFanGame.Enemy.AmbushEnemyMotion ambushMotion;
         private bool floating;
         private bool useSpriteFootprint;
         private bool pickup;
@@ -66,7 +69,9 @@ namespace TrickalFanGame.Frontend
             health = GetComponent<Health>();
             bomb = GetComponent<PlacedBomb>();
             flight = GetComponent<PlayerFlight>();
+            drawnFall = GetComponent<PlayerWalkAnimator>();
             trap = GetComponent<RoomTrap>();
+            ambushMotion = GetComponent<TrickalFanGame.Enemy.AmbushEnemyMotion>();
             floating = GetComponent<TrickalFanGame.Enemy.EnemyFlight>() != null;
             pickup = GetComponent<RunResourcePickup>() != null || GetComponent<HealthPickup>() != null ||
                 GetComponent<SPPickup>() != null || GetComponent<TrickalFanGame.Item.ItemPickup>() != null ||
@@ -130,7 +135,8 @@ namespace TrickalFanGame.Frontend
             // The existing flight shadow retains its elevated sorting and bobbing; never draw two shadows.
             if (flight == null) flight = GetComponent<PlayerFlight>();
             shadow.enabled = isActiveAndEnabled && source.enabled && source.gameObject.activeInHierarchy &&
-                (health == null || !health.IsDead) && (bomb == null || !bomb.HasExploded) &&
+                (health == null || !health.IsDead || (drawnFall != null && drawnFall.HasDefeatFrames)) &&
+                (bomb == null || !bomb.HasExploded) &&
                 (flight == null || !flight.IsFlying);
             if (trap != null && trap.IsRemoved) shadow.enabled = false;
             if (!shadow.enabled) return;
@@ -139,6 +145,8 @@ namespace TrickalFanGame.Frontend
             Bounds floor = hasFootprint ? footprint.bounds : source.bounds;
             // Use collision footprint, not tree height, animation frame or the shop's talking range.
             if (useSpriteFootprint || !hasFootprint) floor = source.bounds;
+            // 잠복형's moving mound: keep the still mound's outline so flying clods do not resize the shadow.
+            if (ambushMotion != null && ambushMotion.TryGetMoundBounds(out Bounds mound)) floor = mound;
             if (trap != null && trap.IsFloorTrap)
             {
                 // Spike animation must not move the ground contact or add collision to floor traps.
