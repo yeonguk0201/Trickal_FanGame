@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 3867958198554548248}
   - component: {fileID: 2279147732071030210}
   - component: {fileID: 9106537188078233161}
+  - component: {fileID: 7919012165587775666}
   m_Layer: 6
   m_Name: AmbushFairy
   m_TagString: Untagged
@@ -292,6 +293,24 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 1dc123b2292b4a15b0ae51dc4ef69164, type: 3}
   - {fileID: 21300000, guid: fc5e157f2003485684182d5f89222fff, type: 3}
   - {fileID: 21300000, guid: 9a56e9401cfb44ffa9aaa95f0fce47e8, type: 3}
+--- !u!114 &7919012165587775666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5470415676887288762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: AmbushFairy
+  useSharedProfile: 1
 --- !u!1 &6556195461114167901
 GameObject:
   m_ObjectHideFlags: 0

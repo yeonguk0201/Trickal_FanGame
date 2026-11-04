@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: 5198425093115199971}
   - component: {fileID: 2423833831050061116}
   - component: {fileID: 2867753957319409832}
+  - component: {fileID: 8403880621662507183}
   m_Layer: 6
   m_Name: LobbingFairy
   m_TagString: Untagged
@@ -383,3 +384,21 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d8d02ae25d134c0f87b1207db4aa81bd, type: 3}
   sizeMultiplier: 1.1931837
   knockScale: 1
+--- !u!114 &8403880621662507183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9176006115792224653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: LobbingFairy
+  useSharedProfile: 1

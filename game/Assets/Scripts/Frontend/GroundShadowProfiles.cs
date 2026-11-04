@@ -13,6 +13,8 @@ namespace TrickalFanGame.Frontend
     public static class GroundShadowProfiles
     {
         public const string SpellProfileId = "single-spell-afterimage";
+        // 잠복형 under the floor (mound, including the warning) has its own reviewed shadow (2026-11-04).
+        public const string AmbushBurrowedProfileId = "AmbushFairy-burrowed";
         [Serializable] public sealed class Entry
         {
             public int number;
@@ -74,6 +76,9 @@ namespace TrickalFanGame.Frontend
                     case "terrain-pillar": return "pillar";
                 }
             }
+            var ambush = owner.GetComponent<TrickalFanGame.Enemy.AmbushEnemyController>();
+            if (ambush != null && ambush.IsBurrowed && TryGet(AmbushBurrowedProfileId, out _))
+                return AmbushBurrowedProfileId;
             var keeper = owner.GetComponent<ShopKeeper>();
             if (keeper != null && keeper.Portrait != null)
                 return keeper.Portrait.sprite == UserArtwork.Load(ShopKeeper.GoldiArtworkKey) ? "npc-goldi" : "npc-sist";
