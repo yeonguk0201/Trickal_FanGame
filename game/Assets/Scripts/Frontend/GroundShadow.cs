@@ -34,6 +34,7 @@ namespace TrickalFanGame.Frontend
         // A player with drawn defeat poses keeps the shadow under the fall (Defeat-1).
         private PlayerWalkAnimator drawnFall;
         private RoomTrap trap;
+        private TrickalFanGame.Enemy.AmbushEnemyMotion ambushMotion;
         private bool floating;
         private bool useSpriteFootprint;
         private bool pickup;
@@ -70,6 +71,7 @@ namespace TrickalFanGame.Frontend
             flight = GetComponent<PlayerFlight>();
             drawnFall = GetComponent<PlayerWalkAnimator>();
             trap = GetComponent<RoomTrap>();
+            ambushMotion = GetComponent<TrickalFanGame.Enemy.AmbushEnemyMotion>();
             floating = GetComponent<TrickalFanGame.Enemy.EnemyFlight>() != null;
             pickup = GetComponent<RunResourcePickup>() != null || GetComponent<HealthPickup>() != null ||
                 GetComponent<SPPickup>() != null || GetComponent<TrickalFanGame.Item.ItemPickup>() != null ||
@@ -143,6 +145,8 @@ namespace TrickalFanGame.Frontend
             Bounds floor = hasFootprint ? footprint.bounds : source.bounds;
             // Use collision footprint, not tree height, animation frame or the shop's talking range.
             if (useSpriteFootprint || !hasFootprint) floor = source.bounds;
+            // 잠복형's moving mound: keep the still mound's outline so flying clods do not resize the shadow.
+            if (ambushMotion != null && ambushMotion.TryGetMoundBounds(out Bounds mound)) floor = mound;
             if (trap != null && trap.IsFloorTrap)
             {
                 // Spike animation must not move the ground contact or add collision to floor traps.

@@ -43,7 +43,8 @@ namespace TrickalFanGame.Editor
         public const float MinimumBurrowDuration = 1f;
         public const float EmergeTelegraphDuration = 0.7f;
         public const float AttackDuration = 0.3f;
-        public const float SurfacedDuration = 2f;
+        // 2 → 1.5 (user request, 2026-11-05).
+        public const float SurfacedDuration = 1.5f;
         public const float BurrowDuration = 0.4f;
         public const float HitRadius = 1f;
         public const EnemyDamageTier DamageTier = EnemyDamageTier.Medium;

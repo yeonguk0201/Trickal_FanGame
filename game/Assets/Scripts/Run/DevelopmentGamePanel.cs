@@ -877,6 +877,14 @@ namespace TrickalFanGame.Run
                                 .Count(blast => !blast.HasExploded));
 #if UNITY_EDITOR
             PlayerMovement player = assembler.Graph?.Player;
+            // 불효자손 (TestEnemy) three tiles to the right of the player, to see its drawn defeat (2026-11-05).
+            if (AssistedButton("Spawn Bulhyojason (hops, drawn defeat)") && controller != null && player != null)
+            {
+                GameObject bulhyojason = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/TestEnemy.prefab");
+                status = controller.SpawnExtraEnemy(bulhyojason, player.transform.position + Vector3.right * 3f) != null
+                    ? "Spawned Bulhyojason to the right of the player." : "Bulhyojason spawn failed.";
+            }
             if (AssistedButton("Spawn pure Sansamo (walk + flower shots)") && controller != null && player != null)
             {
                 GameObject sansamo = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
@@ -990,6 +998,7 @@ namespace TrickalFanGame.Run
                     .ToArray();
             GUILayout.Label($"Ambushers alive {ambushers.Length}, buried " +
                             $"{ambushers.Count(ambusher => ambusher.State == TrickalFanGame.Enemy.AmbushEnemyController.AmbushState.Burrowed)}, " +
+                            $"moving {ambushers.Count(ambusher => ambusher.TryGetComponent(out TrickalFanGame.Enemy.AmbushEnemyMotion ambushMotion) && ambushMotion.IsMovingUnderground)}, " +
                             $"warning {ambushers.Count(ambusher => ambusher.State == TrickalFanGame.Enemy.AmbushEnemyController.AmbushState.Emerging)}, " +
                             $"up {ambushers.Count(ambusher => !ambusher.IsBurrowed)}");
 #else

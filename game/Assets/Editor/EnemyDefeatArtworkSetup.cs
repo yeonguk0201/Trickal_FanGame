@@ -29,9 +29,11 @@ namespace TrickalFanGame.Editor
         }
 
         // Prefab name → frame set. 대왕쥬비 shares the 쥬비 drawings at its own size. Defeat-1 (2026-11-04) adds
-        // 부스러기 (TestBoss) and 새마음금고.
+        // 부스러기 (TestBoss) and 새마음금고. 불효자손 (TestEnemy, 2026-11-05) is the base of SansamoEnemy and TestBoss,
+        // so it comes first and its variants override the inherited defeat instead of adding a second one.
         public static readonly Binding[] Bindings =
         {
+            new("TestEnemy", "Bulhyojason"),
             new("JyubiEnemy", "Jyubi"),
             new("JyubiKing", "Jyubi"),
             new("QuickRangedFairy", "SansamoPure"),
@@ -51,6 +53,7 @@ namespace TrickalFanGame.Editor
             foreach (string path in Bindings.SelectMany(binding => Enumerable.Range(0, FrameCount)
                          .Select(binding.FramePath)).Distinct())
                 ImportFrame(path);
+            foreach (Binding binding in Bindings) RemoveAddedDefeatUnderBoundBase(binding.Prefab);
             foreach (Binding binding in Bindings)
             {
                 Sprite[] sprites = Enumerable.Range(0, FrameCount)
@@ -62,15 +65,17 @@ namespace TrickalFanGame.Editor
                 try
                 {
                     var defeat = root.GetComponent<EnemyDefeatAnimation>();
-                    if (defeat == null) defeat = root.AddComponent<EnemyDefeatAnimation>();
+                    bool added = defeat == null;
+                    if (added) defeat = root.AddComponent<EnemyDefeatAnimation>();
                     var serialized = new SerializedObject(defeat);
                     SerializedProperty list = serialized.FindProperty("frames");
                     list.arraySize = sprites.Length;
                     for (int i = 0; i < sprites.Length; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = sprites[i];
                     serialized.FindProperty("sizeMultiplier").floatValue = SizeMultiplier(root, sprites[0]);
                     serialized.FindProperty("knockScale").floatValue = binding.KnockScale;
-                    serialized.ApplyModifiedPropertiesWithoutUndo();
-                    PrefabUtility.SaveAsPrefabAsset(root, path);
+                    // Already set: do not re-save, which would only reserialize unrelated fields.
+                    if (serialized.ApplyModifiedPropertiesWithoutUndo() || added)
+                        PrefabUtility.SaveAsPrefabAsset(root, path);
                 }
                 finally { PrefabUtility.UnloadPrefabContents(root); }
             }
@@ -82,6 +87,25 @@ namespace TrickalFanGame.Editor
         {
             Apply();
             EnemyDefeatArtworkVerification.Verify();
+        }
+
+        // A variant that added its own defeat before its base was bound would end up with two; it keeps the base's
+        // and the loop above overrides its frames, size and knock.
+        private static void RemoveAddedDefeatUnderBoundBase(string prefab)
+        {
+            string path = "Assets/Prefabs/" + prefab + ".prefab";
+            GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            GameObject source = asset != null ? PrefabUtility.GetCorrespondingObjectFromSource(asset) : null;
+            if (source == null || !Bindings.Any(binding => binding.Prefab == source.name)) return;
+            EnemyDefeatAnimation own = asset.GetComponent<EnemyDefeatAnimation>();
+            if (own == null || !PrefabUtility.IsAddedComponentOverride(own)) return;
+            GameObject root = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                UnityEngine.Object.DestroyImmediate(root.GetComponent<EnemyDefeatAnimation>());
+                PrefabUtility.SaveAsPrefabAsset(root, path);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
         }
 
         // Visible body height / visible first-frame height, both as a share of their sprite, so a thrown prop

@@ -241,7 +241,7 @@ MonoBehaviour:
   minimumBurrowDuration: 1
   emergeTelegraphDuration: 0.7
   attackDuration: 0.3
-  surfacedDuration: 2
+  surfacedDuration: 1.5
   burrowDuration: 0.4
   hitRadius: 1
   damageTier: 1
@@ -293,6 +293,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 1dc123b2292b4a15b0ae51dc4ef69164, type: 3}
   - {fileID: 21300000, guid: fc5e157f2003485684182d5f89222fff, type: 3}
   - {fileID: 21300000, guid: 9a56e9401cfb44ffa9aaa95f0fce47e8, type: 3}
+  moveFrames:
+  - {fileID: 21300000, guid: a75bc4f7c3d58f24485ce59abc069ebe, type: 3}
+  - {fileID: 21300000, guid: df67566e690bbba4e9caa4d097eaf130, type: 3}
+  - {fileID: 21300000, guid: e04362413493a904c99c03782e3c0866, type: 3}
+  - {fileID: 21300000, guid: 7e96241f062804844afad867b66173ff, type: 3}
+  moveStride: 0.9
 --- !u!114 &7919012165587775666
 MonoBehaviour:
   m_ObjectHideFlags: 0

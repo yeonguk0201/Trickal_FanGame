@@ -66,9 +66,10 @@ namespace TrickalFanGame.Editor
             int F(AmbushState state, float t) => AmbushEnemyMotion.FrameFor(state, t, attack, sink);
             Require(F(AmbushState.Burrowed, 0f) == 0 && F(AmbushState.Emerging, 0.6f) == 0,
                 "Under the floor and while warning it shows the mound.");
-            Require(F(AmbushState.Attacking, 0.01f) == 1 && F(AmbushState.Attacking, 0.11f) == 2 &&
-                    F(AmbushState.Attacking, 0.21f) == 3 && F(AmbushState.Attacking, 5f) == 3,
-                "The burst must play its three steps in order during the attack.");
+            Require(F(AmbushState.Attacking, 0.01f) == 1 && F(AmbushState.Attacking, 0.06f) == 2 &&
+                    F(AmbushState.Attacking, 0.11f) == 3 && F(AmbushState.Attacking, 0.2f) == 3 &&
+                    F(AmbushState.Attacking, 5f) == 3,
+                "The burst must play its three steps within its first 0.15 s, then hold the last.");
             Require(F(AmbushState.Surfaced, 1f) == 3, "Up out of the ground it must stay on the last step.");
             Require(F(AmbushState.Burrowing, 0.01f) == 3 && F(AmbushState.Burrowing, 0.15f) == 2 &&
                     F(AmbushState.Burrowing, 0.3f) == 1, "Sinking must play the steps back.");
@@ -83,6 +84,71 @@ namespace TrickalFanGame.Editor
                 motion.RenderPose(controller.StateStartedAt);
                 Require(controller.State == AmbushState.Burrowed && visual.sprite == frames[0],
                     "A fresh ambusher must show the mound.");
+
+                // Moving under the floor: four drawn frames on the mound's canvas, one cycle per stride.
+                Sprite[] move = Load(Defeat1MotionSetup.AmbushMovePath);
+                Require(motion.HasMoveFrames && Mathf.Approximately(motion.MoveStride, Defeat1MotionSetup.AmbushMoveStride),
+                    "AmbushFairy must carry four move frames at its stride.");
+                Rect still = WorldVisible(frames[AmbushEnemyMotion.MoundFrame]);
+                for (int i = 0; i < 4; i++)
+                {
+                    Require(motion.MoveFrames[i] == move[i], $"Ambush move frame {i} must be the drawing.");
+                    Require(Mathf.Approximately(move[i].pixelsPerUnit, frames[0].pixelsPerUnit) &&
+                            move[i].pivot == frames[0].pivot && move[i].rect.size == frames[0].rect.size,
+                        $"Ambush move frame {i} must share the mound's canvas, scale and pivot.");
+                    Rect visible = WorldVisible(move[i]);
+                    Require(Mathf.Abs(visible.yMin - still.yMin) < Tolerance && Mathf.Abs(visible.center.x - still.center.x) < Tolerance,
+                        $"Ambush move frame {i} must stand where the still mound stands (got {visible}, mound {still}).");
+                    Require(motion.RenderMovePose((i + 0.1f) / 4f) && visual.sprite == move[i] && motion.CurrentMoveFrame == i,
+                        $"A move cycle must show frame {i} in order.");
+                }
+                Require(motion.RenderMovePose(1.05f) && visual.sprite == move[0], "The move cycle must loop.");
+
+                // Warning: a shaking copy of the mound, the body's own drawing hidden but still enabled.
+                typeof(AmbushEnemyController).GetMethod("SetState", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .Invoke(controller, new object[] { AmbushState.Emerging, 0f });
+                Vector3 bodyPosition = root.transform.position;
+                float stepTime = AmbushEnemyMotion.RumbleStepSeconds;
+                motion.RenderPose(stepTime * 0.5f);
+                Vector3 first = motion.IsRumbling ? motion.Rumble.transform.position : Vector3.zero;
+                Require(motion.IsRumbling && visual.enabled && visual.forceRenderingOff &&
+                        motion.Rumble.sprite == frames[AmbushEnemyMotion.MoundFrame] &&
+                        motion.Rumble.sortingOrder == visual.sortingOrder &&
+                        motion.Rumble.GetComponent<Collider2D>() == null && controller.Mark == null,
+                    "While warning the mound must rattle as a collider-free copy, with no red ellipse.");
+                motion.RenderPose(stepTime * 1.5f);
+                Vector3 second = motion.Rumble.transform.position;
+                Require(Mathf.Abs(first.x - second.x) > AmbushEnemyMotion.RumbleAmplitude &&
+                        Mathf.Abs(first.x - bodyPosition.x) <= AmbushEnemyMotion.RumbleAmplitude + 0.0001f &&
+                        root.transform.position == bodyPosition,
+                    "The rattle must swing side to side within its amplitude and leave the body in place.");
+                typeof(AmbushEnemyController).GetMethod("SetState", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .Invoke(controller, new object[] { AmbushState.Attacking, 1f });
+                motion.RenderPose(1.01f);
+                Require(!motion.IsRumbling && !visual.forceRenderingOff && visual.sprite == frames[1],
+                    "Bursting out must stop the rattle and show the body's own drawing again.");
+                typeof(AmbushEnemyController).GetMethod("SetState", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .Invoke(controller, new object[] { AmbushState.Burrowed, 2f });
+
+                // The shadow keeps the still mound's outline whatever move frame is shown.
+                Require(motion.TryGetMoundBounds(out Bounds mound), "A buried ambusher must report its mound outline.");
+                visual.sprite = frames[AmbushEnemyMotion.MoundFrame];
+                Bounds rendered = visual.bounds;
+                // Floor footprint only: x and y (the renderer's bounds also carry a small depth).
+                Require(((Vector2)(mound.center - rendered.center)).sqrMagnitude < 1e-6f &&
+                        ((Vector2)(mound.size - rendered.size)).sqrMagnitude < 1e-6f,
+                    $"The mound outline must match the still mound drawing (got {mound}, drawn {rendered}).");
+                GroundShadow shadow = GroundShadow.Ensure(root);
+                shadow.Refresh();
+                Vector3 stillPosition = shadow.Visual.transform.position, stillScale = shadow.Visual.transform.localScale;
+                for (int i = 0; i < 4; i++)
+                {
+                    motion.RenderMovePose((i + 0.1f) / 4f);
+                    shadow.Refresh();
+                    Require((shadow.Visual.transform.position - stillPosition).sqrMagnitude < 1e-8f &&
+                            (shadow.Visual.transform.localScale - stillScale).sqrMagnitude < 1e-8f,
+                        $"The buried shadow must not move or resize on move frame {i}.");
+                }
             });
         }
 

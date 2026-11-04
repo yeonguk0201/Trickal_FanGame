@@ -43,7 +43,7 @@ namespace TrickalFanGame.Enemy
         [Header("Attack")]
         [SerializeField, Min(0f)] private float emergeTelegraphDuration = 0.7f;
         [SerializeField, Min(0f)] private float attackDuration = 0.3f;
-        [SerializeField, Min(0f)] private float surfacedDuration = 2f;
+        [SerializeField, Min(0f)] private float surfacedDuration = 1.5f;
         [SerializeField, Min(0f)] private float burrowDuration = 0.4f;
         // Half the ellipse's width; its half height is half of that, like the lob mark.
         [SerializeField, Min(0.05f)] private float hitRadius = 1f;
@@ -220,7 +220,9 @@ namespace TrickalFanGame.Enemy
             body.linearVelocity = Vector2.zero;
             EmergePoint = EnemyLobProjectile.GroundPoint(transform);
             SetState(AmbushState.Emerging, currentTime);
-            CreateMark();
+            // With the drawn frames the mound rattles instead (AmbushEnemyMotion); the ellipse stays the
+            // placeholder warning.
+            if (!HasDrawnFrames) CreateMark();
         }
 
         // It bursts out: hittable again, and the players standing on the ellipse are hurt once.

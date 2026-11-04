@@ -11,7 +11,8 @@ namespace TrickalFanGame.Editor
     // Defeat-1 (docs/28 §7, 2026-11-04): the user's step-3 drawings.
     //  - 산사모-광기 (SelfDestructFairy) walks with four drawn frames as tall as its idle drawing.
     //  - 잠복형 (AmbushFairy) shows a moving mound under the floor and breaks out in three drawn steps; the mound
-    //    is as wide as its idle drawing.
+    //    is as wide as its idle drawing. Its four move frames (2026-11-05) share the burst frames' canvas, scale
+    //    and pivot, so the travelling mound stands where the still one does.
     //  - 에르핀 falls over with four drawn poses on death, the first as tall as her idle walk frame.
     // Each frame's size and ground line come from its import settings (pixels per unit and pivot), so the drawing
     // keeps its feet where the idle drawing stood. Re-running re-imports the same files and updates the same
@@ -27,9 +28,11 @@ namespace TrickalFanGame.Editor
         public const string AmbushPrefab = "Assets/Prefabs/AmbushFairy.prefab";
         public const int FrameCount = 4;
         public const float SelfDestructStride = 0.9f;
+        public const float AmbushMoveStride = 0.9f;
 
         public static string WalkPath(int i) => $"{WalkFolder}/SansamoMadness_Walk_{i}.png";
         public static string AmbushPath(int i) => $"{AmbushFolder}/BulhyojasonCold_Emerge_{i}.png";
+        public static string AmbushMovePath(int i) => $"{AmbushFolder}/BulhyojasonCold_Move_{i}.png";
         public static string ErpinDeathPath(int i) => $"{ErpinDeathFolder}/Erpin_Death_{i}.png";
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Defeat-1 Motions")]
@@ -49,7 +52,9 @@ namespace TrickalFanGame.Editor
             RectInt ambushRef = VisiblePixels(AmbushPath(AmbushEnemyMotion.SurfacedFrame));
             float ambushPpu = ambushRef.width / ambushWidth;
             Sprite[] ambush = ImportShared(AmbushPath, ambushRef, ambushPpu, -ambushHeight / 2f);
-            ConfigurePrefab<AmbushEnemyMotion>(AmbushPrefab, motion => motion.Configure(ambush));
+            Sprite[] ambushMove = ImportShared(AmbushMovePath, ambushRef, ambushPpu, -ambushHeight / 2f);
+            ConfigurePrefab<AmbushEnemyMotion>(AmbushPrefab,
+                motion => motion.Configure(ambush, ambushMove, AmbushMoveStride));
 
             // 에르핀: frame 0 as tall as her idle walk frame, standing on the same ground line.
             Sprite idle = ErpinIdle();
@@ -83,6 +88,9 @@ namespace TrickalFanGame.Editor
             ErpinWalkAnimationVerification.Verify();
             ErpinHighGradeArtworkSetup.Verify();
             Week25Ux0Verification.Verify();
+            // The ambusher's buried shadow keeps the still mound's outline (2026-11-05).
+            GroundShadowVerification.Verify();
+            GroundShadowProfileSetup.Verify();
         }
 
         // The idle drawing's local size: FairyKingdomArtwork fits its visible rect to the view's width, centred.
