@@ -79,7 +79,7 @@ namespace TrickalFanGame.Frontend
             }
             if (visual == null) return;
             string id = artworkId;
-            // Obstacle traps keep their own drawing; stone kinds use progressive fracture frames.
+            // Obstacle traps keep their own drawing; stone kinds and resource boxes use progressive damage frames.
             if (mode == FairyKingdomArtworkMode.Obstacle && TryGetComponent(out RoomTrap trap))
                 id = RoomTrap.ArtworkIdOf(trap.Kind);
             else if (mode == FairyKingdomArtworkMode.Obstacle && obstacle != null)
@@ -96,7 +96,8 @@ namespace TrickalFanGame.Frontend
             if (fitted == null) return;
             bool rockDamage = mode == FairyKingdomArtworkMode.Obstacle && RockDamageArtwork.Supports(id);
             int damageStage = rockDamage && obstacle != null
-                ? RockDamageArtwork.Stage(obstacle.HitsTaken, obstacle.RequiredHits) : 0;
+                ? RockDamageArtwork.Stage(obstacle.HitsTaken, obstacle.RequiredHits, RockDamageArtwork.FrameCount(id))
+                : 0;
             visual.sprite = damageStage > 0 ? RockDamageArtwork.Fit(id, damageStage, localWidth) ?? fitted : fitted;
             bool authoredHazard = false;
             string hazard = id == "obstacle-tree" && obstacle != null && obstacle.IsBurning
