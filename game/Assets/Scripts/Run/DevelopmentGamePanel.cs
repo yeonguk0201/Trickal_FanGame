@@ -409,7 +409,7 @@ namespace TrickalFanGame.Run
                 if (table.GoldenExclusiveArtifacts.Contains(item)) continue;
                 int stacks = inventory != null ? inventory.GetStackCount(item.ItemId) : 0;
                 string limit = item.MaxStacks > 0 ? item.MaxStacks.ToString() : "-";
-                if (!AssistedButton($"Drop {item.DisplayName} ({stacks}/{limit})")) continue;
+                if (!AssistedButton($"Drop {item.DisplayName} ({stacks}/{limit}) {PoolTag(item)}")) continue;
                 RoomPrefab room = CurrentRoom(assembler);
                 ItemPickup pickup = Instantiate(table.ArtifactPickupPrefab,
                     player.position + Vector3.right * 1.2f, Quaternion.identity,
@@ -421,6 +421,15 @@ namespace TrickalFanGame.Run
 #else
             GUILayout.Label("Artifact drops are editor-only.");
 #endif
+        }
+
+        // Pool-0: which reward sources draw the artifact first (B boss, T treasure, S shop).
+        private static string PoolTag(ItemDefinition item)
+        {
+            string tag = (item.IsInPool(ItemPoolSource.Boss) ? "B" : string.Empty) +
+                         (item.IsInPool(ItemPoolSource.Treasure) ? "T" : string.Empty) +
+                         (item.IsInPool(ItemPoolSource.Shop) ? "S" : string.Empty);
+            return tag.Length > 0 ? $"[{tag}]" : "[-]";
         }
 
         // Artifact-2: the state of artifacts whose effect is not visible on the HUD, and the status effects on

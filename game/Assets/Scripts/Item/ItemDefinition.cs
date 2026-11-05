@@ -21,6 +21,9 @@ namespace TrickalFanGame.Item
         [SerializeField, Min(0)] private int maxStacks;
         // 교주의 권능 only: combat or boss rooms to clear for a full gauge (Power-1).
         [SerializeField, Min(0)] private int activeChargeRooms;
+        // Pool-0: the reward sources (boss, treasure room, shop) that draw this artifact first. Other sources still
+        // reach it through the shared-pool fallback. Older setups that rewrite the contract leave this untouched.
+        [SerializeField] private ItemPoolSource poolSources;
 
         public string ItemId => itemId;
         public string DisplayName => displayName;
@@ -35,6 +38,8 @@ namespace TrickalFanGame.Item
         public bool IsSingleUse => ItemKindText.IsSingleUse(kind);
         public bool IsActivePower => ItemKindText.IsActivePower(kind);
         public int ActiveChargeRooms => activeChargeRooms;
+        public ItemPoolSource PoolSources => poolSources;
+        public bool IsInPool(ItemPoolSource source) => source != ItemPoolSource.None && (poolSources & source) == source;
 
         public bool IsValid => IsItemIdValidForKind(itemId, kind) &&
                                !string.IsNullOrWhiteSpace(displayName) &&
@@ -65,6 +70,11 @@ namespace TrickalFanGame.Item
         }
 
 #if UNITY_EDITOR
+        public void ConfigurePoolSources(ItemPoolSource configuredSources)
+        {
+            poolSources = configuredSources;
+        }
+
         public void ConfigureActiveCharge(int configuredChargeRooms)
         {
             activeChargeRooms = Mathf.Max(0, configuredChargeRooms);

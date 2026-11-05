@@ -51,12 +51,22 @@ namespace TrickalFanGame.Item
         private void OnDestroy() => UnsubscribeProgress();
 
         public bool TryOpen(IReadOnlyList<ItemDefinition> itemPool, string rewardId, out string error) =>
-            TryOpen(itemPool, rewardId, null, Vector3.zero, null, out error);
+            TryOpen(itemPool, rewardId, null, Vector3.zero, null, ItemPoolSource.None, out error);
+
+        // Pool-0: source picks which reward pool the 3택1 draws from first (ArtifactRewardSelector).
+        public bool TryOpen(IReadOnlyList<ItemDefinition> itemPool, string rewardId, ItemPoolSource source,
+            out string error) =>
+            TryOpen(itemPool, rewardId, null, Vector3.zero, null, source, out error);
+
+        public bool TryOpen(IReadOnlyList<ItemDefinition> itemPool, string rewardId,
+            IReadOnlyList<ItemDefinition> powerPool, Vector3 powerDropAt, Transform powerDropUnder, out string error) =>
+            TryOpen(itemPool, rewardId, powerPool, powerDropAt, powerDropUnder, ItemPoolSource.None, out error);
 
         // Power-2: a non-empty powerPool makes one card a 교주의 권능 when the 3택1 is first rolled. Taking it puts it
         // in the 권능 slot, and a held 권능 drops at powerDropAt under powerDropUnder (the reward's room).
         public bool TryOpen(IReadOnlyList<ItemDefinition> itemPool, string rewardId,
-            IReadOnlyList<ItemDefinition> powerPool, Vector3 powerDropAt, Transform powerDropUnder, out string error)
+            IReadOnlyList<ItemDefinition> powerPool, Vector3 powerDropAt, Transform powerDropUnder,
+            ItemPoolSource source, out string error)
         {
             if (!TryValidateDependencies(out error)) return false;
             if (string.IsNullOrWhiteSpace(rewardId))
@@ -77,7 +87,7 @@ namespace TrickalFanGame.Item
             if (state == null)
             {
                 IReadOnlyList<ItemRewardCandidate> candidates = ArtifactRewardSelector.BuildCandidates(
-                    itemPool, inventory, runProgress.RunSeed, rewardId, powerPool);
+                    itemPool, inventory, runProgress.RunSeed, rewardId, powerPool, source);
                 if (candidates.Count == 0)
                 {
                     error = $"Reward selection '{rewardId}' has no valid candidates.";

@@ -58,3 +58,5 @@ MonoBehaviour:
   effectValue: 0.15
   stackMode: 0
   maxStacks: 2
+  activeChargeRooms: 0
+  poolSources: 5

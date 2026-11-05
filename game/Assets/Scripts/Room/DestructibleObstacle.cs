@@ -245,7 +245,9 @@ namespace TrickalFanGame.Room
                 List<ItemDefinition> artifacts = new();
                 foreach (ItemDefinition candidate in rareArtifactPool)
                     if (candidate != null && candidate.Kind == ItemKind.Artifact) artifacts.Add(candidate);
-                if (ArtifactRewardSelector.TryChoose(artifacts, rareItemInventory, dropSeed, obstacleId, out item))
+                // Pool-0: a rare obstacle artifact draws from the treasure pool first, like a treasure room.
+                if (ArtifactRewardSelector.TryChoose(artifacts, rareItemInventory, dropSeed, obstacleId,
+                        ItemPoolSource.Treasure, out item))
                     return true;
             }
 

@@ -164,6 +164,9 @@ namespace TrickalFanGame.Shop
         // Shop-1: 골디 sells Items of this rarity or better.
         public const ItemRarity GoldiMinimumRarity = ItemRarity.Rare;
 
+        // Pool-0: shop artifact offers (base and extra slots, general and 골디) draw from the shop pool first.
+        public const ItemPoolSource RewardPoolSource = ItemPoolSource.Shop;
+
         public static string BuildShopId(string roomId) => $"{roomId}:shop";
 
         // Items use the treasure-room rarity weights (distinct, skipping maxed stacks at roll time); consumables are
@@ -254,7 +257,8 @@ namespace TrickalFanGame.Shop
                     if (item != null && !taken.Contains(item.ItemId)) remaining.Add(item);
                 chosen = null;
                 foreach (ItemRewardCandidate candidate in ArtifactRewardSelector.BuildCandidates(remaining, null,
-                             FloorGenerator.DeriveSeed(stockSeed, index, ExtraSlotSalt), $"{shopId}:extra-{index}"))
+                             FloorGenerator.DeriveSeed(stockSeed, index, ExtraSlotSalt), $"{shopId}:extra-{index}",
+                             null, RewardPoolSource))
                 {
                     if (!candidate.IsItem) continue;
                     chosen = candidate.Definition;
@@ -283,7 +287,7 @@ namespace TrickalFanGame.Shop
         {
             if (offers.Count >= itemLimit) return;
             foreach (ItemRewardCandidate candidate in ArtifactRewardSelector.BuildCandidates(
-                         itemPool, inventory, stockSeed, rewardId))
+                         itemPool, inventory, stockSeed, rewardId, null, RewardPoolSource))
             {
                 if (offers.Count >= itemLimit) break;
                 if (candidate.IsItem)

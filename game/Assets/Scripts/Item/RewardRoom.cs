@@ -18,6 +18,9 @@ namespace TrickalFanGame.Item
         // Power-2: 교주의 권능 one 3택1 card is drawn from; empty when this room offers none.
         [SerializeField] private ItemDefinition[] powerOfferPool = System.Array.Empty<ItemDefinition>();
         [SerializeField] private GameObject interactionMarker;
+
+        // Pool-0: treasure and secret room 3택1 draw from the treasure (build) pool first.
+        public const ItemPoolSource RewardPoolSource = ItemPoolSource.Treasure;
         [SerializeField] private GameObject interactionPrompt;
 
         private bool isPlayerInside;
@@ -185,7 +188,8 @@ namespace TrickalFanGame.Item
                 ? selectionItemPool
                 : CopyPool(dropSource?.ItemPool);
             if (rewardSelectionSession.TryOpen(pool, RewardId, powerOfferPool,
-                    transform.position + ActivePowerOffers.RewardDropOffset, transform.parent, out string error))
+                    transform.position + ActivePowerOffers.RewardDropOffset, transform.parent, RewardPoolSource,
+                    out string error))
             {
                 RefreshInteractionVisuals();
                 return true;

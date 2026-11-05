@@ -12,6 +12,9 @@ namespace TrickalFanGame.Item
         [SerializeField] private ItemRewardSelectionSession rewardSelectionSession;
         [SerializeField] private ItemDefinition[] selectionItemPool = System.Array.Empty<ItemDefinition>();
 
+        // Pool-0: a boss 3택1 draws from the boss (stat) pool first.
+        public const ItemPoolSource RewardPoolSource = ItemPoolSource.Boss;
+
         private bool rewardRequested;
 
         public bool IsFinalBoss => isFinalBoss;
@@ -82,7 +85,7 @@ namespace TrickalFanGame.Item
             ItemDefinition[] pool = selectionItemPool != null && selectionItemPool.Length > 0
                 ? selectionItemPool
                 : CopyPool(dropSource?.ItemPool);
-            if (rewardSelectionSession.TryOpen(pool, RewardId, out string error)) return true;
+            if (rewardSelectionSession.TryOpen(pool, RewardId, RewardPoolSource, out string error)) return true;
             Debug.LogError($"[BossItemDrop] Could not open '{RewardId}'. {error}", this);
             return false;
         }

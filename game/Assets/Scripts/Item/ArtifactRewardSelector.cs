@@ -17,11 +17,20 @@ namespace TrickalFanGame.Item
             PlayerInventory inventory,
             int runSeed,
             string rewardId,
+            out ItemDefinition definition) =>
+            TryChoose(itemPool, inventory, runSeed, rewardId, ItemPoolSource.None, out definition);
+
+        public static bool TryChoose(
+            IReadOnlyList<ItemDefinition> itemPool,
+            PlayerInventory inventory,
+            int runSeed,
+            string rewardId,
+            ItemPoolSource source,
             out ItemDefinition definition)
         {
             definition = null;
             IReadOnlyList<ItemRewardCandidate> rewardCandidates = BuildCandidates(
-                itemPool, inventory, runSeed, rewardId);
+                itemPool, inventory, runSeed, rewardId, null, source);
             for (int index = 0; index < rewardCandidates.Count; index++)
             {
                 if (rewardCandidates[index].IsItem)
@@ -38,16 +47,27 @@ namespace TrickalFanGame.Item
             IReadOnlyList<ItemDefinition> itemPool,
             PlayerInventory inventory,
             int runSeed,
-            string rewardId) => BuildCandidates(itemPool, inventory, runSeed, rewardId, null);
+            string rewardId) => BuildCandidates(itemPool, inventory, runSeed, rewardId, null, ItemPoolSource.None);
 
-        // Power-2: a non-empty powerPool turns the last card into a 교주의 권능 (ActivePowerOffers) and leaves the
-        // others to artifacts, with the usual healing fallback when too few artifacts are left.
         public static IReadOnlyList<ItemRewardCandidate> BuildCandidates(
             IReadOnlyList<ItemDefinition> itemPool,
             PlayerInventory inventory,
             int runSeed,
             string rewardId,
-            IReadOnlyList<ItemDefinition> powerPool)
+            IReadOnlyList<ItemDefinition> powerPool) =>
+            BuildCandidates(itemPool, inventory, runSeed, rewardId, powerPool, ItemPoolSource.None);
+
+        // Power-2: a non-empty powerPool turns the last card into a 교주의 권능 (ActivePowerOffers) and leaves the
+        // others to artifacts, with the usual healing fallback when too few artifacts are left.
+        // Pool-0: a source other than None draws from the artifacts in that source's pool first and fills the cards
+        // it cannot from the rest of itemPool (the shared pool), before the healing fallback.
+        public static IReadOnlyList<ItemRewardCandidate> BuildCandidates(
+            IReadOnlyList<ItemDefinition> itemPool,
+            PlayerInventory inventory,
+            int runSeed,
+            string rewardId,
+            IReadOnlyList<ItemDefinition> powerPool,
+            ItemPoolSource source)
         {
             ItemDefinition power = null;
             if (ActivePowerOffers.ValidPowers(powerPool).Count > 0)
@@ -57,7 +77,7 @@ namespace TrickalFanGame.Item
             }
 
             List<ItemRewardCandidate> result = BuildArtifactCandidates(itemPool, inventory, runSeed, rewardId,
-                power != null ? MaximumCandidateCount - 1 : MaximumCandidateCount);
+                power != null ? MaximumCandidateCount - 1 : MaximumCandidateCount, source);
             if (power != null) result.Add(ItemRewardCandidate.ForItem(power, 0));
             return result.ToArray();
         }
@@ -67,7 +87,8 @@ namespace TrickalFanGame.Item
             PlayerInventory inventory,
             int runSeed,
             string rewardId,
-            int count)
+            int count,
+            ItemPoolSource source)
         {
             if (itemPool == null || itemPool.Count == 0)
             {
@@ -104,13 +125,21 @@ namespace TrickalFanGame.Item
                 stateHash = Avalanche(stateHash ^ unchecked((uint)currentStacks));
             }
 
-            List<ItemRewardCandidate> result = new(MaximumCandidateCount);
-            while (result.Count < count && candidates.Count > 0)
+            List<ItemDefinition> shared = new();
+            if (source != ItemPoolSource.None)
             {
-                ItemDefinition selected = ChooseWeighted(candidates, stateHash);
+                shared = candidates.FindAll(candidate => !candidate.IsInPool(source));
+                candidates.RemoveAll(candidate => !candidate.IsInPool(source));
+            }
+
+            List<ItemRewardCandidate> result = new(MaximumCandidateCount);
+            while (result.Count < count && (candidates.Count > 0 || shared.Count > 0))
+            {
+                List<ItemDefinition> drawFrom = candidates.Count > 0 ? candidates : shared;
+                ItemDefinition selected = ChooseWeighted(drawFrom, stateHash);
                 int currentStacks = inventory != null ? inventory.GetStackCount(selected.ItemId) : 0;
                 result.Add(ItemRewardCandidate.ForItem(selected, currentStacks));
-                candidates.Remove(selected);
+                drawFrom.Remove(selected);
                 stateHash = Mix(stateHash, selected.ItemId);
                 stateHash = Avalanche(stateHash ^ unchecked((uint)result.Count));
             }
