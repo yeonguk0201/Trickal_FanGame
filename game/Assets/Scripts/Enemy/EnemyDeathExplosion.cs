@@ -109,12 +109,16 @@ namespace TrickalFanGame.Enemy
             SpriteRenderer visual = artwork != null && artwork.Visual != null
                 ? artwork.Visual
                 : GetComponentInChildren<SpriteRenderer>();
+            if (EnemyDefeatAnimation.PlaysOn(gameObject)) visual = null;
             float now = Time.time;
             float remaining = telegraphFinished ? 0f
                 : IsPrimed ? Mathf.Max(0f, PrimedExplodeAt - now)
                 : telegraphDuration;
             LastBlast = EnemyDeathBlast.Spawn(transform.position, transform.parent, gameObject, visual,
                 remaining, radius, ResolveDamageUnits(), now);
+            // 산사모-광기 keeps crouching through what is left of its warning instead of standing still.
+            if (TryGetComponent(out SelfDestructCrouch crouch) && crouch.HasFrames)
+                LastBlast.ConfigureBodyFrames(crouch.Frames);
             // A primed telegraph continues from where it was instead of starting over.
             if (IsPrimed) LastBlast.ContinueTelegraphFrom(primedAt);
             if (hitsEnemiesAndObstacles) LastBlast.ConfigureEnemyAndObstacleHits(enemyDamage);

@@ -46,8 +46,10 @@ namespace TrickalFanGame.Editor
                    prefab.GetComponent<KnockbackReceiver>() != null &&
                    prefab.GetComponent<RangedEnemyController>() != null,
                 "The ranged prefab is missing health, death, knockback, or ranged behavior.");
-            Assert(prefab.GetComponent<EnemyChase>() == null && prefab.GetComponent<ContactDamage>() == null,
-                "The ranged prefab must not retain chaser or contact-damage behavior.");
+            Assert(prefab.GetComponent<EnemyChase>() == null,
+                "The ranged prefab must not retain chaser behavior.");
+            Assert(prefab.GetComponent<ContactDamage>() is { HalfHeartDamage: true },
+                "The ranged prefab must hurt on touch for half a heart (Contact-0).");
             return prefab;
         }
 

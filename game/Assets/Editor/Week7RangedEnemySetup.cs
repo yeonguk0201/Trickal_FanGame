@@ -61,11 +61,8 @@ namespace TrickalFanGame.Editor
                     Object.DestroyImmediate(chase);
                 }
 
-                ContactDamage contactDamage = contents.GetComponent<ContactDamage>();
-                if (contactDamage != null)
-                {
-                    Object.DestroyImmediate(contactDamage);
-                }
+                // Contact-0: ranged enemies hurt on touch for half a heart.
+                RangedContactDamageSetup.Ensure(contents);
 
                 RangedEnemyController ranged = contents.GetComponent<RangedEnemyController>();
                 if (ranged == null)

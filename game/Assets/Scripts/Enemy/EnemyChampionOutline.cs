@@ -100,6 +100,10 @@ namespace TrickalFanGame.Enemy
         {
             if (source == null || !source.enabled || !source.gameObject.activeInHierarchy) return null;
             if (!source.forceRenderingOff) return source.sprite != null ? source : null;
+            // A hopping picture drawn above the body (EnemyHopMotion).
+            if (TryGetComponent(out EnemyHopMotion hop) && hop.Artwork != null && hop.Artwork.enabled &&
+                hop.Artwork.sprite != null)
+                return hop.Artwork;
             // A movement mesh drawn in the sprite's place, at the same sorting position.
             GetComponentsInChildren(false, meshCandidates);
             foreach (MeshRenderer candidate in meshCandidates)

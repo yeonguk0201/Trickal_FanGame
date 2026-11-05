@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 2279147732071030210}
   - component: {fileID: 9106537188078233161}
   - component: {fileID: 7919012165587775666}
+  - component: {fileID: 1329746095635510811}
   m_Layer: 6
   m_Name: AmbushFairy
   m_TagString: Untagged
@@ -317,6 +318,25 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: AmbushFairy
   useSharedProfile: 1
+--- !u!114 &1329746095635510811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5470415676887288762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 56caaaf21db5ef94ca48d265bb5bf504, type: 3}
+  - {fileID: 21300000, guid: 6555e176daba962439dbc4a6b0cca607, type: 3}
+  - {fileID: 21300000, guid: 32be98630e91fb64b82faf840d6bef49, type: 3}
+  - {fileID: 21300000, guid: a64d36c659c21f8498c02a5408ddf869, type: 3}
+  sizeMultiplier: 1.0101398
+  knockScale: 0
 --- !u!1 &6556195461114167901
 GameObject:
   m_ObjectHideFlags: 0

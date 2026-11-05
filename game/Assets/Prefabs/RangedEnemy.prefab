@@ -98,6 +98,7 @@ GameObject:
   - component: {fileID: 8575249931884036228}
   - component: {fileID: 8452432046994071784}
   - component: {fileID: 6274296918522010085}
+  - component: {fileID: 7951649824032924599}
   m_Layer: 6
   m_Name: RangedEnemy
   m_TagString: Untagged
@@ -287,6 +288,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 1
+  knockbackImmune: 0
 --- !u!114 &8452432046994071784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -320,3 +322,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa527e4c75f4de29f4975b643b25cab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyBehaviorContext
+--- !u!114 &7951649824032924599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6192307500632814172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
+  damageTier: 0
+  cooldown: 1
+  halfHeartDamage: 1

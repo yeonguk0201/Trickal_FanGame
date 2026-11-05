@@ -26,11 +26,20 @@ namespace TrickalFanGame.Editor
         public const string ErpinIdleName = "Erpin_Walk_Down_0";
         public const string SelfDestructPrefab = "Assets/Prefabs/SelfDestructFairy.prefab";
         public const string AmbushPrefab = "Assets/Prefabs/AmbushFairy.prefab";
+        // 2026-11-06: 곡사형 walks with the user's four frames; 부스러기 쫄따구 hops like 부스러기.
+        public const string LobbingPrefab = "Assets/Prefabs/LobbingFairy.prefab";
+        public const string CrumbMinionPrefab = "Assets/Prefabs/BuseureogiCrumbMinion.prefab";
+        public const float LobbingStride = 0.9f;
+        public const float CrumbHopStride = 0.7f;
+        public const float CrumbHopHeight = 0.14f;
         public const int FrameCount = 4;
         public const float SelfDestructStride = 0.9f;
         public const float AmbushMoveStride = 0.9f;
 
         public static string WalkPath(int i) => $"{WalkFolder}/SansamoMadness_Walk_{i}.png";
+        public const string CrouchFolder = "Assets/Art/Enemies/FairyKingdom/Attacking";
+        public static string CrouchPath(int i) => $"{CrouchFolder}/SansamoMadness_Crouch_{i}.png";
+        public static string LobbingWalkPath(int i) => $"{WalkFolder}/LowBloodSugarMadness_Walk_{i}.png";
         public static string AmbushPath(int i) => $"{AmbushFolder}/BulhyojasonCold_Emerge_{i}.png";
         public static string AmbushMovePath(int i) => $"{AmbushFolder}/BulhyojasonCold_Move_{i}.png";
         public static string ErpinDeathPath(int i) => $"{ErpinDeathFolder}/Erpin_Death_{i}.png";
@@ -46,6 +55,21 @@ namespace TrickalFanGame.Editor
             float walkPpu = walkRef.height / walkHeight;
             Sprite[] walk = ImportShared(WalkPath, walkRef, walkPpu, -walkHeight / 2f);
             ConfigurePrefab<EnemyWalkFrames>(SelfDestructPrefab, motion => motion.Configure(walk, SelfDestructStride));
+            // Its self-destruct warning crouches (2026-11-06): frame 0 stands as tall as the idle drawing.
+            RectInt crouchRef = VisiblePixels(CrouchPath(0));
+            Sprite[] crouch = ImportShared(CrouchPath, crouchRef, crouchRef.height / walkHeight, -walkHeight / 2f);
+            ConfigurePrefab<SelfDestructCrouch>(SelfDestructPrefab, motion => motion.Configure(crouch));
+
+            // 곡사형: as 산사모-광기, frame 0 as tall as the idle drawing.
+            IdleSize(LobbingPrefab, out _, out float lobbingHeight);
+            RectInt lobbingRef = VisiblePixels(LobbingWalkPath(0));
+            Sprite[] lobbing = ImportShared(LobbingWalkPath, lobbingRef, lobbingRef.height / lobbingHeight,
+                -lobbingHeight / 2f);
+            ConfigurePrefab<EnemyWalkFrames>(LobbingPrefab, motion => motion.Configure(lobbing, LobbingStride));
+
+            // 부스러기 쫄따구: one drawing, so a small hop per stride instead of walk frames.
+            ConfigurePrefab<EnemyHopMotion>(CrumbMinionPrefab,
+                motion => motion.Configure(CrumbHopStride, CrumbHopHeight));
 
             // 잠복형: the full burst (frame 3) is as wide as the idle drawing, the mound's bottom on its feet.
             IdleSize(AmbushPrefab, out float ambushWidth, out float ambushHeight);

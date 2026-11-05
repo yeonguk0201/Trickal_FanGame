@@ -103,6 +103,7 @@ GameObject:
   - component: {fileID: 4064119436500713578}
   - component: {fileID: 7777663805749961984}
   - component: {fileID: 6288121902481178433}
+  - component: {fileID: 2961045300104060876}
   m_Layer: 6
   m_Name: SelfDestructFairy
   m_TagString: Untagged
@@ -406,3 +407,20 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: SelfDestructFairy
   useSharedProfile: 1
+--- !u!114 &2961045300104060876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7432310428319483453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f0f06d244cfdaa41967f18f776f304e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.SelfDestructCrouch
+  frames:
+  - {fileID: 21300000, guid: e821f14df57f9f44987db5d3a39eb79b, type: 3}
+  - {fileID: 21300000, guid: 8ded1d43f6208584bb76b61f80e7b4fa, type: 3}
+  - {fileID: 21300000, guid: d3ba79348491fb04887b085129b83c77, type: 3}
+  - {fileID: 21300000, guid: 408bd23ffbe13ae44987d30ad789a519, type: 3}

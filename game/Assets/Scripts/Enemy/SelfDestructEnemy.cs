@@ -28,6 +28,10 @@ namespace TrickalFanGame.Enemy
         public float TriggerRange => triggerRange;
         public bool IsPrimed => explosion != null && explosion.IsPrimed;
         public float ExplodeAt => explosion != null ? explosion.PrimedExplodeAt : float.NaN;
+
+        // Share of the warning that has passed (0 at priming, 1 at the blast).
+        public float TelegraphProgress(float currentTime) => explosion == null || !explosion.IsPrimed ? 0f
+            : explosion.TelegraphDuration > 0f ? Mathf.InverseLerp(explosion.PrimedAt, ExplodeAt, currentTime) : 1f;
         public SpriteRenderer Telegraph => telegraph;
         public SpriteRenderer Visual => visual;
 
@@ -69,9 +73,7 @@ namespace TrickalFanGame.Enemy
                 Prime(currentTime);
             }
 
-            float progress = explosion.TelegraphDuration > 0f
-                ? Mathf.InverseLerp(explosion.PrimedAt, ExplodeAt, currentTime)
-                : 1f;
+            float progress = TelegraphProgress(currentTime);
             if (telegraph != null) telegraph.color = EnemyDeathBlast.TelegraphColor(progress);
             if (visual != null) visual.color = EnemyDeathBlast.BodyColor(progress);
             if (currentTime >= ExplodeAt) Detonate();

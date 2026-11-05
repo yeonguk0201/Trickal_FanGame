@@ -28,6 +28,14 @@ namespace TrickalFanGame.Enemy
         public Sprite[] Frames => frames;
         public float SizeMultiplier => sizeMultiplier;
         public float KnockScale => knockScale;
+        public bool HasFrames => frames != null && frames.Length > 0;
+
+        // A death warning (a blast champion or a 쫄따구 blast) must not leave a second, standing copy of the body
+        // while the drawn defeat already shows it falling (2026-11-06 user decision): the warning area alone stays.
+        // It is asked during death, after the enemy is already marked for removal (which turns its components off),
+        // so only the frames count, not whether the component is still enabled.
+        public static bool PlaysOn(GameObject enemy) =>
+            enemy != null && enemy.TryGetComponent(out EnemyDefeatAnimation defeat) && defeat.HasFrames;
 
         private void Awake()
         {

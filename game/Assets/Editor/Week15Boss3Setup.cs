@@ -157,6 +157,8 @@ namespace TrickalFanGame.Editor
                 renderer.color = Color.white;
                 renderer.drawMode = SpriteDrawMode.Simple;
                 contents.GetComponent<TestEnemy>()?.ConfigureReward(false);
+                // Contact-0: ranged enemies hurt on touch for half a heart.
+                RangedContactDamageSetup.Ensure(contents);
                 if (PrefabUtility.SaveAsPrefabAsset(contents, prefabPath) == null)
                     throw new InvalidOperationException($"Could not save minion prefab at {prefabPath}.");
             }

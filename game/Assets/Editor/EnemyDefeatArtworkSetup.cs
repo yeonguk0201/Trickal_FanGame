@@ -18,13 +18,18 @@ namespace TrickalFanGame.Editor
         public const int FrameCount = 4;
         // Bosses burst or slump where they stood; a short knock still shows which way the last hit went.
         public const float BossKnockScale = 0.3f;
+        // 잠복형 falls over in its mound where it stood (2026-11-06 user decision).
+        public const float InPlaceKnockScale = 0f;
 
         public readonly struct Binding
         {
             public readonly string Prefab, Frames, Folder;
             public readonly float KnockScale;
-            public Binding(string prefab, string frames, string folder = FrameRoot, float knockScale = 1f)
-            { Prefab = prefab; Frames = frames; Folder = folder; KnockScale = knockScale; }
+            // The drawing the body shows when it dies, when it is not the Prefab's own (잠복형 is surfaced).
+            public readonly string BodyPath;
+            public Binding(string prefab, string frames, string folder = FrameRoot, float knockScale = 1f,
+                string bodyPath = null)
+            { Prefab = prefab; Frames = frames; Folder = folder; KnockScale = knockScale; BodyPath = bodyPath; }
             public string FramePath(int index) => $"{Folder}/{Frames}_Death_{index}.png";
         }
 
@@ -44,6 +49,9 @@ namespace TrickalFanGame.Editor
             new("LivelyLowBloodSugarFairy", "LivelyFairy"),
             new("TestBoss", "Buseureogi", BossFrameRoot, BossKnockScale),
             new("SaemaeumVaultBoss", "Vault", BossFrameRoot, BossKnockScale),
+            // 잠복형 (2026-11-06) dies above ground, so its size comes from the full burst drawing.
+            new("AmbushFairy", "BulhyojasonCold", FrameRoot, InPlaceKnockScale,
+                Defeat1MotionSetup.AmbushPath(AmbushEnemyMotion.SurfacedFrame)),
         };
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Enemy Defeat Frames")]
@@ -71,7 +79,11 @@ namespace TrickalFanGame.Editor
                     SerializedProperty list = serialized.FindProperty("frames");
                     list.arraySize = sprites.Length;
                     for (int i = 0; i < sprites.Length; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = sprites[i];
-                    serialized.FindProperty("sizeMultiplier").floatValue = SizeMultiplier(root, sprites[0]);
+                    Sprite bodySprite = binding.BodyPath != null
+                        ? AssetDatabase.LoadAssetAtPath<Sprite>(binding.BodyPath) : BodySprite(root);
+                    if (bodySprite == null) throw new InvalidOperationException("No body drawing: " + binding.Prefab);
+                    serialized.FindProperty("sizeMultiplier").floatValue =
+                        VisibleShare(bodySprite) / VisibleShare(sprites[0]);
                     serialized.FindProperty("knockScale").floatValue = binding.KnockScale;
                     // Already set: do not re-save, which would only reserialize unrelated fields.
                     if (serialized.ApplyModifiedPropertiesWithoutUndo() || added)

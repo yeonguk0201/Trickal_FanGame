@@ -682,6 +682,8 @@ Obstacle-7은 단독 `Verify`를 따로 돌려 둘 다 종료 코드 0으로 통
 
 `RockDamageArtworkVerification.Verify` 구현: 3종의 피격 단계별 스프라이트, 색상·크기·바닥 기준점, 충돌 보존과 4회 타격 파괴를 검사한다. 자동 실행 결과는 [작업 기록](art-prompts/rock-damage-frames.md)에 남기며 실제 Play 미술 검수는 별도로 확인한다.
 
+2026-11-05: `RockDamageArtworkVerification.VerifyBoxes` 추가. 자원 상자 8종 22프레임의 색상, 원본 대비 크기·위치, 충돌·타격 수 보존을 검사한다. 결과는 [작업 기록](art-prompts/box-damage-frames.md).
+
 
 ### 타격 피드백 도구 (2026-10-14)
 

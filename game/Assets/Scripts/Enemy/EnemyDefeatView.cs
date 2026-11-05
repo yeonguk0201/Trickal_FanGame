@@ -22,6 +22,7 @@ namespace TrickalFanGame.Enemy
         private Vector3 start;
         private Vector3 knock;
         private float age;
+        private float hop = HopHeight;
         private float baseAlpha = 1f;
         // A floor shadow beside the picture (not under its hop or scale), with no collider either.
         private SpriteRenderer shadow;
@@ -30,6 +31,8 @@ namespace TrickalFanGame.Enemy
 
         public float Age => age;
         public Vector3 KnockOffset => knock;
+        public float Hop => hop;
+        public bool FlipX => view != null && view.flipX;
         public SpriteRenderer Shadow => shadow;
         public static float Lifetime(int frameCount) => frameCount * FrameSeconds + HoldSeconds + FadeSeconds;
 
@@ -53,7 +56,10 @@ namespace TrickalFanGame.Enemy
             view.view.sprite = frames[0];
             view.view.sortingLayerID = body.sortingLayerID;
             view.view.sortingOrder = body.sortingOrder;
-            view.view.flipX = direction.x < -0.01f;
+            // An enemy that falls where it stood (잠복형, knockScale 0) keeps its facing and does not hop.
+            bool inPlace = owner.KnockScale <= 0f;
+            view.view.flipX = inPlace ? body.flipX : direction.x < -0.01f;
+            view.hop = inPlace ? 0f : HopHeight;
             view.baseAlpha = body.color.a;
             view.view.color = new Color(1f, 1f, 1f, view.baseAlpha);
             view.frames = frames;
@@ -139,7 +145,7 @@ namespace TrickalFanGame.Enemy
             view.sprite = frames[index];
             float t = Mathf.Clamp01(age / motion);
             float eased = 1f - (1f - t) * (1f - t);
-            transform.position = start + knock * eased + Vector3.up * (Mathf.Sin(t * Mathf.PI) * HopHeight);
+            transform.position = start + knock * eased + Vector3.up * (Mathf.Sin(t * Mathf.PI) * hop);
             float fade = Mathf.Clamp01((age - motion - HoldSeconds) / FadeSeconds);
             Color color = view.color;
             color.a = baseAlpha * (1f - fade);

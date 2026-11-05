@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 1416465101261741793}
   - component: {fileID: 2492882417131506244}
   - component: {fileID: 1462977357559274551}
+  - component: {fileID: 2385875871017440315}
   m_Layer: 6
   m_Name: CrayonMageMinion
   m_TagString: Untagged
@@ -211,6 +212,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 0.9
+  knockbackImmune: 0
 --- !u!114 &7860121185084462701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -433,6 +435,21 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: CrayonMageMinion
   useSharedProfile: 1
+--- !u!114 &2385875871017440315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420296328456361960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
+  damageTier: 0
+  cooldown: 1
+  halfHeartDamage: 1
 --- !u!1 &4719502203751396104
 GameObject:
   m_ObjectHideFlags: 0

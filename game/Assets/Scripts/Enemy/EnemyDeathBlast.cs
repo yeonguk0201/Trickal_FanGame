@@ -36,6 +36,8 @@ namespace TrickalFanGame.Enemy
         private readonly HashSet<Health> damagedEnemies = new();
         private GameObject source;
         private SpriteRenderer telegraph;
+        // Drawn frames the stopped body plays over the warning (산사모-광기 crouch); empty keeps its last picture.
+        private Sprite[] bodyFrames = System.Array.Empty<Sprite>();
         private float startTime;
         private float destroyAt;
 
@@ -52,6 +54,7 @@ namespace TrickalFanGame.Enemy
         public SpriteRenderer Telegraph => telegraph;
         // The stopped copy of the dead enemy's picture. Null when the enemy had none.
         public SpriteRenderer Body { get; private set; }
+        public int BodyFrameCount => bodyFrames.Length;
 
         public static Color TelegraphColor(float progress) =>
             Color.Lerp(TelegraphStartColor, TelegraphEndColor, Mathf.Clamp01(progress));
@@ -108,6 +111,13 @@ namespace TrickalFanGame.Enemy
             ApplyTelegraphProgress(Time.time);
         }
 
+        // The stopped body plays these frames over the warning, on the same clock as its tint.
+        public void ConfigureBodyFrames(Sprite[] frames)
+        {
+            bodyFrames = frames ?? System.Array.Empty<Sprite>();
+            if (!HasExploded) ApplyTelegraphProgress(Time.time);
+        }
+
         public void ConfigureEnemyAndObstacleHits(float configuredEnemyDamage)
         {
             HitsEnemiesAndObstacles = true;
@@ -147,6 +157,11 @@ namespace TrickalFanGame.Enemy
             float progress = ExplodeAt > startTime ? Mathf.InverseLerp(startTime, ExplodeAt, currentTime) : 1f;
             if (telegraph != null) telegraph.color = TelegraphColor(progress);
             if (Body != null) Body.color = BodyColor(progress);
+            if (Body != null && bodyFrames.Length > 0)
+            {
+                Sprite frame = bodyFrames[SelfDestructCrouch.FrameIndex(progress, bodyFrames.Length)];
+                if (frame != null) Body.sprite = frame;
+            }
         }
 
         public bool Explode()
