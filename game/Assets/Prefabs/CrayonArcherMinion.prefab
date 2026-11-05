@@ -103,6 +103,7 @@ GameObject:
   - component: {fileID: 73491838197361982}
   - component: {fileID: 511534438588400048}
   - component: {fileID: 7947002086066991094}
+  - component: {fileID: 1461332196195470486}
   m_Layer: 6
   m_Name: CrayonArcherMinion
   m_TagString: Untagged
@@ -292,6 +293,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 1
+  knockbackImmune: 0
 --- !u!114 &4147464632201205979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -514,3 +516,18 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: CrayonArcherMinion
   useSharedProfile: 1
+--- !u!114 &1461332196195470486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1716652274724679613}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
+  damageTier: 0
+  cooldown: 1
+  halfHeartDamage: 1

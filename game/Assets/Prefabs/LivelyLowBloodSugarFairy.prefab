@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 5023696619976068168}
   - component: {fileID: 6743697939268354105}
   - component: {fileID: 3820682214053585849}
+  - component: {fileID: 531857468758582039}
   m_Layer: 6
   m_Name: LivelyLowBloodSugarFairy
   m_TagString: Untagged
@@ -333,6 +334,21 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8b15c414ed754b03924067232587d4cf, type: 3}
   sizeMultiplier: 0.99785537
   knockScale: 1
+--- !u!114 &531857468758582039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4351291127771185126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
+  damageTier: 0
+  cooldown: 1
+  halfHeartDamage: 1
 --- !u!1 &6303825839773785878
 GameObject:
   m_ObjectHideFlags: 0

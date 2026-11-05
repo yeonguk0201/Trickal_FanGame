@@ -117,7 +117,8 @@ namespace TrickalFanGame.Editor
             Assert(prefab.GetComponent<RangedEnemyController>() == null &&
                    prefab.GetComponent<MobileRangedEnemyController>() == null &&
                    prefab.GetComponent<LongRangeSniperController>() == null &&
-                   prefab.GetComponent<EnemyChase>() == null && prefab.GetComponent<ContactDamage>() == null &&
+                   prefab.GetComponent<EnemyChase>() == null &&
+                   prefab.GetComponent<ContactDamage>() is { HalfHeartDamage: true } &&
                    prefab.GetComponent<EnemyAttackArtwork>() == null && prefab.GetComponent<LineRenderer>() == null &&
                    prefab.GetComponent<TestEnemy>() != null && prefab.GetComponent<EnemyBehaviorContext>() != null &&
                    prefab.GetComponent<EnemyAttackPresentation>() != null,

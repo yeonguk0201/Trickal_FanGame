@@ -142,6 +142,8 @@ namespace TrickalFanGame.Editor
                 Remove<EnemyAttackArtwork>(contents);
                 Remove<EnemyMovementAnimator>(contents);
                 Remove<LineRenderer>(contents);
+                // Contact-0: ranged enemies hurt on touch for half a heart.
+                RangedContactDamageSetup.Ensure(contents);
 
                 Health health = contents.GetComponent<Health>();
                 SerializedObject serializedHealth = new(health);

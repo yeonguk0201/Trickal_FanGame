@@ -91,8 +91,8 @@ namespace TrickalFanGame.Editor
             ValidateShadowAim(prefab);
             ValidateRoomTransitionClears(prefab);
             ValidateRoomClears(prefab);
-            Debug.Log($"Enemy-12 verification passed: {Week27Enemy12Setup.DisplayName} has 30 health, speed 2, no " +
-                      "contact damage; not before it is alerted or during the spawn delay, it winds up 0.4 s inside " +
+            Debug.Log($"Enemy-12 verification passed: {Week27Enemy12Setup.DisplayName} has 30 health, speed 2, a " +
+                      "half-heart touch; not before it is alerted or during the spawn delay, it winds up 0.4 s inside " +
                       "3.5~7 of the player and lobs to where the player's shadow lay (1 s flight, a red 1.5 x 0.75 ellipse shown " +
                       "the whole way, no collider in the air), then waits 2.4 s. It throws with an obstacle in the " +
                       "way without breaking it, hurts only a player whose feet are inside the ellipse at the floor's medium tier " +
@@ -164,9 +164,10 @@ namespace TrickalFanGame.Editor
                    prefab.GetComponentInChildren<EnemyFeet>(true) != null,
                 "The lobber must be a full-scale enemy with feet and a behaviour context.");
             Assert(prefab.GetComponent<RangedEnemyController>() == null &&
-                   prefab.GetComponent<ContactDamage>() == null && prefab.GetComponent<MeleeEnemyAttack>() == null &&
+                   prefab.GetComponent<ContactDamage>() is { HalfHeartDamage: true } &&
+                   prefab.GetComponent<MeleeEnemyAttack>() == null &&
                    prefab.GetComponent<EnemyDeathExplosion>() == null,
-                "The lobber must hurt only with its lob: no straight shots, contact damage, melee or death blast.");
+                "The lobber must hurt with its lob and a half-heart touch: no straight shots, melee or death blast.");
             Assert(Mathf.Approximately(prefab.GetComponent<Health>().MaxHealth, 30f) &&
                    Mathf.Approximately(prefab.GetComponent<KnockbackReceiver>().KnockbackWeight, 1f),
                 "The lobber must have 30 health and knockback weight 1.");

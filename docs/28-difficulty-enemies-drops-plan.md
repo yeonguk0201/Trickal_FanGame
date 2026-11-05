@@ -146,6 +146,7 @@
 | Variant-0 | 변형 시스템 + 엘리트(§8)                                                               | **완료(2026-10-30)**. 자동 검증과 사용자 Play 확인. §8.5 |
 | Variant-1 | 챔피언 외곽선 + 죽으면 장판·4방향 탄·자폭                                               | **완료(2026-10-31)**. 자동 검증과 사용자 Play 확인. §8.6 |
 | Variant-2 | 챔피언 불사(사이온)                                                                    | **완료(2026-10-31)**. 자동 검증과 사용자 Play 확인. §8.7 |
+| Contact-0 | 원거리 적 반 칸 접촉 피해(자폭형 제외 모든 적이 접촉 피해)                             | **완료(2026-11-06)**. 자동 검증과 사용자 Play 확인. §8.8 |
 | Effect-0  | 이펙트·연출 보강(아래 목록)                                                            | 2026-10-31 사용자 결정. Pool-0 전에 한다                |
 | Pool-0    | 아이템 출처별 풀과 공용 풀 대체                                                        | 보스 스탯 풀 우선                                       |
 | Drop-0    | 층당 목표치, 클리어 드롭 확률·가중치, 보정 장치                                        | Balance-0과 묶을지 결정                                 |
@@ -438,7 +439,7 @@ Curve-1 분류 전에 새 적 유형을 먼저 정한다.
   ×1.5(60). 위협 4(저격과 같음)라 crossfire 선언 위협 15~19는 그대로다. Encounter 콘텐츠 버전 18 → 19(3층 crossfire의
   같은 seed 구성이 바뀐다).
 - 구현 기본값(바꾸려면 알려 달라): 체력 30, 이동 속도 2, 넉백 무게 1, 감지 범위 10, 공격 거리 3.5~7, 준비 0.4초, 비행 1초,
-  높이 2.2, 착지 타원 1.5×0.75, 공격 간격 2.4초, 접촉 피해 없음, 위협 4. 투사체는 크림색 원이다.
+  높이 2.2, 착지 타원 1.5×0.75, 공격 간격 2.4초, 접촉 피해 없음(Contact-0에서 반 칸으로 바뀜, §8.8), 위협 4. 투사체는 크림색 원이다.
 - 원화(사용자 제공, 2026-10-30): **저혈당 요정-광기**(`low-blood-sugar-fairy-madness`)를 정지 그림으로 쓴다. 표시 이름도 같다.
   저혈당 요정-활발과 같은 캔버스라 너비 1.07(키 약 1.2). 그림자는 전용 프로필 없이 기본값이다.
 - 투척 모션·투사체(사용자 제공, 2026-10-30): 4프레임 시트(준비·머리 위로 들기·던짐·마무리)를 `LobbingFairyMotion`이 보여 준다.
@@ -558,6 +559,22 @@ Curve-1 분류 전에 새 적 유형을 먼저 정한다.
 - 자동 검증: `Week27Variant2Verification.SetupAndVerifyBatch`와 `VerifyWithRegressionsBatch`(18개) 통과(2026-10-31). 사용자 Play 확인
   완료(2026-10-31): 회색 반투명 몸과 흰 외곽선 가독성, 불사 3초 체감과 빨라진 이동·공격, 불사 중 방 클리어 대기, 처치 효과가 최종
   사망 때 나는지 모두 적당.
+
+### 8.8 Contact-0 원거리 적 접촉 피해(2026-11-06)
+
+- 사용자 결정(2026-11-06): 자폭형을 뺀 모든 적이 접촉 피해를 준다. 원거리 적은 접촉 피해가 없어서 몸으로 밀면 거리를 벌리려고
+  물러나기만 하고 공격하지 않았다. 원거리 적의 접촉 피해는 **반 칸**(층·등급·엘리트와 무관, 쥬비와 같은 `halfHeartDamage`),
+  쿨다운 1초. 자폭형은 다가와 터지는 적이라 접촉 피해 없음을 유지한다.
+- [15번 피해 모델 계약](./15-fourth-month-plan.md)의 "원거리형은 접촉만으로 피해를 주지 않는다"를 이 결정으로 대체한다.
+- 대상: `RangedEnemy`(원거리형)와 이를 상속하는 `HighBloodSugarFairy`(저격형)·`QuickRangedFairy`(산사모-순수),
+  `LivelyLowBloodSugarFairy`(저혈당 요정-활발), `LobbingFairy`(곡사형), `CrayonArcherMinion`·`CrayonMageMinion`(크레용 보스 소환몹).
+- 구현: 공용 `RangedContactDamageSetup.Ensure`를 Phase E-2·Enemy-8·Enemy-12·Boss-3 Setup이 호출해(예전에는 접촉 피해를 지웠다)
+  다시 실행해도 반 칸 접촉이 유지된다. 기존 Prefab은 메뉴 `Trickal Fan Game > Week 28 > Setup Contact-0 Ranged Contact Damage`로 바꾼다.
+- 자동 검증: `RangedContactDamageVerification.SetupAndVerifyBatch` 통과(2026-11-06). Enemy-12 `SetupAndVerifyBatch`, Phase E-2
+  `Week7RangedEnemyVerification.Verify` 통과. Enemy-8 `SetupAndVerifyBatch`는 이번 변경 전부터 맞지 않는 "자식 0개" 검사(`Feet` 자식)에서,
+  Boss-3 `SetupAndVerifyBatch`는 예전 Week 15 Setup이 만든 Encounter 정의 오류에서 실패한다(둘 다 접촉 피해와 무관).
+- 사용자 Play 확인 완료(2026-11-06). 확인 항목: `FrontendScene`에서 Play해 원거리형·저격형·산사모-순수·저혈당 요정-활발·곡사형에 몸으로 붙으면 하트 반 칸씩, 1초 간격으로
+  줄어드는지, 3층에서도 반 칸인지, 자폭형은 닿아도 피해가 없고 폭발로만 피해를 주는지 본다.
 
 ## 9. 층 분류(Curve-1) 결정(2026-10-24)
 
