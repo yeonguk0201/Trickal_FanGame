@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 9221612778466097809}
   - component: {fileID: 6926745107085970175}
   - component: {fileID: 5916165776844035527}
+  - component: {fileID: 5182298005315205111}
   m_Layer: 6
   m_Name: BuseureogiCrumbMinion
   m_TagString: Untagged
@@ -244,6 +245,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 0.8
+  knockbackImmune: 0
 --- !u!114 &4193192435550944461
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -343,6 +345,24 @@ MonoBehaviour:
   telegraphDuration: 0.6
   radius: 1.2
   damageUnits: 2
+  usesDamageTier: 0
+  damageTier: 1
+  hitsEnemiesAndObstacles: 0
+  enemyDamage: 0
+--- !u!114 &5182298005315205111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4637529536798824959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5d0de76c07de21488000b3d15b767da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyHopMotion
+  strideLength: 0.7
+  hopHeight: 0.14
 --- !u!1 &8609051309289467559
 GameObject:
   m_ObjectHideFlags: 0

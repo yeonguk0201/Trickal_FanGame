@@ -32,15 +32,20 @@ namespace TrickalFanGame.Editor
                 }
                 Require(Mathf.Approximately(prefab.GetComponent<EnemyDefeatAnimation>().KnockScale, binding.KnockScale),
                     prefabName + " must use its configured knock share.");
-                CheckPicture(prefab, prefabName);
+                CheckPicture(prefab, binding);
             }
             Debug.Log($"Defeat verification passed: {EnemyDefeatArtworkSetup.Bindings.Length} enemy and boss Prefabs leave a " +
                 "collider-free defeat picture that starts at the body's feet and height, is knocked away from the hit " +
-                "and stops short of walls, mirrors when knocked left, plays four frames, fades out and removes itself.");
+                "and stops short of walls, mirrors when knocked left (an in-place fall keeps the body's facing and does not hop), " +
+                "plays four frames, fades out and removes itself.");
         }
 
-        private static void CheckPicture(GameObject prefab, string name)
+        private static void CheckPicture(GameObject prefab, EnemyDefeatArtworkSetup.Binding binding)
         {
+            string name = binding.Prefab;
+            bool inPlace = binding.KnockScale <= 0f;
+            Sprite bodyOverride = binding.BodyPath != null ? AssetDatabase.LoadAssetAtPath<Sprite>(binding.BodyPath) : null;
+            Require(binding.BodyPath == null || bodyOverride != null, name + ": missing body drawing " + binding.BodyPath);
             GameObject room = new("Defeat verification room");
             GameObject wall = null;
             try
@@ -50,6 +55,9 @@ namespace TrickalFanGame.Editor
                 var defeat = enemy.GetComponent<EnemyDefeatAnimation>();
                 SpriteRenderer body = BodyOf(enemy);
                 Require(body != null, name + " must have a body drawing to measure.");
+                // The drawing it shows when it dies (잠복형: surfaced), facing right so a kept facing is visible.
+                if (bodyOverride != null) body.sprite = bodyOverride;
+                if (inPlace) body.flipX = true;
                 Bounds bounds = body.bounds;
 
                 EnemyDefeatView left = defeat.SpawnView(Vector2.left);
@@ -57,11 +65,15 @@ namespace TrickalFanGame.Editor
                 Require(left.GetComponentInChildren<Collider2D>() == null && left.GetComponent<Rigidbody2D>() == null,
                     name + ": the defeat picture must not collide.");
                 var view = left.GetComponent<SpriteRenderer>();
-                Require(view.flipX, name + ": a defeat knocked left must be mirrored.");
+                Require(view.flipX, inPlace ? name + ": an in-place defeat must keep the body's facing."
+                    : name + ": a defeat knocked left must be mirrored.");
                 Require(view.sortingLayerID == body.sortingLayerID && view.sortingOrder == body.sortingOrder,
                     name + ": the picture must draw where the body drew.");
                 float multiplier = defeat.SizeMultiplier;
-                Require(Mathf.Abs(multiplier - EnemyDefeatArtworkSetup.SizeMultiplier(prefab, defeat.Frames[0])) < 0.001f &&
+                float expected = bodyOverride != null
+                    ? EnemyDefeatArtworkSetup.VisibleShare(bodyOverride) / EnemyDefeatArtworkSetup.VisibleShare(defeat.Frames[0])
+                    : EnemyDefeatArtworkSetup.SizeMultiplier(prefab, defeat.Frames[0]);
+                Require(Mathf.Abs(multiplier - expected) < 0.001f &&
                     multiplier > 0.5f && multiplier < 2f, name + ": the size multiplier must be the measured one.");
                 // The visible fallen character is as tall as the visible standing one.
                 float standing = bounds.size.y * EnemyDefeatArtworkSetup.VisibleShare(body.sprite);
@@ -88,9 +100,11 @@ namespace TrickalFanGame.Editor
                 left.Advance(EnemyDefeatView.FrameSeconds * 1.5f);
                 Require(view.sprite == frames[1], name + ": the second frame must follow the first.");
                 Vector3 drift = left.transform.position - start;
-                Require(drift.y > 0.01f && Mathf.Abs(shadow.transform.position.y - shadowStart.y) < 0.001f &&
+                Require((inPlace ? drift.sqrMagnitude < 0.000001f && Mathf.Approximately(left.Hop, 0f) : drift.y > 0.01f) &&
+                        Mathf.Abs(shadow.transform.position.y - shadowStart.y) < 0.001f &&
                         Mathf.Abs(shadow.transform.position.x - shadowStart.x - drift.x) < 0.001f,
-                    name + ": the shadow must slide with the (sideways) knock but stay on the floor during the hop.");
+                    inPlace ? name + ": an in-place defeat must neither move nor hop."
+                        : name + ": the shadow must slide with the (sideways) knock but stay on the floor during the hop.");
                 left.Advance(EnemyDefeatView.FrameSeconds * (frames.Length - 1.5f));
                 Require(view.sprite == frames[^1] && (left.transform.position - (start + left.KnockOffset)).sqrMagnitude < 0.0001f,
                     name + ": the knock must end on the last frame at its full offset.");
@@ -110,8 +124,17 @@ namespace TrickalFanGame.Editor
                 wall.GetComponent<BoxCollider2D>().size = new Vector2(0.5f, 4f);
                 bool wallBlocks = (Physics2D.GetLayerCollisionMask(enemy.layer) & 1) != 0;
                 Physics2D.SyncTransforms();
+                if (inPlace) body.flipX = false;
                 EnemyDefeatView right = defeat.SpawnView(Vector2.right);
                 Require(!right.GetComponent<SpriteRenderer>().flipX, name + ": a defeat knocked right keeps the drawing.");
+                if (inPlace)
+                {
+                    // Knocked left, but facing left: the in-place fall follows the body, not the hit.
+                    EnemyDefeatView kept = defeat.SpawnView(Vector2.left);
+                    Require(!kept.GetComponent<SpriteRenderer>().flipX && kept.KnockOffset.sqrMagnitude < 0.000001f,
+                        name + ": an in-place defeat must ignore the hit's side.");
+                    Object.DestroyImmediate(kept.gameObject);
+                }
                 if (wallBlocks)
                     Require(right.KnockOffset.x < Mathf.Min(0.5f, EnemyDefeatView.KnockDistance * defeat.KnockScale) + 0.001f,
                         name + ": the knock must stop short of a wall.");

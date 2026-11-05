@@ -21,24 +21,36 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Artwork/Verify Defeat-1 Motions")]
         public static void Verify()
         {
-            VerifyWalk();
+            VerifyWalk(Defeat1MotionSetup.WalkPath, Defeat1MotionSetup.SelfDestructPrefab,
+                Defeat1MotionSetup.SelfDestructStride, "Sansamo madness walk");
+            VerifyWalk(Defeat1MotionSetup.LobbingWalkPath, Defeat1MotionSetup.LobbingPrefab,
+                Defeat1MotionSetup.LobbingStride, "Lobbing fairy walk");
+            VerifyCrumbHop();
+            VerifyCrouch();
             VerifyAmbush();
             VerifyErpin();
-            Debug.Log("Defeat-1 verification passed: Sansamo madness walks four drawn frames at its idle height and " +
-                      "feet, the ambusher shows mound → three burst steps → held → reversed at its idle width, and " +
+            Debug.Log("Defeat-1 verification passed: Sansamo madness and the lobbing fairy walk four drawn frames at " +
+                      "their idle height and feet, Sansamo madness crouches through four frames over its warning " +
+                      "(and its blast keeps crouching), the crumb minion hops a lifted copy of its drawing, " +
+                      "the ambusher shows mound → three burst steps → held → reversed at its idle width, and " +
                       "Erpin falls through four drawn poses on her idle ground line, keeps her shadow and holds the last.");
         }
 
-        private static void VerifyWalk()
+        private static void VerifyWalk(Func<int, string> pathOf, string prefabPath, float stride, string label)
         {
-            Sprite[] frames = Load(Defeat1MotionSetup.WalkPath);
-            Defeat1MotionSetup.IdleSize(Defeat1MotionSetup.SelfDestructPrefab, out _, out float height);
-            RequireStanding(frames[0], height, -height / 2f, "Sansamo madness walk");
-            WithInstance(Defeat1MotionSetup.SelfDestructPrefab, (root, visual) =>
+            Sprite[] frames = Load(pathOf);
+            Defeat1MotionSetup.IdleSize(prefabPath, out _, out float height);
+            RequireStanding(frames[0], height, -height / 2f, label);
+            for (int i = 1; i < frames.Length; i++)
+                Require(frames[i].rect.size == frames[0].rect.size && frames[i].pivot == frames[0].pivot &&
+                        Mathf.Approximately(frames[i].pixelsPerUnit, frames[0].pixelsPerUnit),
+                    $"{label} frame {i} must share frame 0's canvas, scale and pivot.");
+            WithInstance(prefabPath, (root, visual) =>
             {
                 var walk = root.GetComponent<EnemyWalkFrames>();
-                Require(root.GetComponents<EnemyWalkFrames>().Length == 1 && walk.Frames.Length == 4,
-                    "SelfDestructFairy must carry one four-frame walk.");
+                Require(root.GetComponents<EnemyWalkFrames>().Length == 1 && walk.Frames.Length == 4 &&
+                        Mathf.Approximately(walk.StrideLength, stride),
+                    $"{label}: the Prefab must carry one four-frame walk.");
                 for (int i = 0; i < 4; i++) Require(walk.Frames[i] == frames[i], $"Walk frame {i} must be the drawing.");
                 Vector3 position = root.transform.position, scale = root.transform.localScale;
                 for (int i = 0; i < 4; i++)
@@ -50,6 +62,86 @@ namespace TrickalFanGame.Editor
                 Require(visual.sprite == frames[0], "The walk must loop.");
                 Require(root.transform.position == position && root.transform.localScale == scale,
                     "Walking frames must not move or rescale the enemy.");
+            });
+        }
+
+        // 산사모-광기: the warning crouches through four frames, the first standing where the idle drawing stands.
+        private static void VerifyCrouch()
+        {
+            Sprite[] frames = Load(Defeat1MotionSetup.CrouchPath);
+            Defeat1MotionSetup.IdleSize(Defeat1MotionSetup.SelfDestructPrefab, out _, out float height);
+            RequireStanding(frames[0], height, -height / 2f, "Sansamo madness crouch");
+            for (int i = 1; i < frames.Length; i++)
+                Require(frames[i].rect.size == frames[0].rect.size && frames[i].pivot == frames[0].pivot &&
+                        Mathf.Approximately(frames[i].pixelsPerUnit, frames[0].pixelsPerUnit),
+                    $"Crouch frame {i} must share frame 0's canvas, scale and pivot.");
+            Require(SelfDestructCrouch.FrameIndex(0f, 4) == 0 && SelfDestructCrouch.FrameIndex(0.26f, 4) == 1 &&
+                    SelfDestructCrouch.FrameIndex(0.6f, 4) == 2 && SelfDestructCrouch.FrameIndex(0.8f, 4) == 3 &&
+                    SelfDestructCrouch.FrameIndex(1f, 4) == 3,
+                "The crouch must spread its four frames evenly over the warning and hold the last.");
+            WithInstance(Defeat1MotionSetup.SelfDestructPrefab, (root, visual) =>
+            {
+                var crouch = root.GetComponent<SelfDestructCrouch>();
+                Require(root.GetComponents<SelfDestructCrouch>().Length == 1 && crouch.HasFrames &&
+                        crouch.Frames.Length == 4, "SelfDestructFairy must carry one four-frame crouch.");
+                for (int i = 0; i < 4; i++) Require(crouch.Frames[i] == frames[i], $"Crouch frame {i} must be the drawing.");
+                Vector3 position = root.transform.position;
+                for (int i = 0; i < 4; i++)
+                {
+                    crouch.RenderPose((i + 0.1f) / 4f);
+                    Require(visual.sprite == frames[i], $"The warning must show crouch frame {i} in order.");
+                }
+                Require(root.transform.position == position, "Crouching must not move the enemy.");
+
+                // Dying mid-warning: the blast's stopped body keeps crouching on the warning's clock and turns red.
+                GameObject owner = new("Crouch Blast Verification");
+                try
+                {
+                    visual.sprite = frames[1];
+                    EnemyDeathBlast blast = EnemyDeathBlast.Spawn(Vector3.zero, owner.transform, root, visual, 1f, 1f, 1,
+                        Time.time);
+                    blast.ConfigureBodyFrames(crouch.Frames);
+                    Require(blast.Body != null && blast.BodyFrameCount == 4 && blast.Body.sprite == frames[0],
+                        "The blast body must take the crouch frames from the start of its warning.");
+                    blast.Tick(Time.time + 0.6f);
+                    Require(blast.Body.sprite == frames[2] && blast.Body.color.g < 0.9f,
+                        "Mid-warning the blast body must be on the matching crouch frame and reddening.");
+                }
+                finally { Object.DestroyImmediate(owner); }
+            });
+        }
+
+        // 부스러기 쫄따구: the body stays on the floor; a copy of its drawing rises once per stride and lands.
+        private static void VerifyCrumbHop()
+        {
+            float h = Defeat1MotionSetup.CrumbHopHeight;
+            Require(EnemyHopMotion.LiftAt(0f, h) == 0f && EnemyHopMotion.LiftAt(EnemyHopMotion.TakeOff - 0.01f, h) == 0f &&
+                    Mathf.Abs(EnemyHopMotion.LiftAt((EnemyHopMotion.TakeOff + EnemyHopMotion.Landing) / 2f, h) - h) < 0.0001f &&
+                    EnemyHopMotion.LiftAt(EnemyHopMotion.Landing, h) == 0f && Mathf.Abs(EnemyHopMotion.LiftAt(1.3f, h) -
+                    EnemyHopMotion.LiftAt(0.3f, h)) < 0.0001f,
+                "The hop must rest on the floor, peak at its height mid-air and repeat every stride.");
+            WithInstance(Defeat1MotionSetup.CrumbMinionPrefab, (root, visual) =>
+            {
+                var hop = root.GetComponent<EnemyHopMotion>();
+                Require(root.GetComponents<EnemyHopMotion>().Length == 1 &&
+                        Mathf.Approximately(hop.StrideLength, Defeat1MotionSetup.CrumbHopStride) &&
+                        Mathf.Approximately(hop.HopHeight, h), "The crumb minion must carry one configured hop.");
+                Require(root.GetComponent<EnemyWalkFrames>() == null && root.GetComponent<EnemyMovementAnimator>() == null,
+                    "The crumb minion must not also walk or deform.");
+                Vector3 position = root.transform.position, visualAt = visual.transform.position;
+                visual.flipX = true;
+                visual.color = new Color(1f, 0.5f, 0.5f, 1f);
+                hop.RenderLift(h);
+                SpriteRenderer copy = hop.Artwork;
+                Require(copy != null && copy.enabled && visual.forceRenderingOff && copy.sprite == visual.sprite &&
+                        copy.flipX && copy.color == visual.color && copy.sortingOrder == visual.sortingOrder &&
+                        Mathf.Abs(copy.transform.position.y - visualAt.y - h) < 0.001f &&
+                        Mathf.Abs(copy.transform.position.x - visualAt.x) < 0.001f,
+                    "In the air the drawing (with its colour and facing) must be drawn the hop height above the body.");
+                Require(root.transform.position == position && visual.transform.position == visualAt,
+                    "Hopping must not move the body, its collider or its shadow source.");
+                hop.RenderLift(0f);
+                Require(!copy.enabled && !visual.forceRenderingOff, "Landed, the body draws itself again.");
             });
         }
 

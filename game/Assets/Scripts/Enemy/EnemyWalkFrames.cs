@@ -8,8 +8,9 @@ namespace TrickalFanGame.Enemy
     /// Presentation only, for enemies drawn through FairyKingdomArtworkView. While the body actually travels it
     /// shows the drawn walk frames, one cycle per stride; otherwise the view's idle drawing stays. It runs after the
     /// view has restored the idle drawing each frame. The Editor setup sizes the frames to the idle drawing.
+    /// It runs after LobbingFairyMotion and leaves its throw poses alone (곡사형 걷기, 2026-11-06).
     /// </summary>
-    [DisallowMultipleComponent, DefaultExecutionOrder(200)]
+    [DisallowMultipleComponent, DefaultExecutionOrder(210)]
     [RequireComponent(typeof(Rigidbody2D))]
     public sealed class EnemyWalkFrames : MonoBehaviour
     {
@@ -20,6 +21,7 @@ namespace TrickalFanGame.Enemy
         private Health health;
         private KnockbackReceiver knockback;
         private SpriteRenderer visual;
+        private LobbingFairyMotion throwing;
         private Vector2 previousPosition;
         private float phase;
         private bool moving;
@@ -49,6 +51,7 @@ namespace TrickalFanGame.Enemy
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<Health>();
             knockback = GetComponent<KnockbackReceiver>();
+            throwing = GetComponent<LobbingFairyMotion>();
             FairyKingdomArtworkView view = GetComponent<FairyKingdomArtworkView>();
             visual = view != null && view.Visual != null ? view.Visual : GetComponentInChildren<SpriteRenderer>();
         }
@@ -67,7 +70,7 @@ namespace TrickalFanGame.Enemy
 
         private void LateUpdate()
         {
-            if (moving) RenderPose(phase);
+            if (moving && (throwing == null || throwing.CurrentFrame < 0)) RenderPose(phase);
         }
 
         // Shows the walk frame for cycle (0~1). Also used by the Editor verifier.

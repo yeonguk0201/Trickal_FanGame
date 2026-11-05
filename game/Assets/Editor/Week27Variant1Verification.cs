@@ -528,6 +528,10 @@ namespace TrickalFanGame.Editor
                 Health side = CreatePlayer(root.transform, sideAt);
                 Health beyond = CreatePlayer(root.transform, beyondAt);
                 Health cornerBeyond = CreatePlayer(root.transform, cornerAt);
+                bool drawnDefeat = EnemyDefeatAnimation.PlaysOn(blaster);
+                // 불효자손 (the chaser) has drawn defeat frames, so its blast must not add a standing copy (2026-11-06).
+                Assert(drawnDefeat, $"{chaser.name} has defeat frames, so the blast must treat it as drawn " +
+                    $"(defeat {blaster.GetComponent<EnemyDefeatAnimation>() != null}).");
                 Kill(blaster);
                 EnemyChampionBlast blast = blaster.GetComponent<EnemyChampionDeath>().LastEffect
                     ?.GetComponent<EnemyChampionBlast>();
@@ -540,9 +544,11 @@ namespace TrickalFanGame.Editor
                        positions.All(spot => Mathf.Abs(spot.x - blastAt.x) <= 1.001f &&
                                              Mathf.Abs(spot.y - blastAt.y) <= 1.001f) &&
                        blast.Area != null && blast.Area.enabled &&
-                       blast.Area.sprite.bounds.size.x >= (1f + reach) * 2f - 0.05f && blast.Body != null &&
-                       blast.GetComponentsInChildren<SpriteRenderer>(true).Length == 2,
-                    "A blast champion must leave a one second telegraph of the reached area (no cell marks).");
+                       blast.Area.sprite.bounds.size.x >= (1f + reach) * 2f - 0.05f &&
+                       (blast.Body != null) == !drawnDefeat &&
+                       blast.GetComponentsInChildren<SpriteRenderer>(true).Length == (drawnDefeat ? 1 : 2),
+                    "A blast champion must leave a one second telegraph of the reached area (no cell marks), and a " +
+                    "standing copy of its body only when no drawn defeat shows it falling.");
                 Assert(EnemyChampionBlast.Reaches(blastAt, sideAt, reach) &&
                        !EnemyChampionBlast.Reaches(blastAt, beyondAt, reach) &&
                        !EnemyChampionBlast.Reaches(blastAt, cornerAt, reach),

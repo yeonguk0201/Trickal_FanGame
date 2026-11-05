@@ -102,6 +102,7 @@ GameObject:
   - component: {fileID: 2423833831050061116}
   - component: {fileID: 2867753957319409832}
   - component: {fileID: 8403880621662507183}
+  - component: {fileID: 8696452140556154801}
   m_Layer: 6
   m_Name: LobbingFairy
   m_TagString: Untagged
@@ -402,3 +403,21 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: LobbingFairy
   useSharedProfile: 1
+--- !u!114 &8696452140556154801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9176006115792224653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02e329a4e7113394c929bc50ea077391, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyWalkFrames
+  frames:
+  - {fileID: 21300000, guid: 373e487ced5cc6140a9a9dbcfc840c54, type: 3}
+  - {fileID: 21300000, guid: 139ea44f954dd684ba20a5787777c2e8, type: 3}
+  - {fileID: 21300000, guid: 1a9384829fafc864cb081a9f4b4ba60b, type: 3}
+  - {fileID: 21300000, guid: 3957604e61557b2458086720fce008ff, type: 3}
+  strideLength: 0.9

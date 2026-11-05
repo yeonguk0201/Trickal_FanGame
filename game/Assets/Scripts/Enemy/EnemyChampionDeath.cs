@@ -77,6 +77,7 @@ namespace TrickalFanGame.Enemy
             SpriteRenderer visual = artwork != null && artwork.Visual != null
                 ? artwork.Visual
                 : GetComponentInChildren<SpriteRenderer>();
+            if (EnemyDefeatAnimation.PlaysOn(gameObject)) visual = null;
             EnemyChampionBlast blast = EnemyChampionBlast.Spawn(transform.position, transform.parent, visual, now);
             return blast != null ? blast.gameObject : null;
         }
