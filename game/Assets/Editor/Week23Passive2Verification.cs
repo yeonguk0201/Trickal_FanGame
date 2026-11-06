@@ -92,14 +92,20 @@ namespace TrickalFanGame.Editor
             Assert(description == "몸 크기 +30% · 기본 공격 피해 +20% · 최대 HP +3칸 · 이동속도 -20%",
                 $"거대화 물약 must describe its four effects, but reads '{description}'.");
 
-            string[] sizeUsers = AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" })
+            ItemDefinition[] definitions = AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" })
                 .Select(guid => AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid)))
-                .Where(definition => definition != null && definition.Effects.Any(effect =>
-                    effect.EffectType is ItemEffectType.PlayerSizePercent
-                        or ItemEffectType.BasicAttackDamagePercent))
+                .Where(definition => definition != null).ToArray();
+            string[] sizeUsers = definitions
+                .Where(definition => definition.Effects.Any(effect =>
+                    effect.EffectType == ItemEffectType.PlayerSizePercent))
                 .Select(definition => definition.ItemId).ToArray();
             Assert(sizeUsers.SequenceEqual(new[] { Week23Passive2Setup.PotionId }),
-                "Only 거대화 물약 may use the body size and basic attack damage effects.");
+                $"Only 거대화 물약 may use the body size effect, but found: {string.Join(", ", sizeUsers)}.");
+            // Pool-2's 흑요석 수리검 also raises basic attack damage, so that effect is not exclusive.
+            Assert(definitions.Any(definition => definition.ItemId == Week23Passive2Setup.PotionId &&
+                                                 definition.Effects.Any(effect =>
+                                                     effect.EffectType == ItemEffectType.BasicAttackDamagePercent)),
+                "거대화 물약 must use the basic attack damage effect.");
 
             RoomGraphAssembler assembler = Object.FindFirstObjectByType<RoomGraphAssembler>(FindObjectsInactive.Include);
             Assert(assembler != null && assembler.SelectionRewardPool.Count(item => item == potion) == 1,
