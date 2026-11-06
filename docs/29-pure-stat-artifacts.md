@@ -4,7 +4,7 @@
 > 계획: [28-difficulty-enemies-drops-plan.md](./28-difficulty-enemies-drops-plan.md) §4.3(Pool-2), §4.1(Pool-0), §4.2(Pool-1)
 > 관련 계약: [23-item-classification-contract.md](./23-item-classification-contract.md) §2.3·§2.4, [11-artifact-reference.md](./11-artifact-reference.md)(원작 카드)
 > 원문: `docs/references/trickcal-revive-artifacts-namuwiki-source.txt`
-> 상태: **1순위 11종·2순위 7종 구현, 자동 검증 통과(2026-11-06). 사용자 Play 확인 대기. 피격 무효 확률 3종 보류.**
+> 상태: **1순위 11종·2순위 7종 구현, 자동 검증과 사용자 Play 확인 완료(2026-11-06). 피격 무효 확률 3종 보류.**
 
 ## 1. 요약
 
@@ -160,7 +160,7 @@
 - 회귀: `Verify Pool-2 Pure Stat Artifacts With Regressions` — 위 + Pool-0, Pool-1 회귀 묶음, 사용자 원화, Artifact-2, Shop-0,
   HP-1, Phase G-2·G-4, 방어막 버블, Phase D 고학년 스킬, Spell-5, Power-1. **통과(2026-11-06).**
 - Backend: `item-catalog.spec.ts`(18종 효과·순서·등급·`maxStacks` 0, Pool-1 6종), lint, `pnpm build` 통과.
-- 수동 확인(Play, 대기):
+- 수동 확인(Play): 아래 다섯 가지 모두 사용자 확인, 정상(2026-11-06).
   1. F1 `— Artifact —` → `Show artifact drops`에 18종과 `[BS]` 표시, `Drop`으로 획득 시 카드·일시정지 목록에 원화·설명.
   2. 보스 3택1·상점에 새 아이템이 섞여 나오는지, 등급 비중이 괜찮은지.
   3. 긴급 보호 벨트 + 티아라로 전투방 입장 시 방어막 1칸.
