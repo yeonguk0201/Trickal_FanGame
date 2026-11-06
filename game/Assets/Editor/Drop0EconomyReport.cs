@@ -162,11 +162,14 @@ namespace TrickalFanGame.Editor
                     if (node.Role != GeneratedRoomRole.Intermediate || node.ResolvedEncounterWaves.Count == 0) continue;
                     t.CombatRooms++;
 
-                    // Clear chest: a normal chest is free, golden costs a key, diamond a bomb.
+                    // Clear chest: a normal chest is free, golden costs a key, diamond a bomb. Drop-1: the key-free
+                    // floor turns golden into normal.
+                    bool keyFree = graph.FindFloor(node.FloorNumber)?.IsKeyFree == true;
                     double kindTotal = chests.Kinds.Sum(rule => rule.Weight);
-                    foreach (ChestKindRule rule in chests.Kinds)
+                    foreach (ChestKindRule rolled in chests.Kinds)
                     {
-                        double chance = chests.ChestChance * rule.Weight / kindTotal;
+                        ChestKindRule rule = chests.FindRule(ChestContentTable.ResolveKindForFloor(rolled.Kind, keyFree));
+                        double chance = chests.ChestChance * rolled.Weight / kindTotal;
                         Yield contents = ChestYield(chests, rule) * chance;
                         AddChest(t, rule.Kind, contents, chance);
                         if (rule.Kind == ChestKind.Normal)
@@ -179,7 +182,7 @@ namespace TrickalFanGame.Editor
                     if (node.Template != null)
                         foreach (RoomTemplateChest authored in node.Template.AuthoredChests)
                         {
-                            ChestKind kind = authored.Kind;
+                            ChestKind kind = ChestContentTable.ResolveKindForFloor(authored.Kind, keyFree);
                             ChestKindRule rule = chests.FindRule(kind);
                             if (rule == null) continue;
                             Yield contents = ChestYield(chests, rule);

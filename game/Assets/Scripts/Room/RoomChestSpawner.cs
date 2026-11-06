@@ -11,9 +11,10 @@ namespace TrickalFanGame.Room
     public sealed class RoomChestSite
     {
         public RoomChestSite(RoomPrefab room, RoomTemplateDefinition template, RoomRunState state, RunProgress progress,
-            Transform player = null)
+            Transform player = null, bool keyFreeFloor = false)
         {
             Player = player;
+            KeyFreeFloor = keyFreeFloor;
             Room = room != null ? room : throw new ArgumentNullException(nameof(room));
             Template = template != null ? template : throw new ArgumentNullException(nameof(template));
             State = state ?? throw new ArgumentNullException(nameof(state));
@@ -24,6 +25,8 @@ namespace TrickalFanGame.Room
         public RoomTemplateDefinition Template { get; }
         public RoomRunState State { get; }
         public RunProgress Progress { get; }
+        // Drop-1: the room is on the key-free floor, so its clear and Layout chests are never golden.
+        public bool KeyFreeFloor { get; }
         // A new chest never appears on top of the player, who is usually still in the room when it clears.
         public Transform Player { get; }
         public Vector2? AvoidLocal => Player != null ? Room.transform.InverseTransformPoint(Player.position) : null;
@@ -130,7 +133,8 @@ namespace TrickalFanGame.Room
             {
                 RoomTemplateChest chest = authored[index];
                 if (site.State.GetChest(chest.ChestId) != null) continue;
-                TreasureChest placed = Spawn(table, site, chest.ChestId, chest.Kind,
+                TreasureChest placed = Spawn(table, site, chest.ChestId,
+                    ChestContentTable.ResolveKindForFloor(chest.Kind, site.KeyFreeFloor),
                     DeriveAuthoredSeed(roomContentSeed, chest.ChestId), chest.LocalPosition, out error);
                 if (placed == null)
                 {

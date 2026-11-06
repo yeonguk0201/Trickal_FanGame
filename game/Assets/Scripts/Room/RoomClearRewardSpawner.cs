@@ -136,6 +136,7 @@ namespace TrickalFanGame.Room
                 return false;
             }
 
+            kind = ChestContentTable.ResolveKindForFloor(kind, chestSite.KeyFreeFloor);
             TreasureChest chest = RoomChestSpawner.Spawn(chestTable, chestSite, ClearChestId, kind, chestSeed,
                 out string error);
             // After the chest, so the guaranteed pickups keep clear of it.

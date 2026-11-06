@@ -170,6 +170,8 @@ namespace TrickalFanGame.Room
         public string BossRoomId { get; }
         public IReadOnlyList<GeneratedRoomNode> Nodes { get; }
         public FloorGenerationSettings Settings { get; }
+        // Drop-1: nothing on this floor needs a key (FloorGenerator.IsKeyFreeFloor).
+        public bool IsKeyFree => FloorGenerator.IsKeyFreeFloor(FloorNumber, Settings != null);
     }
 
     public sealed class GeneratedFloorGraph
@@ -304,7 +306,10 @@ namespace TrickalFanGame.Room
                 !IsValidStartTreasure(floor, out error)) return false;
             foreach (GeneratedRoomNode node in floor.Nodes)
             {
-                if (node.Role == GeneratedRoomRole.Shop && !IsValidShop(node, byId, out error)) return false;
+                if (node.RequiresKey && floor.IsKeyFree)
+                { error = $"Floor {floor.FloorNumber} must not lock room {node.RoomId} with a key."; return false; }
+                if (node.Role == GeneratedRoomRole.Shop && !IsValidShop(node, byId, floor.IsKeyFree, out error))
+                    return false;
                 if (node.RequiresKey && !CanReachWithoutRoomForGeneration(
                         floor.StartingRoomId, floor.BossRoomId, node.RoomId, byId))
                 {
@@ -316,15 +321,18 @@ namespace TrickalFanGame.Room
         }
 
         // Special-4: the shop is a key-locked end room behind one regular door from the start or an intermediate
-        // room, so it never sits on the boss route and no hidden passage can bypass its lock.
+        // room, so it never sits on the boss route and no hidden passage can bypass its lock. Drop-1: on the key-free
+        // floor the same end room has no lock.
         private static bool IsValidShop(GeneratedRoomNode shop, IReadOnlyDictionary<string, GeneratedRoomNode> byId,
-            out string error)
+            bool keyFree, out string error)
         {
-            if (!shop.RequiresKey || shop.DirectionalConnections.Count != 1 || shop.DirectionalConnections[0].IsSecret ||
+            if (shop.RequiresKey == keyFree || shop.DirectionalConnections.Count != 1 ||
+                shop.DirectionalConnections[0].IsSecret ||
                 byId[shop.DirectionalConnections[0].DestinationRoomId].Role is not
                     (GeneratedRoomRole.Start or GeneratedRoomRole.Intermediate))
             {
-                error = $"Shop room {shop.RoomId} must be a key-locked end room behind a start or intermediate room.";
+                error = $"Shop room {shop.RoomId} must be a {(keyFree ? "key-free" : "key-locked")} end room " +
+                        "behind a start or intermediate room.";
                 return false;
             }
 
@@ -416,6 +424,10 @@ namespace TrickalFanGame.Room
         // Power-2: on this floor of a configured (floor-settings) Run, the treasure room is a key-free end room right
         // next to the start room, so the guaranteed 교주의 권능 offer is always the first thing the player can reach.
         public const int StartTreasureFloor = 1;
+        // Drop-1 (2026-11-06, 사용자 결정 A): on this floor of a configured Run nothing needs a key. The shop opens
+        // without one and a golden chest rolled or authored there becomes a normal chest
+        // (ChestContentTable.ResolveKindForFloor); the treasure room is already key-free there (Power-2).
+        public const int KeyFreeFloor = 1;
         [SerializeField, Min(1)] private int floorCount = 3;
         [SerializeField, Min(3)] private int minimumRoomsPerFloor = 6;
         [SerializeField, Min(3)] private int maximumRoomsPerFloor = 8;
@@ -601,7 +613,8 @@ namespace TrickalFanGame.Room
                 uint lockRoll = unchecked((uint)DeriveSeed(contentSeed, treasure.RoomNumber, TreasureLockSalt));
                 treasure.AssignKeyRequirement(!startTreasure && optionalRoute && lockRoll % 100u < TreasureLockPercent);
                 nodes = AppendSecretRoom(floorNumber, contentSeed, nodes, reward, shop.Count > 0);
-                nodes = AppendShopRoom(floorNumber, contentSeed, nodes, shop);
+                nodes = AppendShopRoom(floorNumber, contentSeed, nodes, shop,
+                    IsKeyFreeFloor(floorNumber, settings != null));
                 // Retry topology if a reserved special room had no valid cell; never change the size or special rolls.
                 if (settings != null && nodes.Length != totalRooms) continue;
                 floor = new GeneratedFloor(floorNumber, floorSeed, topologySeed, contentSeed,
@@ -612,6 +625,9 @@ namespace TrickalFanGame.Room
 
         public static bool UsesStartTreasure(int floorNumber, bool hasFloorSettings) =>
             hasFloorSettings && floorNumber == StartTreasureFloor;
+
+        public static bool IsKeyFreeFloor(int floorNumber, bool hasFloorSettings) =>
+            hasFloorSettings && floorNumber == KeyFreeFloor;
 
         private static bool RollSpecialRoom(int contentSeed, uint salt, int percent)
         {
@@ -684,8 +700,9 @@ namespace TrickalFanGame.Room
         // existing room number, role, position, seed, or hidden passage. It hangs off the start or an intermediate
         // room as a key-locked end room on an empty cell; the secret room was placed before it and never links to it.
         // Without a shop Room Definition (older verification configurations) floors simply have no shop.
+        // Drop-1: on the key-free floor the shop is the same room without the lock.
         private static GeneratedRoomNode[] AppendShopRoom(int floorNumber, int contentSeed, GeneratedRoomNode[] nodes,
-            IReadOnlyList<RoomDefinition> shop)
+            IReadOnlyList<RoomDefinition> shop, bool keyFree)
         {
             if (shop.Count == 0) return nodes;
             StableRandom random = new(unchecked((uint)DeriveSeed(contentSeed, 0, ShopRoomSalt)));
@@ -709,7 +726,7 @@ namespace TrickalFanGame.Room
             GeneratedRoomNode shopRoom = new(BuildRoomId(floorNumber, roomNumber), floorNumber, roomNumber,
                 parent.GridPosition.Offset(outward), GeneratedRoomRole.Shop,
                 DeriveSeed(contentSeed, roomNumber, ContentSalt), shop[random.NextIndex(shop.Count)]);
-            shopRoom.AssignKeyRequirement(true);
+            shopRoom.AssignKeyRequirement(!keyFree);
             parent.ConnectTo(outward, shopRoom.RoomId);
             shopRoom.ConnectTo(GeneratedFloorGraph.Opposite(outward), parent.RoomId);
 

@@ -727,7 +727,8 @@ namespace TrickalFanGame.Room
                     if (rewardSpawner == null)
                         rewardSpawner = controller.gameObject.AddComponent<RoomClearRewardSpawner>();
                     RoomChestSite chestSite = new(instance, node.Template, state, runProgress,
-                        graph != null && graph.Player != null ? graph.Player.transform : null);
+                        graph != null && graph.Player != null ? graph.Player.transform : null,
+                        generatedGraph?.FindFloor(node.FloorNumber)?.IsKeyFree == true);
                     rewardSpawner.ConfigureChest(chestContentTable, chestSite,
                         RoomClearRewardSpawner.DeriveChestSeed(node.ContentSeed));
                     controller.ConfigureClearReward(rewardSpawner);

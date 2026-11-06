@@ -2454,3 +2454,13 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 실제 화면: Game Scene Play → `F1` → `— Resources —`의 `Key pity on next clear`를 누르고 전투방을 클리어하면 상자 옆에 열쇠가
   하나 더 떨어진다(`Pity key 0/5`로 돌아감). 챔피언 드롭은 `— Seed —`의 `Find champion F2`로 2층 이상 챔피언을 잡고 `— Room —`의
   `Champion drop` 줄에서 확인한다.
+
+## 1층 열쇠 콘텐츠 Drop-1 (2026-11-06)
+
+- 1층은 열쇠가 필요 없다. 규칙은 런타임(`FloorGenerator.KeyFreeFloor`, `ChestContentTable.ResolveKindForFloor`)에 있고, Setup
+  메뉴 `Trickal Fan Game > Week 28 > Setup Drop-1 Key-Free Floor 1`은 Game Scene Room 콘텐츠 버전을 15로 올리기만 한다.
+- 검증: `-executeMethod TrickalFanGame.Editor.Drop1KeyFreeFloorVerification.SetupAndVerifyBatch`(단독),
+  `VerifyWithRegressionsBatch`(커밋 전 회귀 묶음). 단독 메뉴는 `Verify Drop-1 Key-Free Floor 1`.
+- 실제 화면: Game Scene Play → `F1` → `— Seed —`의 `Find shop F1`로 1층 상점이 있는 Run을 열고 `— Shop —`에서 `no key
+  (key-free floor)`인지, 열쇠 0개로 상점 문을 지나갈 수 있는지 본다. 1층 전투방 클리어 상자가 황금으로 나오지 않는지 본다.
+  `— Chest —`의 개발용 황금 상자는 1층에서도 황금 그대로다.

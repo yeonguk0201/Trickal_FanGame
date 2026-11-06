@@ -1192,7 +1192,10 @@ namespace TrickalFanGame.Run
             }
 
             RoomRunState state = assembler.Progress.GetRoomState(shop.RoomId);
-            GUILayout.Label($"{shop.RoomId} at {shop.GridPosition}, {(state?.IsKeyLockOpen == true ? "unlocked" : "locked")}");
+            // Drop-1: the key-free floor's shop has no lock at all.
+            string lockText = !shop.RequiresKey ? "no key (key-free floor)"
+                : state?.IsKeyLockOpen == true ? "unlocked" : "locked";
+            GUILayout.Label($"{shop.RoomId} at {shop.GridPosition}, {lockText}");
             if (AssistedButton("Go to shop door"))
                 Teleport(assembler, shop.DirectionalConnections[0].DestinationRoomId);
         }

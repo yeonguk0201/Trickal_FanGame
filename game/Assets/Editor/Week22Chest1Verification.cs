@@ -300,6 +300,8 @@ namespace TrickalFanGame.Editor
                 // A chest roll places one chest of the seeded kind; a second clear does nothing.
                 Assert(table.TryRollChest(RoomClearRewardSpawner.DeriveChestSeed(chestNode.ContentSeed),
                     out ChestKind kind), "The chosen room must roll a chest.");
+                // Drop-1: floor 1 turns a golden roll into a normal chest.
+                kind = ChestContentTable.ResolveKindForFloor(kind, floor.IsKeyFree);
                 RoomClearRewardSpawner spawner = Spawner(assembler, chestNode.RoomId);
                 RoomRunState state = assembler.Progress.GetRoomState(chestNode.RoomId);
                 // The player stands on the preferred point when the room clears; the chest must not land on them.

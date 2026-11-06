@@ -2687,7 +2687,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ffa130d562b59df4fb09168cad44312f, type: 2}
   - {fileID: 11400000, guid: 2b8205598a3bfb743babd58317a21b80, type: 2}
   - {fileID: 11400000, guid: bbbef5a18185b6e428a3c5387645e964, type: 2}
-  roomContentVersion: 14
+  roomContentVersion: 15
   roomTemplates:
   - {fileID: 11400000, guid: 0acb0c03ac29fe741a8006a51518cf60, type: 2}
   - {fileID: 11400000, guid: cd8ea15c0b6de5949bdfe798aa38e5e3, type: 2}

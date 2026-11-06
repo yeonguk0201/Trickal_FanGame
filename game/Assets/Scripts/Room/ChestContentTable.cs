@@ -312,6 +312,11 @@ namespace TrickalFanGame.Room
             prefab != null && (prefab.GetComponent<RunResourcePickup>() != null ||
                                prefab.GetComponent<HealthPickup>() != null || prefab.GetComponent<SPPickup>() != null);
 
+        // Drop-1: on the key-free floor (FloorGenerator.KeyFreeFloor) a golden chest from a clear roll or a Layout is a
+        // normal chest instead, with normal contents from the same seed. Development and copied chests keep their kind.
+        public static ChestKind ResolveKindForFloor(ChestKind kind, bool keyFreeFloor) =>
+            keyFreeFloor && kind == ChestKind.Golden ? ChestKind.Normal : kind;
+
         // Whether a combat room clear yields a chest, and of which kind.
         public bool TryRollChest(int seed, out ChestKind kind)
         {
