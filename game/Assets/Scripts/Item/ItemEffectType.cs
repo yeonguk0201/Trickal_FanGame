@@ -206,5 +206,14 @@ namespace TrickalFanGame.Item
         // Elif-2 (아이시아의 지갑): on acquire, rolls 0-4 permanent elif once from the Run seed and the item ID
         // (PermanentElif.WalletWeights) and adds them to the Run's elif gain. No value fields are used.
         GainPermanentElifRollOnAcquire = 86,
+        // Pool-2 (찬란한 티아라, 제사장의 향로): every time the player gains a shield, Magnitude more (half-heart units).
+        // Still bound by the 15-heart health + shield limit.
+        ShieldGainBonus = 87,
+        // Pool-2 (블랑셰의 유리 파랑새): high-grade skill (PlayerUltimate) damage +Magnitude, added to the skill damage
+        // bonus. The low-grade skill is unchanged.
+        UltimateDamagePercent = 88,
+        // Pool-2 (블랑셰의 유리 파랑새): basic attack damage -Magnitude. The total penalty stops at
+        // PlayerStats.MaximumBasicAttackDamagePenalty.
+        BasicAttackDamagePenaltyPercent = 89,
     }
 }

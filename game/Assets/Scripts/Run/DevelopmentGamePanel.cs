@@ -409,7 +409,9 @@ namespace TrickalFanGame.Run
                 if (table.GoldenExclusiveArtifacts.Contains(item)) continue;
                 int stacks = inventory != null ? inventory.GetStackCount(item.ItemId) : 0;
                 string limit = item.MaxStacks > 0 ? item.MaxStacks.ToString() : "-";
-                if (!AssistedButton($"Drop {item.DisplayName} ({stacks}/{limit}) {PoolTag(item)}")) continue;
+                // Pool-1: every stat this artifact raises is at its overall cap, so rewards stop offering it.
+                string capped = inventory != null && inventory.AreAllEffectsAtOverallCap(item) ? " [CAP]" : string.Empty;
+                if (!AssistedButton($"Drop {item.DisplayName} ({stacks}/{limit}){capped} {PoolTag(item)}")) continue;
                 RoomPrefab room = CurrentRoom(assembler);
                 ItemPickup pickup = Instantiate(table.ArtifactPickupPrefab,
                     player.position + Vector3.right * 1.2f, Quaternion.identity,

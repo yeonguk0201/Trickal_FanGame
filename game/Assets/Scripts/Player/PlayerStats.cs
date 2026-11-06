@@ -57,6 +57,8 @@ namespace TrickalFanGame.Player
         private float projectileSpeedPercentBonus;
         private float playerSizePercentBonus;
         private float basicAttackDamagePercentBonus;
+        private float basicAttackDamagePenaltyPercent;
+        private float ultimateDamagePercentBonus;
         private float projectileLifetimePercentBonus;
         private float projectileSizePercentBonus;
         private PoisonSettings basicAttackPoison;
@@ -95,23 +97,74 @@ namespace TrickalFanGame.Player
             (baseAttackDamage + flatAttackDamageBonus) *
             Mathf.Max(0f, 1f + attackDamagePercentBonus + powerAttackDamagePercentBonus + tarotAttackDamagePercent);
         public float SkillDamageMultiplier => 1f + skillDamagePercentBonus;
+        // Pool-2 (블랑셰의 유리 파랑새): the high-grade skill adds its own bonus to the skill damage bonus.
+        public float UltimateDamageMultiplier => SkillDamageMultiplier + ultimateDamagePercentBonus;
+        // Pool-2: the basic attack penalty stops here, so a basic attack keeps at least a fifth of its damage.
+        public const float MaximumBasicAttackDamagePenalty = 0.8f;
+        public float BasicAttackDamagePenalty =>
+            Mathf.Min(basicAttackDamagePenaltyPercent, MaximumBasicAttackDamagePenalty);
         // Passive-2: PlayerBodySize turns this into the look, the hurtbox and the fixed feet.
         public float PlayerSizeMultiplier => 1f + playerSizePercentBonus;
 
         // Trap-0: a 거미줄 under the feet scales the final speed (EnvironmentSlow).
-        public float MoveSpeed => (baseMoveSpeed + moveSpeedBonus) *
-            Mathf.Max(0f, 1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent +
-                currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus + powerMoveSpeedPercentBonus +
-                tarotMoveSpeedPercent +
-                (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f)) *
+        // Pool-1: the speed from items and buffs stays between MinimumMoveSpeedMultiplier and
+        // MaximumMoveSpeedMultiplier of the base speed; the 거미줄 slow applies after the clamp.
+        public float MoveSpeed => Mathf.Clamp(
+                (baseMoveSpeed + moveSpeedBonus) *
+                Mathf.Max(0f, 1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent +
+                    currentRoomMoveSpeedPercentBonus + singleUseRoomMoveSpeedPercentBonus + powerMoveSpeedPercentBonus +
+                    tarotMoveSpeedPercent +
+                    (IsBelowMoveSpeedHealthThreshold ? moveSpeedPercentBelowHealthBonus : 0f)),
+                baseMoveSpeed * MinimumMoveSpeedMultiplier,
+                baseMoveSpeed * MaximumMoveSpeedMultiplier) *
             EnvironmentSlow.MultiplierOf(this);
         public float AttackSpeed => baseAttackSpeed *
-            Mathf.Max(0.01f, 1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus +
-                             singleUseRoomAttackSpeedPercentBonus + killFrenzyAttackSpeedPercent +
-                             powerAttackSpeedPercentBonus + tarotAttackSpeedPercent);
-        public float BasicAttackRoomDamageMultiplier =>
+            Mathf.Clamp(1f + attackSpeedPercentBonus + currentRoomAttackSpeedPercentBonus +
+                        singleUseRoomAttackSpeedPercentBonus + killFrenzyAttackSpeedPercent +
+                        powerAttackSpeedPercentBonus + tarotAttackSpeedPercent,
+                0.01f, MaximumAttackSpeedMultiplier);
+
+        // Pool-1: overall caps, so pure-stat artifacts can stack without limit and still not break the game.
+        // Critical chance stops at 100%, health at the 15-heart ceiling (Health), basic shot size at
+        // ProjectileSizing.MaximumPlayerBasicSizeMultiplier. Attack damage and critical damage have no cap.
+        public const float MaximumAttackSpeedMultiplier = 5f;
+        public const float MinimumMoveSpeedMultiplier = 0.1f;
+        public const float MaximumMoveSpeedMultiplier = 2f;
+        public const float MinimumProjectileSpeedMultiplier = 0.6f;
+        public const float MaximumProjectileSpeedMultiplier = 2f;
+        private const float CapTolerance = 0.0001f;
+
+        // Pool-1: whether one more of this effect would change nothing because its stat already sits at the overall
+        // cap. Only lasting bonuses count (artifacts, tarot); room, spell and power buffs end, so they never hide
+        // an artifact from a reward. Effects without an overall cap are never capped.
+        public bool IsAtOverallCap(ItemEffectType effectType)
+        {
+            return effectType switch
+            {
+                ItemEffectType.CriticalChance =>
+                    baseCriticalChance + criticalChanceBonus + tarotCriticalChance >= 1f - CapTolerance,
+                ItemEffectType.AttackSpeedPercent =>
+                    1f + attackSpeedPercentBonus + tarotAttackSpeedPercent >= MaximumAttackSpeedMultiplier - CapTolerance,
+                ItemEffectType.MoveSpeedPercent =>
+                    (baseMoveSpeed + moveSpeedBonus) *
+                    (1f + moveSpeedPercentBonus - moveSpeedPenaltyPercent + tarotMoveSpeedPercent) >=
+                    baseMoveSpeed * MaximumMoveSpeedMultiplier - CapTolerance,
+                ItemEffectType.ProjectileSpeedPercent =>
+                    1f + projectileSpeedPercentBonus + tarotShotSpeedPercent >=
+                    MaximumProjectileSpeedMultiplier - CapTolerance,
+                ItemEffectType.ProjectileSizePercent =>
+                    1f + projectileSizePercentBonus >= ProjectileSizing.MaximumPlayerBasicSizeMultiplier - CapTolerance,
+                ItemEffectType.MaxHealthFlat =>
+                    MaxHealth >= HealthUnits.MaximumHealthAndShieldUnits - CapTolerance,
+                // At 15 hearts of health there is no room left for any shield.
+                ItemEffectType.ShieldGainBonus =>
+                    MaxHealth >= HealthUnits.MaximumHealthAndShieldUnits - CapTolerance,
+                _ => false,
+            };
+        }
+        public float BasicAttackRoomDamageMultiplier => Mathf.Max(0f,
             1f + basicAttackDamagePercentBonus + currentRoomAttackDamagePercentBonus +
-            singleUseRoomAttackDamagePercentBonus + killFrenzyBasicAttackDamagePercent;
+            singleUseRoomAttackDamagePercentBonus + killFrenzyBasicAttackDamagePercent - BasicAttackDamagePenalty);
         public float CriticalChance =>
             Mathf.Clamp01(baseCriticalChance + criticalChanceBonus + singleUseRoomCriticalChanceBonus +
                           tarotCriticalChance);
@@ -131,9 +184,11 @@ namespace TrickalFanGame.Player
         public int PeriodicKillHealProgress => periodicKillHealProgress;
         public ProjectileSplitSettings ProjectileSplitSettings => projectileSplitSettings;
         // Range-0: basic attack travel distance = flight time × shot speed.
-        // 엘리스의 타로카드 may lower them, never below MinimumTarotMultiplier.
+        // 엘리스의 타로카드 may lower range, never below MinimumTarotMultiplier. Shot speed stays between
+        // MinimumProjectileSpeedMultiplier and MaximumProjectileSpeedMultiplier (Pool-1).
         public float ProjectileSpeedMultiplier =>
-            Mathf.Max(MinimumTarotMultiplier, 1f + projectileSpeedPercentBonus + tarotShotSpeedPercent);
+            Mathf.Clamp(1f + projectileSpeedPercentBonus + tarotShotSpeedPercent,
+                MinimumProjectileSpeedMultiplier, MaximumProjectileSpeedMultiplier);
         public float ProjectileLifetimeMultiplier =>
             Mathf.Max(MinimumTarotMultiplier, 1f + projectileLifetimePercentBonus + tarotRangePercent);
         public const float MinimumTarotMultiplier = 0.1f;
@@ -441,6 +496,22 @@ namespace TrickalFanGame.Player
             basicAttackDamagePercentBonus = Mathf.Max(0f, basicAttackDamagePercentBonus + amount);
         }
 
+        public void AddBasicAttackDamagePenaltyPercent(float amount)
+        {
+            basicAttackDamagePenaltyPercent = Mathf.Max(0f, basicAttackDamagePenaltyPercent + amount);
+        }
+
+        public void AddUltimateDamagePercent(float amount)
+        {
+            ultimateDamagePercentBonus = Mathf.Max(0f, ultimateDamagePercentBonus + amount);
+        }
+
+        // Pool-2: the player's bonus on every shield gain lives on Health, where shields are gained.
+        public void AddShieldGainBonus(float amount)
+        {
+            if (amount > 0f) health.SetShieldGainBonus(health.ShieldGainBonus + amount);
+        }
+
         public void AddPlayerSizePercent(float amount)
         {
             playerSizePercentBonus = Mathf.Max(0f, playerSizePercentBonus + amount);
@@ -576,8 +647,12 @@ namespace TrickalFanGame.Player
             {
                 if (isSkill)
                 {
-                    // The same stat adds: the cast already holds the skill damage bonus.
-                    multiplier *= (SkillDamageMultiplier + shockedTargetSkillDamagePercent) / SkillDamageMultiplier;
+                    // The same stat adds: the cast already holds the skill damage bonus (the high-grade one for the
+                    // high-grade skill).
+                    float castMultiplier = context.SourceType == DamageSourceType.PlayerUltimateImpact
+                        ? UltimateDamageMultiplier
+                        : SkillDamageMultiplier;
+                    multiplier *= (castMultiplier + shockedTargetSkillDamagePercent) / castMultiplier;
                 }
 
                 criticalChance = shockedTargetCriticalChanceBonus;

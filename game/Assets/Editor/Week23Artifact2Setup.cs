@@ -69,7 +69,8 @@ namespace TrickalFanGame.Editor
             new(BeltId, "긴급 보호 벨트", ItemRarity.Rare, 1,
                 "전투방에 들어갈 때마다 방어막 반 칸 획득 (HP와 방어막 합 15칸까지)",
                 new ItemEffectEntry(ItemEffectType.ShieldOnCombatRoomEntry, 1f)),
-            new(HairpinId, "돈까스 모양 머리핀", ItemRarity.Uncommon, 3,
+            // Pool-1: pure-stat artifacts stack without limit (0).
+            new(HairpinId, "돈까스 모양 머리핀", ItemRarity.Uncommon, 0,
                 "최대 HP +1칸",
                 new ItemEffectEntry(ItemEffectType.MaxHealthFlat, 2f)),
             new(ScytheId, "림의 낫", ItemRarity.Epic, 1,
@@ -112,7 +113,7 @@ namespace TrickalFanGame.Editor
                 "치명타 피해 +30%p · 상태이상 피해 +30%",
                 new ItemEffectEntry(ItemEffectType.CriticalDamage, 0.3f),
                 new ItemEffectEntry(ItemEffectType.StatusTickDamagePercent, 0.3f)),
-            new(WindArrowId, "실라의 바람살", ItemRarity.Epic, 2,
+            new(WindArrowId, "실라의 바람살", ItemRarity.Epic, 0,
                 "공격속도 +15% · 이동속도 +5% · 탄속 +15% (사거리 증가)",
                 new ItemEffectEntry(ItemEffectType.AttackSpeedPercent, 0.15f),
                 new ItemEffectEntry(ItemEffectType.MoveSpeedPercent, 0.05f),

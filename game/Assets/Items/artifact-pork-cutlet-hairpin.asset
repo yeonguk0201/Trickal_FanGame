@@ -33,6 +33,6 @@ MonoBehaviour:
   effectType: 11
   effectValue: 2
   stackMode: 0
-  maxStacks: 3
+  maxStacks: 0
   activeChargeRooms: 0
   poolSources: 5

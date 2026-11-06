@@ -120,10 +120,11 @@ namespace TrickalFanGame.Editor
             IReadOnlyList<ItemDefinition> active,
             PlayerInventory inventory)
         {
-            ItemDefinition common = active.First(item => item.Rarity == ItemRarity.Common);
+            // Pool-1: Common pure-stat artifacts have no stack limit, so use the first capped non-Rare artifact.
+            ItemDefinition common = active.First(item => item.MaxStacks > 0 && item.Rarity != ItemRarity.Rare);
             for (int stack = 0; stack < common.MaxStacks; stack++)
             {
-                Assert(inventory.TryAcquire(common), "The selected Common artifact must reach its stack cap.");
+                Assert(inventory.TryAcquire(common), "The selected capped artifact must reach its stack cap.");
             }
             Assert(!inventory.TryAcquire(common), "An artifact acquisition beyond maximum stacks must fail.");
 
@@ -234,7 +235,10 @@ namespace TrickalFanGame.Editor
             GameObject sourceObject = new("Phase G-7 Fallback Heal");
             sourceObject.transform.SetParent(dropParent, false);
             ItemDropSource source = sourceObject.AddComponent<ItemDropSource>();
-            source.Configure(pickup, active.ToArray(), sourceObject.transform, dropParent);
+            // Pool-1: unlimited pure-stat artifacts (attack damage has no overall cap) never run out, so the
+            // all-capped pool is built from the artifacts that keep a stack limit.
+            source.Configure(pickup, active.Where(item => item.MaxStacks > 0).ToArray(), sourceObject.transform,
+                dropParent);
             source.ConfigureRewardContext(progress, "floor-03-room-07:treasure");
             Assert(source.TryDrop(inventory) && source.HasDropped && source.LastDroppedDefinition == null &&
                    Approximately(source.LastFallbackHealAmount,
@@ -255,7 +259,8 @@ namespace TrickalFanGame.Editor
             GameObject sourceObject = new("Phase G-7 Dead Player Fallback");
             sourceObject.transform.SetParent(dropParent, false);
             ItemDropSource source = sourceObject.AddComponent<ItemDropSource>();
-            source.Configure(pickup, active.ToArray(), sourceObject.transform, dropParent);
+            source.Configure(pickup, active.Where(item => item.MaxStacks > 0).ToArray(), sourceObject.transform,
+                dropParent);
             source.ConfigureRewardContext(progress, "floor-03-room-08:treasure");
             Assert(health.IsDead && !source.TryDrop(inventory) && !source.HasDropped &&
                    Approximately(source.LastFallbackHealAmount, 0f),

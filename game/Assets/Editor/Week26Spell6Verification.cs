@@ -619,9 +619,9 @@ namespace TrickalFanGame.Editor
                     "Each tarot step must raise or lower its own stat from the base values.");
                 stats.AddTarotStep(TarotStat.ShotSpeed, -5f);
                 stats.AddTarotStep(TarotStat.Range, -5f);
-                Assert(Approximately(stats.ProjectileSpeedMultiplier, PlayerStats.MinimumTarotMultiplier) &&
+                Assert(Approximately(stats.ProjectileSpeedMultiplier, PlayerStats.MinimumProjectileSpeedMultiplier) &&
                        Approximately(stats.ProjectileLifetimeMultiplier, PlayerStats.MinimumTarotMultiplier),
-                    "Shot speed and range must stay above zero however many drops stack.");
+                    "Shot speed must stop at its Pool-1 floor and range above zero however many drops stack.");
             }
             finally
             {

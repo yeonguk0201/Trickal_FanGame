@@ -60,7 +60,7 @@ namespace TrickalFanGame.Editor
             ValidatePoisonStatus();
             ValidatePoisonFromProjectile();
             Debug.Log("Passive-1 verification passed: effect types 43 and 44 are appended, 칸나의 대포 and 비비의 수은 " +
-                      "are Rare two-stack artifacts in the selection reward pool, basic attack shots are triggers " +
+                      "are Rare artifacts (the cannon without a stack limit, the snot two-stack) in the selection reward pool, basic attack shots are triggers " +
                       "that push only by the knockback formula (0.2 at the base, shot speed ratio limited to " +
                       "0.5~2.0, divided by each enemy Prefab's knockback weight, bosses at weight 4) without " +
                       "stunning or interrupting and never during a dash, lunge or boss pattern, the cannon scales " +
@@ -122,7 +122,7 @@ namespace TrickalFanGame.Editor
             ItemDefinition cannon = LoadItem(Week23Passive1Setup.CannonId);
             ItemDefinition snot = LoadItem(Week23Passive1Setup.SnotId);
             Assert(cannon.DisplayName == Week23Passive1Setup.CannonName && cannon.Kind == ItemKind.Artifact &&
-                   cannon.Rarity == ItemRarity.Rare && cannon.IsActive && cannon.MaxStacks == 2 &&
+                   cannon.Rarity == ItemRarity.Rare && cannon.IsActive && cannon.MaxStacks == 0 &&
                    cannon.Effects.Count == 1 &&
                    cannon.Effects[0].EffectType == ItemEffectType.ProjectileSizePercent &&
                    Mathf.Approximately(cannon.Effects[0].Magnitude, 0.5f),
@@ -480,7 +480,11 @@ namespace TrickalFanGame.Editor
                        Mathf.Approximately(SpawnShotRadius(player, prefab, out float secondScale), 0.4f) &&
                        Mathf.Approximately(secondScale, prefab.transform.localScale.x * 2f),
                     "Two cannons must scale the shot's look and collision radius by 2 (radius 0.4).");
-                Assert(!inventory.TryAcquire(cannon), "칸나의 대포 must stop at two stacks.");
+                Assert(ArtifactRewardSelector.IsEligible(cannon, inventory) && inventory.TryAcquire(cannon) &&
+                       Mathf.Approximately(attack.ProjectileSizeMultiplier, 2.25f) &&
+                       !ArtifactRewardSelector.IsEligible(cannon, inventory),
+                    "칸나의 대포 has no stack limit (Pool-1); a third reaches the 2.25 size cap and then stops being " +
+                    "offered.");
                 Assert(Mathf.Approximately(attack.CurrentDamage, damage) &&
                        Mathf.Approximately(attack.ProjectileSpeed, speed) &&
                        Mathf.Approximately(attack.ProjectileLifetime, lifetime),

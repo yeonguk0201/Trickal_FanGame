@@ -290,7 +290,7 @@ namespace TrickalFanGame.Player
                 gameObject,
                 DamageSourceType.PlayerUltimateImpact,
                 damageMultiplier * SkillProgressionRules.DamageMultiplier(progressionLevel) *
-                stats.SkillDamageMultiplier);
+                stats.UltimateDamageMultiplier);
             target.TakeDamage(context);
 
             KnockbackReceiver receiver = target.GetComponent<KnockbackReceiver>();

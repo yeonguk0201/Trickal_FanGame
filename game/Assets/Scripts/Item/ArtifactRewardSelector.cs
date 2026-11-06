@@ -172,7 +172,9 @@ namespace TrickalFanGame.Item
             }
 
             int currentStacks = inventory != null ? inventory.GetStackCount(definition.ItemId) : 0;
-            return definition.MaxStacks <= 0 || currentStacks < definition.MaxStacks;
+            if (definition.MaxStacks > 0 && currentStacks >= definition.MaxStacks) return false;
+            // Pool-1: an unlimited stat artifact whose every stat is at its overall cap would do nothing.
+            return inventory == null || !inventory.AreAllEffectsAtOverallCap(definition);
         }
 
         public static bool AreAllActiveArtifactsAtMaximum(
@@ -194,8 +196,7 @@ namespace TrickalFanGame.Item
                 }
 
                 foundActive = true;
-                if (definition.MaxStacks <= 0 ||
-                    inventory.GetStackCount(definition.ItemId) < definition.MaxStacks)
+                if (IsEligible(definition, inventory))
                 {
                     return false;
                 }

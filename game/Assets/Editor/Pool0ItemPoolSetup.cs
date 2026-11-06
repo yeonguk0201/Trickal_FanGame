@@ -30,6 +30,25 @@ namespace TrickalFanGame.Editor
                 ["artifact-pork-cutlet-hairpin"] = PureStat, // 돈까스 모양 머리핀: 최대 체력
                 ["artifact-sylla-wind-arrow"] = PureStat, // 실라의 바람살: 공속·이속·탄속
                 ["artifact-kanna-cannon"] = PureStat, // 칸나의 대포: 투사체 크기
+                // Pool-2: pure-stat artifacts (priority 1 and 2).
+                ["artifact-towel-headband"] = PureStat, // 수건 머리띠: 최대 체력
+                ["artifact-old-tree-dagger"] = PureStat, // 고목나무 비수: 치명 확률·치명 피해
+                ["artifact-patched-staff"] = PureStat, // 덧댄 지팡이: 스킬 피해
+                ["artifact-mist-dagger"] = PureStat, // 안개 비수: 치명 피해
+                ["artifact-obsidian-shuriken"] = PureStat, // 흑요석 수리검: 치명 피해·기본 공격 피해
+                ["artifact-fox-dagger"] = PureStat, // 여우 단검: 공속·치명 확률·공격력
+                ["artifact-combat-manual"] = PureStat, // 전투 지침서: 치명 피해
+                ["artifact-jade-grimoire"] = PureStat, // 옥빛 마법서: 공격력·치명 확률·스킬 피해
+                ["artifact-sharp-staff"] = PureStat, // 날카로운 지팡이: 공격력·치명 피해·스킬 피해
+                ["artifact-golden-crown"] = PureStat, // 황금 왕관: 치명 확률·치명 피해·스킬 피해
+                ["artifact-belita-staff"] = PureStat, // 벨리타의 지팡이: 공격력·치명 피해
+                ["artifact-weighted-vest"] = PureStat, // 중량 조끼: 최대 체력 + 이속 감소
+                ["artifact-fairy-robe"] = PureStat, // 요정 로브: 최대 체력·이속
+                ["artifact-scale-armor"] = PureStat, // 비늘 갑옷: 최대 체력
+                ["artifact-jade-fountain-pen"] = PureStat, // 제이드의 비싼 만년필: 공격력·공속·스킬 피해
+                ["artifact-shining-tiara"] = PureStat, // 찬란한 티아라: 최대 체력·방어막 획득 보너스
+                ["artifact-priest-censer"] = PureStat, // 제사장의 향로: 최대 체력·방어막 획득 보너스
+                ["artifact-blanchet-glass-bluebird"] = PureStat, // 블랑셰의 유리 파랑새: 고학년 스킬 피해 + 기본 공격 감소
 
                 // Stats with a trade-off or a conditional bonus: boss growth that can also shape a build.
                 ["artifact-30kg-kettlebell"] = MixedStat, // 스킬 피해 + 이속 감소

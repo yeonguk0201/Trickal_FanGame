@@ -105,6 +105,24 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | 아이시아의 지갑 | 아티팩트(황금 전용) | `artifact-aisia-wallet` | Artifact-3 |
 | 칸타의 팽이 | 아티팩트 | `artifact-kanta-top` | Passive-3 |
 | 샤샤의 항아리 | 아티팩트 | `artifact-shasha-jar` | Passive-4 |
+| 수건 머리띠 | 아티팩트 | `artifact-towel-headband` | Pool-2 |
+| 고목나무 비수 | 아티팩트 | `artifact-old-tree-dagger` | Pool-2 |
+| 덧댄 지팡이 | 아티팩트 | `artifact-patched-staff` | Pool-2 |
+| 안개 비수 | 아티팩트 | `artifact-mist-dagger` | Pool-2 |
+| 흑요석 수리검 | 아티팩트 | `artifact-obsidian-shuriken` | Pool-2 |
+| 여우 단검 | 아티팩트 | `artifact-fox-dagger` | Pool-2 |
+| 전투 지침서 | 아티팩트 | `artifact-combat-manual` | Pool-2 |
+| 옥빛 마법서 | 아티팩트 | `artifact-jade-grimoire` | Pool-2 |
+| 날카로운 지팡이 | 아티팩트 | `artifact-sharp-staff` | Pool-2 |
+| 황금 왕관 | 아티팩트 | `artifact-golden-crown` | Pool-2 |
+| 벨리타의 지팡이 | 아티팩트 | `artifact-belita-staff` | Pool-2 |
+| 중량 조끼 | 아티팩트 | `artifact-weighted-vest` | Pool-2 |
+| 요정 로브 | 아티팩트 | `artifact-fairy-robe` | Pool-2 |
+| 비늘 갑옷 | 아티팩트 | `artifact-scale-armor` | Pool-2 |
+| 제이드의 비싼 만년필 | 아티팩트 | `artifact-jade-fountain-pen` | Pool-2 |
+| 찬란한 티아라 | 아티팩트 | `artifact-shining-tiara` | Pool-2 |
+| 제사장의 향로 | 아티팩트 | `artifact-priest-censer` | Pool-2 |
+| 블랑셰의 유리 파랑새 | 아티팩트 | `artifact-blanchet-glass-bluebird` | Pool-2 |
 | 파스텔빛 | 짱셈스펠 | `jjangsem-pastel-light` | Jjangsem-2 |
 | 수상한 물약 | 짱셈스펠 | `jjangsem-suspicious-potion` | Jjangsem-2 |
 | 이성의 끈 | 짱셈스펠 | `jjangsem-thread-of-reason` | Jjangsem-2 |
@@ -305,6 +323,8 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
 | Passive-2 | 효과 45·46은 뒤에 추가, 둘 다 `artifact-giant-potion`만 사용(검증기가 확인), 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |
 | Artifact-3 | 효과 61은 뒤에 추가, `artifact-aisia-wallet`은 `GoldenChestExclusivePool` 목록과 `chest-content-table`의 황금 전용 풀에만 소속(선택 보상·상점 풀 금지, 검증기가 확인). 전용 풀은 목록의 모든 에셋으로 구성하므로 Flight-0 Setup을 다시 실행해도 지갑이 빠지지 않는다 |
 | Passive-3·4 | 효과 62·63은 뒤에 추가, 각각 `artifact-kanta-top`·`artifact-shasha-jar`만 사용, 둘 다 선택 보상 풀 소속, Backend 카탈로그·seed 동시 반영 |
+| Pool-1 | 순수 스탯 6종(`item-01`·`item-12`·`item-04`·`artifact-pork-cutlet-hairpin`·`artifact-sylla-wind-arrow`·`artifact-kanna-cannon`)은 스택 제한 없음(Unity·Backend `maxStacks` 0). 무한 누적 스탯의 전체 상한·하한은 `PlayerStats`(Unity 전용, 계약 변경 없음) |
+| Pool-2 | 순수 스탯 아티팩트 18종(§2.3, 설계는 [29번](./29-pure-stat-artifacts.md)), 효과 87~89는 뒤에 추가(`ShieldGainBonus`·`UltimateDamagePercent`·`BasicAttackDamagePenaltyPercent`), 나머지는 기존 6·7·8·9·11·19·20·46·57, 보스·상점 풀(Pool-0 분류표)·스택 제한 없음(`maxStacks` 0, Pool-1 목록), Backend 카탈로그·테스트·seed 동시 반영(Backend `maxStacks` 0 = 제한 없음) |
 | Power-0 | §9 문서화만. 코드·에셋·Prisma·DTO·Backend 카탈로그 변경 없음 |
 | Power-1 | `ItemKind.Active = 5`·`active-` 접두사 검증 추가, §9.2 ID 6종 에셋과 Backend 카탈로그·테스트·seed 동시 반영, 효과는 65부터 뒤에 추가, 인스턴스 1회 기록, 새 인스턴스 빈 게이지·배출 시 게이지 유지(§9.4), 기존 풀 6곳에 `Active` 없음(검증기가 확인) |
 | Power-2 | 1층 보장 칸·비밀방·상점 확률 칸은 권능 전용 목록(6종)에서 추첨, 공용 풀에 `Active`를 넣지 않음, seed 재현과 재방문 시 같은 후보 |

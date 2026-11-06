@@ -75,6 +75,12 @@ namespace TrickalFanGame.Item
             poolSources = configuredSources;
         }
 
+        // Pool-1: pure-stat artifacts stack without limit (0).
+        public void ConfigureMaxStacks(int configuredMaxStacks)
+        {
+            maxStacks = Mathf.Max(0, configuredMaxStacks);
+        }
+
         public void ConfigureActiveCharge(int configuredChargeRooms)
         {
             activeChargeRooms = Mathf.Max(0, configuredChargeRooms);
