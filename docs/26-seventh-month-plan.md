@@ -3,6 +3,7 @@
 > 기준일: 2026-10-11  
 > 대상 기간: 2027-02-02(화) ~ 2027-03-01(월), 25~28주차  
 > 이전 계획: [21-sixth-month-plan.md](./21-sixth-month-plan.md)  
+> 베타 공개 계획: [30-beta-release-plan.md](./30-beta-release-plan.md)(2026-11-06. 남은 필수 조각과 폴리싱의 베타 기준 순서)  
 > 장기 기준: [02-roadmap.md](./02-roadmap.md)  
 > 시스템 의존성: [12-skill-system-plan.md](./12-skill-system-plan.md)  
 > 아이템 분류 계약: [23-item-classification-contract.md](./23-item-classification-contract.md)  

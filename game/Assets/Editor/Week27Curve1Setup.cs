@@ -12,7 +12,7 @@ namespace TrickalFanGame.Editor
     // Curve-1 (user decisions, 2026-10-24, docs/28 §9): enemies enter by floor (EncounterEnemyFloorPool), so the
     // Encounters that hold a fixed floor-2 enemy start on floor 2. elite-pair keeps its fixed charger, and crossfire
     // keeps a fixed charger and would leave three snipers on floor 1, so both start on floor 2. 산사모-순수 fires
-    // three shots with no aim lead while the run is in its first theme (Depth-0 adds the later-theme variant).
+    // three shots with no aim lead while the run is in its first theme (the later-theme variant waits for depth-based patterns across all enemies).
     // Re-running only rewrites the same assets and the Game Scene generator.
     public static class Week27Curve1Setup
     {
