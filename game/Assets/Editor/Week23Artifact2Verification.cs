@@ -227,17 +227,18 @@ namespace TrickalFanGame.Editor
 
                 ItemDefinition hairpin = LoadItem(Week23Artifact2Setup.HairpinId);
                 Assert(inventory.TryAcquire(hairpin) && inventory.TryAcquire(hairpin) && inventory.TryAcquire(hairpin) &&
-                       !inventory.TryAcquire(hairpin) && Near(stats.MaxHealth, baseHealth + 6f) &&
-                       Near(health.CurrentHealth, baseHealth + 6f),
-                    "Three 돈까스 모양 머리핀 must add and fill 3 hearts, and a fourth must be rejected.");
+                       hairpin.MaxStacks == 0 && ArtifactRewardSelector.IsEligible(hairpin, inventory) &&
+                       Near(stats.MaxHealth, baseHealth + 6f) && Near(health.CurrentHealth, baseHealth + 6f),
+                    "Three 돈까스 모양 머리핀 must add and fill 3 hearts and stay offered without a stack limit (Pool-1).");
 
                 ItemDefinition arrow = LoadItem(Week23Artifact2Setup.WindArrowId);
                 Assert(inventory.TryAcquire(arrow) && Near(stats.AttackSpeed, 1.15f) &&
                        Near(stats.MoveSpeed, baseMove * 1.05f) && Near(stats.ProjectileSpeedMultiplier, 1.15f),
                     "실라의 바람살 must give +15% attack speed, +5% move speed and +15% shot speed.");
-                Assert(inventory.TryAcquire(arrow) && !inventory.TryAcquire(arrow) && Near(stats.AttackSpeed, 1.3f) &&
+                Assert(inventory.TryAcquire(arrow) && arrow.MaxStacks == 0 &&
+                       ArtifactRewardSelector.IsEligible(arrow, inventory) && Near(stats.AttackSpeed, 1.3f) &&
                        Near(stats.MoveSpeed, baseMove * 1.1f) && Near(stats.ProjectileSpeedMultiplier, 1.3f),
-                    "실라의 바람살 must stack twice.");
+                    "실라의 바람살 must stack twice and keep stacking without a limit (Pool-1).");
 
                 ItemDefinition sword = LoadItem(Week23Artifact2Setup.SwordId);
                 ItemDefinition ring = LoadItem(Week23Artifact2Setup.RingId);

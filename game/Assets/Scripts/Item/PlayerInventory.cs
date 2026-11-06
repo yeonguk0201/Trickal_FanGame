@@ -142,6 +142,26 @@ namespace TrickalFanGame.Item
             return stackCounts.TryGetValue(itemId, out int count) ? count : 0;
         }
 
+        // Pool-1: true when every effect of the artifact raises a stat that is already at its overall cap, so taking
+        // it again would do nothing. Rewards and shops skip it (ArtifactRewardSelector.IsEligible).
+        public bool AreAllEffectsAtOverallCap(ItemDefinition definition)
+        {
+            if (definition == null || definition.Effects.Count == 0) return false;
+            if (stats == null) stats = GetComponent<PlayerStats>();
+            if (stats == null) return false;
+            // A penalty is not a reason to take the item, so only the benefits decide (중량 조끼 at 15 hearts).
+            bool hasBenefit = false;
+            foreach (ItemEffectEntry effect in definition.Effects)
+            {
+                if (effect != null && effect.EffectType is ItemEffectType.MoveSpeedPenaltyPercent or
+                        ItemEffectType.BasicAttackDamagePenaltyPercent) continue;
+                if (effect == null || !stats.IsAtOverallCap(effect.EffectType)) return false;
+                hasBenefit = true;
+            }
+
+            return hasBenefit;
+        }
+
         private void ApplyEffect(ItemDefinition definition)
         {
             if (definition.Effects.Count == 0)
@@ -206,6 +226,15 @@ namespace TrickalFanGame.Item
                     case ItemEffectType.SkillDamagePercent:
                         stats.AddSkillDamagePercent(effect.Magnitude);
                         break;
+                    case ItemEffectType.UltimateDamagePercent:
+                        stats.AddUltimateDamagePercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.BasicAttackDamagePenaltyPercent:
+                        stats.AddBasicAttackDamagePenaltyPercent(effect.Magnitude);
+                        break;
+                    case ItemEffectType.ShieldGainBonus:
+                        stats.AddShieldGainBonus(effect.Magnitude);
+                        break;
                     case ItemEffectType.MaxHealth:
                     case ItemEffectType.MaxHealthFlat:
                         stats.AddMaxHealth(effect.Magnitude, true);
@@ -213,9 +242,10 @@ namespace TrickalFanGame.Item
                     case ItemEffectType.ShieldOnAcquireMaxHealthPercent:
                         if (health != null)
                         {
-                            health.SetShield(Mathf.Max(
-                                health.CurrentShield,
-                                health.GetMaxHealthRatioAmount(effect.Magnitude)));
+                            // Pool-2: a shield this sets counts as a gain and gets the shield gain bonus.
+                            float acquiredShield = health.GetMaxHealthRatioAmount(effect.Magnitude);
+                            if (acquiredShield > health.CurrentShield)
+                                health.SetShield(acquiredShield + health.ShieldGainBonus);
                         }
                         break;
                     case ItemEffectType.MoveSpeed:

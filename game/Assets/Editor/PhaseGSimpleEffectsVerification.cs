@@ -70,20 +70,20 @@ namespace TrickalFanGame.Editor
             AcquireStacks(inventory, sword, 5);
             Assert(Approximately(stats.AttackDamage, 12.5f),
                 "Five sword stacks must add 25% attack damage before multiplying the base stat.");
-            Assert(!inventory.TryAcquire(sword) && inventory.GetStackCount(sword.ItemId) == 5,
-                "Sword must reject acquisitions beyond its five-stack cap without changing stats.");
+            Assert(sword.MaxStacks == 0 && ArtifactRewardSelector.IsEligible(sword, inventory),
+                "Sword must have no stack limit and stay offered after five stacks (Pool-1).");
 
             AcquireStacks(inventory, awl, 5);
             Assert(Approximately(stats.CriticalChance, 0.20f),
                 "Five awl stacks must add 15 percentage points to the base 5% critical chance.");
-            Assert(!inventory.TryAcquire(awl) && inventory.GetStackCount(awl.ItemId) == 5,
-                "Awl must reject acquisitions beyond its five-stack cap without changing stats.");
+            Assert(awl.MaxStacks == 0 && ArtifactRewardSelector.IsEligible(awl, inventory),
+                "Awl must have no stack limit and stay offered below the 100% critical chance cap (Pool-1).");
 
             AcquireStacks(inventory, arrow, 3);
             Assert(Approximately(stats.AttackSpeed, 1.30f),
                 "Three arrow stacks must add 30% attack speed before multiplying the base stat.");
-            Assert(!inventory.TryAcquire(arrow) && inventory.GetStackCount(arrow.ItemId) == 3,
-                "Arrow must reject acquisitions beyond its three-stack cap without changing stats.");
+            Assert(arrow.MaxStacks == 0 && ArtifactRewardSelector.IsEligible(arrow, inventory),
+                "Arrow must have no stack limit and stay offered below the attack speed cap (Pool-1).");
         }
 
         private static void VerifyPillowHealing(

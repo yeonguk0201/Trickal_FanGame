@@ -69,6 +69,24 @@ describe('Item catalog', () => {
       'single-spell-tig-challenge',
       'single-spell-goldi-invitation',
       'single-spell-ellis-tarot-card',
+      'artifact-towel-headband',
+      'artifact-old-tree-dagger',
+      'artifact-patched-staff',
+      'artifact-mist-dagger',
+      'artifact-obsidian-shuriken',
+      'artifact-fox-dagger',
+      'artifact-combat-manual',
+      'artifact-jade-grimoire',
+      'artifact-sharp-staff',
+      'artifact-golden-crown',
+      'artifact-belita-staff',
+      'artifact-weighted-vest',
+      'artifact-fairy-robe',
+      'artifact-scale-armor',
+      'artifact-jade-fountain-pen',
+      'artifact-shining-tiara',
+      'artifact-priest-censer',
+      'artifact-blanchet-glass-bluebird',
     ]);
     expect(active.map((item) => item.rarity)).toEqual([
       'COMMON',
@@ -135,10 +153,29 @@ describe('Item catalog', () => {
       'RARE',
       'RARE',
       'RARE',
+      'COMMON',
+      'COMMON',
+      'COMMON',
+      'UNCOMMON',
+      'UNCOMMON',
+      'UNCOMMON',
+      'RARE',
+      'RARE',
+      'RARE',
+      'RARE',
+      'EPIC',
+      'COMMON',
+      'COMMON',
+      'RARE',
+      'RARE',
+      'UNCOMMON',
+      'RARE',
+      'EPIC',
     ]);
-    expect(new Set(active.map((item) => item.id)).size).toBe(64);
+    expect(new Set(active.map((item) => item.id)).size).toBe(82);
     expect(
-      active.every((item) => item.maxStacks > 0 && item.effects.length > 0),
+      // maxStacks 0 means no stack limit (Pool-1 pure-stat artifacts).
+      active.every((item) => item.maxStacks >= 0 && item.effects.length > 0),
     ).toBe(true);
   });
 
@@ -260,7 +297,7 @@ describe('Item catalog', () => {
       {
         id: 'artifact-kanna-cannon',
         rarity: 'RARE',
-        maxStacks: 2,
+        maxStacks: 0,
       },
       {
         id: 'artifact-bibi-snot',
@@ -285,7 +322,7 @@ describe('Item catalog', () => {
       {
         id: 'artifact-pork-cutlet-hairpin',
         rarity: 'UNCOMMON',
-        maxStacks: 3,
+        maxStacks: 0,
       },
       {
         id: 'artifact-rim-scythe',
@@ -330,7 +367,7 @@ describe('Item catalog', () => {
       {
         id: 'artifact-sylla-wind-arrow',
         rarity: 'EPIC',
-        maxStacks: 2,
+        maxStacks: 0,
       },
       {
         id: 'artifact-levi-dagger',
@@ -356,6 +393,96 @@ describe('Item catalog', () => {
         id: 'artifact-shasha-jar',
         rarity: 'EPIC',
         maxStacks: 1,
+      },
+      {
+        id: 'artifact-towel-headband',
+        rarity: 'COMMON',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-old-tree-dagger',
+        rarity: 'COMMON',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-patched-staff',
+        rarity: 'COMMON',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-mist-dagger',
+        rarity: 'UNCOMMON',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-obsidian-shuriken',
+        rarity: 'UNCOMMON',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-fox-dagger',
+        rarity: 'UNCOMMON',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-combat-manual',
+        rarity: 'RARE',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-jade-grimoire',
+        rarity: 'RARE',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-sharp-staff',
+        rarity: 'RARE',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-golden-crown',
+        rarity: 'RARE',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-belita-staff',
+        rarity: 'EPIC',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-weighted-vest',
+        rarity: 'COMMON',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-fairy-robe',
+        rarity: 'COMMON',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-scale-armor',
+        rarity: 'RARE',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-jade-fountain-pen',
+        rarity: 'RARE',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-shining-tiara',
+        rarity: 'UNCOMMON',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-priest-censer',
+        rarity: 'RARE',
+        maxStacks: 0,
+      },
+      {
+        id: 'artifact-blanchet-glass-bluebird',
+        rarity: 'EPIC',
+        maxStacks: 0,
       },
     ]);
   });
@@ -693,7 +820,7 @@ describe('Item catalog', () => {
       name: '칸나의 대포',
       rarity: 'RARE',
       isActive: true,
-      maxStacks: 2,
+      maxStacks: 0,
       effects: [{ type: 'ProjectileSizePercent', magnitude: 0.5 }],
     });
     expect(
@@ -859,6 +986,123 @@ describe('Item catalog', () => {
         { type: 'WaterStreamAttack', magnitude: 0.2, secondaryMagnitude: 0.3 },
       ],
     });
+  });
+
+  it('lifts the stack limit of the six original pure-stat artifacts (Pool-1)', () => {
+    expect(
+      ITEM_CATALOG.filter((item) =>
+        [
+          'item-01',
+          'item-12',
+          'item-04',
+          'artifact-pork-cutlet-hairpin',
+          'artifact-sylla-wind-arrow',
+          'artifact-kanna-cannon',
+        ].includes(item.id),
+      ).map((item) => item.maxStacks),
+    ).toEqual([0, 0, 0, 0, 0, 0]);
+  });
+
+  it('adds the eighteen pure-stat artifacts with no stack limit (Pool-2)', () => {
+    const effectsOf = (id: string) =>
+      ITEM_CATALOG.find((item) => item.id === id)?.effects;
+
+    expect(
+      ITEM_CATALOG.filter((item) =>
+        [
+          'artifact-towel-headband',
+          'artifact-old-tree-dagger',
+          'artifact-patched-staff',
+          'artifact-mist-dagger',
+          'artifact-obsidian-shuriken',
+          'artifact-fox-dagger',
+          'artifact-combat-manual',
+          'artifact-jade-grimoire',
+          'artifact-sharp-staff',
+          'artifact-golden-crown',
+          'artifact-belita-staff',
+          'artifact-weighted-vest',
+          'artifact-fairy-robe',
+          'artifact-scale-armor',
+          'artifact-jade-fountain-pen',
+          'artifact-shining-tiara',
+          'artifact-priest-censer',
+          'artifact-blanchet-glass-bluebird',
+        ].includes(item.id),
+      ).every((item) => item.isActive && item.maxStacks === 0),
+    ).toBe(true);
+    expect(effectsOf('artifact-towel-headband')).toEqual([
+      { type: 'MaxHealthFlat', magnitude: 1 },
+    ]);
+    expect(effectsOf('artifact-old-tree-dagger')).toEqual([
+      { type: 'CriticalChance', magnitude: 0.02 },
+      { type: 'CriticalDamage', magnitude: 0.1 },
+    ]);
+    expect(effectsOf('artifact-patched-staff')).toEqual([
+      { type: 'SkillDamagePercent', magnitude: 0.08 },
+    ]);
+    expect(effectsOf('artifact-mist-dagger')).toEqual([
+      { type: 'CriticalDamage', magnitude: 0.25 },
+    ]);
+    expect(effectsOf('artifact-obsidian-shuriken')).toEqual([
+      { type: 'CriticalDamage', magnitude: 0.1 },
+      { type: 'BasicAttackDamagePercent', magnitude: 0.08 },
+    ]);
+    expect(effectsOf('artifact-fox-dagger')).toEqual([
+      { type: 'AttackSpeedPercent', magnitude: 0.05 },
+      { type: 'CriticalChance', magnitude: 0.03 },
+      { type: 'AttackDamagePercent', magnitude: 0.03 },
+    ]);
+    expect(effectsOf('artifact-combat-manual')).toEqual([
+      { type: 'CriticalDamage', magnitude: 0.4 },
+    ]);
+    expect(effectsOf('artifact-jade-grimoire')).toEqual([
+      { type: 'AttackDamagePercent', magnitude: 0.05 },
+      { type: 'CriticalChance', magnitude: 0.03 },
+      { type: 'SkillDamagePercent', magnitude: 0.1 },
+    ]);
+    expect(effectsOf('artifact-sharp-staff')).toEqual([
+      { type: 'AttackDamagePercent', magnitude: 0.05 },
+      { type: 'CriticalDamage', magnitude: 0.15 },
+      { type: 'SkillDamagePercent', magnitude: 0.1 },
+    ]);
+    expect(effectsOf('artifact-golden-crown')).toEqual([
+      { type: 'CriticalChance', magnitude: 0.04 },
+      { type: 'CriticalDamage', magnitude: 0.15 },
+      { type: 'SkillDamagePercent', magnitude: 0.12 },
+    ]);
+    expect(effectsOf('artifact-belita-staff')).toEqual([
+      { type: 'AttackDamagePercent', magnitude: 0.2 },
+      { type: 'CriticalDamage', magnitude: 0.15 },
+    ]);
+    expect(effectsOf('artifact-weighted-vest')).toEqual([
+      { type: 'MaxHealthFlat', magnitude: 2 },
+      { type: 'MoveSpeedPenaltyPercent', magnitude: 0.05 },
+    ]);
+    expect(effectsOf('artifact-fairy-robe')).toEqual([
+      { type: 'MaxHealthFlat', magnitude: 1 },
+      { type: 'MoveSpeedPercent', magnitude: 0.03 },
+    ]);
+    expect(effectsOf('artifact-scale-armor')).toEqual([
+      { type: 'MaxHealthFlat', magnitude: 4 },
+    ]);
+    expect(effectsOf('artifact-jade-fountain-pen')).toEqual([
+      { type: 'AttackDamagePercent', magnitude: 0.05 },
+      { type: 'AttackSpeedPercent', magnitude: 0.05 },
+      { type: 'SkillDamagePercent', magnitude: 0.1 },
+    ]);
+    expect(effectsOf('artifact-shining-tiara')).toEqual([
+      { type: 'MaxHealthFlat', magnitude: 1 },
+      { type: 'ShieldGainBonus', magnitude: 1 },
+    ]);
+    expect(effectsOf('artifact-priest-censer')).toEqual([
+      { type: 'MaxHealthFlat', magnitude: 2 },
+      { type: 'ShieldGainBonus', magnitude: 1 },
+    ]);
+    expect(effectsOf('artifact-blanchet-glass-bluebird')).toEqual([
+      { type: 'UltimateDamagePercent', magnitude: 1 },
+      { type: 'BasicAttackDamagePenaltyPercent', magnitude: 0.3 },
+    ]);
   });
 
   it('keeps the legacy spell-final-sprint active for past Run records', () => {

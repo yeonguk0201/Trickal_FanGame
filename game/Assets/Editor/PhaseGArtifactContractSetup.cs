@@ -37,11 +37,12 @@ namespace TrickalFanGame.Editor
     {
         public static IReadOnlyList<PhaseGArtifactSpec> All => new[]
         {
-            Spec("item-01", "급조한 목검", ItemRarity.Common, true, 5,
+            // Pool-1: pure-stat artifacts stack without limit (0); PlayerStats caps the stats that would break.
+            Spec("item-01", "급조한 목검", ItemRarity.Common, true, 0,
                 Effect(ItemEffectType.AttackDamagePercent, magnitude: 0.05f)),
-            Spec("item-12", "녹슨 송곳", ItemRarity.Common, true, 5,
+            Spec("item-12", "녹슨 송곳", ItemRarity.Common, true, 0,
                 Effect(ItemEffectType.CriticalChance, magnitude: 0.03f)),
-            Spec("item-04", "낡은 화살", ItemRarity.Uncommon, true, 3,
+            Spec("item-04", "낡은 화살", ItemRarity.Uncommon, true, 0,
                 Effect(ItemEffectType.AttackSpeedPercent, magnitude: 0.10f)),
             Spec("item-14", "광기의 가면", ItemRarity.Uncommon, true, 3,
                 Effect(ItemEffectType.AttackDamageAura, magnitude: 0.20f, radius: 2.5f, intervalSeconds: 1f)),

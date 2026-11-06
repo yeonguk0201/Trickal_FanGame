@@ -101,6 +101,9 @@ namespace TrickalFanGame.Frontend
                 ItemEffectType.ProjectileSizePercent => $"투사체 크기 +{Percent(effect.Magnitude)}",
                 ItemEffectType.PlayerSizePercent => $"몸 크기 +{Percent(effect.Magnitude)}",
                 ItemEffectType.BasicAttackDamagePercent => $"기본 공격 피해 +{Percent(effect.Magnitude)}",
+                ItemEffectType.BasicAttackDamagePenaltyPercent => $"기본 공격 피해 -{Percent(effect.Magnitude)}",
+                ItemEffectType.UltimateDamagePercent => $"고학년 스킬 피해 +{Percent(effect.Magnitude)}",
+                ItemEffectType.ShieldGainBonus => $"방어막을 얻을 때 {Hearts(effect.Magnitude)} 더",
                 ItemEffectType.BasicAttackPoison =>
                     $"기본 공격 적중 시 {Percent(effect.Magnitude)} 확률로 중독 ({Number(effect.DurationSeconds)}초간 " +
                     $"{Number(effect.IntervalSeconds)}초마다 공격력의 {Percent(effect.SecondaryMagnitude)} 피해, " +

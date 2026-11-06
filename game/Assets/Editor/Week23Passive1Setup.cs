@@ -20,7 +20,8 @@ namespace TrickalFanGame.Editor
         public const string CannonId = "artifact-kanna-cannon";
         public const string CannonName = "칸나의 대포";
         public const float CannonSizeBonus = 0.5f;
-        public const int CannonMaxStacks = 2;
+        // Pool-1: no stack limit; the shot stops growing at ProjectileSizing.MaximumPlayerBasicSizeMultiplier.
+        public const int CannonMaxStacks = 0;
 
         public const string SnotId = "artifact-bibi-snot";
         public const string SnotName = "비비의 수은";

@@ -26,6 +26,8 @@ namespace TrickalFanGame.Combat
         private Func<DamageContext, float> lethalDeferral;
         // Current health + shield never exceeds this (the player's 15 hearts). 0 = no limit.
         private float healthAndShieldLimit;
+        // Pool-2 (ShieldGainBonus): added to every shield gain. Only the player sets it.
+        private float shieldGainBonus;
         private DamageInvulnerability damageInvulnerability;
 
         public float CurrentHealth { get; private set; }
@@ -350,9 +352,17 @@ namespace TrickalFanGame.Combat
             return true;
         }
 
+        public float ShieldGainBonus => shieldGainBonus;
+
+        public void SetShieldGainBonus(float bonus)
+        {
+            shieldGainBonus = Mathf.Max(0f, bonus);
+        }
+
+        // Every shield gain goes through here and gets the shield gain bonus (찬란한 티아라, 제사장의 향로).
         public bool AddShield(float amount)
         {
-            return amount > 0f && SetShield(currentShield + amount);
+            return amount > 0f && SetShield(currentShield + amount + shieldGainBonus);
         }
 
         // Returns the shield actually gained; the part beyond the health + shield limit is dropped.
