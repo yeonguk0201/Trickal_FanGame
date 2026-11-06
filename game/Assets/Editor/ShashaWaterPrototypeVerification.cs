@@ -4,6 +4,7 @@ using System.IO;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Frontend;
 using TrickalFanGame.Item;
+using TrickalFanGame.Player;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -220,11 +221,72 @@ namespace TrickalFanGame.Editor
                 if (effect != null) Object.DestroyImmediate(effect.gameObject);
                 Object.DestroyImmediate(owner);
             }
+            VerifyPaintedWallReach();
             // Existing gameplay fixture checks damage, cooldown, walls, pass-through and item synergies.
             Week23Passive4Verification.Verify();
             Debug.Log("Shasha realtime water prototype verification passed: shader, bounded travelling waves, contact fan, " +
                 "nozzle gush, world droplets and mist, moved endpoints, cancellation, A/B cooldown preservation and existing stream rules. " +
                 "Actual Play art comparison pending.");
+        }
+
+        // The drawn stream reaches the painted wall face of a real fairy village room while hits keep the collider length.
+        private static void VerifyPaintedWallReach()
+        {
+            foreach (string path in FairyVillageArtworkSetup.PrefabPaths())
+            {
+                var instance = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(path));
+                try
+                {
+                    instance.transform.position = new Vector3(9000, -9000);
+                    Physics2D.SyncTransforms();
+                    Transform content = instance.GetComponent<TrickalFanGame.Room.RoomPrefab>().Node.ContentRoot.transform;
+                    Vector2 size = TrickalFanGame.Room.FairyVillageRoomGeometry.RoomSize(content);
+                    Rect painted = TrickalFanGame.Room.FairyVillageRoomGeometry.PaintedFloor(size);
+                    Rect walkable = TrickalFanGame.Room.FairyVillageRoomGeometry.WalkableFloor(size);
+                    // Off the door axes so every ray meets a wall, not a door opening.
+                    (Vector2 local, Vector2 direction, float margin)[] rays =
+                    {
+                        (new Vector2(0, -1.5f), Vector2.right, painted.xMax - walkable.xMax),
+                        (new Vector2(0, -1.5f), Vector2.left, walkable.xMin - painted.xMin),
+                        (new Vector2(-3f, 0), Vector2.up, painted.yMax - walkable.yMax),
+                        (new Vector2(-3f, 0), Vector2.down, walkable.yMin - painted.yMin),
+                    };
+                    foreach ((Vector2 local, Vector2 direction, float margin) in rays)
+                    {
+                        Vector2 origin = content.TransformPoint(local);
+                        float length = PlayerWaterStream.ResolveLength(origin, direction, PlayerWaterStream.MaximumLength);
+                        float shown = PlayerWaterStream.VisualLength(origin, direction, length, PlayerWaterStream.MaximumLength);
+                        Require(length < PlayerWaterStream.MaximumLength - 0.001f, $"{path}: {direction} must hit a wall.");
+                        // Bottom: actors stand slightly under the foreground hedge, so the painted edge can be inside
+                        // the collider and the stream keeps its length.
+                        float reach = Mathf.Max(0f, margin);
+                        Require(Mathf.Abs(shown - length - reach) < 0.02f,
+                            $"{path}: {direction} drawn end must reach the painted wall face ({length:0.###} + {reach:0.###}, got {shown:0.###}).");
+                    }
+                    // Hugging the top wall (feet touching it), a stream fired along the wall must travel to the side
+                    // wall, not stop in the wall above. A grown body (giant potion) rises from its feet, so its center
+                    // sits inside or past that wall and the stream start is pulled back toward the feet.
+                    float feetY = walkable.yMax - PlayerFeet.Radius - 0.01f;
+                    foreach (float bodySize in new[] { 1f, 1.5f, 2f, 3f })
+                    for (float x = walkable.xMin + 0.5f; x <= walkable.xMax - 0.5f; x += 0.25f)
+                    foreach (Vector2 direction in new[] { Vector2.left, Vector2.right })
+                    {
+                        // The feet bottom is the body bottom: center = feet bottom + body radius x size.
+                        float bodyY = feetY - PlayerFeet.Radius + PlayerFeet.BodyRadius * bodySize;
+                        Vector2 origin = PlayerWaterStream.ClearOrigin(content.TransformPoint(new Vector2(x, bodyY)),
+                            content.TransformPoint(new Vector2(x, feetY)));
+                        float length = PlayerWaterStream.ResolveLength(origin, direction, PlayerWaterStream.MaximumLength);
+                        float expected = direction.x > 0 ? walkable.xMax - x : x - walkable.xMin;
+                        Require(length > expected - 0.05f && length < expected + 0.05f,
+                            $"{path}: size {bodySize} along the top wall from x={x:0.##} toward {direction} stops at {length:0.###}, wall at {expected:0.###}.");
+                    }
+                    // A free end in open space is not stretched.
+                    Vector2 inside = content.TransformPoint(Vector2.zero);
+                    Require(Mathf.Approximately(PlayerWaterStream.VisualLength(inside, Vector2.right, 1f, PlayerWaterStream.MaximumLength), 1f),
+                        $"{path}: a stream that does not touch a wall must keep its length.");
+                }
+                finally { Object.DestroyImmediate(instance); }
+            }
         }
 
         private static void Require(bool condition, string message)

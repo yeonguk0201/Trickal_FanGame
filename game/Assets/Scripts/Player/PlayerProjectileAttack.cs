@@ -20,6 +20,7 @@ namespace TrickalFanGame.Player
 
         private Health health;
         private PlayerMovement movement;
+        private PlayerFeet feet;
         private PlayerStats stats;
         private PlayerCombatEvents combatEvents;
         private PlayerActionState actionState;
@@ -110,12 +111,13 @@ namespace TrickalFanGame.Player
 
         private void SpawnProjectile(Vector2 direction)
         {
+            Vector2 origin = LaunchOrigin();
             Projectile projectile = Instantiate(
                 projectilePrefab,
-                (Vector2)transform.position + direction * spawnOffset,
+                origin + direction * spawnOffset,
                 Quaternion.identity);
             projectile.transform.localScale = projectilePrefab.transform.localScale * ProjectileSizeMultiplier;
-            projectile.PushOutOfWallsBeside(direction, transform.position);
+            projectile.PushOutOfWallsBeside(direction, origin);
 
             Vector2 velocity = direction * ProjectileSpeed
                 + movement.CurrentVelocity * inheritedVelocityFactor;
@@ -129,7 +131,16 @@ namespace TrickalFanGame.Player
                 configuredHitEffects: stats.BasicAttackHitEffects,
                 configuredBounce: stats.ProjectileBounce,
                 configuredHoming: stats.BasicAttackHoming);
-            projectile.HitEnemiesBehindLaunch(transform.position);
+            projectile.HitEnemiesBehindLaunch(origin);
+        }
+
+        // Hitbox-1: with a grown body hugging the wall above, shots start just below that wall, not inside it.
+        private Vector2 LaunchOrigin()
+        {
+            if (feet == null) feet = GetComponentInChildren<PlayerFeet>(true);
+            return feet != null
+                ? feet.ClearLaunchOrigin(transform.position, TrickalFanGame.Item.PlayerWaterStream.IsStreamBlocker)
+                : (Vector2)transform.position;
         }
 
         private void OnEnemyKilled(PlayerEnemyKilledEvent killEvent)
