@@ -18,7 +18,7 @@ namespace TrickalFanGame.Editor
         public const string OpenDoorMaskPath = Folder + "door-open-foreground-cutout-v1.png";
         public const string ClosedDoorMaskPath = Folder + "door-closed-foreground-cutout-v1.png";
         public const string ClosedBoundaryName = "Fairy Village Closed Door Boundary";
-        public const float MasterScale = 16f / 1572f;
+        public const float MasterScale = FairyVillageRoomGeometry.MasterScale;
         // The lower corner cuts also hold the foot of the side walls. Only the lower hedge, up to its top edge
         // (source Y=783 in the 221 px tall bottom row), may cover actors; the side wall above it must not.
         public const float CornerForegroundCutoff = (941f - 783f) / 221f;
@@ -80,7 +80,7 @@ namespace TrickalFanGame.Editor
             2f * Mathf.Abs(content.Find("Right Upper Wall").localPosition.x) + RoomLayout.WallThickness,
             2f * Mathf.Abs(content.Find("Top Left Wall").localPosition.y) + RoomLayout.WallThickness);
 
-        public static float NativeScale(Vector2 size) => MasterScale * Mathf.Min(1f, size.x / 16f, size.y / 9f);
+        public static float NativeScale(Vector2 size) => FairyVillageRoomGeometry.NativeScale(size);
 
         private static void Apply(string path, Material material)
         {
@@ -170,34 +170,10 @@ namespace TrickalFanGame.Editor
         }
 
         private static Rect CellRect(float[] x, float[] y, int col, int row) => new Rect(x[col], y[row + 1], x[col + 1] - x[col], y[row] - y[row + 1]);
-        // The floor actors can stand on: the largest whole-unit rectangle, centered on the room, that fits inside the
-        // painted floor. Its edges are on the 0.5 Layout grid, so 1x1 obstacles and pits meet the walls with no gap,
-        // and the room Layout grid (RoomLayoutFormat) is exactly this rectangle.
-        public static Rect WalkableFloor(Vector2 size) {
-            Rect painted = PaintedFloor(size);
-            float width = Mathf.Floor(painted.width), height = Mathf.Floor(painted.height);
-            return new Rect(-width / 2, -height / 2, width, height);
-        }
-
-        // Where the painting itself would let actors stand, from the registered wall and hedge edges.
-        public static Rect PaintedFloor(Vector2 size) {
-            float scale = NativeScale(size);
-            // Actors do not shrink with Small's artwork. Keep their penetration below the
-            // painted hedge edge constant in world units, using Small's approved 80% setting.
-            Vector2 reference = Week14Room3Setup.SmallSize;
-            float referenceBoundary = -reference.y / 2 + 110 * NativeScale(reference) * 0.84f;
-            float penetration = LowerHedgeEdge(reference) - referenceBoundary;
-            return Rect.MinMaxRect(-size.x / 2 + 125 * scale * 0.9f, LowerHedgeEdge(size) - penetration,
-                size.x / 2 - 125 * scale * 0.9f, size.y / 2 - 125 * scale * 0.5f);
-        }
-
-        public static float LowerHedgeEdge(Vector2 size)
-        {
-            float scale = NativeScale(size);
-            float margin = (941 * MasterScale - 9) * 0.5f * (scale / MasterScale);
-            // Registered foreground silhouette varies slightly around source Y=783.
-            return -size.y / 2 - margin + (941 - 783) * scale;
-        }
+        // Room measurements live in FairyVillageRoomGeometry so runtime visuals (the Shasha water end) can use them.
+        public static Rect WalkableFloor(Vector2 size) => FairyVillageRoomGeometry.WalkableFloor(size);
+        public static Rect PaintedFloor(Vector2 size) => FairyVillageRoomGeometry.PaintedFloor(size);
+        public static float LowerHedgeEdge(Vector2 size) => FairyVillageRoomGeometry.LowerHedgeEdge(size);
 
         private static void BuildSealBoundary(RoomDoorSlot slot, Transform content, Vector2 size)
         {

@@ -35,6 +35,32 @@ namespace TrickalFanGame.Player
 
         public Vector2 WorldCenter => transform.TransformPoint(Collider.offset);
 
+        // Hitbox-1: a grown body rises from its feet, so hugging the wall above, the body center sits inside or past
+        // that wall and an attack launched there stops at once or leaves the room. The launch point is pulled back
+        // toward the feet, which walls never contain, to just before the first blocker between them.
+        public Vector2 ClearLaunchOrigin(Vector2 origin, Func<Collider2D, bool> isBlocker) =>
+            ClearLaunchOrigin(origin, WorldCenter, isBlocker);
+
+        public static Vector2 ClearLaunchOrigin(Vector2 origin, Vector2 feetCenter, Func<Collider2D, bool> isBlocker)
+        {
+            const float Clearance = 0.02f;
+            Vector2 path = origin - feetCenter;
+            float distance = path.magnitude;
+            if (distance < 0.0001f) return origin;
+            Vector2 direction = path / distance;
+            float nearest = float.PositiveInfinity;
+            foreach (RaycastHit2D hit in Physics2D.RaycastAll(feetCenter, direction, distance))
+            {
+                // A blocker that already contains the feet is not one the body grew into.
+                if (hit.collider != null && hit.distance > 0f && hit.distance < nearest && isBlocker(hit.collider))
+                    nearest = hit.distance;
+            }
+
+            return float.IsPositiveInfinity(nearest)
+                ? origin
+                : feetCenter + direction * Mathf.Max(0f, nearest - Clearance);
+        }
+
         // Hitbox-1: under a root scaled by bodyScale the feet keep their world radius, and their bottom stays at the
         // bottom of the scaled body circle.
         public void ApplyBodyScale(float bodyScale)

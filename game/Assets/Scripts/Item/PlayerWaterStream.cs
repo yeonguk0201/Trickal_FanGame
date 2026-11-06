@@ -42,6 +42,7 @@ namespace TrickalFanGame.Item
         private readonly List<LineRenderer> beamVisuals = new();
         private Health health;
         private PlayerStats stats;
+        private PlayerFeet feet;
         private PlayerActionState actionState;
         private PlayerProjectileAttack projectileAttack;
         private Material streamMaterial;
@@ -158,11 +159,13 @@ namespace TrickalFanGame.Item
             float halfWidth = BeamWidth * 0.5f;
             for (int beam = 0; beam < beamCount; beam++)
             {
-                Vector2 origin = (Vector2)transform.position + side * ((beam - (beamCount - 1) * 0.5f) * BeamSpacing);
+                Vector2 origin = ClearOrigin((Vector2)transform.position +
+                    side * ((beam - (beamCount - 1) * 0.5f) * BeamSpacing));
                 float length = ResolveLength(origin, forward, MaximumLength);
                 if (beam == 0) LastLength = length;
                 HitAlong(origin, forward, length, halfWidth);
-                ShowBeam(beam, origin, origin + forward * length, halfWidth * 2f);
+                ShowBeam(beam, origin, origin + forward * VisualLength(origin, forward, length, MaximumLength),
+                    halfWidth * 2f);
             }
 
             for (int index = beamCount; index < beamVisuals.Count; index++)
@@ -190,6 +193,51 @@ namespace TrickalFanGame.Item
 
             return length;
         }
+
+        // The wall colliders stop at the walkable floor, but the painted wall face is 0.14-0.61 further out, so a
+        // stream ending on the collider floats in front of the stones. Only the drawn stream reaches the painted face;
+        // hits and LastLength keep the collider length.
+        public static float VisualLength(Vector2 origin, Vector2 direction, float length, float maximumLength)
+        {
+            const float MaximumOverlap = 1f;
+            if (length >= maximumLength - 0.001f) return length;
+            RaycastHit2D wall = default;
+            foreach (RaycastHit2D hit in Physics2D.RaycastAll(origin, direction, length + 0.01f))
+            {
+                if (hit.collider != null && IsStreamBlocker(hit.collider) &&
+                    (wall.collider == null || hit.distance < wall.distance)) wall = hit;
+            }
+            RoomNode room = wall.collider != null ? wall.collider.GetComponentInParent<RoomNode>() : null;
+            Transform content = room != null && room.ContentRoot != null ? room.ContentRoot.transform : null;
+            if (content == null) return length;
+            Vector2 size = FairyVillageRoomGeometry.RoomSize(content);
+            if (size == Vector2.zero) return length;
+
+            Rect painted = FairyVillageRoomGeometry.PaintedFloor(size);
+            Vector2 localOrigin = content.InverseTransformPoint(origin);
+            Vector2 localDirection = content.InverseTransformVector(direction);
+            if (!painted.Contains(localOrigin) || localDirection.sqrMagnitude < 0.000001f) return length;
+            float exit = float.PositiveInfinity;
+            if (localDirection.x > 0f) exit = Mathf.Min(exit, (painted.xMax - localOrigin.x) / localDirection.x);
+            if (localDirection.x < 0f) exit = Mathf.Min(exit, (painted.xMin - localOrigin.x) / localDirection.x);
+            if (localDirection.y > 0f) exit = Mathf.Min(exit, (painted.yMax - localOrigin.y) / localDirection.y);
+            if (localDirection.y < 0f) exit = Mathf.Min(exit, (painted.yMin - localOrigin.y) / localDirection.y);
+            Vector2 face = content.TransformPoint(localOrigin + localDirection * exit);
+            float faceDistance = Vector2.Distance(origin, face);
+            // Open door corridors and anything past the painted face keep the collider length.
+            if (faceDistance <= length || faceDistance - length > MaximumOverlap) return length;
+            return Mathf.Min(faceDistance, maximumLength - 0.002f);
+        }
+
+        // Hitbox-1: a grown body's center can sit inside or past the wall above; start from just before it.
+        private Vector2 ClearOrigin(Vector2 origin)
+        {
+            if (feet == null) feet = GetComponentInChildren<PlayerFeet>(true);
+            return feet != null ? feet.ClearLaunchOrigin(origin, IsStreamBlocker) : origin;
+        }
+
+        public static Vector2 ClearOrigin(Vector2 origin, Vector2 feetCenter) =>
+            PlayerFeet.ClearLaunchOrigin(origin, feetCenter, IsStreamBlocker);
 
         public static bool IsStreamBlocker(Collider2D collider)
         {
@@ -400,9 +448,11 @@ namespace TrickalFanGame.Item
             {
                 ProceduralWaterStream effect = proceduralBeams[i];
                 if (effect == null || !effect.BodyVisible) continue;
-                Vector2 origin = (Vector2)transform.position + side * ((i - (BeamCount - 1) * 0.5f) * BeamSpacing);
+                Vector2 origin = ClearOrigin((Vector2)transform.position +
+                    side * ((i - (BeamCount - 1) * 0.5f) * BeamSpacing));
                 float length = ResolveLength(origin, burstForward, MaximumLength);
-                effect.SetPath(origin, origin + burstForward * length, length < MaximumLength - 0.001f);
+                float shown = VisualLength(origin, burstForward, length, MaximumLength);
+                effect.SetPath(origin, origin + burstForward * shown, length < MaximumLength - 0.001f);
             }
         }
 

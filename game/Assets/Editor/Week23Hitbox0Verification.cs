@@ -82,6 +82,7 @@ namespace TrickalFanGame.Editor
                 ValidateEnemiesUseBody();
                 ValidateDoorwayUsesFeet();
                 ValidateShotAlongWallAbove();
+                ValidateGrownShotAlongWallAbove();
                 ValidateShotIntoHuggedObstacle();
             }
             finally
@@ -264,6 +265,45 @@ namespace TrickalFanGame.Editor
                 Assert(upward.transform.position == before &&
                        upward.GetComponent<Collider2D>().Distance(wall).isOverlapped,
                     "A shot fired into the wall must not be moved; the wall still takes it.");
+            });
+        }
+
+        // Bug fix (2026-11-06 play feedback): a grown body (giant potion) rises from its feet, so against the wall above
+        // its center sits inside that wall. A sideways shot launched there was taken by the wall at once; the launch
+        // point is pulled back toward the feet, and the shot then slides clear of the wall like a normal-size one.
+        private static void ValidateGrownShotAlongWallAbove()
+        {
+            foreach (float size in new[] { 2f, 3f })
+            Run($"grown {size} shot along wall above", root =>
+            {
+                Box(root, "Environment", Origin + new Vector2(0f, 2f), new Vector2(20f, 1f));
+                Rigidbody2D body = Player(root, Origin);
+                body.gameObject.AddComponent<PlayerBodySize>().SetSizeMultiplier(size);
+                Drive(body, Vector2.up);
+                Collider2D wall = root.GetComponentsInChildren<BoxCollider2D>().Single();
+                PlayerFeet feet = body.GetComponentInChildren<PlayerFeet>();
+                Vector2 center = body.position;
+                Assert(wall.OverlapPoint(center) || center.y > wall.bounds.max.y,
+                    $"The probe must reproduce the bug: a size {size} body center is inside or past the wall above.");
+                Vector2 origin = feet.ClearLaunchOrigin(center, TrickalFanGame.Item.PlayerWaterStream.IsStreamBlocker);
+                Assert(!wall.OverlapPoint(origin) && origin.y < wall.bounds.min.y &&
+                       wall.bounds.min.y - origin.y < 0.05f && Mathf.Abs(origin.x - center.x) < 0.001f,
+                    "A grown body's launch point must sit just below the wall above.");
+                const float spawnOffset = 0.65f;
+                const float range = 5.3f;
+                foreach (float sign in new[] { 1f, -1f })
+                {
+                    Vector2 direction = new(sign, 0f);
+                    Projectile shot = Shot(root, origin + direction * spawnOffset);
+                    shot.PushOutOfWallsBeside(direction, origin);
+                    Collider2D shotCollider = shot.GetComponent<Collider2D>();
+                    ContactFilter2D filter = new()
+                        { useLayerMask = true, layerMask = LayerMask.GetMask("Environment"), useTriggers = false };
+                    Assert(!shotCollider.Distance(wall).isOverlapped &&
+                           shotCollider.Cast(direction, filter, new RaycastHit2D[1], range) == 0,
+                        $"A size {size} shot fired {(sign > 0f ? "right" : "left")} along the wall above must fly its range.");
+                    UnityEngine.Object.DestroyImmediate(shot.gameObject);
+                }
             });
         }
 
