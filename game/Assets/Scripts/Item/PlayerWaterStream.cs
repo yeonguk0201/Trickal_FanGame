@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Enemy;
 using TrickalFanGame.Player;
 using TrickalFanGame.Room;
 using UnityEngine;
@@ -259,7 +260,9 @@ namespace TrickalFanGame.Item
             beamTargets.Clear();
             foreach (RaycastHit2D hit in Physics2D.CircleCastAll(origin, halfWidth, forward, length))
             {
-                if (hit.collider == null) continue;
+                // Hitbox-2: an enemy's feet are terrain only, the body is the hurtbox. A burrowed ambusher keeps only
+                // its feet on, so counting them would let the stream hit it and split or bounce from it.
+                if (hit.collider == null || hit.collider.GetComponent<EnemyFeet>() != null) continue;
                 DestructibleObstacle obstacle = hit.collider.GetComponentInParent<DestructibleObstacle>();
                 if (obstacle != null)
                 {

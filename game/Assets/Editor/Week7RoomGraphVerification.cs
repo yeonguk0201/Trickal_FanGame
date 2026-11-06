@@ -125,7 +125,9 @@ namespace TrickalFanGame.Editor
                     "A transition must activate only the destination room.");
                 Rigidbody2D playerBody = player.GetComponent<Rigidbody2D>();
                 Assert(playerBody != null &&
-                       (playerBody.position - (Vector2)second.Entry.position).sqrMagnitude < 0.0001f,
+                       // The entry point marks where the feet land, lifted by ArrivalFeetOffset.
+                       (playerBody.position + PlayerFeet.LocalPosition - RoomLayout.ArrivalFeetOffset -
+                        (Vector2)second.Entry.position).sqrMagnitude < 0.0001f,
                     "A transition must place the player at the destination entry point.");
                 Assert((Vector2)cameraObject.transform.position == (Vector2)second.CameraAnchor.position,
                     "A transition must snap the camera to the destination room anchor.");

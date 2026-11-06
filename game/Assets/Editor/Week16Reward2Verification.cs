@@ -87,12 +87,16 @@ namespace TrickalFanGame.Editor
             foreach (ItemDefinition definition in definitions)
             {
                 card.Bind(ItemRewardCandidate.ForItem(definition, Math.Max(0, definition.MaxStacks - 1)), playerHealth);
-                Assert(card.KindText.text == (definition.Kind == ItemKind.Spell ? "스펠" : "아티팩트") &&
+                // Power-2: a cult leader power shows its charge and use key instead of stacks.
+                bool stackLineMatches = definition.IsActivePower
+                    ? card.StackText.text == GamePowerHudView.BuildOfferLine(definition)
+                    : card.StackText.text.Contains("현재 스택", StringComparison.Ordinal);
+                Assert(!string.IsNullOrEmpty(ItemKindText.GetDisplayName(definition.Kind)) &&
+                       card.KindText.text == ItemKindText.GetDisplayName(definition.Kind) &&
                        card.NameText.text == definition.DisplayName &&
                        card.RarityText.text.Contains(definition.Rarity.ToString().ToUpperInvariant(),
                            StringComparison.Ordinal) &&
-                       !string.IsNullOrWhiteSpace(card.EffectText.text) &&
-                       card.StackText.text.Contains("현재 스택", StringComparison.Ordinal),
+                       !string.IsNullOrWhiteSpace(card.EffectText.text) && stackLineMatches,
                     $"Reward card fields are incomplete for {definition.ItemId}.");
                 AssertFits(card.NameText, definition.ItemId + " name");
                 AssertFits(card.EffectText, definition.ItemId + " effect");
