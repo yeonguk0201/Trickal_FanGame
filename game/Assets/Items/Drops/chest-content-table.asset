@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39de8d18221a0a543945aa93eb89170a, type: 3}
   m_Name: chest-content-table
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Room.ChestContentTable
-  chestChance: 0.33
+  chestChance: 0.5
   kinds:
   - kind: 0
     weight: 75
     minimumCount: 1
-    countWeights: 3c0000001e0000000a000000
+    countWeights: 280000002800000014000000
     spellChance: 0.05
     specialRewardChance: 0
     jjangsemShare: 0
@@ -38,19 +38,19 @@ MonoBehaviour:
   consumables:
   - dropId: heart
     prefab: {fileID: 303849290133622444, guid: fe735d51964ab6243baf43f8c7221f9a, type: 3}
-    weight: 30
+    weight: 22
   - dropId: sp
     prefab: {fileID: 2738873779375130701, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
-    weight: 30
+    weight: 22
   - dropId: gold
     prefab: {fileID: 1421089735375027616, guid: 615b40b3d6223ad4a9363c3e586e6072, type: 3}
-    weight: 20
+    weight: 26
   - dropId: key
     prefab: {fileID: 5401781955347040268, guid: 0488521fa1d47a84d95253f53e50f9d7, type: 3}
-    weight: 12
+    weight: 15
   - dropId: bomb
     prefab: {fileID: 55609960391072830, guid: 523aa0bd7b8a129418565809a9f40126, type: 3}
-    weight: 8
+    weight: 15
   spells:
   - {fileID: 11400000, guid: 27abb698b3a5c524fb24c4959e1f9ce8, type: 2}
   - {fileID: 11400000, guid: 4eaa6ff4288eb3544be34e8da9170537, type: 2}

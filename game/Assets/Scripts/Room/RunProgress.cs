@@ -13,6 +13,8 @@ namespace TrickalFanGame.Room
         private readonly Dictionary<string, ItemRewardSelectionState> rewardSelections = new(StringComparer.Ordinal);
         private readonly Dictionary<string, ShopStockState> shopStocks = new(StringComparer.Ordinal);
         private readonly RunResourceWallet resources = new();
+        // Drop-0: rooms cleared since the last key or bomb, for the guaranteed drop.
+        private readonly ResourcePity pity = new();
         private readonly HashSet<string> clearedRoomIds = new(StringComparer.Ordinal);
         // Spell-6 (네티의 지도): floors whose whole map the minimap shows.
         private readonly HashSet<int> revealedMapFloors = new();
@@ -90,12 +92,19 @@ namespace TrickalFanGame.Room
         public int TryAddResource(RunResourceType type, int amount)
         {
             if (IsProgressionStopped) return 0;
-            if (type != RunResourceType.Elif) return resources.Add(type, amount);
+            if (type != RunResourceType.Elif)
+            {
+                int added = resources.Add(type, amount);
+                pity.RecordGain(type, added);
+                return added;
+            }
             if (amount <= 0) return 0;
             ElifGained += amount;
             NotifyElifChanged();
             return amount;
         }
+
+        public ResourcePity Pity => pity;
 
         public bool TrySpendResource(RunResourceType type, int amount = 1)
         {
@@ -480,6 +489,7 @@ namespace TrickalFanGame.Room
             rewardSelections.Clear();
             shopStocks.Clear();
             resources.Clear();
+            pity.Clear();
             ElifStartingBalance = 0;
             ElifGained = 0;
             ElifSpent = 0;

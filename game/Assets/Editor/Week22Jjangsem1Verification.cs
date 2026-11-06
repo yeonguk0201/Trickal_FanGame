@@ -235,8 +235,9 @@ namespace TrickalFanGame.Editor
             RunResourcePickup goldOriginal = originals.Select(pickup => pickup.GetComponent<RunResourcePickup>())
                 .First(resource => resource != null && resource.ResourceType == RunResourceType.Gold);
             Assert(goldCopy.GetComponent<RunResourcePickup>().Collect(run.Progress) &&
-                   run.Progress.GetResourceCount(RunResourceType.Gold) == gold + 1 && !goldOriginal.IsCollected,
-                "Collecting a copied gold must add one gold and leave the original on the floor.");
+                   run.Progress.GetResourceCount(RunResourceType.Gold) == gold + goldOriginal.Amount &&
+                   !goldOriginal.IsCollected,
+                "Collecting a copied gold must add its gold and leave the original on the floor.");
 
             // The next use copies the copies of the last one; the targets are fixed before it copies anything.
             RoomDuplicationTargets before = RoomDuplication.CollectTargets(content, true);

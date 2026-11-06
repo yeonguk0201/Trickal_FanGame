@@ -21,6 +21,7 @@ namespace TrickalFanGame.Room
         [SerializeField] private ResourceDropTable encounterClearDropTable;
         // Variant-0: the guaranteed pickup an elite drops when killed.
         [SerializeField] private ResourceDropTable eliteKillDropTable;
+        [SerializeField] private ResourceDropTable championKillDropTable;
         [SerializeField] private ChestContentTable chestContentTable;
         [SerializeField] private GameObject[] floorBossPrefabs = Array.Empty<GameObject>();
         [SerializeField] private ItemRewardSelectionSession rewardSelectionSession;
@@ -46,6 +47,7 @@ namespace TrickalFanGame.Room
         public EncounterEnemyRoster EnemyRoster => encounterEnemyRoster;
         public ResourceDropTable EncounterClearDropTable => encounterClearDropTable;
         public ResourceDropTable EliteKillDropTable => eliteKillDropTable;
+        public ResourceDropTable ChampionKillDropTable => championKillDropTable;
         public ChestContentTable ChestContentTable => chestContentTable;
         public IReadOnlyList<GameObject> FloorBossPrefabs => floorBossPrefabs;
         public GeneratedFloorGraph GeneratedGraph => generatedGraph;
@@ -87,6 +89,11 @@ namespace TrickalFanGame.Room
         public void ConfigureEliteKillDrop(ResourceDropTable configuredTable)
         {
             eliteKillDropTable = configuredTable;
+        }
+
+        public void ConfigureChampionKillDrop(ResourceDropTable configuredTable)
+        {
+            championKillDropTable = configuredTable;
         }
 
         // Chest-1: combat room clears roll a chest instead of the old single-pickup drop table.
@@ -702,6 +709,13 @@ namespace TrickalFanGame.Room
                                                 eliteKillDropTable != null && eliteKillDropTable.TryValidate(out _)
                     ? new EliteKillReward(eliteKillDropTable, instance.Node.ContentRoot.transform, state,
                         EliteKillReward.DeriveSeed(node.ContentSeed), runProgress)
+                    : null);
+                // Drop-0: without a table (older test scenes) champions still fight but drop nothing.
+                controller.ConfigureChampionReward(EnemyVariantRules.CountChampions(node.ResolvedEncounterWaves) > 0 &&
+                                                   championKillDropTable != null &&
+                                                   championKillDropTable.TryValidate(out _)
+                    ? new ChampionKillReward(championKillDropTable, instance.Node.ContentRoot.transform, state,
+                        node.FloorNumber, ChampionKillReward.DeriveRoomSeed(node.ContentSeed), runProgress)
                     : null);
                 if (chestContentTable != null)
                 {

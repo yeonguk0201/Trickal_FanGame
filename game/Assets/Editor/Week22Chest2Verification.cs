@@ -196,8 +196,9 @@ namespace TrickalFanGame.Editor
                                     table.FindRule(ChestKind.Golden).SpecialRewardChance;
             float diamondSpellPerClear = table.KindChancePerRoll(ChestKind.Diamond) *
                                          table.FindRule(ChestKind.Diamond).SpellChance;
-            AssertNear(specialPerClear, 0.0165f, 0.0001f, "golden special rewards per clear");
-            AssertNear(diamondSpellPerClear, 0.0165f, 0.0001f, "diamond spells per clear");
+            // Drop-0 (2026-11-06): 50% chests make both 0.025 per clear (was 0.0165 at 33%).
+            AssertNear(specialPerClear, 0.025f, 0.0001f, "golden special rewards per clear");
+            AssertNear(diamondSpellPerClear, 0.025f, 0.0001f, "diamond spells per clear");
             Debug.Log($"Chest-2 expected per combat room clear: golden special reward {specialPerClear:F4}, " +
                       $"diamond spell {diamondSpellPerClear:F4}.");
         }

@@ -174,7 +174,10 @@ namespace TrickalFanGame.Editor
             RunResourcePickup pickup = GetOrAdd<RunResourcePickup>(root);
             SerializedObject serializedPickup = new(pickup);
             serializedPickup.FindProperty("resourceType").intValue = (int)spec.Type;
-            serializedPickup.FindProperty("amount").intValue = PickupAmount;
+            // Drop-0: one gold pickup is worth GoldPickupAmount; keys and bombs stay one each.
+            serializedPickup.FindProperty("amount").intValue = spec.Type == RunResourceType.Gold
+                ? Drop0DropRateSetup.GoldPickupAmount
+                : PickupAmount;
             serializedPickup.FindProperty("runProgress").objectReferenceValue = null;
             serializedPickup.ApplyModifiedPropertiesWithoutUndo();
         }

@@ -2800,6 +2800,7 @@ MonoBehaviour:
   encounterEnemyRoster: {fileID: 11400000, guid: dbd3fb86e3fb0264686c348e9060667b, type: 2}
   encounterClearDropTable: {fileID: 11400000, guid: eea23f72b6b54874cb7d18a125855309, type: 2}
   eliteKillDropTable: {fileID: 11400000, guid: 2b613792019fcd74b9e96e7a17375a5d, type: 2}
+  championKillDropTable: {fileID: 11400000, guid: 415a0a7777a84aa48bbf72eeb9c83a09, type: 2}
   chestContentTable: {fileID: 11400000, guid: 48012de1a8d9a0d409c734fa4cf5845c, type: 2}
   floorBossPrefabs:
   - {fileID: 421685952657128216, guid: f991af9e6d8bc4e4f869e052eded37e0, type: 3}

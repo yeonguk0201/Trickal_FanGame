@@ -32,6 +32,10 @@ namespace TrickalFanGame.Room
         public ChestContentTable ChestTable => chestTable;
         public int ChestSeed => chestSeed;
         public TreasureChest LastSpawnedChest { get; private set; }
+        // Drop-0: the key or bomb pickups the pity counter guaranteed on this room's clear.
+        public IReadOnlyList<GameObject> LastPityDrops => lastPityDrops;
+        private readonly List<GameObject> lastPityDrops = new();
+        public const float PityDropSpacing = 0.9f;
         public event Action<GameObject> RewardSpawned;
 
         public static int DeriveDropSeed(int roomContentSeed)
@@ -102,7 +106,9 @@ namespace TrickalFanGame.Room
                 return false;
             }
 
-            if (!dropTable.TryRoll(dropSeed, out ResourceDropEntry entry) || entry.Prefab == null)
+            bool rolled = dropTable.TryRoll(dropSeed, out ResourceDropEntry entry) && entry.Prefab != null;
+            SpawnPityDrops(dropTable.Entries);
+            if (!rolled)
             {
                 return false;
             }
@@ -123,14 +129,17 @@ namespace TrickalFanGame.Room
 
         private bool TrySpawnChest()
         {
-            if (chestSite == null || runState == null || !runState.TryMarkClearRewardGranted() ||
-                !chestTable.TryRollChest(chestSeed, out ChestKind kind))
+            if (chestSite == null || runState == null || !runState.TryMarkClearRewardGranted()) return false;
+            if (!chestTable.TryRollChest(chestSeed, out ChestKind kind))
             {
+                SpawnPityDrops(chestTable.Consumables);
                 return false;
             }
 
             TreasureChest chest = RoomChestSpawner.Spawn(chestTable, chestSite, ClearChestId, kind, chestSeed,
                 out string error);
+            // After the chest, so the guaranteed pickups keep clear of it.
+            SpawnPityDrops(chestTable.Consumables);
             if (chest == null)
             {
                 Debug.LogError($"Room {runState.RoomId} could not place its {kind} chest. {error}", this);
@@ -141,6 +150,63 @@ namespace TrickalFanGame.Room
             LastSpawnedReward = chest.gameObject;
             RewardSpawned?.Invoke(chest.gameObject);
             return true;
+        }
+        // Drop-0: counts this first clear for the pity counter and drops the key or bomb it guarantees. The pickup
+        // Prefab is the source table's own key or bomb candidate. The room's clear reward is granted once, so a
+        // revisit never counts or drops again.
+        private void SpawnPityDrops(IReadOnlyList<ResourceDropEntry> candidates)
+        {
+            lastPityDrops.Clear();
+            if (runProgress == null) return;
+            runProgress.Pity.RecordCombatClear(out bool key, out bool bomb);
+            if (key) SpawnPityDrop(candidates, RunResourceType.Key);
+            if (bomb) SpawnPityDrop(candidates, RunResourceType.Bomb);
+        }
+
+        private void SpawnPityDrop(IReadOnlyList<ResourceDropEntry> candidates, RunResourceType type)
+        {
+            ResourceDropEntry entry = FindResourceEntry(candidates, type);
+            if (entry == null)
+            {
+                Debug.LogError($"Room {runState.RoomId} has no {type} candidate for its guaranteed drop.", this);
+                return;
+            }
+
+            Vector3 position = PityDropPosition();
+            GameObject pickup = Instantiate(entry.Prefab, position, Quaternion.identity, rewardParent);
+            pickup.name = $"Pity Drop {entry.DropId} - {runState.RoomId}";
+            if (pickup.TryGetComponent(out RunResourcePickup resourcePickup)) resourcePickup.BindRunProgress(runProgress);
+            lastPityDrops.Add(pickup);
+        }
+
+        public static ResourceDropEntry FindResourceEntry(IReadOnlyList<ResourceDropEntry> candidates,
+            RunResourceType type)
+        {
+            if (candidates == null) return null;
+            foreach (ResourceDropEntry candidate in candidates)
+                if (candidate != null && candidate.Prefab != null &&
+                    candidate.Prefab.TryGetComponent(out RunResourcePickup pickup) && pickup.ResourceType == type)
+                    return candidate;
+            return null;
+        }
+
+        // A safe spot away from the player, chests and earlier guaranteed pickups when the room has a chest site;
+        // otherwise beside the old clear drop point.
+        private Vector3 PityDropPosition()
+        {
+            if (chestSite != null)
+            {
+                List<Vector2> occupied = RoomChestSpawner.OccupiedLocal(chestSite);
+                foreach (GameObject earlier in lastPityDrops)
+                    occupied.Add(chestSite.Room.transform.InverseTransformPoint(earlier.transform.position));
+                if (ChestPlacement.TryFindSafeLocalPosition(chestSite.Template, chestSite.Room.gameObject,
+                        chestSite.PreferredLocal, occupied, chestSite.AvoidLocal, PityDropSpacing,
+                        out Vector2 local, out _))
+                    return chestSite.Room.transform.TransformPoint(local);
+            }
+
+            Vector3 origin = rewardPoint != null ? rewardPoint.position : transform.position;
+            return origin + new Vector3(PityDropSpacing * (lastPityDrops.Count + 1), 0f, 0f);
         }
     }
 }

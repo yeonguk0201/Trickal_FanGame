@@ -2441,3 +2441,16 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - Defeat-3(2026-11-06): 잠복형 쓰러짐·곡사형 걷기·부스러기 쫄따구 뜀도 같은 메뉴(`Apply Enemy Defeat Frames`, `Apply Defeat-1 Motions`)가 연결한다. 시트를 다시 받으면 `python scripts/split-lobbing-walk-and-ambush-death.py walk|crouch|death <시트>`(곡사형 걷기, 산사모-광기 웅크리기, 잠복형 쓰러짐)로 자른 뒤 메뉴를 다시 실행한다. 실제 화면: `F1` → `Spawn ambusher (bursts from the floor)`로 나온 잠복형을 잡아 그 자리에서(밀리거나 튀지 않고) 쓰러지는지, `Spawn lobber (throws over obstacles)`로 걷는 동안 네 장이 재생되고 던질 때는 던지기 자세가 나오는지, `Spawn crumb minion (explodes on death)`로 쫄따구가 움직일 때 그림만 살짝 뛰고 그림자는 바닥에 남는지 본다. 챔피언 `Blast` 변형(불효자손 등 쓰러짐 그림이 있는 적)을 잡으면 1초 예고 동안 서 있는 그림 없이 쓰러짐 그림과 붉은 영역만 보여야 한다. `Spawn self-destruct (blows up near you)`로 산사모-광기에 다가가면 1초 예고 동안 붉어지며 네 장에 걸쳐 웅크리고, 예고 중에 잡으면 남은 시간 동안 멈춘 몸이 계속 웅크리다 터져야 한다.
 - Contact-0 원거리 적 접촉 피해(Unity): 메뉴 `Trickal Fan Game > Week 28 > Setup Contact-0 Ranged Contact Damage`가 원거리 적 Prefab 7종에 반 칸·1초 쿨다운 `ContactDamage`를 멱등으로 붙인다. 자동 검증은 Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.RangedContactDamageVerification.SetupAndVerifyBatch -logFile <로그 경로>`(Setup 2회 GUID 보존, 7종의 반 칸·쿨다운·충돌체, 1·3층 반 칸 적용, 자폭형 제외 모든 적 Prefab의 접촉 피해 보유). 단독 검사는 메뉴 `Verify Contact-0 Ranged Contact Damage`.
 - 실제 화면: `F1` → `Spawn self-destruct (blows up near you)`로 산사모-광기가 걸어오는지, `Spawn ambusher (bursts from the floor)`로 흙더미가 다가와 세 단계로 튀어나오고 다시 들어가는지 본다. `— Boss room —`의 `Boss F1~F3`(층마다 보스가 다를 수 있다)으로 부스러기·새마음금고를 잡아 쓰러짐 그림을, 크레용 용사는 각성 뒤 황금 걷기를 확인한다(보스 테스트 씬에서도 볼 수 있다). 에르핀은 체력이 다 닳으면 네 장으로 쓰러진 뒤 GAME OVER로 넘어가는지, 그동안 그림자가 남는지 본다. 적·보스 쓰러짐 그림의 그림자는 튀어오를 때 바닥에 남고 그림과 함께 사라져야 한다.
+
+## 드롭률 Drop-0 (2026-11-06)
+
+- 값 적용 메뉴: `Trickal Fan Game > Week 28 > Setup Drop-0 Drop Rates`. 상자 테이블·엘리트/챔피언 처치 테이블·골드 픽업 양을
+  고치고 Game Scene에 챔피언 테이블을 연결한다. 다시 실행해도 에셋이 늘지 않는다. 값은 `Drop0DropRateSetup`에 있다.
+- 측정 메뉴: `Trickal Fan Game > Week 28 > Report Drop-0 Economy`. 512 seed로 층별 열쇠·폭탄·골드·엘리프 기대값(보정 포함)과
+  잠긴 방·황금상자 수를 Console에 찍는다. 배치: `-executeMethod TrickalFanGame.Editor.Drop0EconomyReport.ReportBatch`
+  (값 적용 후 측정은 `SetupAndReportBatch`).
+- 검증: `-executeMethod TrickalFanGame.Editor.Drop0DropRateVerification.SetupAndVerifyBatch`(단독),
+  `VerifyWithRegressionsBatch`(커밋 전 회귀 묶음).
+- 실제 화면: Game Scene Play → `F1` → `— Resources —`의 `Key pity on next clear`를 누르고 전투방을 클리어하면 상자 옆에 열쇠가
+  하나 더 떨어진다(`Pity key 0/5`로 돌아감). 챔피언 드롭은 `— Seed —`의 `Find champion F2`로 2층 이상 챔피언을 잡고 `— Room —`의
+  `Champion drop` 줄에서 확인한다.

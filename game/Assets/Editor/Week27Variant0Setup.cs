@@ -20,15 +20,9 @@ namespace TrickalFanGame.Editor
         public const int EncounterContentVersion = 21;
         public const string EliteDropTablePath = Week17Resource3Setup.DropTableFolder + "/elite-kill-drop-table.asset";
 
-        // Placeholder until Drop-0: the basic obstacle candidates without the secret pit, always one pickup.
-        public static readonly (string DropId, int Weight)[] EliteDropWeights =
-        {
-            ("heart", 25),
-            ("sp", 25),
-            ("key", 10),
-            ("bomb", 8),
-            ("elif", 30),
-        };
+        // Always one pickup. Drop-0 (2026-11-06) owns the candidates and weights (was heart 25 / SP 25 / key 10 /
+        // bomb 8 / elif 30).
+        public static readonly (string DropId, int Weight)[] EliteDropWeights = Drop0DropRateSetup.KillDropWeights;
 
         [MenuItem("Trickal Fan Game/Week 27/Setup Variant-0 Elite Enemies")]
         public static void Setup()

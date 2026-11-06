@@ -48,7 +48,7 @@ namespace TrickalFanGame.Editor
             ValidateRunProgressLifecycle();
             ValidatePickupCollection();
             ValidateColliderFiltering();
-            Debug.Log("Resource-1 run resource verification passed: gold, key and bomb pickups each grant 1, " +
+            Debug.Log("Resource-1 run resource verification passed: gold pickups grant their amount (Drop-0), keys and bombs 1, " +
                       "counts cap at 99 with the overflow dropped, a full resource leaves its pickup on the " +
                       "floor, a pickup never grants twice, only the player collects, nothing is granted after " +
                       "the Run ends, and every count starts at 0 and resets with the Run.");
@@ -70,8 +70,9 @@ namespace TrickalFanGame.Editor
                 Assert(pickup != null && body != null && collider != null && renderer != null,
                     $"{spec.Type} pickup prefab must have RunResourcePickup, Rigidbody2D, CircleCollider2D " +
                     "and SpriteRenderer.");
-                Assert(pickup.ResourceType == spec.Type && pickup.Amount == 1,
-                    $"{spec.PrefabPath} must grant exactly one {spec.Type}.");
+                int amount = spec.Type == RunResourceType.Gold ? Drop0DropRateSetup.GoldPickupAmount : 1;
+                Assert(pickup.ResourceType == spec.Type && pickup.Amount == amount,
+                    $"{spec.PrefabPath} must grant exactly {amount} {spec.Type} (Drop-0 sets the gold amount).");
                 Assert(covered.Add(pickup.ResourceType), $"Only one prefab may grant {spec.Type}.");
                 Assert(prefab.layer == pickupLayer, $"{spec.Type} pickup prefab must use the Pickup layer.");
                 Assert(!collider.isTrigger && collider.radius > 0f,
@@ -186,12 +187,14 @@ namespace TrickalFanGame.Editor
                 foreach (Week17Resource1Setup.PickupSpec spec in Week17Resource1Setup.Specs)
                 {
                     pickupObject = CreatePickup(spec.Type, out RunResourcePickup pickup);
+                    // Drop-0: a gold pickup is worth GoldPickupAmount; the rest grant one.
+                    int amount = pickup.Amount;
                     Assert(!pickup.Collect(null) && pickupObject != null,
                         $"A {spec.Type} pickup must not be collected without a Run.");
                     Assert(pickup.Collect(progress) && pickupObject == null &&
-                           progress.GetResourceCount(spec.Type) == 1,
-                        $"A {spec.Type} pickup must grant exactly one and disappear.");
-                    Assert(!pickup.Collect(progress) && progress.GetResourceCount(spec.Type) == 1,
+                           progress.GetResourceCount(spec.Type) == amount,
+                        $"A {spec.Type} pickup must grant its amount ({amount}) and disappear.");
+                    Assert(!pickup.Collect(progress) && progress.GetResourceCount(spec.Type) == amount,
                         $"A collected {spec.Type} pickup must never grant a second time.");
                     // Elif-2: the permanent elif has no Run cap, so it is checked by Elif-2 verification instead.
                     if (spec.Type == RunResourceType.Elif) continue;
