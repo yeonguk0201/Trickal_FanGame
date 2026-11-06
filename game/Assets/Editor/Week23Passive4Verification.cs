@@ -1,5 +1,6 @@
 using System.Linq;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Enemy;
 using TrickalFanGame.Frontend;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
@@ -320,6 +321,24 @@ namespace TrickalFanGame.Editor
                     "The enemy hit must send four short streams that deal the split damage to others near it: " +
                     $"target {target.CurrentHealth}, above {above.CurrentHealth}, below {below.CurrentHealth}, " +
                     $"high {high.CurrentHealth}.");
+
+                // A burrowed ambusher keeps only its feet collider on and is invulnerable: the stream must not
+                // count it as hit, so no short streams start from it.
+                Object.DestroyImmediate(target.gameObject);
+                Object.DestroyImmediate(above.gameObject);
+                Object.DestroyImmediate(below.gameObject);
+                Health burrowed = CreateEnemy(root.transform, Origin + Vector2.right * 3f, 1000f);
+                EnemyFeet.Ensure(burrowed.gameObject, out EnemyFeet feet);
+                Assert(feet != null, "The burrowed test enemy must have feet.");
+                burrowed.GetComponent<CircleCollider2D>().enabled = false;
+                burrowed.SetInvulnerable(true);
+                Health nearBurrowed = CreateEnemy(root.transform, Origin + new Vector2(3f, 1.2f), 1000f);
+                Physics2D.SyncTransforms();
+
+                stream.Tick(Vector2.right, Start + 10f);
+                Assert(Near(burrowed.CurrentHealth, 1000f) && Near(nearBurrowed.CurrentHealth, 1000f),
+                    "The stream must not hit a burrowed enemy through its feet nor split from it: " +
+                    $"near it {nearBurrowed.CurrentHealth}.");
             }
             finally
             {
