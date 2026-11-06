@@ -54,8 +54,9 @@ namespace TrickalFanGame.Editor
                 $"The gold pickup Prefab at {path} must keep GUID {GoldPickupGuid}.");
             RunResourcePickup pickup = Week17Resource1Setup.LoadPrefab(RunResourceType.Gold);
             Assert(pickup != null && AssetDatabase.GetAssetPath(pickup) == path &&
-                   pickup.ResourceType == RunResourceType.Gold && pickup.Amount == 1,
-                "The existing pickup Prefab must still grant exactly one gold.");
+                   pickup.ResourceType == RunResourceType.Gold &&
+                   pickup.Amount == Drop0DropRateSetup.GoldPickupAmount,
+                $"The existing pickup Prefab must grant {Drop0DropRateSetup.GoldPickupAmount} gold (Drop-0).");
         }
 
         private static void ValidateShopText()

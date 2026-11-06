@@ -196,8 +196,9 @@ namespace TrickalFanGame.Editor
                                     table.FindRule(ChestKind.Golden).SpecialRewardChance;
             float diamondSpellPerClear = table.KindChancePerRoll(ChestKind.Diamond) *
                                          table.FindRule(ChestKind.Diamond).SpellChance;
-            AssertNear(specialPerClear, 0.0165f, 0.0001f, "golden special rewards per clear");
-            AssertNear(diamondSpellPerClear, 0.0165f, 0.0001f, "diamond spells per clear");
+            // Drop-0 (2026-11-06): 50% chests make both 0.025 per clear (was 0.0165 at 33%).
+            AssertNear(specialPerClear, 0.025f, 0.0001f, "golden special rewards per clear");
+            AssertNear(diamondSpellPerClear, 0.025f, 0.0001f, "diamond spells per clear");
             Debug.Log($"Chest-2 expected per combat room clear: golden special reward {specialPerClear:F4}, " +
                       $"diamond spell {diamondSpellPerClear:F4}.");
         }
@@ -248,13 +249,16 @@ namespace TrickalFanGame.Editor
         // consumables and one exclusive artifact once, and never again after reopening or rebuilding the floor.
         private static void ValidateClearGoldenChest(RoomGraphAssembler assembler, ChestContentTable table)
         {
-            int seed = FindSeed(assembler.Generator, floor => CombatRooms(floor).Any(node => RollsGoldenReward(table, node)));
+            // Drop-1: floor 1 has no golden chests, so the clear path runs on floor 2.
+            int seed = FindSeed(assembler.Generator, floor => CombatRooms(floor).Any(node => RollsGoldenReward(table, node)),
+                GoldenChestFloor);
             try
             {
                 PrepareRun(assembler, seed);
-                GeneratedRoomNode node = CombatRooms(assembler.GeneratedGraph.FindFloor(1))
-                    .First(candidate => RollsGoldenReward(table, candidate));
                 PlayerMovement player = assembler.Graph.Player;
+                Assert(assembler.TryLoadFloor(GoldenChestFloor, player, out string error), error);
+                GeneratedRoomNode node = CombatRooms(assembler.GeneratedGraph.FindFloor(GoldenChestFloor))
+                    .First(candidate => RollsGoldenReward(table, candidate));
                 PlayerInventory inventory = player.GetComponent<PlayerInventory>();
                 int chestSeed = RoomClearRewardSpawner.DeriveChestSeed(node.ContentSeed);
                 ChestContents expected = table.RollContents(chestSeed, ChestKind.Golden);
@@ -289,7 +293,7 @@ namespace TrickalFanGame.Editor
                        Children(assembler, node.RoomId, DropPrefix).Length == expected.Consumables.Count,
                     "Opening an opened golden chest again must drop nothing.");
 
-                Assert(assembler.TryLoadFloor(1, player, out string error), error);
+                Assert(assembler.TryLoadFloor(GoldenChestFloor, player, out error), error);
                 TreasureChest rebuilt = Room(assembler, node.RoomId).Node.ContentRoot
                     .GetComponentsInChildren<TreasureChest>(true).Single(candidate => candidate.gameObject.activeSelf);
                 Assert(rebuilt.IsOpened && Children(assembler, node.RoomId, ArtifactPrefix).Length == 0 &&
@@ -440,12 +444,14 @@ namespace TrickalFanGame.Editor
             Assert(assembler.TryApplyGeneratedGraphForVerification(seed, out string error), error);
         }
 
-        private static int FindSeed(FloorGenerator generator, Func<GeneratedFloor, bool> wanted)
+        private const int GoldenChestFloor = 2;
+
+        private static int FindSeed(FloorGenerator generator, Func<GeneratedFloor, bool> wanted, int floorNumber = 1)
         {
             for (int seed = 1; seed <= MaximumSeedSearch; seed++)
             {
                 if (generator.TryGenerateForSeed(seed, out GeneratedFloorGraph graph, out _) &&
-                    graph.FindFloor(2) != null && wanted(graph.FindFloor(1)))
+                    graph.FindFloor(2) != null && wanted(graph.FindFloor(floorNumber)))
                     return seed;
             }
 

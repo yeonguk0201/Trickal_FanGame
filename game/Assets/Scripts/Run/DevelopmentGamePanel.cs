@@ -503,6 +503,16 @@ namespace TrickalFanGame.Run
             if (AssistedButton("+10 Key")) progress.TryAddResource(RunResourceType.Key, 10);
             if (AssistedButton("+10 Gold")) progress.TryAddResource(RunResourceType.Gold, 10);
             GUILayout.EndHorizontal();
+            // Drop-0: combat clears since the last key or bomb; at the threshold the next clear guarantees one.
+            ResourcePity pity = progress.Pity;
+            GUILayout.Label($"Pity key {pity.KeyDroughtClears}/{ResourcePity.KeyThreshold}  " +
+                            $"bomb {pity.BombDroughtClears}/{ResourcePity.BombThreshold}  (next clear guarantees at the threshold)");
+            GUILayout.BeginHorizontal();
+            if (AssistedButton("Key pity on next clear"))
+                pity.SetDroughtForDevelopment(RunResourceType.Key, ResourcePity.KeyThreshold);
+            if (AssistedButton("Bomb pity on next clear"))
+                pity.SetDroughtForDevelopment(RunResourceType.Bomb, ResourcePity.BombThreshold);
+            GUILayout.EndHorizontal();
         }
 
         // Elif-2/3 (contract 27 §7.2): the permanent elif. Elif added here is usable in this Run but is not saved as
@@ -1182,7 +1192,10 @@ namespace TrickalFanGame.Run
             }
 
             RoomRunState state = assembler.Progress.GetRoomState(shop.RoomId);
-            GUILayout.Label($"{shop.RoomId} at {shop.GridPosition}, {(state?.IsKeyLockOpen == true ? "unlocked" : "locked")}");
+            // Drop-1: the key-free floor's shop has no lock at all.
+            string lockText = !shop.RequiresKey ? "no key (key-free floor)"
+                : state?.IsKeyLockOpen == true ? "unlocked" : "locked";
+            GUILayout.Label($"{shop.RoomId} at {shop.GridPosition}, {lockText}");
             if (AssistedButton("Go to shop door"))
                 Teleport(assembler, shop.DirectionalConnections[0].DestinationRoomId);
         }
@@ -1265,6 +1278,16 @@ namespace TrickalFanGame.Run
                             ", blasts pending " +
                             TrickalFanGame.Enemy.EnemyChampionBlast.Live.Count(blast => !blast.HasStarted) +
                             ", undying now " + UndyingStatus(controller));
+            // Drop-0: generated champions (not the ones made here, which have no wave slot) roll their kill drop once.
+            ChampionKillReward championReward = controller?.ChampionKillReward;
+            int floor = node?.FloorNumber ?? 0;
+            GUILayout.Label($"Champion drop {ChampionKillReward.DropPercent(floor)}% on floor {floor}, " +
+                            (championReward == null
+                                ? "no reward in this room"
+                                : $"rolled {championReward.RolledCount}, last " +
+                                  (championReward.LastSpawnedReward != null
+                                      ? championReward.LastSpawnedReward.name
+                                      : "none")));
         }
 
         // Variant-2: each undying champion running on undying life, with its life left and seconds left.

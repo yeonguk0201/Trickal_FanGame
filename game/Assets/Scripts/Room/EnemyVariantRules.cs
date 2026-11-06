@@ -140,7 +140,7 @@ namespace TrickalFanGame.Room
             return count;
         }
 
-        private static int SlotOf(int waveIndex, int spawnIndex) => waveIndex * 256 + spawnIndex;
+        public static int SlotOf(int waveIndex, int spawnIndex) => waveIndex * 256 + spawnIndex;
 
         private static ResolvedEncounterSpawn[][] CloneWaves(ResolvedEncounterSpawn[][] waves)
         {

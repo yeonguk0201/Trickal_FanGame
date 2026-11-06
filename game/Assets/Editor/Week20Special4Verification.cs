@@ -49,15 +49,17 @@ namespace TrickalFanGame.Editor
                    generator.EncounterContentVersion >= Week20Special4Setup.EncounterContentVersion,
                 "Special-4 must raise the Room and Encounter content versions for the shop door.");
 
-            int runtimeSeed = ValidateGeneration(generator);
+            (int runtimeSeed, int keyFreeSeed) = ValidateGeneration(generator);
             ValidateStockBuilder(catalog, assembler.SelectionRewardPool);
             ValidateRuntimePurchasesAndReload(assembler, catalog, runtimeSeed);
+            ValidateKeyFreeShop(assembler, keyFreeSeed);
             Debug.Log("Special-4 verification passed: floors reproduce a 60% key-locked shop end room (at most one) " +
                       "beside the start or an intermediate room without changing existing rooms or the boss route, " +
                       "stock rolls three distinct Items at rarity prices and three distinct consumables, entry takes " +
                       "one " +
                       "key, purchases spend gold exactly once, Items go to the inventory, consumables drop as floor " +
-                      "pickups, and stock, sold slots, and the open lock survive floor rebuilds.");
+                      "pickups, and stock, sold slots, and the open lock survive floor rebuilds. Drop-1: the floor-1 " +
+                      "shop has no lock and lets the player in without a key.");
         }
 
         private static (ShopCatalog, ShopRoom, RoomDefinition) ValidateAssets()
@@ -110,7 +112,7 @@ namespace TrickalFanGame.Editor
             return (catalog, prefab, definition);
         }
 
-        private static int ValidateGeneration(FloorGenerator generator)
+        private static (int lockedSeed, int keyFreeSeed) ValidateGeneration(FloorGenerator generator)
         {
             GameObject holder = new("Special-4 generator without shop");
             try
@@ -126,7 +128,7 @@ namespace TrickalFanGame.Editor
                     generator.MaximumRoomsPerFloor, generator.MinimumBossDistance, generator.GenerationRetryLimit,
                     generator.RoomDefinitions.ToArray());
 
-                int floors = 0, shops = 0, runtimeSeed = 0;
+                int floors = 0, shops = 0, runtimeSeed = 0, keyFreeSeed = 0;
                 HashSet<GeneratedRoomRole> parentRoles = new();
                 for (int seed = 1; seed <= SeedCount; seed++)
                 {
@@ -150,10 +152,13 @@ namespace TrickalFanGame.Editor
                         shops++;
                         GeneratedRoomNode shop = shopRooms[0];
                         Assert(shop.RoomNumber == floor.Nodes.Count && shop.RoomType == RoomType.Shop &&
-                               shop.RequiresKey && shop.Encounter == null && shop.Template != null &&
+                               shop.RequiresKey == !floor.IsKeyFree && shop.Encounter == null && shop.Template != null &&
                                shop.Template.SupportsRoomType(RoomType.Shop) &&
                                shop.DirectionalConnections.Count == 1 && !shop.DirectionalConnections[0].IsSecret,
-                            $"Seed {seed} floor {floor.FloorNumber} shop must be the last key-locked end room.");
+                            $"Seed {seed} floor {floor.FloorNumber} shop must be the last end room, key-locked except " +
+                            "on the key-free floor (Drop-1).");
+                        Assert(floor.IsKeyFree == (floor.FloorNumber == FloorGenerator.KeyFreeFloor),
+                            $"Seed {seed}: only floor {FloorGenerator.KeyFreeFloor} of the Game Scene Run is key-free.");
                         GeneratedRoomNode parent = floor.Nodes.Single(node =>
                             node.RoomId == shop.DirectionalConnections[0].DestinationRoomId);
                         Assert(parent.Role is GeneratedRoomRole.Start or GeneratedRoomRole.Intermediate &&
@@ -164,18 +169,20 @@ namespace TrickalFanGame.Editor
                                                        !node.ConnectedRoomIds.Contains(shop.RoomId)),
                             $"Seed {seed} floor {floor.FloorNumber} secret room must not bypass the shop lock.");
                         parentRoles.Add(parent.Role);
-                        if (runtimeSeed == 0 && floor.FloorNumber == 1) runtimeSeed = seed;
+                        // Drop-1: the key lock is exercised on floor 2; floor 1 is key-free.
+                        if (runtimeSeed == 0 && floor.FloorNumber == 2) runtimeSeed = seed;
+                        if (keyFreeSeed == 0 && floor.IsKeyFree) keyFreeSeed = seed;
                     }
                 }
 
                 float ratio = shops / (float)floors;
                 Assert(ratio >= 0.5f && ratio <= 0.7f,
                     $"Shops should appear on about 60% of floors; observed {ratio:P1} of {floors}.");
-                Assert(runtimeSeed > 0 && parentRoles.Contains(GeneratedRoomRole.Intermediate),
-                    "Seeds must include a floor-1 shop and shops beside intermediate rooms.");
+                Assert(runtimeSeed > 0 && keyFreeSeed > 0 && parentRoles.Contains(GeneratedRoomRole.Intermediate),
+                    "Seeds must include floor-1 and floor-2 shops and shops beside intermediate rooms.");
                 Debug.Log($"Special-4 generation: {shops}/{floors} floors ({ratio:P1}) have a shop. " +
-                          $"Runtime seed {runtimeSeed}.");
-                return runtimeSeed;
+                          $"Runtime seed {runtimeSeed}, key-free seed {keyFreeSeed}.");
+                return (runtimeSeed, keyFreeSeed);
             }
             finally
             {
@@ -240,8 +247,9 @@ namespace TrickalFanGame.Editor
         {
             RunProgress progress = assembler.Progress;
             progress.ResetProgress();
-            Assert(assembler.TryApplyGeneratedGraphForVerification(seed, out string error), error);
-            GeneratedFloor floor = assembler.GeneratedGraph.FindFloor(1);
+            Assert(assembler.TryApplyGeneratedGraphForVerification(seed, out string error) &&
+                   assembler.TryLoadFloor(LockedShopFloor, null, out error), error);
+            GeneratedFloor floor = assembler.GeneratedGraph.FindFloor(LockedShopFloor);
             GeneratedRoomNode shopNode = floor.Nodes.Single(node => node.Role == GeneratedRoomRole.Shop);
             GeneratedRoomConnection back = shopNode.DirectionalConnections[0];
             RoomPrefab parentRoom = FindRuntimeRoom(assembler, back.DestinationRoomId);
@@ -267,6 +275,7 @@ namespace TrickalFanGame.Editor
             Assert(!door.Doorway.TryEnter(assembler.Graph.Player) && !shopState.IsKeyLockOpen &&
                    assembler.Graph.CurrentNode == parentRoom.Node,
                 "The shop must reject entry without a key.");
+            ResetTransitionCooldown(assembler.Graph);
             Assert(progress.TryAddResource(RunResourceType.Key, 1) == 1 && door.Doorway.TryEnter(assembler.Graph.Player) &&
                    shopState.IsKeyLockOpen && progress.GetResourceCount(RunResourceType.Key) == 0 &&
                    assembler.Graph.CurrentNode == shopRoom.Node,
@@ -332,7 +341,8 @@ namespace TrickalFanGame.Editor
                 "Bought consumables must wait on the floor instead of being granted directly.");
 
             int goldBeforeReload = progress.GetResourceCount(RunResourceType.Gold);
-            Assert(assembler.TryLoadFloor(2, null, out error) && assembler.TryLoadFloor(1, null, out error), error);
+            Assert(assembler.TryLoadFloor(1, null, out error) &&
+                   assembler.TryLoadFloor(LockedShopFloor, null, out error), error);
             RoomPrefab rebuiltRoom = FindRuntimeRoom(assembler, shopNode.RoomId);
             ShopRoom rebuilt = rebuiltRoom.GetComponentInChildren<ShopRoom>(true);
             Assert(rebuilt != null && rebuilt != shop && rebuilt.Stock == stock &&
@@ -356,6 +366,39 @@ namespace TrickalFanGame.Editor
             Assert(progress.GetShopStock(stock.ShopId) == null && progress.GetResourceCount(RunResourceType.Gold) == 0,
                 "A new Run must forget shop stock and gold.");
         }
+
+        // Drop-1: the floor-1 shop door is a plain shop door. It never locks and the player walks in without a key.
+        private static void ValidateKeyFreeShop(RoomGraphAssembler assembler, int seed)
+        {
+            RunProgress progress = assembler.Progress;
+            progress.ResetProgress();
+            Assert(assembler.TryApplyGeneratedGraphForVerification(seed, out string error), error);
+            GeneratedRoomNode shopNode = assembler.GeneratedGraph.FindFloor(FloorGenerator.KeyFreeFloor).Nodes
+                .Single(node => node.Role == GeneratedRoomRole.Shop);
+            GeneratedRoomConnection back = shopNode.DirectionalConnections[0];
+            RoomPrefab parentRoom = FindRuntimeRoom(assembler, back.DestinationRoomId);
+            RoomPrefab shopRoom = FindRuntimeRoom(assembler, shopNode.RoomId);
+            RoomDoorSlot door = parentRoom.FindSlot(GeneratedFloorGraph.Opposite(back.Direction));
+            parentRoom.Controller.BindRunState(progress.GetRoomState(parentRoom.Node.RoomId), true);
+            Assert(assembler.Graph.TryReplaceFloor(assembler.Graph.Nodes.ToArray(), parentRoom.Node,
+                assembler.Graph.Player, out error), error);
+            Assert(!shopNode.RequiresKey && !door.Doorway.RequiresKey && !door.Blocker.IsLocked &&
+                   door.Blocker.VisualKind == DoorVisualKind.Shop,
+                "The floor-1 shop door must keep its coin identity without a key lock.");
+            // An earlier verifier's door transition would still be inside the graph's cooldown in batch mode.
+            ResetTransitionCooldown(assembler.Graph);
+            Assert(progress.GetResourceCount(RunResourceType.Key) == 0 && door.Doorway.TryEnter(assembler.Graph.Player) &&
+                   assembler.Graph.CurrentNode == shopRoom.Node && progress.GetResourceCount(RunResourceType.Key) == 0,
+                "The floor-1 shop must let the player in without a key.");
+            progress.ResetProgress();
+        }
+
+        private const int LockedShopFloor = 2;
+
+        private static void ResetTransitionCooldown(RoomGraphController graph) =>
+            typeof(RoomGraphController).GetField("nextTransitionTime",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(graph, 0f);
 
         private static RoomPrefab FindRuntimeRoom(RoomGraphAssembler assembler, string roomId)
         {

@@ -188,9 +188,13 @@ namespace TrickalFanGame.Editor
             Assert(assembler.Graph.TryReplaceFloor(assembler.Graph.Nodes.ToArray(), parentRoom.Node,
                 assembler.Graph.Player, out error), error);
             RoomDoorSlot door = parentRoom.FindSlot(GeneratedFloorGraph.Opposite(back.Direction));
-            Assert(progress.TryAddResource(RunResourceType.Key, 1) == 1 && door.Doorway.TryEnter(assembler.Graph.Player) &&
+            // Drop-1: the floor-1 shop has no lock (Special-4 checks the key lock on floor 2). An earlier verifier's
+            // door transition would still be inside the graph's cooldown in batch mode.
+            typeof(RoomGraphController).GetField("nextTransitionTime", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(assembler.Graph, 0f);
+            Assert(progress.GetResourceCount(RunResourceType.Key) == 0 && door.Doorway.TryEnter(assembler.Graph.Player) &&
                    assembler.Graph.CurrentNode == shopRoom.Node,
-                "Entering the shop must still take one key.");
+                "Entering the floor-1 shop must not need a key.");
 
             keeper.SetPlayerPresence(true, inventory, health, actionState);
             Assert(keeper.CanInteract && keeper.Prompt.gameObject.activeSelf && actionState.CanMove,

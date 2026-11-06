@@ -24,19 +24,21 @@ namespace TrickalFanGame.Editor
         private const int ContentSamples = 60000;
         private const int MaximumSeedSearch = 4096;
 
-        // Expected pickups per combat room clear, old drop vs chests (docs/21 Chest-1 comparison table).
+        // Expected pickups per combat room clear, old drop vs chests (docs/21 Chest-1 comparison table). Drop-0
+        // (2026-11-06): 1.1 pickups per clear at 50% chests, normal 1~3 at 40/40/20 and its consumable weights (Chest-1
+        // was heart/SP 0.1955, gold 0.1304, key 0.0782, bomb 0.0521).
         private static readonly (string Id, float Old, float Chest)[] ExpectedPerClear =
         {
-            ("heart", 0.099f, 0.195525f),
-            ("sp", 0.099f, 0.195525f),
-            ("gold", 0.066f, 0.13035f),
-            ("key", 0.0396f, 0.07821f),
-            ("bomb", 0.0264f, 0.05214f),
+            ("heart", 0.099f, 0.242f),
+            ("sp", 0.099f, 0.242f),
+            ("gold", 0.066f, 0.286f),
+            ("key", 0.0396f, 0.165f),
+            ("bomb", 0.0264f, 0.165f),
         };
-        private const float ExpectedKeyCostPerClear = 0.066f;
-        private const float ExpectedBombCostPerClear = 0.0165f;
+        private const float ExpectedKeyCostPerClear = 0.1f;
+        private const float ExpectedBombCostPerClear = 0.025f;
         // Normal 5% plus the diamond chest's guaranteed spell (Chest-2).
-        private const float ExpectedSpellsPerClear = 0.028875f;
+        private const float ExpectedSpellsPerClear = 0.04375f;
 
         public static void SetupAndVerifyBatch()
         {
@@ -81,8 +83,8 @@ namespace TrickalFanGame.Editor
             ValidateEncounterRoomsUseChests(assembler);
             ValidateClearChest(assembler, table);
             ValidateDevelopmentChests(assembler, table);
-            Debug.Log("Chest-1 verification passed: combat room clears roll a 33% chest (75/20/5) from the room seed " +
-                      "instead of the old drop, opening drops normal 1~3 (60/30/10, 5% spell), golden 2~4 and " +
+            Debug.Log($"Chest-1 verification passed: combat room clears roll a {Week22Chest1Setup.ChestChance:P0} chest (75/20/5) from the room seed " +
+                      "instead of the old drop, opening drops normal 1~3 (Drop-0 40/40/20, 5% spell), golden 2~4 and " +
                       "diamond 4~6 consumables once, revisits and rebuilds keep the chest without dropping again, " +
                       "and the development panel forces each kind.");
         }
@@ -90,8 +92,10 @@ namespace TrickalFanGame.Editor
         private static void ValidateTable(ChestContentTable table)
         {
             Assert(table.TryValidate(out string error), error);
-            Assert(Mathf.Approximately(table.ChestChance, 0.33f), "Chests must appear on 33% of clears (§3.1).");
-            AssertRule(table.FindRule(ChestKind.Normal), 75, 1, new[] { 60, 30, 10 }, 0.05f);
+            // Drop-0 (2026-11-06) raised the chest chance and the normal chest counts (was 33%, 60/30/10).
+            Assert(Mathf.Approximately(table.ChestChance, Drop0DropRateSetup.ClearChestChance),
+                $"Chests must appear on {Drop0DropRateSetup.ClearChestChance:P0} of clears (Drop-0).");
+            AssertRule(table.FindRule(ChestKind.Normal), 75, 1, Drop0DropRateSetup.NormalChestCountWeights, 0.05f);
             AssertRule(table.FindRule(ChestKind.Golden), 20, 2, new[] { 1, 1, 1 }, 0f);
             AssertRule(table.FindRule(ChestKind.Diamond), 5, 4, new[] { 1, 1, 1 }, 1f);
 
@@ -105,8 +109,9 @@ namespace TrickalFanGame.Editor
             {
                 ResourceDropEntry entry = table.Consumables.Single(candidate => candidate.DropId == id);
                 ResourceDropEntry old = oldTable.Entries.Single(candidate => candidate.DropId == oldId);
-                Assert(entry.Weight == weight && entry.Weight == old.Weight && entry.Prefab == old.Prefab,
-                    $"Chest consumable '{id}' must keep the old clear drop weight and pickup (D2).");
+                // Drop-0 (2026-11-06) moved the chest weights away from the old clear drop; the pickups stay.
+                Assert(entry.Weight == weight && entry.Prefab == old.Prefab,
+                    $"Chest consumable '{id}' must use the Drop-0 weight and the old clear drop pickup.");
             }
 
             ItemDefinition[] expectedSpells = Week22Chest1Setup.FindSingleUseItems(ItemKind.SingleUseSpell);
@@ -156,7 +161,7 @@ namespace TrickalFanGame.Editor
                 kinds[kind]++;
             }
 
-            AssertNear(chests / (float)DistributionSamples, 0.33f, 0.005f, "chest chance");
+            AssertNear(chests / (float)DistributionSamples, Drop0DropRateSetup.ClearChestChance, 0.006f, "chest chance");
             AssertNear(kinds[ChestKind.Normal] / (float)chests, 0.75f, 0.01f, "normal share");
             AssertNear(kinds[ChestKind.Golden] / (float)chests, 0.20f, 0.01f, "golden share");
             AssertNear(kinds[ChestKind.Diamond] / (float)chests, 0.05f, 0.005f, "diamond share");
@@ -295,6 +300,8 @@ namespace TrickalFanGame.Editor
                 // A chest roll places one chest of the seeded kind; a second clear does nothing.
                 Assert(table.TryRollChest(RoomClearRewardSpawner.DeriveChestSeed(chestNode.ContentSeed),
                     out ChestKind kind), "The chosen room must roll a chest.");
+                // Drop-1: floor 1 turns a golden roll into a normal chest.
+                kind = ChestContentTable.ResolveKindForFloor(kind, floor.IsKeyFree);
                 RoomClearRewardSpawner spawner = Spawner(assembler, chestNode.RoomId);
                 RoomRunState state = assembler.Progress.GetRoomState(chestNode.RoomId);
                 // The player stands on the preferred point when the room clears; the chest must not land on them.

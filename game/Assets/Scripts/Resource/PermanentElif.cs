@@ -8,7 +8,9 @@ namespace TrickalFanGame.Resource
     // so a seed still places gold in the same spots and only some of those pickups become elif.
     public static class PermanentElif
     {
-        public const float ConversionChance = 0.07f;
+        // Drop-0 (2026-11-06): 7% → 4.6%, so the Run's expected elif stays the same while gold pickups grow by about
+        // half (512 seeds: 7.97 → 12.02 floor gold pickups per Run, counting golden and diamond chests).
+        public const float ConversionChance = 0.046f;
         public const string ArtworkKey = "permanent-elif";
         public const string DropId = "permanent-elif";
         // Backend limits (backend/src/contracts/permanent-elif.ts): a Run save above RunGainMax is rejected.

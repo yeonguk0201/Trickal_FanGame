@@ -36,7 +36,7 @@ namespace TrickalFanGame.Editor
             ValidateRunRequest();
             ValidateChestPath();
             Debug.Log("Week 27 Elif-2 verification passed: Elif = 3 after gold/key/bomb, gold pickups turn into " +
-                      "elif at 7% from a separate seeded hash (same seed, same result; drop rolls untouched), the " +
+                      $"elif at {PermanentElif.ConversionChance:P1} from a separate seeded hash (same seed, same result; drop rolls untouched), the " +
                       "wallet rolls 0-4 once at 40/30/15/10/5%, the Run counts elif from its starting balance with " +
                       "no 99 cap, development elif is usable but not saved, the save request carries gained/spent " +
                       "(capped at 50) on both request shapes, chest gold follows the hash and 멜룬카드 skips elif.");
@@ -82,10 +82,11 @@ namespace TrickalFanGame.Editor
             Assert(!RunResourceWallet.IsDefined(RunResourceType.Elif) && !wallet.CanAccept(RunResourceType.Elif) &&
                    wallet.Add(RunResourceType.Elif, 1) == 0,
                 "The Run wallet must not hold the permanent elif.");
-            Assert(Mathf.Approximately(PermanentElif.ConversionChance, 0.07f) &&
+            Assert(Mathf.Approximately(PermanentElif.ConversionChance, 0.046f) &&
                    PermanentElif.WalletWeights.SequenceEqual(new[] { 40, 30, 15, 10, 5 }) &&
                    PermanentElif.RunGainMax == 50 && PermanentElif.BalanceMax == 9999,
-                "Elif-2 must use the contract 27 values: 7%, wallet 40/30/15/10/5, Run gain 50, balance 9999.");
+                "Elif-2 must use the contract 27 values: 4.6% (Drop-0, was 7%), wallet 40/30/15/10/5, Run gain 50, " +
+                "balance 9999.");
             Assert(GameResourceHudView.LabelOf(RunResourceType.Elif) == "엘리프" &&
                    GameResourceHudView.FormatCount(RunResourceType.Elif, 7) == "07" &&
                    GameResourceHudView.FormatCount(RunResourceType.Elif, 150) == "150" &&
@@ -214,9 +215,10 @@ namespace TrickalFanGame.Editor
             RunResourcePickup goldPrefab = Week17Resource1Setup.LoadPrefab(RunResourceType.Gold);
             RunResourcePickup keyPrefab = Week17Resource1Setup.LoadPrefab(RunResourceType.Key);
             Assert(goldPrefab != null && keyPrefab != null, "Run Resource-1 setup first: the pickup prefabs are missing.");
-            Assert(goldPrefab.ResourceType == RunResourceType.Gold && goldPrefab.Amount == 1 &&
+            Assert(goldPrefab.ResourceType == RunResourceType.Gold &&
+                   goldPrefab.Amount == Drop0DropRateSetup.GoldPickupAmount &&
                    AssetDatabase.GetAssetPath(goldPrefab) == Week17Resource1Setup.ElifPrefabPath,
-                "ElifPickup.prefab must stay the one-gold pickup (contract 27 §8).");
+                "ElifPickup.prefab must stay the gold pickup, worth Drop-0's gold amount (contract 27 §8).");
             RunResourcePickup elifPrefab = Week17Resource1Setup.LoadPrefab(RunResourceType.Elif);
             Assert(elifPrefab != null && elifPrefab.ResourceType == RunResourceType.Elif && elifPrefab.Amount == 1 &&
                    AssetDatabase.GetAssetPath(elifPrefab) == Week17Resource1Setup.PermanentElifPrefabPath,

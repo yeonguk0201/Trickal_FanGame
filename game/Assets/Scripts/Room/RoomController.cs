@@ -23,11 +23,14 @@ namespace TrickalFanGame.Room
         [SerializeField] private DoorController[] doors = Array.Empty<DoorController>();
 
         private readonly Dictionary<Health, Action> enemyDeathHandlers = new();
+        // Drop-0: the wave slot of each living champion, for its kill reward.
+        private readonly Dictionary<Health, int> championSlots = new();
         private EncounterRuntimeWave[] encounterWaves = Array.Empty<EncounterRuntimeWave>();
         private Health playerHealth;
         private RoomRunState runState;
         private RoomClearRewardSpawner clearRewardSpawner;
         private EliteKillReward eliteKillReward;
+        private ChampionKillReward championKillReward;
 
         public RoomState State { get; private set; } = RoomState.Waiting;
         public int AliveEnemyCount => enemyDeathHandlers.Count;
@@ -45,6 +48,7 @@ namespace TrickalFanGame.Room
 
         public event Action<RoomState> StateChanged;
         public EliteKillReward EliteKillReward => eliteKillReward;
+        public ChampionKillReward ChampionKillReward => championKillReward;
         public event Action<GameObject> EnemySpawned;
         public event Action<int> WaveStarted;
         public event Action<int> WaveCompleted;
@@ -130,6 +134,11 @@ namespace TrickalFanGame.Room
         public void ConfigureEliteReward(EliteKillReward configuredReward)
         {
             eliteKillReward = configuredReward;
+        }
+
+        public void ConfigureChampionReward(ChampionKillReward configuredReward)
+        {
+            championKillReward = configuredReward;
         }
 
         public bool TryValidateEncounterConfiguration(out string error)
@@ -226,6 +235,7 @@ namespace TrickalFanGame.Room
             }
 
             enemyDeathHandlers.Clear();
+            championSlots.Clear();
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -295,6 +305,7 @@ namespace TrickalFanGame.Room
             }
 
             enemyDeathHandlers.Clear();
+            championSlots.Clear();
             UnsubscribeFromPlayer();
             runState?.ResetEncounterProgress();
             HasStarted = false;
@@ -415,11 +426,12 @@ namespace TrickalFanGame.Room
             CurrentWaveNumber = waveIndex + 1;
             WaveStarted?.Invoke(CurrentWaveNumber);
             for (int index = 0; index < wave.EnemyPrefabs.Count; index++)
-                SpawnEnemy(wave.EnemyPrefabs[index], wave.SpawnPoints[index], wave.VariantAt(index));
+                SpawnEnemy(wave.EnemyPrefabs[index], wave.SpawnPoints[index], wave.VariantAt(index),
+                    EnemyVariantRules.SlotOf(waveIndex, index));
         }
 
         private void SpawnEnemy(GameObject configuredPrefab, Transform spawnPoint,
-            EnemyVariantKind variant = EnemyVariantKind.None)
+            EnemyVariantKind variant = EnemyVariantKind.None, int slot = -1)
         {
             if (configuredPrefab == null || spawnPoint == null)
             {
@@ -438,6 +450,7 @@ namespace TrickalFanGame.Room
             FloorDifficultyScaler.ApplyScaling(enemy, floorNumber);
             // Variant-0: after the floor scaling, so an elite doubles the floor's health.
             EnemyVariant.Apply(enemy, variant);
+            if (slot >= 0 && EnemyVariant.IsChampionKind(variant)) championSlots[enemyHealth] = slot;
             EnemySpawned?.Invoke(enemy);
             AlertEnemy(enemyHealth);
             RegisterEnemy(enemyHealth);
@@ -464,6 +477,8 @@ namespace TrickalFanGame.Room
             runProgress?.RecordKill();
             if (EnemyVariant.IsEliteEnemy(enemyHealth.gameObject))
                 eliteKillReward?.TrySpawn(enemyHealth.transform.position);
+            if (championSlots.Remove(enemyHealth, out int championSlot))
+                championKillReward?.TrySpawn(championSlot, enemyHealth.transform.position);
 
             if (State == RoomState.Combat && !IsProgressionStopped && AliveEnemyCount == 0)
             {

@@ -170,5 +170,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Resource.RunResourcePickup
   resourceType: 0
-  amount: 1
+  amount: 3
   runProgress: {fileID: 0}

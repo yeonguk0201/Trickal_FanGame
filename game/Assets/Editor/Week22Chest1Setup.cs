@@ -18,24 +18,26 @@ namespace TrickalFanGame.Editor
         public const string ChestContentTablePath = Week17Resource3Setup.DropTableFolder + "/chest-content-table.asset";
 
         // §3.1: 33% of clears, then 75/20/5. D2 (2026-10-03): normal 1~3 (60/30/10) with a 5% spell, golden 2~4,
-        // diamond 4~6, consumable weights kept from the old clear drop.
-        public const float ChestChance = 0.33f;
+        // diamond 4~6, consumable weights kept from the old clear drop. Drop-0 (2026-11-06) owns the chest chance,
+        // the normal count weights and the consumable weights now.
+        public const float ChestChance = Drop0DropRateSetup.ClearChestChance;
         public const float NormalSpellChance = 0.05f;
 
         // New table, new stable IDs; the old table's "elif" candidate is the gold pickup.
         public static readonly (string Id, string OldId, int Weight)[] ConsumableWeights =
         {
-            ("heart", "heart", 30),
-            ("sp", "sp", 30),
-            ("gold", "elif", 20),
-            ("key", "key", 12),
-            ("bomb", "bomb", 8),
+            ("heart", "heart", Drop0DropRateSetup.ChestConsumableWeight("heart")),
+            ("sp", "sp", Drop0DropRateSetup.ChestConsumableWeight("sp")),
+            ("gold", "elif", Drop0DropRateSetup.ChestConsumableWeight("gold")),
+            ("key", "key", Drop0DropRateSetup.ChestConsumableWeight("key")),
+            ("bomb", "bomb", Drop0DropRateSetup.ChestConsumableWeight("bomb")),
         };
 
         // Chest-2 (D2, 2026-10-05) adds the golden special reward and the diamond chest's guaranteed spell.
         public static ChestKindRule[] BuildKindRules() => new[]
         {
-            new ChestKindRule(ChestKind.Normal, 75, 1, new[] { 60, 30, 10 }, NormalSpellChance),
+            new ChestKindRule(ChestKind.Normal, 75, 1, Drop0DropRateSetup.NormalChestCountWeights.ToArray(),
+                NormalSpellChance),
             new ChestKindRule(ChestKind.Golden, 20, 2, new[] { 1, 1, 1 }, 0f,
                 Week22Chest2Setup.GoldenSpecialRewardChance),
             new ChestKindRule(ChestKind.Diamond, 5, 4, new[] { 1, 1, 1 }, Week22Chest2Setup.DiamondSpellChance, 0f,
@@ -64,7 +66,7 @@ namespace TrickalFanGame.Editor
                 throw new InvalidOperationException("Game Scene save failed during Chest-1 setup.");
             AssetDatabase.SaveAssets();
             Debug.Log($"Chest-1 setup complete: combat room clears roll {ChestContentTablePath} " +
-                      "(33% chest, 75/20/5 normal/golden/diamond) instead of the old clear drop.");
+                      $"({ChestChance:P0} chest, 75/20/5 normal/golden/diamond) instead of the old clear drop.");
         }
 
         public static ChestContentTable EnsureTable()
