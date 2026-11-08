@@ -11,6 +11,7 @@ import type { RunsService } from './runs.service';
 
 describe('RunsController', () => {
   const dto = {} as CreateRunDto;
+  const profileKey = '30000000-0000-4000-8000-000000000001';
   const data = {
     runId: 'run-id',
     experienceGained: 400,
@@ -44,11 +45,14 @@ describe('RunsController', () => {
       const statusMock = jest.fn();
       const response = { status: statusMock } as unknown as Response;
 
-      await expect(controller.create(dto, response)).resolves.toEqual({
+      await expect(
+        controller.create(dto, profileKey, response),
+      ).resolves.toEqual({
         success: true,
         data,
       });
       expect(statusMock).toHaveBeenCalledWith(status);
+      expect(service.create).toHaveBeenCalledWith(dto, profileKey);
     },
   );
 

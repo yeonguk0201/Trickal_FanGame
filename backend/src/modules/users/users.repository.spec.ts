@@ -273,6 +273,7 @@ describe('UsersRepository H-4 skill upgrade transaction', () => {
           characterId: 'erpin',
           skillType,
           targetLevel: 2,
+          clientProfileId: OWNER_KEY,
         }),
       ).resolves.toMatchObject({
         characterId: 'erpin',
@@ -301,6 +302,19 @@ describe('UsersRepository H-4 skill upgrade transaction', () => {
     },
   );
 
+  it('rejects a profile key that does not own the nickname', async () => {
+    await expect(
+      repository.upgradeSkill({
+        nickname: 'test-player',
+        characterId: 'erpin',
+        skillType: 'LOW_GRADE',
+        targetLevel: 2,
+        clientProfileId: '30000000-0000-4000-8000-000000000002',
+      }),
+    ).rejects.toMatchObject({ code: 'PROFILE_KEY_MISMATCH' });
+    expect(transaction.userCharacterProgress.update).not.toHaveBeenCalled();
+  });
+
   it('returns the current result for the same target level without spending a point', async () => {
     const progress = createProgress({
       skillPoints: 1,
@@ -314,6 +328,7 @@ describe('UsersRepository H-4 skill upgrade transaction', () => {
         characterId: 'erpin',
         skillType: 'LOW_GRADE',
         targetLevel: 2,
+        clientProfileId: OWNER_KEY,
       }),
     ).resolves.toMatchObject({ skillPoints: 1, lowGradeSkillLevel: 2 });
     expect(transaction.userCharacterProgress.update).not.toHaveBeenCalled();
@@ -363,6 +378,7 @@ describe('UsersRepository H-4 skill upgrade transaction', () => {
           characterId: 'erpin',
           skillType: 'LOW_GRADE',
           targetLevel,
+          clientProfileId: OWNER_KEY,
         }),
         code,
       );
@@ -406,12 +422,14 @@ describe('UsersRepository H-4 skill upgrade transaction', () => {
         characterId: 'erpin',
         skillType: 'LOW_GRADE',
         targetLevel: 2,
+        clientProfileId: OWNER_KEY,
       }),
       repository.upgradeSkill({
         nickname: 'test-player',
         characterId: 'erpin',
         skillType: 'LOW_GRADE',
         targetLevel: 2,
+        clientProfileId: OWNER_KEY,
       }),
     ]);
 
@@ -443,10 +461,14 @@ function createProgress(
   };
 }
 
+const OWNER_KEY = '30000000-0000-4000-8000-000000000001';
+
 function createTransactionMock() {
   return {
     user: {
-      findUnique: jest.fn().mockResolvedValue({ id: 'user-id' }),
+      findUnique: jest
+        .fn()
+        .mockResolvedValue({ id: 'user-id', clientProfileId: OWNER_KEY }),
     },
     userCharacterProgress: {
       findUnique: jest.fn().mockResolvedValue(createProgress()),

@@ -34,10 +34,6 @@ export interface CreateRunResultDto {
   progress: CharacterProgressDto;
 }
 
-export interface UpgradeSkillRequestDto {
-  targetLevel: number;
-}
-
 export interface UserProfileDto {
   id: string;
   nickname: string;

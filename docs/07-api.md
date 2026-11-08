@@ -206,7 +206,10 @@ GET /api/statistics/items
 
 ```http
 POST /api/runs
+X-Client-Profile-Id: <clientProfileId>
 ```
+
+`X-Client-Profile-Id`는 필수다(§28). 서버는 이 기기 키로 Run 소유자를 찾는다.
 
 ### Request
 
@@ -260,7 +263,7 @@ POST /api/runs
 | Field | Type | Required | 설명 |
 |---|---|---:|---|
 | `clientRunId` | UUID | O | Unity가 Run 시작 시 생성하는 멱등성 식별자 |
-| `userId` | UUID | O | 유저 ID |
+| `userId` | UUID | X | 유저 ID. 생략하면 기기 키의 사용자로 저장한다. 보내면 기기 키의 사용자와 같아야 하며 다르면 `PROFILE_KEY_MISMATCH`(403) |
 | `characterId` | string | O | 캐릭터 ID |
 | `gameVersion` | string | O | 게임 버전 |
 | `startedAt` | datetime | O | 게임 시작 시간 |
@@ -431,6 +434,9 @@ Unity는 생성된 Run ID와 Backend가 계산한 캐릭터 진행 결과를 표
 ---
 
 # 8.6 Create Run Error
+
+기기 키가 없거나 UUID가 아니면 `PROFILE_KEY_REQUIRED`(401), 기기 키로 등록된 사용자가 없으면
+`USER_NOT_FOUND`(404), `userId`가 기기 키의 사용자와 다르면 `PROFILE_KEY_MISMATCH`(403)다.
 
 존재하지 않는 캐릭터:
 
@@ -700,7 +706,11 @@ Run이 없는 유저는 `totalRuns`, `clears`, `winRate`, `averagePlayTime`, `av
 
 ```http
 PUT /api/users/:nickname/characters/:characterId/skills/:skillType
+X-Client-Profile-Id: <clientProfileId>
 ```
+
+게임만 호출한다(Web은 조회만, 2026-11-08). 기기 키가 없으면 `PROFILE_KEY_REQUIRED`(401), 닉네임 주인의
+기기 키와 다르면 `PROFILE_KEY_MISMATCH`(403)다.
 
 `skillType`은 다음 안정적인 값을 사용한다.
 
@@ -1060,6 +1070,8 @@ MVP에서 사용할 주요 Error Code:
 | `INVALID_REQUEST` | 잘못된 요청 |
 | `VALIDATION_ERROR` | 데이터 검증 실패 |
 | `USER_NOT_FOUND` | 유저 없음 |
+| `PROFILE_KEY_REQUIRED` | 쓰기 요청에 기기 키 헤더(`X-Client-Profile-Id`)가 없거나 UUID가 아님(401) |
+| `PROFILE_KEY_MISMATCH` | 기기 키가 대상 프로필의 소유자가 아님(403) |
 | `CHARACTER_NOT_FOUND` | 캐릭터 없음 |
 | `ITEM_NOT_FOUND` | 아이템 없음 |
 | `RUN_NOT_FOUND` | Run 없음 |
@@ -1302,10 +1314,15 @@ MVP에서는 최소한의 보안을 적용한다.
 
 초기 MVP에서는 복잡한 로그인 시스템을 구현하지 않는다.
 
-게임에서 전적 저장에 필요한 최소한의 식별 방식만 사용한다. 최초 등록의 `clientProfileId`, 응답의
-`userId`와 닉네임을 한 PC의 로컬 프로필에 저장하지만 이는 인증 토큰이 아니며 사용자 소유권을
-증명하지 않는다.
-닉네임 변경, 사용자 전환과 기존 사용자의 새 기기 복구는 MVP 범위에서 제공하지 않는다.
+게임에서 전적 저장에 필요한 최소한의 식별 방식만 사용한다(베타 결정, 2026-11-08,
+[30번 §3.1](./30-beta-release-plan.md)). 게임이 처음 만든 `clientProfileId`를 **기기 키**로 쓴다.
+
+- 쓰기 요청(`POST /api/runs`, `PUT .../skills/:skillType`)은 `X-Client-Profile-Id` 헤더에 기기 키를 보낸다.
+  서버는 키의 사용자를 찾거나 대상 닉네임의 주인과 비교한다.
+- 기기 키는 등록 응답(`POST /api/users`)에만 돌려주고 조회 응답에는 넣지 않는다. `userId`와 닉네임은
+  공개 값이라 소유권 증명에 쓰지 않는다.
+- Web은 조회만 하며 쓰기 요청을 보내지 않는다.
+- 닉네임 변경, 사용자 전환과 기존 사용자의 새 기기 복구는 베타 범위에서 제공하지 않는다.
 
 향후 계정 복구가 필요해지면 **로컬 우선 게스트 → 선택적 계정 연동** 구조로 확장한다.
 

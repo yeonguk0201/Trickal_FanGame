@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using TrickalFanGame.Data;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -7,6 +8,10 @@ namespace TrickalFanGame.Network
 {
     public class ApiClient : MonoBehaviour, IGameApiClient, IUserRegistrationClient, ISkillProgressApiClient
     {
+        // Backend checks this header on write requests (Run save, skill upgrade).
+        // Keep in sync with backend/src/common/auth/client-profile-key.ts.
+        public const string ProfileKeyHeader = "X-Client-Profile-Id";
+
         [Header("API Settings")]
         [SerializeField] private string baseUrl = "http://localhost:3001/api";
         [SerializeField] private float timeout = 10f;
@@ -69,6 +74,7 @@ namespace TrickalFanGame.Network
             webRequest.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
             webRequest.downloadHandler = new DownloadHandlerBuffer();
             webRequest.SetRequestHeader("Content-Type", "application/json");
+            webRequest.SetRequestHeader(ProfileKeyHeader, LocalProfile.ClientProfileId);
             webRequest.timeout = Mathf.Max(1, Mathf.CeilToInt(timeout));
 
             yield return webRequest.SendWebRequest();
@@ -314,6 +320,7 @@ namespace TrickalFanGame.Network
             webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
             webRequest.downloadHandler = new DownloadHandlerBuffer();
             webRequest.SetRequestHeader("Content-Type", "application/json");
+            webRequest.SetRequestHeader(ProfileKeyHeader, LocalProfile.ClientProfileId);
             webRequest.timeout = (int)timeout;
 
             yield return webRequest.SendWebRequest();

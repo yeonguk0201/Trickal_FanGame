@@ -3,7 +3,6 @@ import type {
   ApiSuccess,
   CharacterStatisticsDto,
   ClearRankingDto,
-  CharacterProgressDto,
   FloorStatisticsDto,
   ItemStatisticsDto,
   RankingMetaDto,
@@ -12,9 +11,7 @@ import type {
   RunHistoryDto,
   RunRankingDto,
   RunSummaryDto,
-  SkillType,
   StatisticsOverviewDto,
-  UpgradeSkillRequestDto,
   UserProfileDto,
   UserSearchResultDto,
 } from "./meta-api-contract";
@@ -63,23 +60,6 @@ export async function getUserRuns(
     `/users/${encodeURIComponent(nickname)}/runs?page=${encodeURIComponent(page)}&limit=${limit}`,
   );
   return { runs: response.data, ...response.meta };
-}
-
-export async function upgradeCharacterSkill(
-  nickname: string,
-  characterId: string,
-  skillType: SkillType,
-  targetLevel: number,
-): Promise<CharacterProgressDto> {
-  const body: UpgradeSkillRequestDto = { targetLevel };
-  return request<CharacterProgressDto>(
-    `/users/${encodeURIComponent(nickname)}/characters/${encodeURIComponent(characterId)}/skills/${skillType}`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    },
-  );
 }
 
 export async function getRunDetail(runId: string): Promise<RunDetailDto> {

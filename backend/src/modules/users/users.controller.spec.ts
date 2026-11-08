@@ -69,15 +69,20 @@ describe('UsersController H-4 progression API', () => {
     const controller = new UsersController(service as unknown as UsersService);
 
     await expect(
-      controller.upgradeSkill('test-player', 'erpin', 'LOW_GRADE', {
-        targetLevel: 2,
-      }),
+      controller.upgradeSkill(
+        'test-player',
+        'erpin',
+        'LOW_GRADE',
+        { targetLevel: 2 },
+        '30000000-0000-4000-8000-000000000001',
+      ),
     ).resolves.toEqual({ success: true, data: progress });
     expect(service.upgradeSkill).toHaveBeenCalledWith(
       'test-player',
       'erpin',
       'LOW_GRADE',
       2,
+      '30000000-0000-4000-8000-000000000001',
     );
   });
 });

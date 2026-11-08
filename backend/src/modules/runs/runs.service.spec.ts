@@ -15,7 +15,13 @@ import { RunsService } from './runs.service';
 
 describe('RunsService', () => {
   let service: RunsService;
-  let repository: { create: jest.Mock; findDetailById: jest.Mock };
+  let repository: {
+    create: jest.Mock;
+    findDetailById: jest.Mock;
+    findUserIdByClientProfileId: jest.Mock;
+  };
+  const profileKey = '30000000-0000-4000-8000-000000000001';
+  const ownerUserId = '00000000-0000-4000-8000-000000000001';
 
   const validDto: CreateRunDto = {
     clientRunId: '10000000-0000-4000-8000-000000000001',
@@ -63,6 +69,7 @@ describe('RunsService', () => {
   beforeEach(() => {
     repository = {
       create: jest.fn().mockResolvedValue(persistedResult),
+      findUserIdByClientProfileId: jest.fn().mockResolvedValue(ownerUserId),
       findDetailById: jest.fn().mockResolvedValue({
         id: 'run-id',
         user: { id: 'user-id', nickname: 'test-player' },
@@ -99,7 +106,9 @@ describe('RunsService', () => {
   });
 
   it('stores a valid cleared run through the atomic repository operation', async () => {
-    await expect(service.create(validDto)).resolves.toEqual(persistedResult);
+    await expect(service.create(validDto, profileKey)).resolves.toEqual(
+      persistedResult,
+    );
     expect(repository.create).toHaveBeenCalledWith(validDto);
   });
 
@@ -145,7 +154,9 @@ describe('RunsService', () => {
       deathReason: DeathReason.BOSS,
     };
 
-    await expect(service.create(deathDto)).resolves.toEqual(persistedResult);
+    await expect(service.create(deathDto, profileKey)).resolves.toEqual(
+      persistedResult,
+    );
     expect(repository.create).toHaveBeenCalledWith(deathDto);
   });
 
@@ -156,7 +167,7 @@ describe('RunsService', () => {
     };
 
     await expectApiError(
-      service.create(dto),
+      service.create(dto, profileKey),
       HttpStatus.UNPROCESSABLE_ENTITY,
       'INVALID_RUN_DATA',
     );
@@ -173,7 +184,7 @@ describe('RunsService', () => {
     };
 
     await expectApiError(
-      service.create(dto),
+      service.create(dto, profileKey),
       HttpStatus.UNPROCESSABLE_ENTITY,
       'INVALID_RUN_DATA',
     );
@@ -191,7 +202,7 @@ describe('RunsService', () => {
     };
 
     await expectApiError(
-      service.create(dto),
+      service.create(dto, profileKey),
       HttpStatus.UNPROCESSABLE_ENTITY,
       'INVALID_RUN_DATA',
     );
@@ -221,7 +232,9 @@ describe('RunsService', () => {
       },
     };
 
-    await expect(service.create(dto)).resolves.toEqual(persistedResult);
+    await expect(service.create(dto, profileKey)).resolves.toEqual(
+      persistedResult,
+    );
     expect(repository.create).toHaveBeenCalledWith(dto);
   });
 
@@ -255,7 +268,7 @@ describe('RunsService', () => {
       };
 
       await expectApiError(
-        service.create(dto),
+        service.create(dto, profileKey),
         HttpStatus.UNPROCESSABLE_ENTITY,
         'INVALID_ELIF_DATA',
       );
@@ -277,7 +290,7 @@ describe('RunsService', () => {
     };
 
     await expectApiError(
-      service.create(dto),
+      service.create(dto, profileKey),
       HttpStatus.UNPROCESSABLE_ENTITY,
       'INVALID_ELIF_DATA',
     );
@@ -293,7 +306,86 @@ describe('RunsService', () => {
   ] as const)('maps repository error %s to HTTP %s', async (code, status) => {
     repository.create.mockRejectedValue(new RunsRepositoryError(code, code));
 
-    await expectApiError(service.create(validDto), status, code);
+    await expectApiError(service.create(validDto, profileKey), status, code);
+  });
+});
+
+describe('RunsService profile key', () => {
+  const profileKey = '30000000-0000-4000-8000-000000000001';
+  const ownerUserId = '00000000-0000-4000-8000-000000000001';
+  const dto = {
+    clientRunId: '10000000-0000-4000-8000-000000000001',
+    characterId: 'erpin',
+    gameVersion: '0.1.0',
+    startedAt: '2026-08-17T10:00:00.000Z',
+    endedAt: '2026-08-17T10:10:00.000Z',
+    playTime: 600,
+    reachedFloor: 1,
+    isCleared: false,
+    killCount: 0,
+    deathReason: DeathReason.ENEMY,
+    items: [],
+  } as CreateRunDto;
+
+  function createService(ownerId: string | null) {
+    const repository = {
+      create: jest.fn().mockResolvedValue({ created: true }),
+      findUserIdByClientProfileId: jest.fn().mockResolvedValue(ownerId),
+    };
+    return {
+      repository,
+      service: new RunsService(repository as unknown as RunsRepository),
+    };
+  }
+
+  it('saves the Run for the key owner when userId is omitted', async () => {
+    const { repository, service } = createService(ownerUserId);
+
+    await service.create(dto, profileKey);
+
+    expect(repository.findUserIdByClientProfileId).toHaveBeenCalledWith(
+      profileKey,
+    );
+    expect(repository.create).toHaveBeenCalledWith({
+      ...dto,
+      userId: ownerUserId,
+    });
+  });
+
+  it('accepts an older request whose userId matches the key owner', async () => {
+    const { repository, service } = createService(ownerUserId);
+
+    await service.create({ ...dto, userId: ownerUserId }, profileKey);
+
+    expect(repository.create).toHaveBeenCalledWith({
+      ...dto,
+      userId: ownerUserId,
+    });
+  });
+
+  it('rejects a userId that belongs to someone else', async () => {
+    const { repository, service } = createService(ownerUserId);
+
+    await expectApiError(
+      service.create(
+        { ...dto, userId: '00000000-0000-4000-8000-000000000002' },
+        profileKey,
+      ),
+      HttpStatus.FORBIDDEN,
+      'PROFILE_KEY_MISMATCH',
+    );
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects a key that has no registered user', async () => {
+    const { repository, service } = createService(null);
+
+    await expectApiError(
+      service.create(dto, profileKey),
+      HttpStatus.NOT_FOUND,
+      'USER_NOT_FOUND',
+    );
+    expect(repository.create).not.toHaveBeenCalled();
   });
 });
 

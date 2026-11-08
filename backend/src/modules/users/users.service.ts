@@ -5,6 +5,7 @@ import {
   SKILL_MAX_LEVEL,
   type CharacterProgressSnapshot,
 } from '../../contracts/meta-progression';
+import { profileKeyMismatch } from '../../common/auth/client-profile-key';
 import { ApiException } from '../../common/exceptions/api.exception';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserRunsQueryDto } from './dto/get-user-runs-query.dto';
@@ -97,6 +98,7 @@ export class UsersService {
     characterId: string,
     skillTypeValue: string,
     targetLevel: number,
+    profileKey: string,
   ): Promise<CharacterProgressSnapshot> {
     const skillType = this.parseSkillType(skillTypeValue);
 
@@ -106,6 +108,7 @@ export class UsersService {
         characterId,
         skillType,
         targetLevel,
+        clientProfileId: profileKey,
       });
     } catch (error: unknown) {
       if (error instanceof UsersRepositoryError) {
@@ -187,6 +190,8 @@ export class UsersService {
           error.code,
           error.message,
         );
+      case 'PROFILE_KEY_MISMATCH':
+        return profileKeyMismatch();
       case 'NICKNAME_ALREADY_EXISTS':
       case 'PROFILE_IDEMPOTENCY_CONFLICT':
         return new ApiException(HttpStatus.CONFLICT, error.code, error.message);

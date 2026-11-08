@@ -19,6 +19,8 @@ import {
 import { Prisma } from '../../generated/prisma/client';
 import type { CreateRunDto } from './dto/create-run.dto';
 
+export type CreateRunInput = CreateRunDto & { userId: string };
+
 const MAX_TRANSACTION_ATTEMPTS = 3;
 
 export type PersistRunResult = CreateRunResultContract & {
@@ -82,7 +84,17 @@ export class RunsRepository {
     });
   }
 
-  async create(dto: CreateRunDto): Promise<PersistRunResult> {
+  async findUserIdByClientProfileId(
+    clientProfileId: string,
+  ): Promise<string | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { clientProfileId },
+      select: { id: true },
+    });
+    return user?.id ?? null;
+  }
+
+  async create(dto: CreateRunInput): Promise<PersistRunResult> {
     const requestFingerprint = createRunRequestFingerprint(dto);
 
     for (let attempt = 1; attempt <= MAX_TRANSACTION_ATTEMPTS; attempt += 1) {
@@ -102,7 +114,7 @@ export class RunsRepository {
   }
 
   private createInTransaction(
-    dto: CreateRunDto,
+    dto: CreateRunInput,
     requestFingerprint: string,
   ): Promise<PersistRunResult> {
     return this.prisma.$transaction(

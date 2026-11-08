@@ -26,11 +26,8 @@
 .skills { display: grid; gap: 10px; }
 .skillRow { gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--line); }
 .skillRow > div { flex: 1; }
-.skillRow button, .inlineError button, .inlineError a, .statusPage button { border: 0; border-radius: 10px; padding: 10px 14px; background: var(--accent); color: #2b1705; font: inherit; font-weight: 800; cursor: pointer; }
-.skillRow button:disabled { cursor: not-allowed; background: #ece8de; color: #8a867c; }
-.success, .error { margin-top: 14px; padding: 11px 13px; border-radius: 10px; font-size: .9rem; }
-.success { background: #eaf8ee; color: #24633a; }
-.error, .inlineError { background: #fff0ed; color: #9f2e27; }
+.inlineError button, .inlineError a, .statusPage button { border: 0; border-radius: 10px; padding: 10px 14px; background: var(--accent); color: #2b1705; font: inherit; font-weight: 800; cursor: pointer; }
+.inlineError { background: #fff0ed; color: #9f2e27; }
 .runList { display: grid; gap: 10px; list-style: none; }
 .runCard { display: grid; grid-template-columns: 76px 1.1fr repeat(3, .8fr) 1.4fr 24px; align-items: center; gap: 12px; padding: 17px 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); transition: transform 150ms ease, border-color 150ms ease; }
 .runCard:hover { transform: translateY(-2px); border-color: var(--accent); }

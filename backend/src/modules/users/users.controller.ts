@@ -11,6 +11,7 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { ClientProfileKey } from '../../common/auth/client-profile-key';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserRunsQueryDto } from './dto/get-user-runs-query.dto';
 import { SearchUsersQueryDto } from './dto/search-users-query.dto';
@@ -72,12 +73,14 @@ export class UsersController {
     @Param('characterId') characterId: string,
     @Param('skillType') skillType: string,
     @Body() dto: UpgradeSkillDto,
+    @ClientProfileKey() profileKey: string,
   ) {
     const data = await this.usersService.upgradeSkill(
       nickname,
       characterId,
       skillType,
       dto.targetLevel,
+      profileKey,
     );
 
     return { success: true, data };
