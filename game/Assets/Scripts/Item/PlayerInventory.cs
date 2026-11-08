@@ -18,6 +18,8 @@ namespace TrickalFanGame.Item
         private readonly Dictionary<string, int> stackCounts = new();
         private readonly HashSet<string> recordedSingleUseInstanceIds = new(StringComparer.Ordinal);
         private readonly HashSet<string> spentArtifactIds = new(StringComparer.Ordinal);
+        // Offline-1: the rarity of every item recorded for the Run result, for the local experience calculation.
+        private readonly Dictionary<string, ItemRarity> recordedRarities = new(StringComparer.Ordinal);
         private PlayerStats stats;
         private Health health;
         private PlayerSP playerSP;
@@ -88,11 +90,17 @@ namespace TrickalFanGame.Item
             ApplyEffect(definition);
             EvaluateSynergies();
 
-            RecordAcquisition(definition.ItemId);
+            RecordAcquisition(definition);
 
             ItemAcquired?.Invoke(definition, newStackCount);
             Debug.Log($"[PlayerInventory] Acquired {definition.DisplayName} x{newStackCount}.", this);
             return true;
+        }
+
+        public bool TryGetRecordedRarity(string itemId, out ItemRarity rarity)
+        {
+            rarity = ItemRarity.Common;
+            return itemId != null && recordedRarities.TryGetValue(itemId, out rarity);
         }
 
         // A single-use item or 권능 is recorded for the Run result once per pickup instance, when it first enters its
@@ -112,15 +120,16 @@ namespace TrickalFanGame.Item
                 return false;
             }
 
-            RecordAcquisition(definition.ItemId);
+            RecordAcquisition(definition);
             return true;
         }
 
-        private void RecordAcquisition(string itemId)
+        private void RecordAcquisition(ItemDefinition definition)
         {
             int floor = Mathf.Max(1, runProgress != null ? runProgress.CurrentFloor : 1);
+            recordedRarities[definition.ItemId] = definition.Rarity;
             acquiredItems.Add(new AcquiredItem(
-                itemId,
+                definition.ItemId,
                 floor,
                 acquiredItems.Count + 1,
                 Time.realtimeSinceStartup));

@@ -3,6 +3,7 @@ using System.Linq;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Data;
 using TrickalFanGame.Frontend;
+using TrickalFanGame.Meta;
 using TrickalFanGame.Item;
 using TrickalFanGame.Network;
 using TrickalFanGame.Room;
@@ -136,6 +137,7 @@ namespace TrickalFanGame.Editor
     public static class Week13Flow5PlayVerification
     {
         private const string PendingKey = "Week13Flow5PlayVerification.Pending";
+        private const string SavedCacheKey = "Week13Flow5PlayVerification.SavedProgressCache";
         private static bool hadProfile;
         private static string previousUserId;
         private static string previousNickname;
@@ -156,6 +158,10 @@ namespace TrickalFanGame.Editor
             previousUserId = LocalProfile.UserId;
             previousNickname = LocalProfile.Nickname;
             LocalProfile.SaveProfile("flow5-local-user", "Flow5Tester");
+            // Offline-1: growth is cached by the device key; keep the real profile's cache aside.
+            string cacheKey = LocalProgression.CacheKey("erpin");
+            SessionState.SetString(SavedCacheKey, PlayerPrefs.HasKey(cacheKey) ? "1" + PlayerPrefs.GetString(cacheKey) : "0");
+            PlayerPrefs.DeleteKey(cacheKey);
             RunLaunchContext.Clear();
             RunResultContext.Clear();
             apiClient = new Flow5ApiClient();
@@ -244,7 +250,7 @@ namespace TrickalFanGame.Editor
                 apiClient.Requests[0].clientRunId == endedClientRunId,
                 "Initial result save did not preserve the ended Run clientRunId.");
             Week13Flow5Verification.Assert(LocalPendingRunStorage.Contains(endedClientRunId) &&
-                string.IsNullOrEmpty(view.SaveStatus.text) && view.StageTitle.text == "RUN 결과" &&
+                view.SaveStatus.text == FrontendRunResultView.OfflineSaveStatus && view.StageTitle.text == "RUN 결과" &&
                 view.StageBody.text.Contains("획득한 아티팩트"),
                 "Offline result did not immediately show local Run data and queue the request.");
 
@@ -255,7 +261,7 @@ namespace TrickalFanGame.Editor
                 apiClient.Requests[1].clientRunId == endedClientRunId &&
                 !LocalPendingRunStorage.Contains(endedClientRunId),
                 "Pending Run recovery did not confirm and remove the exact clientRunId.");
-            string cachedProgress = PlayerPrefs.GetString("TrickalFanGame.CharacterProgress.Flow5Tester.erpin", string.Empty);
+            string cachedProgress = PlayerPrefs.GetString(LocalProgression.CacheKey("erpin"), string.Empty);
             Week13Flow5Verification.Assert(cachedProgress.Contains("\"level\":3"),
                 "Recovered Run progress was not stored in the local cache.");
             NextPhase();
@@ -380,6 +386,9 @@ namespace TrickalFanGame.Editor
             if (!string.IsNullOrWhiteSpace(endedClientRunId)) LocalPendingRunStorage.Remove(endedClientRunId);
             Time.timeScale = 1f;
             PlayerPrefs.DeleteKey("TrickalFanGame.CharacterProgress.Flow5Tester.erpin");
+            string savedCache = SessionState.GetString(SavedCacheKey, "0");
+            if (savedCache.StartsWith("1")) PlayerPrefs.SetString(LocalProgression.CacheKey("erpin"), savedCache.Substring(1));
+            else PlayerPrefs.DeleteKey(LocalProgression.CacheKey("erpin"));
             PlayerPrefs.Save();
             if (hadProfile) LocalProfile.SaveProfile(previousUserId, previousNickname);
             else LocalProfile.ClearProfile();

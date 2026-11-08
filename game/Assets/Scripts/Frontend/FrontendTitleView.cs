@@ -114,8 +114,6 @@ namespace TrickalFanGame.Frontend
             ShowTitleScreen();
         }
 
-        private bool pendingRunRecoveryInFlight;
-
         public ProfileRegistrationOutcome? LastProfileSync { get; private set; }
 
         // Offline-0: a profile kept on this PC tries to register on each launch. Pending Runs are sent after it
@@ -132,15 +130,17 @@ namespace TrickalFanGame.Frontend
             });
         }
 
+        public PendingSyncOutcome? LastPendingSync { get; private set; }
+
+        // Offline-1: sends this profile's queued Runs and skill upgrades oldest first (PendingSync). A failure keeps
+        // the rest queued for the next launch.
         public void RecoverPendingRuns(IGameApiClient overrideClient = null)
         {
-            if (pendingRunRecoveryInFlight || RunResultContext.HasPending || !LocalProfile.HasServerAccount) return;
+            if (RunResultContext.HasPending || !LocalProfile.HasServerAccount) return;
 
             ProfileRegistration.MovePendingRunsToServerAccount();
-            CreateRunRequest pendingRequest = LocalPendingRunStorage.Load(LocalProfile.UserId);
-            if (pendingRequest == null) return;
+            if (!LocalProgression.HasPendingWrites()) return;
 
-            Debug.Log($"[FrontendTitleView] Recovering pending Run request: {pendingRequest.clientRunId}");
             IGameApiClient apiClient = overrideClient ?? ApiClient.Instance;
             if (apiClient == null)
             {
@@ -148,33 +148,12 @@ namespace TrickalFanGame.Frontend
                 return;
             }
 
-            pendingRunRecoveryInFlight = true;
-            apiClient.PostRun(pendingRequest,
-                response => OnPendingRunRecovered(pendingRequest, response, apiClient),
-                OnPendingRunRecoveryFailed);
-        }
-
-        private void OnPendingRunRecovered(CreateRunRequest request, CreateRunResponse response, IGameApiClient apiClient)
-        {
-            if (response?.data == null)
+            Debug.Log("[FrontendTitleView] Sending pending Runs and skill upgrades.");
+            PendingSync.Flush(apiClient, apiClient as ISkillProgressApiClient ?? ApiClient.Instance, outcome =>
             {
-                pendingRunRecoveryInFlight = false;
-                Debug.LogWarning("[FrontendTitleView] Pending Run recovery returned null data.");
-                return;
-            }
-
-            LocalPendingRunStorage.Remove(request.clientRunId);
-            PlayerProgressClient.StoreConfirmedProgress(LocalProfile.Nickname, response.data.progress);
-            PlayerProgressClient.StoreConfirmedElifMeta(LocalProfile.Nickname, response.data.meta);
-            pendingRunRecoveryInFlight = false;
-            Debug.Log($"[FrontendTitleView] Pending Run recovered successfully: {response.data.runId}");
-            RecoverPendingRuns(apiClient);
-        }
-
-        private void OnPendingRunRecoveryFailed(string error)
-        {
-            pendingRunRecoveryInFlight = false;
-            Debug.LogWarning($"[FrontendTitleView] Pending Run recovery failed: {error}. Will retry on next launch.");
+                LastPendingSync = outcome;
+                Debug.Log($"[FrontendTitleView] Pending writes: {outcome}");
+            });
         }
 
         public void ShowTitleScreen()

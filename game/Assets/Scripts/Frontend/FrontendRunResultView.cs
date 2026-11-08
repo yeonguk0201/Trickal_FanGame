@@ -16,11 +16,8 @@ namespace TrickalFanGame.Frontend
     [DefaultExecutionOrder(100), DisallowMultipleComponent]
     public sealed class FrontendRunResultView : MonoBehaviour
     {
-        private static readonly int[] ExperienceCurve =
-        {
-            400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700,
-            1800, 1900, 2000, 2100
-        };
+        // Offline-1: a Run the server could not take still shows the growth calculated on this PC.
+        public const string OfflineSaveStatus = "오프라인 기록 · 서버에 연결되면 저장돼요";
 
         [SerializeField] private FrontendTitleView titleView;
         [SerializeField] private GameObject resultPanel;
@@ -40,6 +37,8 @@ namespace TrickalFanGame.Frontend
 
         private RunResultPayload payload;
         private CreateRunResponse savedResponse;
+        private int resultExperience;
+        private CharacterProgressDto resultProgress;
         private Coroutine sequence;
         private bool submissionInFlight;
         private bool stageAnimating;
@@ -58,6 +57,8 @@ namespace TrickalFanGame.Frontend
         public bool IsShowing => resultPanel != null && resultPanel.activeInHierarchy;
         public bool IsSubmissionInFlight => submissionInFlight;
         public bool IsSummaryVisible => actionRoot != null && actionRoot.activeInHierarchy;
+        public int ResultExperience => resultExperience;
+        public CharacterProgressDto ResultProgress => resultProgress;
 
         public void Configure(FrontendTitleView configuredTitleView, GameObject panel, TMP_Text heading,
             TMP_Text configuredCharacterName, TMP_Text reaction, TMP_Text speech, TMP_Text configuredStageTitle,
@@ -161,6 +162,8 @@ namespace TrickalFanGame.Frontend
             }
 
             savedResponse = response;
+            resultExperience = response.data.experienceGained;
+            resultProgress = response.data.progress;
             LocalPendingRunStorage.Remove(payload.Request.clientRunId);
             PlayerProgressClient.StoreConfirmedProgress(LocalProfile.Nickname, response.data.progress);
             PlayerProgressClient.StoreConfirmedElifMeta(LocalProfile.Nickname, response.data.meta);
@@ -174,9 +177,13 @@ namespace TrickalFanGame.Frontend
             submissionInFlight = false;
             Debug.Log($"[FrontendRunResultView] Save failed (offline mode): {error}");
             LocalPendingRunStorage.Save(payload.Request);
-            saveStatus.text = "";
+            resultExperience = LocalProgression.ExperienceOf(payload.Request);
+            resultProgress = PlayerProgressClient.IsLocalProfileNickname(LocalProfile.Nickname)
+                ? LocalProgression.Current(payload.Request.characterId)
+                : MetaProgressionRules.ApplyRunExperience(StartingProgress(), resultExperience);
+            saveStatus.text = OfflineSaveStatus;
             if (sequence != null) StopCoroutine(sequence);
-            sequence = StartCoroutine(PlayOfflineSequence());
+            sequence = StartCoroutine(PlaySequence());
         }
 
         private void ShowPendingResult()
@@ -208,7 +215,7 @@ namespace TrickalFanGame.Frontend
             if (skipToSummary) { ShowSummary(); yield break; }
 
             CharacterProgressDto start = StartingProgress();
-            CharacterProgressDto end = savedResponse.data.progress;
+            CharacterProgressDto end = resultProgress;
             if (end.level > start.level)
             {
                 yield return ShowTextStage("LEVEL UP!", $"Lv. {start.level}  →  Lv. {end.level}", 1.15f);
@@ -221,30 +228,6 @@ namespace TrickalFanGame.Frontend
 
             yield return ShowTextStage("획득 아티팩트", BuildArtifactReview(), 1.1f);
             ShowSummary();
-        }
-
-        private IEnumerator PlayOfflineSequence()
-        {
-            skipToSummary = false;
-            finishCurrentStage = false;
-            hasUsedFastForward = false;
-            yield return ShowTextStage("RUN 기록", BuildRunRecord(), 1.25f);
-            if (skipToSummary) { ShowOfflineSummary(); yield break; }
-
-            yield return ShowTextStage("획득 아티팩트", BuildArtifactReview(), 1.1f);
-            ShowOfflineSummary();
-        }
-
-        private void ShowOfflineSummary()
-        {
-            sequence = null;
-            stageAnimating = false;
-            stageTitle.text = "RUN 결과";
-            stageBody.text = $"{BuildRunRecord()}\n{BuildArtifactReview()}";
-            experienceBar.gameObject.SetActive(false);
-            experienceText.gameObject.SetActive(false);
-            actionRoot.SetActive(true);
-            Focus(retryRunButton);
         }
 
         private IEnumerator ShowTextStage(string title, string body, float duration)
@@ -266,8 +249,8 @@ namespace TrickalFanGame.Frontend
         private IEnumerator AnimateExperience()
         {
             CharacterProgressDto start = StartingProgress();
-            CharacterProgressDto end = savedResponse.data.progress;
-            stageTitle.text = $"경험치 +{savedResponse.data.experienceGained}";
+            CharacterProgressDto end = resultProgress;
+            stageTitle.text = $"경험치 +{resultExperience}";
             stageBody.text = "";
             experienceBar.gameObject.SetActive(true);
             experienceText.gameObject.SetActive(true);
@@ -337,7 +320,7 @@ namespace TrickalFanGame.Frontend
         {
             sequence = null;
             stageAnimating = false;
-            CharacterProgressDto end = savedResponse.data.progress;
+            CharacterProgressDto end = resultProgress;
             stageTitle.text = "RUN 결과";
             stageBody.text = $"Lv. {end.level}  ·  EXP {end.experience}/{end.experienceToNextLevel}\n" +
                              $"스킬 포인트 {end.skillPoints}\n{BuildRunRecord()}\n{BuildArtifactReview()}";
@@ -349,14 +332,7 @@ namespace TrickalFanGame.Frontend
 
         private CharacterProgressDto StartingProgress()
         {
-            return payload.StartingProgress ?? new CharacterProgressDto
-            {
-                characterId = payload.Request.characterId,
-                level = 1,
-                experience = 0,
-                experienceToNextLevel = ExperienceCurve[0],
-                skillPoints = 0
-            };
+            return payload.StartingProgress ?? MetaProgressionRules.CreateDefault(payload.Request.characterId);
         }
 
         private string BuildRunRecord()
@@ -384,11 +360,9 @@ namespace TrickalFanGame.Frontend
             experienceText.text = $"Lv. {level}    {value} / {required}";
         }
 
-        private static int RequiredExperience(int level)
-        {
-            int index = Mathf.Clamp(level - 1, 0, ExperienceCurve.Length - 1);
-            return ExperienceCurve[index];
-        }
+        private static int RequiredExperience(int level) =>
+            MetaProgressionRules.ExperienceToNextLevel[
+                Mathf.Clamp(level - 1, 0, MetaProgressionRules.ExperienceToNextLevel.Length - 1)];
 
         private void PlayLevelCue()
         {

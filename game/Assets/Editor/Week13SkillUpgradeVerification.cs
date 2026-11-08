@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using TrickalFanGame.Data;
 using TrickalFanGame.Frontend;
+using TrickalFanGame.Meta;
 using TrickalFanGame.Network;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -26,8 +27,15 @@ namespace TrickalFanGame.Editor
 
             string oldUserId = LocalProfile.UserId;
             string oldNickname = LocalProfile.Nickname;
+            string cacheKey = LocalProgression.CacheKey("erpin");
+            string[] savedKeys = { cacheKey, "PendingRunQueue.v1", "PendingRunExperience.v1" };
+            string[] savedValues = savedKeys.Select(key => PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : null)
+                .ToArray();
             try
             {
+                LocalPendingRunStorage.Clear();
+                PlayerPrefs.DeleteKey(cacheKey);
+                PlayerPrefs.DeleteKey(LocalProgression.LegacyNicknameCacheKey("SkillTester", "erpin"));
                 LocalProfile.SaveProfile("skill-verification-user", "SkillTester");
                 var profile = new FakeProfileClient(CreateProgress(points: 2, low: 1, high: 10));
                 var upgrades = new FakeSkillClient();
@@ -58,13 +66,21 @@ namespace TrickalFanGame.Editor
 
                 upgrades.NextError = SkillUpgradeError.FromApiError(422, "INVALID_SKILL_TARGET_LEVEL", "conflict");
                 skill.UpgradeLowGrade();
-                Assert(skill.StatusText.text == FrontendSkillUpgradeView.ConflictMessage,
-                    "Stale target conflicts need a dedicated message.");
+                Assert(skill.StatusText.text == FrontendSkillUpgradeView.ConflictMessage &&
+                    !LocalProgression.HasPendingWrites(),
+                    "Stale target conflicts need a dedicated message and must not queue an upgrade.");
 
+                // Offline-1: a network failure queues the upgrade, and the queue is sent again right away.
                 upgrades.NextError = SkillUpgradeError.FromResponse(0, UnityWebRequest.Result.ConnectionError,
                     "offline", string.Empty);
+                upgrades.NextProgress = CreateProgress(points: 0, low: 3, high: 10);
+                int callsBeforeOffline = upgrades.CallCount;
                 skill.UpgradeLowGrade();
-                Assert(skill.StatusText.text.Contains("네트워크"), "Network failures need a dedicated message.");
+                Assert(upgrades.CallCount == callsBeforeOffline + 2 && upgrades.LastTargetLevel == 3 &&
+                    skill.StatusText.text == FrontendSkillUpgradeView.SyncedMessage &&
+                    skill.Progress.lowGradeSkillLevel == 3 && skill.Progress.skillPoints == 0 &&
+                    !LocalProgression.HasPendingWrites(),
+                    "A network failure must queue the upgrade and the resend must apply the server snapshot.");
 
                 skill.Progress.skillPoints = 0;
                 skill.UpgradeLowGrade();
@@ -75,26 +91,61 @@ namespace TrickalFanGame.Editor
                 Assert(skill.StatusText.text == FrontendSkillUpgradeView.MaximumLevelMessage,
                     "Maximum level needs a dedicated message without issuing a request.");
 
+                PlayerPrefs.DeleteKey(cacheKey);
                 var empty = new FakeProfileClient((CharacterProgressDto)null);
                 skill.SetApiClients(empty, upgrades);
                 skill.Show(LoadErpin());
-                Assert(skill.Progress == null && skill.StatusText.text == FrontendSkillUpgradeView.EmptyMessage &&
-                    skill.RetryButton.gameObject.activeSelf, "Skill-1 must distinguish an empty progress state.");
+                Assert(skill.Progress != null && skill.Progress.level == 1 && skill.Progress.skillPoints == 0 &&
+                    skill.StatusText.text == FrontendSkillUpgradeView.SelectMessage &&
+                    !skill.LowGradeUpgradeButton.interactable,
+                    "A character the server has not seen must start at Lv.1 without points.");
 
                 var failed = new FakeProfileClient("offline");
                 skill.SetApiClients(failed, upgrades);
                 skill.Show(LoadErpin());
-                Assert(skill.Progress == null && skill.StatusText.text == FrontendSkillUpgradeView.LoadFailedMessage &&
-                    skill.RetryButton.gameObject.activeSelf, "Skill-1 must distinguish a lookup failure state.");
+                Assert(skill.Progress != null &&
+                    skill.StatusText.text == FrontendSkillUpgradeView.OfflineProgressMessage &&
+                    skill.RetryButton.gameObject.activeSelf,
+                    "A failed lookup must show the progress kept on this PC with a retry.");
+
+                // Offline-1: a profile the server has not registered grows and upgrades on this PC only.
+                LocalProfile.SaveOfflineProfile("SkillOffline");
+                LocalPendingRunStorage.RecordRunExperience("skill-offline-run", 400);
+                LocalPendingRunStorage.Save(new CreateRunRequest
+                {
+                    clientRunId = "skill-offline-run",
+                    userId = LocalProfile.OwnerId,
+                    characterId = "erpin",
+                    reachedFloor = 1
+                });
+                int callsBeforeLocal = upgrades.CallCount;
+                int lookupsBeforeLocal = failed.GetUserCalls;
+                skill.Show(LoadErpin());
+                Assert(failed.GetUserCalls == lookupsBeforeLocal && skill.Progress.level == 2 &&
+                    skill.Progress.skillPoints == 1 && skill.LowGradeUpgradeButton.interactable &&
+                    skill.StatusText.text == FrontendSkillUpgradeView.OfflineProgressMessage,
+                    "An unregistered profile must show its offline growth without a server lookup.");
+                skill.UpgradeLowGrade();
+                Assert(upgrades.CallCount == callsBeforeLocal && skill.Progress.lowGradeSkillLevel == 2 &&
+                    skill.Progress.skillPoints == 0 &&
+                    skill.StatusText.text == FrontendSkillUpgradeView.OfflineUpgradeMessage &&
+                    LocalPendingRunStorage.HasPendingSkillUpgrades(LocalProfile.OwnerId),
+                    "An unregistered profile must upgrade offline and queue the upgrade.");
             }
             finally
             {
                 skill.Hide();
                 if (string.IsNullOrEmpty(oldUserId) || string.IsNullOrEmpty(oldNickname)) LocalProfile.ClearProfile();
                 else LocalProfile.SaveProfile(oldUserId, oldNickname);
+                for (int index = 0; index < savedKeys.Length; index++)
+                {
+                    if (savedValues[index] == null) PlayerPrefs.DeleteKey(savedKeys[index]);
+                    else PlayerPrefs.SetString(savedKeys[index], savedValues[index]);
+                }
+                PlayerPrefs.Save();
             }
 
-            Debug.Log("Skill-1/2 verification passed: tall data-driven picker, loading/empty/failure states, progress rendering, idempotent target-level request, immediate refresh, and categorized failures.");
+            Debug.Log("Skill-1/2 verification passed: tall data-driven picker, loading/empty/failure states, progress rendering, idempotent target-level request, immediate refresh, categorized failures, and Offline-1 offline upgrades (queued, resent, unregistered profile).");
         }
 
         public static void SetupAndVerifyBatch()

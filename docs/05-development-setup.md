@@ -2464,3 +2464,24 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 실제 화면: Game Scene Play → `F1` → `— Seed —`의 `Find shop F1`로 1층 상점이 있는 Run을 열고 `— Shop —`에서 `no key
   (key-free floor)`인지, 열쇠 0개로 상점 문을 지나갈 수 있는지 본다. 1층 전투방 클리어 상자가 황금으로 나오지 않는지 본다.
   `— Chest —`의 개발용 황금 상자는 1층에서도 황금 그대로다.
+
+## 서버 없이 성장·스킬 강화 Offline-1 (2026-11-09)
+
+- 규칙은 런타임 코드에 있다. Setup 없음. 경험치·레벨·스킬 포인트 계산은 `MetaProgressionRules`(Backend
+  `backend/src/contracts/meta-progression.ts`·`backend/src/domain/meta-progression.ts`와 같은 값), 성장 캐시와 대기열 재계산은
+  `LocalProgression`, 대기열 전송은 `PendingSync`([30번 §3.1 S4](./30-beta-release-plan.md)).
+- 성장 캐시는 서버가 확인한 값만 기기 키 기준(`TrickalFanGame.CharacterProgress.device.<clientProfileId>.<characterId>`)으로
+  둔다. 예전 닉네임 기준 캐시는 등록된 프로필에서 한 번 읽어 옮긴다. 게임이 보여 주는 성장은 이 캐시에 아직 안 보낸 Run과
+  스킬 강화를 순서대로 더한 값이다. Run 종료 때 계산한 경험치는 `PendingRunExperience.v1`에 두고 서버가 확인하면 지운다.
+- 스킬 강화는 서버 계정이 없거나, 앞에 대기 중인 쓰기가 있거나, 네트워크·5xx 오류면 대기열(`PendingRunQueue.v1`)에 Run과
+  함께 들어간다. 타이틀이 실행마다 오래된 것부터 보내고, 서버가 규칙으로 거부한 강화(422·진행 없음)는 버린다.
+- 검증: 메뉴 `Trickal Fan Game > Beta > Verify Offline-1 Growth`, 배치
+  `-batchmode -nographics -quit -executeMethod TrickalFanGame.Editor.BetaOffline1Verification.Verify`. Backend 계약 파일의 상수·
+  경험치 곡선·등급 경험치를 직접 대조하고, Backend 도메인 테스트와 같은 사례, 오프라인 Run·강화 → 등록 → 순서 전송·거부 강화
+  버림·네트워크 실패 중단을 검사한다. 스킬 화면은 `Week13SkillUpgradeVerification.Verify`, 결과 화면 오프라인 성장 표시는
+  `Week13Flow5PlayVerification.RunBatch`(Play Mode, `-quit` 없이)가 함께 확인한다.
+- 수동 확인(서버를 끄고 켜며 Frontend Play): 왼쪽 위 `DEV: RESET LOCAL PROFILE` → `NEW PLAYER`로 새 기기 키를 만든다.
+  (1) 서버를 끈 채 새 닉네임 → Run 1판 → 결과 화면에 `경험치 +N`, 레벨 업, `오프라인 기록 · 서버에 연결되면 저장돼요` →
+  캐릭터 선택 → 스킬 강화 화면에 같은 레벨·포인트, 강화하면 `오프라인으로 강화했어요` → 다음 Run에서 강화된 스킬이 적용된다.
+  (2) 서버를 켜고 재실행 → 타이틀에서 등록과 Run·강화 전송 → 스킬 강화 화면과 Web 사용자 페이지의 레벨·경험치·스킬 단계가
+  같다. (3) 등록된 프로필로 서버를 끄고 Run·강화 → 서버를 켜고 재실행 → 같은 값으로 맞춰진다.
