@@ -103,7 +103,7 @@ namespace TrickalFanGame.Frontend
 
         private void InitializeView()
         {
-            RecoverPendingRuns();
+            if (!SyncOfflineProfile()) RecoverPendingRuns();
 
             if (FrontendEntryContext.TryConsumeHome())
             {
@@ -116,10 +116,27 @@ namespace TrickalFanGame.Frontend
 
         private bool pendingRunRecoveryInFlight;
 
+        public ProfileRegistrationOutcome? LastProfileSync { get; private set; }
+
+        // Offline-0: a profile kept on this PC tries to register on each launch. Pending Runs are sent after it
+        // succeeds. Returns false when there was nothing to register.
+        public bool SyncOfflineProfile(IUserRegistrationClient overrideClient = null,
+            IGameApiClient recoveryClient = null)
+        {
+            IUserRegistrationClient client = overrideClient ?? ApiClient.Instance as IUserRegistrationClient;
+            return ProfileRegistration.TrySyncOfflineProfile(client, outcome =>
+            {
+                LastProfileSync = outcome;
+                Debug.Log($"[FrontendTitleView] Offline profile sync: {outcome}");
+                if (outcome == ProfileRegistrationOutcome.Registered) RecoverPendingRuns(recoveryClient);
+            });
+        }
+
         public void RecoverPendingRuns(IGameApiClient overrideClient = null)
         {
-            if (pendingRunRecoveryInFlight || RunResultContext.HasPending || !LocalProfile.IsRegistered) return;
+            if (pendingRunRecoveryInFlight || RunResultContext.HasPending || !LocalProfile.HasServerAccount) return;
 
+            ProfileRegistration.MovePendingRunsToServerAccount();
             CreateRunRequest pendingRequest = LocalPendingRunStorage.Load(LocalProfile.UserId);
             if (pendingRequest == null) return;
 
@@ -177,7 +194,11 @@ namespace TrickalFanGame.Frontend
             if (creditsPanel != null) creditsPanel.SetActive(false);
             if (homeView != null) homeView.Hide();
             if (nicknamePanel != null) nicknamePanel.SetActive(true);
-            if (nicknameView != null) nicknameView.FocusInput();
+            if (nicknameView != null)
+            {
+                if (LocalProfile.NeedsNewNickname) nicknameView.ShowNicknameTakenNotice(LocalProfile.Nickname);
+                nicknameView.FocusInput();
+            }
         }
 
         public void ShowHomeScreen()
@@ -222,7 +243,7 @@ namespace TrickalFanGame.Frontend
 
         public void RequestStart()
         {
-            if (!LocalProfile.IsRegistered)
+            if (!LocalProfile.IsRegistered || LocalProfile.NeedsNewNickname)
             {
                 ShowNicknameRegistration();
                 return;

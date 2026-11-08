@@ -733,7 +733,9 @@ namespace TrickalFanGame.Editor
             public void PostUserWithErrorInfo(CreateUserRequest request, Action<CreateUserResponse> onSuccess,
                 Action<RegistrationError> onError)
             {
-                PostUser(request, onSuccess, message => onError?.Invoke(RegistrationError.NetworkFailure(message)));
+                // Offline-0: an unreachable server now keeps the profile offline, so the retry case is a refusal.
+                PostUser(request, onSuccess, message => onError?.Invoke(
+                    RegistrationError.FromApiError(409, "PROFILE_IDEMPOTENCY_CONFLICT", message)));
             }
 
             public void GetUser(string nickname, Action<UserProfileResponse> onSuccess, Action<string> onError)

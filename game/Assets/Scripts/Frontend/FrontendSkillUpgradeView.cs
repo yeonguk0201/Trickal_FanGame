@@ -17,6 +17,7 @@ namespace TrickalFanGame.Frontend
         public const string LoadingMessage = "진행 정보를 불러오는 중입니다...";
         public const string EmptyMessage = "이 캐릭터의 진행 정보가 없습니다.";
         public const string LoadFailedMessage = "진행 정보를 불러오지 못했습니다. 네트워크를 확인해 주세요.";
+        public const string NotRegisteredMessage = "서버에 등록되면 스킬을 강화할 수 있어요. 서버에 연결된 뒤 다시 열어 주세요.";
         public const string NotEnoughPointsMessage = "사용할 수 있는 스킬 포인트가 부족합니다.";
         public const string MaximumLevelMessage = "이미 최대 레벨인 스킬입니다.";
         public const string ConflictMessage = "진행 정보가 변경되었습니다. 다시 불러온 뒤 시도해 주세요.";
@@ -137,6 +138,12 @@ namespace TrickalFanGame.Frontend
             int version = viewVersion;
             SetLoadingState(LoadingMessage);
             IGameApiClient client = profileClient ?? ApiClient.Instance;
+            if (!LocalProfile.HasServerAccount)
+            {
+                // Offline-0: skills are upgraded on the server; Offline-1 adds offline upgrades.
+                ShowLoadFailure(NotRegisteredMessage);
+                return;
+            }
             if (client == null)
             {
                 ShowLoadFailure(LoadFailedMessage);

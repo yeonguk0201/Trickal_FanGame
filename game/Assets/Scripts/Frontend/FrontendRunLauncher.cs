@@ -55,7 +55,7 @@ namespace TrickalFanGame.Frontend
                 return;
             }
 
-            if (!RunLaunchContext.TryPrepare(LocalProfile.UserId, LocalProfile.Nickname, characterId))
+            if (!RunLaunchContext.TryPrepare(LocalProfile.OwnerId, LocalProfile.Nickname, characterId))
             {
                 Debug.LogError("[FrontendRunLauncher] A Run launch is already pending or its identity is invalid.", this);
                 return;

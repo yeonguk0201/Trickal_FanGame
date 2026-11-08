@@ -31,7 +31,7 @@ namespace TrickalFanGame.Frontend
                 return;
             }
 
-            float height = confirmationVisible ? 118f : 48f;
+            float height = confirmationVisible ? 150f : 48f;
             GUILayout.BeginArea(new Rect(12f, 12f, 300f, height), GUI.skin.box);
             if (!confirmationVisible)
             {
@@ -42,12 +42,17 @@ namespace TrickalFanGame.Frontend
             }
             else
             {
-                GUILayout.Label("Clear local user ID and nickname?");
-                GUILayout.Label("The client profile ID will be kept.");
+                GUILayout.Label("RESET: clear user ID and nickname, keep the device key");
+                GUILayout.Label("(the server only accepts the old nickname again).");
+                GUILayout.Label("NEW PLAYER: also make a new device key.");
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("RESET", GUILayout.Height(28f)))
                 {
-                    ResetProfileAndReloadFrontend();
+                    ResetProfileAndReloadFrontend(false);
+                }
+                if (GUILayout.Button("NEW PLAYER", GUILayout.Height(28f)))
+                {
+                    ResetProfileAndReloadFrontend(true);
                 }
                 if (GUILayout.Button("CANCEL", GUILayout.Height(28f)))
                 {
@@ -58,11 +63,14 @@ namespace TrickalFanGame.Frontend
             GUILayout.EndArea();
         }
 
-        private void ResetProfileAndReloadFrontend()
+        private void ResetProfileAndReloadFrontend(bool newDeviceKey)
         {
-            LocalProfile.ClearProfile();
+            if (newDeviceKey) LocalProfile.ResetDeviceKey();
+            else LocalProfile.ClearProfile();
             confirmationVisible = false;
-            Debug.Log("[DevelopmentProfileResetMenu] Cleared local user ID and nickname; kept client profile ID.");
+            Debug.Log(newDeviceKey
+                ? "[DevelopmentProfileResetMenu] Cleared the local profile and made a new device key (new player)."
+                : "[DevelopmentProfileResetMenu] Cleared local user ID and nickname; kept client profile ID.");
             SceneManager.LoadScene(FrontendBuildIndex);
         }
 #endif

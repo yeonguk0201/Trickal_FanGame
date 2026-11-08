@@ -123,6 +123,32 @@ namespace TrickalFanGame.Data
         }
 
         /// <summary>
+        /// Offline-0: Runs queued before the server registered the profile carry the device key as their owner.
+        /// Once registration succeeds they move to the server user ID so the title's recovery sends them. The
+        /// Backend finds the owner from the profile key header, and the userId it checks then matches.
+        /// </summary>
+        public static int ReassignOwner(string fromOwnerId, string toOwnerId)
+        {
+            if (string.IsNullOrWhiteSpace(fromOwnerId) || string.IsNullOrWhiteSpace(toOwnerId) ||
+                fromOwnerId == toOwnerId)
+                return 0;
+
+            List<PendingRunEntry> entries = ReadEntries();
+            int moved = 0;
+            foreach (PendingRunEntry entry in entries)
+            {
+                if (entry.request.userId != fromOwnerId) continue;
+                entry.request.userId = toOwnerId;
+                moved++;
+            }
+
+            if (moved == 0) return 0;
+            WriteEntries(entries);
+            Debug.Log($"[LocalPendingRunStorage] Moved {moved} pending Run request(s) to the registered profile.");
+            return moved;
+        }
+
+        /// <summary>
         /// Clears every queued request. Intended only for explicit profile or test cleanup.
         /// </summary>
         public static void Clear()

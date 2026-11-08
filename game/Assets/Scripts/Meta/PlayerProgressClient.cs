@@ -1,4 +1,5 @@
 using System;
+using TrickalFanGame.Data;
 using TrickalFanGame.Network;
 using TrickalFanGame.Player;
 using UnityEngine;
@@ -71,10 +72,12 @@ namespace TrickalFanGame.Meta
             HasFreshElifMeta = false;
             statusMessage = $"Loading progression for {characterId}...";
             IGameApiClient client = apiClient ?? ApiClient.Instance;
-            if (client == null)
+            if (client == null || IsUnregisteredLocalProfile(userNickname))
             {
                 LoadedElifMeta = LoadCachedElifMeta(userNickname);
-                ApplyFallback(characterId, "ApiClient is unavailable.");
+                ApplyFallback(characterId, client == null
+                    ? "ApiClient is unavailable."
+                    : "The profile is not registered on the server yet.");
                 onReady?.Invoke(true);
                 return true;
             }
@@ -118,6 +121,11 @@ namespace TrickalFanGame.Meta
                 });
             return true;
         }
+
+        // Offline-0: a nickname kept only on this PC may belong to someone else on the server, so it is never
+        // looked up there until the server registers this profile.
+        public static bool IsUnregisteredLocalProfile(string nickname) =>
+            !LocalProfile.HasServerAccount && LocalProfile.IsRegistered && nickname == LocalProfile.Nickname;
 
         public void ApplyFallback(string characterId, string reason)
         {
