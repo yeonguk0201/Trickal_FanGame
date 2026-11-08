@@ -12,7 +12,9 @@ export default async function UserPage({
   params,
   searchParams,
 }: PageProps<"/users/[nickname]">) {
-  const { nickname } = await params;
+  // The dynamic segment can arrive still percent-encoded (e.g. Korean nicknames), and the API client encodes
+  // it again, so decode it once here.
+  const nickname = decodeSegment((await params).nickname);
   const query = await searchParams;
   const requestedPage = Array.isArray(query.page)
     ? query.page[0] ?? "1"
@@ -57,4 +59,12 @@ export default async function UserPage({
       }
     />
   );
+}
+
+function decodeSegment(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
