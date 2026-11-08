@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { profileKeyMismatch } from '../../common/auth/client-profile-key';
 import { ApiException } from '../../common/exceptions/api.exception';
 import {
   normalizeRunElif,
@@ -48,12 +49,25 @@ export class RunsService {
     };
   }
 
-  async create(dto: CreateRunDto) {
+  async create(dto: CreateRunDto, profileKey: string) {
     this.validateRunData(dto);
     this.validateElifData(dto);
 
+    const userId =
+      await this.runsRepository.findUserIdByClientProfileId(profileKey);
+    if (!userId) {
+      throw new ApiException(
+        HttpStatus.NOT_FOUND,
+        'USER_NOT_FOUND',
+        '존재하지 않는 유저입니다.',
+      );
+    }
+    if (dto.userId !== undefined && dto.userId !== userId) {
+      throw profileKeyMismatch();
+    }
+
     try {
-      return await this.runsRepository.create(dto);
+      return await this.runsRepository.create({ ...dto, userId });
     } catch (error: unknown) {
       if (error instanceof RunsRepositoryError) {
         throw this.toApiException(error);

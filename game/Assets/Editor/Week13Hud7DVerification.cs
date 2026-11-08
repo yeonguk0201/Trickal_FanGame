@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using TrickalFanGame.Data;
 using TrickalFanGame.Frontend;
+using TrickalFanGame.Meta;
 using TrickalFanGame.Item;
 using TrickalFanGame.Network;
 using TrickalFanGame.Run;
@@ -64,6 +65,7 @@ namespace TrickalFanGame.Editor
     public static class Week13Hud7DPlayVerification
     {
         private const string PendingKey = "Week13Hud7DPlayVerification.Pending";
+        private const string SavedCacheKey = "Week13Hud7DPlayVerification.SavedProgressCache";
         private static bool hadProfile;
         private static string previousUserId;
         private static string previousNickname;
@@ -84,6 +86,11 @@ namespace TrickalFanGame.Editor
             previousUserId = LocalProfile.UserId;
             previousNickname = LocalProfile.Nickname;
             LocalProfile.SaveProfile("hud7d-local-user", "Hud7DTester");
+            // Offline-1: growth is cached by the device key; keep the real profile cache aside.
+            string cacheKey = LocalProgression.CacheKey("erpin");
+            SessionState.SetString(SavedCacheKey,
+                PlayerPrefs.HasKey(cacheKey) ? "1" + PlayerPrefs.GetString(cacheKey) : "0");
+            PlayerPrefs.DeleteKey(cacheKey);
             RunLaunchContext.Clear();
             RunResultContext.Clear();
             FrontendEntryContext.Clear();
@@ -194,6 +201,10 @@ namespace TrickalFanGame.Editor
             FrontendEntryContext.Clear();
             Time.timeScale = 1f;
             PlayerPrefs.DeleteKey("TrickalFanGame.CharacterProgress.Hud7DTester.erpin");
+            string savedCache = SessionState.GetString(SavedCacheKey, "0");
+            if (savedCache.StartsWith("1"))
+                PlayerPrefs.SetString(LocalProgression.CacheKey("erpin"), savedCache.Substring(1));
+            else PlayerPrefs.DeleteKey(LocalProgression.CacheKey("erpin"));
             PlayerPrefs.Save();
             if (hadProfile) LocalProfile.SaveProfile(previousUserId, previousNickname);
             else LocalProfile.ClearProfile();

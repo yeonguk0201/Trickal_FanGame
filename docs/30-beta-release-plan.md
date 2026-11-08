@@ -19,7 +19,7 @@
 
 | 게이트 | 정할 것 | 막는 조각 |
 | ------ | ------- | --------- |
-| B1 공개 형태 | 서버를 운영해 저장·웹 전적까지 열지, 게임 빌드만 배포하고 서버는 동기화 보조로 둘지. 서버 비용·운영 기간 | Deploy-0, Offline-0 |
+| B1 공개 형태 | **결정(2026-11-08)**: 서버를 운영해 웹 전적을 열되, 게임 플레이는 서버에 의존하지 않는다. 세부는 §3.1 | Auth-0, Offline-0·1, Deploy-0 |
 | B2 배포 채널 | 빌드를 어디에 올릴지(직접 배포·itch.io 등), 대상 OS, 테스터 모집 범위 | Beta-0 |
 | B3 Layout 범위 | Balance-0·Play-2 전에 추가할 Layout 수와 방 크기별 구성(26번 D11) | Layout-0 |
 | B4 피드백 수집 | 버그·의견을 받을 경로(설문·디스코드 등), 게임 안 링크 여부, 로그 첨부 방식 | Beta-0 |
@@ -32,15 +32,76 @@
 
 | 조각 | 작업 | 선행 | 완료 기준 | 상태 |
 | ---- | ---- | ---- | --------- | ---- |
-| Deploy-0 | Backend·DB·Web 운영 배포 | B1 | 운영 DB 설정, 환경 변수 분리, CORS, 게임·Web의 API 주소 설정, 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회 | 예정 |
-| Offline-0 | 서버 없이 신규 등록·플레이 | Elif-3 | 26번 §3.1 완료 기준 그대로. 서버 등록 실패 시 로컬 프로필로 바로 시작, 서버가 살아나면 등록과 쌓인 Run 저장을 이어 함 | 예정 |
+| Auth-0 | 기기 키 인증, 웹 스킬 강화 제거 | B1 | §3.1 S1·S2. 쓰기 요청(Run 저장·스킬 강화)은 기기 키가 맞아야 받고, 다른 사용자의 키나 키 없는 요청은 거부. Web은 조회만 | 구현(2026-11-08, Backend Jest·build, Web lint·tsc·vitest·build, Unity `BetaAuth0Verification.Verify` 통과, 로컬 서버로 게임 스킬 강화 사용자 확인). Run 저장·재전송 수동 확인 대기 |
+| Offline-0 | 서버 없이 신규 등록·플레이 | Auth-0, Elif-3 | 26번 §3.1 완료 기준 그대로. 서버 등록 실패 시 로컬 프로필로 바로 시작, 서버가 살아나면 등록과 쌓인 Run 저장을 이어 함. 닉네임 충돌은 §3.1 S3 | 완료(2026-11-09, Unity `BetaOffline0Verification.Verify`와 Week13 Flow-3 Play 검증 통과, 사용자 Play로 수동 확인 3종) |
+| Offline-1 | 서버 없이 성장·스킬 강화 | Offline-0 | §3.1 S4. 서버 없이도 경험치·레벨·스킬 포인트가 오르고 스킬을 강화하며, 서버가 살아나면 Run과 강화를 순서대로 보내 서버 값과 같아짐 | 완료(2026-11-09, Unity `BetaOffline1Verification.Verify`(Backend 계약 파일 직접 대조 포함), `Week13SkillUpgradeVerification.Verify`, `BetaOffline0Verification.Verify`, `Week27Elif3Verification.Verify`, Flow-5 Play 검증 통과). 사용자 Play 수동 확인 (1) 미등록 오프라인 성장·강화, (2) 등록 후 순서 전송·Web 값 일치, (3) 등록된 프로필 오프라인 → 재연결 값 일치 확인(2026-11-09) |
+| Deploy-0 | Backend·DB·Web 운영 배포 | Auth-0 | §3.1 S6. 운영 DB 설정, 환경 변수 분리, CORS, 게임·Web의 API 주소 설정, 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회 | 코드 준비(2026-11-09, Backend Jest·build, Web lint·build, Unity `BetaDeploy0Verification.Verify` 통과). 운영 계정 생성·배포와 운영 환경 확인 대기([05번](./05-development-setup.md) §11.4) |
 | Layout-0 | Layout 추가 | B3 | 텍스트 Layout과 가져오기 도구(T7)로 작성, seed 재현·문 사이 경로·스폰·상자 위치 검증 | 예정 |
 | Sound-1 | 전투 피드백 효과음(적·사망·권능) | Sound-0 | 26번 §3.6 그대로. Play-2 전에 넣는다 | 예정 |
 | Verify-0 | 현재 계약 기준 회귀와 Setup 보존 | 위 변경 | 유효 검증의 통과/실패 목록, Setup 재실행 시 콘텐츠·GUID 보존, 계약 차이 출력 | 예정 |
 | Balance-0 | 경제 측정 | Layout-0 | 26번 §7 "실제 플레이와 경제 측정" 그대로 | 예정 |
 | Play-2 | 여러 seed 실제 Run·저장·웹 확인 | Balance-0 | 무자원 필수 경로·3층 종료, 중복 보상·재추첨 없음, 아이템 전적 정상 | 예정 |
 | Build-0 | 실제 게임 빌드 | Play-2 | 정상 빌드에 개발 패널 미포함, 프로필 → Run → 저장 → 웹 확인, 저장 실패 재시도 | 예정 |
-| Beta-0 | 베타 공개 준비 | Build-0, B2, B4 | 빌드에 버전 표시, 피드백 경로 안내, 조작 안내(키 설명), 알려진 문제 목록, 크레딧(CC BY 음원 포함) 확인, 배포 채널 업로드 | 예정 |
+| Beta-0 | 베타 공개 준비 | Build-0, B2, B4 | 빌드에 버전 표시, 피드백 경로 안내, 조작 안내(키 설명), 알려진 문제 목록, 크레딧(CC BY 음원 포함) 확인, 베타 전적 초기화 안내(§3.1 S5), 배포 채널 업로드 | 예정 |
+
+### 3.1 서버·오프라인 설계(B1, 2026-11-08 사용자 결정)
+
+서버는 운영하고 웹 전적도 열지만, 게임 플레이는 서버에 의존하지 않는다. 서버는 저장과 웹 조회를 맡는다.
+
+- **S1 신원(로그인 없음)**: 이메일·비밀번호·소셜 로그인은 두지 않는다. 게임이 처음 만든 `clientProfileId`(PlayerPrefs)를
+  기기 키로 쓰고, 쓰기 요청마다 보내 서버가 소유자를 확인한다. 기기 키는 공개 조회 응답에 넣지 않는다. PC를 바꾸거나
+  저장을 지우면 계정을 잃는다(복구 코드는 베타 뒤에 검토). 개인정보를 받지 않으므로 별도 개인정보 처리 안내는 두지 않는다.
+- **S2 Web은 조회만**: Web의 스킬 강화 요청(`api-client.ts`의 `PUT .../skills/...`)과 화면 버튼을 뺀다. 스킬 강화는 게임에서만 한다.
+- **S3 닉네임 충돌**: 서버 없이 등록한 닉네임이 나중에 서버에서 이미 쓰이고 있으면, 플레이는 막지 않고 서버에 연결된 때
+  타이틀에서 새 닉네임을 받는다. 새 닉네임으로 등록되면 쌓인 Run을 보낸다. 성장·엘리프 캐시는 서버가 확인한 값만
+  닉네임 기준으로 저장하므로 등록 전 프로필에는 옮길 캐시가 없다. Offline-1의 로컬 성장 캐시는 기기 키 기준으로 둔다.
+- **S4 오프라인 성장**: 서버가 없어도 게임이 경험치·레벨·스킬 포인트를 Backend `meta-progression` 계약과 같은 규칙으로
+  계산하고 스킬을 강화한다. 서버가 살아나면 Run과 스킬 강화를 일어난 순서대로 한 대기열에서 보낸다. 스킬 강화는 목표 단계를
+  보내므로 다시 보내도 한 번만 반영된다. 서버가 거부하면(계산 차이) 그 강화는 버리고 서버 값을 따른다. 서버 값이 기준이고
+  로컬 값은 캐시다(Elif-3 §4.3과 같은 방식). 계약 값은 contract-drift-check로 대조한다.
+- **S5 베타 데이터**: 베타 계정·전적은 정식 공개 때 초기화한다. 베타 안내에 적는다.
+- **Auth-0 구현 기록**: 헤더 `X-Client-Profile-Id`(Backend `common/auth/client-profile-key.ts`, Unity
+  `ApiClient.ProfileKeyHeader`). Run 저장은 키로 사용자를 찾고 `userId`는 선택이 됐다(보내면 키의 사용자와 같아야 함). 그래서
+  Offline-0의 등록 전 Run도 `userId` 없이 보낼 수 있고, Auth-0 전에 쌓인 대기 Run도 그대로 보내진다. 오류는 키 없음
+  `PROFILE_KEY_REQUIRED`(401), 다른 사용자 `PROFILE_KEY_MISMATCH`(403). Web의 스킬 강화 버튼·요청을 지우고 단계만 보인다.
+  수동 확인: 게임 스킬 강화 완료(2026-11-08 사용자). 남은 것은 로컬 서버로 Run 저장·재전송, 헤더 없이
+  `curl -X POST /api/runs`가 401인지.
+- **Offline-0 구현 기록**: `LocalProfile`은 닉네임만 있으면 플레이할 수 있고(`IsRegistered`), 서버 사용자 ID가 있으면
+  `HasServerAccount`다. 등록 전 Run의 소유자(`OwnerId`)는 기기 키이고, 등록되면 `ProfileRegistration`이 대기 Run을 서버
+  사용자 ID로 옮긴다(`LocalPendingRunStorage.ReassignOwner`). 등록 요청이 네트워크 오류·5xx면 로컬 프로필로 바로 시작하고,
+  타이틀이 실행마다 다시 등록한 뒤 대기 Run을 보낸다. 닉네임 충돌이면 `NeedsNewNickname`을 켜고 타이틀 시작 때 닉네임 화면에
+  안내를 띄운다(그때도 서버가 없으면 로컬에서 이름만 바꾼다). 등록 전 닉네임은 다른 사람 것일 수 있어 서버 조회
+  (`GetUser`)를 하지 않고 캐시·기본 성장으로 시작하며, 스킬 강화 화면은 "서버에 등록되면 강화" 안내를 띄운다(Offline-1에서
+  오프라인 강화). 게임이 Backend 닉네임 충돌 코드(`NICKNAME_ALREADY_EXISTS`)를 몰라 "프로필 충돌"로 보이던 문제도 고쳤다.
+  Week13 Flow-3 Play 검증의 재시도 시나리오는 네트워크 실패가 이제 오프라인 시작이므로 409 거부로 바꿨다.
+  수동 확인: (1) 서버를 끈 채 새 닉네임 → 바로 홈·Run 시작, 결과는 오프라인 저장.
+  (1)·(3) 사용자 확인 완료(2026-11-09). (2)는 사용자가 `두두`로 확인했고 Backend에 Run 2판이 저장됐다. 이때 Web 사용자
+  페이지가 한글 닉네임을 두 번 인코딩해 "존재하지 않는 사용자"로 보이던 기존 버그를 같이 고쳤다(`users/[nickname]/page.tsx`). 같은 PC에서는 Frontend 왼쪽 위 `DEV: RESET LOCAL PROFILE` → `NEW PLAYER`(새 기기 키)로 새 사용자를 만든다.
+  `RESET`은 기기 키를 유지하므로 서버에 이미 그 키로 등록된 닉네임만 다시 받는다(다른 닉네임은 `PROFILE_IDEMPOTENCY_CONFLICT`).
+  (2) 서버를 끈 채 `NEW PLAYER` → 새 닉네임 → Run 1판 → 서버를 켜고 재실행 → 타이틀에서 등록되고 그 Run이 웹 전적에 1번
+  올라감. (3) 서버를 끈 채 `NEW PLAYER` → 서버에 이미 있는 닉네임 → 서버를 켜고 재실행 → 시작 버튼에서 새 닉네임 안내, 새
+  닉네임 등록 후 Run 전송.
+- **Offline-1 구현 기록**: 게임의 `MetaProgressionRules`가 Backend `meta-progression` 계약과 같은 규칙(층 100·처치 5·등급
+  10/20/30/50, 레벨별 필요 경험치, Lv.19 상한, 레벨당 스킬 포인트 1, 스킬 Lv.10 상한)으로 계산한다. 성장 캐시는 서버가
+  확인한 값만 기기 키 기준으로 두고(`LocalProgression`), 게임이 보여 주고 Run에 적용하는 성장은 그 캐시에 아직 안 보낸 Run과
+  스킬 강화를 대기열 순서대로 더한 값이다(Elif-3 §4.3과 같은 방식). 스킬 강화는 `PendingRunQueue.v1`에 Run과 함께 들어가고
+  (`PendingSkillUpgrade`), 등록되면 Run과 함께 서버 사용자 ID로 옮겨진다. `PendingSync`가 타이틀(과 스킬 화면의 오프라인 강화
+  직후)에서 오래된 것부터 보내며, 규칙 거부 강화는 버리고 네트워크·5xx는 멈춘 뒤 다음 실행에 다시 보낸다. 대기 중인 강화 뒤의
+  새 Run도 대기열을 거쳐 보낸다(`RunSubmission`). Run 경험치는 종료 때 `RunSession`이 아이템 등급으로 계산해 두고
+  (`PendingRunExperience.v1`), 결과 화면은 저장 실패 때도 경험치·레벨 업·스킬 포인트를 보여 주며 `오프라인 기록` 안내를 띄운다.
+  스킬 화면의 "서버에 등록되면 강화" 안내는 오프라인 진행 표시로 바뀌었다. 계약 대조는 `BetaOffline1Verification`이
+  `backend/src/contracts/meta-progression.ts`를 직접 읽어 한다. 수동 확인 3종은 [05번](./05-development-setup.md)
+  "서버 없이 성장·스킬 강화 Offline-1"에 있다.
+- **S6 운영 환경**: 무료 요금제 조합으로 시작한다. Web은 Vercel, Backend는 무료 요금제 호스팅(Render 등), DB는 무료 Postgres
+- **Deploy-0 구현 기록**: Backend는 `config/runtime-config.ts`가 시작 때 환경 변수를 읽고, `NODE_ENV=production`에서
+  `DATABASE_URL`·`CORS_ORIGIN`이 없으면 시작하지 않는다(로컬 기본값으로 조용히 넘어가지 않음). CORS는 쉼표로 여러 출처, 끝 `/`
+  제거. 종료 신호에 DB 연결을 닫는다(`enableShutdownHooks`). seed는 운영에서 `test-player`를 만들지 않는다(`SEED_TEST_USER`로
+  바꿀 수 있음). `render.yaml`(Render Blueprint, 무료·싱가포르, `main` 브랜치)이 빌드 때 migrate deploy와 카탈로그 seed를
+  실행한다(무료 요금제는 배포 전 단계가 없음). Web은 Vercel 운영 빌드에 `NEXT_PUBLIC_API_URL`이 없으면 빌드를 멈춘다. Unity는
+  `ApiEndpoint`가 주소를 정한다: `-apiUrl` → Editor는 로컬(메뉴 `Trickal Fan Game/Beta/Use Production API in Editor`로 운영)
+  → 빌드는 운영. `ApiClient`는 시작 때 `/api/health`로 잠든 서버를 깨운다. 운영 DB는 Neon(싱가포르, pooled 연결)이다. Supabase 무료
+  슬롯이 다른 프로젝트에 쓰이고 있고 무료 프로젝트가 일주일 무요청이면 일시정지되기 때문이다(2026-11-09 사용자 결정). 배포 절차와 운영 확인 항목은 [05번](./05-development-setup.md) §11.4.
+  (Neon·Supabase 등). Backend가 잠들어 첫 요청이 늦어도 게임은 대기열로 처리한다. 운영 기간은 베타 기간(정식 공개 전까지).
 
 ## 4. 연출(Effect-0 남은 것)
 
@@ -113,7 +174,7 @@ Beta-0의 버전 표시·피드백 안내·조작 안내는 Menu 디자인과 �
 
 권장 순서:
 
-1. B1·B3 결정 → Deploy-0·Offline-0 착수(다른 작업과 겹치지 않고 일정 위험이 가장 크다)
+1. B3 결정, Auth-0 → Offline-0 → Offline-1, Deploy-0은 Auth-0 뒤 병렬(다른 작업과 겹치지 않고 일정 위험이 가장 크다)
 2. Layout-0 → Sound-1 → Number-0
 3. Verify-0 → Balance-0 → Play-2 → Build-0 → Beta-0
 4. 병렬: Menu-0~2, Boss-Intro-0, Sound-2·3·6·7, Effect-0 남은 것
@@ -123,9 +184,11 @@ Beta-0의 버전 표시·피드백 안내·조작 안내는 Menu 디자인과 �
 
 ## 10. 완료 체크리스트
 
-- [ ] B1~B4를 정했다.
+- [ ] B1~B4를 정했다. (B1 2026-11-08 결정)
+- [ ] 쓰기 요청이 기기 키로 확인되고 Web은 조회만 한다. (Auth-0)
 - [ ] 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회가 된다. (Deploy-0)
 - [ ] 서버 없이 신규 등록과 플레이가 되고, 서버가 살아나면 쌓인 저장을 보낸다. (Offline-0)
+- [x] 서버 없이 성장·스킬 강화가 되고, 서버가 살아나면 서버 값과 같아진다. (Offline-1)
 - [ ] Layout을 추가하고 배치 검증을 통과했다. (Layout-0)
 - [ ] 적·사망·권능 효과음을 사용자 Play로 확인했다. (Sound-1)
 - [ ] 피해 숫자가 TextMeshPro로 바뀌고 치명타가 구분된다. (Number-0)

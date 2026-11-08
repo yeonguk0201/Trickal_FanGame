@@ -17,12 +17,14 @@ type UpgradeSkillInput = {
   characterId: string;
   skillType: SkillType;
   targetLevel: number;
+  clientProfileId: string;
 };
 
 export class UsersRepositoryError extends Error {
   constructor(
     public readonly code:
       | 'USER_NOT_FOUND'
+      | 'PROFILE_KEY_MISMATCH'
       | 'CHARACTER_PROGRESS_NOT_FOUND'
       | 'SKILL_POINT_NOT_ENOUGH'
       | 'SKILL_LEVEL_MAX'
@@ -268,12 +270,18 @@ export class UsersRepository {
       async (transaction) => {
         const user = await transaction.user.findUnique({
           where: { nickname: input.nickname },
-          select: { id: true },
+          select: { id: true, clientProfileId: true },
         });
         if (!user) {
           throw new UsersRepositoryError(
             'USER_NOT_FOUND',
             '존재하지 않는 유저입니다.',
+          );
+        }
+        if (user.clientProfileId.toLowerCase() !== input.clientProfileId) {
+          throw new UsersRepositoryError(
+            'PROFILE_KEY_MISMATCH',
+            '이 프로필에 대한 권한이 없습니다.',
           );
         }
 

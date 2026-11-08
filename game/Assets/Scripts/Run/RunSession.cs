@@ -397,6 +397,9 @@ namespace TrickalFanGame.Run
                 return;
             }
 
+            // Offline-1: the experience this Run gives by the Backend rules, used until the server confirms it.
+            LocalPendingRunStorage.RecordRunExperience(clientRunId, CalculateRunExperience(pendingRequest, inventory));
+
             // UX-0: a death waits for the GAME OVER sequence and its confirm input before the result screen.
             // The request is queued locally now, so quitting during the sequence still saves it once later.
             if (!isCleared && gameOverSequence != null &&
@@ -572,6 +575,20 @@ namespace TrickalFanGame.Run
         }
 
         private RunElifDto BuildRunElif() => BuildRunElif(runProgress);
+
+        // calculateRunExperience over the request's items. An item without a recorded rarity counts as Common;
+        // the server's value replaces this one when the Run is saved.
+        public static int CalculateRunExperience(CreateRunRequest request, PlayerInventory runInventory)
+        {
+            if (request == null) return 0;
+            List<ItemRarity> rarities = new();
+            if (request.items != null)
+                foreach (RunItemDto item in request.items)
+                    rarities.Add(runInventory != null && runInventory.TryGetRecordedRarity(item?.itemId, out ItemRarity rarity)
+                        ? rarity
+                        : ItemRarity.Common);
+            return MetaProgressionRules.CalculateRunExperience(request.reachedFloor, request.killCount, rarities);
+        }
 
         private RunItemDto[] BuildRunItems(DateTime endedAt)
         {

@@ -217,19 +217,32 @@ describe('UsersService', () => {
 
   it('upgrades a valid skill and returns its progress snapshot', async () => {
     await expect(
-      service.upgradeSkill('test-player', 'erpin', 'LOW_GRADE', 2),
+      service.upgradeSkill(
+        'test-player',
+        'erpin',
+        'LOW_GRADE',
+        2,
+        '30000000-0000-4000-8000-000000000001',
+      ),
     ).resolves.toMatchObject({ skillPoints: 1, lowGradeSkillLevel: 2 });
     expect(repository.upgradeSkill).toHaveBeenCalledWith({
       nickname: 'test-player',
       characterId: 'erpin',
       skillType: 'LOW_GRADE',
       targetLevel: 2,
+      clientProfileId: '30000000-0000-4000-8000-000000000001',
     });
   });
 
   it('rejects an invalid skill type before opening a transaction', async () => {
     await expect(
-      service.upgradeSkill('test-player', 'erpin', 'ULTIMATE', 2),
+      service.upgradeSkill(
+        'test-player',
+        'erpin',
+        'ULTIMATE',
+        2,
+        '30000000-0000-4000-8000-000000000001',
+      ),
     ).rejects.toMatchObject({
       status: HttpStatus.UNPROCESSABLE_ENTITY,
       response: {
@@ -242,6 +255,7 @@ describe('UsersService', () => {
 
   it.each([
     ['USER_NOT_FOUND', HttpStatus.NOT_FOUND],
+    ['PROFILE_KEY_MISMATCH', HttpStatus.FORBIDDEN],
     ['CHARACTER_PROGRESS_NOT_FOUND', HttpStatus.NOT_FOUND],
     ['SKILL_POINT_NOT_ENOUGH', HttpStatus.UNPROCESSABLE_ENTITY],
     ['SKILL_LEVEL_MAX', HttpStatus.UNPROCESSABLE_ENTITY],
@@ -254,7 +268,13 @@ describe('UsersService', () => {
       );
 
       await expect(
-        service.upgradeSkill('test-player', 'erpin', 'LOW_GRADE', 2),
+        service.upgradeSkill(
+          'test-player',
+          'erpin',
+          'LOW_GRADE',
+          2,
+          '30000000-0000-4000-8000-000000000001',
+        ),
       ).rejects.toMatchObject({
         status,
         response: { success: false, error: { code } },

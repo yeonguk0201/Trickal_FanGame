@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using TrickalFanGame.Data;
+using TrickalFanGame.Meta;
 using TrickalFanGame.Network;
 using TrickalFanGame.Utils;
 using UnityEngine;
@@ -153,23 +154,44 @@ namespace TrickalFanGame.Frontend
 
             IUserRegistrationClient registrationClient = _registrationClient
                 ?? ApiClient.Instance as IUserRegistrationClient;
-
-            if (registrationClient != null)
-            {
-                registrationClient.PostUserWithErrorInfo(request, OnRegistrationSuccess, OnRegistrationErrorWithInfo);
-                return;
-            }
-
             IGameApiClient apiClient = _apiClient ?? ApiClient.Instance;
-            if (apiClient == null)
+
+            // Offline-0: with the registration client (or no client at all) an unreachable server keeps the
+            // nickname on this PC and play starts anyway.
+            if (registrationClient != null || apiClient == null)
             {
-                ShowError("API 클라이언트를 찾을 수 없습니다.");
-                _isSubmitting = false;
-                SetSubmitInteractable(true);
+                ProfileRegistration.Register(registrationClient, nickname, OnRegistrationFinished);
                 return;
             }
 
             apiClient.PostUser(request, OnRegistrationSuccess, OnRegistrationError);
+        }
+
+        private void OnRegistrationFinished(ProfileRegistrationOutcome outcome, RegistrationError? error)
+        {
+            _isSubmitting = false;
+            if (outcome == ProfileRegistrationOutcome.Registered ||
+                outcome == ProfileRegistrationOutcome.SavedOffline)
+            {
+                OnRegistrationComplete?.Invoke(new CreateUserData
+                {
+                    id = LocalProfile.UserId,
+                    clientProfileId = LocalProfile.ClientProfileId,
+                    nickname = LocalProfile.Nickname
+                });
+                return;
+            }
+
+            ShowError(error.HasValue
+                ? GetUserFriendlyMessage(error.Value)
+                : "알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+            SetSubmitInteractable(true);
+        }
+
+        // Offline-0: the server reported that the nickname chosen offline is taken.
+        public void ShowNicknameTakenNotice(string takenNickname)
+        {
+            ShowError($"'{takenNickname}'은(는) 이미 다른 사람이 쓰고 있어요. 새 닉네임을 정해주세요.");
         }
 
         private void OnRegistrationSuccess(CreateUserResponse response)
@@ -191,14 +213,6 @@ namespace TrickalFanGame.Frontend
         {
             _isSubmitting = false;
             ShowError(error);
-            SetSubmitInteractable(true);
-        }
-
-        private void OnRegistrationErrorWithInfo(RegistrationError error)
-        {
-            _isSubmitting = false;
-            string message = GetUserFriendlyMessage(error);
-            ShowError(message);
             SetSubmitInteractable(true);
         }
 

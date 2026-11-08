@@ -6,10 +6,11 @@ jest.mock('../../database/prisma.service', () => ({
 
 import { createRunRequestFingerprint } from '../../contracts/meta-progression';
 import { Prisma } from '../../generated/prisma/client';
-import { CreateRunDto, DeathReason } from './dto/create-run.dto';
+import { DeathReason } from './dto/create-run.dto';
 import {
   RunsRepository,
   RunsRepositoryError,
+  type CreateRunInput,
   type PersistRunResult,
 } from './runs.repository';
 
@@ -30,7 +31,7 @@ describe('RunsRepository H-3 transaction and idempotency', () => {
   };
   let transaction: Transaction;
 
-  const validDto: CreateRunDto = {
+  const validDto: CreateRunInput = {
     clientRunId: '10000000-0000-4000-8000-000000000001',
     userId: '00000000-0000-4000-8000-000000000001',
     characterId: 'erpin',
@@ -79,7 +80,7 @@ describe('RunsRepository H-3 transaction and idempotency', () => {
     meta: emptyElifMeta,
     created: true,
   };
-  const elifDto: CreateRunDto = {
+  const elifDto: CreateRunInput = {
     ...validDto,
     elif: {
       gained: 3,
@@ -519,7 +520,7 @@ function createTransactionMock() {
   };
 }
 
-function createExistingRun(dto: CreateRunDto) {
+function createExistingRun(dto: CreateRunInput) {
   return {
     id: '20000000-0000-4000-8000-000000000001',
     requestFingerprint: createRunRequestFingerprint(dto),

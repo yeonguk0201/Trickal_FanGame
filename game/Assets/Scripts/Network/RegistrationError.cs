@@ -63,7 +63,8 @@ namespace TrickalFanGame.Network
 
             if (httpStatusCode == 409)
             {
-                return code == "NICKNAME_EXISTS"
+                // The Backend sends NICKNAME_ALREADY_EXISTS; NICKNAME_EXISTS is the older name.
+                return code == "NICKNAME_ALREADY_EXISTS" || code == "NICKNAME_EXISTS"
                     ? RegistrationErrorType.NicknameExists
                     : RegistrationErrorType.ProfileConflict;
             }

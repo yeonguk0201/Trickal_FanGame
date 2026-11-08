@@ -304,9 +304,47 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 
 ### 11.3 Unity
 
-- 개발 API 주소: `http://localhost:3001/api`
-- 운영 API 주소: 배포 후 별도 설정
+- 개발 API 주소: `http://localhost:3001/api`(Editor는 `ApiClient`의 직렬화 `baseUrl`)
+- 운영 API 주소: `ApiEndpoint.ProductionBaseUrl`(`https://trickal-fan-game-api.onrender.com/api`). 실제 빌드는 항상 이 주소를 쓴다.
+- 주소 결정 순서(`ApiEndpoint`): 명령줄 `-apiUrl <주소>`(또는 `-apiUrl=<주소>`) → Editor는 로컬, 단 메뉴
+  `Trickal Fan Game/Beta/Use Production API in Editor`가 켜져 있으면 운영 → 빌드는 운영. 실행 시 콘솔에
+  `[ApiClient] Backend: <주소>`가 찍힌다. 빌드는 HTTP를 막으므로(`insecureHttpOption: 0`) `-apiUrl`로 로컬 HTTP를 쓰려면
+  Player Settings의 HTTP 허용이 필요하다.
+- `ApiClient`는 시작할 때 `GET /api/health`를 한 번 보내 잠든 무료 서버를 미리 깨운다(결과는 무시).
 - Secret, DB 연결 문자열, Supabase service role key: Unity 프로젝트에 저장 금지
+
+### 11.4 운영 배포(Deploy-0)
+
+조합(30번 §3.1 S6): Backend는 Render 무료(`render.yaml` Blueprint, 싱가포르), DB는 Neon 무료, Web은 Vercel.
+개발 DB(Supabase `trickal-fan-game-dev`)와 운영 DB는 분리한다. Supabase 무료 프로젝트 2개는 개발용과 다른 프로젝트가
+쓰고 있고, Supabase 무료는 일주일 동안 요청이 없으면 일시정지돼 직접 복구해야 하므로 운영은 Neon을 쓴다(2026-11-09 사용자
+결정). Neon은 요청이 없으면 잠들었다가 요청이 오면 스스로 깬다. 서버가 잠들거나 꺼져도 게임은 대기열로 처리하므로 게임
+플레이는 막히지 않는다.
+
+1. **DB**: Neon에 `trickal-fan-game-prod` 프로젝트를 만든다(Region: AWS Asia Pacific (Singapore)).
+   Dashboard → Connect에서 연결 문자열 두 개를 복사한다. **Connection pooling** 켠 것(`...-pooler...`)은 서버용,
+   끈 것(직접 연결)은 마이그레이션용이다. 둘 다 `?sslmode=require`까지만 남기고 끝의 `&channel_binding=require`는 지운다.
+   이 값들은 로컬 `.env`(개발용 Supabase)와 다르며 Render 화면에만 입력한다.
+2. **Backend**: `render.yaml`이 `main`에 병합된 뒤 Render Dashboard → New → Blueprint → GitHub 저장소 선택.
+   비밀 값 세 개를 입력한다.
+   - `DATABASE_URL`: 1번 pooled 연결 문자열
+   - `DIRECT_URL`: 1번 직접 연결 문자열(`prisma migrate deploy`만 쓴다. 서버와 seed는 `DATABASE_URL`)
+   - `CORS_ORIGIN`: Web 운영 주소(예: `https://trickal-fan-game.vercel.app`). 3번 전이면 임시로 넣고 3번 뒤 고친다.
+   빌드 명령이 `prisma migrate deploy`와 seed(캐릭터·아이템 카탈로그 upsert, 운영에서는 `test-player` 없음)를 매 배포마다
+   실행한다. `NODE_ENV=production`에서 `DATABASE_URL`·`CORS_ORIGIN`이 없으면 서버가 시작하지 않는다.
+   서비스 주소가 `trickal-fan-game-api.onrender.com`이 아니면 `ApiEndpoint.ProductionBaseUrl`을 실제 주소로 고친다
+   (`BetaDeploy0Verification`이 `render.yaml` 서비스 이름과 대조한다).
+   빌드가 pnpm 버전 문제로 실패하면 빌드 명령 앞에 `corepack enable &&`를 붙인다.
+3. **Web**: Vercel → Add New Project → 저장소 선택 → Root Directory `web`. Environment Variables에
+   `NEXT_PUBLIC_API_URL=https://trickal-fan-game-api.onrender.com/api`(Production). 이 값이 없으면 운영 빌드가 실패한다.
+   배포 뒤 실제 도메인을 Render의 `CORS_ORIGIN`에 넣고 Render를 다시 배포한다.
+4. **확인**
+   - `https://trickal-fan-game-api.onrender.com/api/health/ready` → `{"status":"ok","database":"up"}`(첫 요청은 깨어나느라 최대 1분)
+   - 헤더 없는 쓰기 거부: `curl -i -X POST https://trickal-fan-game-api.onrender.com/api/runs -H "Content-Type: application/json" -d "{}"` → 401 `PROFILE_KEY_REQUIRED`
+   - 게임: Editor 메뉴 `Trickal Fan Game/Beta/Use Production API in Editor` 켜기 → Play → Frontend 왼쪽 위
+     `DEV: RESET LOCAL PROFILE` → `NEW PLAYER`(로컬 서버 프로필과 섞이지 않게) → 새 닉네임 → Run 1판 → 결과 저장 성공
+   - Web 운영 도메인에서 그 닉네임 검색 → 사용자 페이지에 Run 1판, Run 상세 열림, 브라우저 콘솔에 CORS 오류 없음
+   - 확인이 끝나면 메뉴 토글을 끈다(켜 둔 채면 Editor Play가 운영 서버에 기록한다).
 
 ---
 
@@ -2464,3 +2502,24 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 실제 화면: Game Scene Play → `F1` → `— Seed —`의 `Find shop F1`로 1층 상점이 있는 Run을 열고 `— Shop —`에서 `no key
   (key-free floor)`인지, 열쇠 0개로 상점 문을 지나갈 수 있는지 본다. 1층 전투방 클리어 상자가 황금으로 나오지 않는지 본다.
   `— Chest —`의 개발용 황금 상자는 1층에서도 황금 그대로다.
+
+## 서버 없이 성장·스킬 강화 Offline-1 (2026-11-09)
+
+- 규칙은 런타임 코드에 있다. Setup 없음. 경험치·레벨·스킬 포인트 계산은 `MetaProgressionRules`(Backend
+  `backend/src/contracts/meta-progression.ts`·`backend/src/domain/meta-progression.ts`와 같은 값), 성장 캐시와 대기열 재계산은
+  `LocalProgression`, 대기열 전송은 `PendingSync`([30번 §3.1 S4](./30-beta-release-plan.md)).
+- 성장 캐시는 서버가 확인한 값만 기기 키 기준(`TrickalFanGame.CharacterProgress.device.<clientProfileId>.<characterId>`)으로
+  둔다. 예전 닉네임 기준 캐시는 등록된 프로필에서 한 번 읽어 옮긴다. 게임이 보여 주는 성장은 이 캐시에 아직 안 보낸 Run과
+  스킬 강화를 순서대로 더한 값이다. Run 종료 때 계산한 경험치는 `PendingRunExperience.v1`에 두고 서버가 확인하면 지운다.
+- 스킬 강화는 서버 계정이 없거나, 앞에 대기 중인 쓰기가 있거나, 네트워크·5xx 오류면 대기열(`PendingRunQueue.v1`)에 Run과
+  함께 들어간다. 타이틀이 실행마다 오래된 것부터 보내고, 서버가 규칙으로 거부한 강화(422·진행 없음)는 버린다.
+- 검증: 메뉴 `Trickal Fan Game > Beta > Verify Offline-1 Growth`, 배치
+  `-batchmode -nographics -quit -executeMethod TrickalFanGame.Editor.BetaOffline1Verification.Verify`. Backend 계약 파일의 상수·
+  경험치 곡선·등급 경험치를 직접 대조하고, Backend 도메인 테스트와 같은 사례, 오프라인 Run·강화 → 등록 → 순서 전송·거부 강화
+  버림·네트워크 실패 중단을 검사한다. 스킬 화면은 `Week13SkillUpgradeVerification.Verify`, 결과 화면 오프라인 성장 표시는
+  `Week13Flow5PlayVerification.RunBatch`(Play Mode, `-quit` 없이)가 함께 확인한다.
+- 수동 확인(서버를 끄고 켜며 Frontend Play): 왼쪽 위 `DEV: RESET LOCAL PROFILE` → `NEW PLAYER`로 새 기기 키를 만든다.
+  (1) 서버를 끈 채 새 닉네임 → Run 1판 → 결과 화면에 `경험치 +N`, 레벨 업, `오프라인 기록 · 서버에 연결되면 저장돼요` →
+  캐릭터 선택 → 스킬 강화 화면에 같은 레벨·포인트, 강화하면 `오프라인으로 강화했어요` → 다음 Run에서 강화된 스킬이 적용된다.
+  (2) 서버를 켜고 재실행 → 타이틀에서 등록과 Run·강화 전송 → 스킬 강화 화면과 Web 사용자 페이지의 레벨·경험치·스킬 단계가
+  같다. (3) 등록된 프로필로 서버를 끄고 Run·강화 → 서버를 켜고 재실행 → 같은 값으로 맞춰진다.

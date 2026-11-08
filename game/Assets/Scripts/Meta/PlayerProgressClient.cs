@@ -1,4 +1,5 @@
 using System;
+using TrickalFanGame.Data;
 using TrickalFanGame.Network;
 using TrickalFanGame.Player;
 using UnityEngine;
@@ -8,7 +9,6 @@ namespace TrickalFanGame.Meta
     [DisallowMultipleComponent]
     public sealed class PlayerProgressClient : MonoBehaviour
     {
-        private const string CachePrefix = "TrickalFanGame.CharacterProgress.";
         public const string ElifCachePrefix = "TrickalFanGame.ElifMeta.";
 
         [SerializeField] private string userNickname = "test-player";
@@ -71,10 +71,12 @@ namespace TrickalFanGame.Meta
             HasFreshElifMeta = false;
             statusMessage = $"Loading progression for {characterId}...";
             IGameApiClient client = apiClient ?? ApiClient.Instance;
-            if (client == null)
+            if (client == null || IsUnregisteredLocalProfile(userNickname))
             {
                 LoadedElifMeta = LoadCachedElifMeta(userNickname);
-                ApplyFallback(characterId, "ApiClient is unavailable.");
+                ApplyFallback(characterId, client == null
+                    ? "ApiClient is unavailable."
+                    : "The profile is not registered on the server yet.");
                 onReady?.Invoke(true);
                 return true;
             }
@@ -102,9 +104,10 @@ namespace TrickalFanGame.Meta
                     else
                     {
                         ResolvedUserId = response.data.id;
-                        Apply(characterId, progress, false);
                         SaveCachedProgress(characterId, progress);
-                        statusMessage = $"Online progression loaded: {characterId} Lv.{progress.level}.";
+                        // Offline-1: writes still queued on this PC count on top of the server value.
+                        Apply(characterId, UsesDeviceCache ? LocalProgression.Current(characterId) : progress, false);
+                        statusMessage = $"Online progression loaded: {characterId} Lv.{AppliedProgress.level}.";
                     }
 
                     isLoading = false;
@@ -119,9 +122,24 @@ namespace TrickalFanGame.Meta
             return true;
         }
 
+        // Offline-0: a nickname kept only on this PC may belong to someone else on the server, so it is never
+        // looked up there until the server registers this profile.
+        public static bool IsUnregisteredLocalProfile(string nickname) =>
+            !LocalProfile.HasServerAccount && LocalProfile.IsRegistered && nickname == LocalProfile.Nickname;
+
+        // Offline-1: this PC's profile keeps its growth by the device key and adds the writes still queued.
+        private bool UsesDeviceCache => IsLocalProfileNickname(userNickname);
+
+        public static bool IsLocalProfileNickname(string nickname) =>
+            LocalProfile.IsRegistered && !string.IsNullOrWhiteSpace(nickname) && nickname == LocalProfile.Nickname;
+
         public void ApplyFallback(string characterId, string reason)
         {
-            CharacterProgressDto cached = LoadCachedProgress(characterId);
+            CharacterProgressDto cached = UsesDeviceCache
+                ? (LocalProgression.LoadConfirmed(characterId) != null || LocalProgression.HasPendingWrites()
+                    ? LocalProgression.Current(characterId)
+                    : null)
+                : LoadCachedProgress(characterId);
             bool hasCache = cached != null;
             Apply(characterId, cached ?? CreateDefaultProgress(characterId), true);
             isLoading = false;
@@ -155,7 +173,14 @@ namespace TrickalFanGame.Meta
                 string.IsNullOrWhiteSpace(progress.characterId))
                 return;
 
-            PlayerPrefs.SetString($"{CachePrefix}{nickname}.{progress.characterId}", JsonUtility.ToJson(progress));
+            if (IsLocalProfileNickname(nickname))
+            {
+                LocalProgression.StoreConfirmed(progress);
+                return;
+            }
+
+            PlayerPrefs.SetString(LocalProgression.LegacyNicknameCacheKey(nickname, progress.characterId),
+                JsonUtility.ToJson(progress));
             PlayerPrefs.Save();
         }
 
@@ -241,8 +266,9 @@ namespace TrickalFanGame.Meta
 
         private void SaveCachedProgress(string characterId, CharacterProgressDto progress)
         {
-            PlayerPrefs.SetString(BuildCacheKey(characterId), JsonUtility.ToJson(progress));
-            PlayerPrefs.Save();
+            if (progress == null) return;
+            CharacterProgressDto stored = Normalize(characterId, progress);
+            StoreConfirmedProgress(userNickname, stored);
         }
 
         private CharacterProgressDto LoadCachedProgress(string characterId)
@@ -265,43 +291,14 @@ namespace TrickalFanGame.Meta
 
         private string BuildCacheKey(string characterId)
         {
-            return $"{CachePrefix}{userNickname}.{characterId}";
+            return LocalProgression.LegacyNicknameCacheKey(userNickname, characterId);
         }
 
-        private static CharacterProgressDto CreateDefaultProgress(string characterId)
-        {
-            return new CharacterProgressDto
-            {
-                characterId = characterId,
-                level = 1,
-                experience = 0,
-                experienceToNextLevel = 400,
-                skillPoints = 0,
-                lowGradeSkillLevel = 1,
-                highGradeSkillLevel = 1
-            };
-        }
+        private static CharacterProgressDto CreateDefaultProgress(string characterId) =>
+            MetaProgressionRules.CreateDefault(characterId);
 
-        private static CharacterProgressDto Normalize(
-            string characterId,
-            CharacterProgressDto progress)
-        {
-            if (progress == null)
-            {
-                return CreateDefaultProgress(characterId);
-            }
-
-            return new CharacterProgressDto
-            {
-                characterId = characterId,
-                level = Mathf.Clamp(progress.level, 1, 19),
-                experience = Mathf.Max(0, progress.experience),
-                experienceToNextLevel = Mathf.Max(0, progress.experienceToNextLevel),
-                skillPoints = Mathf.Max(0, progress.skillPoints),
-                lowGradeSkillLevel = SkillProgressionRules.ClampLevel(progress.lowGradeSkillLevel),
-                highGradeSkillLevel = SkillProgressionRules.ClampLevel(progress.highGradeSkillLevel)
-            };
-        }
+        private static CharacterProgressDto Normalize(string characterId, CharacterProgressDto progress) =>
+            MetaProgressionRules.Normalize(characterId, progress);
 
         private void OnGUI()
         {

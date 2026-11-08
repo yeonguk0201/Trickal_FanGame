@@ -8,6 +8,7 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { ClientProfileKey } from '../../common/auth/client-profile-key';
 import { CreateRunDto } from './dto/create-run.dto';
 import { RunsService } from './runs.service';
 
@@ -25,9 +26,10 @@ export class RunsController {
   @Post()
   async create(
     @Body() dto: CreateRunDto,
+    @ClientProfileKey() profileKey: string,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { created, ...data } = await this.runsService.create(dto);
+    const { created, ...data } = await this.runsService.create(dto, profileKey);
     response.status(created ? HttpStatus.CREATED : HttpStatus.OK);
 
     return {

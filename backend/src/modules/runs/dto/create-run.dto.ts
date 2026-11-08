@@ -82,8 +82,11 @@ export class CreateRunDto {
   @IsUUID()
   clientRunId: string;
 
+  // The owner comes from the profile key header. Older clients still send
+  // userId; when present it must match the key's user.
+  @IsOptional()
   @IsUUID()
-  userId: string;
+  userId?: string;
 
   @IsString()
   @MaxLength(64)

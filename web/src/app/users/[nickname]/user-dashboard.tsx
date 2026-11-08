@@ -7,12 +7,10 @@ import {
   getErrorMessage,
   getUserProfile,
   getUserRuns,
-  upgradeCharacterSkill,
 } from "@/lib/api-client";
 import type {
   CharacterProgressDto,
   RunHistoryDto,
-  SkillType,
   UserProfileDto,
 } from "@/lib/meta-api-contract";
 import styles from "./user-dashboard.module.css";
@@ -133,23 +131,7 @@ export default function UserDashboard({
             {user.characterProgress.map((progress) => (
               <ProgressCard
                 key={progress.characterId}
-                nickname={nickname}
                 progress={progress}
-                onUpdate={(updated) =>
-                  setUser((current) =>
-                    current
-                      ? {
-                          ...current,
-                          characterProgress: current.characterProgress.map(
-                            (item) =>
-                              item.characterId === updated.characterId
-                                ? { ...item, ...updated }
-                                : item,
-                          ),
-                        }
-                      : current,
-                  )
-                }
               />
             ))}
           </div>
@@ -258,54 +240,13 @@ export default function UserDashboard({
   );
 }
 
-function ProgressCard({ nickname, progress, onUpdate }: {
-  nickname: string;
-  progress: CharacterProgressDto;
-  onUpdate: (progress: CharacterProgressDto) => void;
-}) {
-  const [pendingSkill, setPendingSkill] = useState<SkillType | null>(null);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+// Read-only: skill upgrades happen in the game, which owns the profile key.
+function ProgressCard({ progress }: { progress: CharacterProgressDto }) {
   const maxLevel = progress.maxLevel ?? 19;
   const maxSkillLevel = progress.maxSkillLevel ?? 10;
   const xpPercent = progress.experienceToNextLevel === 0
     ? 100
     : Math.min(100, (progress.experience / progress.experienceToNextLevel) * 100);
-
-  const upgrade = async (skillType: SkillType) => {
-    const currentLevel = skillType === "LOW_GRADE"
-      ? progress.lowGradeSkillLevel
-      : progress.highGradeSkillLevel;
-    setPendingSkill(skillType);
-    setFeedback(null);
-    try {
-      const updated = await upgradeCharacterSkill(
-        nickname,
-        progress.characterId,
-        skillType,
-        currentLevel + 1,
-      );
-      onUpdate(updated);
-      const updatedLevel = skillType === "LOW_GRADE"
-        ? updated.lowGradeSkillLevel
-        : updated.highGradeSkillLevel;
-      setFeedback({
-        type: "success",
-        message: updatedLevel === currentLevel || updated.skillPoints === progress.skillPoints
-          ? "이미 반영된 강화 요청입니다. 현재 상태를 유지했습니다."
-          : `스킬이 Lv.${updatedLevel}로 강화되었습니다.`,
-      });
-    } catch (error) {
-      const code = error instanceof ApiClientError ? error.code : "";
-      const knownMessage: Record<string, string> = {
-        SKILL_POINT_NOT_ENOUGH: "사용할 수 있는 스킬 포인트가 부족합니다.",
-        SKILL_LEVEL_MAX: "이미 최대 스킬 레벨입니다.",
-        INVALID_SKILL_TARGET_LEVEL: "다른 요청이 먼저 반영되었습니다. 페이지를 새로 불러와 주세요.",
-      };
-      setFeedback({ type: "error", message: knownMessage[code] ?? getErrorMessage(error) });
-    } finally {
-      setPendingSkill(null);
-    }
-  };
 
   return (
     <article className={styles.progressCard}>
@@ -335,48 +276,21 @@ function ProgressCard({ nickname, progress, onUpdate }: {
         <strong>{progress.skillPoints}</strong>
       </div>
       <div className={styles.skills}>
-        <SkillRow
-          label="저학년 스킬"
-          level={progress.lowGradeSkillLevel}
-          maxLevel={maxSkillLevel}
-          points={progress.skillPoints}
-          pending={pendingSkill !== null}
-          onUpgrade={() => void upgrade("LOW_GRADE")}
-        />
-        <SkillRow
-          label="고학년 스킬"
-          level={progress.highGradeSkillLevel}
-          maxLevel={maxSkillLevel}
-          points={progress.skillPoints}
-          pending={pendingSkill !== null}
-          onUpgrade={() => void upgrade("HIGH_GRADE")}
-        />
+        <SkillRow label="저학년 스킬" level={progress.lowGradeSkillLevel} maxLevel={maxSkillLevel} />
+        <SkillRow label="고학년 스킬" level={progress.highGradeSkillLevel} maxLevel={maxSkillLevel} />
       </div>
-      {feedback && (
-        <p className={feedback.type === "success" ? styles.success : styles.error} role="status">
-          {feedback.message}
-        </p>
-      )}
     </article>
   );
 }
 
-function SkillRow({ label, level, maxLevel, points, pending, onUpgrade }: {
+function SkillRow({ label, level, maxLevel }: {
   label: string;
   level: number;
   maxLevel: number;
-  points: number;
-  pending: boolean;
-  onUpgrade: () => void;
 }) {
-  const atMax = level >= maxLevel;
-  const noPoints = points < 1;
   return (
     <div className={styles.skillRow}>
       <div><span>{label}</span><strong>Lv.{level} / {maxLevel}</strong></div>
-      <button disabled={pending || atMax || noPoints} onClick={onUpgrade}>
-        {pending ? "처리 중…" : atMax ? "최대 레벨" : noPoints ? "포인트 필요" : "강화"}
-      </button>
     </div>
   );
 }

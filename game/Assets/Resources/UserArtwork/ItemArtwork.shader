@@ -63,13 +63,19 @@ Shader "TrickalFanGame/ItemArtwork"
                 {
                     // A solid white silhouette follows the transparent artifact, about 3% of its side wide.
                     // Two rings of samples keep the wide outline free of gaps on diagonals and thin shapes.
+                    // A sample past the image's edge counts as transparent: otherwise art that nearly touches one
+                    // edge wrapped around and drew a stray outline along the opposite edge.
                     float a = c.a;
                     [unroll] for (int n = 0; n < 12; n++)
                     {
                         float angle = n * 0.523599;
                         float2 offset = float2(cos(angle), sin(angle));
-                        a = max(a, tex2D(_MainTex, i.uv + offset * 0.03).a);
-                        a = max(a, tex2D(_MainTex, i.uv + offset * 0.015).a);
+                        float2 far = i.uv + offset * 0.03;
+                        float2 near = i.uv + offset * 0.015;
+                        float farInside = step(0, far.x) * step(0, far.y) * step(far.x, 1) * step(far.y, 1);
+                        float nearInside = step(0, near.x) * step(0, near.y) * step(near.x, 1) * step(near.y, 1);
+                        a = max(a, tex2D(_MainTex, far).a * farInside);
+                        a = max(a, tex2D(_MainTex, near).a * nearInside);
                     }
                     float alpha = max(c.a, a);
                     c.rgb = lerp(float3(1,1,1), c.rgb, c.a / max(alpha, 0.001));

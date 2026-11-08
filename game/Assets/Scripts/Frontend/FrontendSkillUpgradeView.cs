@@ -15,8 +15,12 @@ namespace TrickalFanGame.Frontend
     public sealed class FrontendSkillUpgradeView : MonoBehaviour
     {
         public const string LoadingMessage = "진행 정보를 불러오는 중입니다...";
-        public const string EmptyMessage = "이 캐릭터의 진행 정보가 없습니다.";
-        public const string LoadFailedMessage = "진행 정보를 불러오지 못했습니다. 네트워크를 확인해 주세요.";
+        public const string SelectMessage = "강화할 스킬을 선택해 주세요.";
+        public const string UpgradedMessage = "스킬 강화가 완료되었습니다.";
+        // Offline-1 (docs/30 §3.1 S4): without the server the screen shows this PC's progress and upgrades it.
+        public const string OfflineProgressMessage = "오프라인 진행 정보예요. 강화는 서버에 연결되면 반영돼요.";
+        public const string OfflineUpgradeMessage = "오프라인으로 강화했어요. 서버에 연결되면 반영돼요.";
+        public const string SyncedMessage = "오프라인 기록을 서버에 반영했어요.";
         public const string NotEnoughPointsMessage = "사용할 수 있는 스킬 포인트가 부족합니다.";
         public const string MaximumLevelMessage = "이미 최대 레벨인 스킬입니다.";
         public const string ConflictMessage = "진행 정보가 변경되었습니다. 다시 불러온 뒤 시도해 주세요.";
@@ -133,16 +137,17 @@ namespace TrickalFanGame.Frontend
         public void LoadProgress()
         {
             if (requestInFlight || character == null) return;
-            requestInFlight = true;
             int version = viewVersion;
-            SetLoadingState(LoadingMessage);
             IGameApiClient client = profileClient ?? ApiClient.Instance;
-            if (client == null)
+            if (!LocalProfile.HasServerAccount || client == null)
             {
-                ShowLoadFailure(LoadFailedMessage);
+                // Offline-0: a nickname kept only on this PC is never looked up on the server.
+                ShowLocalProgress(OfflineProgressMessage);
                 return;
             }
 
+            requestInFlight = true;
+            SetLoadingState(LoadingMessage);
             client.GetUser(LocalProfile.Nickname,
                 response =>
                 {
@@ -150,18 +155,14 @@ namespace TrickalFanGame.Frontend
                     requestInFlight = false;
                     CharacterProgressDto found = response?.data?.characterProgress?
                         .FirstOrDefault(item => item != null && item.characterId == character.CharacterId);
-                    if (found == null)
-                    {
-                        progress = null;
-                        SetLoadingState(EmptyMessage, retryVisible: true);
-                        return;
-                    }
-                    ApplyProgress(found, "강화할 스킬을 선택해 주세요.");
+                    if (found != null) PlayerProgressClient.StoreConfirmedProgress(LocalProfile.Nickname, found);
+                    ApplyProgress(LocalProgression.Current(character.CharacterId),
+                        LocalProgression.HasPendingWrites() ? OfflineProgressMessage : SelectMessage);
                 },
                 _ =>
                 {
                     if (version != viewVersion) return;
-                    ShowLoadFailure(LoadFailedMessage);
+                    ShowLocalProgress(OfflineProgressMessage);
                 });
         }
 
@@ -185,10 +186,12 @@ namespace TrickalFanGame.Frontend
                 return;
             }
 
+            // Offline-1: without a server account, or behind writes still waiting, the upgrade joins the queue so
+            // the server receives it after the Runs that gave its point.
             ISkillProgressApiClient client = skillClient ?? ApiClient.Instance;
-            if (client == null)
+            if (!LocalProfile.HasServerAccount || client == null || LocalProgression.HasPendingWrites())
             {
-                statusText.text = "강화 서버에 연결할 수 없습니다.";
+                QueueOfflineUpgrade(skillType);
                 return;
             }
 
@@ -202,16 +205,65 @@ namespace TrickalFanGame.Frontend
                     if (version != viewVersion) return;
                     requestInFlight = false;
                     PlayerProgressClient.StoreConfirmedProgress(LocalProfile.Nickname, updated);
-                    ApplyProgress(updated, "스킬 강화가 완료되었습니다.");
+                    ApplyProgress(LocalProgression.Current(character.CharacterId), UpgradedMessage);
                 },
                 error =>
                 {
                     if (version != viewVersion) return;
                     requestInFlight = false;
+                    if (IsServerUnavailable(error))
+                    {
+                        // The target level makes a later resend apply only once, even if this one arrived.
+                        QueueOfflineUpgrade(skillType);
+                        return;
+                    }
                     statusText.text = MessageFor(error.Type);
                     RenderProgress();
                 });
         }
+
+        private void QueueOfflineUpgrade(SkillType skillType)
+        {
+            CharacterProgressDto updated = LocalProgression.QueueSkillUpgrade(character.CharacterId, skillType);
+            if (updated == null)
+            {
+                statusText.text = progress.skillPoints <= 0 ? NotEnoughPointsMessage : MaximumLevelMessage;
+                RenderProgress();
+                return;
+            }
+
+            ApplyProgress(updated, OfflineUpgradeMessage);
+            TrySendPending();
+        }
+
+        // A registered profile tries to send the queue right away; the title retries on the next launch otherwise.
+        private void TrySendPending()
+        {
+            if (!LocalProfile.HasServerAccount) return;
+            IGameApiClient runClient = profileClient ?? ApiClient.Instance;
+            ISkillProgressApiClient upgradeClient = skillClient ?? ApiClient.Instance;
+            if (runClient == null || upgradeClient == null) return;
+
+            int version = viewVersion;
+            PendingSync.Flush(runClient, upgradeClient, outcome =>
+            {
+                if (version != viewVersion || requestInFlight || character == null) return;
+                if (outcome != PendingSyncOutcome.Completed) return;
+                ApplyProgress(LocalProgression.Current(character.CharacterId), SyncedMessage);
+            });
+        }
+
+        private void ShowLocalProgress(string message)
+        {
+            requestInFlight = false;
+            ApplyProgress(LocalProgression.Current(character.CharacterId), message);
+            retryButton.gameObject.SetActive(LocalProfile.HasServerAccount);
+        }
+
+        private static bool IsServerUnavailable(SkillUpgradeError error) =>
+            error.Type == SkillUpgradeErrorType.Network ||
+            error.Type == SkillUpgradeErrorType.Server ||
+            error.Type == SkillUpgradeErrorType.Parse;
 
         private void ApplyProgress(CharacterProgressDto updated, string message)
         {
@@ -270,13 +322,6 @@ namespace TrickalFanGame.Frontend
             highGradeUpgradeButton.interactable = false;
             retryButton.gameObject.SetActive(retryVisible);
             Focus(retryVisible ? retryButton : backButton);
-        }
-
-        private void ShowLoadFailure(string message)
-        {
-            requestInFlight = false;
-            progress = null;
-            SetLoadingState(message, retryVisible: true);
         }
 
         private int ResolveMaxSkillLevel() => progress != null && progress.maxSkillLevel > 0

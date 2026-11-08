@@ -23,36 +23,48 @@ const character = {
 const testUserId = '00000000-0000-4000-8000-000000000001';
 const testClientProfileId = '10000000-0000-4000-8000-000000000001';
 
+// The local test player is for development only; the beta server starts empty.
+const seedTestUser =
+  process.env.SEED_TEST_USER !== undefined
+    ? process.env.SEED_TEST_USER === 'true'
+    : process.env.NODE_ENV !== 'production';
+
 async function main() {
+  const testUserWrites = seedTestUser
+    ? [
+        prisma.user.upsert({
+          where: { nickname: 'test-player' },
+          update: {},
+          create: {
+            id: testUserId,
+            clientProfileId: testClientProfileId,
+            nickname: 'test-player',
+          },
+        }),
+        prisma.userCharacterProgress.upsert({
+          where: {
+            userId_characterId: {
+              userId: testUserId,
+              characterId: character.id,
+            },
+          },
+          update: {},
+          create: {
+            userId: testUserId,
+            characterId: character.id,
+          },
+        }),
+      ]
+    : [];
+
   await prisma.$transaction(
     [
-      prisma.user.upsert({
-        where: { nickname: 'test-player' },
-        update: {},
-        create: {
-          id: testUserId,
-          clientProfileId: testClientProfileId,
-          nickname: 'test-player',
-        },
-      }),
       prisma.character.upsert({
         where: { id: character.id },
         update: character,
         create: character,
       }),
-      prisma.userCharacterProgress.upsert({
-        where: {
-          userId_characterId: {
-            userId: testUserId,
-            characterId: character.id,
-          },
-        },
-        update: {},
-        create: {
-          userId: testUserId,
-          characterId: character.id,
-        },
-      }),
+      ...testUserWrites,
       ...ITEM_CATALOG.map((item) =>
         prisma.item.upsert({
           where: { id: item.id },

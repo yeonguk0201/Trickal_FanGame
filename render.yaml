@@ -1,0 +1,26 @@
+# Render Blueprint for the beta Backend (Deploy-0). Setup steps: docs/05-development-setup.md
+# "운영 배포 Deploy-0". Secrets (DATABASE_URL, CORS_ORIGIN) are entered in the Render dashboard.
+services:
+  - type: web
+    name: trickal-fan-game-api
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    rootDir: backend
+    # The free plan has no pre-deploy step, so migrations and the idempotent catalog seed run in the build.
+    # --prod=false keeps devDependencies (Nest CLI, Prisma CLI, tsx) even though NODE_ENV is production.
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm build && pnpm prisma:migrate:deploy && pnpm exec prisma db seed
+    startCommand: pnpm start:prod
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
