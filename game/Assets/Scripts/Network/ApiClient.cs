@@ -13,12 +13,19 @@ namespace TrickalFanGame.Network
         public const string ProfileKeyHeader = "X-Client-Profile-Id";
 
         [Header("API Settings")]
-        [SerializeField] private string baseUrl = "http://localhost:3001/api";
+        // Editor-only local address. Player builds use ApiEndpoint.ProductionBaseUrl (see ApiEndpoint).
+        [SerializeField] private string baseUrl = ApiEndpoint.LocalBaseUrl;
         [SerializeField] private float timeout = 10f;
         [SerializeField] private bool enableLogging = true;
 
+        // The free Backend host sleeps when idle and can take close to a minute to wake.
+        private const int WarmUpTimeoutSeconds = 60;
+
         private static ApiClient _instance;
         public static ApiClient Instance => _instance != null ? _instance : null;
+
+        private string _resolvedBaseUrl;
+        public string BaseUrl => _resolvedBaseUrl ??= ApiEndpoint.ResolveCurrent(baseUrl);
 
         private void Awake()
         {
@@ -29,6 +36,22 @@ namespace TrickalFanGame.Network
             }
             _instance = this;
             DontDestroyOnLoad(gameObject);
+            if (enableLogging)
+            {
+                Debug.Log($"[ApiClient] Backend: {BaseUrl}");
+            }
+            StartCoroutine(WarmUpCoroutine());
+        }
+
+        // Fire-and-forget health request so a sleeping server is awake by the time the player saves a Run.
+        // The result is ignored; failed saves already wait in the pending queue.
+        private System.Collections.IEnumerator WarmUpCoroutine()
+        {
+            using (UnityWebRequest webRequest = UnityWebRequest.Get($"{BaseUrl}/health"))
+            {
+                webRequest.timeout = WarmUpTimeoutSeconds;
+                yield return webRequest.SendWebRequest();
+            }
         }
 
         public void PostRun(CreateRunRequest request, Action<CreateRunResponse> onSuccess, Action<string> onError)
@@ -67,7 +90,7 @@ namespace TrickalFanGame.Network
             Action<SkillUpgradeError> onError)
         {
             string skillPath = skillType == SkillType.LowGrade ? "LOW_GRADE" : "HIGH_GRADE";
-            string url = $"{baseUrl}/users/{UnityWebRequest.EscapeURL(nickname)}/characters/" +
+            string url = $"{BaseUrl}/users/{UnityWebRequest.EscapeURL(nickname)}/characters/" +
                 $"{UnityWebRequest.EscapeURL(characterId)}/skills/{skillPath}";
             string json = JsonUtility.ToJson(new UpgradeSkillRequest { targetLevel = targetLevel });
             using var webRequest = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT);
@@ -115,7 +138,7 @@ namespace TrickalFanGame.Network
             Action<UserProfileResponse> onSuccess,
             Action<string> onError)
         {
-            string url = $"{baseUrl}/users/{UnityWebRequest.EscapeURL(nickname)}";
+            string url = $"{BaseUrl}/users/{UnityWebRequest.EscapeURL(nickname)}";
             using var webRequest = UnityWebRequest.Get(url);
             webRequest.timeout = Mathf.Max(1, Mathf.CeilToInt(timeout));
 
@@ -156,7 +179,7 @@ namespace TrickalFanGame.Network
             Action<CreateUserResponse> onSuccess,
             Action<string> onError)
         {
-            string url = $"{baseUrl}/users";
+            string url = $"{BaseUrl}/users";
             string json = JsonUtility.ToJson(request);
 
             if (enableLogging)
@@ -217,7 +240,7 @@ namespace TrickalFanGame.Network
             Action<CreateUserResponse> onSuccess,
             Action<RegistrationError> onError)
         {
-            string url = $"{baseUrl}/users";
+            string url = $"{BaseUrl}/users";
             string json = JsonUtility.ToJson(request);
 
             if (enableLogging)
@@ -306,7 +329,7 @@ namespace TrickalFanGame.Network
             Action<CreateRunResponse> onSuccess,
             Action<string> onError)
         {
-            string url = $"{baseUrl}/runs";
+            string url = $"{BaseUrl}/runs";
             string json = SerializeRunRequest(request);
 
             if (enableLogging)
