@@ -35,7 +35,7 @@
 | Auth-0 | 기기 키 인증, 웹 스킬 강화 제거 | B1 | §3.1 S1·S2. 쓰기 요청(Run 저장·스킬 강화)은 기기 키가 맞아야 받고, 다른 사용자의 키나 키 없는 요청은 거부. Web은 조회만 | 구현(2026-11-08, Backend Jest·build, Web lint·tsc·vitest·build, Unity `BetaAuth0Verification.Verify` 통과, 로컬 서버로 게임 스킬 강화 사용자 확인). Run 저장·재전송 수동 확인 대기 |
 | Offline-0 | 서버 없이 신규 등록·플레이 | Auth-0, Elif-3 | 26번 §3.1 완료 기준 그대로. 서버 등록 실패 시 로컬 프로필로 바로 시작, 서버가 살아나면 등록과 쌓인 Run 저장을 이어 함. 닉네임 충돌은 §3.1 S3 | 완료(2026-11-09, Unity `BetaOffline0Verification.Verify`와 Week13 Flow-3 Play 검증 통과, 사용자 Play로 수동 확인 3종) |
 | Offline-1 | 서버 없이 성장·스킬 강화 | Offline-0 | §3.1 S4. 서버 없이도 경험치·레벨·스킬 포인트가 오르고 스킬을 강화하며, 서버가 살아나면 Run과 강화를 순서대로 보내 서버 값과 같아짐 | 완료(2026-11-09, Unity `BetaOffline1Verification.Verify`(Backend 계약 파일 직접 대조 포함), `Week13SkillUpgradeVerification.Verify`, `BetaOffline0Verification.Verify`, `Week27Elif3Verification.Verify`, Flow-5 Play 검증 통과). 사용자 Play 수동 확인 (1) 미등록 오프라인 성장·강화, (2) 등록 후 순서 전송·Web 값 일치, (3) 등록된 프로필 오프라인 → 재연결 값 일치 확인(2026-11-09) |
-| Deploy-0 | Backend·DB·Web 운영 배포 | Auth-0 | §3.1 S6. 운영 DB 설정, 환경 변수 분리, CORS, 게임·Web의 API 주소 설정, 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회 | 코드 준비(2026-11-09, Backend Jest·build, Web lint·build, Unity `BetaDeploy0Verification.Verify` 통과). 운영 계정 생성·배포와 운영 환경 확인 대기([05번](./05-development-setup.md) §11.4) |
+| Deploy-0 | Backend·DB·Web 운영 배포 | Auth-0 | §3.1 S6. 운영 DB 설정, 환경 변수 분리, CORS, 게임·Web의 API 주소 설정, 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회 | 완료(2026-11-09, Backend Jest·build, Web lint·build, Unity `BetaDeploy0Verification.Verify` 통과. Render·Neon·Vercel 배포 후 운영 API의 health·DB·헤더 없는 Run 저장 401·CORS 확인, 사용자 Play로 운영 서버 등록 → Run 저장 → 운영 Web 전적 확인) |
 | Layout-0 | Layout 추가 | B3 | 텍스트 Layout과 가져오기 도구(T7)로 작성, seed 재현·문 사이 경로·스폰·상자 위치 검증 | 예정 |
 | Sound-1 | 전투 피드백 효과음(적·사망·권능) | Sound-0 | 26번 §3.6 그대로. Play-2 전에 넣는다 | 예정 |
 | Verify-0 | 현재 계약 기준 회귀와 Setup 보존 | 위 변경 | 유효 검증의 통과/실패 목록, Setup 재실행 시 콘텐츠·GUID 보존, 계약 차이 출력 | 예정 |
@@ -101,6 +101,9 @@
   `ApiEndpoint`가 주소를 정한다: `-apiUrl` → Editor는 로컬(메뉴 `Trickal Fan Game/Beta/Use Production API in Editor`로 운영)
   → 빌드는 운영. `ApiClient`는 시작 때 `/api/health`로 잠든 서버를 깨운다. 운영 DB는 Neon(싱가포르, pooled 연결)이다. Supabase 무료
   슬롯이 다른 프로젝트에 쓰이고 있고 무료 프로젝트가 일주일 무요청이면 일시정지되기 때문이다(2026-11-09 사용자 결정). 배포 절차와 운영 확인 항목은 [05번](./05-development-setup.md) §11.4.
+  운영 주소: API `https://trickal-fan-game-api.onrender.com/api`, Web `https://trickal-fan-game.vercel.app`, DB Neon
+  `trickal-fan-game-prod`(싱가포르). 운영 확인(2026-11-09): `/api/health/ready` DB up, 헤더 없는 `POST /api/runs` 401
+  `PROFILE_KEY_REQUIRED`, CORS 허용, Editor 운영 토글로 `NEW PLAYER` 등록(201) → Run 저장 → 운영 Web 전적 표시(사용자 확인).
   (Neon·Supabase 등). Backend가 잠들어 첫 요청이 늦어도 게임은 대기열로 처리한다. 운영 기간은 베타 기간(정식 공개 전까지).
 
 ## 4. 연출(Effect-0 남은 것)
@@ -186,7 +189,7 @@ Beta-0의 버전 표시·피드백 안내·조작 안내는 Menu 디자인과 �
 
 - [ ] B1~B4를 정했다. (B1 2026-11-08 결정)
 - [ ] 쓰기 요청이 기기 키로 확인되고 Web은 조회만 한다. (Auth-0)
-- [ ] 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회가 된다. (Deploy-0)
+- [x] 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회가 된다. (Deploy-0)
 - [ ] 서버 없이 신규 등록과 플레이가 되고, 서버가 살아나면 쌓인 저장을 보낸다. (Offline-0)
 - [x] 서버 없이 성장·스킬 강화가 되고, 서버가 살아나면 서버 값과 같아진다. (Offline-1)
 - [ ] Layout을 추가하고 배치 검증을 통과했다. (Layout-0)
