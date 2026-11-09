@@ -36,19 +36,6 @@ namespace TrickalFanGame.Editor
             int group = Undo.GetCurrentGroup();
             Undo.SetCurrentGroupName("Setup HUD-7B Pause Menu");
 
-            TMP_Text title = panel.Find("Title")?.GetComponent<TMP_Text>();
-            if (title == null) throw new InvalidOperationException("HUD-3C pause title is missing.");
-            Undo.RecordObject(title, "Configure Pause Title");
-            title.text = "일시정지";
-
-            TMP_Text hint = panel.Find("Resume Hint")?.GetComponent<TMP_Text>();
-            if (hint != null)
-            {
-                Undo.RecordObject(hint.rectTransform, "Layout Resume Hint");
-                hint.rectTransform.anchoredPosition = new Vector2(0, 292);
-                hint.text = "ESC를 다시 누르거나 아래 버튼으로 게임에 돌아갑니다.";
-            }
-
             RectTransform statsPanel = Rect(panel, "Detailed Stats", new Vector2(-382, -12), new Vector2(300, 560));
             Image statsBackground = Component<Image>(statsPanel.gameObject);
             statsBackground.color = new Color(0.055f, 0.08f, 0.12f, 1f);
@@ -64,15 +51,7 @@ namespace TrickalFanGame.Editor
             TMP_Text artifactTitle = Text(panel, "Artifact Section Title", "보유 아티팩트", new Vector2(164, 256),
                 new Vector2(700, 40), 28, font, TextAlignmentOptions.Center);
             artifactTitle.fontStyle = FontStyles.Bold;
-            RectTransform viewport = panel.Find("Artifact Viewport") as RectTransform;
-            if (viewport == null) throw new InvalidOperationException("HUD-3C artifact viewport is missing.");
-            Undo.RecordObject(viewport, "Layout Artifact Viewport");
-            viewport.anchoredPosition = new Vector2(164, -18);
-            viewport.sizeDelta = new Vector2(700, 520);
-
-            RectTransform template = viewport.Find("Content/Artifact Detail Template") as RectTransform;
-            if (template == null) throw new InvalidOperationException("HUD-3C artifact template is missing.");
-            LayoutArtifactTemplate(template);
+            ApplyLayout(panel);
 
             Button resumeButton = Button(panel, "Resume Button", "게임으로 돌아가기", new Vector2(0, -334),
                 new Vector2(260, 52), font);
@@ -88,6 +67,7 @@ namespace TrickalFanGame.Editor
             raycaster.enabled = false;
             EnsureEventSystem(scene, resumeButton.gameObject);
             view.ConfigureMenu(stats, statsText, resumeButton, panel, raycaster);
+            Week25Ux0Setup.ReapplyPauseButtons(view);
             EnsureGlyphs(font);
 
             foreach (Component component in view.GetComponentsInChildren<Component>(true))
@@ -99,6 +79,35 @@ namespace TrickalFanGame.Editor
             AssetDatabase.SaveAssets();
             Undo.CollapseUndoOperations(group);
             Debug.Log("Week 13 HUD-7B setup complete. Detailed stats, resume control, focus confinement and restoration are connected.");
+        }
+
+        // The pause panel layout HUD-7B puts over HUD-3C (title, hint, artifact list beside the stats). HUD-3C calls this
+        // too when the stats panel exists, so re-running HUD-3C keeps the HUD-7B layout (Verify-0).
+        public static void ApplyLayout(RectTransform panel)
+        {
+            TMP_Text title = panel.Find("Title")?.GetComponent<TMP_Text>();
+            if (title == null) throw new InvalidOperationException("HUD-3C pause title is missing.");
+            Undo.RecordObject(title, "Configure Pause Title");
+            title.text = "일시정지";
+
+            TMP_Text hint = panel.Find("Resume Hint")?.GetComponent<TMP_Text>();
+            if (hint != null)
+            {
+                Undo.RecordObject(hint.rectTransform, "Layout Resume Hint");
+                hint.rectTransform.anchoredPosition = new Vector2(0, 292);
+                Undo.RecordObject(hint, "Configure Resume Hint");
+                hint.text = "ESC를 다시 누르거나 아래 버튼으로 게임에 돌아갑니다.";
+            }
+
+            RectTransform viewport = panel.Find("Artifact Viewport") as RectTransform;
+            if (viewport == null) throw new InvalidOperationException("HUD-3C artifact viewport is missing.");
+            Undo.RecordObject(viewport, "Layout Artifact Viewport");
+            viewport.anchoredPosition = new Vector2(164, -18);
+            viewport.sizeDelta = new Vector2(700, 520);
+
+            RectTransform template = viewport.Find("Content/Artifact Detail Template") as RectTransform;
+            if (template == null) throw new InvalidOperationException("HUD-3C artifact template is missing.");
+            LayoutArtifactTemplate(template);
         }
 
         private static void LayoutArtifactTemplate(RectTransform template)

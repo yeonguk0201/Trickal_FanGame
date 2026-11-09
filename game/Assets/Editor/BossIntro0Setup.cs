@@ -58,6 +58,9 @@ namespace TrickalFanGame.Editor
             RectTransform overlay = Rect(frame, OverlayName, Vector2.zero, FrontendLayout.ReferenceSize);
             Undo.SetTransformParent(overlay, frame, "Order " + OverlayName);
             overlay.SetAsLastSibling();
+            // The pause menu stays on top (HUD-3C also puts it last), so re-running either Setup keeps one order.
+            Transform pause = frame.Find(Week13Hud3CSetup.OverlayName);
+            if (pause != null) overlay.SetSiblingIndex(pause.GetSiblingIndex());
             CanvasGroup canvasGroup = Component<CanvasGroup>(overlay.gameObject);
             canvasGroup.alpha = 0f;
             canvasGroup.interactable = false;

@@ -63,10 +63,19 @@ namespace TrickalFanGame.Editor
             Debug.Log("Week 25 UX-0 setup complete. Pause settings and the GAME OVER sequence are connected.");
         }
 
-        private static void ConfigurePauseSettings(Scene scene, GamePauseArtifactView view, TMP_FontAsset font)
+        // HUD-7B/7C/7D create the pause buttons with their own sizes. They call this at the end, so re-running them keeps
+        // the UX-0 four-button row once UX-0 has added the settings button (Verify-0).
+        public static void ReapplyPauseButtons(GamePauseArtifactView view)
         {
-            Button settingsButton = Button(view.FocusScope, SettingsButtonName, "설정", Vector2.zero,
-                PauseButtonSize, font, new Color(0.14f, 0.34f, 0.42f, 1f));
+            Transform settings = view.FocusScope != null ? view.FocusScope.Find(SettingsButtonName) : null;
+            Button settingsButton = settings != null ? settings.GetComponent<Button>() : null;
+            if (settingsButton == null || view.ResumeButton == null || view.RestartRunButton == null ||
+                view.LeaveRunButton == null) return;
+            LayoutPauseButtons(view, settingsButton);
+        }
+
+        private static void LayoutPauseButtons(GamePauseArtifactView view, Button settingsButton)
+        {
             Button[] order = { view.ResumeButton, settingsButton, view.RestartRunButton, view.LeaveRunButton };
             for (int i = 0; i < order.Length; i++)
             {
@@ -86,6 +95,13 @@ namespace TrickalFanGame.Editor
                     selectOnRight = right
                 };
             }
+        }
+
+        private static void ConfigurePauseSettings(Scene scene, GamePauseArtifactView view, TMP_FontAsset font)
+        {
+            Button settingsButton = Button(view.FocusScope, SettingsButtonName, "설정", Vector2.zero,
+                PauseButtonSize, font, new Color(0.14f, 0.34f, 0.42f, 1f));
+            LayoutPauseButtons(view, settingsButton);
 
             // Full-screen dim that blocks the pause menu, holding a copy of the Frontend settings panel so both
             // screens show the same controls bound to the same LocalSettings.

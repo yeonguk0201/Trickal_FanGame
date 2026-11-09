@@ -70,6 +70,7 @@ namespace TrickalFanGame.Editor
             confirmButton.navigation = Explicit(confirmButton, confirmButton, cancelButton, cancelButton);
 
             view.ConfigureLeaveRun(session, leaveButton, confirmationGroup, confirmButton, cancelButton, dialog);
+            Week25Ux0Setup.ReapplyPauseButtons(view);
             EnsureGlyphs(font);
             foreach (Component component in view.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);

@@ -60,8 +60,8 @@ namespace TrickalFanGame.Editor
             Assert(!view.GraphicRaycaster.enabled,
                 "HUD input raycasting must remain disabled outside pause.");
             Assert(view.ResumeButton.transform.IsChildOf(view.FocusScope) &&
-                view.ResumeButton.GetComponent<RectTransform>().sizeDelta == new Vector2(260, 52),
-                "HUD-7B requires a standard-size resume button inside the focus scope.");
+                view.ResumeButton.GetComponent<RectTransform>().sizeDelta == Week25Ux0Setup.PauseButtonSize,
+                "HUD-7B requires a pause-menu-size resume button (UX-0) inside the focus scope.");
             RectTransform statsPanel = view.FocusScope.Find("Detailed Stats") as RectTransform;
             RectTransform viewport = view.FocusScope.Find("Artifact Viewport") as RectTransform;
             Assert(statsPanel != null && statsPanel.sizeDelta == new Vector2(300, 560) &&
@@ -116,11 +116,14 @@ namespace TrickalFanGame.Editor
                     $"{eventSystem.currentSelectedGameObject?.name ?? "<null>"}, " +
                     $"Resume={view.ResumeButton.gameObject.name}, " +
                     $"CurrentEventSystem={EventSystem.current?.gameObject.name ?? "<null>"}.");
-                Assert(view.StatsText.text.Contains("공격력  3.5") &&
-                    view.StatsText.text.Contains("공격속도  1.25") &&
-                    view.StatsText.text.Contains("이동속도  6") &&
-                    view.StatsText.text.Contains("치명타율  15%") &&
-                    view.StatsText.text.Contains("투사체  2") && view.StatsText.text.Contains("관통  2"),
+                // Expected values come from the live stats so base stat tuning does not break this check (Verify-0).
+                string shown = view.StatsText.text;
+                Assert(shown.Contains($"공격력  {stats.AttackDamage:0.##}") &&
+                    shown.Contains($"공격속도  {stats.AttackSpeed:0.##}") &&
+                    shown.Contains($"이동속도  {stats.MoveSpeed:0.##}") &&
+                    shown.Contains($"치명타율  {stats.CriticalChance * 100f:0.#}%") &&
+                    shown.Contains($"투사체  {stats.ProjectileCount}") && shown.Contains($"관통  {stats.PierceCount}") &&
+                    stats.ProjectileCount >= 2 && stats.PierceCount >= 2,
                     "HUD-7B detailed stats do not match the live PlayerStats values.");
 
                 eventSystem.SetSelectedGameObject(outside);
