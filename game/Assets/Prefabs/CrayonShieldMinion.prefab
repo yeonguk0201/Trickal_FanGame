@@ -244,6 +244,7 @@ MonoBehaviour:
   defaultDuration: 0.2
   defaultStunDuration: 0.4
   knockbackWeight: 2
+  knockbackImmune: 0
 --- !u!114 &2267487297711112900
 MonoBehaviour:
   m_ObjectHideFlags: 0
