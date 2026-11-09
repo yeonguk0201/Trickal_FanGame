@@ -21,7 +21,7 @@
 | ------ | ------- | --------- |
 | B1 공개 형태 | **결정(2026-11-08)**: 서버를 운영해 웹 전적을 열되, 게임 플레이는 서버에 의존하지 않는다. 세부는 §3.1 | Auth-0, Offline-0·1, Deploy-0 |
 | B2 배포 채널 | 빌드를 어디에 올릴지(직접 배포·itch.io 등), 대상 OS, 테스터 모집 범위 | Beta-0 |
-| B3 Layout 범위 | Balance-0·Play-2 전에 추가할 Layout 수와 방 크기별 구성(26번 D11) | Layout-0 |
+| B3 Layout 범위 | **결정(2026-11-09)**: 직사각형 Layout 8개를 Small +3·Tall +3·Wide +2로 추가하고, 그에 따른 크기별 등장 비중 변화는 그대로 받는다. 세부는 §3.2 | Layout-0 |
 | B4 피드백 수집 | 버그·의견을 받을 경로(설문·디스코드 등), 게임 안 링크 여부, 로그 첨부 방식 | Beta-0 |
 | B5 보스 BGM 음원 | 기존 BGM과 같은 출처인지, 새로 구할지(크레딧 범위) | Sound-2 |
 | B6 방 클리어음 | 지금처럼 `DoorOpen`이 대신할지, 따로 둘지 | Sound-4 |
@@ -36,7 +36,7 @@
 | Offline-0 | 서버 없이 신규 등록·플레이 | Auth-0, Elif-3 | 26번 §3.1 완료 기준 그대로. 서버 등록 실패 시 로컬 프로필로 바로 시작, 서버가 살아나면 등록과 쌓인 Run 저장을 이어 함. 닉네임 충돌은 §3.1 S3 | 완료(2026-11-09, Unity `BetaOffline0Verification.Verify`와 Week13 Flow-3 Play 검증 통과, 사용자 Play로 수동 확인 3종) |
 | Offline-1 | 서버 없이 성장·스킬 강화 | Offline-0 | §3.1 S4. 서버 없이도 경험치·레벨·스킬 포인트가 오르고 스킬을 강화하며, 서버가 살아나면 Run과 강화를 순서대로 보내 서버 값과 같아짐 | 완료(2026-11-09, Unity `BetaOffline1Verification.Verify`(Backend 계약 파일 직접 대조 포함), `Week13SkillUpgradeVerification.Verify`, `BetaOffline0Verification.Verify`, `Week27Elif3Verification.Verify`, Flow-5 Play 검증 통과). 사용자 Play 수동 확인 (1) 미등록 오프라인 성장·강화, (2) 등록 후 순서 전송·Web 값 일치, (3) 등록된 프로필 오프라인 → 재연결 값 일치 확인(2026-11-09) |
 | Deploy-0 | Backend·DB·Web 운영 배포 | Auth-0 | §3.1 S6. 운영 DB 설정, 환경 변수 분리, CORS, 게임·Web의 API 주소 설정, 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회 | 완료(2026-11-09, Backend Jest·build, Web lint·build, Unity `BetaDeploy0Verification.Verify` 통과. Render·Neon·Vercel 배포 후 운영 API의 health·DB·헤더 없는 Run 저장 401·CORS 확인, 사용자 Play로 운영 서버 등록 → Run 저장 → 운영 Web 전적 확인) |
-| Layout-0 | Layout 추가 | B3 | 텍스트 Layout과 가져오기 도구(T7)로 작성, seed 재현·문 사이 경로·스폰·상자 위치 검증 | 예정 |
+| Layout-0 | Layout 추가 | B3 | 텍스트 Layout과 가져오기 도구(T7)로 작성, seed 재현·문 사이 경로·스폰·상자 위치 검증 | 구현(2026-11-09, Unity `RoomLayoutImporterVerification.ImportAndVerifyBatch`·`VerifyWithRegressionsBatch`, `Week25Trap1Verification.Verify` 통과, 사용자 Play 확인 — 고칠 방 없음) |
 | Sound-1 | 전투 피드백 효과음(적·사망·권능) | Sound-0 | 26번 §3.6 그대로. Play-2 전에 넣는다 | 예정 |
 | Verify-0 | 현재 계약 기준 회귀와 Setup 보존 | 위 변경 | 유효 검증의 통과/실패 목록, Setup 재실행 시 콘텐츠·GUID 보존, 계약 차이 출력 | 예정 |
 | Balance-0 | 경제 측정 | Layout-0 | 26번 §7 "실제 플레이와 경제 측정" 그대로 | 예정 |
@@ -106,6 +106,42 @@
   `PROFILE_KEY_REQUIRED`, CORS 허용, Editor 운영 토글로 `NEW PLAYER` 등록(201) → Run 저장 → 운영 Web 전적 표시(사용자 확인).
   (Neon·Supabase 등). Backend가 잠들어 첫 요청이 늦어도 게임은 대기열로 처리한다. 운영 기간은 베타 기간(정식 공개 전까지).
 
+### 3.2 Layout-0(B3, 2026-11-09 사용자 결정)
+
+- **범위**: 방 수가 적은 크기에 직사각형 Layout 8개를 더한다. Small 3 → 6, Tall 4 → 7, Wide 5 → 7. Basic·Large(각 9)는
+  그대로다. Small·Tall에 처음으로 함정 방이 생긴다. 후보를 더 만들어 고르지 않고 정한 수만 만들어 사용자 Play로 고친다.
+- **등장 비중**: 생성기는 프로필을 먼저 고르지 않고 그 방에 맞는 모든 템플릿을 가중치로 한 번에 추첨한다
+  (`RoomTemplateSelector`). 그래서 Layout을 더한 크기는 더 자주 나온다. 가중치 합 기준(겹침으로 실제와 조금 다름)으로 Small
+  11 → 16%, Basic 27 → 21%, Wide 17 → 20%, Tall 13 → 19%, Large 32 → 25%가 된다. 사용자가 이 변화를 그대로 받기로 했고,
+  Balance-0이 이 분포로 기준선을 잡는다.
+- **추가한 방**(`game/RoomLayouts/`, 가중치는 따로 적은 것만 100이 아님, 난이도 보정은 모두 +1):
+
+  | ID | 성격 |
+  | --- | --- |
+  | `small-fire-gate` | 함정: 왼쪽 불 기둥 3칸, 가운데 가시 돌 2개 |
+  | `small-twin-pits` | 아래 양쪽 구덩이, 가운데 짱돌 1개 |
+  | `small-gold-vein` | 위쪽 양옆 황금돌 4개(가중치 50) |
+  | `tall-spike-ladder` | 함정: 네 구석 바닥 가시와 주기 가시 A·B, 가운데 바닥 가시 2개 |
+  | `tall-chasm` | 네 구석과 가운데의 구덩이 |
+  | `tall-rock-maze` | 구석 짱돌 선반과 가운데 짱돌 기둥(짱돌 16개) |
+  | `wide-web-thicket` | 함정: 양쪽 거미줄 덤불과 그 앞의 독버섯 2개 |
+  | `wide-rubble-yard` | 짱돌 무더기가 흩어진 앞마당(짱돌 13개) |
+
+- **콘텐츠 버전**: Room 콘텐츠 버전을 15 → 16으로 올렸다(`RoomLayoutImporter.RoomContentVersion`). 같은 seed라도 이전과 다른
+  방이 나온다. Trap-1 검증기가 임포터 버전을 13으로 고정해 비교하던 것은 "13 이상"으로 바꿨다.
+- **검증**: `ImportAndVerifyBatch`가 22개 방 파일과 Prefab·템플릿 일치, 문 사이 경로, 모든 문 조합의 Encounter 배치, 400 seed
+  안에서 모든 방 등장과 결정성을 확인했다(2026-11-09). 이 검증기의 강제 재임포트는 기존 방 Prefab 14개의 내부 fileID만 바꾸므로
+  (내용 같음) 커밋 전에 되돌린다. 회귀 묶음(Encounter-4·Spawn-2·Difficulty-1·Terrain-0·Chest-1·Jjangsem-1·Obstacle-1~7·Special-2·3·
+  Flight-0)도 통과했다. Trap-1 검증기는 함정이 Trap-1 방 3개에만 있다고 가정해 새 함정 방에서 실패했으므로, 함정이 있는 다른
+  방은 방 파일에서 들여온 것인지 확인하고 같은 상자 위치·런타임 검사를 하도록 바꿨다.
+- **수동 확인**(완료, 2026-11-09 사용자 확인, 고칠 방 없음): Game Scene Play → `F1` → `— Layout —`의 `Show layouts`에서 새 방마다 `Force <방 ID>`를 눌러 본다.
+  (1) 어느 문으로 들어와도 서 있는 자리에 함정·장애물이 없다. (2) 함정을 밟지 않고 모든 문을 오갈 수 있다. (3) 적이
+  끼이지 않고 방이 클리어되고, 원거리형이 엄폐물 뒤에서 멈추지 않는다. (4) 클리어 상자가 함정·구덩이 위에 놓이지 않는다.
+  (5) 방마다 느낌이 다른지, 고칠 방이 있는지. 끝나면 `Clear forced layout and restart`.
+- **ㄱ·ㄴ자 방(Shape-0, 후보)**: 사용자가 원함(2026-11-09). 직사각형이 아닌 방은 새 프로필이고, 생성기 겹침 판정·걸을 수
+  있는 바닥과 벽 그림·카메라 구역·미니맵 모양·문 위치·Encounter가 모두 직사각형을 전제로 하므로 Layout-0과 분리한다.
+  베타 뒤로 미룬다(2026-11-09 사용자 결정, §8).
+
 ## 4. 연출(Effect-0 남은 것)
 
 28번 §7 Effect-0 목록에서 남은 항목이다. 피해 숫자는 베타 전에 한다(2026-11-06 사용자 요청).
@@ -169,6 +205,7 @@ Beta-0의 버전 표시·피드백 안내·조작 안내는 Menu 디자인과 �
 ## 8. 베타 뒤로 미루는 것
 
 - Depth-0(깊이와 테마 안 층수 분리)과 테마 확장(정령산 이후). 테마를 추가할 때 함께 한다.
+- Shape-0 ㄱ·ㄴ자 방(§3.2). 새 프로필로 생성기 겹침 판정·바닥과 벽 그림·카메라 구역·미니맵 모양·문 위치·Encounter를 함께 설계한다.
 - 적 전체의 깊이별 패턴 강화(28번 §3.3), 산사모-순수 늦은 테마 4발·약한 보정 포함.
 - 캐릭터 추가(지금은 에르핀만).
 - Sound-5, Sound-9 중 결과 BGM, Menu-3~5(일정이 밀릴 때).
@@ -192,7 +229,7 @@ Beta-0의 버전 표시·피드백 안내·조작 안내는 Menu 디자인과 �
 - [x] 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회가 된다. (Deploy-0)
 - [ ] 서버 없이 신규 등록과 플레이가 되고, 서버가 살아나면 쌓인 저장을 보낸다. (Offline-0)
 - [x] 서버 없이 성장·스킬 강화가 되고, 서버가 살아나면 서버 값과 같아진다. (Offline-1)
-- [ ] Layout을 추가하고 배치 검증을 통과했다. (Layout-0)
+- [x] Layout을 추가하고 배치 검증을 통과했다. (Layout-0)
 - [ ] 적·사망·권능 효과음을 사용자 Play로 확인했다. (Sound-1)
 - [ ] 피해 숫자가 TextMeshPro로 바뀌고 치명타가 구분된다. (Number-0)
 - [ ] 회귀 목록과 Setup 재실행 보존을 확인했다. (Verify-0)

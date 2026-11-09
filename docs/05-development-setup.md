@@ -1677,7 +1677,9 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
 - T7 방 Layout 임포터(1단계): 방 하나를 `game/RoomLayouts/<방 ID>.room.txt` 텍스트 파일 하나로 적고, 메뉴
   `Trickal Fan Game > Tools > Import Room Layouts`가 파일마다 방 Prefab(`Assets/Rooms/Prefabs/Layouts/room-<ID>.prefab`)과
   템플릿(`Assets/Rooms/Templates/Layouts/<ID>.asset`)을 만들어 Game Scene 생성기 목록에 등록한다. Room 콘텐츠 버전은
-  13이다(Trap-1에서 함정 방 3개를 더하며 12에서 올렸다). 임포터 이전에 만든 템플릿 19개는 건드리지 않는다.
+  16이다(Trap-1에서 함정 방 3개를 더하며 13, Layout-0에서 방 8개를 더하며 16으로 올렸다). 임포터 이전에 만든 템플릿 19개는
+  건드리지 않는다. `ImportAndVerifyBatch`의 강제 재임포트는 기존 방 Prefab의 내부 fileID만 바꾸므로(내용 같음), 고치지 않은
+  방의 Prefab diff는 커밋 전에 되돌린다.
   - **파일 형식**: 위쪽은 `키: 값` 머리말, `grid:` 줄 아래는 격자다. `//`로 시작하는 줄은 머리말에서만 주석이다.
 
     ```text

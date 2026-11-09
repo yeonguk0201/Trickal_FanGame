@@ -65,7 +65,7 @@ namespace TrickalFanGame.Editor
             FloorGenerator generator = GameObject.Find(Week8RandomRoomSetup.GeneratorObjectName)
                 ?.GetComponent<FloorGenerator>();
             Assert(generator != null, "Trap-1 verification needs the Game Scene generator.");
-            Assert(RoomLayoutImporter.RoomContentVersion == RoomContentVersion &&
+            Assert(RoomLayoutImporter.RoomContentVersion >= RoomContentVersion &&
                    generator.RoomContentVersion >= RoomContentVersion,
                 $"Trap-1 raises the Room content version to {RoomContentVersion}; the Game Scene has " +
                 $"{generator.RoomContentVersion}. Import the room Layouts.");
@@ -88,12 +88,15 @@ namespace TrickalFanGame.Editor
                 ValidateRuntime(template);
             }
 
-            // Layouts that hold no trap keep their chest positions: the trap rule only removes trap cells.
+            // Traps come only from room files. Later trap rooms (Layout-0) get the same chest and runtime checks.
             foreach (RoomTemplateDefinition template in generator.RoomTemplates)
             {
                 if (Layouts.Any(layout => layout.id == template.TemplateId)) continue;
-                Assert(template.RoomPrefabAsset.GetComponentsInChildren<RoomTrap>(true).Length == 0,
-                    $"Room '{template.TemplateId}' holds a trap but is not a Trap-1 Layout.");
+                if (template.RoomPrefabAsset.GetComponentsInChildren<RoomTrap>(true).Length == 0) continue;
+                Assert(RoomLayoutImporter.IsImportedTemplate(template),
+                    $"Room '{template.TemplateId}' holds a trap but was not imported from a room file.");
+                ValidateChestPositions(template);
+                ValidateRuntime(template);
             }
 
             ValidateGeneration(generator);
