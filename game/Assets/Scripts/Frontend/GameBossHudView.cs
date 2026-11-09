@@ -19,6 +19,10 @@ namespace TrickalFanGame.Frontend
         private RoomNode observedNode;
         private BossController observedBoss;
         private Health observedHealth;
+        // Boss-Intro-0: while the intro plays, the bar is hidden and then fills from empty to the boss's health.
+        private bool introActive;
+        private bool introHidden;
+        private float introFill = 1f;
 
         public RoomGraphController RoomGraph => roomGraph;
         public CanvasGroup CanvasGroup => canvasGroup;
@@ -28,6 +32,25 @@ namespace TrickalFanGame.Frontend
         public Image HealthFill => healthFill;
         public BossController ObservedBoss => observedBoss;
         public bool IsVisible => canvasGroup != null && canvasGroup.alpha > 0.99f;
+        public bool IsIntroActive => introActive;
+        public float IntroFill => introFill;
+
+        public void SetIntroPresentation(bool hidden, float fillProgress)
+        {
+            introActive = true;
+            introHidden = hidden;
+            introFill = Mathf.Clamp01(fillProgress);
+            RefreshNow();
+        }
+
+        public void ClearIntroPresentation()
+        {
+            if (!introActive) return;
+            introActive = false;
+            introHidden = false;
+            introFill = 1f;
+            RefreshNow();
+        }
 
         public void Configure(
             RoomGraphController configuredRoomGraph,
@@ -90,10 +113,10 @@ namespace TrickalFanGame.Frontend
             }
 
             RefreshValues();
-            SetVisible(true);
+            SetVisible(!(introActive && introHidden));
         }
 
-        private static BossController FindActiveBoss(RoomNode node)
+        public static BossController FindActiveBoss(RoomNode node)
         {
             if (node == null || node.ContentRoot == null || node.Definition == null ||
                 node.Definition.RoomType != RoomType.Boss)
@@ -197,6 +220,7 @@ namespace TrickalFanGame.Frontend
                 return;
             }
 
+            if (introActive) currentHealth *= introFill;
             if (bossNameText != null) bossNameText.text = observedBoss.DisplayName;
             if (phaseText != null) phaseText.text = $"페이즈 {observedBoss.CurrentPhase} / {observedBoss.PhaseCount}";
             if (healthText != null) healthText.text = $"{Mathf.CeilToInt(currentHealth)} / {Mathf.CeilToInt(maxHealth)}";
