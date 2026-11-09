@@ -1,0 +1,10 @@
+id: small-gold-vein
+profile: small
+weight: 50
+note: 위쪽 양옆에 황금돌이 박힌 작은 금맥 방
+grid:
+..G....G..
+..G....G..
+...1..4...
+..3....2..
+..........

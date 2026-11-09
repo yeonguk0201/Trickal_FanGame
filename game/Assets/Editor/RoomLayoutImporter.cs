@@ -21,7 +21,8 @@ namespace TrickalFanGame.Editor
     // The 19 templates authored before the importer are not part of it and are never touched.
     public static class RoomLayoutImporter
     {
-        public const int RoomContentVersion = 13;
+        // Layout-0 added eight Small, Tall and Wide rooms, so the same seed now draws different templates.
+        public const int RoomContentVersion = 16;
         // Folder beside Assets, so the text files need no .meta.
         public const string LayoutFolderName = "RoomLayouts";
         public const string TemplateFolder = Week14Room1Setup.TemplateFolder + "/Layouts";
