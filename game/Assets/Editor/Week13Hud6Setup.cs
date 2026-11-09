@@ -107,7 +107,7 @@ namespace TrickalFanGame.Editor
 
         private static void EnsureGlyphs(TMP_FontAsset font)
         {
-            const string required = "+0123456789";
+            const string required = "+0123456789" + WorldCombatNumberPool.BlockedLabel;
             if (!font.HasCharacters(required) && !font.TryAddCharacters(required, out string missing))
                 throw new InvalidOperationException("Missing HUD-6 glyphs: " + missing);
             EditorUtility.SetDirty(font);

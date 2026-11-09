@@ -41948,7 +41948,16 @@ MonoBehaviour:
   lifetime: 0.8
   riseDistance: 0.65
   horizontalScatter: 0.18
-  damageColor: {r: 1, g: 0.34, b: 0.28, a: 1}
+  numberMaterial: {fileID: 2100000, guid: aa3102691ec50ee4985b3447ab3bc181, type: 2}
+  shadowMaterial: {fileID: 2100000, guid: 617a2ff2234d3e949a6e2a28451d0c29, type: 2}
+  blockedLabelMaterial: {fileID: 2100000, guid: 91f0b2e0507f2b541a9b40648c8d23b1, type: 2}
+  numberColor: {r: 1, g: 0.95, b: 0.86, a: 1}
+  criticalBurstColor: {r: 1, g: 1, b: 1, a: 0.95}
+  shadowColor: {r: 0.36, g: 0.13, b: 0.02, a: 0.5}
+  shadowOffset: {x: 0.04, y: -0.03}
+  blockedLabelFaceColor: {r: 1, g: 0.96862745, b: 0.5411765, a: 1}
+  criticalScale: 1.35
+  periodicScale: 0.72
 --- !u!4 &1246577927
 Transform:
   m_ObjectHideFlags: 0

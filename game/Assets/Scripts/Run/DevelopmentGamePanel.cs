@@ -206,6 +206,14 @@ namespace TrickalFanGame.Run
                 GUILayout.EndHorizontal();
             }
 
+            // Number-0: normal, critical, tick and blocked ("무적 0") damage numbers over the player, side by side.
+            WorldCombatNumberPool numbers = FindFirstObjectByType<WorldCombatNumberPool>();
+            if (numbers != null && assembler.Graph?.Player != null && GUILayout.Button("Damage number samples"))
+            {
+                numbers.SpawnSamples(assembler.Graph.Player.transform.position + Vector3.up * 0.6f);
+                status = "Normal 12, critical 48, tick 3, blocked 0.";
+            }
+
             // Hitbox-1: the look follows the size, the hurtbox stops at its limit and the feet never change.
             PlayerBodySize size = assembler.Graph?.Player != null
                 ? assembler.Graph.Player.GetComponent<PlayerBodySize>()
