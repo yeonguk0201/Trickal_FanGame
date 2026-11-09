@@ -654,11 +654,15 @@ export const ITEM_CATALOG = [
     id: 'artifact-aisia-wallet',
     name: '아이시아의 지갑',
     description:
-      '획득하면 골드를 100 얻습니다. 보유 한도 99를 넘는 골드는 버려집니다. 황금상자에서만 얻을 수 있습니다.',
+      '획득하면 골드를 100 얻고 엘리프 0~4개를 한 번 추첨해 얻습니다. 보유 한도 99를 넘는 골드는 버려집니다. 황금상자에서만 얻을 수 있습니다.',
     rarity: 'RARE',
     isActive: true,
     maxStacks: 1,
-    effects: [{ type: 'GainGoldOnAcquire', magnitude: 100 }],
+    effects: [
+      { type: 'GainGoldOnAcquire', magnitude: 100 },
+      // Elif-2 (docs/27 §3.2): one 0~4 permanent elif roll on pickup.
+      { type: 'GainPermanentElifRollOnAcquire' },
+    ],
   },
   {
     id: 'artifact-kanta-top',
