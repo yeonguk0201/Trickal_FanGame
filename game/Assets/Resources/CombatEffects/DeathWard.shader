@@ -3,11 +3,12 @@ Shader "TrickalFanGame/Death Ward"
     // 레비의 단도 (DeathWardGlow). Mode 0 draws a gold outline around the player drawing with a light band that
     // sweeps across the body; the quad covers the sprite rect plus a margin and samples only inside _UvRect, so
     // neighbouring frames of a sheet never bleed in. Modes 1-3 are the burst when the lethal hit is cancelled:
-    // a gold-white flash, a gold ring and four-point sparkles. All values come per renderer.
+    // a gold-white flash, a gold ring and four-point sparkles. Mode 4 is the glow behind the floating dagger icon:
+    // white at the center turning yellow, then orange at its soft edge, like a flame. All values come per renderer.
     Properties
     {
         _MainTex ("Player sprite texture (mode 0)", 2D) = "white" {}
-        _Mode ("0 outline, 1 flash, 2 ring, 3 sparkle", Float) = 0
+        _Mode ("0 outline, 1 flash, 2 ring, 3 sparkle, 4 icon glow", Float) = 0
         _Opacity ("Layer opacity", Float) = 1
         _UvRect ("Sprite rect in texture UV (min xy, max zw)", Vector) = (0, 0, 1, 1)
         _OutlineUv ("Outline width in texture UV", Vector) = (0.01, 0.01, 0, 0)
@@ -87,6 +88,14 @@ Shader "TrickalFanGame/Death Ward"
                     float band=1-smoothstep(_Thickness-aa,_Thickness+aa,abs(d-_Ring));
                     float edge=saturate((d-_Ring+_Thickness)/max(2*_Thickness,1e-4));
                     return half4(lerp(RimDeep,RimLight,edge),band*_Opacity);
+                }
+                if (_Mode>3.5)
+                {
+                    // Flame-like glow: white core, yellow middle, orange soft edge.
+                    float g=saturate(1-d);
+                    half3 c=lerp(half3(1,0.55,0.12),half3(1,0.86,0.28),smoothstep(0.05,0.45,g));
+                    c=lerp(c,half3(1,1,0.94),smoothstep(0.5,0.85,g));
+                    return half4(c,pow(g,1.5)*_Opacity);
                 }
                 // Four-point sparkle: two thin crossed spikes around a soft core.
                 float2 a=abs(q);
