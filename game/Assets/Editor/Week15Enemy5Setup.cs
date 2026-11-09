@@ -29,6 +29,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Setup Enemy-5 Fairy Enemy Assets and Encounters")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week15Enemy5Setup), RetiredSetup.Enemies);
             if (!string.Equals(SceneManager.GetActiveScene().path, Week13FrontendSetup.GameScenePath,
                     StringComparison.Ordinal))
             {

@@ -19,6 +19,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 13/Setup HUD-4C Floor Name")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week13Hud4CSetup), RetiredSetup.GameHud);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before HUD-4C setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

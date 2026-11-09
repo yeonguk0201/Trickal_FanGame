@@ -13,6 +13,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Setup Temporary Enemy Role Colors")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week15EnemyRoleColorSetup), RetiredSetup.Enemies);
             ApplyColor(Week15Enemy2Setup.BulhyojasonPrefabPath, BulhyojasonColor);
             ApplyColor(Week15Enemy2Setup.SansamoPrefabPath, SansamoColor);
             ApplyColor(Week15Enemy4Setup.SniperPrefabPath, HighBloodSugarColor);

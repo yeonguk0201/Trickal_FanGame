@@ -23,6 +23,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 21/Setup Spell-2 Afterimage")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week21Spell2Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Spell-2 setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

@@ -14,6 +14,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Setup Phase E-4 Enemy Balance")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week7EnemyBalanceSetup), RetiredSetup.Enemies);
             if (!ValidateContracts())
             {
                 return;

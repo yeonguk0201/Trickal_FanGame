@@ -23,6 +23,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 22/Setup Spell-4 Membership Card")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week22Spell4Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Spell-4 setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

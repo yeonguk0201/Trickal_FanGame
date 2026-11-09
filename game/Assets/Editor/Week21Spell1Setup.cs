@@ -18,6 +18,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 21/Setup Spell-1 Catch That One")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week21Spell1Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Spell-1 setup.");
 

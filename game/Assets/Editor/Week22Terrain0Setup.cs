@@ -117,6 +117,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 22/Setup Terrain-0 Pit Layouts")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week22Terrain0Setup), RetiredSetup.Rooms);
             int pitLayer = EnsurePitLayer();
             ConfigurePitCollisions(pitLayer);
             Week18Obstacle2Setup.OpenGameScene();

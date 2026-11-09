@@ -15,6 +15,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 16/Setup Reward-3 Room Integration")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week16Reward3Setup), RetiredSetup.GameHud);
             Week16Reward2Setup.Setup();
             Scene scene = EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath, OpenSceneMode.Single);
             RoomGraphAssembler assembler = FindSingle<RoomGraphAssembler>(scene, "RoomGraphAssembler");

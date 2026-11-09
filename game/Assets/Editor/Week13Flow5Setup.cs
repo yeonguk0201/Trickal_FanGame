@@ -13,6 +13,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 13/Setup Flow-5 Run Result")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week13Flow5Setup), RetiredSetup.Frontend);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Flow-5 setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

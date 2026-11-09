@@ -14,6 +14,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Setup Room-4 Seeded Template Selection")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week14Room4Setup), RetiredSetup.Rooms);
             Week14Room3Setup.Setup();
             EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath, OpenSceneMode.Single);
             FloorGenerator generator = GameObject.Find(Week8RandomRoomSetup.GeneratorObjectName)

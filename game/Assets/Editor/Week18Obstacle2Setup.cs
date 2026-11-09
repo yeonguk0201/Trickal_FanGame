@@ -72,6 +72,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 18/Setup Obstacle-2 Obstacle Layouts")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week18Obstacle2Setup), RetiredSetup.Rooms);
             OpenGameScene();
             DestructibleObstacle obstaclePrefab = Week18Obstacle1Setup.EnsurePrefab();
             GameObject largePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(Week14Room6Setup.LargePrefabPath);

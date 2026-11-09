@@ -58,6 +58,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 27/Setup Enemy-11 Jyubi King")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week27Enemy11Setup), RetiredSetup.Enemies);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Enemy-11 setup.");
             Week18Obstacle2Setup.OpenGameScene();

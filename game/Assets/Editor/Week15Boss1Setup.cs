@@ -38,6 +38,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Setup Boss-1 Buseureogi")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week15Boss1Setup), RetiredSetup.Enemies);
             if (!string.Equals(SceneManager.GetActiveScene().path, Week13FrontendSetup.GameScenePath,
                     StringComparison.Ordinal))
             {

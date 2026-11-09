@@ -63,6 +63,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 27/Setup Enemy-10 Self Destruct")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week27Enemy10Setup), RetiredSetup.Enemies);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Enemy-10 setup.");
             Week18Obstacle2Setup.OpenGameScene();

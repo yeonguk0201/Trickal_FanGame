@@ -74,6 +74,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 27/Setup Enemy-12 Lobbing Enemy")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week27Enemy12Setup), RetiredSetup.Enemies);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Enemy-12 setup.");
             Week18Obstacle2Setup.OpenGameScene();

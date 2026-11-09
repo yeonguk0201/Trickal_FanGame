@@ -20,6 +20,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 23/Setup Artifact-3 Aisia Wallet")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week23Artifact3Setup), RetiredSetup.Items);
             ArtifactSetupUtility.RequireEditMode(Piece);
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 

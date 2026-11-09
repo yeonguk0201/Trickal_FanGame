@@ -65,6 +65,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 16/Setup Content-0 First Item Contracts")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week16Content0Setup), RetiredSetup.Items);
             Week16Item0Setup.Setup();
             foreach (Week16Content0Spec spec in Week16Content0Catalog.All)
             {

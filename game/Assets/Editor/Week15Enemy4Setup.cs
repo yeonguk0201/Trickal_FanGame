@@ -12,6 +12,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Setup Enemy-4 Long-Range Sniper")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week15Enemy4Setup), RetiredSetup.Enemies);
             CreatePrefabIfMissing();
             ConfigurePrefab();
             AssetDatabase.SaveAssets();

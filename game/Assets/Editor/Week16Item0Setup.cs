@@ -9,6 +9,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 16/Setup Item-0 Common Item Kinds")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week16Item0Setup), RetiredSetup.Items);
             PhaseGArtifactContractSetup.Setup();
 
             string[] guids = AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/Items" });

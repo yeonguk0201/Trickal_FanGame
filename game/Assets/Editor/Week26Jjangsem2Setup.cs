@@ -62,6 +62,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 26/Setup Jjangsem-2 Four Jjangsem Spells")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week26Jjangsem2Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Jjangsem-2 setup.");
 

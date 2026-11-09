@@ -32,13 +32,13 @@
 
 | 조각 | 작업 | 선행 | 완료 기준 | 상태 |
 | ---- | ---- | ---- | --------- | ---- |
-| Auth-0 | 기기 키 인증, 웹 스킬 강화 제거 | B1 | §3.1 S1·S2. 쓰기 요청(Run 저장·스킬 강화)은 기기 키가 맞아야 받고, 다른 사용자의 키나 키 없는 요청은 거부. Web은 조회만 | 구현(2026-11-08, Backend Jest·build, Web lint·tsc·vitest·build, Unity `BetaAuth0Verification.Verify` 통과, 로컬 서버로 게임 스킬 강화 사용자 확인). Run 저장·재전송 수동 확인 대기 |
+| Auth-0 | 기기 키 인증, 웹 스킬 강화 제거 | B1 | §3.1 S1·S2. 쓰기 요청(Run 저장·스킬 강화)은 기기 키가 맞아야 받고, 다른 사용자의 키나 키 없는 요청은 거부. Web은 조회만 | 구현(2026-11-08, Backend Jest·build, Web lint·tsc·vitest·build, Unity `BetaAuth0Verification.Verify` 통과, 로컬 서버로 게임 스킬 강화 사용자 확인). 완료(2026-11-10, Run 저장·재전송과 헤더 없는 요청 401을 사용자가 확인, Deploy-0 운영 확인과 같은 결과) |
 | Offline-0 | 서버 없이 신규 등록·플레이 | Auth-0, Elif-3 | 26번 §3.1 완료 기준 그대로. 서버 등록 실패 시 로컬 프로필로 바로 시작, 서버가 살아나면 등록과 쌓인 Run 저장을 이어 함. 닉네임 충돌은 §3.1 S3 | 완료(2026-11-09, Unity `BetaOffline0Verification.Verify`와 Week13 Flow-3 Play 검증 통과, 사용자 Play로 수동 확인 3종) |
 | Offline-1 | 서버 없이 성장·스킬 강화 | Offline-0 | §3.1 S4. 서버 없이도 경험치·레벨·스킬 포인트가 오르고 스킬을 강화하며, 서버가 살아나면 Run과 강화를 순서대로 보내 서버 값과 같아짐 | 완료(2026-11-09, Unity `BetaOffline1Verification.Verify`(Backend 계약 파일 직접 대조 포함), `Week13SkillUpgradeVerification.Verify`, `BetaOffline0Verification.Verify`, `Week27Elif3Verification.Verify`, Flow-5 Play 검증 통과). 사용자 Play 수동 확인 (1) 미등록 오프라인 성장·강화, (2) 등록 후 순서 전송·Web 값 일치, (3) 등록된 프로필 오프라인 → 재연결 값 일치 확인(2026-11-09) |
 | Deploy-0 | Backend·DB·Web 운영 배포 | Auth-0 | §3.1 S6. 운영 DB 설정, 환경 변수 분리, CORS, 게임·Web의 API 주소 설정, 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회 | 완료(2026-11-09, Backend Jest·build, Web lint·build, Unity `BetaDeploy0Verification.Verify` 통과. Render·Neon·Vercel 배포 후 운영 API의 health·DB·헤더 없는 Run 저장 401·CORS 확인, 사용자 Play로 운영 서버 등록 → Run 저장 → 운영 Web 전적 확인) |
 | Layout-0 | Layout 추가 | B3 | 텍스트 Layout과 가져오기 도구(T7)로 작성, seed 재현·문 사이 경로·스폰·상자 위치 검증 | 구현(2026-11-09, Unity `RoomLayoutImporterVerification.ImportAndVerifyBatch`·`VerifyWithRegressionsBatch`, `Week25Trap1Verification.Verify` 통과, 사용자 Play 확인 — 고칠 방 없음) |
 | Sound-1 | 전투 피드백 효과음(적·사망·권능) | Sound-0 | 26번 §3.6 그대로. Play-2 전에 넣는다 | 예정 |
-| Verify-0 | 현재 계약 기준 회귀와 Setup 보존 | 위 변경 | 유효 검증의 통과/실패 목록, Setup 재실행 시 콘텐츠·GUID 보존, 계약 차이 출력 | 예정 |
+| Verify-0 | 현재 계약 기준 회귀와 Setup 보존 | 위 변경 | 유효 검증의 통과/실패 목록, Setup 재실행 시 콘텐츠·GUID 보존, 계약 차이 출력 | 구현(2026-11-10, 검증기 195개 통과, Setup 149개 중 유지 85·은퇴 62·내부 ID만 2·내용 변경 0, Unity↔Backend 계약 차이 0, Backend Jest 191 통과, §3.3). 완료(2026-11-10, 일시정지 화면 겹침·버튼 한 줄·스크롤 사용자 Play 확인) |
 | Balance-0 | 경제 측정 | Layout-0 | 26번 §7 "실제 플레이와 경제 측정" 그대로 | 예정 |
 | Play-2 | 여러 seed 실제 Run·저장·웹 확인 | Balance-0 | 무자원 필수 경로·3층 종료, 중복 보상·재추첨 없음, 아이템 전적 정상 | 예정 |
 | Build-0 | 실제 게임 빌드 | Play-2 | 정상 빌드에 개발 패널 미포함, 프로필 → Run → 저장 → 웹 확인, 저장 실패 재시도 | 예정 |
@@ -64,8 +64,7 @@
   `ApiClient.ProfileKeyHeader`). Run 저장은 키로 사용자를 찾고 `userId`는 선택이 됐다(보내면 키의 사용자와 같아야 함). 그래서
   Offline-0의 등록 전 Run도 `userId` 없이 보낼 수 있고, Auth-0 전에 쌓인 대기 Run도 그대로 보내진다. 오류는 키 없음
   `PROFILE_KEY_REQUIRED`(401), 다른 사용자 `PROFILE_KEY_MISMATCH`(403). Web의 스킬 강화 버튼·요청을 지우고 단계만 보인다.
-  수동 확인: 게임 스킬 강화 완료(2026-11-08 사용자). 남은 것은 로컬 서버로 Run 저장·재전송, 헤더 없이
-  `curl -X POST /api/runs`가 401인지.
+  수동 확인: 게임 스킬 강화(2026-11-08 사용자), Run 저장·재전송과 헤더 없는 `POST /api/runs` 401(2026-11-10 사용자 확인) 완료.
 - **Offline-0 구현 기록**: `LocalProfile`은 닉네임만 있으면 플레이할 수 있고(`IsRegistered`), 서버 사용자 ID가 있으면
   `HasServerAccount`다. 등록 전 Run의 소유자(`OwnerId`)는 기기 키이고, 등록되면 `ProfileRegistration`이 대기 Run을 서버
   사용자 ID로 옮긴다(`LocalPendingRunStorage.ReassignOwner`). 등록 요청이 네트워크 오류·5xx면 로컬 프로필로 바로 시작하고,
@@ -141,6 +140,43 @@
 - **ㄱ·ㄴ자 방(Shape-0, 후보)**: 사용자가 원함(2026-11-09). 직사각형이 아닌 방은 새 프로필이고, 생성기 겹침 판정·걸을 수
   있는 바닥과 벽 그림·카메라 구역·미니맵 모양·문 위치·Encounter가 모두 직사각형을 전제로 하므로 Layout-0과 분리한다.
   베타 뒤로 미룬다(2026-11-09 사용자 결정, §8).
+
+### 3.3 Verify-0(2026-11-10)
+
+세 가지 도구를 만들었다(실행법은 [05번](./05-development-setup.md) "Verify-0 전체 검증·Setup 재실행 검사").
+
+- **전체 검증** `BetaVerify0Runner`: `Verify()`가 있는 검증기를 모두 빈 Scene에서 하나씩 돌리고 결과를
+  `game/Logs/Verify0/verify-all.md`에 쓴다. 처음 194개 중 11개가 실패했고, 원인별로 고쳐 195개(계약 검사 추가) 모두 통과했다.
+  - 순서에 따라 실패하던 2개: `UserArtwork`(스프라이트·재질)와 `CombatEffectArtwork`(프레임)의 static 캐시가 Unity가 파괴한
+    객체를 그대로 돌려줬다. 파괴된 항목은 다시 만들도록 고쳤다(런타임 코드, 값 변경 없음).
+  - 이후 조각에서 바뀐 계약을 따라가지 못한 4개: 스파이크 경고 색(Trap-0에서 제거), 일시정지 버튼 크기(UX-0), 보상 풀
+    종류(Power-1 권능 추가), 상세 스탯 기본값. 지금 계약에 맞게 단언을 고쳤다.
+  - 열린 Scene이 필요한 3개(`Week13Frontend`, `Week7HighGradeSkill`, `Week7ChaserMonster`)와 일부러 오류 로그를 남기는 4개
+    (Slot-0·Power-1 거부 시험, Reward-2·HUD-7B의 Edit Mode EventSystem)는 실행기에 Scene과 예상 로그를 적었다.
+- **계약 차이** `BetaVerify0ContractVerification`: Unity 아이템 83개를 `backend/src/contracts/item-catalog.ts`와 ID·등급·isActive·
+  maxStacks·효과 종류와 수치까지 비교하고, 캐릭터를 seed와 비교한다. 결과는 `contract-diff.md`.
+  아이시아의 지갑의 엘리프 추첨 효과(`GainPermanentElifRollOnAcquire`, Elif-2)가 Backend 카탈로그에 빠져 있어 추가했다(설명 문구
+  포함, Backend Jest 191 통과). 운영 DB는 다음 배포의 seed로 반영된다. Backend에만 있는 `item-05·07·09·10`은 과거 전적 보존용
+  레거시라 참고로만 표시한다.
+- **Setup 재실행 보존** `BetaVerify0SetupRunner`: Setup을 하나씩 다시 실행해 바뀐 파일을 기록하고 git으로 되돌린다. 시작 때의
+  미커밋 파일은 백업에서 복원한다. 결과는 `setup-rerun.md`와 Setup별 diff(`setup-diffs/`).
+  - 처음 결과: 149개 중 78개 유지, 71개가 내용을 바꿨다.
+  - **일시정지 창 회귀**: UX-1 커밋(`decce5d`) 때 HUD-3C Setup이 다시 실행돼 일시정지 창이 예전 배치(목록 1024×600, 상세
+    스탯과 겹침)로 돌아가 있었다. HUD-3C가 HUD-7B 배치를, HUD-7B·7C·7D가 UX-0 버튼 줄을 다시 적용하도록 고치고 Scene을
+    복구했다(HUD-7B 배치: 목록 700×520, 제목 "일시정지", 안내 문구 위). Boss-Intro-0 오버레이는 일시정지 창 바로 아래에 둔다.
+  - **은퇴 62개**(`RetiredSetup`): 지금 값을 이후 조각이나 Layout 가져오기가 관리하는 Setup은 실행하면 안내만 하고 멈춘다.
+    아이템 18(풀 소속·충전 값), 방·Encounter·장애물 18, 적·보스 16, 예전 Game HUD 5, Frontend 5. 은퇴한 Setup을 부르는
+    유지 Setup은 없다. 각 검증기의 `Verify()`는 그대로 쓰고, 은퇴한 Setup을 부르는 `SetupAndVerifyBatch`만 멈춘다.
+  - **처음 분석에서 남았던 6개**는 모두 값이 같았다(diff를 오브젝트 단위로 다시 비교).
+    - `EnemyAttackAnimationSetup`·`EnemyMovementAnimationSetup`·`BossMovementAnimationSetup`: 나중에 생긴 필드를 기본값으로 적고
+      (`knockbackImmune: 0` 등), 보스 스프라이트 `.meta`에 생략돼 있던 기본 Import 설정을 모두 적는다. 한 번 실행한 결과를
+      커밋해 다시 실행해도 바뀌지 않게 했다.
+    - `FairyVillageArtworkSetup`(방 Prefab 41개)·`Week25Ux0Setup`(게임 안 설정 창 복사본): 오브젝트를 지우고 다시 만들어 내부
+      fileID와 순서만 바뀐다. 실행기가 IDONLY로 분류한다. 커밋할 필요가 없다.
+  - 최종(2026-11-10): 유지 85, 은퇴 62, IDONLY 2, 내용 변경 0. 전체 검증 195개 통과.
+- **수동 확인**: Game Scene Play → `Esc` → 일시정지 창에서 상세 스탯(왼쪽)과 보유 아티팩트 목록(오른쪽)이 겹치지 않고, 아래
+  버튼 네 개(돌아가기·설정·처음부터·홈으로)가 한 줄로 보이는지 본다. 아티팩트가 많을 때 목록이 스크롤되는지 `F1` 개발 패널로
+  아티팩트를 여러 개 얻어 확인한다.
 
 ## 4. 연출(Effect-0 남은 것)
 
@@ -264,15 +300,15 @@ Beta-0의 버전 표시·피드백 안내·조작 안내는 Menu 디자인과 �
 
 ## 10. 완료 체크리스트
 
-- [ ] B1~B4를 정했다. (B1 2026-11-08 결정)
-- [ ] 쓰기 요청이 기기 키로 확인되고 Web은 조회만 한다. (Auth-0)
+- [ ] B1~B4를 정했다. (B1 2026-11-08, B3 2026-11-09 결정)
+- [x] 쓰기 요청이 기기 키로 확인되고 Web은 조회만 한다. (Auth-0)
 - [x] 운영 환경에서 프로필 → Run 저장 → 웹 전적 조회가 된다. (Deploy-0)
-- [ ] 서버 없이 신규 등록과 플레이가 되고, 서버가 살아나면 쌓인 저장을 보낸다. (Offline-0)
+- [x] 서버 없이 신규 등록과 플레이가 되고, 서버가 살아나면 쌓인 저장을 보낸다. (Offline-0)
 - [x] 서버 없이 성장·스킬 강화가 되고, 서버가 살아나면 서버 값과 같아진다. (Offline-1)
 - [x] Layout을 추가하고 배치 검증을 통과했다. (Layout-0)
 - [ ] 적·사망·권능 효과음을 사용자 Play로 확인했다. (Sound-1)
 - [x] 피해 숫자가 TextMeshPro로 바뀌고 치명타가 구분된다. (Number-0)
-- [ ] 회귀 목록과 Setup 재실행 보존을 확인했다. (Verify-0)
+- [x] 회귀 목록과 Setup 재실행 보존을 확인했다. (Verify-0)
 - [ ] 여러 seed 실제 Run에서 경제·시간을 기록하고 저장·웹 전적을 확인했다. (Balance-0, Play-2)
 - [ ] 실제 빌드에서 개발 패널 없이 전체 흐름이 된다. (Build-0)
 - [ ] 버전 표시·피드백 경로·조작 안내·크레딧을 넣고 배포 채널에 올렸다. (Beta-0)

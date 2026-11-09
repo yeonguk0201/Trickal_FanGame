@@ -14,6 +14,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Setup Enemy-2 Melee Chasers")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week15Enemy2Setup), RetiredSetup.Enemies);
             ConfigurePrefab(
                 BulhyojasonPrefabPath,
                 "BulhyojasonEnemy",

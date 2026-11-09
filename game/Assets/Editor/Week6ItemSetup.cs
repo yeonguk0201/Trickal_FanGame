@@ -15,6 +15,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Setup Week 6 Items and Synergy")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week6ItemSetup), RetiredSetup.Items);
             if (SceneManager.GetActiveScene().path != ScenePath)
             {
                 EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);

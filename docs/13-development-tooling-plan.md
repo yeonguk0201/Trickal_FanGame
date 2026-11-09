@@ -743,3 +743,12 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 - [x] 사용자 함정 7종 수치를 반영하고 실제 Unity 출력 35필드 일치, 기존 프로필 불변과 단독 그림자 검증/재렌더를 확인했다 (`output/ground-shadow-traps-reviewed.log`, 종료 코드 0).
 - [x] 실제 Play 미술 검수: 사용자 수동 확인 완료(2026-10-20).
 - 실행 및 사용법은 `docs/05-development-setup.md`의 함정 7종 공용 그림자·미세 조정을 따른다.
+
+### Verify-0 전체 검증·계약 차이·Setup 재실행 검사 (2026-11-10)
+
+- [x] `BetaVerify0Runner`: 모든 `Verify()` 검증기를 빈 Scene에서 차례로 실행하고 통과/실패 목록을 남긴다. 195개 통과(2026-11-10).
+- [x] `BetaVerify0ContractVerification`: Unity 아이템·캐릭터와 Backend 카탈로그·seed를 필드 단위로 비교한다. 차이 0(레거시 4개 참고).
+- [x] `BetaVerify0SetupRunner`: Setup을 하나씩 다시 실행해 바뀐 파일과 diff를 남기고 되돌린다. 유지 85·은퇴 62·내부 ID만 2·내용 변경 0(30번 §3.3).
+- [x] `RetiredSetup`: 이후 조각이 값을 관리하는 Setup의 재실행을 막는다.
+- [ ] 전체 검증을 커밋 전에 자동으로 돌리는 것은 후보로 둔다(약 15분).
+- 실행법은 [개발 환경](./05-development-setup.md) "Verify-0 전체 검증·Setup 재실행 검사".

@@ -15,6 +15,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 27/Setup Elif-2 Permanent Elif")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week27Elif2Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Elif-2 setup.");
             if (Week17Resource1Setup.EnsurePrefab(TrickalFanGame.Resource.RunResourceType.Elif, out string error) == null)

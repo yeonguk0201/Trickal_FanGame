@@ -17,6 +17,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Setup Boss-2 Saemaeum Vault")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week15Boss2Setup), RetiredSetup.Enemies);
             Week15Boss1Setup.Setup();
             ConfigureSpriteImport();
             EnsurePrefabExists();

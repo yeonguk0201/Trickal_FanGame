@@ -76,8 +76,9 @@ namespace TrickalFanGame.Editor
                 Sprite lowered = trap.Visual.sprite;
                 root.GetComponent<FairyKingdomArtworkView>().Refresh();
                 trap.Tick(1.6f);
-                Require(trap.Visual.sprite == lowered && trap.Visual.color.a < 1f,
-                    "Warning must keep spikes retracted with warning tint.");
+                // Trap-0 removed the warning tint: spikes stay lowered and untinted until they rise.
+                Require(trap.Visual.sprite == lowered && trap.Visual.color == Color.white,
+                    "Spikes must stay lowered without a warning tint until they rise (Trap-0).");
                 trap.Tick(2.1f);
                 Require(trap.Visual.sprite.name == "trap-periodic-spikes" && trap.Visual.color == Color.white,
                     "Raised spikes must restore original artwork.");

@@ -12,7 +12,9 @@ namespace TrickalFanGame.Combat
         public static Sprite[] Frames(string name, int columns = 1, int rows = 1, Vector2? pivot = null)
         {
             string key = name + columns + rows + pivot;
-            if (Sheets.TryGetValue(key, out Sprite[] cached)) return cached;
+            // Rebuild frames that Unity has since destroyed (e.g. after unloading unused assets).
+            if (Sheets.TryGetValue(key, out Sprite[] cached) && System.Array.TrueForAll(cached, frame => frame != null))
+                return cached;
             Texture2D texture = Resources.Load<Texture2D>("CombatEffects/" + name);
             if (texture == null) return System.Array.Empty<Sprite>();
             var frames = new Sprite[columns * rows];
@@ -34,7 +36,7 @@ namespace TrickalFanGame.Combat
                     anchor, 100f, 0, SpriteMeshType.FullRect);
                 frames[i].name = name + "-" + i;
             }
-            Sheets.Add(key, frames);
+            Sheets[key] = frames;
             return frames;
         }
 
