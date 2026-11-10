@@ -21,6 +21,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 20/Setup Special-2 Player Bomb")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week20Special2Setup), RetiredSetup.Rooms);
             PlacedBomb prefab = EnsurePlacedBombPrefab();
             Scene scene = EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath, OpenSceneMode.Single);
             PlayerMovement player = FindSingle<PlayerMovement>(scene, "player");

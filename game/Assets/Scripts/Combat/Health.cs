@@ -56,6 +56,7 @@ namespace TrickalFanGame.Combat
         public event Action Died;
         public event Action<float> Healed;
         public static event Action<Health, DamageContext, DamageResult> AnyDamageResolved;
+        public static event Action<Health, DamageContext> AnyDamageBlocked;
 
         private void Awake()
         {
@@ -118,7 +119,14 @@ namespace TrickalFanGame.Combat
             }
 
             float amount = result.FinalDamage;
-            if (IsDead || IsInvulnerable || amount <= 0)
+            if (!IsDead && amount > 0f && IsInvulnerable)
+            {
+                // Number-0: a hit that invulnerability stopped, so the target can show "무적 0".
+                AnyDamageBlocked?.Invoke(this, context);
+                return;
+            }
+
+            if (IsDead || amount <= 0)
             {
                 return;
             }

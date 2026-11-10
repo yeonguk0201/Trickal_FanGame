@@ -25,6 +25,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Setup Boss-3 Crayon Hero")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week15Boss3Setup), RetiredSetup.Enemies);
             Week15Boss2Setup.Setup();
             ConfigureSpriteImport(BossSpritePath);
             ConfigureSpriteImport(ArcherSpritePath);

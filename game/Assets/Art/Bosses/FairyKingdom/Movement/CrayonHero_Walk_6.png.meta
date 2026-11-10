@@ -110,7 +110,7 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData:
+      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
@@ -118,17 +118,17 @@ TextureImporter:
       spriteID: 252c305bd14b4fcdb7c0d4b44098d5d1
       internalID: 1432606091510988506
       vertices: []
-      indices:
+      indices: 
       edges: []
       weights: []
     outline: []
-    customData:
+    customData: 
     physicsShape: []
     bones: []
     spriteID: 5105a37c8cc14964b6ada3dff34cca9c
     internalID: 0
     vertices: []
-    indices:
+    indices: 
     edges: []
     weights: []
     secondaryTextures: []
@@ -136,8 +136,8 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       CrayonHero_Walk_6_0: 1432606091510988506
-  mipmapLimitGroupName:
+  mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  userData:
-  assetBundleName:
-  assetBundleVariant:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

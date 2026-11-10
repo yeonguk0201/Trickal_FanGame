@@ -69,6 +69,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 19/Setup Difficulty-1 Room Difficulty")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week19Difficulty1Setup), RetiredSetup.Rooms);
             Week18Obstacle2Setup.OpenGameScene();
             FloorGenerator generator = GameObject.Find(Week8RandomRoomSetup.GeneratorObjectName)
                 ?.GetComponent<FloorGenerator>();

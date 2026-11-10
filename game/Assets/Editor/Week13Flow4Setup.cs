@@ -15,6 +15,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 13/Setup Flow-4 Run Launch")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week13Flow4Setup), RetiredSetup.Frontend);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Flow-4 setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

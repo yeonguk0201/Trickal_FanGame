@@ -13,6 +13,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Setup Boss-4 Full Run Binding")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week15Boss4Setup), RetiredSetup.Enemies);
             Week15Boss3Setup.Setup();
             if (!string.Equals(SceneManager.GetActiveScene().path, Week13FrontendSetup.GameScenePath,
                     StringComparison.Ordinal))

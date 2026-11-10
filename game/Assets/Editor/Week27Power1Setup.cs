@@ -91,6 +91,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 27/Setup Power-1 Active Powers")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week27Power1Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Power-1 setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

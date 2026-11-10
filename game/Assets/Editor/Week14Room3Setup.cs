@@ -25,6 +25,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Setup Room-3 Small Basic Wide Templates")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week14Room3Setup), RetiredSetup.Rooms);
             Week14Room1Setup.Setup();
             GameObject basicPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(Week8GridFloorSetup.PrefabPath);
             if (basicPrefab == null)

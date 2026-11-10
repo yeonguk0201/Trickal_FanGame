@@ -33,6 +33,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 25/Setup Enemy-7 Jyubi Swarm and Crumb Blast")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week25Enemy7Setup), RetiredSetup.Enemies);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Enemy-7 setup.");
             Week18Obstacle2Setup.OpenGameScene();

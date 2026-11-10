@@ -121,6 +121,8 @@ namespace TrickalFanGame.Editor
 
             GamePauseArtifactView pauseView = Component<GamePauseArtifactView>(overlayRect.gameObject);
             pauseView.Configure(inventory, overlay, content, entryTemplate, empty);
+            // Keep the later pause layout when HUD-7B has already been applied (Verify-0).
+            if (panel.Find("Detailed Stats") != null) Week13Hud7BSetup.ApplyLayout(panel);
 
             foreach (Component component in overlayRect.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);

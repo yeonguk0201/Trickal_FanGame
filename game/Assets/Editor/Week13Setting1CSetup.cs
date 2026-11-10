@@ -18,6 +18,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 13/Setup Setting-1C Detailed Stats HUD")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week13Setting1CSetup), RetiredSetup.Frontend);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Setting-1C setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

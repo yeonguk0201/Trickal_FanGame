@@ -45,6 +45,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Setup Room-6 Tall Large and Boss Profiles")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week14Room6Setup), RetiredSetup.Rooms);
             Week14Encounter3Setup.Setup();
             GameObject basicPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(Week8GridFloorSetup.PrefabPath);
             if (basicPrefab == null)

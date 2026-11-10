@@ -18,6 +18,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 13/Setup HUD-4A Minimap Foundation")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week13Hud4ASetup), RetiredSetup.GameHud);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before HUD-4A setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

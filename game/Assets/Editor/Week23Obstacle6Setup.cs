@@ -48,6 +48,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 23/Setup Obstacle-6 Remaining Obstacles")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week23Obstacle6Setup), RetiredSetup.Rooms);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Obstacle-6 setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

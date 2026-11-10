@@ -120,6 +120,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Setup Phase G-1 Artifact Contracts")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(PhaseGArtifactContractSetup), RetiredSetup.Items);
             EnsureFolder();
 
             foreach (PhaseGArtifactSpec spec in PhaseGArtifactCatalog.All)

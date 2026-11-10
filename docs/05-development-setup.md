@@ -2525,3 +2525,42 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
   캐릭터 선택 → 스킬 강화 화면에 같은 레벨·포인트, 강화하면 `오프라인으로 강화했어요` → 다음 Run에서 강화된 스킬이 적용된다.
   (2) 서버를 켜고 재실행 → 타이틀에서 등록과 Run·강화 전송 → 스킬 강화 화면과 Web 사용자 페이지의 레벨·경험치·스킬 단계가
   같다. (3) 등록된 프로필로 서버를 끄고 Run·강화 → 서버를 켜고 재실행 → 같은 값으로 맞춰진다.
+
+## Verify-0 전체 검증·Setup 재실행 검사 (2026-11-10)
+
+결과 파일은 모두 `game/Logs/Verify0/`(git 제외)에 생긴다. 메뉴는 `Trickal Fan Game > Beta`에 있다.
+
+- **전체 검증**: 메뉴 `Run Verify-0 All Verifiers`, 배치는
+  `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.BetaVerify0Runner.RunAllBatch -logFile <로그 경로>`.
+  `Verify()`가 있는 검증기를 이름 순서로 빈 Scene에서 하나씩 실행하고(열린 Scene이 필요한 검증기는 실행기의 `RequiredScenes`),
+  `verify-all.md`에 PASS·FAIL·ERRLOG(예외는 없지만 오류 로그가 남음)를 쓴다. 일부러 남기는 오류 로그는 실행기의
+  `ExpectedErrors`에 이유와 함께 적는다. 약 15분 걸린다. 모두 통과하면 종료 코드 0이다.
+- **일부만**: `-verify0Filter UserArtwork,Week16Reward0`처럼 클래스 이름 일부를 쉼표로 넘긴다. 두 실행기 모두 쓴다.
+- **계약 차이**: 메뉴 `Verify Verify-0 Unity Backend Contract`(전체 검증에도 포함). Unity 아이템 에셋과
+  `backend/src/contracts/item-catalog.ts`, 캐릭터와 `backend/prisma/seed.ts`를 비교해 `contract-diff.md`에 쓴다. 아이템을 추가·수정하면
+  Backend 카탈로그도 같이 바꿔야 통과한다.
+- **Setup 재실행 검사**: 메뉴 `Run Verify-0 Setup Rerun Check`, 배치 메서드
+  `TrickalFanGame.Editor.BetaVerify0SetupRunner.RunAllBatch`. `Setup()`이 있는 Setup을 하나씩 실행하고 바뀐 파일을 기록한 뒤
+  되돌린다. 시작 때 미커밋이던 파일(코드 제외)은 백업해 두었다가 그 내용으로 복원한다. `setup-rerun.md`에 KEEP·RETIRED·NOISE(공백만)·
+  IDONLY(내부 fileID·순서·들여쓰기만, 커밋 불필요)·CHANGED·FAIL, `setup-diffs/<Setup>.diff`에 바뀐 내용을 남긴다. 약 5~12분.
+- **은퇴한 Setup**: `RetiredSetup.Stop`으로 시작하는 Setup은 실행하면 이유를 알리고 멈춘다(배치에서는 `RetiredSetupException`).
+  그 Setup의 값을 바꾸려면 지금 그 값을 관리하는 쪽(이후 조각의 Setup, Layout 가져오기, 에셋 직접 수정)을 고친다. 새 Setup은
+  재실행해도 다른 Setup이 정한 값을 되돌리지 않게 작성하고, 이 검사에서 KEEP인지 확인한다.
+
+## 메뉴 디자인 Menu (2026-11-10)
+
+계획은 [26번 §3.5](./26-seventh-month-plan.md), 도구 상태는 [13번](./13-development-tooling-plan.md) "메뉴 부품 가져오기·화면 캡처".
+
+- **부품 다시 가져오기**: 저장소 루트에서 `python tools/artwork/package_menu_ui.py`. 원본은 `output/menu-components-v2/`(git 제외)이고
+  결과는 `game/Assets/Art/UI/Menu/`에 덮어쓴다. 그 뒤 Unity 메뉴 `Trickal Fan Game > Menu > Setup Menu-1 Art Import`로 Import 설정과
+  9-slice 경계를 맞춘다(경계 값은 `MenuArtSetup.Borders`).
+- **설정 화면(Menu-5)**: 메뉴 `Trickal Fan Game > Menu > Setup Menu-5 Settings`. Frontend 설정 패널을 꾸민 뒤 UX-0 Setup을 이어 실행해
+  일시정지 설정에도 같은 패널을 복사한다. 검증은 `Verify Menu-5 Settings`, 배치는
+  `-executeMethod TrickalFanGame.Editor.Menu5SettingsVerification.SetupAndVerifyBatch`(Setup 두 번, 검증, 캡처).
+- **크레딧(Menu-5)**: 메뉴 `Setup Menu-5 Credits`, 검증 `Verify Menu-5 Credits`, 배치
+  `Menu5CreditsVerification.SetupAndVerifyBatch`. Credits-0 Setup(`Credits > Setup Credits Screen`)도 끝에 같은 모양을 적용한다.
+- **캐릭터 선택·스킬 강화(Menu-3)**: 메뉴 `Setup Menu-3 Character Select and Skill Upgrade`, 검증
+  `Verify Menu-3 Character Select and Skill Upgrade`, 배치 `Menu3CharacterVerification.SetupAndVerifyBatch`. Setup은
+  `erpin` 에셋의 메뉴 표시 필드가 비어 있을 때만 채운다(이미 고친 값은 유지).
+- **화면 캡처**: 메뉴 `Capture Menu-5 Settings`·`Capture Menu-5 Credits`·`Capture Menu-3 Screens` 또는 각 검증기의 `CaptureBatch`.
+  `-nographics` 없이 실행한다. 결과는 `output/menu-review/<화면>-1920x1080.png`, `...-1280x720.png`. Scene은 저장하지 않고 다시 연다.

@@ -38,6 +38,9 @@ description: TrickalFanGame Unity 변경에 맞는 현재 Editor 검증기를 �
 | `DevelopmentGamePanel` | `Week20DevPanelVerification.Verify` | — |
 | 전투 효과음(`CombatSfxSetup`, `PlayerCombatAudio`, `GameAudioController` 큐) | `CombatSfxVerification.Verify` (클립을 바꿔 다시 들여와야 하면 `SetupAndVerifyBatch`, Scene 저장함) | `CombatSfxVerification.VerifyWithRegressionsBatch` |
 | 사용자 제공 원화 연결 | `UserArtworkVerification.Verify` | — |
+| 아이템 에셋 추가·수정(Backend 카탈로그와 대조) | `BetaVerify0ContractVerification.Verify` | — |
+| Setup 코드를 고치거나 새로 만듦(재실행이 다른 값을 되돌리는지) | `BetaVerify0SetupRunner.RunAllBatch -verify0Filter <Setup 이름>` | 전체: `BetaVerify0SetupRunner.RunAllBatch` |
+| 여러 조각에 걸친 공용 기반·베타 전 전체 점검 | — | `BetaVerify0Runner.RunAllBatch`(전체 검증기, 약 15분) |
 | 주차 조각(`Week<NN><조각>Setup`과 그 런타임 코드) | 같은 이름의 `Week<NN><조각>Verification.Verify` | 같은 클래스의 `VerifyWithRegressionsBatch` (있을 때) |
 
 ## 검증기 선택

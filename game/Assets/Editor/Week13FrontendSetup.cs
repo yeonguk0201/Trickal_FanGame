@@ -26,6 +26,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 13/Setup Frontend Flow")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week13FrontendSetup), RetiredSetup.Frontend);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Frontend setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

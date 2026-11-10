@@ -45,6 +45,7 @@ namespace TrickalFanGame.Editor
             if (title == null || warning == null || actionLabel == null)
                 throw new InvalidOperationException("HUD-7C confirmation text references are missing.");
             view.ConfigureRestartRun(restartButton, title, warning, actionLabel);
+            Week25Ux0Setup.ReapplyPauseButtons(view);
             EnsureGlyphs(font);
 
             foreach (Component component in view.GetComponentsInChildren<Component>(true))

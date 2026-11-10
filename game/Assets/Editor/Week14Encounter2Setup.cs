@@ -19,6 +19,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Setup Encounter-2 Mixed Encounters")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week14Encounter2Setup), RetiredSetup.Rooms);
             Week14Encounter1Setup.Setup();
             GameObject chaser = AssetDatabase.LoadAssetAtPath<GameObject>(ChaserPrefabPath);
             GameObject ranged = AssetDatabase.LoadAssetAtPath<GameObject>(RangedPrefabPath);

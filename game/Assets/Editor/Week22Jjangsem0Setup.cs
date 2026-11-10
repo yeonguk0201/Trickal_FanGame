@@ -27,6 +27,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 22/Setup Jjangsem-0 Bigwood Fruit")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week22Jjangsem0Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Jjangsem-0 setup.");
 

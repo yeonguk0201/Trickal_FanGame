@@ -24,6 +24,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 22/Setup Flight-0 Fake Wings")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week22Flight0Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Flight-0 setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

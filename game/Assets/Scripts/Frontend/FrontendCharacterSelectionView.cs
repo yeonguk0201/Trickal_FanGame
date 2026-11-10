@@ -24,7 +24,16 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private Button confirmButton;
         [SerializeField] private Button backButton;
 
+        // Menu-3: info panel, previous/next arrows and "준비중" slots that fill the roster grid.
+        [SerializeField] private FrontendCharacterDetailsView detailsView;
+        [SerializeField] private Button previousButton;
+        [SerializeField] private Button nextButton;
+        [SerializeField] private GameObject comingSoonTemplate;
+        [SerializeField, Min(0)] private int slotCount;
+        [SerializeField] private GameObject statusBackground; // hidden while the status line is empty
+
         private readonly List<FrontendCharacterCardView> cards = new();
+        private readonly List<GameObject> comingSoonSlots = new();
         private CharacterDefinition selectedCharacter;
         private bool confirmed;
 
@@ -37,6 +46,12 @@ namespace TrickalFanGame.Frontend
         public RectTransform CardContainer => cardContainer;
         public FrontendCharacterCardView CardTemplate => cardTemplate;
         public FrontendCharacterSelectionPurpose Purpose { get; private set; }
+        public FrontendCharacterDetailsView DetailsView => detailsView;
+        public Button PreviousButton => previousButton;
+        public Button NextButton => nextButton;
+        public GameObject ComingSoonTemplate => comingSoonTemplate;
+        public int SlotCount => slotCount;
+        public IReadOnlyList<GameObject> ComingSoonSlots => comingSoonSlots;
 
         public event Action<string> OnCharacterConfirmed;
         public event Action<CharacterDefinition> OnUpgradeCharacterConfirmed;
@@ -53,16 +68,42 @@ namespace TrickalFanGame.Frontend
             backButton = back;
         }
 
+        public void ConfigurePresentation(FrontendCharacterDetailsView details, Button previous, Button next,
+            GameObject comingSoon, int slots, GameObject statusPill = null)
+        {
+            statusBackground = statusPill;
+            detailsView = details;
+            previousButton = previous;
+            nextButton = next;
+            comingSoonTemplate = comingSoon;
+            slotCount = slots;
+        }
+
         private void OnEnable()
         {
             if (confirmButton != null) confirmButton.onClick.AddListener(ConfirmSelection);
             if (backButton != null) backButton.onClick.AddListener(RequestBack);
+            if (previousButton != null) previousButton.onClick.AddListener(SelectPrevious);
+            if (nextButton != null) nextButton.onClick.AddListener(SelectNext);
         }
 
         private void OnDisable()
         {
             if (confirmButton != null) confirmButton.onClick.RemoveListener(ConfirmSelection);
             if (backButton != null) backButton.onClick.RemoveListener(RequestBack);
+            if (previousButton != null) previousButton.onClick.RemoveListener(SelectPrevious);
+            if (nextButton != null) nextButton.onClick.RemoveListener(SelectNext);
+        }
+
+        public void SelectPrevious() => Step(-1);
+        public void SelectNext() => Step(1);
+
+        private void Step(int direction)
+        {
+            if (confirmed || cards.Count == 0) return;
+            int index = cards.FindIndex(card => card.Character == selectedCharacter);
+            int next = index < 0 ? 0 : (index + direction + cards.Count) % cards.Count;
+            Select(cards[next].Character);
         }
 
         public void Show(FrontendCharacterSelectionPurpose purpose = FrontendCharacterSelectionPurpose.StartRun)
@@ -73,16 +114,20 @@ namespace TrickalFanGame.Frontend
             selectedCharacter = null;
             confirmed = false;
             foreach (FrontendCharacterCardView card in cards) card.SetSelected(false);
+            if (detailsView != null) detailsView.Bind(cards.Count > 0 ? cards[0].Character : null);
             confirmButton.interactable = false;
-            statusText.text = cards.Count > 0
+            SetStatus(cards.Count > 0
                 ? purpose == FrontendCharacterSelectionPurpose.UpgradeSkills
                     ? "강화할 캐릭터를 선택해 주세요."
                     : SelectMessage
-                : EmptyMessage;
+                : EmptyMessage);
             TMP_Text confirmLabel = confirmButton != null ? confirmButton.GetComponentInChildren<TMP_Text>() : null;
             if (confirmLabel != null) confirmLabel.text = purpose == FrontendCharacterSelectionPurpose.UpgradeSkills
                 ? "강화 화면으로" : "게임 시작";
-            Focus(cards.Count > 0 ? cards[0].Button : backButton);
+            // Menu-3 (user decision 2026-11-10): the first character starts selected, so Enter starts right away.
+            // Selecting still only marks the card; a Run starts only on confirm.
+            if (cards.Count > 0) Select(cards[0].Character);
+            else Focus(backButton);
         }
 
         public void Hide()
@@ -97,7 +142,8 @@ namespace TrickalFanGame.Frontend
             if (confirmed || character == null || cards.All(card => card.Character != character)) return;
             selectedCharacter = character;
             foreach (FrontendCharacterCardView card in cards) card.SetSelected(card.Character == character);
-            statusText.text = $"{character.DisplayName}을(를) 선택했습니다.";
+            if (detailsView != null) detailsView.Bind(character);
+            SetStatus(string.Empty); // the slot ring, 선택됨 badge and info panel already show the choice
             confirmButton.interactable = true;
             Focus(confirmButton);
         }
@@ -107,11 +153,17 @@ namespace TrickalFanGame.Frontend
             if (confirmed || selectedCharacter == null) return;
             confirmed = true;
             confirmButton.interactable = false;
-            statusText.text = string.Format(ConfirmedMessageFormat, selectedCharacter.DisplayName);
+            SetStatus(string.Format(ConfirmedMessageFormat, selectedCharacter.DisplayName));
             if (Purpose == FrontendCharacterSelectionPurpose.UpgradeSkills)
                 OnUpgradeCharacterConfirmed?.Invoke(selectedCharacter);
             else
                 OnCharacterConfirmed?.Invoke(selectedCharacter.CharacterId);
+        }
+
+        private void SetStatus(string message)
+        {
+            statusText.text = message;
+            if (statusBackground != null) statusBackground.SetActive(!string.IsNullOrEmpty(message));
         }
 
         public void RequestBack()
@@ -133,6 +185,17 @@ namespace TrickalFanGame.Frontend
                 cards.Add(card);
             }
             cardTemplate.gameObject.SetActive(false);
+            if (comingSoonTemplate != null)
+            {
+                for (int i = cards.Count; i < slotCount; i++)
+                {
+                    GameObject slot = Instantiate(comingSoonTemplate, cardContainer);
+                    slot.name = "ComingSoonSlot";
+                    slot.SetActive(true);
+                    comingSoonSlots.Add(slot);
+                }
+                comingSoonTemplate.SetActive(false);
+            }
             ConfigureNavigation();
         }
 

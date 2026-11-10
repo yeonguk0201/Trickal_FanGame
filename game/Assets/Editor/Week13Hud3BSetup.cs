@@ -18,6 +18,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 13/Setup HUD-3B Artifact Acquisition Toast")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week13Hud3BSetup), RetiredSetup.GameHud);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before HUD-3B setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

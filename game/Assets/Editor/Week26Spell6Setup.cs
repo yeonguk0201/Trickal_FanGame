@@ -49,6 +49,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 26/Setup Spell-6 Five Spells")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week26Spell6Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Spell-6 setup.");
 

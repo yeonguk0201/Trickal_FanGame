@@ -14,7 +14,8 @@ namespace TrickalFanGame.Frontend
 
         public static Sprite Load(string key)
         {
-            if (!sprites.TryGetValue(key, out Sprite sprite))
+            // Reload a cached sprite that Unity has since destroyed; a missing resource stays cached as null.
+            if (!sprites.TryGetValue(key, out Sprite sprite) || (!ReferenceEquals(sprite, null) && sprite == null))
             {
                 sprite = Resources.Load<Sprite>("UserArtwork/" + key);
                 sprites[key] = sprite;
@@ -26,7 +27,7 @@ namespace TrickalFanGame.Frontend
         {
             if (index == 3) return Load("erpin-high-grade");
             string key = "hud-" + index;
-            if (sprites.TryGetValue(key, out Sprite cached)) return cached;
+            if (sprites.TryGetValue(key, out Sprite cached) && cached != null) return cached;
             Sprite sheet = Load("hud-icons");
             if (sheet == null) return null;
             float w = sheet.texture.width / 2f, h = sheet.texture.height / 2f;
@@ -43,7 +44,7 @@ namespace TrickalFanGame.Frontend
         // spent: an artifact whose once-per-Run effect is used up, drawn grey (UI only).
         public static Material ItemMaterial(bool spell, bool spent = false)
         {
-            if (materials.TryGetValue((spell, spent), out Material material)) return material;
+            if (materials.TryGetValue((spell, spent), out Material material) && material != null) return material;
             Shader shader = Resources.Load<Shader>("UserArtwork/ItemArtwork");
             if (shader == null) return null;
             material = new Material(shader)

@@ -15,6 +15,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 19/Setup Spawn-1 Placement Roles")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week19Spawn1Setup), RetiredSetup.Rooms);
             Week18Obstacle2Setup.OpenGameScene();
             FloorGenerator generator = GameObject.Find(Week8RandomRoomSetup.GeneratorObjectName)
                 ?.GetComponent<FloorGenerator>();

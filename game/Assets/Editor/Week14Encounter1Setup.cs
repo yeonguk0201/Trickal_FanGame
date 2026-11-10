@@ -18,6 +18,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Setup Encounter-1 Contract")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week14Encounter1Setup), RetiredSetup.Rooms);
             Week14Room5Setup.Setup();
             EnsureFolder(EncounterFolder);
             RoomProfile[] profiles =

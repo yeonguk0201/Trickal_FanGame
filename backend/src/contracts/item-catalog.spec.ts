@@ -962,7 +962,10 @@ describe('Item catalog', () => {
       ITEM_CATALOG.find((item) => item.id === 'artifact-aisia-wallet'),
     ).toMatchObject({
       name: '아이시아의 지갑',
-      effects: [{ type: 'GainGoldOnAcquire', magnitude: 100 }],
+      effects: [
+        { type: 'GainGoldOnAcquire', magnitude: 100 },
+        { type: 'GainPermanentElifRollOnAcquire' },
+      ],
     });
     expect(
       ITEM_CATALOG.find((item) => item.id === 'artifact-kanta-top'),

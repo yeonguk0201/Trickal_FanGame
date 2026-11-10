@@ -25,6 +25,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 22/Setup Jjangsem-1 Melune Card")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week22Jjangsem1Setup), RetiredSetup.Items);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Jjangsem-1 setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

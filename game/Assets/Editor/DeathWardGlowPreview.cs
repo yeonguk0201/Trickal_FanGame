@@ -15,7 +15,7 @@ namespace TrickalFanGame.Editor
         private DeathWardGlow glow;
         private float duration = DeathWardGlowVerification.Duration;
         private float time = 0.06f, speed = 0.5f;
-        private bool playing, flip, showOutline = true, showFlash = true, showRing = true, showSparkles = true;
+        private bool playing, flip, showOutline = true, showFlash = true, showRing = true, showSparkles = true, showIcon = true;
         private double lastTick;
 
         [MenuItem("Trickal Fan Game/Effects/Preview Dagger Ward Glow")]
@@ -69,7 +69,7 @@ namespace TrickalFanGame.Editor
         private void OnGUI()
         {
             EditorGUILayout.HelpBox("Edit Mode · runtime glow on Erpin's walking frame in a temporary Scene. The game " +
-                "invulnerability is 5 s; the last second blinks. Final art review uses SampleScene Play " +
+                "invulnerability is 5 s; the last second blinks, and the dagger icon fades out 0.5 s after it. Final art review uses SampleScene Play " +
                 "(F1 > — Artifact — > Lethal hit).", MessageType.Info);
             if (GUILayout.Button("Open / reset Scene preview")) CreatePreview();
             EditorGUI.BeginChangeCheck();
@@ -81,7 +81,8 @@ namespace TrickalFanGame.Editor
             showFlash = EditorGUILayout.Toggle("Flash", showFlash);
             showRing = EditorGUILayout.Toggle("Ring", showRing);
             showSparkles = EditorGUILayout.Toggle("Sparkles", showSparkles);
-            time = EditorGUILayout.Slider("Time (seconds)", time, 0f, duration);
+            showIcon = EditorGUILayout.Toggle("Dagger icon", showIcon);
+            time = EditorGUILayout.Slider("Time (seconds)", time, 0f, duration + DeathWardGlow.IconFadeOut);
             if (EditorGUI.EndChangeCheck() || durationChanged) Rebuild(durationChanged);
             speed = EditorGUILayout.Slider("Playback speed", speed, 0.05f, 1f);
             playing = EditorGUILayout.Toggle("Loop playback", playing);
@@ -95,7 +96,7 @@ namespace TrickalFanGame.Editor
             lastTick = now;
             if (player != null && view == null) { playing = false; Cleanup(); return; }
             if (!playing || view == null) return;
-            time = Mathf.Repeat(time + delta * speed, duration);
+            time = Mathf.Repeat(time + delta * speed, duration + DeathWardGlow.IconFadeOut);
             Rebuild(false);
             Repaint();
         }
@@ -111,7 +112,7 @@ namespace TrickalFanGame.Editor
             }
             player.flipX = flip;
             glow.RenderAt(time);
-            glow.SetPreviewLayers(showOutline, showFlash, showRing, showSparkles);
+            glow.SetPreviewLayers(showOutline, showFlash, showRing, showSparkles, showIcon);
             view.Repaint();
         }
 

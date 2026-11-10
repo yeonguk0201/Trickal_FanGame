@@ -67,6 +67,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 25/Setup Enemy-9 Nururing Fairy Warrior")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week25Enemy9Setup), RetiredSetup.Enemies);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Enemy-9 setup.");
             Week18Obstacle2Setup.OpenGameScene();

@@ -13,6 +13,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 15/Setup Boss-0 Common Runtime")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week15Boss0Setup), RetiredSetup.Enemies);
             Week15Enemy5Setup.Setup();
             GameObject contents = PrefabUtility.LoadPrefabContents(BossPrefabPath);
             if (contents == null) throw new UnityException($"Missing Boss-0 prefab at {BossPrefabPath}.");

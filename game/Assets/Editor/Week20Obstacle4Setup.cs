@@ -100,6 +100,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 20/Setup Obstacle-4 Fairy Kingdom Obstacles and Layouts")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week20Obstacle4Setup), RetiredSetup.Rooms);
             Week18Obstacle2Setup.OpenGameScene();
             DestructibleObstacle obstaclePrefab = Week18Obstacle1Setup.EnsurePrefab();
             ObstacleVariantTable variantTable = EnsureVariantAssets();

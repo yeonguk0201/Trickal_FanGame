@@ -29,6 +29,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 18/Setup Obstacle-1 Destructible Obstacle")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week18Obstacle1Setup), RetiredSetup.Rooms);
             DestructibleObstacle prefab = EnsurePrefab();
             Selection.activeObject = prefab.gameObject;
             Debug.Log("Obstacle-1 destructible obstacle ready: a 1x1 Environment block that breaks after 5 player " +

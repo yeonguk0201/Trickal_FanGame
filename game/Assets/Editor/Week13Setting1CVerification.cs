@@ -43,8 +43,9 @@ namespace TrickalFanGame.Editor
             Assert(settings.DetailedStatsHudToggle != null, "Settings requires the detailed stats HUD toggle.");
             Assert(settings.DetailedStatsHudToggle.transform.parent == settings.transform,
                 "The detailed stats toggle must stay inside the settings popup.");
-            Assert(settings.GetComponent<RectTransform>().sizeDelta == new Vector2(720, 720),
-                "The expanded settings popup must remain within the 720px UI-spec height.");
+            // Menu-5 widened the popup for the magic-library layout; docs/16 allows popups up to 1120 × 760.
+            Assert(settings.GetComponent<RectTransform>().sizeDelta == Menu5SettingsSetup.PanelSize,
+                "The settings popup must keep the Menu-5 size inside the 1120 × 760 UI-spec popup limit.");
             TMP_Text label = settings.transform.Find("DetailedStatsHudLabel")?.GetComponent<TMP_Text>();
             Assert(label != null && label.text == "상세 스탯 표시" && label.fontSize >= 20f,
                 "The detailed stats toggle needs a readable Korean label.");

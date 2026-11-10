@@ -25,6 +25,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 16/Setup Reward-2 Placeholder Cards")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week16Reward2Setup), RetiredSetup.GameHud);
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Exit Play Mode before Reward-2 setup.");
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

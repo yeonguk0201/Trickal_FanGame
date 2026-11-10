@@ -47,17 +47,26 @@ namespace TrickalFanGame.Editor
                 Random.State randomBefore = Random.state;
                 DeathWardGlow glow = DeathWardGlow.Create(player, Duration);
                 Require(glow != null && DeathWardGlow.Create(player, Duration) == glow &&
-                        player.GetComponentsInChildren<MeshRenderer>(true).Length == 3 + DeathWardGlow.SparkleCount,
-                    "The glow must be created once per player with an outline, a flash, a ring and the sparkles.");
+                        player.GetComponentsInChildren<MeshRenderer>(true).Length == 4 + DeathWardGlow.SparkleCount &&
+                        glow.Icon != null && glow.IconGlow != null &&
+                        player.GetComponentsInChildren<SpriteRenderer>(true).Length == 2,
+                    "The glow must be created once per player with an outline, a flash, a ring, the sparkles and " +
+                    "the dagger icon with its glow.");
                 VerifyOutlineTiming();
                 VerifyOutlineGeometry(glow, player, sprite);
                 VerifyBurst(glow);
+                VerifyIcon(glow, player);
                 glow.RenderAt(Duration + 0.01f);
-                Require(player.GetComponentsInChildren<MeshRenderer>().All(renderer => !renderer.enabled),
-                    "Nothing may show after the invulnerability ends.");
+                Require(!glow.Outline.enabled && glow.Icon.enabled && glow.IconGlow.enabled,
+                    "Only the dagger icon may stay after the invulnerability ends, while it fades out.");
+                glow.RenderAt(Duration + DeathWardGlow.IconFadeOut + 0.01f);
+                Require(player.GetComponentsInChildren<MeshRenderer>().All(renderer => !renderer.enabled) &&
+                        !glow.Icon.enabled && Mathf.Approximately(glow.Lifetime, Duration + DeathWardGlow.IconFadeOut),
+                    "Nothing may show after the dagger icon has faded out.");
                 player.enabled = false;
                 glow.RenderAt(1f);
-                Require(!glow.Outline.enabled, "A hidden player drawing must hide the outline.");
+                Require(!glow.Outline.enabled && !glow.Icon.enabled,
+                    "A hidden player drawing must hide the outline and the dagger icon.");
                 Require(Random.state.Equals(randomBefore), "The dagger ward glow must not consume UnityEngine.Random.");
                 glow.Stop();
                 Require(player.GetComponent<DeathWardGlow>() == null && player.transform.childCount == 0,
@@ -154,6 +163,60 @@ namespace TrickalFanGame.Editor
             glow.RenderAt(DeathWardGlow.BurstDuration);
             Require(!glow.Flash.enabled && !glow.Ring.enabled && glow.Sparkles.All(sparkle => !sparkle.enabled) &&
                     glow.Outline.enabled, "Only the outline may stay after the burst.");
+        }
+
+        private static void VerifyIcon(DeathWardGlow glow, SpriteRenderer player)
+        {
+            float fadeIn = DeathWardGlow.IconFadeIn, fadeOut = DeathWardGlow.IconFadeOut;
+            Require(DeathWardGlow.IconOpacityAt(0f, Duration) == 0f &&
+                    DeathWardGlow.IconOpacityAt(fadeIn * 0.5f, Duration) is > 0.3f and < 0.7f &&
+                    Mathf.Approximately(DeathWardGlow.IconOpacityAt(fadeIn, Duration), 1f) &&
+                    Mathf.Approximately(DeathWardGlow.IconOpacityAt(Duration, Duration), 1f) &&
+                    DeathWardGlow.IconOpacityAt(Duration + fadeOut * 0.5f, Duration) is > 0.3f and < 0.7f &&
+                    DeathWardGlow.IconOpacityAt(Duration + fadeOut, Duration) == 0f,
+                "The dagger icon must fade in over 0.5 s and fade out over 0.5 s after the invulnerability.");
+            for (float t = fadeIn; t <= Duration; t += 0.01f)
+                Require(Mathf.Approximately(DeathWardGlow.IconOpacityAt(t, Duration), 1f),
+                    $"The dagger icon must stay fully visible during the invulnerability ({t:0.00}s).");
+
+            glow.RenderAt(2f);
+            SpriteRenderer icon = glow.Icon;
+            Require(icon.enabled && glow.IconGlow.enabled && icon.sprite != null &&
+                    Mathf.Approximately(icon.color.a, 1f),
+                "The dagger icon and its glow must show during the invulnerability.");
+            Bounds drawing = player.sprite.bounds;
+            Bounds iconBounds = icon.bounds;
+            float drawnWidth = iconBounds.size.x * DeathWardGlow.IconArtWidthShare;
+            float drawnBottom = iconBounds.center.y - iconBounds.size.y * DeathWardGlow.IconArtHeightShare * 0.5f;
+            Require(drawnWidth > drawing.size.x * 0.35f && drawnWidth < drawing.size.x * 0.5f,
+                $"The dagger must be about half the player's width ({drawnWidth:0.000} of {drawing.size.x:0.000}).");
+            float glowRadius = glow.IconGlow.transform.localScale.x;
+            Require(glowRadius >= glow.IconWidth * DeathWardGlow.IconGlowShare * DeathWardGlow.IconPulseMinScale - 1e-4f,
+                "The glow must reach past the dagger so it shows around it.");
+            var glowBlock = new MaterialPropertyBlock();
+            glow.IconGlow.GetPropertyBlock(glowBlock);
+            Require(Mathf.Approximately(glowBlock.GetFloat("_Mode"), 4f),
+                "The dagger glow must use its own flame-colored mode, not the white burst flash.");
+            float low = 1f, high = 0f;
+            for (float t = 0f; t < DeathWardGlow.IconPulsePeriod; t += 0.01f)
+            {
+                low = Mathf.Min(low, DeathWardGlow.IconPulseAt(t));
+                high = Mathf.Max(high, DeathWardGlow.IconPulseAt(t));
+            }
+            Require(low < 0.05f && high > 0.95f, "The glow must pulse fully once per period.");
+            Require(drawnBottom > drawing.max.y - DeathWardGlow.IconBob - 1e-4f &&
+                    Mathf.Abs(iconBounds.center.x - drawing.center.x) < 1e-3f,
+                "The dagger must float over the player's head, centered on the drawing.");
+            Require(icon.sortingLayerID == player.sortingLayerID &&
+                    glow.IconGlow.sortingOrder > player.sortingOrder &&
+                    icon.sortingOrder > glow.IconGlow.sortingOrder &&
+                    glow.Sparkles.All(sparkle => icon.sortingOrder > sparkle.sortingOrder),
+                "The dagger must draw over its glow, the burst and the player.");
+            float width = glow.IconWidth;
+            player.flipX = true;
+            glow.RenderAt(2.3f);
+            player.flipX = false;
+            Require(Mathf.Approximately(glow.IconWidth, width), "The dagger size must not change while it shows.");
         }
 
         private static void VerifySpentIcon()

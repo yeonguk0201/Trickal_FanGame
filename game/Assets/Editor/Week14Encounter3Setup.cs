@@ -18,6 +18,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Week 14/Setup Encounter-3 Waves and Revisit State")]
         public static void Setup()
         {
+            RetiredSetup.Stop(nameof(Week14Encounter3Setup), RetiredSetup.Rooms);
             Week14Encounter2Setup.Setup();
             RoomProfile[] profiles =
             {

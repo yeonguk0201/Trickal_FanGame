@@ -58,8 +58,9 @@ namespace TrickalFanGame.Editor
                     observedKinds.Add(candidate.Definition.Kind);
             }
 
-            Assert(observedKinds.SetEquals(new[] { ItemKind.Artifact, ItemKind.Spell }),
-                "The unified pool did not expose both ARTIFACT and SPELL candidates across deterministic seeds.");
+            // No kind quota: every kind in the pool (권능 joined with Power-1) must show up across seeds.
+            Assert(observedKinds.SetEquals(pool.Select(definition => definition.Kind)),
+                "The unified pool did not expose every item kind it contains across deterministic seeds.");
         }
 
         private static void ValidateDeterminismWeightsAndNoKindQuota()
