@@ -46,8 +46,9 @@ namespace TrickalFanGame.Editor
             Debug.Log("Beta Offline-1 verification passed: experience, level and skill point rules match the Backend " +
                       "contract; offline Runs and skill upgrades raise the shown progress and wait in one queue; " +
                       "registration moves both to the server user; sending goes oldest first, drops an upgrade the " +
-                      "server refuses, stops on a network failure, and leaves the server's values as the cache " +
-                      "keyed by the device key.");
+                      "server refuses, drops a Run refused for good but keeps one a Backend deploy can fix, stops on " +
+                      "a network failure, leaves the server's values as the cache keyed by the device key, and ignores a " +
+                      "stale server snapshot that would undo a saved write.");
         }
 
         private static void VerifyRules()
@@ -206,6 +207,70 @@ namespace TrickalFanGame.Editor
             server.UpgradeSkill("Offline1Renamed", CharacterId, SkillType.HighGrade, 2, _ => { }, _ => { });
             Assert(outcome == PendingSyncOutcome.Completed && server.State.highGradeSkillLevel == 2 &&
                    server.State.skillPoints == 5, "Sending the same target level again must not apply twice.");
+
+            VerifyRunRejections(server);
+            VerifyStaleSnapshot();
+        }
+
+        // A slow server: a lookup taken before an upgrade was saved arrives after the upgrade's own answer. The
+        // upgrade already left the queue, so storing the older snapshot would undo it on this PC.
+        private static void VerifyStaleSnapshot()
+        {
+            LocalPendingRunStorage.Clear();
+            PlayerPrefs.DeleteKey(LocalProgression.CacheKey(CharacterId));
+            CharacterProgressDto before = Progress(3, 120, 1, low: 2, high: 1);
+            CharacterProgressDto afterUpgrade = Progress(3, 120, 0, low: 3, high: 1);
+            Assert(LocalProgression.StoreConfirmed(before) && LocalProgression.StoreConfirmed(afterUpgrade),
+                "Newer snapshots must replace the cache.");
+            Assert(!LocalProgression.StoreConfirmed(before) &&
+                   LocalProgression.Current(CharacterId).lowGradeSkillLevel == 3,
+                "A snapshot taken before a saved upgrade must not undo it.");
+            Assert(!LocalProgression.StoreConfirmed(Progress(3, 100, 0, low: 3, high: 1)) &&
+                   !LocalProgression.StoreConfirmed(Progress(2, 500, 0, low: 3, high: 1)) &&
+                   LocalProgression.Current(CharacterId).experience == 120,
+                "A snapshot taken before a saved Run must not undo its experience.");
+            Assert(LocalProgression.StoreConfirmed(Progress(3, 120, 0, low: 3, high: 1)) &&
+                   LocalProgression.StoreConfirmed(Progress(4, 10, 1, low: 3, high: 1)) &&
+                   LocalProgression.Current(CharacterId).level == 4,
+                "The same or a newer snapshot must still be stored.");
+        }
+
+        // A Run the server can never accept is dropped so the writes behind it still go; a refusal a later Backend
+        // deploy can fix (a character not deployed yet) keeps the Run and stops.
+        private static void VerifyRunRejections(FakeServer server)
+        {
+            string backend = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "backend", "src",
+                "modules", "runs"));
+            string source = File.ReadAllText(Path.Combine(backend, "runs.service.ts"), Encoding.UTF8) +
+                            File.ReadAllText(Path.Combine(backend, "runs.repository.ts"), Encoding.UTF8);
+            foreach (string code in PendingSync.RunRejectionCodes)
+                Assert(source.Contains($"'{code}'"), $"The Backend Run module no longer returns {code}.");
+
+            var invalid = Run("offline-1-invalid", 1, 0);
+            var valid = Run("offline-1-after-invalid", 1, 0);
+            QueueRun(invalid, 100);
+            QueueRun(valid, 100);
+            server.RunErrors[invalid.clientRunId] = "INVALID_RUN_DATA: 유효하지 않은 플레이 데이터입니다.";
+            server.Calls.Clear();
+            PendingSyncOutcome outcome = PendingSyncOutcome.Unavailable;
+            PendingSync.Flush(server, server, result => outcome = result);
+            Assert(outcome == PendingSyncOutcome.Completed && !LocalPendingRunStorage.Contains(invalid.clientRunId) &&
+                   !LocalPendingRunStorage.TryGetRunExperience(invalid.clientRunId, out _) &&
+                   server.Calls.Contains("run:" + valid.clientRunId) && !LocalProgression.HasPendingWrites(),
+                "A Run refused for good must be dropped and the Runs behind it sent.");
+
+            var notDeployed = Run("offline-1-not-deployed", 1, 0);
+            QueueRun(notDeployed, 100);
+            server.RunErrors[notDeployed.clientRunId] = "CHARACTER_NOT_FOUND: 존재하지 않는 캐릭터입니다.";
+            PendingSync.Flush(server, server, result => outcome = result);
+            Assert(outcome == PendingSyncOutcome.Stopped && LocalPendingRunStorage.Contains(notDeployed.clientRunId),
+                "A Run for a character the Backend has not deployed must stay queued.");
+            Assert(PendingSync.IsRunRejectedForGood("RUN_IDEMPOTENCY_CONFLICT: x") &&
+                   !PendingSync.IsRunRejectedForGood("VALIDATION_ERROR: x") &&
+                   !PendingSync.IsRunRejectedForGood("HTTP 422: Unprocessable Entity") &&
+                   !PendingSync.IsRunRejectedForGood(null),
+                "Only the listed Backend codes may drop a Run.");
+            LocalPendingRunStorage.Remove(notDeployed.clientRunId);
         }
 
         private static void AssertBackendConstant(string source, string name, int value)
@@ -279,6 +344,7 @@ namespace TrickalFanGame.Editor
             public readonly Dictionary<string, int> ExperienceOverride = new();
             public CharacterProgressDto State = MetaProgressionRules.CreateDefault(CharacterId);
             public string FailRunId;
+            public readonly Dictionary<string, string> RunErrors = new();
 
             public void GetUser(string nickname, Action<UserProfileResponse> onSuccess, Action<string> onError) =>
                 onError?.Invoke("not used");
@@ -297,6 +363,11 @@ namespace TrickalFanGame.Editor
                 if (request.clientRunId == FailRunId)
                 {
                     onError?.Invoke("NETWORK_ERROR");
+                    return;
+                }
+                if (RunErrors.TryGetValue(request.clientRunId, out string refusal))
+                {
+                    onError?.Invoke(refusal);
                     return;
                 }
 

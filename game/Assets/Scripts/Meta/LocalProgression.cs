@@ -29,13 +29,33 @@ namespace TrickalFanGame.Meta
             ? new[] { LocalProfile.UserId, LocalProfile.ClientProfileId }
             : new[] { LocalProfile.ClientProfileId };
 
-        public static void StoreConfirmed(CharacterProgressDto progress)
+        // Returns false when the snapshot is older than the cache and was ignored. With a slow server, requests
+        // overlap: a lookup taken before a write was saved can arrive after that write's own answer. Storing it
+        // would lose the write locally, since it already left the queue. The server never lowers level,
+        // experience or skill levels, so a snapshot behind the cache on any of them is stale.
+        public static bool StoreConfirmed(CharacterProgressDto progress)
         {
-            if (progress == null || string.IsNullOrWhiteSpace(progress.characterId)) return;
-            PlayerPrefs.SetString(CacheKey(progress.characterId),
-                JsonUtility.ToJson(MetaProgressionRules.Normalize(progress.characterId, progress)));
+            if (progress == null || string.IsNullOrWhiteSpace(progress.characterId)) return false;
+            CharacterProgressDto incoming = MetaProgressionRules.Normalize(progress.characterId, progress);
+            CharacterProgressDto cached = Read(CacheKey(progress.characterId), progress.characterId);
+            if (cached != null && IsBehind(incoming, cached))
+            {
+                Debug.Log($"[LocalProgression] Ignored a stale server snapshot of {progress.characterId}: " +
+                          $"Lv.{incoming.level} {incoming.experience} XP, skills " +
+                          $"{incoming.lowGradeSkillLevel}/{incoming.highGradeSkillLevel} is behind the cache.");
+                return false;
+            }
+
+            PlayerPrefs.SetString(CacheKey(progress.characterId), JsonUtility.ToJson(incoming));
             PlayerPrefs.Save();
+            return true;
         }
+
+        public static bool IsBehind(CharacterProgressDto snapshot, CharacterProgressDto cached) =>
+            snapshot.level < cached.level ||
+            (snapshot.level == cached.level && snapshot.experience < cached.experience) ||
+            snapshot.lowGradeSkillLevel < cached.lowGradeSkillLevel ||
+            snapshot.highGradeSkillLevel < cached.highGradeSkillLevel;
 
         // The last server-confirmed progress, or null. A registered profile without a device-key entry reads the
         // older nickname-keyed cache once (Offline-0 and earlier wrote that one).

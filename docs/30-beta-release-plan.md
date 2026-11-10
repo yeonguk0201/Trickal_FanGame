@@ -88,7 +88,8 @@
   직후)에서 오래된 것부터 보내며, 규칙 거부 강화는 버리고 네트워크·5xx는 멈춘 뒤 다음 실행에 다시 보낸다. 대기 중인 강화 뒤의
   새 Run도 대기열을 거쳐 보낸다(`RunSubmission`). Run 경험치는 종료 때 `RunSession`이 아이템 등급으로 계산해 두고
   (`PendingRunExperience.v1`), 결과 화면은 저장 실패 때도 경험치·레벨 업·스킬 포인트를 보여 주며 `오프라인 기록` 안내를 띄운다.
-  스킬 화면의 "서버에 등록되면 강화" 안내는 오프라인 진행 표시로 바뀌었다. 계약 대조는 `BetaOffline1Verification`이
+  스킬 화면의 "서버에 등록되면 강화" 안내는 오프라인 진행 표시로 바뀌었다. 이후(2026-11-11) 스킬 화면은 등록된 프로필도
+  로컬 우선으로 바꿨다: 서버 조회·강화 응답을 기다리지 않고 바로 보여 주고 강화하며, 강화는 항상 대기열을 거쳐 뒤에서 보낸다. 계약 대조는 `BetaOffline1Verification`이
   `backend/src/contracts/meta-progression.ts`를 직접 읽어 한다. 수동 확인 3종은 [05번](./05-development-setup.md)
   "서버 없이 성장·스킬 강화 Offline-1"에 있다.
 - **S6 운영 환경**: 무료 요금제 조합으로 시작한다. Web은 Vercel, Backend는 무료 요금제 호스팅(Render 등), DB는 무료 Postgres

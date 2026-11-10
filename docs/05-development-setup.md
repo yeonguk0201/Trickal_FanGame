@@ -2513,8 +2513,16 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 성장 캐시는 서버가 확인한 값만 기기 키 기준(`TrickalFanGame.CharacterProgress.device.<clientProfileId>.<characterId>`)으로
   둔다. 예전 닉네임 기준 캐시는 등록된 프로필에서 한 번 읽어 옮긴다. 게임이 보여 주는 성장은 이 캐시에 아직 안 보낸 Run과
   스킬 강화를 순서대로 더한 값이다. Run 종료 때 계산한 경험치는 `PendingRunExperience.v1`에 두고 서버가 확인하면 지운다.
-- 스킬 강화는 서버 계정이 없거나, 앞에 대기 중인 쓰기가 있거나, 네트워크·5xx 오류면 대기열(`PendingRunQueue.v1`)에 Run과
-  함께 들어간다. 타이틀이 실행마다 오래된 것부터 보내고, 서버가 규칙으로 거부한 강화(422·진행 없음)는 버린다.
+- 스킬 강화는 로컬 우선이다(2026-11-11). 화면은 이 PC의 진행을 바로 보여 주고 등록된 프로필이면 서버 조회를 뒤에서 해 조용히
+  다시 그린다. 강화는 서버 응답을 기다리지 않고 바로 반영되며 항상 대기열(`PendingRunQueue.v1`)에 Run과 함께 들어가고, 등록된
+  프로필이면 곧바로 뒤에서 보낸다. 타이틀도 실행마다 오래된 것부터 보내고, 서버가 규칙으로 거부한 강화(422·진행 없음)는 버리며
+  스킬 화면은 `서버 기록에 맞춰 진행 정보를 고쳤어요`를 띄운다. Run은 다시 보내도 같은 답이 나오는 거부
+  (`INVALID_RUN_DATA`, `RUN_IDEMPOTENCY_CONFLICT`, `ELIF_UPGRADE_LEVEL_GAP`, `PendingSync.RunRejectionCodes`)만 버리고,
+  Backend 배포·등록으로 풀릴 수 있는 거부(`VALIDATION_ERROR`, `CHARACTER_NOT_FOUND`, `ITEM_NOT_FOUND`, `INVALID_ELIF_DATA`,
+  `USER_NOT_FOUND`, 프로필 키 오류)와 네트워크·5xx는 남겨 두고 전송을 멈춘다.
+- 서버가 느려 요청이 겹치면 오래된 조회 응답이 이미 저장된 쓰기의 응답보다 늦게 올 수 있다. 서버는 레벨·경험치·스킬 레벨을
+  내리지 않으므로 `LocalProgression.StoreConfirmed`는 캐시보다 하나라도 뒤처진 응답을 무시한다. 그래서 운영 중에 서버 DB를
+  과거로 되돌리면 그 PC의 진행은 서버로 내려가지 않는다(되돌리지 않는 것을 전제로 한다).
 - 검증: 메뉴 `Trickal Fan Game > Beta > Verify Offline-1 Growth`, 배치
   `-batchmode -nographics -quit -executeMethod TrickalFanGame.Editor.BetaOffline1Verification.Verify`. Backend 계약 파일의 상수·
   경험치 곡선·등급 경험치를 직접 대조하고, Backend 도메인 테스트와 같은 사례, 오프라인 Run·강화 → 등록 → 순서 전송·거부 강화
@@ -2522,7 +2530,7 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
   `Week13Flow5PlayVerification.RunBatch`(Play Mode, `-quit` 없이)가 함께 확인한다.
 - 수동 확인(서버를 끄고 켜며 Frontend Play): 왼쪽 위 `DEV: RESET LOCAL PROFILE` → `NEW PLAYER`로 새 기기 키를 만든다.
   (1) 서버를 끈 채 새 닉네임 → Run 1판 → 결과 화면에 `경험치 +N`, 레벨 업, `오프라인 기록 · 서버에 연결되면 저장돼요` →
-  캐릭터 선택 → 스킬 강화 화면에 같은 레벨·포인트, 강화하면 `오프라인으로 강화했어요` → 다음 Run에서 강화된 스킬이 적용된다.
+  캐릭터 선택 → 스킬 강화 화면에 같은 레벨·포인트, 강화하면 바로 `스킬 강화가 완료되었습니다.` → 다음 Run에서 강화된 스킬이 적용된다.
   (2) 서버를 켜고 재실행 → 타이틀에서 등록과 Run·강화 전송 → 스킬 강화 화면과 Web 사용자 페이지의 레벨·경험치·스킬 단계가
   같다. (3) 등록된 프로필로 서버를 끄고 Run·강화 → 서버를 켜고 재실행 → 같은 값으로 맞춰진다.
 
