@@ -83,7 +83,10 @@ namespace TrickalFanGame.Editor
             }
 
             var back = (FrontendStartButton)view.BackButton;
-            Assert(UsesSprite(back.GetComponent<Image>(), MenuArtSetup.ButtonPrimary), "Back button must use the primary button art.");
+            Assert(UsesSprite(back.GetComponent<Image>(), MenuArtSetup.ButtonSecondary) &&
+                   ((RectTransform)back.transform).anchoredPosition == MenuUiBuilder.BackPosition &&
+                   ((RectTransform)back.transform).sizeDelta == MenuUiBuilder.BackSize && back.transform.Find("ArrowIcon") != null,
+                "Back must be the shared back button in the shared spot.");
             AssertGrows(back, back.transform);
 
             // Every text must stay inside the 1920 × 1080 frame and use the shared font.

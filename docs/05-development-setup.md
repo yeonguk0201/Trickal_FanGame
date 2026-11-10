@@ -2565,6 +2565,10 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - **설정 화면(Menu-5)**: 메뉴 `Trickal Fan Game > Menu > Setup Menu-5 Settings`. Frontend 설정 패널을 꾸민 뒤 UX-0 Setup을 이어 실행해
   일시정지 설정에도 같은 패널을 복사한다. 검증은 `Verify Menu-5 Settings`, 배치는
   `-executeMethod TrickalFanGame.Editor.Menu5SettingsVerification.SetupAndVerifyBatch`(Setup 두 번, 검증, 캡처).
+- **타이틀·홈(Menu-2)**: 메뉴 `Trickal Fan Game > Menu > Setup Menu-2 Title and Home`, 검증 `Verify Menu-2 Title and Home`, 배치
+  `Menu2HomeVerification.SetupAndVerifyBatch`(Setup 두 번, 검증, Week13 Frontend 검증, 캡처 `menu2-title`·`menu2-home`).
+  Credits-0 Setup도 끝에 같은 모양을 적용한다. 타이틀 원화는 `python -I tools/artwork/package_title_ui.py <엠블럼.png> <시작 버튼.png>`로
+  `Assets/Art/UI/Menu/UI_Menu_Title_*.png`를 다시 만든다(시작 버튼 글자는 지움).
 - **크레딧(Menu-5)**: 메뉴 `Setup Menu-5 Credits`, 검증 `Verify Menu-5 Credits`, 배치
   `Menu5CreditsVerification.SetupAndVerifyBatch`. Credits-0 Setup(`Credits > Setup Credits Screen`)도 끝에 같은 모양을 적용한다.
 - **캐릭터 선택·스킬 강화(Menu-3)**: 메뉴 `Setup Menu-3 Character Select and Skill Upgrade`, 검증

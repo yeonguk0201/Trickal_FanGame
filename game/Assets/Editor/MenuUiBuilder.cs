@@ -264,6 +264,18 @@ namespace TrickalFanGame.Editor
             if (child != null) Undo.DestroyObjectImmediate(child.gameObject);
         }
 
+        // Shared back button (user feedback, Menu-2): character select, settings and credits use the same cream
+        // button with an arrow in the same bottom-left spot. Positions are for a panel centred on the 1920 x 1080 frame.
+        public static readonly Vector2 BackPosition = new(-790, -450);
+        public static readonly Vector2 BackSize = new(220, 64);
+
+        public static void StyleBackButton(FrontendStartButton button)
+        {
+            Place((RectTransform)button.transform, BackPosition, BackSize);
+            StyleButton(button, false, BackSize, 26);
+            BackArrow(button);
+        }
+
         // Back buttons carry a left arrow in front of the label, like the reference screens.
         public static void BackArrow(FrontendStartButton button)
         {

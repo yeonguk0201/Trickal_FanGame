@@ -16,7 +16,6 @@ namespace TrickalFanGame.Editor
     {
         public const string SectionRowTemplateName = "Credits Section Row Template";
         public const float EntryHeight = 104f;
-        public static readonly Vector2 BackSize = new(300, 84);
         // Row width is the 1220 viewport minus the content inset and padding (1180); the licence keeps 84 + 16 free.
         public const float LicenseWidth = 1080f;
         public const float LicenseHeight = 44f; // two lines at 16px
@@ -47,9 +46,7 @@ namespace TrickalFanGame.Editor
             RectTransform board = Node(root, "CreditsBoard", new Vector2(0, -36), new Vector2(1320, 740));
             Skin(board.gameObject, MenuArtSetup.PanelMain, Color.white);
             board.SetSiblingIndex(0);
-            Image erpin = Picture(root, "ErpinSticker", MenuArtSetup.SilhouetteComingSoon, new Vector2(-790, -300), new Vector2(280, 280));
-            erpin.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Characters/Player/Character_Erpin.png");
-            erpin.transform.SetSiblingIndex(1);
+            RemoveChild(root, "ErpinSticker"); // user feedback (Menu-2): no character art on the credits screen
             Picture(board, "BottomClover", MenuArtSetup.Clover, new Vector2(0, -362), new Vector2(60, 58));
 
             TMP_Text title = Require<TMP_Text>(root, "CreditsTitle");
@@ -80,10 +77,7 @@ namespace TrickalFanGame.Editor
 
             if (view.EmptyMessageText != null) StyleText(view.EmptyMessageText, 24, Ink);
 
-            var back = (FrontendStartButton)view.BackButton;
-            Place((RectTransform)back.transform, new Vector2(0, -452), BackSize);
-            StyleButton(back, true, BackSize, 30);
-            BackArrow(back);
+            StyleBackButton((FrontendStartButton)view.BackButton);
             foreach (Component component in root.GetComponentsInChildren<Component>(true)) EditorUtility.SetDirty(component);
         }
 

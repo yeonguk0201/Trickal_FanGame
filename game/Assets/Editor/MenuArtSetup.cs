@@ -50,6 +50,9 @@ namespace TrickalFanGame.Editor
         public const string Glow = "UI_Menu_Glow_9s";
         public const string RoundedFill = "UI_Menu_RoundedFill_9s";
         public const string Slash = "UI_Menu_Slash";
+        // Menu-2 title art (tools/artwork/package_title_ui.py): game name emblem and the start button without text.
+        public const string TitleLogo = "UI_Menu_Title_Logo";
+        public const string TitleStartButton = "UI_Menu_Title_StartButton";
 
         // Unity spriteBorder order: left, bottom, right, top. Corners, button caps and the ribbon notch stay unstretched.
         public static readonly IReadOnlyDictionary<string, Vector4> Borders = new Dictionary<string, Vector4>
@@ -74,7 +77,7 @@ namespace TrickalFanGame.Editor
             SectionRibbon, SliderTrack, SliderFill, RingPill, RingRounded, Clover, Checkbox, Checkmark, ArrowLeft,
             PortraitSlot, Pedestal, SilhouetteComingSoon, IconMusic, IconStarburst, IconHeart, IconWand, IconSword,
             IconSkillJunior, IconSkillSenior, IconSpeaker, IconSparkles, IconMonitor, IconFullscreen, IconList,
-            IconCrown, IconLock, SkillLowGrade, SkillBasic, Glow, RoundedFill, Slash
+            IconCrown, IconLock, SkillLowGrade, SkillBasic, Glow, RoundedFill, Slash, TitleLogo, TitleStartButton
         };
 
         public static string PathOf(string name) => $"{Folder}/{name}.png";
