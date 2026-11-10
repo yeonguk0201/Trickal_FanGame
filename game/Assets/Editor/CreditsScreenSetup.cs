@@ -97,6 +97,8 @@ namespace TrickalFanGame.Editor
             Undo.RecordObject(homeView, "Configure credits route");
             homeView.ConfigureCredits(homeButton);
 
+            // Menu-5 owns the look; reapplying it here keeps reruns of this setup from restoring the temporary UI.
+            Menu5CreditsSetup.Apply(creditsView);
             creditsView.gameObject.SetActive(false);
             foreach (Component component in creditsView.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);

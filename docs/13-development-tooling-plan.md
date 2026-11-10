@@ -752,3 +752,12 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 - [x] `RetiredSetup`: 이후 조각이 값을 관리하는 Setup의 재실행을 막는다.
 - [ ] 전체 검증을 커밋 전에 자동으로 돌리는 것은 후보로 둔다(약 15분).
 - 실행법은 [개발 환경](./05-development-setup.md) "Verify-0 전체 검증·Setup 재실행 검사".
+
+### 메뉴 부품 가져오기·화면 캡처 (2026-11-10, Menu-1)
+
+- [x] `tools/artwork/package_menu_ui.py`: 사용자 메뉴 부품(`output/menu-components-v2`)을 보이는 영역으로 자르고 UI 크기로 줄여
+  `Assets/Art/UI/Menu/`에 복사한다. 테두리 강조용 흰 링 2종도 만든다.
+- [x] `MenuArtSetup`: 메뉴 스프라이트 33개의 Import 설정과 9-slice 경계를 맞춘다. 재실행 시 바뀐 것만 다시 가져온다.
+- [x] `MenuScreenCapture`: Play 없이 Frontend 화면을 `output/menu-review/<화면>-<해상도>.png`(1920×1080, 1280×720)로 렌더한다.
+  미술 검수 자료이며 실제 Play 확인을 대신하지 않는다.
+- 실행법은 [개발 환경](./05-development-setup.md) "메뉴 디자인 Menu".

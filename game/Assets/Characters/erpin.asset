@@ -16,3 +16,20 @@ MonoBehaviour:
   displayName: "\uC5D0\uB974\uD540"
   description: "MVP \uAE30\uBCF8 \uD50C\uB808\uC774 \uCE90\uB9AD\uD130"
   portrait: {fileID: 21300000, guid: 99284f00c85795949b72821e2d755fc8, type: 3}
+  epithet: "\uC694\uC815\uC758 \uC5EC\uC655"
+  introduction: "\uC694\uC815\uB4E4\uC758 \uC5EC\uC655.\n\uB2EC\uCF64\uD55C \uB514\uC800\uD2B8\uB77C\uBA74
+    \uC0AC\uC871\uC744 \uBABB \uC4F4\uB2E4.\n\uD55C\uC2EC\uD574\uBCF4\uC77C \uB54C\uB3C4
+    \uC788\uACE0 \uB9CE\uC774 \uBD80\uC871\uD55C \uAC8C \uC0AC\uC2E4\uC774\uC9C0\uB9CC,\n\uC790\uAE30
+    \uB098\uB984\uB300\uB85C \uB178\uB825\uD558\uB294 \uC694\uC815\uC774\uB2E4.\n\uC544\uBB34\uB9AC
+    \uBC84\uB987\uC5C6\uAC8C \uD589\uB3D9\uD574\uB3C4\n\uBBF8\uC6CC\uD560 \uC218
+    \uC5C6\uB294 \uAD6C\uC11D\uC774 \uC788\uB2E4."
+  slotPortrait: {fileID: 21300000, guid: d522703851f34765a3dc55decabf4f46, type: 3}
+  healthRating: 5
+  skillPointRating: 3
+  attackRating: 3
+  basicSkillName: "\uC694\uC815\uC758 \uBE5B\uC0B4"
+  basicSkillDescription: "\uC9C0\uD321\uC774\uB85C \uB9C8\uB825\uD0C4\uC744 \uBC1C\uC0AC\uD574\n\uC55E\uC758
+    \uC801\uC744 \uACF5\uACA9\uD574\uC694."
+  basicSkillIcon: {fileID: 21300000, guid: 5371e5251602637458104eb775815f16, type: 3}
+  lowGradeSkillName: "\uB9C8\uB825\uD0C4 \uD3ED\uC8FC"
+  highGradeSkillName: "\uB3CC\uACA8\uC5B4\uC5B4\uC5B4!!! \uC5B5...?"

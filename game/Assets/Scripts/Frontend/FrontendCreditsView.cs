@@ -16,6 +16,9 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private ScrollRect scrollRect;
         [SerializeField] private RectTransform content;
         [SerializeField] private TMP_Text sectionTemplate;
+        // Menu-5: a heading row with ribbon art; its TMP child takes the heading. Notes keep sectionTemplate.
+        [SerializeField] private GameObject sectionRowTemplate;
+        [SerializeField] private Color noteColor = new(0.72f, 0.8f, 0.88f);
         [SerializeField] private FrontendCreditsEntryView entryTemplate;
         [SerializeField] private TMP_Text emptyMessage;
         [SerializeField] private Button backButton;
@@ -108,6 +111,16 @@ namespace TrickalFanGame.Frontend
 
         private void AddSectionRow(string text, bool note = false)
         {
+            if (!note && sectionRowTemplate != null)
+            {
+                GameObject heading = Instantiate(sectionRowTemplate, content);
+                heading.name = "Credits Section";
+                heading.SetActive(true);
+                TMP_Text label = heading.GetComponentInChildren<TMP_Text>(true);
+                if (label != null) label.text = text;
+                rows.Add(heading);
+                return;
+            }
             TMP_Text row = Instantiate(sectionTemplate, content);
             row.name = note ? "Credits Section Note" : "Credits Section";
             row.gameObject.SetActive(true);
@@ -115,10 +128,18 @@ namespace TrickalFanGame.Frontend
             if (note)
             {
                 row.fontSize = sectionTemplate.fontSize * 0.68f;
-                row.color = new Color(0.72f, 0.8f, 0.88f);
+                row.color = noteColor;
             }
             rows.Add(row.gameObject);
         }
+
+        public void ConfigureSectionRow(GameObject template, Color note)
+        {
+            sectionRowTemplate = template;
+            noteColor = note;
+        }
+
+        public GameObject SectionRowTemplate => sectionRowTemplate;
 
         private void Clear()
         {

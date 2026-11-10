@@ -39,6 +39,13 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private Button retryButton;
         [SerializeField] private Button backButton;
 
+        // Menu-3: the character card on the left of the upgrade screen. Display only.
+        [SerializeField] private TMP_Text characterNameText;
+        [SerializeField] private TMP_Text epithetText;
+        [SerializeField] private Image portraitImage;
+        [SerializeField] private TMP_Text lowGradeNameText;
+        [SerializeField] private TMP_Text highGradeNameText;
+
         private IGameApiClient profileClient;
         private ISkillProgressApiClient skillClient;
         private CharacterDefinition character;
@@ -92,6 +99,18 @@ namespace TrickalFanGame.Frontend
             backButton = back;
         }
 
+        public void ConfigurePresentation(TMP_Text characterName, TMP_Text epithet, Image portrait,
+            TMP_Text lowGradeName = null, TMP_Text highGradeName = null)
+        {
+            lowGradeNameText = lowGradeName;
+            highGradeNameText = highGradeName;
+            characterNameText = characterName;
+            epithetText = epithet;
+            portraitImage = portrait;
+        }
+
+        public TMP_Text CharacterNameText => characterNameText;
+
         public void SetApiClients(IGameApiClient configuredProfileClient, ISkillProgressApiClient configuredSkillClient)
         {
             profileClient = configuredProfileClient;
@@ -117,6 +136,13 @@ namespace TrickalFanGame.Frontend
         public void Show(CharacterDefinition selectedCharacter)
         {
             character = selectedCharacter;
+            if (characterNameText != null) characterNameText.text = character != null ? character.DisplayName : string.Empty;
+            if (epithetText != null) epithetText.text = character != null ? character.Epithet : string.Empty;
+            if (portraitImage != null && character != null && character.Portrait != null) portraitImage.sprite = character.Portrait;
+            if (lowGradeNameText != null && !string.IsNullOrWhiteSpace(character?.LowGradeSkillName))
+                lowGradeNameText.text = character.LowGradeSkillName;
+            if (highGradeNameText != null && !string.IsNullOrWhiteSpace(character?.HighGradeSkillName))
+                highGradeNameText.text = character.HighGradeSkillName;
             progress = null;
             requestInFlight = false;
             viewVersion++;

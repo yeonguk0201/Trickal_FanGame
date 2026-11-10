@@ -262,7 +262,8 @@ namespace TrickalFanGame.Editor
 
                 foreach (string heading in sections.Select(section => section.heading))
                     Assert(copy.Rows.Any(child => child != null &&
-                            child.GetComponent<TMP_Text>() is { } text && text.text == heading.Trim()),
+                            child.GetComponentInChildren<TMP_Text>(true) is { } text && text.text == heading.Trim()),
+                        // Menu-5 heading rows keep the text inside the ribbon.
                         $"The credits screen dropped the section heading \"{heading}\".");
             }
             finally

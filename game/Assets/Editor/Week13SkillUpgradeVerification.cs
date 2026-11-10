@@ -21,8 +21,8 @@ namespace TrickalFanGame.Editor
             FrontendHomeView home = FindSingle<FrontendHomeView>(scene);
             FrontendCharacterSelectionView selection = home.CharacterSelectionView;
             FrontendSkillUpgradeView skill = home.SkillUpgradeView;
-            Assert(selection.CardTemplate.GetComponent<RectTransform>().sizeDelta == new Vector2(320, 520),
-                "Character picker must keep the tall card prepared for future horizontal paging.");
+            Assert(selection.CardTemplate.GetComponent<RectTransform>().sizeDelta == Menu3CharacterSetup.SlotSize,
+                "Character picker must keep the Menu-3 roster slot.");
             Assert(skill != null, "Skill upgrade view is missing.");
 
             string oldUserId = LocalProfile.UserId;

@@ -2546,3 +2546,21 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - **은퇴한 Setup**: `RetiredSetup.Stop`으로 시작하는 Setup은 실행하면 이유를 알리고 멈춘다(배치에서는 `RetiredSetupException`).
   그 Setup의 값을 바꾸려면 지금 그 값을 관리하는 쪽(이후 조각의 Setup, Layout 가져오기, 에셋 직접 수정)을 고친다. 새 Setup은
   재실행해도 다른 Setup이 정한 값을 되돌리지 않게 작성하고, 이 검사에서 KEEP인지 확인한다.
+
+## 메뉴 디자인 Menu (2026-11-10)
+
+계획은 [26번 §3.5](./26-seventh-month-plan.md), 도구 상태는 [13번](./13-development-tooling-plan.md) "메뉴 부품 가져오기·화면 캡처".
+
+- **부품 다시 가져오기**: 저장소 루트에서 `python tools/artwork/package_menu_ui.py`. 원본은 `output/menu-components-v2/`(git 제외)이고
+  결과는 `game/Assets/Art/UI/Menu/`에 덮어쓴다. 그 뒤 Unity 메뉴 `Trickal Fan Game > Menu > Setup Menu-1 Art Import`로 Import 설정과
+  9-slice 경계를 맞춘다(경계 값은 `MenuArtSetup.Borders`).
+- **설정 화면(Menu-5)**: 메뉴 `Trickal Fan Game > Menu > Setup Menu-5 Settings`. Frontend 설정 패널을 꾸민 뒤 UX-0 Setup을 이어 실행해
+  일시정지 설정에도 같은 패널을 복사한다. 검증은 `Verify Menu-5 Settings`, 배치는
+  `-executeMethod TrickalFanGame.Editor.Menu5SettingsVerification.SetupAndVerifyBatch`(Setup 두 번, 검증, 캡처).
+- **크레딧(Menu-5)**: 메뉴 `Setup Menu-5 Credits`, 검증 `Verify Menu-5 Credits`, 배치
+  `Menu5CreditsVerification.SetupAndVerifyBatch`. Credits-0 Setup(`Credits > Setup Credits Screen`)도 끝에 같은 모양을 적용한다.
+- **캐릭터 선택·스킬 강화(Menu-3)**: 메뉴 `Setup Menu-3 Character Select and Skill Upgrade`, 검증
+  `Verify Menu-3 Character Select and Skill Upgrade`, 배치 `Menu3CharacterVerification.SetupAndVerifyBatch`. Setup은
+  `erpin` 에셋의 메뉴 표시 필드가 비어 있을 때만 채운다(이미 고친 값은 유지).
+- **화면 캡처**: 메뉴 `Capture Menu-5 Settings`·`Capture Menu-5 Credits`·`Capture Menu-3 Screens` 또는 각 검증기의 `CaptureBatch`.
+  `-nographics` 없이 실행한다. 결과는 `output/menu-review/<화면>-1920x1080.png`, `...-1280x720.png`. Scene은 저장하지 않고 다시 연다.

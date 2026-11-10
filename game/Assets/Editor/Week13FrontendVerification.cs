@@ -150,13 +150,16 @@ namespace TrickalFanGame.Editor
             Assert(selection.CardContainer != null && selection.CardTemplate != null &&
                 selection.StatusText != null && selection.ConfirmButton != null && selection.BackButton != null,
                 "Missing character selection references.");
-            Vector2 cardSize = selection.CardTemplate.GetComponent<RectTransform>().sizeDelta;
-            Assert(cardSize == new Vector2(320, 520) && cardSize.y > cardSize.x,
-                "Character cards must use the requested tall 320 x 520 layout.");
-            Assert(selection.ConfirmButton.GetComponent<RectTransform>().sizeDelta == new Vector2(280, 64),
-                "Character confirmation must use the primary button size.");
-            Assert(selection.BackButton.GetComponent<RectTransform>().sizeDelta == new Vector2(220, 52),
-                "Character back must use the standard button size.");
+            // Menu-3 replaced the 320 x 520 card with roster slots plus a separate info panel (docs/16 §2.3).
+            Assert(selection.CardTemplate.GetComponent<RectTransform>().sizeDelta == Menu3CharacterSetup.SlotSize,
+                "Character slots must use the Menu-3 roster slot size.");
+            Assert(selection.DetailsView != null && selection.ComingSoonTemplate != null &&
+                   selection.SlotCount == Menu3CharacterSetup.RosterSlots,
+                "Character select requires the info panel and the coming-soon roster slots.");
+            Assert(selection.ConfirmButton.GetComponent<RectTransform>().sizeDelta == Menu3CharacterSetup.ConfirmSize,
+                "Character confirmation must use the Menu-3 primary button size.");
+            Assert(selection.BackButton.GetComponent<RectTransform>().sizeDelta == Menu3CharacterSetup.BackSize,
+                "Character back must use the Menu-3 back button size.");
             var serialized = new SerializedObject(selection);
             SerializedProperty definitions = serialized.FindProperty("characters");
             Assert(definitions.arraySize > 0, "Character selection requires data, not a hard-coded empty state.");
@@ -598,13 +601,12 @@ namespace TrickalFanGame.Editor
             if (home.CurrentDestination != FrontendDestination.CharacterSelection ||
                 !selection.gameObject.activeInHierarchy || home.HomePanel.activeInHierarchy ||
                 selection.Cards.Count != 1 || selection.Cards[0].Character.CharacterId != "erpin" ||
-                selection.ConfirmButton.interactable ||
-                EventSystem.current.currentSelectedGameObject != selection.Cards[0].Button.gameObject)
+                // Menu-3: the first character starts selected and focus waits on the confirm button.
+                selection.SelectedCharacterId != "erpin" || !selection.ConfirmButton.interactable ||
+                EventSystem.current.currentSelectedGameObject != selection.ConfirmButton.gameObject)
                 throw new InvalidOperationException("Game Start did not build the data-driven character list.");
-
-            selection.ConfirmButton.onClick.Invoke();
-            if (confirmations != 0)
-                throw new InvalidOperationException("Character confirmation fired before a valid selection.");
+            if (confirmations != 0 || Object.FindFirstObjectByType<TrickalFanGame.Run.RunSession>() != null)
+                throw new InvalidOperationException("Opening character select confirmed or started a Run.");
 
             selection.Cards[0].Button.onClick.Invoke();
             if (selection.SelectedCharacterId != "erpin" || !selection.ConfirmButton.interactable ||
@@ -628,7 +630,9 @@ namespace TrickalFanGame.Editor
                 throw new InvalidOperationException("Character selection did not return to Home cleanly.");
 
             home.GameStartButton.onClick.Invoke();
-            if (selection.SelectedCharacter != null || selection.ConfirmButton.interactable)
+            // Reopening starts over from the default selection; the earlier confirmation must not carry over.
+            if (selection.SelectedCharacterId != "erpin" || !selection.ConfirmButton.interactable ||
+                selection.StatusText.text == "에르핀 선택 완료")
                 throw new InvalidOperationException("Character selection state leaked across screen visits.");
             selection.BackButton.onClick.Invoke();
             if (home.CurrentDestination != null || !home.HomePanel.activeInHierarchy ||
