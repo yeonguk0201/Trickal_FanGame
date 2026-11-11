@@ -35,6 +35,10 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Text keyText;
         // One cell per room to clear, bottom to top (UX-1 vertical gauge). Cells beyond the held 권능's requirement are hidden.
         [SerializeField] private Image[] gaugeCells = System.Array.Empty<Image>();
+        // In-game presentation guide: a thin-frame background shown only while no 권능 is held (the icon hides then),
+        // and the sky-blue cell artwork for charged cells. The artwork already holds the colour, so it draws untinted.
+        [SerializeField] private GameObject emptySlot;
+        [SerializeField] private Sprite filledCellSprite;
 
         private bool subscribed;
         private bool hasRendered;
@@ -48,6 +52,10 @@ namespace TrickalFanGame.Frontend
         public TMP_Text GaugeText => gaugeText;
         public TMP_Text KeyText => keyText;
         public System.Collections.Generic.IReadOnlyList<Image> GaugeCells => gaugeCells;
+        public GameObject EmptySlot => emptySlot;
+        public Sprite FilledCellSprite => filledCellSprite;
+        // The colour a charged cell draws with: white over the cell artwork, the plain sky blue without it.
+        public Color FilledColor => filledCellSprite != null ? Color.white : FilledCellColor;
 
         public void Configure(PlayerPowerSlot configuredSlot, Image configuredIcon, TMP_Text configuredNameText,
             TMP_Text configuredGaugeText, TMP_Text configuredKeyText, Image[] configuredGaugeCells)
@@ -61,6 +69,14 @@ namespace TrickalFanGame.Frontend
             gaugeCells = configuredGaugeCells ?? System.Array.Empty<Image>();
             hasRendered = false;
             if (isActiveAndEnabled) Subscribe();
+            RefreshNow();
+        }
+
+        public void ConfigureArtwork(GameObject configuredEmptySlot, Sprite configuredFilledCellSprite)
+        {
+            emptySlot = configuredEmptySlot;
+            filledCellSprite = configuredFilledCellSprite;
+            hasRendered = false;
             RefreshNow();
         }
 
@@ -118,6 +134,9 @@ namespace TrickalFanGame.Frontend
 
             if (icon != null) icon.color = held == null ? EmptyIconColor : ActivePowerPickup.PowerColor;
             UserArtwork.Apply(icon, held);
+            if (emptySlot != null) emptySlot.SetActive(held == null);
+            // With the empty-slot frame the dark empty icon would cover it, so the icon only draws while held.
+            if (icon != null) icon.enabled = held != null || emptySlot == null;
             if (nameText != null) nameText.text = held != null ? held.DisplayName : EmptyText;
             int required = held != null ? held.ActiveChargeRooms : 0;
             if (gaugeText != null) gaugeText.text = BuildGauge(charge, required);
@@ -131,7 +150,9 @@ namespace TrickalFanGame.Frontend
                 Image cell = gaugeCells[index];
                 if (cell == null) continue;
                 cell.gameObject.SetActive(index < required);
-                cell.color = index < charge ? FilledCellColor : EmptyCellColor;
+                bool filled = index < charge;
+                cell.sprite = filled ? filledCellSprite : null;
+                cell.color = filled ? FilledColor : EmptyCellColor;
             }
             if (keyText != null)
             {

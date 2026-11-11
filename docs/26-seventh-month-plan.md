@@ -316,6 +316,12 @@ Grid-0(취소): 벽에 닿은 장애물·구덩이의 그림만 그 면의 여�
   사유는 경고 아이콘 오류 줄로 옮겼다. `확인 중...`은 버튼 대신 오류 줄 자리에 표시한다. v3 입력창·꽃·성·강조선 에셋은 빼고
   `Menu2NicknameVerification`·Week13 Frontend Play 검증 통과, 두 해상도 캡처. 확인 버튼을 뒤로 버튼과 같은 높이(117)로 줄이고
   두 버튼을 카드 가운데로 맞췄다. 사용자 Play 확인 완료(2026-11-11).
+- **인게임 연출 에셋**: [적용 가이드](./ingame-presentation-asset-guide.md)대로 첫 입장 배너, 보상 제단·떠 있는 선물, 권능
+  빈 슬롯·게이지, 상세 스탯 아이콘, ESC 일시정지 창(확정 시안, 1120×720)을 연결했다(`InGamePresentationSetup`).
+  `InGamePresentationVerification.SetupAndVerifyBatch`(Setup 두 번·이전 일시정지 Setup 재실행 포함)와
+  `VerifyWithRegressionsBatch`(HUD-3C·4C·7B·7C·7D, UX-0·1, Setting-1C, Power-1, Reward-3) 통과, 두 해상도 캡처(2026-11-11).
+  Play 확인 후 일시정지·배너 글자를 판 가운데로 내리고, 배너를 줄여 올린 뒤 안개처럼 흐릿하게 나타났다 사라지게 했다(총 2초).
+  첫 Run에서 배너가 안 보이던 문제(장면 로드 직후 긴 프레임)를 고쳤다. 사용자 Play 확인 완료(2026-11-11).
 - **남은 화면**: 결과(Menu-4)는 시안이 없다.
 
 Menu-2~5는 서로 독립이라 순서를 바꿔도 된다. 기본 순서는 첫인상과 전체 톤의 기준인 타이틀·홈 → 카드 구조를 공유하는

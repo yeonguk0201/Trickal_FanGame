@@ -242,8 +242,26 @@ namespace TrickalFanGame.Editor
             TMP_Text key = Text(panel, "Use Key", GamePowerHudView.UsableText, KeyPosition,
                 new Vector2(Week27Ux1Setup.PowerSize.x, 24), 16, font);
 
+            // In-game presentation guide: the track artwork outside, the existing mask and cells inside, and the thin
+            // frame behind the icon while no 권능 is held. Charged cells get the sky-blue cell artwork at runtime.
+            Image outline = gauge.GetComponent<Image>();
+            outline.sprite = InGamePresentationSetup.LoadSprite(InGamePresentationSetup.PowerGaugeTrack);
+            outline.type = Image.Type.Simple;
+            outline.pixelsPerUnitMultiplier = 1f;
+            outline.color = Color.white;
+            bar.GetComponent<Mask>().showMaskGraphic = false;
+            Image empty = Component<Image>(Rect(panel, "Empty Slot", IconPosition, Vector2.one * IconSize).gameObject);
+            empty.sprite = InGamePresentationSetup.LoadSprite(InGamePresentationSetup.PowerEmptySlot);
+            empty.type = Image.Type.Simple;
+            empty.preserveAspect = true;
+            empty.color = Color.white;
+            empty.raycastTarget = false;
+            MenuUiBuilder.DrawBehind(empty.transform, icon.transform);
+
             GamePowerHudView view = Component<GamePowerHudView>(panel.gameObject);
             view.Configure(slot, icon, null, null, key, cells);
+            view.ConfigureArtwork(empty.gameObject,
+                InGamePresentationSetup.LoadSprite(InGamePresentationSetup.PowerGaugeFill));
             foreach (Component component in panel.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);
         }

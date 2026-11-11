@@ -496,8 +496,9 @@ namespace TrickalFanGame.Editor
             Image outline = gauge.GetComponent<Image>();
             Image barImage = bar.GetComponent<Image>();
             Assert(gauge.parent == power && outline != null && barImage != null && bar.GetComponent<Mask>() != null &&
-                   outline.type == Image.Type.Sliced && barImage.type == Image.Type.Sliced &&
-                   outline.sprite != null && outline.sprite.border.x > 0f &&
+                   // In-game presentation guide: the outer bar is the gauge track art; the inner pill still masks.
+                   outline.sprite == InGamePresentationSetup.LoadSprite(InGamePresentationSetup.PowerGaugeTrack) &&
+                   barImage.type == Image.Type.Sliced &&
                    Mathf.Approximately(gauge.sizeDelta.x - bar.sizeDelta.x, GamePowerHudView.GaugeOutline * 2f),
                 "The 권능 gauge must be one round-ended bar with a thin outline, masking its cells.");
             float gap = Left(gauge) - Right(icon);
