@@ -53,6 +53,11 @@ namespace TrickalFanGame.Editor
         // Menu-2 title art (tools/artwork/package_title_ui.py): game name emblem and the start button without text.
         public const string TitleLogo = "UI_Menu_Title_Logo";
         public const string TitleStartButton = "UI_Menu_Title_StartButton";
+        // Menu-2 nickname screen (tools/artwork/package_nickname_ui.py): the v4 card with its baked buttons.
+        public const string NicknameCard = "UI_Menu_Nickname_Card";
+        public const string NicknameBackButton = "UI_Menu_Nickname_BackButton";
+        public const string NicknameConfirmButton = "UI_Menu_Nickname_ConfirmButton";
+        public const string IconWarning = "UI_Menu_Icon_Warning";
 
         // Unity spriteBorder order: left, bottom, right, top. Corners, button caps and the ribbon notch stay unstretched.
         public static readonly IReadOnlyDictionary<string, Vector4> Borders = new Dictionary<string, Vector4>
@@ -77,7 +82,8 @@ namespace TrickalFanGame.Editor
             SectionRibbon, SliderTrack, SliderFill, RingPill, RingRounded, Clover, Checkbox, Checkmark, ArrowLeft,
             PortraitSlot, Pedestal, SilhouetteComingSoon, IconMusic, IconStarburst, IconHeart, IconWand, IconSword,
             IconSkillJunior, IconSkillSenior, IconSpeaker, IconSparkles, IconMonitor, IconFullscreen, IconList,
-            IconCrown, IconLock, SkillLowGrade, SkillBasic, Glow, RoundedFill, Slash, TitleLogo, TitleStartButton
+            IconCrown, IconLock, SkillLowGrade, SkillBasic, Glow, RoundedFill, Slash, TitleLogo, TitleStartButton,
+            NicknameCard, NicknameBackButton, NicknameConfirmButton, IconWarning
         };
 
         public static string PathOf(string name) => $"{Folder}/{name}.png";

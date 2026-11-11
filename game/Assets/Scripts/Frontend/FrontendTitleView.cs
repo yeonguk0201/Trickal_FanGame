@@ -77,6 +77,7 @@ namespace TrickalFanGame.Frontend
         {
             if (startButton != null) startButton.onClick.AddListener(RequestStart);
             if (nicknameView != null) nicknameView.OnRegistrationComplete += OnNicknameRegistered;
+            if (nicknameView != null) nicknameView.OnBackRequested += ShowTitleScreen;
             if (creditsButton != null) creditsButton.onClick.AddListener(ShowCreditsFromTitle);
             if (creditsView != null) creditsView.OnBackRequested += CloseCredits;
             if (homeView != null) homeView.OnCreditsRequested += ShowCreditsFromHome;
@@ -96,6 +97,7 @@ namespace TrickalFanGame.Frontend
         {
             if (startButton != null) startButton.onClick.RemoveListener(RequestStart);
             if (nicknameView != null) nicknameView.OnRegistrationComplete -= OnNicknameRegistered;
+            if (nicknameView != null) nicknameView.OnBackRequested -= ShowTitleScreen;
             if (creditsButton != null) creditsButton.onClick.RemoveListener(ShowCreditsFromTitle);
             if (creditsView != null) creditsView.OnBackRequested -= CloseCredits;
             if (homeView != null) homeView.OnCreditsRequested -= ShowCreditsFromHome;
@@ -216,7 +218,9 @@ namespace TrickalFanGame.Frontend
 
         public void FocusStart()
         {
-            if (startButton != null && startButton.IsInteractable() && EventSystem.current != null)
+            // Tab on another screen (e.g. typing a nickname) must not move focus to the hidden start button.
+            if (startButton != null && startButton.gameObject.activeInHierarchy && startButton.IsInteractable() &&
+                EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
 

@@ -2569,6 +2569,12 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
   `Menu2HomeVerification.SetupAndVerifyBatch`(Setup 두 번, 검증, Week13 Frontend 검증, 캡처 `menu2-title`·`menu2-home`).
   Credits-0 Setup도 끝에 같은 모양을 적용한다. 타이틀 원화는 `python -I tools/artwork/package_title_ui.py <엠블럼.png> <시작 버튼.png>`로
   `Assets/Art/UI/Menu/UI_Menu_Title_*.png`를 다시 만든다(시작 버튼 글자는 지움).
+- **닉네임(Menu-2)**: 메뉴 `Setup Menu-2 Nickname`, 검증 `Verify Menu-2 Nickname`, 배치
+  `Menu2NicknameVerification.SetupAndVerifyBatch`(Setup 두 번, 검증, Week13 Frontend 검증, 캡처 `menu2-nickname`·
+  `menu2-nickname-error`). 첫 실행은 예전 루트 `NicknamePanel`을 `ReferenceFrame/NicknameScreen`으로 옮기고, 이후에는 모양만 다시
+  맞춘다. 부품은 `python -I tools/artwork/package_nickname_ui.py`로 다시 만든다(카드·버튼은 `output/menu-components-v4/`,
+  카드는 글자 없는 `nickname-card-textless.png`를 1448×1086 그대로 복사; 경고 아이콘·에르핀은 v3). 배치 좌표는
+  `Menu2NicknameSetup`의 카드 픽셀 사각형(`layout.json`과 같은 좌상단 기준)이다.
 - **크레딧(Menu-5)**: 메뉴 `Setup Menu-5 Credits`, 검증 `Verify Menu-5 Credits`, 배치
   `Menu5CreditsVerification.SetupAndVerifyBatch`. Credits-0 Setup(`Credits > Setup Credits Screen`)도 끝에 같은 모양을 적용한다.
 - **캐릭터 선택·스킬 강화(Menu-3)**: 메뉴 `Setup Menu-3 Character Select and Skill Upgrade`, 검증

@@ -514,6 +514,13 @@ namespace TrickalFanGame.Editor
                 view.StartButton.onClick.Invoke();
                 if (view.NicknameView == null || !view.NicknameView.gameObject.activeInHierarchy)
                     throw new InvalidOperationException("A new local player did not reach nickname registration.");
+                // Menu-2: back returns to the title and GAME START reopens the nickname screen.
+                view.NicknameView.BackButton.onClick.Invoke();
+                if (view.NicknameView.gameObject.activeInHierarchy || !view.TitlePanel.activeInHierarchy)
+                    throw new InvalidOperationException("Nickname back did not return to the title.");
+                view.StartButton.onClick.Invoke();
+                if (!view.NicknameView.gameObject.activeInHierarchy)
+                    throw new InvalidOperationException("GAME START did not reopen nickname registration after back.");
 
                 var retryApi = new RetryRegistrationApiClient();
                 view.NicknameView.SetApiClient(retryApi);
@@ -522,7 +529,9 @@ namespace TrickalFanGame.Editor
                 view.NicknameView.SubmitButton.onClick.Invoke();
                 if (retryApi.Requests.Count != 1 || retryApi.Requests[0].clientProfileId != clientProfileId ||
                     LocalProfile.IsRegistered || !view.NicknameView.ErrorText.gameObject.activeInHierarchy ||
-                    !view.NicknameView.SubmitButton.interactable)
+                    !view.NicknameView.SubmitButton.interactable ||
+                    view.NicknameView.ProgressText.gameObject.activeInHierarchy ||
+                    !view.NicknameView.BackButton.interactable)
                     throw new InvalidOperationException("Failed registration did not preserve a retryable local profile request.");
 
                 view.NicknameView.SubmitButton.onClick.Invoke();

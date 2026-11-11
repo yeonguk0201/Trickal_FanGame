@@ -157,7 +157,7 @@ namespace TrickalFanGame.Editor
         }
 
         // The shared TMP font is dynamic; adding the new title glyphs keeps them in the atlas for builds.
-        private static void AddGlyphs(string characters)
+        internal static void AddGlyphs(string characters)
         {
             TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Week13FrontendSetup.FontPath);
             if (font == null) throw new InvalidOperationException("Missing Frontend font: " + Week13FrontendSetup.FontPath);
