@@ -172,6 +172,16 @@ namespace TrickalFanGame.Editor
                 Capture(Prefab("NururingFairyWarrior"), "NururingFairyWarrior", "누루링-요정전사", added,
                     "NururingFairyWarrior.prefab");
                 Capture(Prefab("NururingSplit"), "NururingSplit", "누루링 분열체", added, "NururingSplit.prefab");
+                // Reward altar (2026-11-11): the altar's floor shadow and the gift's shadow on the altar top.
+                // The gift's review counts the altar as floor so the adjustable shadow draws on top of it.
+                const string altarGroup = "보상 제단";
+                string altarSource = "room prefab / " + InGamePresentationSetup.AltarVisualName;
+                Capture(RewardAltar(), InGamePresentationSetup.AltarShadowProfileId, "보상 제단 · 바닥", altarGroup,
+                    altarSource, null, owner => owner.transform.Find(InGamePresentationSetup.AltarSpriteName).gameObject);
+                Capture(RewardAltar(), InGamePresentationSetup.GiftShadowProfileId, "보상 선물 · 제단 위", altarGroup,
+                    altarSource, null, owner => owner.transform.Find(InGamePresentationSetup.GiftName).gameObject,
+                    owner => new Renderer[] { owner.transform.Find(InGamePresentationSetup.AltarSpriteName)
+                        .GetComponent<SpriteRenderer>() });
                 File.WriteAllText(Path.Combine(folder, "manifest.json"), JsonUtility.ToJson(manifest, true),
                     new System.Text.UTF8Encoding(false));
                 Debug.Log($"Ground shadow review exported: {manifest.entries.Count} actual gameplay appearances, " +
@@ -185,6 +195,18 @@ namespace TrickalFanGame.Editor
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/" + name + ".prefab");
             if (prefab == null) throw new InvalidOperationException("Missing prefab: " + name);
             return Object.Instantiate(prefab);
+        }
+        // The altar and gift as the room prefabs carry them, gift at its resting height.
+        private static GameObject RewardAltar()
+        {
+            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Rooms/Prefabs" }).OrderBy(value => value))
+            {
+                GameObject room = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
+                RewardRoom reward = room.GetComponentInChildren<RewardRoom>(true);
+                Transform visual = reward != null ? reward.transform.Find(InGamePresentationSetup.AltarVisualName) : null;
+                if (visual != null) return Object.Instantiate(visual.gameObject);
+            }
+            throw new InvalidOperationException("No room prefab has a reward altar.");
         }
         private static void Layer(GameObject owner)
         {
@@ -217,8 +239,11 @@ namespace TrickalFanGame.Editor
             visual.sprite = motion.Frames[frame];
             visual.color = Color.white;
         }
+        // shadowOwner: the child that casts the reviewed shadow (default: the owner itself).
+        // backdrop: renderers reviewed as part of the floor, so the shadow is drawn over them (the gift's altar).
         private static void Capture(GameObject owner, string id, string name, string group, string sourcePath,
-            Action<GameObject> pose = null)
+            Action<GameObject> pose = null, Func<GameObject, GameObject> shadowOwner = null,
+            Func<GameObject, Renderer[]> backdrop = null)
         {
             try
             {
@@ -233,13 +258,17 @@ namespace TrickalFanGame.Editor
                     trap.RestartCycle(0f);
                     trap.RefreshPeriodicArtwork(trap.StateAt(0f));
                 }
-                GroundShadow shadow = GroundShadow.Ensure(owner); shadow.enabled = true;
+                GameObject caster = shadowOwner != null ? shadowOwner(owner) : owner;
+                GroundShadow shadow = GroundShadow.Ensure(caster); shadow.enabled = true;
                 Physics2D.SyncTransforms(); shadow.Refresh();
                 if (shadow.Visual == null || !shadow.Visual.enabled) throw new InvalidOperationException("Missing shadow: " + id);
                 shadow.Visual.gameObject.layer = 30;
-                Renderer[] bodies = owner.GetComponentsInChildren<Renderer>(true).Where(value => value != shadow.Visual && value.enabled).ToArray();
+                Renderer[] under = backdrop != null ? backdrop(owner) : Array.Empty<Renderer>();
+                Renderer[] bodies = owner.GetComponentsInChildren<Renderer>(true)
+                    .Where(value => value != shadow.Visual && value.enabled && Array.IndexOf(under, value) < 0).ToArray();
                 Bounds bounds = bodies[0].bounds;
                 foreach (Renderer body in bodies) bounds.Encapsulate(body.bounds);
+                foreach (Renderer body in under) bounds.Encapsulate(body.bounds);
                 bounds.Encapsulate(shadow.Visual.bounds);
                 float span = Mathf.Max(3.4f, Mathf.Max(bounds.size.x, bounds.size.y) + 0.9f);
                 camera.orthographicSize = span * 0.5f;
@@ -247,14 +276,18 @@ namespace TrickalFanGame.Editor
                 int number = manifest.entries.Count + 1;
                 string prefix = number.ToString("D3");
                 floor.SetActive(true); Render(prefix + "-game.png");
+                foreach (Renderer body in under) body.enabled = false;
                 floor.SetActive(false); shadow.Visual.enabled = false; Render(prefix + "-body.png");
                 foreach (Renderer body in bodies) body.enabled = false;
                 shadow.Visual.enabled = true; Render(prefix + "-shadow.png");
-                foreach (Renderer body in bodies) body.enabled = true;
-                owner.SetActive(false); floor.SetActive(true); Render(prefix + "-floor.png");
+                // The floor layer keeps the backdrop; with none it is just the room floor, as before.
+                shadow.Visual.enabled = false;
+                foreach (Renderer body in under) body.enabled = true;
+                if (under.Length == 0) owner.SetActive(false);
+                floor.SetActive(true); Render(prefix + "-floor.png");
                 Vector3 anchor = camera.WorldToViewportPoint(shadow.Visual.transform.position);
                 SerializedObject settings = new(shadow);
-                if (GroundShadowProfiles.TryGet(GroundShadowProfiles.ResolveId(owner, shadow.ProfileId), out var expected))
+                if (GroundShadowProfiles.TryGet(GroundShadowProfiles.ResolveId(caster, shadow.ProfileId), out var expected))
                 {
                     foreach (string property in new[] { "widthMultiplier", "thickness", "opacity" })
                     {

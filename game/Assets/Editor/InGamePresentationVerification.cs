@@ -295,6 +295,30 @@ namespace TrickalFanGame.Editor
             Assert(duplicates == 0, $"The pause panel has {duplicates} duplicated child name(s).");
         }
 
+        // A live copy: walking feet cannot stand in the footprint, and behind/in front picks the altar's draw order.
+        private static void VerifyAltarDepth()
+        {
+            Transform source = RoomPrefabPaths().Select(path => AssetDatabase.LoadAssetAtPath<GameObject>(path)
+                    .GetComponentInChildren<RewardRoom>(true)).First(reward => reward != null)
+                .transform.Find(InGamePresentationSetup.AltarVisualName);
+            GameObject visual = Object.Instantiate(source.gameObject);
+            try
+            {
+                visual.transform.position = new Vector3(40f, 40f, 0f); // away from anything else in the open scene
+                Physics2D.SyncTransforms();
+                RewardAltarDepth depth = visual.GetComponent<RewardAltarDepth>();
+                Bounds footprint = depth.Footprint.bounds;
+                Assert(Physics2D.OverlapCircle(footprint.center, PlayerFeet.Radius, RoomPit.MovementBlockMask) ==
+                       depth.Footprint, "Walking feet must be blocked at the altar's centre.");
+                Vector2 behind = new(footprint.center.x, footprint.max.y + PlayerFeet.Radius);
+                Vector2 front = new(footprint.center.x, footprint.min.y - PlayerFeet.Radius);
+                Assert(depth.IsBehind(behind) && !depth.IsBehind(front) &&
+                       !depth.IsBehind(new Vector2(footprint.max.x + PlayerFeet.Radius, footprint.min.y)),
+                    "Feet past the footprint's back edge are behind the altar; at its front or front side they are not.");
+            }
+            finally { Object.DestroyImmediate(visual); }
+        }
+
         private static void VerifyRewardAltars()
         {
             Sprite altarSprite = InGamePresentationSetup.LoadSprite(InGamePresentationSetup.RewardAltar);
@@ -322,8 +346,53 @@ namespace TrickalFanGame.Editor
                 RewardGiftFloat bob = gift.GetComponent<RewardGiftFloat>();
                 Assert(bob != null && Mathf.Approximately(bob.Amplitude, 0.05f) && Mathf.Approximately(bob.Period, 1.6f),
                     "The gift must bob ±0.05 every 1.6 s: " + path);
+                GroundShadow altarShadow = altar.GetComponent<GroundShadow>();
+                GroundShadow giftShadow = gift.GetComponent<GroundShadow>();
+                Transform altarTop = visual.Find(InGamePresentationSetup.AltarTopName);
+                Assert(altarShadow != null && altarShadow.ProfileId == InGamePresentationSetup.AltarShadowProfileId &&
+                       altarShadow.Surface == null && giftShadow != null &&
+                       giftShadow.ProfileId == InGamePresentationSetup.GiftShadowProfileId &&
+                       altarTop != null && giftShadow.Surface == altarTop &&
+                       Mathf.Abs(altarTop.localPosition.y - InGamePresentationSetup.AltarTopY) < 0.0001f &&
+                       gift.sortingOrder - altar.sortingOrder >= 2,
+                    "The altar casts its own floor shadow and the gift its own shadow on the altar top: " + path);
+                Assert(visual.GetComponentsInChildren<GroundShadow>(true).Length == 2 &&
+                       altar.transform.Find(GroundShadow.ObjectName) == null &&
+                       gift.transform.Find(GroundShadow.ObjectName) == null,
+                    "Reward altar shadows must not repeat or be saved as children: " + path);
+                CapsuleCollider2D solid = visual.Find(InGamePresentationSetup.AltarFootprintName)
+                    ?.GetComponent<CapsuleCollider2D>();
+                RewardAltarDepth depth = visual.GetComponent<RewardAltarDepth>();
+                Assert(solid != null && !solid.isTrigger && solid.enabled &&
+                       solid.gameObject.layer == LayerMask.NameToLayer(RoomMovementClass.EnvironmentLayerName) &&
+                       (RoomPit.MovementBlockMask & (1 << solid.gameObject.layer)) != 0 &&
+                       solid.direction == CapsuleDirection2D.Horizontal &&
+                       solid.size == InGamePresentationSetup.AltarFootprintSize &&
+                       visual.GetComponentsInChildren<Collider2D>(true).Length == 1,
+                    "The altar must have one solid Environment footprint that blocks movement: " + path);
+                Assert(depth != null && depth.Footprint == solid &&
+                       depth.FrontSortingOrder == InGamePresentationSetup.AltarSortingOrder &&
+                       RewardAltarDepth.BehindPlayerSortingOrder > PlayerMovement.BodySortingOrder &&
+                       RewardAltarDepth.BehindPlayerSortingOrder <
+                       PlayerMovement.BodySortingOrder + PlayerFlight.FlyingSortingOrderBoost + 1 &&
+                       RewardAltarDepth.BehindPlayerSortingOrder < PlayerMovement.AboveBodySortingOrder,
+                    "The altar must draw over a walking player behind it and under one in front: " + path);
+                // The 2.6 × 2.6 interaction trigger still reaches feet resting against every side of the footprint.
+                BoxCollider2D zone = reward.GetComponent<BoxCollider2D>();
+                Vector2 centre = (Vector2)(visual.localPosition + solid.transform.localPosition);
+                Vector2 reach = InGamePresentationSetup.AltarFootprintSize / 2f + Vector2.one * PlayerFeet.Radius;
+                Vector2 half = zone.size / 2f;
+                Assert(Mathf.Abs(centre.x - zone.offset.x) + reach.x < half.x &&
+                       Mathf.Abs(centre.y - zone.offset.y) + reach.y < half.y,
+                    "The interaction trigger must still reach the player standing at any side of the altar: " + path);
+                Assert(ActivePowerOffers.RewardDropOffset.y < centre.y - InGamePresentationSetup.AltarFootprintSize.y / 2f,
+                    "The reward drop must land in front of the altar's footprint: " + path);
             }
+            foreach (string id in new[] { InGamePresentationSetup.AltarShadowProfileId,
+                         InGamePresentationSetup.GiftShadowProfileId })
+                Assert(GroundShadowProfiles.TryGet(id, out _), "Missing reviewed ground shadow profile: " + id);
             Assert(count > 0, "No room prefab has a treasure reward.");
+            VerifyAltarDepth();
 
             // Sizes from the art's opaque bounds (100 px per unit) against the player's visible height.
             float altarHeight = InGamePresentationSetup.AltarVisiblePixels.y / 100f * InGamePresentationSetup.AltarScale;

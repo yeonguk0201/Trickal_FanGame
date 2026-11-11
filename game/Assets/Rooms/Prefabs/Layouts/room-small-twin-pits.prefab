@@ -660,6 +660,7 @@ GameObject:
   - component: {fileID: 8116282595634675770}
   - component: {fileID: 4313745546828651713}
   - component: {fileID: 6647855613369961111}
+  - component: {fileID: 8995233437765744098}
   m_Layer: 0
   m_Name: Floating Gift
   m_TagString: Untagged
@@ -676,8 +677,8 @@ Transform:
   m_GameObject: {fileID: 544294528139027040}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.2139518, z: 0}
-  m_LocalScale: {x: 0.19403848, y: 0.19403848, z: 0.19403848}
+  m_LocalPosition: {x: 0, y: 1.183668, z: 0}
+  m_LocalScale: {x: 0.19076997, y: 0.19076997, z: 0.19076997}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3172726083923193553}
@@ -729,7 +730,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: f5d0d0ea5d9a4e669581aaa15f9c2278, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -753,9 +754,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a21e29907c804e63a9c092d2b8538164, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.RewardGiftFloat
-  baseLocalY: 1.2139518
+  baseLocalY: 1.183668
   amplitude: 0.05
   period: 1.6
+--- !u!114 &8995233437765744098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 544294528139027040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: reward-gift
+  useSharedProfile: 1
+  surface: {fileID: 2431169725170716427}
 --- !u!1 &594771704655453402
 GameObject:
   m_ObjectHideFlags: 0
@@ -2240,6 +2260,75 @@ MonoBehaviour:
   destinationEntryPoint: {fileID: 0}
   requiredClearedRoom: {fileID: 0}
   allowsOneWay: 0
+--- !u!1 &1779547897077290407
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3214709117002865478}
+  - component: {fileID: 6222304424623497065}
+  m_Layer: 8
+  m_Name: Altar Footprint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3214709117002865478
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779547897077290407}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.33250722, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3172726083923193553}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!70 &6222304424623497065
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779547897077290407}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Size: {x: 1.3, y: 0.6}
+  m_Direction: 1
 --- !u!1 &1805195315116443954
 GameObject:
   m_ObjectHideFlags: 0
@@ -5318,6 +5407,37 @@ MonoBehaviour:
   textureRepeat: {x: 1, y: 1}
   foregroundCutoff: 1
   foregroundMask: {fileID: 0}
+--- !u!1 &5514405635423619139
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2431169725170716427}
+  m_Layer: 0
+  m_Name: Altar Top
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2431169725170716427
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5514405635423619139}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.6826513, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3172726083923193553}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5572676559591378073
 GameObject:
   m_ObjectHideFlags: 0
@@ -5909,6 +6029,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1569550551974336532}
   - component: {fileID: 5700905046248412174}
+  - component: {fileID: 679066213026463830}
   m_Layer: 0
   m_Name: Altar
   m_TagString: Untagged
@@ -5926,7 +6047,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.25613078, y: 0.25613078, z: 0.25613078}
+  m_LocalScale: {x: 0.27089337, y: 0.27089337, z: 0.27089337}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3172726083923193553}
@@ -5990,6 +6111,25 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &679066213026463830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5912061963595828414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681f93dc20fe47acb4fcba5332eb67d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Frontend.GroundShadow
+  widthMultiplier: 1
+  thickness: 0.28
+  opacity: 0.28
+  offset: {x: 0, y: 0}
+  profileId: reward-altar
+  useSharedProfile: 1
+  surface: {fileID: 0}
 --- !u!1 &6162165119738496993
 GameObject:
   m_ObjectHideFlags: 0
@@ -9406,6 +9546,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3172726083923193553}
   - component: {fileID: 7226005627310626763}
+  - component: {fileID: 7742166932469275606}
   m_Layer: 0
   m_Name: Reward Altar
   m_TagString: Untagged
@@ -9428,6 +9569,8 @@ Transform:
   m_Children:
   - {fileID: 1569550551974336532}
   - {fileID: 8116282595634675770}
+  - {fileID: 2431169725170716427}
+  - {fileID: 3214709117002865478}
   m_Father: {fileID: 3947280447176316036}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!210 &7226005627310626763
@@ -9443,6 +9586,20 @@ SortingGroup:
   m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
+--- !u!114 &7742166932469275606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9073374795718795137}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2761cb3e001977c43a4181c2705e9197, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Item.RewardAltarDepth
+  footprint: {fileID: 6222304424623497065}
+  frontSortingOrder: 1
 --- !u!1001 &704444653189950698
 PrefabInstance:
   m_ObjectHideFlags: 0

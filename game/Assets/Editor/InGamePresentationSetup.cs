@@ -69,12 +69,23 @@ namespace TrickalFanGame.Editor
         public const string AltarVisualName = "Reward Altar";
         public const string AltarSpriteName = "Altar";
         public const string GiftName = "Floating Gift";
+        public const string AltarTopName = "Altar Top"; // where the gift's shadow lies
+        // The altar's solid floor footprint (Environment layer, so it blocks like a wall): a flat capsule a little
+        // inside the stone ring's outline, resting on the art's visible bottom (12 px above the sprite's edge).
+        public const string AltarFootprintName = "Altar Footprint";
+        public static readonly Vector2 AltarFootprintSize = new(1.3f, 0.6f);
+        public const float AltarVisibleBottomPixels = 12f;
+        public static float AltarFootprintCenterY =>
+            AltarVisibleBottomPixels / 100f * AltarScale + AltarFootprintSize.y / 2f;
+        // Separate reviewed shadows (Resources/GroundShadowProfiles.json): the altar on the floor, the gift on the altar.
+        public const string AltarShadowProfileId = "reward-altar";
+        public const string GiftShadowProfileId = "reward-gift";
         public const float PlayerVisibleHeight = 1.175f;
         public const float AltarHeightRatio = 0.8f;
-        public static readonly Vector2 AltarVisiblePixels = new(500, 367);
-        public const float AltarTopCentrePixels = 276f; // middle of the top face, above the sprite's bottom edge
+        public static readonly Vector2 AltarVisiblePixels = new(500, 347);
+        public const float AltarTopCentrePixels = 252f; // middle of the top face, above the sprite's bottom edge
         public const float GiftWidthRatio = 0.5f;
-        public static readonly Vector2 GiftVisiblePixels = new(330, 368);
+        public static readonly Vector2 GiftVisiblePixels = new(355, 368);
         public const float GiftHoverGap = 0.1f;           // gap left under the gift at its lowest point
         public const float AltarBaseY = -0.55f;           // altar bottom under the reward root
         public const float PromptY = 1.35f;
@@ -563,20 +574,43 @@ namespace TrickalFanGame.Editor
             altarRenderer.drawMode = SpriteDrawMode.Simple;
             altarRenderer.color = Color.white;
             altarRenderer.sortingOrder = 0;
+            BindShadow(altar.gameObject, AltarShadowProfileId, null);
 
+            Transform altarTop = Child(visual, AltarTopName, new Vector3(0f, AltarTopY, 0f), Vector3.one);
             Transform gift = Child(visual, GiftName, new Vector3(0f, GiftBaseY, 0f), Vector3.one * GiftScale);
             SpriteRenderer giftRenderer = Get<SpriteRenderer>(gift.gameObject);
             giftRenderer.sprite = giftSprite;
             giftRenderer.drawMode = SpriteDrawMode.Simple;
             giftRenderer.color = Color.white;
-            giftRenderer.sortingOrder = 1;
+            giftRenderer.sortingOrder = 2; // its shadow draws at 1, between the altar and the gift
             Get<RewardGiftFloat>(gift.gameObject).Configure(GiftBaseY);
+            BindShadow(gift.gameObject, GiftShadowProfileId, altarTop);
+
+            Transform footprint = Child(visual, AltarFootprintName, new Vector3(0f, AltarFootprintCenterY, 0f),
+                Vector3.one);
+            int environment = LayerMask.NameToLayer(RoomMovementClass.EnvironmentLayerName);
+            if (environment < 0) throw new InvalidOperationException("Missing Environment layer.");
+            footprint.gameObject.layer = environment;
+            CapsuleCollider2D solid = Get<CapsuleCollider2D>(footprint.gameObject);
+            solid.isTrigger = false;
+            solid.direction = CapsuleDirection2D.Horizontal;
+            solid.size = AltarFootprintSize;
+            solid.offset = Vector2.zero;
+            Get<RewardAltarDepth>(visual.gameObject).Configure(solid, AltarSortingOrder);
 
             Transform marker = reward.transform.Find("Interaction Marker");
             if (marker != null) Object.DestroyImmediate(marker.gameObject);
             Transform prompt = reward.transform.Find("Interaction Prompt");
             if (prompt != null) prompt.localPosition = new Vector3(0f, PromptY, 0f);
             reward.ConfigureInteractionVisuals(gift.gameObject, prompt != null ? prompt.gameObject : null);
+        }
+
+        // The shadow child itself is created at play time; the prefab only keeps the binding.
+        private static void BindShadow(GameObject owner, string profileId, Transform surface)
+        {
+            GroundShadow shadow = Get<GroundShadow>(owner);
+            shadow.SetProfileId(profileId);
+            shadow.SetSurface(surface);
         }
 
         private static Transform Child(Transform parent, string name, Vector3 position, Vector3 scale)
