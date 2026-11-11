@@ -539,7 +539,13 @@
       반복, 쫄따구 뜀 높이·복사본·몸 고정), `Week27Variant1Verification.Verify`(쓰러짐 그림이 있는 폭발 챔피언은 몸 복사본
       없음), `Week25Enemy7Verification.Verify` 통과(2026-11-06). 사용자 Play 확인(2026-11-06): 쫄따구 뜀·곡사형 걷기·
       잠복형 제자리 쓰러짐 "괜찮다".
-    - 남은 것: 누루링·자폭형·부스러기 쫄따구·크레용 용사는 쓰러짐 그림이 없어 지금처럼 바로 사라진다.
+    - Defeat-4 크레용 졸개(2026-11-11, 사용자 원화): 마법사(`CrayonMageMinion`)·도끼병(`CrayonAxeMinion`)·궁병
+      (`CrayonArcherMinion`) 쓰러짐 네 장씩(`Death/CrayonMage|CrayonAxe|CrayonArcher_Death_0~3`, 원본은 `Death/Source`)을
+      연결했다. 그전에는 쓰러짐 그림 없이 바로 사라졌다. 지팡이·화살·떨어져 나간 몸 반쪽이 옆 칸 열까지 걸쳐 있어 시트는
+      열 간격이 아니라 그림 조각 단위로 나눴다(`scripts/split-crayon-minion-death.py`, 작은 효과선은 가장 가까운 큰 조각을
+      따른다). 확인용으로 `F1` 패널에 `Spawn crayon mage, axe, archer (drawn defeat)`를 더했다. 자동 검증 배치: 미실행(Unity
+      다중 인스턴스 잠금, 연결은 사용자가 메뉴로 실행). 사용자 Play 확인(2026-11-11): "좋다, 문제없다".
+    - 남은 것: 누루링·자폭형·부스러기 쫄따구·크레용 용사·크레용 방패병은 쓰러짐 그림이 없어 지금처럼 바로 사라진다.
 - 새 적 원화(자폭형·곡사형·잠복형)는 사용자가 준비한다. 원화 전에는 임시 그림으로 로직부터 만든다.
 - Curve-1~Variant-2와 Drop-0·1은 Play-2 기록 전에 끝내야 그 기록이 기준선으로 남는다(§6).
 

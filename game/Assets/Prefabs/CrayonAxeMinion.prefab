@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 7755734025311633134}
   - component: {fileID: 7897655199667525666}
   - component: {fileID: 8832098423808731973}
+  - component: {fileID: 2906420398974505492}
   m_Layer: 6
   m_Name: CrayonAxeMinion
   m_TagString: Untagged
@@ -354,6 +355,25 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: CrayonAxeMinion
   useSharedProfile: 1
+--- !u!114 &2906420398974505492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8344673385379417815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 4e82a1b25d517344183f80424533202e, type: 3}
+  - {fileID: 21300000, guid: 22bd83a60285852499e71cc88906f539, type: 3}
+  - {fileID: 21300000, guid: fd9a0d5fdf5ba1049b28687e97d32811, type: 3}
+  - {fileID: 21300000, guid: 6c6eff38410360b4998c7042c2aef6c6, type: 3}
+  sizeMultiplier: 0.9783234
+  knockScale: 1
 --- !u!1 &8581781216918918751
 GameObject:
   m_ObjectHideFlags: 0

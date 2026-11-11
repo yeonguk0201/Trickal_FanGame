@@ -1,0 +1,845 @@
+fileFormatVersion: 2
+guid: 8e70a92c53036e0469441ff86f844edb
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1963359460366314252
+    second: CrayonArcher_Death_Sheet_0
+  - first:
+      213: 7471113024751253119
+    second: CrayonArcher_Death_Sheet_1
+  - first:
+      213: 5014552927938453383
+    second: CrayonArcher_Death_Sheet_2
+  - first:
+      213: 4785320462154015933
+    second: CrayonArcher_Death_Sheet_3
+  - first:
+      213: -4463062706446415264
+    second: CrayonArcher_Death_Sheet_4
+  - first:
+      213: -2420249898074990111
+    second: CrayonArcher_Death_Sheet_5
+  - first:
+      213: 3999185145888138633
+    second: CrayonArcher_Death_Sheet_6
+  - first:
+      213: 6497431340869717133
+    second: CrayonArcher_Death_Sheet_7
+  - first:
+      213: -1015054709192277148
+    second: CrayonArcher_Death_Sheet_8
+  - first:
+      213: 5968107582056609488
+    second: CrayonArcher_Death_Sheet_9
+  - first:
+      213: -3839502681348388259
+    second: CrayonArcher_Death_Sheet_10
+  - first:
+      213: -432348626934482482
+    second: CrayonArcher_Death_Sheet_11
+  - first:
+      213: 4508798254307787598
+    second: CrayonArcher_Death_Sheet_12
+  - first:
+      213: -2250978641277013609
+    second: CrayonArcher_Death_Sheet_13
+  - first:
+      213: 2046138679869305034
+    second: CrayonArcher_Death_Sheet_14
+  - first:
+      213: 423056806468808101
+    second: CrayonArcher_Death_Sheet_15
+  - first:
+      213: -6010929790585084026
+    second: CrayonArcher_Death_Sheet_16
+  - first:
+      213: 6683106174730849426
+    second: CrayonArcher_Death_Sheet_17
+  - first:
+      213: 5191457003316416535
+    second: CrayonArcher_Death_Sheet_18
+  - first:
+      213: 640489897211195594
+    second: CrayonArcher_Death_Sheet_19
+  - first:
+      213: 7765228879687848292
+    second: CrayonArcher_Death_Sheet_20
+  - first:
+      213: -7945405374185365025
+    second: CrayonArcher_Death_Sheet_21
+  - first:
+      213: -2493462056209336757
+    second: CrayonArcher_Death_Sheet_22
+  - first:
+      213: 181547763861097604
+    second: CrayonArcher_Death_Sheet_23
+  - first:
+      213: -2096038482697990357
+    second: CrayonArcher_Death_Sheet_24
+  - first:
+      213: -2525869525027934434
+    second: CrayonArcher_Death_Sheet_25
+  - first:
+      213: 1984646524545811484
+    second: CrayonArcher_Death_Sheet_26
+  - first:
+      213: -973604059234591114
+    second: CrayonArcher_Death_Sheet_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 55
+        width: 443
+        height: 622
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f4967e19feb0c4e0800000000000000
+      internalID: -1963359460366314252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 499
+        y: 15
+        width: 532
+        height: 687
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f76b71d56b9bea760800000000000000
+      internalID: 7471113024751253119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 1046
+        y: 643
+        width: 49
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78f9a29d155479540800000000000000
+      internalID: 5014552927938453383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 1086
+        y: 578
+        width: 104
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db4291b4b9fd86240800000000000000
+      internalID: 4785320462154015933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 1166
+        y: 628
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06ac7f36d140012c0800000000000000
+      internalID: -4463062706446415264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 1182
+        y: 643
+        width: 26
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e9909d6a8b896ed0800000000000000
+      internalID: -2420249898074990111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 1215
+        y: 568
+        width: 266
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9856eab93b5ff7730800000000000000
+      internalID: 3999185145888138633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 1337
+        y: 595
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8c870131638b2a50800000000000000
+      internalID: 6497431340869717133
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 679
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 463c107be1dc9e1f0800000000000000
+      internalID: -1015054709192277148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 675
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d6bcc9b93af2d250800000000000000
+      internalID: 5968107582056609488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 1625
+        y: 421
+        width: 67
+        height: 174
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5ac11467a857bac0800000000000000
+      internalID: -3839502681348388259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 1693
+        y: 567
+        width: 20
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec93178e63dfff9f0800000000000000
+      internalID: -432348626934482482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 1703
+        y: 534
+        width: 20
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e43cae7af18729e30800000000000000
+      internalID: 4508798254307787598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 423
+        width: 116
+        height: 231
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79131b91adae2c0e0800000000000000
+      internalID: -2250978641277013609
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 49
+        width: 506
+        height: 508
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac0fbc6d948556c10800000000000000
+      internalID: 2046138679869305034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 1689
+        y: 502
+        width: 46
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ad626d8ceffed500800000000000000
+      internalID: 423056806468808101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 1734
+        y: 521
+        width: 63
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 687ec56e333e49ca0800000000000000
+      internalID: -6010929790585084026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 1923
+        y: 451
+        width: 21
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29c4d0548a92fbc50800000000000000
+      internalID: 6683106174730849426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 1955
+        y: 371
+        width: 200
+        height: 184
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 710936593a2cb0840800000000000000
+      internalID: 5191457003316416535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 1882
+        y: 482
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac0ff750b2a73e800800000000000000
+      internalID: 640489897211195594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 1858
+        y: 441
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 461166d2682a3cb60800000000000000
+      internalID: 7765228879687848292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 1880
+        y: 449
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd1a333a8ef3cb190800000000000000
+      internalID: -7945405374185365025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 1906
+        y: 453
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b463ab68871756dd0800000000000000
+      internalID: -2493462056209336757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 1545
+        y: 35
+        width: 613
+        height: 305
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48c05b6babcf48200800000000000000
+      internalID: 181547763861097604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 1693
+        y: 280
+        width: 130
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2fcc33fa1069e2e0800000000000000
+      internalID: -2096038482697990357
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 79
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1fa9b3bc0f42fcd0800000000000000
+      internalID: -2525869525027934434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 491
+        y: 49
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c14444cbf71ea8b10800000000000000
+      internalID: 1984646524545811484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonArcher_Death_Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 53
+        width: 13
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67e917934401d72f0800000000000000
+      internalID: -973604059234591114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CrayonArcher_Death_Sheet_0: -1963359460366314252
+      CrayonArcher_Death_Sheet_1: 7471113024751253119
+      CrayonArcher_Death_Sheet_10: -3839502681348388259
+      CrayonArcher_Death_Sheet_11: -432348626934482482
+      CrayonArcher_Death_Sheet_12: 4508798254307787598
+      CrayonArcher_Death_Sheet_13: -2250978641277013609
+      CrayonArcher_Death_Sheet_14: 2046138679869305034
+      CrayonArcher_Death_Sheet_15: 423056806468808101
+      CrayonArcher_Death_Sheet_16: -6010929790585084026
+      CrayonArcher_Death_Sheet_17: 6683106174730849426
+      CrayonArcher_Death_Sheet_18: 5191457003316416535
+      CrayonArcher_Death_Sheet_19: 640489897211195594
+      CrayonArcher_Death_Sheet_2: 5014552927938453383
+      CrayonArcher_Death_Sheet_20: 7765228879687848292
+      CrayonArcher_Death_Sheet_21: -7945405374185365025
+      CrayonArcher_Death_Sheet_22: -2493462056209336757
+      CrayonArcher_Death_Sheet_23: 181547763861097604
+      CrayonArcher_Death_Sheet_24: -2096038482697990357
+      CrayonArcher_Death_Sheet_25: -2525869525027934434
+      CrayonArcher_Death_Sheet_26: 1984646524545811484
+      CrayonArcher_Death_Sheet_27: -973604059234591114
+      CrayonArcher_Death_Sheet_3: 4785320462154015933
+      CrayonArcher_Death_Sheet_4: -4463062706446415264
+      CrayonArcher_Death_Sheet_5: -2420249898074990111
+      CrayonArcher_Death_Sheet_6: 3999185145888138633
+      CrayonArcher_Death_Sheet_7: 6497431340869717133
+      CrayonArcher_Death_Sheet_8: -1015054709192277148
+      CrayonArcher_Death_Sheet_9: 5968107582056609488
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
