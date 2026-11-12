@@ -45,7 +45,7 @@ namespace TrickalFanGame.Editor
         // Special-effect artifacts that still stack without limit, each by its own balance decision.
         public static readonly IReadOnlyList<string> UnlimitedSpecialItemIds = new[]
         {
-            Week23Passive3Setup.TopId, // 칸타의 팽이: each stack adds a bounce that is worth half the one before.
+            Week23Passive3Setup.TopId, // 칸타의 팽이: each stack adds a bounce worth 55% of the one before.
         };
 
         public static bool IsUnlimited(string itemId) =>

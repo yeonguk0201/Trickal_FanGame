@@ -974,12 +974,12 @@ describe('Item catalog', () => {
       effects: [
         {
           type: 'BounceBetweenEnemies',
-          magnitude: 0.15,
+          magnitude: 0.05,
           secondaryMagnitude: 0.35,
           integerAmount: 2,
           radius: 3.5,
           intervalSeconds: 0.15,
-          scaleMultiplier: 0.5,
+          scaleMultiplier: 0.55,
         },
       ],
     });

@@ -19,7 +19,7 @@ MonoBehaviour:
   isActive: 1
   effects:
   - effectType: 62
-    magnitude: 0.15
+    magnitude: 0.05
     healthThreshold: 0
     secondaryMagnitude: 0.35
     integerAmount: 2
@@ -28,7 +28,7 @@ MonoBehaviour:
     radius: 3.5
     intervalSeconds: 0.15
     spreadAngleDegrees: 0
-    scaleMultiplier: 0.5
+    scaleMultiplier: 0.55
     durationSeconds: 0
   effectType: 62
   effectValue: 2

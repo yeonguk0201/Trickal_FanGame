@@ -43,10 +43,10 @@ namespace TrickalFanGame.Editor
             ValidateSameEnemyRepeat();
             ValidateCourseOrder();
             Debug.Log("Passive-3 verification passed: effect type 62 is appended, 칸타의 팽이 is a Rare artifact " +
-                      "without a stack limit in the selection reward pool with 2 bounces and one more per stack, the " +
-                      "first stack alone costs 15% basic attack damage, a shot that hit an enemy turns to the nearest " +
+                      "without a stack limit in the selection reward pool with 2 bounces and one more per stack, " +
+                      "every stack costs 5% basic attack damage, a shot that hit an enemy turns to the nearest " +
                       "other enemy within 3.5 and two enemies are hit in turn, each bounce to another enemy keeps " +
-                      "50% and each bounce back to a lone enemy keeps 35% (compounding), a hit after a bounce pushes " +
+                      "55% and each bounce back to a lone enemy keeps 35% (compounding), a hit after a bounce pushes " +
                       "with 25% knockback, a shot on a lone enemy hops off it, slows for 0.15 seconds and flies back " +
                       "to hit it once per bounce, every bounce hit is a basic attack hit, a kill with no other enemy " +
                       "ends the shot, and bounces are used before pierces.");
@@ -75,11 +75,11 @@ namespace TrickalFanGame.Editor
             Assert(top.DisplayName == Week23Passive3Setup.TopName && top.Kind == ItemKind.Artifact &&
                    top.Rarity == ItemRarity.Rare && top.IsActive && top.MaxStacks == 0 && effect != null &&
                    effect.EffectType == ItemEffectType.BounceBetweenEnemies && effect.IntegerAmount == 2 &&
-                   Mathf.Approximately(effect.Radius, 3.5f) && Mathf.Approximately(effect.ScaleMultiplier, 0.5f) &&
+                   Mathf.Approximately(effect.Radius, 3.5f) && Mathf.Approximately(effect.ScaleMultiplier, 0.55f) &&
                    Mathf.Approximately(effect.SecondaryMagnitude, 0.35f) &&
-                   Mathf.Approximately(effect.IntervalSeconds, 0.15f) && Mathf.Approximately(effect.Magnitude, 0.15f),
-                "칸타의 팽이 must be a Rare artifact without a stack limit with 2 bounces, radius 3.5, 50% kept per " +
-                "bounce to another enemy, 35% kept per repeat, a 0.15s delay and a 15% basic attack penalty.");
+                   Mathf.Approximately(effect.IntervalSeconds, 0.15f) && Mathf.Approximately(effect.Magnitude, 0.05f),
+                "칸타의 팽이 must be a Rare artifact without a stack limit with 2 bounces, radius 3.5, 55% kept per " +
+                "bounce to another enemy, 35% kept per repeat, a 0.15s delay and a 5% basic attack penalty per stack.");
             Assert(Mathf.Approximately(ProjectileBounceSettings.BouncedKnockbackScale, 0.25f),
                 "A hit after a bounce must push with 25% of the normal knockback.");
             string description = ArtifactEffectDescription.Build(top);
@@ -102,15 +102,16 @@ namespace TrickalFanGame.Editor
                     "Without 칸타의 팽이 shots must not bounce nor lose basic attack damage.");
                 Assert(inventory.TryAcquire(top) && stats.ProjectileBounce.BounceCount == 2 &&
                        Near(stats.ProjectileBounce.SearchRadius, 3.5f) &&
-                       Near(stats.ProjectileBounce.OtherEnemyDamageRatio, 0.5f) &&
+                       Near(stats.ProjectileBounce.OtherEnemyDamageRatio, 0.55f) &&
                        Near(stats.ProjectileBounce.RepeatDamageRatio, 0.35f) &&
                        Near(stats.ProjectileBounce.SameTargetDelaySeconds, 0.15f) &&
-                       Near(stats.BasicAttackDamagePenalty, 0.15f),
-                    "One 칸타의 팽이 must give 2 bounces and cost 15% basic attack damage.");
+                       Near(stats.BasicAttackDamagePenalty, 0.05f),
+                    "One 칸타의 팽이 must give 2 bounces and cost 5% basic attack damage.");
                 Assert(inventory.TryAcquire(top) && stats.ProjectileBounce.BounceCount == 3 &&
+                       Near(stats.BasicAttackDamagePenalty, 0.1f) &&
                        inventory.TryAcquire(top) && stats.ProjectileBounce.BounceCount == 4 &&
                        Near(stats.BasicAttackDamagePenalty, 0.15f),
-                    "Every later 칸타의 팽이 must add one bounce without a stack limit and without another penalty " +
+                    "Every later 칸타의 팽이 must add one bounce and another 5% penalty without a stack limit " +
                     $"(bounces {stats.ProjectileBounce.BounceCount}, penalty {stats.BasicAttackDamagePenalty}).");
             }
             finally
@@ -140,25 +141,25 @@ namespace TrickalFanGame.Editor
                 float wholePush = first.GetComponent<KnockbackReceiver>().PushVelocity.magnitude;
                 Assert(Near(first.CurrentHealth, 990f) && wholePush > 0.01f && shot != null &&
                        shot.BounceTarget == second && shot.RemainingBounces == 1 &&
-                       Near(shot.BounceDamageMultiplier, 0.5f) &&
+                       Near(shot.BounceDamageMultiplier, 0.55f) &&
                        Vector2.Dot(shot.Velocity.normalized, Vector2.right) > 0.7f && Near(shot.Velocity.magnitude, 8f),
                     "After its whole first hit the shot must turn to the nearest other enemy within 3.5 at the same " +
-                    "speed, keeping half its damage.");
+                    "speed, keeping 55% of its damage.");
 
                 shot.transform.position = second.transform.position;
                 Assert(!shot.TickBounce(0.02f), "The bounce hit must end the bounce flight.");
                 float bouncedPush = second.GetComponent<KnockbackReceiver>().PushVelocity.magnitude;
-                Assert(Near(second.CurrentHealth, 995f) && shot.BounceTarget == first && shot.RemainingBounces == 0 &&
-                       Near(shot.BounceDamageMultiplier, 0.25f) &&
+                Assert(Near(second.CurrentHealth, 994.5f) && shot.BounceTarget == first && shot.RemainingBounces == 0 &&
+                       Near(shot.BounceDamageMultiplier, 0.3025f) &&
                        Near(bouncedPush, wholePush * ProjectileBounceSettings.BouncedKnockbackScale),
-                    "The bounce must hit the second enemy for half with a quarter of the push and turn back to the " +
+                    "The bounce must hit the second enemy for 55% with a quarter of the push and turn back to the " +
                     $"first (second {second.CurrentHealth}, push {bouncedPush} of {wholePush}).");
 
                 shot.transform.position = first.transform.position;
                 shot.TickBounce(0.02f);
-                Assert(shot == null && Near(first.CurrentHealth, 987.5f) && Near(second.CurrentHealth, 995f) &&
+                Assert(shot == null && Near(first.CurrentHealth, 986.975f) && Near(second.CurrentHealth, 994.5f) &&
                        Near(far.CurrentHealth, 1000f) && basicHits == 3,
-                    "With two enemies the shot hits them in turn for 100%, 50% and 25%, three basic attack hits in " +
+                    "With two enemies the shot hits them in turn for 100%, 55% and 30.25%, three basic attack hits in " +
                     $"all (first {first.CurrentHealth}, second {second.CurrentHealth}, hits {basicHits}).");
             }
             finally

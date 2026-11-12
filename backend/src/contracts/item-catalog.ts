@@ -668,19 +668,19 @@ export const ITEM_CATALOG = [
     id: 'artifact-kanta-top',
     name: '칸타의 팽이',
     description:
-      '처음 획득하면 기본 공격 피해가 15% 감소합니다. 기본 공격 투사체가 적을 맞히면 반경 3.5m 안의 가장 가까운 다른 적에게 2회 튕깁니다. 스택 제한이 없고 스택마다 튕김이 1회 늘어납니다. 다른 적으로 튕길 때마다 피해가 50% 줄고, 다른 적이 없으면 0.15초 뒤 같은 적을 다시 맞히며 그때마다 피해가 65% 줄어듭니다(곱연산). 튕긴 뒤의 적중은 넉백이 25%입니다.',
+      '스택마다 기본 공격 피해가 5% 감소합니다. 기본 공격 투사체가 적을 맞히면 반경 3.5m 안의 가장 가까운 다른 적에게 2회 튕깁니다. 스택 제한이 없고 스택마다 튕김이 1회 늘어납니다. 다른 적으로 튕길 때마다 피해가 45% 줄고, 다른 적이 없으면 0.15초 뒤 같은 적을 다시 맞히며 그때마다 피해가 65% 줄어듭니다(곱연산). 튕긴 뒤의 적중은 넉백이 25%입니다.',
     rarity: 'RARE',
     isActive: true,
     maxStacks: 0,
     effects: [
       {
         type: 'BounceBetweenEnemies',
-        magnitude: 0.15,
+        magnitude: 0.05,
         secondaryMagnitude: 0.35,
         integerAmount: 2,
         radius: 3.5,
         intervalSeconds: 0.15,
-        scaleMultiplier: 0.5,
+        scaleMultiplier: 0.55,
       },
     ],
   },

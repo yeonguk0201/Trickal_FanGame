@@ -143,7 +143,7 @@ namespace TrickalFanGame.Frontend
                 ItemEffectType.GainGoldOnAcquire => $"획득 시 골드 +{Number(effect.Magnitude)} (보유 한도 99까지)",
                 ItemEffectType.GainPermanentElifRollOnAcquire => "획득 시 엘리프 0~4개",
                 ItemEffectType.BounceBetweenEnemies =>
-                    (effect.Magnitude > 0f ? $"기본 공격 피해 -{Percent(effect.Magnitude)} (첫 획득 시), " : "") +
+                    (effect.Magnitude > 0f ? $"기본 공격 피해 -{Percent(effect.Magnitude)} (스택마다), " : "") +
                     $"기본 공격이 적을 맞히면 가까운 다른 적에게 {effect.IntegerAmount}회 튕김 (스택마다 +1회, 튕길 " +
                     $"때마다 피해 -{Percent(1f - effect.ScaleMultiplier)}, 같은 적을 다시 맞히면 " +
                     $"-{Percent(1f - effect.SecondaryMagnitude)}, 튕긴 탄 넉백 " +
