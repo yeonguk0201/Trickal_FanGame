@@ -53,8 +53,9 @@ namespace TrickalFanGame.Editor
                     ItemDefinition item = AssetDatabase.LoadAssetAtPath<ItemDefinition>(AssetDatabase.GUIDToAssetPath(guid));
                     if (UserArtwork.Load(item.ItemId) == null) continue;
                     Require(UserArtwork.Apply(image, item) && image.color == Color.white &&
-                        image.material.GetFloat("_Card") == (item.Kind == ItemKind.Artifact ? 0f : 1f),
-                        "Artwork must retain its colors and the correct frame style: " + item.ItemId);
+                        image.material.GetFloat("_Card") == (item.Kind == ItemKind.Artifact ? 0f : 1f) &&
+                        image.material.GetColor("_FrameColor") == UserArtwork.FrameColor(item.Rarity),
+                        "Artwork must retain its colors and the correct frame style and rarity colour: " + item.ItemId);
                     linked++;
                     if (item.Kind == ItemKind.Active) powers++;
                 }
