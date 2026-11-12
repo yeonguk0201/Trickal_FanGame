@@ -267,10 +267,12 @@ namespace TrickalFanGame.Item
                     break;
                 case ItemEffectType.BounceBetweenEnemies:
                     if (integerAmount <= 0 || radius <= 0f || secondaryMagnitude <= 0f || secondaryMagnitude > 1f ||
-                        intervalSeconds <= 0f)
+                        scaleMultiplier <= 0f || scaleMultiplier > 1f || intervalSeconds <= 0f ||
+                        magnitude < 0f || magnitude >= 1f)
                     {
                         error = "BounceBetweenEnemies requires a positive bounce count, search radius and same-enemy " +
-                                "delay, and a repeat damage ratio within (0, 1].";
+                                "delay, same-enemy and other-enemy damage ratios within (0, 1], and a basic attack " +
+                                "penalty within [0, 1).";
                         return false;
                     }
 

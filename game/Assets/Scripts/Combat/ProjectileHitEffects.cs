@@ -70,16 +70,24 @@ namespace TrickalFanGame.Combat
     }
 
     // Passive-0 §4.4: a basic attack shot that hit an enemy turns toward another enemy (칸타의 팽이).
+    // Balance (user decision, 2026-11-13): every bounce multiplies the shot's damage by one ratio, chosen by where
+    // it goes: OtherEnemyDamageRatio to another enemy, RepeatDamageRatio back to the same enemy. The ratios compound
+    // (0.5 → 100%, 50%, 25%, ...), so more bounces add less and less. A hit after a bounce pushes with
+    // BouncedKnockbackScale of the normal knockback.
     public readonly struct ProjectileBounceSettings
     {
+        public const float BouncedKnockbackScale = 0.25f;
+
         public ProjectileBounceSettings(
             int bounceCount,
             float searchRadius,
+            float otherEnemyDamageRatio,
             float repeatDamageRatio,
             float sameTargetDelaySeconds)
         {
             BounceCount = Mathf.Max(0, bounceCount);
             SearchRadius = Mathf.Max(0f, searchRadius);
+            OtherEnemyDamageRatio = Mathf.Clamp01(otherEnemyDamageRatio);
             RepeatDamageRatio = Mathf.Clamp01(repeatDamageRatio);
             SameTargetDelaySeconds = Mathf.Max(0f, sameTargetDelaySeconds);
         }
@@ -87,13 +95,15 @@ namespace TrickalFanGame.Combat
         public int BounceCount { get; }
         // Measured from the centre of the enemy that was just hit.
         public float SearchRadius { get; }
-        // Damage kept for every earlier hit of the same shot on the same enemy (0.5 = 100% → 50% → 25%).
+        // Damage kept by a bounce to another enemy.
+        public float OtherEnemyDamageRatio { get; }
+        // Damage kept by a bounce back to the same enemy (no other enemy near).
         public float RepeatDamageRatio { get; }
         public float SameTargetDelaySeconds { get; }
         public bool IsEnabled => BounceCount > 0 && SearchRadius > 0f;
 
         public ProjectileBounceSettings WithBounceCount(int bounceCount) =>
-            new(bounceCount, SearchRadius, RepeatDamageRatio, SameTargetDelaySeconds);
+            new(bounceCount, SearchRadius, OtherEnemyDamageRatio, RepeatDamageRatio, SameTargetDelaySeconds);
     }
 
     // Passive-0 §4.2 (에슈르의 마도서): a basic attack shot keeps its speed and turns toward the nearest living enemy

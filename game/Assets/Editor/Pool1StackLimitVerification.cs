@@ -54,7 +54,7 @@ namespace TrickalFanGame.Editor
         }
 
         // Pure-stat artifacts are exactly the Pool-0 pure-stat group and have no limit; every other pooled artifact
-        // keeps one.
+        // keeps one, except the special-effect artifacts Pool1StackLimitSetup lists as unlimited (칸타의 팽이).
         private static void VerifyAssetLimits()
         {
             ItemDefinition[] artifacts = Pool0ItemPoolSetup.LoadArtifacts();
@@ -68,7 +68,7 @@ namespace TrickalFanGame.Editor
             {
                 ItemDefinition item = artifacts.Single(candidate => candidate.ItemId == id);
                 if (Pool1StackLimitSetup.IsUnlimited(id))
-                    Assert(item.MaxStacks == 0, $"{id} is a pure-stat artifact and must have no stack limit. Run Pool-1 setup.");
+                    Assert(item.MaxStacks == 0, $"{id} is listed as unlimited and must have no stack limit. Run Pool-1 setup.");
                 else
                     Assert(item.MaxStacks > 0, $"{id} has a special effect and must keep its stack limit.");
             }

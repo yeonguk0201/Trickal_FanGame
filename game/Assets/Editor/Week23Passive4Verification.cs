@@ -102,7 +102,7 @@ namespace TrickalFanGame.Editor
                 ValidateLengthAndObstacles();
                 ValidateShotModifiers();
                 ValidateSplitSynergy();
-                ValidateBounceSynergy();
+                ValidateNoBounce();
             }
             finally
             {
@@ -115,7 +115,7 @@ namespace TrickalFanGame.Editor
                       "shot speed are, passes over obstacles while hitting them and stops at walls and doors, is " +
                       "0.2 wide, fires one burst per attack cooldown that hits every enemy on it as a basic attack hit with 30% " +
                       "knockback, 다중 투사체 adds parallel streams, 칸나의 대포 widens it, 다야의 다이아몬드 커터 " +
-                      "sends four short streams from the enemy hit and 칸타의 팽이 jumps to nearby enemies.");
+                      "sends four short streams from the enemy hit and 칸타의 팽이 does not make the stream bounce.");
         }
 
         private static void ValidateContractAssetAndPool()
@@ -346,28 +346,29 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        private static void ValidateBounceSynergy()
+        // User decision (2026-11-13): 칸타의 팽이 does not make the stream bounce.
+        private static void ValidateNoBounce()
         {
             GameObject root = new("Passive-4 Bounce Verification");
             try
             {
                 GameObject player = CreateStreamPlayer(root.transform, Origin, out PlayerWaterStream stream);
                 PlayerStats stats = player.GetComponent<PlayerStats>();
-                stats.AddProjectileBounce(2, 3.5f, 0.5f, 0.15f);
+                stats.AddProjectileBounce(2, 3.5f, 0.5f, 0.35f, 0.15f, 0f);
                 Health target = CreateEnemy(root.transform, Origin + Vector2.right * 3f, 1000f);
                 Health first = CreateEnemy(root.transform, Origin + new Vector2(3f, -1.5f), 1000f);
                 Health second = CreateEnemy(root.transform, Origin + new Vector2(3f, -3f), 1000f);
                 Health third = CreateEnemy(root.transform, Origin + new Vector2(3f, -4.5f), 1000f);
-                // Further than the short jump range of 2 from every enemy in the chain.
+                // Off the stream line, like the three enemies below the target.
                 Health distant = CreateEnemy(root.transform, Origin + new Vector2(6.5f, 3f), 1000f);
                 Physics2D.SyncTransforms();
 
                 stream.Tick(Vector2.right, Start);
-                Assert(Near(target.CurrentHealth, 990f) && Near(first.CurrentHealth, 990f) &&
-                       Near(second.CurrentHealth, 990f) && Near(third.CurrentHealth, 1000f) &&
+                Assert(Near(target.CurrentHealth, 990f) && Near(first.CurrentHealth, 1000f) &&
+                       Near(second.CurrentHealth, 1000f) && Near(third.CurrentHealth, 1000f) &&
                        Near(distant.CurrentHealth, 1000f),
-                    "A stream hit must jump to the nearest enemies in turn, once per bounce and only over a short " +
-                    $"range: first {first.CurrentHealth}, second {second.CurrentHealth}, third {third.CurrentHealth}.");
+                    "With 칸타의 팽이 the stream must still hit only the enemies on it, without jumping to nearby " +
+                    $"ones: first {first.CurrentHealth}, second {second.CurrentHealth}, third {third.CurrentHealth}.");
             }
             finally
             {

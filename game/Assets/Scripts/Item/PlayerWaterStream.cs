@@ -17,7 +17,7 @@ namespace TrickalFanGame.Item
     // - 다중 투사체: that many parallel streams.
     // - 칸나의 대포: a wider stream.
     // - 다야의 다이아몬드 커터: every hit sends four short streams up, down, left and right from the enemy.
-    // - 칸타의 팽이: every hit jumps to nearby enemies over a short range.
+    // - 칸타의 팽이: nothing (user decision, 2026-11-13: the stream does not bounce).
     // - Range (장난감 망원경) and shot speed (실라의 바람살) do nothing.
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Health), typeof(PlayerStats), typeof(PlayerCombatEvents))]
@@ -27,7 +27,6 @@ namespace TrickalFanGame.Item
         // Distance between the centre lines of parallel streams.
         public const float BeamSpacing = 0.4f;
         public const float SplitLength = 1.5f;
-        public const float BounceRange = 2f;
 
         private const int EnemyLayerMask = 1 << 6;
         private const float FlashSeconds = 0.08f;
@@ -295,11 +294,6 @@ namespace TrickalFanGame.Item
             {
                 SplitFrom(target);
             }
-
-            if (stats.ProjectileBounce.IsEnabled)
-            {
-                BounceFrom(target);
-            }
         }
 
         private void ApplyHit(Health target, Vector2 direction, float damageScale)
@@ -353,51 +347,6 @@ namespace TrickalFanGame.Item
                     }
                 }
             }
-        }
-
-        // 칸타의 팽이: the hit jumps to the nearest enemy not yet in this chain, once per bounce.
-        private void BounceFrom(Health source)
-        {
-            chainTargets.Clear();
-            chainTargets.Add(source);
-            Health current = source;
-            for (int bounce = 0; bounce < stats.ProjectileBounce.BounceCount; bounce++)
-            {
-                Health next = FindNearestEnemy(current.transform.position, BounceRange, chainTargets);
-                if (next == null)
-                {
-                    return;
-                }
-
-                chainTargets.Add(next);
-                Vector2 offset = next.transform.position - current.transform.position;
-                ShowFlash(current.transform.position, next.transform.position, BeamWidth);
-                ApplyHit(next, offset.sqrMagnitude > 0.0001f ? offset.normalized : Vector2.right, 1f);
-                current = next;
-            }
-        }
-
-        private Health FindNearestEnemy(Vector2 center, float range, HashSet<Health> excluded)
-        {
-            Health nearest = null;
-            float nearestDistance = float.PositiveInfinity;
-            foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, range, EnemyLayerMask))
-            {
-                Health candidate = hit.GetComponentInParent<Health>();
-                if (!IsEnemy(candidate) || excluded.Contains(candidate))
-                {
-                    continue;
-                }
-
-                float distance = ((Vector2)candidate.transform.position - center).sqrMagnitude;
-                if (distance < nearestDistance)
-                {
-                    nearestDistance = distance;
-                    nearest = candidate;
-                }
-            }
-
-            return nearest;
         }
 
         private bool IsEnemy(Health target)

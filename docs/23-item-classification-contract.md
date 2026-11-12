@@ -194,10 +194,13 @@ Slot-0, Spell-0~4, Chest-2, Flight-0, Jjangsem-0·1이 구현할 때 따르는 �
   처음 쓴다. 14종의 ID·등급·스택·효과는 Backend 카탈로그에도 같은 값으로 기록했다(목록은 [21번 Artifact-2](./21-sixth-month-plan.md)).
   Artifact-3·Passive-3·Passive-4(2026-10-07)에서 `GainGoldOnAcquire = 61`(`magnitude` = 획득 시 골드, 지갑 상한 99에서 잘림),
   `BounceBetweenEnemies = 62`(`integerAmount` = 첫 스택의 튕김 횟수이며 이후 스택마다 +1, `radius` = 탐색 반경,
-  `secondaryMagnitude` = 같은 적 재적중마다 남는 피해 비율, `intervalSeconds` = 같은 적 재적중 지연, `magnitude` 없음),
+  `secondaryMagnitude` = 같은 적 재적중마다 남는 피해 비율, `intervalSeconds` = 같은 적 재적중 지연, `magnitude` 없음.
+  2026-11-13 밸런스 조정에서 `scaleMultiplier` = 다른 적으로 튕길 때마다 남는 피해 비율, `magnitude` = 첫 스택에서 한 번만
+  받는 기본 공격 피해 감소를 추가했다. 두 비율은 튕길 때마다 곱해진다),
   `WaterStreamAttack = 63`(`magnitude` = 줄기 폭, `secondaryMagnitude` = 탄 넉백 대비 비율)을 추가했다.
   `artifact-aisia-wallet`(Rare, 1스택, 61 `magnitude` 100), `artifact-kanta-top`(Rare, 2스택, 62 `integerAmount` 2·`radius` 3.5·
-  `secondaryMagnitude` 0.5·`intervalSeconds` 0.15), `artifact-shasha-jar`(Epic, 1스택, 63 `magnitude` 0.2·`secondaryMagnitude` 0.3)만
+  `secondaryMagnitude` 0.5·`intervalSeconds` 0.15. 2026-11-13부터 스택 제한 없음, `magnitude` 0.15·`secondaryMagnitude` 0.35·
+  `scaleMultiplier` 0.5, 튕긴 뒤 적중 넉백 25%), `artifact-shasha-jar`(Epic, 1스택, 63 `magnitude` 0.2·`secondaryMagnitude` 0.3)만
   쓰며 Backend 카탈로그에도 같은 값을 기록했다.
   Passive-5(2026-10-07)에서 `SplitOnHit = 64`(`integerAmount` = 방향 수 4, `secondaryMagnitude` = 분열탄 피해 비율,
   `maximumDistance` = 분열탄 사거리, `scaleMultiplier` = 기본 탄 대비 크기, `magnitude` 없음)를 추가하고 `item-11`의 효과를

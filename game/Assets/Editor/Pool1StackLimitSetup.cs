@@ -42,7 +42,15 @@ namespace TrickalFanGame.Editor
             Pool2PureStatArtifactSetup.BlanchetBluebirdId,
         };
 
-        public static bool IsUnlimited(string itemId) => UnlimitedItemIds.Contains(itemId, StringComparer.Ordinal);
+        // Special-effect artifacts that still stack without limit, each by its own balance decision.
+        public static readonly IReadOnlyList<string> UnlimitedSpecialItemIds = new[]
+        {
+            Week23Passive3Setup.TopId, // 칸타의 팽이: each stack adds a bounce that is worth half the one before.
+        };
+
+        public static bool IsUnlimited(string itemId) =>
+            UnlimitedItemIds.Contains(itemId, StringComparer.Ordinal) ||
+            UnlimitedSpecialItemIds.Contains(itemId, StringComparer.Ordinal);
 
         [MenuItem("Trickal Fan Game/Week 28/Setup Pool-1 Stack Limits")]
         public static void Setup()

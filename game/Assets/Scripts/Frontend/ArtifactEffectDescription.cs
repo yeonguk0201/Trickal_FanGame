@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TrickalFanGame.Combat;
 using TrickalFanGame.Item;
 using UnityEngine;
 
@@ -142,8 +143,11 @@ namespace TrickalFanGame.Frontend
                 ItemEffectType.GainGoldOnAcquire => $"획득 시 골드 +{Number(effect.Magnitude)} (보유 한도 99까지)",
                 ItemEffectType.GainPermanentElifRollOnAcquire => "획득 시 엘리프 0~4개",
                 ItemEffectType.BounceBetweenEnemies =>
-                    $"기본 공격이 적을 맞히면 가까운 다른 적에게 {effect.IntegerAmount}회 튕김 (스택마다 +1회, 같은 적을 " +
-                    $"다시 맞히면 피해 {Percent(effect.SecondaryMagnitude)}씩)",
+                    (effect.Magnitude > 0f ? $"기본 공격 피해 -{Percent(effect.Magnitude)} (첫 획득 시), " : "") +
+                    $"기본 공격이 적을 맞히면 가까운 다른 적에게 {effect.IntegerAmount}회 튕김 (스택마다 +1회, 튕길 " +
+                    $"때마다 피해 -{Percent(1f - effect.ScaleMultiplier)}, 같은 적을 다시 맞히면 " +
+                    $"-{Percent(1f - effect.SecondaryMagnitude)}, 튕긴 탄 넉백 " +
+                    $"{Percent(ProjectileBounceSettings.BouncedKnockbackScale)})",
                 ItemEffectType.SplitOnHit =>
                     $"적을 맞히면 그 적의 상하좌우 {effect.IntegerAmount}방향으로 분열 (분열탄 피해 " +
                     $"{Percent(effect.SecondaryMagnitude)})",

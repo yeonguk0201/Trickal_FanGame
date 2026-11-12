@@ -19,20 +19,20 @@ MonoBehaviour:
   isActive: 1
   effects:
   - effectType: 62
-    magnitude: 0
+    magnitude: 0.15
     healthThreshold: 0
-    secondaryMagnitude: 0.5
+    secondaryMagnitude: 0.35
     integerAmount: 2
     minimumDistance: 0
     maximumDistance: 0
     radius: 3.5
     intervalSeconds: 0.15
     spreadAngleDegrees: 0
-    scaleMultiplier: 0
+    scaleMultiplier: 0.5
     durationSeconds: 0
   effectType: 62
   effectValue: 2
   stackMode: 0
-  maxStacks: 2
+  maxStacks: 0
   activeChargeRooms: 0
   poolSources: 2

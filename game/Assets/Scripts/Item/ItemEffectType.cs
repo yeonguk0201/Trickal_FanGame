@@ -127,8 +127,9 @@ namespace TrickalFanGame.Item
         GainGoldOnAcquire = 61,
         // Passive-3 (칸타의 팽이, Passive-0 §4.4): a basic attack shot that hit an enemy turns toward the nearest
         // other enemy within Radius. IntegerAmount = bounces of the first stack (each later stack adds one),
-        // SecondaryMagnitude = damage kept per earlier hit of the same shot on the same enemy,
-        // IntervalSeconds = delay before the shot hits the same enemy again when no other enemy is near.
+        // ScaleMultiplier = damage kept by each bounce to another enemy, SecondaryMagnitude = damage kept by each
+        // bounce back to the same enemy (both compound), IntervalSeconds = delay before the shot hits the same enemy
+        // again when no other enemy is near, Magnitude = basic attack damage penalty taken once, at the first stack.
         BounceBetweenEnemies = 62,
         // Passive-4 (샤샤의 항아리, Passive-0 §4.5): the basic attack becomes a straight water stream that reaches
         // the room's wall or door and hits every enemy on it once per attack cooldown. Magnitude = stream width,

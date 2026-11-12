@@ -521,20 +521,30 @@ namespace TrickalFanGame.Player
 
         public void EnableWaterStream() => HasWaterStream = true;
 
-        // The first stack sets the bounce; each later stack adds one bounce.
+        // The first stack sets the bounce and costs basicAttackDamagePenalty once; each later stack only adds one
+        // bounce.
         public void AddProjectileBounce(
             int bounceCount,
             float searchRadius,
+            float otherEnemyDamageRatio,
             float repeatDamageRatio,
-            float sameTargetDelaySeconds)
+            float sameTargetDelaySeconds,
+            float basicAttackDamagePenalty)
         {
-            ProjectileBounceSettings configured = projectileBounce.IsEnabled
-                ? projectileBounce.WithBounceCount(projectileBounce.BounceCount + 1)
-                : new ProjectileBounceSettings(bounceCount, searchRadius, repeatDamageRatio,
-                    sameTargetDelaySeconds);
-            if (configured.IsEnabled)
+            bool firstStack = !projectileBounce.IsEnabled;
+            ProjectileBounceSettings configured = firstStack
+                ? new ProjectileBounceSettings(bounceCount, searchRadius, otherEnemyDamageRatio, repeatDamageRatio,
+                    sameTargetDelaySeconds)
+                : projectileBounce.WithBounceCount(projectileBounce.BounceCount + 1);
+            if (!configured.IsEnabled)
             {
-                projectileBounce = configured;
+                return;
+            }
+
+            projectileBounce = configured;
+            if (firstStack)
+            {
+                AddBasicAttackDamagePenaltyPercent(basicAttackDamagePenalty);
             }
         }
 

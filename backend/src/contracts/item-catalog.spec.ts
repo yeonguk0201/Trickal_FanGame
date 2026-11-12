@@ -387,7 +387,7 @@ describe('Item catalog', () => {
       {
         id: 'artifact-kanta-top',
         rarity: 'RARE',
-        maxStacks: 2,
+        maxStacks: 0,
       },
       {
         id: 'artifact-shasha-jar',
@@ -974,10 +974,12 @@ describe('Item catalog', () => {
       effects: [
         {
           type: 'BounceBetweenEnemies',
-          secondaryMagnitude: 0.5,
+          magnitude: 0.15,
+          secondaryMagnitude: 0.35,
           integerAmount: 2,
           radius: 3.5,
           intervalSeconds: 0.15,
+          scaleMultiplier: 0.5,
         },
       ],
     });
