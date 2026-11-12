@@ -154,7 +154,7 @@ namespace TrickalFanGame.Frontend
                 ItemEffectType.WaterStreamAttack =>
                     "기본 공격이 벽까지 뻗는 물줄기로 변경 (줄기 위의 모든 적과 장애물을 타격)",
                 ItemEffectType.GainShield => $"방어막 {Hearts(effect.Magnitude)} 획득",
-                ItemEffectType.SpawnHealthPickups => $"주변에 하트 {effect.IntegerAmount}개 생성",
+                ItemEffectType.SpawnHealthPickups => $"주변에 딸기맛 캡슐 {effect.IntegerAmount}개 생성",
                 ItemEffectType.GainRandomGold =>
                     $"골드 {effect.IntegerAmount}~{Number(effect.Magnitude)} 무작위 획득",
                 ItemEffectType.CurrentRoomCriticalBonus =>

@@ -312,7 +312,7 @@ export const ITEM_CATALOG = [
     id: 'single-spell-amelia-love-letter',
     name: '아멜리아의 러브레터',
     description:
-      '사용하면 캐릭터 주변에 HP 1칸을 회복하는 하트 2개가 떨어집니다. HP가 가득 차 있으면 하트는 바닥에 남습니다.',
+      '사용하면 캐릭터 주변에 HP 1칸을 회복하는 딸기맛 캡슐 2개가 떨어집니다. HP가 가득 차 있으면 딸기맛 캡슐은 바닥에 남습니다.',
     rarity: 'UNCOMMON',
     isActive: true,
     maxStacks: 1,
@@ -386,7 +386,7 @@ export const ITEM_CATALOG = [
     id: 'jjangsem-melune-card',
     name: '멜룬카드',
     description:
-      '사용하면 현재 방의 열지 않은 상자와 바닥의 하트·SP·골드·열쇠·폭탄을 하나씩 복제합니다. 복제한 상자는 내용물을 따로 추첨하며 같은 방법(열쇠·폭탄)으로 엽니다. 복제할 것이 없는 방에서는 사용할 수 없습니다. 다이아몬드 상자에서만 얻을 수 있습니다.',
+      '사용하면 현재 방의 열지 않은 상자와 바닥의 딸기맛 캡슐·소다맛 캡슐·골드·열쇠·폭탄을 하나씩 복제합니다. 복제한 상자는 내용물을 따로 추첨하며 같은 방법(열쇠·폭탄)으로 엽니다. 복제할 것이 없는 방에서는 사용할 수 없습니다. 다이아몬드 상자에서만 얻을 수 있습니다.',
     rarity: 'RARE',
     isActive: true,
     maxStacks: 1,

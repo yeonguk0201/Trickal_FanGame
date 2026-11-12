@@ -88,7 +88,7 @@ namespace TrickalFanGame.Editor
 
             AssertItem(Week22Spell5Setup.ArmorInvitationId, "갑옷축제 초대장", ItemRarity.Rare, "방어막 2칸 획득",
                 effect => effect.EffectType == ItemEffectType.GainShield && Mathf.Approximately(effect.Magnitude, 4f));
-            AssertItem(Week22Spell5Setup.LoveLetterId, "아멜리아의 러브레터", ItemRarity.Uncommon, "주변에 하트 2개 생성",
+            AssertItem(Week22Spell5Setup.LoveLetterId, "아멜리아의 러브레터", ItemRarity.Uncommon, "주변에 딸기맛 캡슐 2개 생성",
                 effect => effect.EffectType == ItemEffectType.SpawnHealthPickups && effect.IntegerAmount == 2);
             AssertItem(Week22Spell5Setup.RandomCoinId, "랜덤코인", ItemRarity.Common, "골드 2~10 무작위 획득",
                 effect => effect.EffectType == ItemEffectType.GainRandomGold && effect.IntegerAmount == 2 &&

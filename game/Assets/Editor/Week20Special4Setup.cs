@@ -33,11 +33,14 @@ namespace TrickalFanGame.Editor
         public const int UncommonPrice = 15;
         public const int RarePrice = 20;
         public const int EpicPrice = 25;
+        // User decision (2026-11-13): the heart pickup is sold as 딸기맛 캡슐 and the SP pickup joins as 소다맛 캡슐.
+        // The shop rolls three of these four for its consumable slots. The IDs stay stable keys.
         public static readonly (string Id, string Name, string PrefabPath, int Price)[] Consumables =
         {
-            ("heart", "하트", HeartPrefabPath, 3),
+            ("heart", "딸기맛 캡슐", HeartPrefabPath, 3),
             ("key", "열쇠", Week17Resource1Setup.KeyPrefabPath, 5),
             ("bomb", "폭탄", Week17Resource1Setup.BombPrefabPath, 5),
+            ("sp", "소다맛 캡슐", Week17Resource3Setup.SpPickupPrefabPath, 3),
         };
 
         // Shop-0: the shopkeeper stands in the room center and replaces the four world stalls.
@@ -58,6 +61,20 @@ namespace TrickalFanGame.Editor
             Debug.Log("Special-4 ready: floors roll a 60% key-locked shop beside the start or an intermediate room, " +
                       "selling three Items by rarity price and three consumables that drop as floor pickups. " +
                       "Run the Shop-0 setup to connect the shop UI.");
+        }
+
+        // Updates only the shop catalog (names, prices, pickups) and the font glyphs for its names, without touching
+        // the shop Prefab or the Game Scene that later setups (Shop-0) changed.
+        [MenuItem("Trickal Fan Game/Week 20/Setup Special-4 Shop Catalog")]
+        public static void SetupCatalog()
+        {
+            ShopCatalog catalog = EnsureCatalog();
+            TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Week13FrontendSetup.FontPath);
+            if (font == null) throw new InvalidOperationException("Special-4 requires the HUD font.");
+            EnsureGlyphs(font);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Special-4 shop catalog ready: " +
+                      string.Join(", ", catalog.Consumables.Select(consumable => consumable.DisplayName)) + ".");
         }
 
         public static RoomDefinition EnsureShopDefinition()
