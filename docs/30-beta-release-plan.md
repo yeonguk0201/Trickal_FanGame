@@ -223,14 +223,14 @@
 착수 때 정한 것(사용자 결정):
 
 - 보스방에 들어가 보스가 나타나면 게임 시간을 0으로 둔다(`Time.timeScale = 0`). 캐릭터·적·투사체가 모두 멈추고 피해도 없다. 연출은 실제 시간으로 돈다.
-- 흐름(약 2.9초): 왼쪽 위에서 보스 패널, 오른쪽 아래에서 플레이어 패널이 사선 빨간 띠와 함께 들어온다(0.35초) → 가운데에 노란 VS가 크게 나타났다 줄어들며 붙는다. 흰 번쩍임과 흔들림 → 1.6초부터 패널이 양옆으로 빠진다 → 보스 체력바가 0에서 끝까지 찬다(1초) → 정지가 풀리고 전투가 시작된다.
+- 흐름(약 2.9초): 왼쪽 위에서 플레이어 패널, 오른쪽 아래에서 보스 패널이 일러스트 리본과 함께 들어온다(0.35초) → 가운데에 VS 일러스트가 크게 나타났다 줄어들며 붙는다. 흰 번쩍임과 흔들림 → 1.6초부터 패널이 양옆으로 빠진다 → 보스 체력바가 0에서 끝까지 찬다(1초) → 정지가 풀리고 전투가 시작된다.
 - 건너뛰기: Space·Enter·마우스 왼쪽·게임패드 A/Start. 패널 중에는 체력바 채우기로, 채우는 중에는 바로 전투로 넘어간다. 처음 0.25초는 문으로 걸어 들어오며 누른 키를 무시한다. Escape는 일시정지와 겹쳐서 쓰지 않는다.
 - 같은 보스를 다시 만날 때 생략하는 기능은 넣지 않는다. 필요하면 나중에 추가한다.
-- 그림: 보스는 기본 몸 스프라이트(`BossMovementAnimator.BodySprite`), 플레이어는 `CharacterDefinition.Portrait`를 크게 확대해 쓴다. VS는 프론트엔드 글꼴과 외곽선 재질(`Assets/Fonts/Boss Intro VS.mat`)로 그린다. 원화(§7 2번)는 VS·패널·보스 체력바 정도이고, 받으면 이미지만 바꾼다.
+- 그림: 1280×720 편집 시안의 배치를 HUD 기준 1920×1080으로 환산한다. 딸기색 보스 리본, 청색 플레이어 리본, VS를 투명 PNG로 합성해 방이 뒤로 비친다. 보스는 기본 몸 스프라이트(`BossMovementAnimator.BodySprite`), 플레이어는 `CharacterDefinition.Portrait`를 쓴다. 이름은 프론트엔드 TMP 글꼴과 각 패널의 외곽선 재질로 표시한다.
 
 구성: `Trickal Fan Game/Beta/Setup Boss-Intro-0 Boss Intro`가 Game HUD `ReferenceFrame` 아래에 `Boss Intro` 오버레이를 만든다(재실행 시 같은 오브젝트·재질 재사용). 런타임은 `GameBossIntroView`, 체력바 채우기는 `GameBossHudView.SetIntroPresentation`.
 
-검증: `Trickal Fan Game/Beta/Verify Boss-Intro-0 Boss Intro`(배치 `BossIntro0Verification.SetupAndVerifyBatch` 통과, 2026-11-09). 회귀 묶음은 `VerifyWithRegressionsBatch`(HUD-5, 개발 패널).
+검증: `Trickal Fan Game/Beta/Verify Boss-Intro-0 Boss Intro`(배치 `BossIntro0Verification.SetupAndVerifyBatch` 통과, 2026-11-09). 2026-11-16 배치에서 새 원화 참조·배치·슬라이드 방향 및 기존 전투 전환을 확인했다. 새 시안의 Play 화면 확인은 남아 있다. 회귀 묶음은 `VerifyWithRegressionsBatch`(HUD-5, 개발 패널).
 
 수동 확인(2026-11-09 사용자 확인, 문제 없음): Game Scene Play → `F1` 개발 패널 `— Boss room —`의 `Boss F1`·`Boss F2`·`Boss F3`로 보스방 이동 → 연출 중 모두 멈추는지, 패널·VS·체력바 채우기가 보기 좋은지, Space로 건너뛰기가 되는지, 끝나면 전투가 바로 시작되는지 본다.
 
@@ -274,7 +274,7 @@ Beta-0의 버전 표시·피드백 안내·조작 안내는 Menu 디자인과 �
 베타는 임시 그림으로 공개할 수 있다. 원화가를 구하면 아래 순서로 맡긴다. 그 전까지는 지금 그림을 유지한다.
 
 1. 쓰러짐 그림: 누루링·자폭형·부스러기 쫄따구·크레용 용사
-2. 보스 등장 연출용 그림(Boss-Intro-0)
+2. 보스 체력바 그림(Boss-Intro-0 관련, 패널·VS는 §4.2에 반영)
 3. 임시 그림 교체: 저혈당 요정-활발의 빵 탄, 잠복형 매복·공격 상태(임시 색), 다중 투사체(`item-06`) 아이콘, 새마음금고 투사체
 4. 걷기·공격 모션이 없는 적의 프레임(Motion-0)
 5. 메뉴 UI 부품·배경(Menu-1)
