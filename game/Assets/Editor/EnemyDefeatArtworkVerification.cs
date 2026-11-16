@@ -106,7 +106,7 @@ namespace TrickalFanGame.Editor
                     inPlace ? name + ": an in-place defeat must neither move nor hop."
                         : name + ": the shadow must slide with the (sideways) knock but stay on the floor during the hop.");
                 left.Advance(EnemyDefeatView.FrameSeconds * (frames.Length - 1.5f));
-                Require(view.sprite == frames[^1] && (left.transform.position - (start + left.KnockOffset)).sqrMagnitude < 0.0001f,
+                Require(view.sprite == frames[^1] && (left.transform.position - (start + left.KnockOffset + Vector3.up * left.Drop)).sqrMagnitude < 0.0001f,
                     name + ": the knock must end on the last frame at its full offset.");
                 Require(view.color.a > 0.99f, name + ": the picture must stay opaque until the fade.");
                 left.Advance(EnemyDefeatView.HoldSeconds + EnemyDefeatView.FadeSeconds * 0.5f);

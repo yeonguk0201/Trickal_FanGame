@@ -23,6 +23,8 @@ namespace TrickalFanGame.Enemy
         private Vector3 knock;
         private float age;
         private float hop = HopHeight;
+        // Vertical drop (≤ 0) to the floor shadow, eased in like gravity during the knock.
+        private float drop;
         private float baseAlpha = 1f;
         // A floor shadow beside the picture (not under its hop or scale), with no collider either.
         private SpriteRenderer shadow;
@@ -32,6 +34,7 @@ namespace TrickalFanGame.Enemy
         public float Age => age;
         public Vector3 KnockOffset => knock;
         public float Hop => hop;
+        public float Drop => drop;
         public bool FlipX => view != null && view.flipX;
         public SpriteRenderer Shadow => shadow;
         public static float Lifetime(int frameCount) => frameCount * FrameSeconds + HoldSeconds + FadeSeconds;
@@ -66,6 +69,10 @@ namespace TrickalFanGame.Enemy
             view.start = root.transform.position;
             view.knock = (Vector3)(direction * ClearDistance(owner, direction));
             view.CreateShadow(owner, body, room);
+            // A flying enemy (쥬비) floats above its shadow: the picture drops onto the shadow while it falls,
+            // instead of lying in mid-air above it.
+            if (owner.GetComponent<EnemyFlight>() != null && view.shadow != null)
+                view.drop = Mathf.Min(0f, view.shadowOffset.y);
             return view;
         }
 
@@ -145,7 +152,8 @@ namespace TrickalFanGame.Enemy
             view.sprite = frames[index];
             float t = Mathf.Clamp01(age / motion);
             float eased = 1f - (1f - t) * (1f - t);
-            transform.position = start + knock * eased + Vector3.up * (Mathf.Sin(t * Mathf.PI) * hop);
+            transform.position = start + knock * eased +
+                Vector3.up * (Mathf.Sin(t * Mathf.PI) * hop + drop * t * t);
             float fade = Mathf.Clamp01((age - motion - HoldSeconds) / FadeSeconds);
             Color color = view.color;
             color.a = baseAlpha * (1f - fade);
