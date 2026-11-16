@@ -796,10 +796,13 @@ namespace TrickalFanGame.Run
                   (nearest.Kind == RoomTrapKind.PeriodicSpikes
                       ? $"  {nearest.StateAt(Time.time)}{(nearest.SecondPhase ? " (B)" : " (A)")}"
                       : string.Empty) +
+                  (nearest.Kind == RoomTrapKind.MudCake
+                      ? nearest.HasBurst ? $"  burst {Time.time - nearest.BurstTime:0.0}s" : "  intact"
+                      : string.Empty) +
                   (nearestObstacle != null
                       ? $"  {nearestObstacle.HitsTaken}/{nearestObstacle.RequiredHits} hits"
                       : string.Empty));
-            GUILayout.Label($"Web slow x{EnvironmentSlow.MultiplierOf(player):0.##}   " +
+            GUILayout.Label($"Web/mud slow x{EnvironmentSlow.MultiplierOf(player):0.##}   " +
                             $"gas clouds {room.GetComponentsInChildren<PoisonGasCloud>(false).Length}");
 #if UNITY_EDITOR
             const string trapFolder = "Assets/Prefabs/Traps";

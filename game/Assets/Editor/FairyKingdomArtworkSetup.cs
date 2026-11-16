@@ -18,8 +18,9 @@ namespace TrickalFanGame.Editor
     {
         public const string ArtRoot = "Assets/Art/Drafts/FairyKingdom";
         // Every PNG under ArtRoot. 48 since Enemy-12 added 저혈당 요정-광기, Enemy-10 산사모-광기 and Enemy-13
-        // 불효자손-냉정 (2026-10-30). The menu names keep "45" so documented menu paths stay valid.
-        public const int ExpectedSpriteCount = 48;
+        // 불효자손-냉정 (2026-10-30), 49 since Trap-2 added 진흙케이크 (2026-11-16). The menu names keep "45" so
+        // documented menu paths stay valid.
+        public const int ExpectedSpriteCount = 49;
         public const string CatalogPath = "Assets/Resources/FairyKingdomArtwork/Catalog.asset";
         public const string DisplayRoot = "Assets/Prefabs/FairyKingdomArtwork";
         public const string PreviewScenePath = "Assets/Scenes/FairyKingdomArtworkPreview.unity";

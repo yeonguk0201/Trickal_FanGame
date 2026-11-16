@@ -676,6 +676,15 @@
       "opacity": 0.58
     },
     {
+      "number": 143,
+      "id": "trap-mud-cake",
+      "widthMultiplier": 1.2,
+      "thickness": 0.3,
+      "offsetX": 0.0,
+      "offsetY": 0.05,
+      "opacity": 0.55
+    },
+    {
       "number": 4,
       "id": "QuickRangedFairy",
       "widthMultiplier": 1.04,

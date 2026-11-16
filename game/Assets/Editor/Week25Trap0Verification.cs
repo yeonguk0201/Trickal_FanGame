@@ -47,7 +47,7 @@ namespace TrickalFanGame.Editor
             ValidateSpiderweb();
             ValidateFireAndSpikedRock();
             ValidatePoisonMushroom();
-            Debug.Log("Trap-0 verification passed: seven trap Prefabs bound to their drawings; every player hit is " +
+            Debug.Log("Trap-0 verification passed: every trap Prefab (seven kinds and Trap-2 mud cake) bound to its drawing; every player hit is " +
                       "half a heart judged by the feet center down to the soles against the drawn ellipse, shares the post-hit window and " +
                       "repeats after 1 " +
                       "second; floor traps hurt or slow grounded enemies by the same line from their feet without crediting the " +
@@ -77,7 +77,8 @@ namespace TrickalFanGame.Editor
 
         private static void ValidatePrefabs()
         {
-            Assert(Week25Trap0Setup.Kinds.Length == 7, "Trap-0 defines exactly seven trap kinds.");
+            // The seven Trap-0 kinds and Trap-2 진흙케이크, which shares the Prefab path and floor rules.
+            Assert(Week25Trap0Setup.Kinds.Length == 8, "Trap-0 builds one Prefab for each of the eight trap kinds.");
             Assert(!PlayerCombatEvents.IsPlayerDamage(DamageSourceType.Environment),
                 "Environment damage must not count as player damage.");
             FairyKingdomArtworkCatalog catalog =
@@ -103,9 +104,13 @@ namespace TrickalFanGame.Editor
                     Assert(obstacle == null && trap.GetComponentInChildren<Collider2D>(true) == null &&
                            view.Mode == FairyKingdomArtworkMode.Fixed &&
                            trap.Visual.sortingOrder == Week25Trap0Setup.FloorSortingOrder &&
-                           trap.HitSize == Week25Trap0Setup.DrawnSize(artworkId) &&
-                           trap.HitSize.x == RoomTrap.CellSize && trap.HitSize.y > 0.1f &&
-                           trap.HitSize.y < RoomTrap.CellSize,
+                           trap.HitSize == Week25Trap0Setup.DrawnSize(kind) &&
+                           view.LocalWidth == RoomTrap.ArtworkWidthOf(kind) &&
+                           (kind == RoomTrapKind.MudCake
+                               ? trap.HitSize == RoomTrap.MudCakeHitSize
+                               : trap.HitSize.x == RoomTrap.ArtworkWidthOf(kind)) && trap.HitSize.y > 0.1f &&
+                           // A drawing taller than wide (진흙케이크) is clamped to its cell.
+                           trap.HitSize.y <= RoomTrap.CellSize,
                         $"Floor trap {kind} must have no collider, draw under actors and take its hit size " +
                         "from its drawing.");
                     continue;
@@ -509,7 +514,7 @@ namespace TrickalFanGame.Editor
         }
 
         // A player with 5 hearts and the feet collider, plus the traps and enemies of one scenario.
-        private sealed class Fixture
+        internal sealed class Fixture
         {
             public const float EnemyRadius = 0.3f;
 

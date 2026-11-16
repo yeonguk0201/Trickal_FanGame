@@ -1673,6 +1673,15 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   덮는다. 장판 위에서는 1초마다 반 칸이다. (5) 방을 클리어해 상자가 나올 때 함정 위에 놓이지 않는다. (6) 방을 나갔다
   돌아오면 꺼진 불·부서진 가시 돌·독버섯·폭탄으로 없앤 거미줄은 없고 나머지 함정은 그대로다. (7) 적이 함정 사이에
   끼이지 않고 방이 클리어된다. 끝나면 `Clear forced layout and restart`를 누른다.
+- Trap-2 진흙케이크: 메뉴 `Trickal Fan Game > Traps > Setup Trap-2 Mud Cake`가 케이크 원화를 요정왕국 원화 카탈로그(49종)와
+  표시 Prefab에 넣고, Trap-0의 같은 경로로 `Assets/Prefabs/Traps/trap-mud-cake.prefab` 하나만 만든다. 다른 함정 Prefab·Scene·방은
+  건드리지 않는다. 터짐 시트는 `Resources/EnvironmentHazards/mud-cake-burst-sheet.png`·`.json`이다. 방 파일 글자는 아직 없다.
+  자동 검증 메뉴는 `Trickal Fan Game > Traps > Verify Trap-2 Mud Cake`, 배치는 Unity `-batchmode -nographics -quit
+  -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Trap2MudCakeVerification.SetupAndVerifyBatch -logFile <로그 경로>`다.
+  회귀는 `VerifyWithRegressionsBatch`(Trap-0·Trap-1·환경 위험 원화·요정왕국 원화·지면 그림자·개발 패널)다.
+  수동 확인: Game Scene Play → `F1` 패널 `— Trap —`의 `Place MudCake`로 플레이어 오른쪽 칸에 놓는다. 첫 줄에 가장 가까운
+  함정이 `MudCake ... intact`로 보이고, 밟으면 반 칸 피해와 함께 터짐 4칸이 재생되며 `burst 0.0s`부터 시간이 오른다.
+  웅덩이 위에서 `Web/mud slow x0.7`이 보이고, 4초 뒤 웅덩이가 투명해지며 사라진다. 적을 유인해 밟게 하면 적도 터뜨린다.
 
 - T7 방 Layout 임포터(1단계): 방 하나를 `game/RoomLayouts/<방 ID>.room.txt` 텍스트 파일 하나로 적고, 메뉴
   `Trickal Fan Game > Tools > Import Room Layouts`가 파일마다 방 Prefab(`Assets/Rooms/Prefabs/Layouts/room-<ID>.prefab`)과

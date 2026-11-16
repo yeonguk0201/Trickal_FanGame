@@ -17,6 +17,8 @@ namespace TrickalFanGame.Room
         Spiderweb,
         SpikedRock,
         PoisonMushroom,
+        // Trap-2: appended so the serialized values of the seven kinds above stay the same.
+        MudCake,
     }
 
     public enum PeriodicSpikeState
@@ -34,6 +36,10 @@ namespace TrickalFanGame.Room
     // - Obstacle kinds (불, 가시 돌, 독버섯) sit on a fixed-kind DestructibleObstacle, which gives them the hit count,
     //   the Environment collider that enemies path around and the broken state kept across revisits. 불 and 가시 돌
     //   hurt only the player, on contact.
+    // - 진흙케이크 (Trap-2) is a one-use floor kind. The first grounded body whose feet reach the drawing bursts it:
+    //   everyone on the cake then takes the trap hit once, and the burst leaves a mud puddle (the last burst frame)
+    //   that slows grounded bodies on it until it fades. A bomb bursts it without the hit. A burst cake never
+    //   returns on a revisit.
     // Traps keep working after the room is cleared.
     [DisallowMultipleComponent]
     public sealed class RoomTrap : MonoBehaviour
@@ -56,6 +62,23 @@ namespace TrickalFanGame.Room
         public const string FireVariantId = "fire";
         public const string SpikedRockVariantId = "spiked-rock";
         public const string PoisonMushroomVariantId = "poison-mushroom";
+        // Trap-2 진흙케이크 (user decisions 2026-11-16). The cake and its first three burst frames are drawn narrower
+        // than the cell, but stepping is judged on the whole cell. The last burst frame (the puddle) then spreads
+        // around its own center until it is drawn as if fitted one cell wide, and the slow area is that grown
+        // puddle. Trap2MudCakeVerification measures the puddle against the sheet.
+        public const float MudCakeWidth = 0.65f;
+        public static readonly Vector2 MudCakeHitSize = Vector2.one * CellSize;
+        public const float MudSpeedMultiplier = 0.7f;
+        public const float MudPuddleSeconds = 4f;
+        public const float MudPuddleFadeSeconds = 0.5f;
+        public const float MudPuddleGrowSeconds = 0.3f;
+        // The puddle drawn per unit of drawing width: its visible size and center under the cell center.
+        public static readonly Vector2 MudPuddleSizePerWidth = new(1.08f, 0.67f);
+        public static readonly Vector2 MudPuddleOffsetPerWidth = new(0f, -0.26f);
+        // The grown puddle keeps the center it had at the cake's width and reaches the one-cell-wide size.
+        public static Vector2 MudPuddleSize => MudPuddleSizePerWidth;
+        public static Vector2 MudPuddleOffset => MudPuddleOffsetPerWidth * MudCakeWidth;
+        public static float MudPuddleGrownScale => 1f / MudCakeWidth;
         public const string DeathReason = "HAZARD";
         public const string EnemyLayerName = "Enemy";
 
@@ -75,6 +98,7 @@ namespace TrickalFanGame.Room
         private Health playerHealth;
         private DestructibleObstacle obstacle;
         private float cycleStartTime;
+        private float burstTime = float.NaN;
 
         public string TrapId => trapId;
         public RoomTrapKind Kind => kind;
@@ -87,10 +111,13 @@ namespace TrickalFanGame.Room
         // The gas the last break of this 독버섯 left, until it ends.
         public PoisonGasCloud LastGas { get; private set; }
         public ExtinguishedFireArtwork FireRemnant { get; private set; }
+        // 진흙케이크: burst (by a step or a bomb) and when, for the burst frames and the puddle.
+        public bool HasBurst => !float.IsNaN(burstTime);
+        public float BurstTime => burstTime;
 
         public static bool IsFloorKind(RoomTrapKind kind) =>
             kind is RoomTrapKind.FloorSpikes or RoomTrapKind.PeriodicSpikes or RoomTrapKind.DamagePuddle or
-                RoomTrapKind.Spiderweb;
+                RoomTrapKind.Spiderweb or RoomTrapKind.MudCake;
 
         public static string ArtworkIdOf(RoomTrapKind kind) => kind switch
         {
@@ -100,8 +127,12 @@ namespace TrickalFanGame.Room
             RoomTrapKind.DamagePuddle => "trap-damage-puddle",
             RoomTrapKind.Spiderweb => "trap-spiderweb",
             RoomTrapKind.SpikedRock => "trap-spiked-rock",
+            RoomTrapKind.MudCake => "trap-mud-cake",
             _ => "trap-poison-mushroom",
         };
+
+        // How wide the drawing is fitted on its cell. Every kind fills the cell except the smaller 진흙케이크.
+        public static float ArtworkWidthOf(RoomTrapKind kind) => kind == RoomTrapKind.MudCake ? MudCakeWidth : CellSize;
 
         // The fixed obstacle kind under an obstacle trap; null for a floor trap.
         public static string ObstacleVariantIdOf(RoomTrapKind kind) => kind switch
@@ -184,7 +215,8 @@ namespace TrickalFanGame.Room
             return ownObstacle.TryValidate(out error);
         }
 
-        // Called when the room is built, after its obstacles are bound. A web removed on an earlier visit stays gone.
+        // Called when the room is built, after its obstacles are bound. A web removed or a 진흙케이크 burst on an
+        // earlier visit stays gone.
         public void Bind(RoomRunState configuredState, PlayerMovement configuredPlayer, float currentTime)
         {
             runState = configuredState;
@@ -195,7 +227,8 @@ namespace TrickalFanGame.Room
             if (kind == RoomTrapKind.Fire && obstacle != null && obstacle.IsBroken)
                 EnsureFireRemnant(currentTime, true);
             RestartCycle(currentTime);
-            if (kind == RoomTrapKind.Spiderweb && runState != null && runState.IsTrapRemoved(trapId))
+            if (kind is RoomTrapKind.Spiderweb or RoomTrapKind.MudCake && runState != null &&
+                runState.IsTrapRemoved(trapId))
             {
                 IsRemoved = true;
                 gameObject.SetActive(false);
@@ -261,6 +294,12 @@ namespace TrickalFanGame.Room
         public void Tick(float currentTime)
         {
             if (IsRemoved || !IsFloorKind(kind)) return;
+            if (kind == RoomTrapKind.MudCake)
+            {
+                TickMudCake(currentTime);
+                return;
+            }
+
             PeriodicSpikeState state = StateAt(currentTime);
             RefreshPeriodicArtwork(state);
             if (state != PeriodicSpikeState.Raised) return;
@@ -294,6 +333,98 @@ namespace TrickalFanGame.Room
 
                 Affect(enemy, false, currentTime);
             }
+        }
+
+        private void TickMudCake(float currentTime)
+        {
+            if (!HasBurst)
+            {
+                if (IsPlayerOn(transform.position, hitSize) || GroundedEnemiesOn(transform.position, hitSize).Count > 0)
+                    Burst(currentTime, true);
+                return;
+            }
+
+            float elapsed = currentTime - burstTime;
+            if (elapsed >= MudPuddleSeconds)
+            {
+                IsRemoved = true;
+                gameObject.SetActive(false);
+                return;
+            }
+
+            if (visual != null)
+            {
+                Color color = visual.color;
+                color.a = Mathf.Clamp01((MudPuddleSeconds - elapsed) / MudPuddleFadeSeconds);
+                visual.color = color;
+                if (visual.transform != transform)
+                {
+                    float scale = MudPuddleScaleAt(elapsed);
+                    visual.transform.localScale = new Vector3(scale, scale, 1f);
+                    visual.transform.localPosition = (Vector3)(MudPuddleOffset * (1f - scale));
+                }
+            }
+
+            Vector2 puddle = (Vector2)transform.position + MudPuddleOffset;
+            float until = currentTime + WebSlowLinger;
+            if (IsPlayerOn(puddle, MudPuddleSize))
+                EnvironmentSlow.Apply(player.gameObject, MudSpeedMultiplier, currentTime, until);
+            foreach (Health enemy in GroundedEnemiesOn(puddle, MudPuddleSize))
+                EnvironmentSlow.Apply(enemy.gameObject, MudSpeedMultiplier, currentTime, until);
+        }
+
+        // The drawing's scale after the burst: 1 through the first three frames, then the puddle frame eases out to
+        // its grown size.
+        public static float MudPuddleScaleAt(float elapsed)
+        {
+            float start = (EnvironmentHazardArtwork.MudCakeBurstFrames - 1) * EnvironmentHazardArtwork.MudCakeBurstFrameSeconds;
+            float t = Mathf.Clamp01((elapsed - start) / MudPuddleGrowSeconds);
+            t = 1f - (1f - t) * (1f - t);
+            return Mathf.Lerp(1f, MudPuddleGrownScale, t);
+        }
+
+        // Bursts a 진흙케이크 once. A step hurts everything standing on the cake; a bomb only bursts it.
+        public bool Burst(float currentTime, bool hurt)
+        {
+            if (kind != RoomTrapKind.MudCake || IsRemoved || HasBurst) return false;
+            burstTime = currentTime;
+            runState?.TryMarkTrapRemoved(trapId);
+            if (!hurt) return true;
+            if (IsPlayerOn(transform.position, hitSize)) TryDamagePlayer(playerHealth, currentTime);
+            foreach (Health enemy in new List<Health>(GroundedEnemiesOn(transform.position, hitSize)))
+                TryDamageEnemy(enemy, currentTime);
+            return true;
+        }
+
+        private bool IsPlayerOn(Vector2 center, Vector2 size) =>
+            player != null && playerHealth != null && !playerHealth.IsDead && !IsFlying(player) &&
+            ContainsFeetIn(player.FeetPosition, PlayerFeet.Radius, center, size);
+
+        // Living grounded enemies whose feet line reaches the ellipse inscribed in size around center.
+        private HashSet<Health> GroundedEnemiesOn(Vector2 center, Vector2 size)
+        {
+            ContactFilter2D filter = new()
+            {
+                useLayerMask = true,
+                layerMask = LayerMask.GetMask(EnemyLayerName),
+                useTriggers = true,
+            };
+            Physics2D.OverlapBox(center, size + Vector2.one, 0f, filter, enemyHits);
+            tickedEnemies.Clear();
+            foreach (Collider2D hit in enemyHits)
+            {
+                Health enemy = hit != null ? hit.GetComponentInParent<Health>() : null;
+                if (enemy == null || enemy == playerHealth || enemy.IsDead || tickedEnemies.Contains(enemy) ||
+                    enemy.GetComponent<EnemyFlight>() != null)
+                {
+                    continue;
+                }
+
+                EnemyFeet.GroundCircle(enemy.gameObject, out Vector2 feetCenter, out float feetRadius);
+                if (ContainsFeetIn(feetCenter, feetRadius, center, size)) tickedEnemies.Add(enemy);
+            }
+
+            return tickedEnemies;
         }
 
         private void Affect(Health target, bool isPlayer, float currentTime)
@@ -373,12 +504,19 @@ namespace TrickalFanGame.Room
             FireRemnant = ExtinguishedFireArtwork.Spawn(transform, visual, width, currentTime, alreadyCold);
         }
 
-        // A 거미줄 survives attacks and being walked through; only a bomb removes it.
+        // A 거미줄 survives attacks and being walked through; only a bomb removes it. The same blast bursts a
+        // 진흙케이크 without its hit (not counted).
         public static int RemoveWebsByBombInCircle(Vector2 center, float radius)
         {
             int removed = 0;
             foreach (RoomTrap trap in FindObjectsByType<RoomTrap>(FindObjectsSortMode.None))
             {
+                if (trap.kind == RoomTrapKind.MudCake)
+                {
+                    if (CircleOverlapsCell(trap.transform.position, center, radius)) trap.Burst(Time.time, false);
+                    continue;
+                }
+
                 if (trap.kind != RoomTrapKind.Spiderweb || trap.IsRemoved ||
                     !CircleOverlapsCell(trap.transform.position, center, radius))
                 {
@@ -412,12 +550,16 @@ namespace TrickalFanGame.Room
         // point on the drawing counts, and so does the drawing passing between them.
         public bool ContainsFeet(Vector2 feetCenter) => ContainsFeet(feetCenter, PlayerFeet.Radius);
 
-        public bool ContainsFeet(Vector2 feetCenter, float feetRadius)
+        public bool ContainsFeet(Vector2 feetCenter, float feetRadius) =>
+            ContainsFeetIn(feetCenter, feetRadius, transform.position, hitSize);
+
+        // The same feet line against any ellipse; 진흙케이크 uses it for its puddle.
+        public static bool ContainsFeetIn(Vector2 feetCenter, float feetRadius, Vector2 center, Vector2 size)
         {
-            Vector2 offset = feetCenter - (Vector2)transform.position;
-            float x = offset.x / (hitSize.x * 0.5f);
+            Vector2 offset = feetCenter - center;
+            float x = offset.x / (size.x * 0.5f);
             if (Mathf.Abs(x) > 1f) return false;
-            float halfHeight = hitSize.y * 0.5f * Mathf.Sqrt(1f - x * x);
+            float halfHeight = size.y * 0.5f * Mathf.Sqrt(1f - x * x);
             return offset.y - feetRadius <= halfHeight && offset.y >= -halfHeight;
         }
 

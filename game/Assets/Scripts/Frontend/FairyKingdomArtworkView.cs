@@ -112,6 +112,13 @@ namespace TrickalFanGame.Frontend
             }
             if (TryGetComponent(out RoomTrap periodic) && periodic.Kind == RoomTrapKind.PeriodicSpikes)
                 periodic.RefreshPeriodicArtwork(periodic.StateAt(Time.time));
+            // Trap-2: a burst 진흙케이크 plays its burst frames and holds the puddle; the trap fades the color.
+            if (periodic != null && periodic.Kind == RoomTrapKind.MudCake && periodic.HasBurst)
+            {
+                Sprite burst = EnvironmentHazardArtwork.Fit(EnvironmentHazardArtwork.MudCakeBurst,
+                    Time.time - periodic.BurstTime, localWidth);
+                if (burst != null) visual.sprite = burst;
+            }
             if (id == "obstacle-tree" && visual.transform != transform)
             {
                 // The root marks the lower grid cell. Only the drawing reaches into the cell above it.
