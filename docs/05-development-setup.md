@@ -1675,7 +1675,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   끼이지 않고 방이 클리어된다. 끝나면 `Clear forced layout and restart`를 누른다.
 - Trap-2 진흙케이크: 메뉴 `Trickal Fan Game > Traps > Setup Trap-2 Mud Cake`가 케이크 원화를 요정왕국 원화 카탈로그(49종)와
   표시 Prefab에 넣고, Trap-0의 같은 경로로 `Assets/Prefabs/Traps/trap-mud-cake.prefab` 하나만 만든다. 다른 함정 Prefab·Scene·방은
-  건드리지 않는다. 터짐 시트는 `Resources/EnvironmentHazards/mud-cake-burst-sheet.png`·`.json`이다. 방 파일 글자는 아직 없다.
+  건드리지 않는다. 터짐 시트는 `Resources/EnvironmentHazards/mud-cake-burst-sheet.png`·`.json`이다. 방 파일 글자는 `m`이고
+  다른 바닥 함정과 같은 배치 규칙을 따른다. 이 글자를 쓰는 방은 아직 없다.
   자동 검증 메뉴는 `Trickal Fan Game > Traps > Verify Trap-2 Mud Cake`, 배치는 Unity `-batchmode -nographics -quit
   -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Trap2MudCakeVerification.SetupAndVerifyBatch -logFile <로그 경로>`다.
   회귀는 `VerifyWithRegressionsBatch`(Trap-0·Trap-1·환경 위험 원화·요정왕국 원화·지면 그림자·개발 패널)다.
@@ -1746,6 +1747,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
     | `V` `X` `R` `Q` | 종류 고정: 시스트의 금고·폭발 상자·셰이디의 랜덤박스·마요의 수집품 상자 |
     | `^` `~` `w` | 바닥 함정: 바닥 가시·장판·거미줄 (Trap-1) |
     | `a` `b` | 바닥 함정: 주기 가시 A 위상(내려간 상태로 시작)·B 위상(올라온 상태로 시작) |
+    | `m` | 바닥 함정: 진흙케이크(1회용, Trap-2). `M`(마리의 폭탄상자)과 대소문자로 구분한다 |
     | `*` `Z` `P` | 장애물 함정: 불(비행도 막음)·가시 돌·독버섯. 장애물 규칙을 그대로 따른다 |
 
     종류 고정 장애물은 방당 특수 장애물 1개 규칙에 세지 않는다. 같은 방의 `#`는 그대로 40% 확률로 1개가 특수
