@@ -1,0 +1,13 @@
+id: basic-golden-crown
+profile: basic
+weight: 40
+difficulty: 1
+note: 위쪽 양 날개의 금돌과 아래쪽 양 끝의 금돌이 왕관 장식처럼 솟는다.
+grid:
+GGGG.....GGGG
+.............
+...3.....5...
+..4..........
+...1.....2...
+..G.......G..
+..G.......G..

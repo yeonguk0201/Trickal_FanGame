@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TrickalFanGame.Enemy;
 using TrickalFanGame.Player;
 using UnityEngine;
 
@@ -7,12 +8,14 @@ namespace TrickalFanGame.Room
 {
     public readonly struct RoomObstacleFootprint
     {
-        public RoomObstacleFootprint(string obstacleId, Rect bounds, bool isDestructible, bool isPit = false)
+        public RoomObstacleFootprint(string obstacleId, Rect bounds, bool isDestructible, bool isPit = false,
+            bool requiresSafePathAvoidance = true)
         {
             ObstacleId = obstacleId;
             Bounds = bounds;
             IsDestructible = isDestructible && !isPit;
             IsPit = isPit;
+            RequiresSafePathAvoidance = requiresSafePathAvoidance;
         }
 
         public string ObstacleId { get; }
@@ -21,17 +24,22 @@ namespace TrickalFanGame.Room
         public bool IsDestructible { get; }
         // Terrain-0: a pit blocks walking like an obstacle but projectiles and sightlines pass over it.
         public bool IsPit { get; }
+        // Floor-trap metadata: only permanent floor spikes require a route around their cells.
+        public bool RequiresSafePathAvoidance { get; }
         public bool BlocksProjectiles => !IsPit;
         public string Kind => IsPit ? "pit" : "obstacle";
     }
 
-    // Static checks for an authored obstacle Layout. Obstacles are treated as solid even when destructible, so a
-    // Layout never needs attacks or bombs to keep its doors connected, its SpawnPoints reachable, or its ranged
-    // SpawnPoints able to fire into the combat area. Pits (Terrain-0) block reachability like obstacles but never
-    // block sightlines. Floor traps (Trap-1) never block anything; TryValidateFloorTraps checks them on their own.
+    // Placement checks use intact geometry. Connectivity and combat sight coverage use geometry after removing
+    // destructible obstacles: rooms may require breaking a barrier. Pits and static obstacles remain blocking.
+    // Floor traps are checked separately; only permanent floor spikes require an avoidance route.
     public static class RoomObstacleLayout
     {
         public const float ActorRadius = 0.5f;
+        // Walls, obstacles and pits stop only the feet of the player (0.3) and of walking enemies (0.35), so a
+        // one-cell lane is a real route. Door and SpawnPoint connectivity use the larger feet; placement keeps the
+        // body radius.
+        public static float LaneRadius => Mathf.Max(PlayerFeet.Radius, EnemyFeet.Radius);
         public const float ProjectileClearance = 0.1f;
         public const float ReachabilityCellSize = 0.25f;
         public const float SightSampleSpacing = 1f;
@@ -90,15 +98,16 @@ namespace TrickalFanGame.Room
                 if (!trap.IsFloorTrap) continue;
                 Vector2 center = root.InverseTransformPoint(trap.transform.position);
                 traps.Add(new RoomObstacleFootprint(trap.TrapId,
-                    new Rect(center - Vector2.one * RoomTrap.CellSize * 0.5f, Vector2.one * RoomTrap.CellSize), false));
+                    new Rect(center - Vector2.one * RoomTrap.CellSize * 0.5f, Vector2.one * RoomTrap.CellSize), false,
+                    requiresSafePathAvoidance: trap.Kind == RoomTrapKind.FloorSpikes));
             }
 
             return traps;
         }
 
         // Trap-1: floor traps sit on 1x1 cells of the Layout grid, clear of obstacles, pits, chests, SpawnPoints and
-        // each door's safe entry point, and the doors stay connected by a path whose feet circle never touches a
-        // trap cell. The cell is larger than the drawn hit area, so a path that passes here never steps on a trap.
+        // each door's safe entry point. After destruction, doors must stay connected without touching permanent
+        // floor spikes. Periodic spikes and other floor traps may be crossed; their placement checks still apply.
         public static bool TryValidateFloorTraps(
             string layoutId,
             Rect movementBounds,
@@ -179,13 +188,17 @@ namespace TrickalFanGame.Room
                 return true;
             }
 
-            ReachabilityGrid grid = new(movementBounds, solid, floorTraps, PlayerFeet.Radius);
+            List<RoomObstacleFootprint> permanentTraps = new();
+            foreach (RoomObstacleFootprint trap in floorTraps)
+                if (trap.RequiresSafePathAvoidance) permanentTraps.Add(trap);
+            ReachabilityGrid grid = new(movementBounds, AfterDestruction(solid), LaneRadius, permanentTraps,
+                PlayerFeet.Radius);
             bool[] reachable = grid.FloodFrom(doors[0].SafeEntryPosition);
             foreach (RoomTemplateDoor door in doors)
             {
                 if (grid.IsReachable(reachable, door.SafeEntryPosition)) continue;
                 error = $"Layout '{layoutId}' has no path from the {doors[0].Direction} safe entry to the " +
-                        $"{door.Direction} safe entry that avoids every floor trap.";
+                        $"{door.Direction} safe entry that avoids permanent floor spikes after destruction.";
                 return false;
             }
 
@@ -210,9 +223,14 @@ namespace TrickalFanGame.Room
 
             if (!TryValidateFootprints(layoutId, movementBounds, footprints, out error)) return false;
 
+            // Obstacles and pits only have to stay out of the door opening itself: the door width, and the depth to
+            // the safe entry plus a body radius so an arriving player never overlaps one. They may flank the opening:
+            // it is wider than a body, and the reachability check below still judges every route with the full body
+            // circle. Chests keep their wider clearance in ChestPlacement.
             foreach (RoomTemplateDoor door in doors)
             {
-                Rect passage = Expand(RoomTemplateGeometry.RequiredDoorPassageBounds(door), ActorRadius);
+                Rect passage = ExpandAlongDoor(RoomTemplateGeometry.RequiredDoorPassageBounds(door), door.Direction,
+                    ActorRadius);
                 foreach (RoomObstacleFootprint footprint in footprints)
                 {
                     if (Overlaps(passage, footprint.Bounds))
@@ -237,7 +255,8 @@ namespace TrickalFanGame.Room
                 }
             }
 
-            ReachabilityGrid grid = new(movementBounds, footprints);
+            List<RoomObstacleFootprint> remaining = AfterDestruction(footprints);
+            ReachabilityGrid grid = new(movementBounds, remaining, LaneRadius);
             if (doors.Count == 0)
             {
                 error = $"Layout '{layoutId}' has no door to anchor its required passages.";
@@ -280,7 +299,7 @@ namespace TrickalFanGame.Room
 
             for (int index = 0; index < spawnPoints.Count; index++)
             {
-                float coverage = SightCoverage(spawnPoints[index], samples, footprints);
+                float coverage = SightCoverage(spawnPoints[index], samples, remaining);
                 if (coverage < MinimumSightCoverage)
                 {
                     error = $"Layout '{layoutId}' SpawnPoint {index + 1} sees only {coverage:P0} of the combat area; " +
@@ -299,7 +318,7 @@ namespace TrickalFanGame.Room
             IReadOnlyList<RoomObstacleFootprint> footprints)
         {
             IReadOnlyList<RoomObstacleFootprint> solid = footprints ?? Array.Empty<RoomObstacleFootprint>();
-            ReachabilityGrid grid = new(movementBounds, solid);
+            ReachabilityGrid grid = new(movementBounds, solid, ActorRadius);
             bool[] reached = grid.FloodFrom(origin);
             Rect inner = Expand(movementBounds, -ActorRadius + Tolerance);
             return point =>
@@ -309,6 +328,15 @@ namespace TrickalFanGame.Room
                     if (Distance(point, footprint.Bounds) < ActorRadius - Tolerance) return false;
                 return true;
             };
+        }
+
+        public static List<RoomObstacleFootprint> AfterDestruction(IReadOnlyList<RoomObstacleFootprint> footprints)
+        {
+            List<RoomObstacleFootprint> remaining = new();
+            if (footprints != null)
+                foreach (RoomObstacleFootprint footprint in footprints)
+                    if (!footprint.IsDestructible) remaining.Add(footprint);
+            return remaining;
         }
 
         public static float SightCoverage(Vector2 origin, IReadOnlyList<Vector2> samples,
@@ -472,6 +500,12 @@ namespace TrickalFanGame.Room
         public static Rect Expand(Rect rect, float amount) =>
             Rect.MinMaxRect(rect.xMin - amount, rect.yMin - amount, rect.xMax + amount, rect.yMax + amount);
 
+        // Grows a door passage only along the way through the door, leaving its width unchanged.
+        private static Rect ExpandAlongDoor(Rect passage, RoomDoorDirection direction, float amount) =>
+            direction == RoomDoorDirection.Left || direction == RoomDoorDirection.Right
+                ? Rect.MinMaxRect(passage.xMin - amount, passage.yMin, passage.xMax + amount, passage.yMax)
+                : Rect.MinMaxRect(passage.xMin, passage.yMin - amount, passage.xMax, passage.yMax + amount);
+
         // Touching edges do not count; obstacles may sit side by side.
         public static bool Overlaps(Rect first, Rect second) =>
             first.xMin < second.xMax - Tolerance && second.xMin < first.xMax - Tolerance &&
@@ -511,7 +545,8 @@ namespace TrickalFanGame.Room
         private static bool Approximately(Vector2 first, Vector2 second) =>
             (first - second).sqrMagnitude < Tolerance;
 
-        // Cells whose centers keep an actor-sized circle clear of every obstacle and pit and inside the movement bounds.
+        // Cells whose centers keep a circle of the given radius clear of every obstacle and pit and inside the movement
+        // bounds.
         // The avoided rectangles (floor trap cells) are kept clear by their own, smaller radius.
         private sealed class ReachabilityGrid
         {
@@ -520,14 +555,14 @@ namespace TrickalFanGame.Room
             private readonly int height;
             private readonly bool[] free;
 
-            public ReachabilityGrid(Rect movementBounds, IReadOnlyList<RoomObstacleFootprint> footprints,
+            public ReachabilityGrid(Rect movementBounds, IReadOnlyList<RoomObstacleFootprint> footprints, float radius,
                 IReadOnlyList<RoomObstacleFootprint> avoided = null, float avoidedRadius = 0f)
             {
                 bounds = movementBounds;
                 width = Mathf.Max(1, Mathf.RoundToInt(movementBounds.width / ReachabilityCellSize));
                 height = Mathf.Max(1, Mathf.RoundToInt(movementBounds.height / ReachabilityCellSize));
                 free = new bool[width * height];
-                Rect inner = Expand(movementBounds, -ActorRadius + Tolerance);
+                Rect inner = Expand(movementBounds, -radius + Tolerance);
                 for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
                 {
@@ -535,7 +570,7 @@ namespace TrickalFanGame.Room
                     bool clear = inner.Contains(center);
                     for (int index = 0; clear && index < footprints.Count; index++)
                     {
-                        clear = Distance(center, footprints[index].Bounds) >= ActorRadius - Tolerance;
+                        clear = Distance(center, footprints[index].Bounds) >= radius - Tolerance;
                     }
 
                     for (int index = 0; clear && avoided != null && index < avoided.Count; index++)

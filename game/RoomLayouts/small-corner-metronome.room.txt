@@ -1,0 +1,11 @@
+id: small-corner-metronome
+profile: small
+weight: 100
+difficulty: 1
+note: 위아래 네 모서리에 번갈아 켜지는 가시 띠.
+grid:
+aaa....bbb
+..1....4..
+...3..2...
+..........
+bbb....aaa

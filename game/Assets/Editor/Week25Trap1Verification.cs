@@ -11,7 +11,7 @@ namespace TrickalFanGame.Editor
 {
     // Trap-1: the three trap Layouts (room text files with trap symbols) and the placement rules of a floor trap.
     // A floor trap never stands within 1.5 of a door's safe entry, on a SpawnPoint, an obstacle, a pit or a chest,
-    // every pair of doors keeps a path whose feet circle touches no trap cell, and a chest never lands on a trap.
+    // after destruction every pair of doors keeps a path avoiding permanent floor spikes; chests avoid all traps.
     public static class Week25Trap1Verification
     {
         public const string SpikeFieldId = "basic-spike-field";
@@ -164,7 +164,7 @@ namespace TrickalFanGame.Editor
                 ("a trap beside the Up safe entry", new[] { Trap("trap-a", 7, 2) }, "Up safe entry"),
                 ("a trap wall between the doors",
                     Enumerable.Range(0, 7).Select(row => Trap($"trap-{row}", 4, row)).ToArray(),
-                    "avoids every floor trap"),
+                    "avoids permanent floor spikes"),
             };
             foreach ((string label, RoomObstacleFootprint[] traps, string expected) in rejected)
             {
@@ -252,12 +252,16 @@ namespace TrickalFanGame.Editor
             // One more trap across the room breaks the trap-free path, so the check reads the real cells.
             if (floorTraps.Count == 0) return;
             Rect floor = document.Profile.GridRect;
-            List<RoomObstacleFootprint> walled = new(floorTraps);
+            Rect wall = new(floor.xMin + 4f, floor.yMin, 1f, floor.height);
+            List<RoomObstacleFootprint> walled = floorTraps
+                .Where(trap => !RoomObstacleLayout.Overlaps(trap.Bounds, wall)).ToList();
+            List<RoomObstacleFootprint> outsideWall = footprints
+                .Where(footprint => !RoomObstacleLayout.Overlaps(footprint.Bounds, wall)).ToList();
             for (float y = floor.yMin; y < floor.yMax - 0.5f; y += 1f)
             {
                 Rect cell = new(floor.xMin + 4f, y, 1f, 1f);
                 if (walled.Any(trap => RoomObstacleLayout.Overlaps(trap.Bounds, cell)) ||
-                    footprints.Any(footprint => RoomObstacleLayout.Overlaps(footprint.Bounds, cell)))
+                    outsideWall.Any(footprint => RoomObstacleLayout.Overlaps(footprint.Bounds, cell)))
                 {
                     continue;
                 }
@@ -266,8 +270,8 @@ namespace TrickalFanGame.Editor
             }
 
             Assert(!RoomObstacleLayout.TryValidateFloorTraps(document.Id, document.Profile.Floor,
-                       template.DoorSlots, Array.Empty<Vector2>(), footprints, walled, out error) &&
-                   error.Contains("avoids every floor trap", StringComparison.Ordinal),
+                       template.DoorSlots, Array.Empty<Vector2>(), outsideWall, walled, out error) &&
+                   error.Contains("avoids permanent floor spikes", StringComparison.Ordinal),
                 $"{label} with a trap column added must lose its trap-free path. Got: {error}");
         }
 

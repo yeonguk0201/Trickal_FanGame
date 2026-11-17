@@ -1,0 +1,11 @@
+id: small-ember-hooks
+profile: small
+weight: 100
+difficulty: 1
+note: 왼쪽 긴 불기둥과 오른쪽 짧은 불기둥이 아래에서 올라오는 두 갈고리.
+grid:
+..........
+..1....4..
+..*3..2...
+..*....*..
+..*....*..

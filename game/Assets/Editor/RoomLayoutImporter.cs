@@ -21,8 +21,8 @@ namespace TrickalFanGame.Editor
     // The 19 templates authored before the importer are not part of it and are never touched.
     public static class RoomLayoutImporter
     {
-        // Layout-0 added eight Small, Tall and Wide rooms, so the same seed now draws different templates.
-        public const int RoomContentVersion = 16;
+        // Layout-1 added thirty rooms (six per profile), so the same seed now draws different templates.
+        public const int RoomContentVersion = 17;
         // Folder beside Assets, so the text files need no .meta.
         public const string LayoutFolderName = "RoomLayouts";
         public const string TemplateFolder = Week14Room1Setup.TemplateFolder + "/Layouts";
@@ -250,7 +250,8 @@ namespace TrickalFanGame.Editor
             List<RoomObstacleFootprint> terrain = new();
             foreach (RoomLayoutCell cell in document.Obstacles)
             {
-                terrain.Add(new RoomObstacleFootprint(ObstacleId(cell), profile.CellRect(cell.Column, cell.Row), true));
+                terrain.Add(new RoomObstacleFootprint(ObstacleId(cell), profile.CellRect(cell.Column, cell.Row),
+                    cell.Symbol.Kind != RoomLayoutCellKind.Tree));
             }
 
             foreach (RoomLayoutPit pit in document.Pits())
@@ -276,7 +277,7 @@ namespace TrickalFanGame.Editor
             // Trap-1: floor traps block nothing, so they are checked apart from the obstacles above.
             List<RoomObstacleFootprint> floorTraps = document.CellsOf(RoomLayoutCellKind.FloorTrap)
                 .Select(cell => new RoomObstacleFootprint(cell.Id(TrapIdPrefix), profile.CellRect(cell.Column, cell.Row),
-                    false)).ToList();
+                    false, requiresSafePathAvoidance: cell.Symbol.TrapKind == RoomTrapKind.FloorSpikes)).ToList();
             if (!RoomObstacleLayout.TryValidateFloorTraps(document.Id, movementBounds, doors, spawnPoints, withChests,
                     floorTraps, out error))
             {
@@ -285,7 +286,7 @@ namespace TrickalFanGame.Editor
 
             if (chests.Count == 0) return true;
             Func<Vector2, bool> isReachable = RoomObstacleLayout.CreateReachability(movementBounds,
-                doors[0].SafeEntryPosition, terrain);
+                doors[0].SafeEntryPosition, RoomObstacleLayout.AfterDestruction(terrain));
             List<Rect> doorPassages = doors.Select(door => RoomObstacleLayout.Expand(
                 RoomTemplateGeometry.RequiredDoorPassageBounds(door),
                 RoomObstacleLayout.ActorRadius + ChestPlacement.ChestHalfSize)).ToList();

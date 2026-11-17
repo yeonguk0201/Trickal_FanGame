@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TrickalFanGame.Enemy;
+using TrickalFanGame.Player;
 using TrickalFanGame.Room;
 using UnityEditor;
 using UnityEngine;
@@ -126,6 +128,7 @@ namespace TrickalFanGame.Editor
                 "Room Layout verification needs the Game Scene assembler and its chest content table.");
 
             ValidateFormatRejections();
+            ValidateOneCellLaneNavigation();
             List<RoomLayoutDocument> documents = ValidateCatalog(generator);
             ValidateRuntime(documents, assembler);
             ValidateWeightedPick();
@@ -145,6 +148,7 @@ namespace TrickalFanGame.Editor
         public static void VerifyWithRegressionsBatch()
         {
             Verify();
+            Week25Trap1Verification.Verify();
             Week19Encounter4Verification.Verify();
             Week19Spawn2Verification.Verify();
             Week19Difficulty1Verification.Verify();
@@ -176,6 +180,41 @@ namespace TrickalFanGame.Editor
             char[][] rows = BaseBasicGrid.Select(row => row.ToCharArray()).ToArray();
             foreach ((int row, int column, char symbol) in edits) rows[row][column] = symbol;
             return $"id: {id}\nprofile: basic\ngrid:\n{string.Join("\n", rows.Select(row => new string(row)))}\n";
+        }
+
+        // A walking enemy plans a straight route through a one-cell lane between solid walls, whether the lane is
+        // centered on a whole or a half unit (odd and even profile grids).
+        private static void ValidateOneCellLaneNavigation()
+        {
+            int environment = LayerMask.NameToLayer("Environment");
+            Assert(environment >= 0, "The Environment layer is missing.");
+            foreach (float laneY in new[] { 0f, 0.5f })
+            {
+                Vector2 origin = new(1000f, 1000f + laneY);
+                List<GameObject> walls = new();
+                try
+                {
+                    foreach (float side in new[] { 1f, -1f })
+                    {
+                        GameObject wall = new("Lane Verification Wall") { layer = environment };
+                        wall.transform.position = origin + new Vector2(0f, side * (0.5f + 10f));
+                        wall.AddComponent<BoxCollider2D>().size = new Vector2(6f, 20f);
+                        walls.Add(wall);
+                    }
+
+                    Physics2D.SyncTransforms();
+                    List<Vector2> path = new();
+                    Assert(EnemyObstacleNavigator.FindPathOrNearest(origin + Vector2.left * 4f,
+                               origin + Vector2.right * 4f, EnemyFeet.Radius, path) &&
+                           path.All(point => Mathf.Abs(point.y - origin.y) < 0.5f),
+                        $"A walking enemy must plan through a one-cell lane centered at y+{laneY}.");
+                }
+                finally
+                {
+                    foreach (GameObject wall in walls) Object.DestroyImmediate(wall);
+                    Physics2D.SyncTransforms();
+                }
+            }
         }
 
         private static void ValidateFormatRejections()
@@ -237,17 +276,17 @@ namespace TrickalFanGame.Editor
                 ("a pit in a door passage", Basic(id, (0, 6, 'o')), "door passage"),
                 ("a SpawnPoint in a door passage", Basic(id, (3, 6, '.'), (0, 6, '3')), "door passage"),
                 ("a wall that cuts the doors apart",
-                    Basic(id, Enumerable.Range(0, 7).Select(row => (row, 3, '#')).ToArray()), "safe entry"),
+                    Basic(id, Enumerable.Range(0, 7).Select(row => (row, 3, 'T')).ToArray()), "safe entry"),
                 ("a SpawnPoint walled in by obstacles",
-                    Basic(id, (2, 6, '#'), (4, 6, '#'), (3, 5, '#'), (3, 7, '#')), "not reachable"),
+                    Basic(id, (2, 6, 'T'), (4, 6, 'T'), (3, 5, 'T'), (3, 7, 'T')), "not reachable"),
                 ("a chest in a door passage", Basic(id, (3, 1, 'c')), "door passage"),
                 ("two chests side by side", Basic(id, (0, 1, 'c'), (0, 2, 'g')), "Chest at"),
                 // Trap-1: an obstacle trap follows the obstacle rules, a floor trap its own.
                 ("a fire in a door passage", Basic(id, (3, 0, '*')), "door passage"),
                 ("a floor trap beside a door's safe entry", Basic(id, (3, 2, '^')), "safe entry"),
                 ("a floor trap column that every path between the doors must cross",
-                    Basic(id, Enumerable.Range(0, 7).Select(row => (row, 3, row % 2 == 0 ? 'a' : 'b')).ToArray()),
-                    "avoids every floor trap"),
+                    Basic(id, Enumerable.Range(0, 7).Select(row => (row, 3, '^')).ToArray()),
+                    "avoids permanent floor spikes"),
             };
             foreach ((string label, string text, string expected) in invalidGeometry)
             {
@@ -256,6 +295,49 @@ namespace TrickalFanGame.Editor
                        error.Contains(expected, StringComparison.Ordinal),
                     $"The importer must reject {label} with its reason. Got: {error}");
             }
+
+            // A one-cell lane is a route: walls, obstacles and pits stop only the feet of the player and walking enemies.
+            Assert(RoomObstacleLayout.LaneRadius < 0.5f &&
+                   RoomObstacleLayout.LaneRadius >= Math.Max(PlayerFeet.Radius, EnemyFeet.Radius),
+                "Room connectivity must use the larger of the player and walking enemy feet radii.");
+            Assert(RoomLayoutFormat.TryParse(
+                       Basic(id, Enumerable.Range(0, 7).Where(row => row != 3).Select(row => (row, 4, 'o')).ToArray()),
+                       file, out RoomLayoutDocument laned, out error) &&
+                   RoomLayoutImporter.TryValidateGeometry(laned, out error),
+                $"A pit wall with a one-cell lane must connect the doors and SpawnPoints. {error}");
+            Assert(RoomLayoutFormat.TryParse(
+                       Basic(id, Enumerable.Range(0, 7).Select(row => (row, 4, 'o')).ToArray()), file,
+                       out RoomLayoutDocument sealedLane, out error) &&
+                   !RoomLayoutImporter.TryValidateGeometry(sealedLane, out error),
+                "A full pit wall must still cut the doors apart.");
+
+            // Obstacles and pits may flank a door opening (the guide's `O` cells); chests may not.
+            Assert(RoomLayoutFormat.TryParse(
+                       Basic(id, (0, 4, '#'), (1, 4, 'T'), (0, 8, '*'), (1, 8, '#'), (1, 0, 'o'), (1, 1, 'o'),
+                           (5, 11, 'T'), (5, 12, '#')), file,
+                       out RoomLayoutDocument flanked, out error) &&
+                   RoomLayoutImporter.TryValidateGeometry(flanked, out error),
+                $"Obstacles and pits beside a door opening must be allowed. {error}");
+            Assert(RoomLayoutFormat.TryParse(Basic(id, (1, 4, 'c')), file, out RoomLayoutDocument flankingChest,
+                       out error) &&
+                   !RoomLayoutImporter.TryValidateGeometry(flankingChest, out error) &&
+                   error.Contains("Chest at", StringComparison.Ordinal),
+                $"A chest beside a door opening must stay rejected. Got: {error}");
+
+            // Destruction and timed traversal are valid ways to connect a room. Permanent hazards are not.
+            foreach (char passable in new[] { '#', '*', 'Z', 'P', 'a', 'b', '~', 'w', 'm' })
+            {
+                Assert(RoomLayoutFormat.TryParse(
+                           Basic(id, Enumerable.Range(0, 7).Select(row => (row, 3, passable)).ToArray()), file,
+                           out RoomLayoutDocument barrier, out error) &&
+                       RoomLayoutImporter.TryValidateGeometry(barrier, out error),
+                    $"A full barrier of '{passable}' must allow traversal after destruction or timing. {error}");
+            }
+            Assert(RoomLayoutFormat.TryParse(
+                       Basic(id, (2, 6, '*'), (4, 6, '*'), (3, 5, '*'), (3, 7, '*')), file,
+                       out RoomLayoutDocument fireCage, out error) &&
+                   RoomLayoutImporter.TryValidateGeometry(fireCage, out error),
+                $"A SpawnPoint enclosed by destructible fire must be reachable and visible after destruction. {error}");
 
             // Trap-1: a floor trap may leave a one-cell lane (the feet circle is narrower than a body), traps count
             // as terrain for the default difficulty, and each symbol names its kind and phase.
