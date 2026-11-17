@@ -1,0 +1,11 @@
+id: small-poison-button
+profile: small
+weight: 100
+difficulty: 1
+note: 중앙에 독버섯 두 개를 붙인 작은 덩어리.
+grid:
+..........
+..1....3..
+....PP4...
+.......2..
+..........

@@ -21,9 +21,9 @@
 
 - 루프: Frame1 → Frame2 → Frame3 → Frame1, 초당 10프레임(`BossProjectile.AuthoredFramesPerSecond`). 원본 `Boss_Buseureogi_CreamProjectile_v1.png`는 대표 원화로만 보존.
 - 임포트: PPU 1000, 커스텀 피벗 (0.8, 0.5) = 크림 앞머리 중심. 판정점(투사체 위치)이 앞머리에 오고 꼬리가 뒤로 늘어진다.
-- 표시: 자식 `Artwork` 렌더러를 비행 방향으로 회전, 월드 배율 0.75(`AuthoredArtworkWorldScale`), 틴트 없음. 판정 크기(`ProjectileSizing.BossScale`)는 그대로.
+- 표시: 자식 `Artwork` 렌더러를 비행 방향으로 회전, 월드 배율 0.5(`CreamProjectileArtworkWorldScale`), 틴트 없음. 판정 크기(`ProjectileSizing.BossScale`)는 그대로.
 - 연결: `BuseureogiBossPatternRuntime.projectileFrames`. 구성은 `Trickal Fan Game/Effects/Setup Buseureogi Cream Projectile`(Boss-1 Setup도 같이 지정), 검증은 `Trickal Fan Game/Effects/Verify Buseureogi Cream Projectile`.
-- 프레임이 없는 보스(새마음 금고 등)는 기존처럼 보스 스프라이트를 빨갛게 칠한 투사체를 쓴다.
+- 전용 투사체 원화가 없는 보스는 기존처럼 보스 스프라이트를 빨갛게 칠한 투사체를 쓴다.
 - 손으로 만든 `.meta` 4개가 마지막 줄바꿈 없이 끝나 Unity가 PNG를 무시하던 문제를 GUID 유지한 채 수정.
 - 검증 상태: 배치 실행은 열린 Unity 인스턴스 잠금으로 미실행. 수동 확인 필요 — 위 Setup 메뉴 실행 후 Verify 메뉴 통과, Game Scene에서 1층 보스 접근 사격 시 크림 머리가 플레이어 쪽을 향해 3프레임으로 꿈틀대는지 Play 미술 검수.
 

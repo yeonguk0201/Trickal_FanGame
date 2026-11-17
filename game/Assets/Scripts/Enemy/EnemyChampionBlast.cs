@@ -35,6 +35,7 @@ namespace TrickalFanGame.Enemy
 
         private readonly List<PlacedBomb> bombs = new();
         private PlacedBomb bombPrefab;
+        private string sourceDisplayName;
         private float startTime;
         private float destroyAt;
 
@@ -85,7 +86,7 @@ namespace TrickalFanGame.Enemy
         }
 
         public static EnemyChampionBlast Spawn(Vector3 position, Transform parent, SpriteRenderer sourceVisual,
-            float now)
+            float now, GameObject source = null)
         {
             PlacedBomb prefab = ResolveBombPrefab();
             if (prefab == null)
@@ -98,6 +99,7 @@ namespace TrickalFanGame.Enemy
             host.transform.SetParent(parent, false);
             host.transform.position = position;
             EnemyChampionBlast blast = host.AddComponent<EnemyChampionBlast>();
+            blast.sourceDisplayName = EnemyDamageName.From(source);
             blast.bombPrefab = prefab;
             blast.BombRadius = prefab.ExplosionRadius;
             blast.startTime = now;
@@ -217,7 +219,7 @@ namespace TrickalFanGame.Enemy
                 PlacedBomb bomb = Instantiate(bombPrefab, positions[index], Quaternion.identity, transform.parent);
                 bomb.name = $"{BombName} {index + 1}";
                 bombs.Add(bomb);
-                bomb.ConfigureUnownedBlast(Time.time, 0f);
+                bomb.ConfigureUnownedBlast(Time.time, 0f, sourceDisplayName);
             }
 
             if (Body != null)

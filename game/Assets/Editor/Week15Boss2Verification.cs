@@ -172,6 +172,10 @@ namespace TrickalFanGame.Editor
 
                 BossProjectile[] firstVolley = UnityEngine.Object.FindObjectsByType<BossProjectile>(
                     FindObjectsSortMode.None);
+                Sprite ruby = Resources.Load<Sprite>("CombatEffects/saemaeum-ruby-projectile");
+                Assert(ruby != null && firstVolley.All(projectile => projectile.Artwork != null &&
+                    projectile.Artwork.sprite == ruby && projectile.Artwork.color == Color.white),
+                    "Every fan volley projectile must show the ruby sprite in its original colors.");
                 Vector2[] velocities = firstVolley.Select(projectile =>
                         GetPrivateField<Vector2>(projectile, "velocity").normalized)
                     .ToArray();
@@ -212,6 +216,8 @@ namespace TrickalFanGame.Editor
             try
             {
                 boss.ConfigureHud("새마음금고", 1);
+                Assert(!runtime.CanSelect(BossPatternExecution.SaemaeumTreasureHeal),
+                    "A full-health boss must not select treasure healing.");
                 health.TakeDamage(600f);
                 runtime.BeginCombat(target.transform, 19, 0f);
                 float before = health.CurrentHealth;
@@ -224,6 +230,13 @@ namespace TrickalFanGame.Editor
                        Mathf.Approximately(health.CurrentHealth, before + runtime.HealPerUse * 3f) &&
                        runtime.CanSelect(BossPatternExecution.SaemaeumTreasureHeal),
                     "Boss-2 phase-one healing must remain selectable without a use-count limit.");
+
+                health.Heal(health.MaxHealth);
+                Assert(!runtime.CanSelect(BossPatternExecution.SaemaeumTreasureHeal),
+                    "Healing back to full must remove treasure healing from the candidates.");
+                health.TakeDamage(1f);
+                Assert(runtime.CanSelect(BossPatternExecution.SaemaeumTreasureHeal),
+                    "Taking damage again must make phase-one healing available again.");
 
                 boss.ConfigureHud("새마음금고", 2);
                 boss.SetPhase(1);
@@ -259,6 +272,10 @@ namespace TrickalFanGame.Editor
                     "Slime scatter did not execute.");
                 List<float> radii = runtime.SlimeRadiiThisPhase();
                 Assert(runtime.SlimeBlobs.Count == 5, "Phase one must spit one large and four small lumps.");
+                Sprite jelly = Resources.Load<Sprite>("CombatEffects/saemaeum-jelly-projectile");
+                Assert(jelly != null && runtime.SlimeBlobs.All(blob =>
+                    blob.GetComponentInChildren<SpriteRenderer>().sprite == jelly),
+                    "Every airborne slime scatter projectile must use the jelly sprite.");
                 Assert(Vector2.Distance(runtime.SlimeBlobs[0].Destination, target.transform.position) < 0.001f,
                     "The first slime lump must land where the player stands.");
                 for (int a = 0; a < runtime.SlimeBlobs.Count; a++)
@@ -614,6 +631,8 @@ namespace TrickalFanGame.Editor
             Assert(spawned != null && spawned.DisplayName == "새마음금고" &&
                    spawned.GetComponent<SaemaeumVaultBossPatternRuntime>() != null,
                 "The generated floor-two boss room spawned Buseureogi instead of Saemaeum Vault.");
+            Assert(Vector3.Distance(spawned.transform.position, bossRoom.Node.transform.position) < 0.001f,
+                "The boss must spawn at the room center, independently of the enemy spawn markers.");
             Sprite expectedSprite = AssetDatabase.LoadAllAssetsAtPath(Week15Boss2Setup.BossSpritePath)
                 .OfType<Sprite>().FirstOrDefault();
             Assert(expectedSprite != null && spawned.GetComponentInChildren<SpriteRenderer>()?.sprite == expectedSprite,

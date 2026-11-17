@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using TrickalFanGame.Item;
 using TrickalFanGame.Network;
 
 namespace TrickalFanGame.Run
@@ -5,16 +7,23 @@ namespace TrickalFanGame.Run
     public sealed class RunResultPayload
     {
         public RunResultPayload(CreateRunRequest request, CharacterProgressDto startingProgress,
-            IGameApiClient apiClient)
+            IGameApiClient apiClient, IReadOnlyDictionary<string, ItemRarity> itemRarities = null,
+            string deathDescription = null)
         {
             Request = request;
             StartingProgress = startingProgress;
             ApiClient = apiClient;
+            DeathDescription = deathDescription;
+            ItemRarities = itemRarities == null
+                ? new Dictionary<string, ItemRarity>()
+                : new Dictionary<string, ItemRarity>(itemRarities);
         }
 
         public CreateRunRequest Request { get; }
         public CharacterProgressDto StartingProgress { get; }
         public IGameApiClient ApiClient { get; }
+        public string DeathDescription { get; }
+        public IReadOnlyDictionary<string, ItemRarity> ItemRarities { get; }
     }
 
     public static class RunResultContext
@@ -24,12 +33,13 @@ namespace TrickalFanGame.Run
         public static bool HasPending => pending != null;
 
         public static bool TryPrepare(CreateRunRequest request, CharacterProgressDto startingProgress,
-            IGameApiClient apiClient)
+            IGameApiClient apiClient, IReadOnlyDictionary<string, ItemRarity> itemRarities = null,
+            string deathDescription = null)
         {
             if (pending != null || request == null || string.IsNullOrWhiteSpace(request.clientRunId))
                 return false;
 
-            pending = new RunResultPayload(request, Clone(startingProgress), apiClient);
+            pending = new RunResultPayload(request, Clone(startingProgress), apiClient, itemRarities, deathDescription);
             return true;
         }
 

@@ -1,0 +1,11 @@
+id: small-sticky-dessert
+profile: small
+weight: 50
+difficulty: 1
+note: 위 모서리의 진흙케이크와 아래 오른쪽의 간식상자.
+grid:
+mmm....mmm
+..1....4..
+...3..2...
+..........
+.......S..

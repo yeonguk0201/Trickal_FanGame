@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using TrickalFanGame.Data;
+using TrickalFanGame.Item;
 using TrickalFanGame.Meta;
 using TrickalFanGame.Network;
 using TrickalFanGame.Run;
@@ -46,12 +47,24 @@ namespace TrickalFanGame.Frontend
         private bool skipToSummary;
         private bool hasUsedFastForward;
         private AudioClip levelCue;
+        private RunResultStageView recordView;
+        private RunResultStageView levelUpView;
+        private RunResultStageView skillPointsView;
+        private RunResultStageView artifactsView;
+        private RunResultStageView summaryView;
+        private RunResultStageView activeStage;
+        private RunResultBadgeView badge;
+        private bool ExperienceInterrupted => finishCurrentStage || skipToSummary;
 
         public GameObject ResultPanel => resultPanel;
-        public TMP_Text StageTitle => stageTitle;
+        public TMP_Text StageTitle => activeStage != null ? activeStage.Title : stageTitle;
         public TMP_Text StageBody => stageBody;
         public TMP_Text SaveStatus => saveStatus;
-        public Slider ExperienceBar => experienceBar;
+        public Slider ExperienceBar => activeStage == recordView && recordView != null
+            ? recordView.ExperienceBar : experienceBar;
+        public TMP_Text ExperienceSource => recordView != null ? recordView.ExperienceSource : null;
+        public RunResultStageView SummaryView => summaryView;
+        public bool IsAnimatingExperience => stageAnimating;
         public Button RetryRunButton => retryRunButton;
         public Button HomeButton => homeButton;
         public bool IsShowing => resultPanel != null && resultPanel.activeInHierarchy;
@@ -194,13 +207,125 @@ namespace TrickalFanGame.Frontend
             titleView.HomeView.Hide();
             resultPanel.SetActive(true);
             actionRoot.SetActive(false);
+            saveStatus.gameObject.SetActive(false);
             experienceBar.gameObject.SetActive(false);
             experienceText.gameObject.SetActive(false);
+            BuildPresentation();
             bool cleared = payload.Request.isCleared;
-            resultTitle.text = cleared ? "RUN CLEAR" : "RUN FAILED";
-            characterName.text = payload.Request.characterId == "erpin" ? "에르핀" : payload.Request.characterId;
-            characterReaction.text = cleared ? "^_^" : "T_T";
-            speechText.text = cleared ? "해냈어! 역시 내가 최고야!" : "으앙... 다음에는 꼭 이길 거야.";
+            var character = titleView.HomeView.CharacterSelectionView?.FindCharacter(payload.Request.characterId);
+            Sprite portrait = character != null ? character.Portrait : null;
+            if (!cleared && payload.Request.characterId == "erpin")
+                portrait = UserArtwork.Load("run-result-erpin-defeat") ?? portrait;
+            badge.SetPortrait(portrait);
+            badge.SetOutcome(cleared);
+            badge.SetDialogue(speechText.font, cleared ? "해냈어! 역시 나야!" : "아무래도 이건 좀 아닌 것 같아!");
+            SetLayout(badge.transform, 0f, 0f, 1.245f);
+            badge.SetCrestLayout(new Vector2(0f, 46f), 1f);
+            badge.SetPortraitLayout(cleared ? new Vector2(8f, -68f) : new Vector2(7f, -23f),
+                cleared ? 1.322f : 1.313f);
+            OffsetLayout(badge.transform, "Outcome Effects", 0f, 25f, 1.21f);
+            OffsetLayout(badge.transform, "Outcome Wordmark", 0f, 34f, 1.15f);
+            OffsetLayout(badge.transform, "Dialogue Bubble", 76f, -52f, 0.97f);
+        }
+
+        private void BuildPresentation()
+        {
+            if (recordView != null) return;
+
+            Image background = resultPanel.GetComponent<Image>();
+            background.sprite = UserArtwork.Load("run-result-background");
+            if (background.sprite != null) background.color = Color.white;
+
+            RectTransform characterPanel = (RectTransform)characterReaction.transform.parent;
+            characterPanel.anchoredPosition = new Vector2(-485, 12);
+            characterPanel.GetComponent<Image>().enabled = false;
+            badge = RunResultBadgeView.CreateVictory(characterPanel, null);
+            badge.transform.SetAsFirstSibling();
+            characterName.gameObject.SetActive(false);
+            characterReaction.gameObject.SetActive(false);
+            resultTitle.gameObject.SetActive(false);
+            speechText.transform.parent.gameObject.SetActive(false);
+
+            RectTransform stagePanel = (RectTransform)stageTitle.transform.parent;
+            stagePanel.anchoredPosition = new Vector2(445, 35);
+            stagePanel.GetComponent<Image>().enabled = false;
+            saveStatus.rectTransform.anchoredPosition = new Vector2(62, 330);
+            TMP_FontAsset font = stageTitle.font;
+            recordView = RunResultStageView.CreateRecord(stagePanel, font);
+            levelUpView = RunResultStageView.CreateLevelUp(stagePanel, font);
+            skillPointsView = RunResultStageView.CreateSkillPoints(stagePanel, font);
+            artifactsView = RunResultStageView.CreateArtifacts(stagePanel, font);
+            summaryView = RunResultStageView.CreateSummary(stagePanel, font);
+            // Buttons use the screen center independently of the summary's scale.
+            actionRoot.transform.SetParent(stagePanel.parent, false);
+            SetLayout(actionRoot.transform, 0f, 0f, 1f);
+            SetLayout(retryRunButton.transform, 217f, -341f, 1.093f);
+            SetLayout(homeButton.transform, 640f, -341f, 1.093f);
+            ApplyStageLayouts();
+            RunResultButton.Apply(retryRunButton, true);
+            RunResultButton.Apply(homeButton, false);
+            saveStatus.transform.SetAsLastSibling();
+        }
+
+        private void ApplyStageLayouts()
+        {
+            SetLayout(recordView.transform, 0f, 0f, 1f);
+            SetLayout(levelUpView.transform, 0f, 0f, 1.098f);
+            SetLayout(skillPointsView.transform, 0f, 0f, 1.184f);
+            SetLayout(artifactsView.transform, 0f, 0f, 1.193f);
+            SetLayout(summaryView.transform, 0f, 0f, 1.047f);
+
+            Transform record = recordView.transform;
+            OffsetLayout(record, "Title", 0f, 0f, 1.79f);
+            foreach (string name in new[] { "ReachedFloor", "KillCount", "PlayTime", "FloorSeparator", "TimeSeparator" })
+                OffsetLayout(record, name, 0f, 0f, 1.2f);
+            OffsetLayout(record, "DeathReason", 0f, -22f, 1.273f);
+            OffsetLayout(record, "CurrentLevel", -25f, 0f, 1.176f);
+            OffsetLayout(record, "ExperienceSource", 0f, 23f, 1.113f);
+
+            Transform levelUp = levelUpView.transform;
+            OffsetLayout(levelUp, "LevelUpLight", 8f, 21f, 3f);
+            OffsetLayout(levelUp, "LevelUpCrown", 0f, 49f, 1.004f);
+            OffsetLayout(levelUp, "LevelUpWordmark", 0f, 20f, 1.5f);
+            OffsetLayout(levelUp, "LevelUpLeftLeaf", -85f, 0f, 1.224f);
+            OffsetLayout(levelUp, "LevelUpRightLeaf", 85f, 0f, 1.224f);
+
+            Transform points = skillPointsView.transform;
+            OffsetLayout(points, "Title", 0f, 0f, 1.509f);
+            OffsetLayout(points, "SkillToken", 23f, 0f, 1f);
+            OffsetLayout(points, "PointsGained", -35f, 0f, 0.954f);
+            OffsetLayout(points, "PointsBalance", 0f, 0f, 1.089f);
+
+            OffsetLayout(artifactsView.transform, "Title", 0f, 0f, 1.509f);
+
+            Transform summary = summaryView.transform;
+            OffsetLayout(summary, "Title", 0f, 0f, 1.509f);
+            foreach (string name in new[] { "ReachedFloor", "KillCount", "PlayTime" })
+                OffsetLayout(summary, name, 0f, 0f, 1.05f);
+            OffsetLayout(summary, "DeathReason", 0f, -13f, 1.073f);
+            OffsetLayout(summary, "SkillPointsBalance", 0f, -17f, 1.051f);
+        }
+
+        private static void SetLayout(Transform target, float x, float y, float scale)
+        {
+            RectTransform rect = (RectTransform)target;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(x, y);
+            rect.localScale = new Vector3(scale, scale, 1f);
+        }
+
+        private static void OffsetLayout(Transform root, string name, float dx, float dy, float scale)
+        {
+            if (root.Find(name) is not RectTransform rect) return;
+            rect.anchoredPosition += new Vector2(dx, dy);
+            rect.localScale = Vector3.Scale(rect.localScale, new Vector3(scale, scale, 1f));
+        }
+
+        private static void ApplyRewardCountLayout(RunResultStageView stage, float y, float scale)
+        {
+            Transform items = stage.transform.Find("RewardSlots/Items");
+            for (int i = 0; i < Mathf.Min(2, items.childCount); i++)
+                OffsetLayout(items.GetChild(i), "Count", 0f, y, scale);
         }
 
         private IEnumerator PlaySequence()
@@ -208,36 +333,49 @@ namespace TrickalFanGame.Frontend
             skipToSummary = false;
             finishCurrentStage = false;
             hasUsedFastForward = false;
-            yield return ShowTextStage("RUN 기록", BuildRunRecord(), 1.25f);
-            if (skipToSummary) { ShowSummary(); yield break; }
-
-            yield return AnimateExperience();
-            if (skipToSummary) { ShowSummary(); yield break; }
+            stageTitle.gameObject.SetActive(false);
+            stageBody.gameObject.SetActive(false);
 
             CharacterProgressDto start = StartingProgress();
             CharacterProgressDto end = resultProgress;
-            if (end.level > start.level)
+            recordView.SetRecord(payload.Request, payload.DeathDescription);
+            ShowStage(recordView);
+            yield return AnimateExperience(start, end);
+
+            if (!skipToSummary && end.level > start.level)
             {
-                yield return ShowTextStage("LEVEL UP!", $"Lv. {start.level}  →  Lv. {end.level}", 1.15f);
-                if (skipToSummary) { ShowSummary(); yield break; }
+                levelUpView.SetLevelUp(start.level, end.level);
+                ShowStage(levelUpView);
+                yield return WaitOnStage(RunResultStageView.LevelUpLightPeriod);
             }
 
-            int gainedPoints = Mathf.Max(0, end.skillPoints - start.skillPoints);
-            yield return ShowTextStage("스킬 포인트", $"+{gainedPoints}\n보유 {end.skillPoints} 포인트", 1.0f);
-            if (skipToSummary) { ShowSummary(); yield break; }
+            if (!skipToSummary)
+            {
+                skillPointsView.SetSkillPoints(Mathf.Max(0, end.skillPoints - start.skillPoints), end.skillPoints);
+                ShowStage(skillPointsView);
+                yield return WaitOnStage(1f);
+            }
 
-            yield return ShowTextStage("획득 아티팩트", BuildArtifactReview(), 1.1f);
+            if (!skipToSummary)
+            {
+                artifactsView.SetRewards(payload);
+                ApplyRewardCountLayout(artifactsView, -12f, 1.149f);
+                ShowStage(artifactsView);
+                yield return WaitOnStage(1.35f);
+            }
+
             ShowSummary();
         }
 
-        private IEnumerator ShowTextStage(string title, string body, float duration)
+        private void ShowStage(RunResultStageView stage)
         {
-            stageAnimating = false;
-            finishCurrentStage = false;
-            experienceBar.gameObject.SetActive(false);
-            experienceText.gameObject.SetActive(false);
-            stageTitle.text = title;
-            stageBody.text = body;
+            if (activeStage != null) activeStage.gameObject.SetActive(false);
+            activeStage = stage;
+            activeStage.gameObject.SetActive(true);
+        }
+
+        private IEnumerator WaitOnStage(float duration)
+        {
             float elapsed = 0f;
             while (elapsed < duration && !skipToSummary)
             {
@@ -246,86 +384,132 @@ namespace TrickalFanGame.Frontend
             }
         }
 
-        private IEnumerator AnimateExperience()
+        private IEnumerator AnimateExperience(CharacterProgressDto start, CharacterProgressDto end)
         {
-            CharacterProgressDto start = StartingProgress();
-            CharacterProgressDto end = resultProgress;
-            stageTitle.text = $"경험치 +{resultExperience}";
-            stageBody.text = "";
-            experienceBar.gameObject.SetActive(true);
-            experienceText.gameObject.SetActive(true);
+            TMP_Text source = recordView.ExperienceSource;
             int level = start.level;
             int current = start.experience;
-            bool firstSegment = true;
-
-            while (level < end.level && !skipToSummary)
-            {
-                int required = RequiredExperience(level);
-                yield return AnimateExperienceSegment(level, current, required, required,
-                    firstSegment ? 0.72f : 0.3f);
-                if (skipToSummary) break;
-                level++;
-                current = 0;
-                firstSegment = false;
-                PlayLevelCue();
-                yield return PulseExperienceBar();
-            }
-
-            if (!skipToSummary)
-            {
-                int required = end.experienceToNextLevel > 0
-                    ? end.experienceToNextLevel
-                    : Mathf.Max(1, RequiredExperience(end.level));
-                yield return AnimateExperienceSegment(end.level, current, end.experience, required, 0.5f);
-            }
-
-            SetExperience(end.level, end.experience,
-                end.experienceToNextLevel > 0 ? end.experienceToNextLevel : Mathf.Max(1, end.experience));
-            stageAnimating = false;
-            finishCurrentStage = false;
-        }
-
-        private IEnumerator AnimateExperienceSegment(int level, int from, int to, int required, float duration)
-        {
+            recordView.SetExperience(level, current, MetaProgressionRules.RequiredExperience(level));
             stageAnimating = true;
-            finishCurrentStage = false;
-            float elapsed = 0f;
-            while (elapsed < duration && !finishCurrentStage && !skipToSummary)
+            yield return null;
+
+            foreach (var (label, amount) in BuildExperienceSources())
             {
-                elapsed += Time.unscaledDeltaTime;
-                float value = Mathf.Lerp(from, to, Mathf.Clamp01(elapsed / duration));
-                SetExperience(level, Mathf.RoundToInt(value), required);
-                yield return null;
+                if (ExperienceInterrupted) break;
+
+                source.text = $"{label} <color=#38F5CA>+{amount}</color>";
+                yield return FadeExperienceSource(0f, 1f, 0.16f);
+                int remaining = amount;
+                while (remaining > 0 && !ExperienceInterrupted && level <= end.level)
+                {
+                    int required = MetaProgressionRules.RequiredExperience(level);
+                    if (required == 0) break;
+
+                    int target = level == end.level ? end.experience : required;
+                    int gain = Mathf.Min(remaining, target - current);
+                    if (gain <= 0) break;
+
+                    yield return AnimateExperienceSegment(level, current, current + gain, required);
+                    current += gain;
+                    remaining -= gain;
+                    if (current == required && level < end.level && !ExperienceInterrupted)
+                    {
+                        PlayLevelCue();
+                        level++;
+                        current = 0;
+                        recordView.SetExperience(level, current, MetaProgressionRules.RequiredExperience(level));
+                    }
+                }
+                yield return FadeExperienceSource(1f, 0f, 0.20f);
             }
-            SetExperience(level, to, required);
+
+            SetSourceOpacity(0f);
+            recordView.SetExperience(end.level, end.experience, end.experienceToNextLevel);
             stageAnimating = false;
+            finishCurrentStage = false;
+            yield return WaitOnStage(0.45f);
         }
 
-        private IEnumerator PulseExperienceBar()
+        private IEnumerable<(string label, int amount)> BuildExperienceSources()
         {
-            Transform target = experienceBar.transform;
-            Vector3 original = Vector3.one;
-            float elapsed = 0f;
-            while (elapsed < 0.14f && !skipToSummary)
+            CreateRunRequest request = payload.Request;
+            int remaining = Mathf.Max(0, resultExperience);
+            int floor = Mathf.Min(remaining, Mathf.Max(0, request.reachedFloor) * MetaProgressionRules.ReachedFloorExperience);
+            if (floor > 0)
             {
+                yield return ($"{request.reachedFloor}층 도달", floor);
+                remaining -= floor;
+            }
+
+            int kills = Mathf.Min(remaining, Mathf.Max(0, request.killCount) * MetaProgressionRules.KillExperience);
+            if (kills > 0)
+            {
+                yield return ($"적 {request.killCount}마리 처치", kills);
+                remaining -= kills;
+            }
+
+            var artifacts = (request.items ?? System.Array.Empty<RunItemDto>())
+                .Where(item => item != null && RunResultStageView.IsArtifact(item.itemId))
+                .GroupBy(item => payload.ItemRarities.TryGetValue(item.itemId, out ItemRarity rarity)
+                    ? rarity : ItemRarity.Common)
+                .OrderBy(group => group.Key);
+
+            foreach (var group in artifacts)
+            {
+                int amount = group.Count() * MetaProgressionRules.RarityExperience(group.Key);
+                if (amount <= 0 || amount > remaining) continue;
+
+                string rarityName = group.Key switch
+                {
+                    ItemRarity.Uncommon => "고급",
+                    ItemRarity.Rare => "희귀",
+                    ItemRarity.Epic => "전설",
+                    _ => "일반"
+                };
+                yield return ($"{rarityName} 아티팩트 {group.Count()}개", amount);
+                remaining -= amount;
+            }
+
+            if (remaining > 0) yield return ("기타 획득 경험치", remaining);
+        }
+
+        private IEnumerator FadeExperienceSource(float from, float to, float duration)
+        {
+            float elapsed = 0f;
+            while (elapsed < duration && !ExperienceInterrupted)
+            {
+                SetSourceOpacity(Mathf.Lerp(from, to, elapsed / duration));
                 elapsed += Time.unscaledDeltaTime;
-                float pulse = 1f + Mathf.Sin(elapsed / 0.14f * Mathf.PI) * 0.08f;
-                target.localScale = original * pulse;
                 yield return null;
             }
-            target.localScale = original;
+            SetSourceOpacity(ExperienceInterrupted ? 0f : to);
+        }
+
+        private void SetSourceOpacity(float alpha) => recordView.ExperienceSourceFade.alpha = alpha;
+
+        private IEnumerator AnimateExperienceSegment(int level, int from, int to, int required)
+        {
+            float elapsed = 0f;
+            const float duration = 0.34f;
+            while (elapsed < duration && !ExperienceInterrupted)
+            {
+                float t = Mathf.Clamp01(elapsed / duration);
+                int value = Mathf.RoundToInt(Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t)));
+                recordView.SetExperience(level, value, required);
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            recordView.SetExperience(level, to, required);
         }
 
         private void ShowSummary()
         {
             sequence = null;
             stageAnimating = false;
-            CharacterProgressDto end = resultProgress;
-            stageTitle.text = "RUN 결과";
-            stageBody.text = $"Lv. {end.level}  ·  EXP {end.experience}/{end.experienceToNextLevel}\n" +
-                             $"스킬 포인트 {end.skillPoints}\n{BuildRunRecord()}\n{BuildArtifactReview()}";
-            experienceBar.gameObject.SetActive(false);
-            experienceText.gameObject.SetActive(false);
+            summaryView.SetSummary(payload, resultProgress);
+            ApplyRewardCountLayout(summaryView, -11f, 1f);
+            ShowStage(summaryView);
+            saveStatus.gameObject.SetActive(true);
             actionRoot.SetActive(true);
             Focus(retryRunButton);
         }
@@ -334,35 +518,6 @@ namespace TrickalFanGame.Frontend
         {
             return payload.StartingProgress ?? MetaProgressionRules.CreateDefault(payload.Request.characterId);
         }
-
-        private string BuildRunRecord()
-        {
-            string time = $"{payload.Request.playTime / 60:00}:{payload.Request.playTime % 60:00}";
-            string death = payload.Request.isCleared || string.IsNullOrWhiteSpace(payload.Request.deathReason)
-                ? ""
-                : $"\n사망 원인  {payload.Request.deathReason}";
-            return $"도달 {payload.Request.reachedFloor}층  ·  처치 {payload.Request.killCount}\n플레이 시간 {time}{death}";
-        }
-
-        private string BuildArtifactReview()
-        {
-            RunItemDto[] items = payload.Request.items ?? System.Array.Empty<RunItemDto>();
-            if (items.Length == 0) return "획득한 아티팩트 없음";
-            IEnumerable<string> summary = items.GroupBy(item => item.itemId)
-                .Select(group => group.Count() > 1 ? $"{group.Key} ×{group.Count()}" : group.Key);
-            return string.Join("  ·  ", summary);
-        }
-
-        private void SetExperience(int level, int value, int required)
-        {
-            required = Mathf.Max(1, required);
-            experienceBar.value = Mathf.Clamp01((float)value / required);
-            experienceText.text = $"Lv. {level}    {value} / {required}";
-        }
-
-        private static int RequiredExperience(int level) =>
-            MetaProgressionRules.ExperienceToNextLevel[
-                Mathf.Clamp(level - 1, 0, MetaProgressionRules.ExperienceToNextLevel.Length - 1)];
 
         private void PlayLevelCue()
         {

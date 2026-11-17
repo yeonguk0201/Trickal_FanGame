@@ -54,6 +54,13 @@ namespace TrickalFanGame.Editor
             Debug.Log("Boss-Intro-0 regression batch passed: Boss-Intro-0, HUD-5 and the development panel.");
         }
 
+        public static void VerifyBossEntryBatch()
+        {
+            VerifyWithRegressionsBatch();
+            Week15Boss2Verification.Verify();
+            Debug.Log("Boss entry verification passed: intro, centered spawn and healing eligibility.");
+        }
+
         private static void VerifyWiring(GameBossIntroView view, GameBossHudView bossHud)
         {
             Assert(view.BossHud == bossHud && view.RoomGraph != null && view.RunSession != null,
@@ -114,6 +121,14 @@ namespace TrickalFanGame.Editor
                 view.Begin(boss);
                 Assert(view.Stage == BossIntroStage.Panels && Time.timeScale == 0f,
                     "Starting the intro must stop game time.");
+                typeof(BossController).GetMethod("Update",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                    .Invoke(boss, null);
+                Assert(boss.State == BossActionState.Idle && boss.CurrentPatternId == null,
+                    "Boss Update must not start a pattern while the intro has stopped time.");
+                view.TryBegin();
+                Assert(view.Stage == BossIntroStage.Panels && view.Elapsed == 0f,
+                    "A boss checking the intro in the same frame must not restart it.");
                 Assert(view.BossNameText.text == "검증보스" && view.BossPortrait.sprite == bossRenderer.sprite &&
                        view.BossPortrait.enabled, "The boss panel must show the boss name and its sprite.");
                 Assert(view.PlayerNameText.text == character.DisplayName &&

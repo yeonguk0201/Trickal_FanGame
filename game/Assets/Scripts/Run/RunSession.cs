@@ -351,7 +351,14 @@ namespace TrickalFanGame.Run
             UnbindRunEvents();
         }
 
-        private void OnPlayerDied() => EndRun(false, playerDeathReason != null ? playerDeathReason.CurrentReason : "UNKNOWN");
+        private string deathDescription;
+
+        private void OnPlayerDied()
+        {
+            if (!hasStarted || hasEnded) return;
+            deathDescription = PlayerDeathReason.Describe(playerHealth.KillingBlow);
+            EndRun(false, playerDeathReason != null ? playerDeathReason.CurrentReason : "UNKNOWN");
+        }
         private void OnBossDied()
         {
             runProgress?.RecordKill();
@@ -425,11 +432,23 @@ namespace TrickalFanGame.Run
             statusMessage = IsCleared ? "Run cleared. Saving result..." : "Run ended. Saving result...";
             if (resultTransition != null && resultTransition.TryTransition(
                     pendingRequest, playerProgressClient != null ? playerProgressClient.AppliedProgress : null,
-                    GetValidApiClient()))
+                    GetValidApiClient(), ResultItemRarities(), deathDescription))
             {
                 return;
             }
             SubmitPendingRun();
+        }
+
+        private Dictionary<string, ItemRarity> ResultItemRarities()
+        {
+            Dictionary<string, ItemRarity> rarities = new();
+            if (inventory == null || pendingRequest.items == null) return rarities;
+
+            foreach (RunItemDto item in pendingRequest.items)
+                if (!string.IsNullOrEmpty(item?.itemId) && inventory.TryGetRecordedRarity(item.itemId, out ItemRarity rarity))
+                    rarities[item.itemId] = rarity;
+
+            return rarities;
         }
 
         public bool RetrySave()

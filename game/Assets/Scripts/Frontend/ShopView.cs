@@ -315,6 +315,15 @@ namespace TrickalFanGame.Frontend
 
         public static string GetTitle(ShopKind kind) => kind == ShopKind.Goldi ? GoldiTitle : Title;
         public static string GetKeeperLine(ShopKind kind) => kind == ShopKind.Goldi ? GoldiKeeperLine : KeeperLine;
+        // The rarity in Korean only (the reward cards show the same words).
+        public static string KoreanRarityLabel(ItemRarity rarity) => rarity switch
+        {
+            ItemRarity.Uncommon => "고급",
+            ItemRarity.Rare => "희귀",
+            ItemRarity.Epic => "전설",
+            _ => "일반",
+        };
+
         // What a shop consumable does, keyed by its stable ID (shop-catalog.asset).
         public static string DescribeConsumable(string consumableId) => consumableId switch
         {
@@ -915,8 +924,7 @@ namespace TrickalFanGame.Frontend
                     : $"현재 스택 {stacks} / {maximum}");
                 SetText(detailEffectText, ArtifactEffectDescription.Build(item));
                 // The tooltip's kind line names the rarity in Korean only, like the reward cards.
-                SetText(detailKindText,
-                    $"{ItemKindText.GetDisplayName(item.Kind)}  ·  {ItemRewardCardView.RewardRarityLabel(item.Rarity)}");
+                SetText(detailKindText, $"{ItemKindText.GetDisplayName(item.Kind)}  ·  {KoreanRarityLabel(item.Rarity)}");
             }
             else
             {

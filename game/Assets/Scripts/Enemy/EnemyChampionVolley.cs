@@ -42,6 +42,7 @@ namespace TrickalFanGame.Enemy
             }
         }
 
+        internal string SourceDisplayName { get; private set; }
         public float FireAt { get; private set; }
         public bool HasFired { get; private set; }
         public bool HasEnded { get; private set; }
@@ -49,7 +50,7 @@ namespace TrickalFanGame.Enemy
         public IReadOnlyList<EnemyProjectile> Shots { get; private set; } = System.Array.Empty<EnemyProjectile>();
 
         public static EnemyChampionVolley Spawn(Vector3 position, Transform parent, int floorNumber,
-            IReadOnlyList<Vector2> configuredDirections, float now)
+            IReadOnlyList<Vector2> configuredDirections, float now, GameObject source = null)
         {
             GameObject host = new(ObjectName);
             host.transform.SetParent(parent, false);
@@ -57,6 +58,7 @@ namespace TrickalFanGame.Enemy
             // The projectiles read their damage floor from their source.
             EnemyFloorLevel.Apply(host, Mathf.Max(1, floorNumber));
             EnemyChampionVolley volley = host.AddComponent<EnemyChampionVolley>();
+            volley.SourceDisplayName = EnemyDamageName.From(source);
             volley.directions = (configuredDirections ?? EnemyChampionDeath.FourWays).ToArray();
             volley.FireAt = now + TelegraphDuration;
 

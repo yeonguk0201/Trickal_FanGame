@@ -48,23 +48,23 @@ namespace TrickalFanGame.Editor
             try
             {
                 drawn = BossProjectile.Create(new Vector2(-7100f, 7100f), Vector2.up * 5f, null,
-                    EnemyDamageTier.Medium, null, frames);
+                    EnemyDamageTier.Medium, null, frames, BuseureogiBossPatternRuntime.CreamProjectileArtworkWorldScale);
                 Require(drawn.GetComponent<SpriteRenderer>() == null && drawn.Artwork != null &&
                         drawn.Artwork.transform.parent == drawn.transform,
                     "Drawn cream must render on a child so rotation and scale leave the hitbox alone.");
                 Require(drawn.Artwork.color == Color.white, "The cream drawing must not be tinted.");
                 Require(Mathf.Abs(Mathf.DeltaAngle(drawn.Artwork.transform.eulerAngles.z, 90f)) < 0.01f,
                     "The cream head (drawn facing right) must point along the flight direction.");
-                Require(Mathf.Approximately(drawn.Artwork.transform.lossyScale.x, BossProjectile.AuthoredArtworkWorldScale),
+                float artworkScale = drawn.Artwork.transform.lossyScale.x;
+                Require(Mathf.Approximately(artworkScale, BuseureogiBossPatternRuntime.CreamProjectileArtworkWorldScale),
                     "The cream drawing must keep its authored world scale.");
                 CircleCollider2D collider = drawn.GetComponent<CircleCollider2D>();
                 Require(Mathf.Approximately(drawn.transform.localScale.x, ProjectileSizing.BossScale) &&
                         Mathf.Approximately(collider.radius, ProjectileSizing.BaseColliderRadius),
                     "Drawn artwork must not change the boss projectile hitbox.");
-                // The head fills most of the canvas height; keep it close to the 0.45 player hit distance.
-                float canvasHeight = frames[0].bounds.size.y * BossProjectile.AuthoredArtworkWorldScale;
-                Require(canvasHeight > 0.45f && canvasHeight < 0.8f,
-                    $"The cream drawing must stay readable but near the hit size, found {canvasHeight:0.00} world units tall.");
+                float canvasHeight = frames[0].bounds.size.y * artworkScale;
+                Require(canvasHeight > 0.3f && canvasHeight < 0.54f,
+                    $"The cream drawing must stay compact, found {canvasHeight:0.00} world units tall.");
 
                 float step = 1f / BossProjectile.AuthoredFramesPerSecond;
                 int[] expected = { 0, 1, 2, 0 };

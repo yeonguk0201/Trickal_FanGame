@@ -1687,88 +1687,10 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
 - T7 방 Layout 임포터(1단계): 방 하나를 `game/RoomLayouts/<방 ID>.room.txt` 텍스트 파일 하나로 적고, 메뉴
   `Trickal Fan Game > Tools > Import Room Layouts`가 파일마다 방 Prefab(`Assets/Rooms/Prefabs/Layouts/room-<ID>.prefab`)과
   템플릿(`Assets/Rooms/Templates/Layouts/<ID>.asset`)을 만들어 Game Scene 생성기 목록에 등록한다. Room 콘텐츠 버전은
-  16이다(Trap-1에서 함정 방 3개를 더하며 13, Layout-0에서 방 8개를 더하며 16으로 올렸다). 임포터 이전에 만든 템플릿 19개는
+  17이다(Trap-1에서 함정 방 3개를 더하며 13, Layout-0에서 방 8개를 더하며 16, 크기별 6개씩 방 30개를 더하며 17로 올렸다). 임포터 이전에 만든 템플릿 19개는
   건드리지 않는다. `ImportAndVerifyBatch`의 강제 재임포트는 기존 방 Prefab의 내부 fileID만 바꾸므로(내용 같음), 고치지 않은
   방의 Prefab diff는 커밋 전에 되돌린다.
-  - **파일 형식**: 위쪽은 `키: 값` 머리말, `grid:` 줄 아래는 격자다. `//`로 시작하는 줄은 머리말에서만 주석이다.
-
-    ```text
-    id: basic-gold-mine
-    profile: basic
-    weight: 40
-    note: 황금돌이 네 모서리에 몰려 있는 금광 방
-    grid:
-    GG#.........#GG
-    G.............G
-    ...1.......5...
-    .......3.......
-    ...............
-    ...4.......2...
-    G.............G
-    GG#.........#GG
-    ```
-
-    | 키 | 필수 | 뜻 |
-    | --- | --- | --- |
-    | `id` | 예 | 방 ID. 파일 이름과 같고 `<프로필>-`로 시작한다. 소문자·숫자·하이픈만 쓴다 |
-    | `profile` | 예 | `small`·`basic`·`wide`·`tall`·`large` |
-    | `weight` | 아니오 | 등장 가중치 1~1000. 기본 100(기존 방과 같은 확률). 드롭이나 상자가 많은 방은 낮춘다 |
-    | `difficulty` | 아니오 | Layout 난이도 보정 0~5. 적지 않으면 장애물·구덩이가 있으면 +1, 없으면 0 |
-    | `floors` | 아니오 | 나오는 층. `2` 또는 `1-3`. 기본은 모든 층 |
-    | `note` | 아니오 | 사람이 읽는 설명. 게임에 쓰이지 않는다 |
-
-  - **격자**: 한 글자가 1×1 한 칸이고 위에서 아래로 적는다. 칸 수는 프로필마다 고정이다.
-
-    | 프로필 | 가로 × 세로 | SpawnPoint 수 |
-    | --- | --- | --- |
-    | `small` | 10 × 5 | 4 |
-    | `basic` | 13 × 7 | 5 |
-    | `wide` | 21 × 7 | 5 |
-    | `tall` | 13 × 11 | 5 |
-    | `large` | 21 × 11 | 6 |
-
-    한 칸은 1×1이고 격자는 방 중심에 맞춘다. 격자는 **실제로 걸을 수 있는 바닥**
-    (`FairyVillageArtworkSetup.WalkableFloor`)과 정확히 같다. 벽 경계 콜라이더가 이 사각형의 변에 놓이므로 바깥 줄
-    장애물·구덩이는 벽에 빈틈없이 붙는다. 바닥은 그림에서 계산한 영역(`PaintedFloor`)에 들어가는 가장 큰 정수 크기
-    사각형이며, 벽 경계를 다시 만들려면 `Trickal Fan Game/Artwork/Apply Fairy Village Tiles and Walls`를 실행한다.
-
-  - **글자**(`RoomLayoutFormat.Symbols`):
-
-    | 글자 | 뜻 |
-    | --- | --- |
-    | `.` | 바닥 |
-    | `#` | 짱돌. 지금처럼 방마다 최대 1개가 seed로 특수 장애물이 된다 |
-    | `T` | 나무(비행도 막음) |
-    | `o` | 구덩이. 붙어 있는 칸은 직사각형으로 합쳐진다 |
-    | `1`~`6` | SpawnPoint. 프로필의 개수만큼 각각 한 번씩 적는다 |
-    | `c` `g` `d` | 일반·황금·다이아몬드 상자. 방에 처음 들어갈 때부터 놓여 있다 |
-    | `M` `G` `K` | 종류 고정: 마리의 폭탄상자·황금돌·마요의 열쇠꾸러미 |
-    | `S` `B` `F` | 종류 고정: 에르핀의 간식상자·에슈르의 빵상자·리코타의 음식상자 |
-    | `V` `X` `R` `Q` | 종류 고정: 시스트의 금고·폭발 상자·셰이디의 랜덤박스·마요의 수집품 상자 |
-    | `^` `~` `w` | 바닥 함정: 바닥 가시·장판·거미줄 (Trap-1) |
-    | `a` `b` | 바닥 함정: 주기 가시 A 위상(내려간 상태로 시작)·B 위상(올라온 상태로 시작) |
-    | `m` | 바닥 함정: 진흙케이크(1회용, Trap-2). `M`(마리의 폭탄상자)과 대소문자로 구분한다 |
-    | `*` `Z` `P` | 장애물 함정: 불(비행도 막음)·가시 돌·독버섯. 장애물 규칙을 그대로 따른다 |
-
-    종류 고정 장애물은 방당 특수 장애물 1개 규칙에 세지 않는다. 같은 방의 `#`는 그대로 40% 확률로 1개가 특수
-    장애물이 된다.
-  - **SpawnPoint 역할**: `1`·`2`는 근접 압박, `3`은 돌진 통로, `4` 이후는 근접·후방 사격이다(Small의 `4`는 모든 역할).
-    전부 후방 사격 지점으로도 쓰인다.
-  - **배치할 때 지킬 것**(어기면 임포터가 이유와 함께 거부한다):
-    - 문 앞 통로에는 장애물·구덩이·상자를 둘 수 없다. Basic은 좌우 2열의 가운데 5행, 가운데 5열의 위아래 2행이다.
-    - 통로는 2칸 이상이어야 지나갈 수 있는 것으로 본다. 장애물 사이 1칸 틈은 막힌 것으로 판정한다.
-    - SpawnPoint와 상자는 장애물·구덩이의 **바로 왼쪽 칸과 바로 아래 칸**, 격자의 **맨 윗줄과 맨 오른쪽 열**에 둘
-      수 없다(도달 판정 격자가 점을 오른쪽 위 칸으로 보기 때문이다).
-    - SpawnPoint마다 전투 구역의 35% 이상이 보여야 한다.
-    - 상자끼리는 1.5 이상 떨어져야 한다(사이에 한 칸 이상).
-    - 바닥 함정은 문 안전 진입점에서 1.5 안에 둘 수 없다. Basic은 좌우 3열의 가운데 3행, 가운데 3열의 위아래 3행이다
-      (Wide·Large도 문마다 같은 3×3칸).
-    - 모든 문 사이에 바닥 함정 칸을 밟지 않는 길이 있어야 한다. 발밑 원(반지름 0.3) 기준이라 함정 칸 사이 1칸 틈은
-      지나갈 수 있는 것으로 보지만, 대각선으로 맞닿은 함정 칸 사이는 막힌 것으로 본다. 장애물은 지금처럼 몸 원
-      (반지름 0.5) 기준이다.
-    - 바닥 함정은 SpawnPoint 옆 칸에 둘 수 있다(같은 칸만 안 된다). 적은 중심이 함정 그림 안에 있을 때만 밟는다.
-    - 문이 어떤 조합으로 열려도 그 프로필의 모든 Encounter가 배치되어야 한다. SpawnPoint를 문 안전 진입점에서 1.5,
-      문에서 2 이상 떨어뜨려 두면 된다.
+  - **파일 형식·글자·배치 규칙·작성 순서**: `31-room-layout-guide.md`가 기준이다.
   - **메뉴**(`Trickal Fan Game > Tools`): `Validate Room Layouts`는 에셋을 쓰지 않고 검사만 한다. `Import Room Layouts`는
     글이 바뀐 방만 다시 만들고(바뀌지 않은 방의 Prefab은 그대로다), 거부된 방은 이전에 통과한 버전을 그대로 둔다.
     파일을 지운 방은 목록에서 빠지고 그 방의 Prefab·템플릿이 삭제된다. `Reimport All Room Layouts`는 전부 다시
@@ -1779,7 +1701,7 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   - **이미 Run에 쓰인 방을 고칠 때**: 방 ID와 칸 위치로 만든 장애물 ID(`obstacle-c03-r05`)는 seed 재현에 쓰이는 안정
     키다. 방을 추가·삭제하거나 배치를 바꾼 묶음을 내보낼 때 `RoomLayoutImporter.RoomContentVersion`을 한 번 올린다.
     Prefab 구성 방식을 바꾸면 `BuildRevision`도 올려 모든 방을 다시 만들게 한다.
-  - **글자 추가**: `RoomLayoutFormat.BuildSymbols`에 한 줄, `RoomLayoutImporter.PlaceContent`에 배치 분기 하나를 넣는다.
+  - **글자 추가**: `31-room-layout-guide.md` §8.
   - 자동 검증 메뉴는 `Trickal Fan Game > Tools > Verify Room Layouts`, 배치는 Unity `-batchmode -nographics -quit
     -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.RoomLayoutImporterVerification.ImportAndVerifyBatch
     -logFile <로그 경로>`다. 형식·배치 거부 25가지와 사유(함정 3가지 포함), 함정 글자 8개의 종류·위상, 임포트 2회의 GUID·Prefab 내용 불변, 강제 재임포트의 GUID,
@@ -2594,6 +2516,44 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
   `erpin` 에셋의 메뉴 표시 필드가 비어 있을 때만 채운다(이미 고친 값은 유지).
 - **화면 캡처**: 메뉴 `Capture Menu-5 Settings`·`Capture Menu-5 Credits`·`Capture Menu-3 Screens` 또는 각 검증기의 `CaptureBatch`.
   `-nographics` 없이 실행한다. 결과는 `output/menu-review/<화면>-1920x1080.png`, `...-1280x720.png`. Scene은 저장하지 않고 다시 연다.
+
+
+### 오프라인 방 격자 편집기 (2026-11-17)
+
+1. 저장소 루트에서 `python tools/room-layout-editor/build.py`를 실행한다.
+2. 생성된 `tmp/room-layout-editor.html`을 Edge 또는 Chrome으로 연다. 서버·인터넷 연결이 필요 없다.
+3. 왼쪽에서 기존 방을 고르거나 **새 방 만들기**로 5개 프로필 중 하나를 선택한다. 크기는 생성 시 정하며 다른 크기의 방은 새로 만든다.
+4. 오른쪽 재료를 고르고 클릭/드래그로 배치한다. 빗금 칸은 현재 재료의 배치 금지 칸이다. 우클릭 또는 지우개는 삭제, 사각형은 넓은 영역 채우기다. 금지 칸은 건너뛴다.
+5. **선택·이동**에서 요소를 드래그하거나 방향키·행/열 입력으로 한 칸 단위 이동한다. 한 칸은 1×1이고 좌상단부터 행/열을 1로 센다. 스폰 번호는 중복 생성하지 않고 기존 위치에서 이동한다. 회전·자유 크기 조절은 방 텍스트 형식에서 지원하지 않아 제공하지 않는다.
+6. Ctrl+Z / Ctrl+Shift+Z로 실행 취소/다시 실행. **이 방 초기화**는 포함된 원본으로 복원하며 새 방은 비운다. 초기화·삭제도 실행 취소할 수 있다.
+7. **방 내보내기**로 `<id>.room.txt`를 저장하거나 텍스트를 복사한다. **전체 JSON 저장**은 전체 보관함과 선택 방을 백업한다. **가져오기**에서 JSON/room.txt 붙여넣기 또는 여러 파일 선택을 지원한다. 같은 ID는 확인 후 교체하고 그 외 방은 보존한다.
+8. 자동 저장은 HTML 경로별 브라우저 저장소를 사용한다. 저장소/클립보드 접근이 제한되어도 편집·파일 저장·수동 텍스트 복사는 가능하다. HTML 파일 자체에는 변경이 기록되지 않으므로 다른 PC에는 JSON도 함께 전달한다. 다시 빌드해도 기존 브라우저 저장 내용이 우선이며, 프로젝트의 최신 방은 가져오기 또는 해당 방 초기화로 반영한다.
+9. 채택한 방 텍스트를 `game/RoomLayouts/`에 저장하고 `Trickal Fan Game > Tools > Validate Room Layouts` → `Import Room Layouts` 순서로 적용한다. Play → F1 → `— Layout —` → `Show layouts` → `Force <id>`로 확인한다.
+
+편집기 검사는 31번 문서의 문 금지 칸·스폰·인접 배치·상자 간격과 칸 단위 연결성 사전 검사다. 연결성은 파괴형 제거 후를 기준으로 하며, 문 사이 회피 대상은 상시 바닥 가시(`^`)뿐이다. 주기 가시·장판·거미줄·진흙케이크는 통과를 허용한다. 스폰 접근에는 바닥 함정을 장벽으로 세지 않는다. Unity의 파괴 후 시야, 전체 Encounter 및 실제 충돌 반지름 검증 통과를 보장하지 않는다. 불완전한 작업도 초안으로 내보낼 수 있다. 기존 방 ID는 안정 키이므로 이름만 바꾸고 싶으면 표시 이름을 수정한다.
+
+소스: `tools/room-layout-editor/editor.html` / 생성기: `build.py` / 브라우저 검증: `test.cjs`.
+검증 실행: `node tools/room-layout-editor/test.cjs <playwright 모듈 경로>` (설치된 Edge 사용, 임시 프로필, headless). 제한된 환경에서 Edge IPC가 차단되면 권한이 허용된 실행을 사용한다.
+
+
+#### 방 통로 정책 검수 (2026-11-17)
+
+- Edit Mode 자동 검증: `Trickal Fan Game > Tools > Verify Room Layouts With Regressions`. 파괴형/주기 가시 장벽 허용, 상시 바닥 가시 장벽 거부 및 기존 방·Encounter 회귀를 검사한다.
+- Play 수동 검수: 편집기에서 새 방에 문 바로 앞을 피해 불 장벽 또는 주기 가시 띠를 만들고 내보내기 → Validate → Import. Game Scene F1 → `— Layout —` → `Show layouts` → `Force <id>`.
+- 기대 결과: 불을 공격해 길을 열고 내부 적을 처리할 수 있으며, 주기 가시가 내려간 타이밍에 필수 경로를 통과할 수 있다. 같은 필수 경로를 `^`로 완전히 막은 방은 Validate 단계에서 거부되어야 한다. 임포터 통과만으로 실제 플레이 난이도·무피해 타이밍 검수가 완료된 것은 아니다.
+
+
+### 클로버 보상 선택 UI (2026-11-17)
+
+- `SampleScene`의 기존 보상 선택 Overlay에 카드·확정 버튼 원화와 Menu 공용 장식을 연결한다. 보상 추첨·지급 계약은 변경하지 않는다.
+- Edit Mode 재적용: `Trickal Fan Game > UI > Apply Clover Reward UI`. 보상 Overlay만 수정하고 Scene을 저장한다. 기존 이름의 오브젝트를 재사용한다.
+- 정적 화면 캡처: `Trickal Fan Game > UI > Capture Clover Reward UI`. `output/menu-review/reward-clover-1920x1080.png`, `reward-clover-1280x720.png`에 저장한다. 예시 아이템과 임시 카메라는 저장하지 않는다.
+- 배치: `TrickalFanGame.Editor.RewardUiArtworkSetup.ApplyVerifyAndCaptureBatch` (그래픽 필요, `-nographics` 제외). 적용 후 `Week16Reward2Verification.Verify`로 카드 내용·방향키 이동·확정·취소·후보 유지 재열기를 검사하고 두 해상도로 렌더한다.
+- Play 수동 확인: `SampleScene`에서 보상 제단에 상호작용해 창을 연다. 마우스 또는 좌우 방향키로 후보 선택 → 하단 선택으로 포커스를 옮겨도 선택 카드의 노란 테두리와 `[선택 중]`이 유지되어야 한다. 취소 후 재열기 시 후보가 유지되고, 확정은 1회만 지급되어야 한다. 실제 Play 미술·입력 확인은 별도다.
+
+- 보상 UI 후속 조정: 전용 `reward-title-plaque.png`를 비율 유지로 표시한다. 선택 중인 카드에만 상태 문구·클로버가 보이며, 등급은 한글만 표시한다. 카드 안 선택 버튼과 상하 안내 문구는 제거하고 하단 확정·취소만 유지한다. 카드 전체를 클릭하거나 방향키로 선택한다. 카드와 하단 버튼 사이에는 약 70px(1920×1080 기준)의 간격을 둔다.
+
+- 2026-11-18 보상 UI: 기존 디자인의 넓은 헤더 원화와 진한 금색 테두리 선택 카드 원화를 연결했다. 선택 카드에만 보라 리본 전체가 나타난다. 권능의 보상 카드 하단은 `방 N개 클리어로 충전`만 표시한다. 아이템 그림·상태 클로버를 우측으로 조정하고 설명 위 여백을 늘렸으며 취소 버튼은 선택 버튼의 불투명 영역 크기에 맞췄다. 검증 진입점은 위와 동일하다.
 
 ### 클로버 상점 UI (2026-11-18)
 

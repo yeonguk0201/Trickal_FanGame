@@ -13,6 +13,8 @@ namespace TrickalFanGame.Frontend
 
         public void ConfigureBorders(GameObject hover, GameObject focus)
         {
+            if (hoverBorder != null && hoverBorder != hover) hoverBorder.SetActive(false);
+            if (focusBorder != null && focusBorder != focus) focusBorder.SetActive(false);
             hoverBorder = hover;
             focusBorder = focus;
             RefreshBorders();

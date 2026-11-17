@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using TrickalFanGame.Item;
 using TrickalFanGame.Network;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,10 +19,11 @@ namespace TrickalFanGame.Run
         }
 
         public bool TryTransition(CreateRunRequest request, CharacterProgressDto startingProgress,
-            IGameApiClient apiClient)
+            IGameApiClient apiClient, IReadOnlyDictionary<string, ItemRarity> itemRarities = null,
+            string deathDescription = null)
         {
             int buildIndex = SceneUtility.GetBuildIndexByScenePath(frontendScenePath);
-            if (buildIndex < 0 || !RunResultContext.TryPrepare(request, startingProgress, apiClient))
+            if (buildIndex < 0 || !RunResultContext.TryPrepare(request, startingProgress, apiClient, itemRarities, deathDescription))
                 return false;
 
             float previousTimeScale = Time.timeScale;

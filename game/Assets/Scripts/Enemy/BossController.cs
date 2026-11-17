@@ -283,6 +283,12 @@ namespace TrickalFanGame.Enemy
 
         private void Update()
         {
+            // A room trigger can spawn us after the intro view's Update has already run.
+            // Give it the first chance to stop time before any pattern can start or move us.
+            if (!combatStarted)
+                FindFirstObjectByType<TrickalFanGame.Frontend.GameBossIntroView>()?.TryBegin();
+            if (Time.timeScale == 0f) return;
+
             if (!combatStarted)
             {
                 if (target == null) target = FindFirstObjectByType<PlayerMovement>()?.transform;

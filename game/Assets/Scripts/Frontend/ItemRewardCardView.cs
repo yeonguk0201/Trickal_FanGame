@@ -29,7 +29,40 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Text stackText;
 
         private bool buttonBound;
-        private Image artwork;
+        [SerializeField] private Image artwork;
+        [SerializeField] private GameObject selectionHighlight;
+        [SerializeField] private GameObject selectionClover;
+        [SerializeField] private GameObject selectionRibbon;
+        private bool chosen;
+
+        public void ConfigureArtwork(Image image, GameObject highlight, GameObject clover = null, GameObject ribbon = null)
+        {
+            artwork = image;
+            selectionHighlight = highlight;
+            selectionClover = clover;
+            selectionRibbon = ribbon;
+            RefreshHighlight();
+        }
+
+        public void SetChosen(bool value)
+        {
+            chosen = value;
+            RefreshHighlight();
+            if (stateText != null && (State == ItemRewardCardState.Available || State == ItemRewardCardState.Focused))
+                stateText.text = chosen || State == ItemRewardCardState.Focused ? "[선택 중]" : "[선택 가능]";
+        }
+
+        private void RefreshHighlight()
+        {
+            bool selected = chosen || State == ItemRewardCardState.Focused || State == ItemRewardCardState.Acquired;
+            if (selectionHighlight != null) selectionHighlight.SetActive(selected);
+            if (selectionRibbon != null) selectionRibbon.SetActive(selected);
+            if (selectionClover != null)
+            {
+                selectionClover.SetActive(selected);
+                if (stateText != null) stateText.gameObject.SetActive(selected);
+            }
+        }
 
         public ItemRewardCandidate Candidate { get; private set; }
         public ItemRewardCardState State { get; private set; } = ItemRewardCardState.Unavailable;
@@ -65,6 +98,7 @@ namespace TrickalFanGame.Frontend
         public void Bind(ItemRewardCandidate candidate, Health playerHealth)
         {
             Candidate = candidate;
+            chosen = false;
             RefreshArtwork(candidate != null && candidate.IsItem ? candidate.Definition : null);
             if (candidate == null)
             {
@@ -77,11 +111,11 @@ namespace TrickalFanGame.Frontend
                 ItemDefinition definition = candidate.Definition;
                 SetText(kindText, ItemKindText.GetDisplayName(definition.Kind));
                 SetText(nameText, definition.DisplayName);
-                SetText(rarityText, RarityLabel(definition.Rarity));
+                SetText(rarityText, RewardRarityLabel(definition.Rarity));
                 SetText(effectText, ArtifactEffectDescription.Build(definition));
                 string maximum = definition.MaxStacks > 0 ? definition.MaxStacks.ToString() : "제한 없음";
                 SetText(stackText, definition.IsActivePower
-                    ? GamePowerHudView.BuildOfferLine(definition)
+                    ? BuildPowerChargeLabel(definition)
                     : $"현재 스택 {candidate.CurrentStacks} / {maximum}");
             }
             else
@@ -103,6 +137,7 @@ namespace TrickalFanGame.Frontend
 
         public void ShowOutcome(bool acquired)
         {
+            chosen = acquired;
             ApplyState(acquired ? ItemRewardCardState.Acquired : ItemRewardCardState.Unavailable);
         }
 
@@ -120,7 +155,7 @@ namespace TrickalFanGame.Frontend
             }
             bool hasArtwork = UserArtwork.Apply(artwork, definition);
             artwork.gameObject.SetActive(hasArtwork);
-            if (nameText != null)
+            if (nameText != null && selectionHighlight == null)
             {
                 nameText.rectTransform.anchoredPosition = new Vector2(hasArtwork ? 42f : 0f, 126f);
                 nameText.rectTransform.sizeDelta = new Vector2(hasArtwork ? 264f : 360f, 70f);
@@ -147,13 +182,14 @@ namespace TrickalFanGame.Frontend
         private void ApplyState(ItemRewardCardState nextState)
         {
             State = nextState;
+            RefreshHighlight();
             if (button != null)
                 button.interactable = nextState == ItemRewardCardState.Available ||
                                       nextState == ItemRewardCardState.Focused;
             if (stateText == null) return;
             stateText.text = nextState switch
             {
-                ItemRewardCardState.Available => "[선택 가능]",
+                ItemRewardCardState.Available => chosen ? "[선택 중]" : "[선택 가능]",
                 ItemRewardCardState.Focused => "[선택 중]",
                 ItemRewardCardState.Acquired => "[획득 완료]",
                 _ => "[선택 종료]",
@@ -180,6 +216,18 @@ namespace TrickalFanGame.Frontend
             if (target != null) target.text = value;
         }
 
+        public static string BuildPowerChargeLabel(ItemDefinition definition) =>
+            $"방 {definition.ActiveChargeRooms}개 클리어로 충전";
+
+        public static string RewardRarityLabel(ItemRarity rarity) => rarity switch
+        {
+            ItemRarity.Uncommon => "고급",
+            ItemRarity.Rare => "희귀",
+            ItemRarity.Epic => "전설",
+            _ => "일반",
+        };
+
+        // Other consumers retain their existing bilingual labels.
         public static string RarityLabel(ItemRarity rarity) => rarity switch
         {
             ItemRarity.Uncommon => "고급 / UNCOMMON",

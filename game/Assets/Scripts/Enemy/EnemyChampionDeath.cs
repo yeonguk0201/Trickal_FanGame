@@ -56,12 +56,12 @@ namespace TrickalFanGame.Enemy
             Vector3 position = transform.position;
             LastEffect = kind switch
             {
-                EnemyVariantKind.ChampionPuddle => EnemyChampionPuddle.Spawn(position, parent, floor, now)?.gameObject,
+                EnemyVariantKind.ChampionPuddle => EnemyChampionPuddle.Spawn(position, parent, floor, now, gameObject)?.gameObject,
                 // The volley spawns where the shots fit, off a wall the champion died against (Hitbox-2).
                 EnemyVariantKind.ChampionShots => EnemyChampionVolley.Spawn(
                     EnemyProjectile.ClearLaunchPosition(gameObject, position,
                         ProjectileSizing.WorldCollisionRadius(ProjectileSizing.RangedEnemyScale)), parent, floor,
-                    VolleyDirectionsFor(gameObject), now)?.gameObject,
+                    VolleyDirectionsFor(gameObject), now, gameObject)?.gameObject,
                 EnemyVariantKind.ChampionBlast => SpawnBlast(now),
                 _ => null,
             };
@@ -78,7 +78,7 @@ namespace TrickalFanGame.Enemy
                 ? artwork.Visual
                 : GetComponentInChildren<SpriteRenderer>();
             if (EnemyDefeatAnimation.PlaysOn(gameObject)) visual = null;
-            EnemyChampionBlast blast = EnemyChampionBlast.Spawn(transform.position, transform.parent, visual, now);
+            EnemyChampionBlast blast = EnemyChampionBlast.Spawn(transform.position, transform.parent, visual, now, gameObject);
             return blast != null ? blast.gameObject : null;
         }
     }

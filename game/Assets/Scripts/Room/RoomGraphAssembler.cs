@@ -555,16 +555,11 @@ namespace TrickalFanGame.Room
 
             GameObject portalObject = new($"Floor {floor.FloorNumber} Exit");
             portalObject.transform.SetParent(bossRoom.Node.ContentRoot.transform, false);
-            portalObject.transform.localPosition = Vector3.up * RoomLayout.FloorExitVerticalOffset;
-            portalObject.transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+            portalObject.transform.localPosition = Vector3.zero;
             SpriteRenderer indicator = portalObject.AddComponent<SpriteRenderer>();
-            RoomDoorSlot visualSource = bossRoom.FindSlot(RoomDoorDirection.Up);
-            indicator.sprite = visualSource != null && visualSource.Seal != null
-                ? visualSource.Seal.GetComponent<SpriteRenderer>()?.sprite
-                : null;
             indicator.sortingOrder = 1;
             BoxCollider2D collider = portalObject.AddComponent<BoxCollider2D>();
-            collider.size = Vector2.one;
+            collider.size = new Vector2(1.2f, 1.2f);
             FloorAdvancePortal portal = portalObject.AddComponent<FloorAdvancePortal>();
             portal.Configure(this, bossRoom.Controller, floor.FloorNumber + 1, indicator,
                 runProgress, null);

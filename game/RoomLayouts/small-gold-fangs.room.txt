@@ -1,0 +1,11 @@
+id: small-gold-fangs
+profile: small
+weight: 40
+difficulty: 1
+note: 하단 양쪽의 금돌 네 개와 중앙에서 약간 오른쪽인 금돌 하나.
+grid:
+..........
+..1....4..
+...3.G2...
+..G....G..
+..G....G..
