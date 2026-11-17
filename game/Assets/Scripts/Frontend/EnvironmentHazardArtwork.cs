@@ -18,6 +18,11 @@ namespace TrickalFanGame.Frontend
         public const string Gas = "poison-gas-sheet";
         public const string Spikes = "spikes-retracted";
         public const string Mushroom = "mushroom-hit-preburst";
+        // Trap-2 진흙케이크: four burst frames in equal cells grounded on the cake's drawn bottom. The last frame is
+        // the puddle and holds until the trap fades it.
+        public const string MudCakeBurst = "mud-cake-burst-sheet";
+        public const int MudCakeBurstFrames = 4;
+        public const float MudCakeBurstFrameSeconds = 0.08f;
         public const string ResourceRoot = "EnvironmentHazards/";
         [Serializable] private struct Frame { public int x, y, width, height; }
         [Serializable] private sealed class Sheet
@@ -31,6 +36,8 @@ namespace TrickalFanGame.Frontend
 
         public static int FrameAt(string id, float elapsed) =>
             id == Spikes || id == Mushroom ? 0 :
+            id == MudCakeBurst ? Mathf.Clamp(Mathf.FloorToInt(Mathf.Max(0f, elapsed) / MudCakeBurstFrameSeconds), 0,
+                MudCakeBurstFrames - 1) :
             id == FireExtinguish ? Mathf.Clamp(Mathf.FloorToInt(Mathf.Max(0f, elapsed) * 10f), 0, 7) :
             Mathf.FloorToInt(Mathf.Repeat(Mathf.Max(0f, elapsed) * (id == Gas ? 6f : 10f), 8f));
 
@@ -44,7 +51,7 @@ namespace TrickalFanGame.Frontend
                 Texture2D texture = Resources.Load<Texture2D>(ResourceRoot + id);
                 if (manifest == null || texture == null) return null;
                 sheet = JsonUtility.FromJson<Sheet>(manifest.text);
-                int count = id == Spikes || id == Mushroom ? 1 : 8;
+                int count = id == Spikes || id == Mushroom ? 1 : id == MudCakeBurst ? MudCakeBurstFrames : 8;
                 if (sheet == null || sheet.frames?.Length != count || sheet.frameWidth <= 0 ||
                     sheet.width != texture.width || sheet.height != texture.height)
                     throw new InvalidOperationException("Invalid environment hazard sheet: " + id);
@@ -65,7 +72,7 @@ namespace TrickalFanGame.Frontend
             {
                 Tree => "obstacle-tree", Fire or FireMedium or FireLow or FireExtinguish => "trap-fire",
                 Spikes => "trap-periodic-spikes",
-                Mushroom => "trap-poison-mushroom", _ => null,
+                Mushroom => "trap-poison-mushroom", MudCakeBurst => "trap-mud-cake", _ => null,
             };
             Sprite intact = reference != null ? FairyKingdomArtwork.Fit(reference, width) : null;
             float pivotY = intact != null ? -intact.bounds.min.y * ppu / selected.height : 0.5f;

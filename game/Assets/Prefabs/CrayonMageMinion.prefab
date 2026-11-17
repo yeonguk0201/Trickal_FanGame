@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 2492882417131506244}
   - component: {fileID: 1462977357559274551}
   - component: {fileID: 2385875871017440315}
+  - component: {fileID: 3874186953150695832}
   m_Layer: 6
   m_Name: CrayonMageMinion
   m_TagString: Untagged
@@ -450,6 +451,25 @@ MonoBehaviour:
   damageTier: 0
   cooldown: 1
   halfHeartDamage: 1
+--- !u!114 &3874186953150695832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420296328456361960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc1e3bb70d5e3d48a2fc6a6301b1110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyDefeatAnimation
+  frames:
+  - {fileID: 21300000, guid: 3ead59753e7852346a74c86056503440, type: 3}
+  - {fileID: 21300000, guid: f3bb1412c26239c44b2fcf718ba35bc5, type: 3}
+  - {fileID: 21300000, guid: 6f7bdeb2785066c4cb7bb45019cc877a, type: 3}
+  - {fileID: 21300000, guid: e7aae7f5286694347b99cf99c7c58a2f, type: 3}
+  sizeMultiplier: 0.9747675
+  knockScale: 1
 --- !u!1 &4719502203751396104
 GameObject:
   m_ObjectHideFlags: 0

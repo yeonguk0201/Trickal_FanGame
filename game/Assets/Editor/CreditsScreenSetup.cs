@@ -62,25 +62,13 @@ namespace TrickalFanGame.Editor
             Undo.SetCurrentGroupName("Setup Credits Screen");
 
             FrontendCreditsView creditsView = BuildPanel(frame, font);
-            FrontendStartButton titleButton = CreditsButton(titleView.TitlePanel.transform, TitleButtonName,
-                new Vector2(0, -330), font);
+            // Menu-2 user feedback: the title shows only GAME START; credits stay one step away on the home menu.
+            RemoveTitleButton(titleView);
             FrontendStartButton homeButton = CreditsButton(homeMenu, HomeButtonName, new Vector2(0, -400), font);
 
             // Keyboard reachability: the home menu loop is owned by Setup Frontend Flow, so this only adds the
-            // step down into the credits button and the step back up. Re-running that setup restores the plain
-            // four-button loop, which the Credits-0 verifier then reports as missing.
-            titleView.StartButton.navigation = new Navigation
-            {
-                mode = Navigation.Mode.Explicit,
-                selectOnDown = titleButton,
-                selectOnUp = titleButton
-            };
-            titleButton.navigation = new Navigation
-            {
-                mode = Navigation.Mode.Explicit,
-                selectOnUp = titleView.StartButton,
-                selectOnDown = titleView.StartButton
-            };
+            // step down into the credits button and the step back up.
+            titleView.StartButton.navigation = new Navigation { mode = Navigation.Mode.None };
             Navigation quitNavigation = homeView.QuitButton.navigation;
             quitNavigation.mode = Navigation.Mode.Explicit;
             quitNavigation.selectOnDown = homeButton;
@@ -93,18 +81,19 @@ namespace TrickalFanGame.Editor
             };
 
             Undo.RecordObject(titleView, "Configure credits route");
-            titleView.ConfigureCredits(creditsView.gameObject, creditsView, titleButton);
+            titleView.ConfigureCredits(creditsView.gameObject, creditsView, null);
             Undo.RecordObject(homeView, "Configure credits route");
             homeView.ConfigureCredits(homeButton);
 
             // Menu-5 owns the look; reapplying it here keeps reruns of this setup from restoring the temporary UI.
             Menu5CreditsSetup.Apply(creditsView);
+            Menu2HomeSetup.ApplyTitle(titleView);
+            Menu2HomeSetup.Apply(homeView);
             creditsView.gameObject.SetActive(false);
             foreach (Component component in creditsView.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);
             EditorUtility.SetDirty(titleView);
             EditorUtility.SetDirty(homeView);
-            EditorUtility.SetDirty(titleButton);
             EditorUtility.SetDirty(homeButton);
             EditorUtility.SetDirty(titleView.StartButton);
             EditorUtility.SetDirty(homeView.QuitButton);
@@ -224,6 +213,12 @@ namespace TrickalFanGame.Editor
             FrontendCreditsView view = Component<FrontendCreditsView>(root.gameObject);
             view.Configure(scroll, content, sectionTemplate, entryTemplate, empty, back);
             return view;
+        }
+
+        private static void RemoveTitleButton(FrontendTitleView titleView)
+        {
+            Transform button = titleView.TitlePanel.transform.Find(TitleButtonName);
+            if (button != null) Undo.DestroyObjectImmediate(button.gameObject);
         }
 
         private static FrontendStartButton CreditsButton(Transform parent, string name, Vector2 position,

@@ -221,14 +221,15 @@ namespace TrickalFanGame.Editor
 
         private static void VerifySpentIcon()
         {
-            Material spent = UserArtwork.ItemMaterial(false, true);
-            Require(spent != null && spent != UserArtwork.ItemMaterial(false) &&
-                    Mathf.Approximately(spent.GetFloat("_Spent"), 1f) &&
-                    Mathf.Approximately(UserArtwork.ItemMaterial(false).GetFloat("_Spent"), 0f),
-                "Spent artifacts must use their own grey item material.");
             ItemDefinition dagger = AssetDatabase.LoadAssetAtPath<ItemDefinition>(
                 Week23Artifact2Setup.ItemPath(Week23Artifact2Setup.DaggerId));
             Require(dagger != null, "레비의 단도 must exist.");
+            Material spent = UserArtwork.ItemMaterial(false, true, dagger.Rarity);
+            Material readyMaterial = UserArtwork.ItemMaterial(false, false, dagger.Rarity);
+            Require(spent != null && spent != readyMaterial &&
+                    Mathf.Approximately(spent.GetFloat("_Spent"), 1f) &&
+                    Mathf.Approximately(readyMaterial.GetFloat("_Spent"), 0f),
+                "Spent artifacts must use their own grey item material.");
             var slotObject = new GameObject("Dagger slot verification", typeof(RectTransform), typeof(Image));
             try
             {
@@ -240,7 +241,7 @@ namespace TrickalFanGame.Editor
                 Color readyColor = icon.color;
                 slot.Bind(dagger, 1, true);
                 Require(slot.IsSpent && (icon.sprite != null
-                        ? icon.material == spent && ready == UserArtwork.ItemMaterial(false)
+                        ? icon.material == spent && ready == readyMaterial
                         : icon.color == UserArtwork.SpentPlaceholderColor && readyColor != icon.color),
                     "The HUD must show a spent dagger grey.");
             }

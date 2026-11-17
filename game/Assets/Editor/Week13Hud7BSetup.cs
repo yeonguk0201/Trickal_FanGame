@@ -108,6 +108,9 @@ namespace TrickalFanGame.Editor
             RectTransform template = viewport.Find("Content/Artifact Detail Template") as RectTransform;
             if (template == null) throw new InvalidOperationException("HUD-3C artifact template is missing.");
             LayoutArtifactTemplate(template);
+            // HUD-3C and HUD-7B rebuild the panel in the old look; the in-game presentation look is put back on top.
+            GamePauseArtifactView view = panel.parent != null ? panel.parent.GetComponent<GamePauseArtifactView>() : null;
+            if (view != null) InGamePresentationSetup.ReapplyPause(view);
         }
 
         private static void LayoutArtifactTemplate(RectTransform template)

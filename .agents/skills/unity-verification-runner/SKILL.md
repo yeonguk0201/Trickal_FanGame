@@ -37,6 +37,7 @@ description: TrickalFanGame Unity 변경에 맞는 현재 Editor 검증기를 �
 | 검수된 전투 이펙트 | `ReviewedCombatEffectsVerification.Verify` | `ReviewedCombatEffectsVerification.VerifyWithRegressionsBatch` |
 | `DevelopmentGamePanel` | `Week20DevPanelVerification.Verify` | — |
 | 전투 효과음(`CombatSfxSetup`, `PlayerCombatAudio`, `GameAudioController` 큐) | `CombatSfxVerification.Verify` (클립을 바꿔 다시 들여와야 하면 `SetupAndVerifyBatch`, Scene 저장함) | `CombatSfxVerification.VerifyWithRegressionsBatch` |
+| 인게임 연출 에셋(`InGamePresentationSetup`: 배너·보상 제단·권능 슬롯·스탯 아이콘·ESC 창) | `InGamePresentationVerification.Verify` | `InGamePresentationVerification.VerifyWithRegressionsBatch` |
 | 사용자 제공 원화 연결 | `UserArtworkVerification.Verify` | — |
 | 아이템 에셋 추가·수정(Backend 카탈로그와 대조) | `BetaVerify0ContractVerification.Verify` | — |
 | Setup 코드를 고치거나 새로 만듦(재실행이 다른 값을 되돌리는지) | `BetaVerify0SetupRunner.RunAllBatch -verify0Filter <Setup 이름>` | 전체: `BetaVerify0SetupRunner.RunAllBatch` |

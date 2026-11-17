@@ -55,7 +55,7 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private RectTransform playerPanel;
         [SerializeField] private Image playerPortrait;
         [SerializeField] private TMP_Text playerNameText;
-        [SerializeField] private TMP_Text vsText;
+        [SerializeField] private Image vsArtwork;
         [SerializeField] private Image flash;
 
         private BossController introducedBoss;
@@ -77,7 +77,7 @@ namespace TrickalFanGame.Frontend
         public RectTransform PlayerPanel => playerPanel;
         public Image PlayerPortrait => playerPortrait;
         public TMP_Text PlayerNameText => playerNameText;
-        public TMP_Text VsText => vsText;
+        public Image VsArtwork => vsArtwork;
         public Image Flash => flash;
         public BossIntroStage Stage { get; private set; } = BossIntroStage.Idle;
         public bool IsPlaying => Stage != BossIntroStage.Idle;
@@ -91,7 +91,7 @@ namespace TrickalFanGame.Frontend
             CanvasGroup configuredCanvasGroup, RectTransform configuredShakeRoot,
             RectTransform configuredBossPanel, Image configuredBossPortrait, TMP_Text configuredBossNameText,
             RectTransform configuredPlayerPanel, Image configuredPlayerPortrait, TMP_Text configuredPlayerNameText,
-            TMP_Text configuredVsText, Image configuredFlash)
+            Image configuredVsArtwork, Image configuredFlash)
         {
             roomGraph = configuredRoomGraph;
             bossHud = configuredBossHud;
@@ -105,7 +105,7 @@ namespace TrickalFanGame.Frontend
             playerPanel = configuredPlayerPanel;
             playerPortrait = configuredPlayerPortrait;
             playerNameText = configuredPlayerNameText;
-            vsText = configuredVsText;
+            vsArtwork = configuredVsArtwork;
             flash = configuredFlash;
             restPositionsCaptured = false;
         }
@@ -208,16 +208,16 @@ namespace TrickalFanGame.Frontend
             float slideIn = EaseOutBack(Mathf.Clamp01(elapsed / SlideInSeconds));
             float slideOut = EaseInCubic(Mathf.Clamp01((elapsed - SlideOutAt) / SlideOutSeconds));
             float offset = SlideDistance * (1f - slideIn) + SlideDistance * slideOut;
-            if (bossPanel != null) bossPanel.anchoredPosition = bossRestPosition + Vector2.left * offset;
-            if (playerPanel != null) playerPanel.anchoredPosition = playerRestPosition + Vector2.right * offset;
+            if (bossPanel != null) bossPanel.anchoredPosition = bossRestPosition + Vector2.right * offset;
+            if (playerPanel != null) playerPanel.anchoredPosition = playerRestPosition + Vector2.left * offset;
 
-            if (vsText != null)
+            if (vsArtwork != null)
             {
                 float slam = Mathf.Clamp01((elapsed - SlideInSeconds) / VsSlamSeconds);
                 bool shown = elapsed >= SlideInSeconds;
-                vsText.gameObject.SetActive(shown);
-                vsText.transform.localScale = Vector3.one * Mathf.Lerp(VsStartScale, 1f, slam * slam);
-                vsText.alpha = Mathf.Clamp01(slam * 3f) * (1f - slideOut);
+                vsArtwork.gameObject.SetActive(shown);
+                vsArtwork.transform.localScale = Vector3.one * Mathf.Lerp(VsStartScale, 1f, slam * slam);
+                vsArtwork.color = new Color(1f, 1f, 1f, Mathf.Clamp01(slam * 3f) * (1f - slideOut));
             }
 
             float sinceImpact = elapsed - VsImpactAt;
@@ -281,7 +281,7 @@ namespace TrickalFanGame.Frontend
             return fallback;
         }
 
-        // The boss's own still body; the intro art (§7) replaces this later.
+        // Use the boss's own still body for its portrait.
         private static Sprite ResolveBossSprite(BossController boss)
         {
             BossMovementAnimator animator = boss.GetComponent<BossMovementAnimator>();

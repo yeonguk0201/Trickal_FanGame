@@ -20,9 +20,13 @@ namespace TrickalFanGame.Editor
         public const string SettingsButtonName = "Settings Button";
         public const string GameOverCanvasName = "Game Over Canvas";
         public const int GameOverSortingOrder = 60;
-        public static readonly Vector2 PauseButtonSize = new(240, 52);
-        public const float PauseButtonY = -334f;
+        // In-game presentation guide (approved pause mock-up): 설정, 홈으로 나가기, 게임 재개, 처음부터 다시하기 from left.
+        public static readonly Vector2 PauseButtonSize = new(240, 68);
+        public const float PauseButtonY = -300f;
         public static readonly float[] PauseButtonX = { -390f, -130f, 130f, 390f };
+
+        public static Button[] PauseButtonOrder(GamePauseArtifactView view, Button settingsButton) =>
+            new[] { settingsButton, view.LeaveRunButton, view.ResumeButton, view.RestartRunButton };
 
         [MenuItem("Trickal Fan Game/Week 25/Setup UX-0 In-game Settings and Game Over")]
         public static void Setup()
@@ -45,6 +49,7 @@ namespace TrickalFanGame.Editor
             Undo.SetCurrentGroupName("Setup UX-0");
 
             ConfigurePauseSettings(scene, view, font);
+            InGamePresentationSetup.ReapplyPause(view);
             GameOverSequence sequence = ConfigureGameOver(scene, font);
             Undo.RecordObject(session, "Configure UX-0 RunSession");
             session.ConfigureGameOverSequence(sequence);
@@ -72,11 +77,13 @@ namespace TrickalFanGame.Editor
             if (settingsButton == null || view.ResumeButton == null || view.RestartRunButton == null ||
                 view.LeaveRunButton == null) return;
             LayoutPauseButtons(view, settingsButton);
+            // Keeps the in-game presentation look once it has been applied (HUD-7B/7C/7D restyle the buttons).
+            InGamePresentationSetup.ReapplyPause(view);
         }
 
-        private static void LayoutPauseButtons(GamePauseArtifactView view, Button settingsButton)
+        internal static void LayoutPauseButtons(GamePauseArtifactView view, Button settingsButton)
         {
-            Button[] order = { view.ResumeButton, settingsButton, view.RestartRunButton, view.LeaveRunButton };
+            Button[] order = PauseButtonOrder(view, settingsButton);
             for (int i = 0; i < order.Length; i++)
             {
                 RectTransform rect = order[i].GetComponent<RectTransform>();

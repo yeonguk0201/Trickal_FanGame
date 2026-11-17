@@ -10,7 +10,7 @@ namespace TrickalFanGame.Frontend
     public static class UserArtwork
     {
         private static readonly Dictionary<string, Sprite> sprites = new();
-        private static readonly Dictionary<(bool, bool), Material> materials = new();
+        private static readonly Dictionary<(bool, bool, ItemRarity), Material> materials = new();
 
         public static Sprite Load(string key)
         {
@@ -41,17 +41,31 @@ namespace TrickalFanGame.Frontend
 
         public static readonly Color SpentPlaceholderColor = new(0.32f, 0.32f, 0.32f, 1f);
 
-        // spent: an artifact whose once-per-Run effect is used up, drawn grey (UI only).
-        public static Material ItemMaterial(bool spell, bool spent = false)
+        // The outline of an artifact and the frame of a spell card: white, green, blue, purple by rarity.
+        public static Color FrameColor(ItemRarity rarity) => rarity switch
         {
-            if (materials.TryGetValue((spell, spent), out Material material) && material != null) return material;
+            ItemRarity.Uncommon => new Color(0.36f, 0.86f, 0.42f, 1f),
+            ItemRarity.Rare => new Color(0.34f, 0.6f, 1f, 1f),
+            ItemRarity.Epic => new Color(0.74f, 0.42f, 1f, 1f),
+            _ => Color.white,
+        };
+
+        // spent: an artifact whose once-per-Run effect is used up, drawn grey (UI only).
+        public static Material ItemMaterial(bool spell, bool spent = false, ItemRarity rarity = ItemRarity.Common)
+        {
+            if (materials.TryGetValue((spell, spent, rarity), out Material material) && material != null)
+                return material;
             Shader shader = Resources.Load<Shader>("UserArtwork/ItemArtwork");
             if (shader == null) return null;
             material = new Material(shader)
-                { name = (spell ? "Spell artwork" : "Artifact artwork") + (spent ? " (spent)" : string.Empty) };
+            {
+                name = (spell ? "Spell artwork" : "Artifact artwork") + " " + rarity +
+                       (spent ? " (spent)" : string.Empty),
+            };
             material.SetFloat("_Card", spell ? 1f : 0f);
             material.SetFloat("_Spent", spent ? 1f : 0f);
-            materials[(spell, spent)] = material;
+            material.SetColor("_FrameColor", FrameColor(rarity));
+            materials[(spell, spent, rarity)] = material;
             return material;
         }
 
@@ -63,7 +77,9 @@ namespace TrickalFanGame.Frontend
             {
                 image.sprite = sprite;
                 image.preserveAspect = true;
-                image.material = sprite != null ? ItemMaterial(definition.Kind != ItemKind.Artifact, spent) : null;
+                image.material = sprite != null
+                    ? ItemMaterial(definition.Kind != ItemKind.Artifact, spent, definition.Rarity)
+                    : null;
                 if (sprite != null) image.color = Color.white;
                 // The placeholder square has no artwork to grey out, so its rarity color goes grey instead.
                 else if (spent) image.color = SpentPlaceholderColor;
@@ -83,7 +99,7 @@ namespace TrickalFanGame.Frontend
             // Each pickup draws with its own material that holds its own texture. With one shared material the
             // pickups on the floor all showed the artwork of the one that appeared last, until the room was
             // shown again.
-            Material shared = ItemMaterial(spell);
+            Material shared = ItemMaterial(spell, false, definition.Rarity);
             if (shared != null)
             {
                 Material own = new(shared) { name = shared.name + " (" + definition.ItemId + ")" };

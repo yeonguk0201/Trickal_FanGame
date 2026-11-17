@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
+using TrickalFanGame.Room;
 using TrickalFanGame.Run;
 using TrickalFanGame.Shop;
 using UnityEngine;
@@ -41,6 +42,16 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private Button settingsButton;
         [SerializeField] private GameObject settingsRoot;
         [SerializeField] private FrontendSettingsView settingsView;
+        [Header("In-game Presentation")]
+        [SerializeField] private RunProgress runProgress;
+        [SerializeField] private TMP_Text seedValueText;
+        // One value per row in StatOrder; the rows show an icon and the number only.
+        [SerializeField] private TMP_Text[] statValueTexts = System.Array.Empty<TMP_Text>();
+        [SerializeField] private Image criticalChanceIcon;
+
+        // The guide asks for an em dash, but ONE Mobile POP has no such glyph, so a hyphen stands in.
+        public const string SeedPlaceholder = "-";
+        public const int StatRowCount = 7;
 
         private readonly List<ArtifactPauseListEntryView> entries = new();
         private float previousTimeScale = 1f;
@@ -77,6 +88,10 @@ namespace TrickalFanGame.Frontend
         public Button SettingsButton => settingsButton;
         public GameObject SettingsRoot => settingsRoot;
         public FrontendSettingsView SettingsView => settingsView;
+        public RunProgress RunProgress => runProgress;
+        public TMP_Text SeedValueText => seedValueText;
+        public IReadOnlyList<TMP_Text> StatValueTexts => statValueTexts;
+        public Image CriticalChanceIcon => criticalChanceIcon;
         public bool IsSettingsOpen => settingsRoot != null && settingsRoot.activeSelf;
         public IReadOnlyList<ArtifactPauseListEntryView> Entries => entries;
         public bool IsPaused { get; private set; }
@@ -148,8 +163,21 @@ namespace TrickalFanGame.Frontend
             if (settingsRoot != null) settingsRoot.SetActive(false);
         }
 
+        // In-game presentation guide: the current Run seed under the title and one icon row per detailed stat.
+        public void ConfigurePresentation(RunProgress configuredRunProgress, TMP_Text configuredSeedValueText,
+            TMP_Text[] configuredStatValueTexts, Image configuredCriticalChanceIcon)
+        {
+            runProgress = configuredRunProgress;
+            seedValueText = configuredSeedValueText;
+            statValueTexts = configuredStatValueTexts ?? System.Array.Empty<TMP_Text>();
+            criticalChanceIcon = configuredCriticalChanceIcon;
+            if (Application.isPlaying) GameDetailedStatsHudView.ApplyCriticalChanceIcon(criticalChanceIcon);
+            RefreshSeed();
+        }
+
         private void Awake()
         {
+            GameDetailedStatsHudView.ApplyCriticalChanceIcon(criticalChanceIcon);
             BindResumeButton();
             BindLeaveButtons();
             BindRestartButton();
@@ -209,6 +237,7 @@ namespace TrickalFanGame.Frontend
             Time.timeScale = 0f;
             RebuildEntries();
             RefreshStats();
+            RefreshSeed();
             IsPaused = true;
             ApplyVisibility(true);
             if (graphicRaycaster != null) graphicRaycaster.enabled = true;
@@ -230,8 +259,36 @@ namespace TrickalFanGame.Frontend
             return true;
         }
 
+        public static string BuildSeed(RunProgress progress) =>
+            progress != null && progress.HasRunSeed ? progress.RunSeed.ToString() : SeedPlaceholder;
+
+        public void RefreshSeed()
+        {
+            if (seedValueText != null) seedValueText.text = BuildSeed(runProgress);
+        }
+
+        // Row values in pause order: attack, attack speed, move speed, critical chance, critical damage, projectiles,
+        // pierce. Critical damage is the multiplier as a percentage (1.5 → 150%).
+        public static string[] BuildStatValues(PlayerStats stats)
+        {
+            if (stats == null) return new[] { "-", "-", "-", "-", "-", "-", "-" };
+            return new[]
+            {
+                $"{stats.AttackDamage:0.##}",
+                $"{stats.AttackSpeed:0.##}",
+                $"{stats.MoveSpeed:0.##}",
+                $"{stats.CriticalChance * 100f:0.#}%",
+                $"{stats.CriticalDamageMultiplier * 100f:0.#}%",
+                $"{stats.ProjectileCount}",
+                $"{stats.PierceCount}"
+            };
+        }
+
         public void RefreshStats()
         {
+            string[] values = BuildStatValues(playerStats);
+            for (int i = 0; i < statValueTexts.Length && i < values.Length; i++)
+                if (statValueTexts[i] != null) statValueTexts[i].text = values[i];
             if (statsText == null) return;
             statsText.text = playerStats == null
                 ? "전투 스탯을 불러올 수 없습니다."

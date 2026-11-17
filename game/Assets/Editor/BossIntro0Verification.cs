@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace TrickalFanGame.Editor
@@ -34,10 +35,10 @@ namespace TrickalFanGame.Editor
         public static void SetupAndVerifyBatch()
         {
             BossIntro0Setup.Setup();
-            string materialGuid = AssetDatabase.AssetPathToGUID(BossIntro0Setup.VsMaterialPath);
+            string materialGuid = AssetDatabase.AssetPathToGUID(BossIntro0Setup.BossNameMaterialPath);
             BossIntro0Setup.Setup();
-            Assert(materialGuid == AssetDatabase.AssetPathToGUID(BossIntro0Setup.VsMaterialPath),
-                "Rerunning Boss-Intro-0 setup must keep the same VS material asset.");
+            Assert(materialGuid == AssetDatabase.AssetPathToGUID(BossIntro0Setup.BossNameMaterialPath),
+                "Rerunning Boss-Intro-0 setup must keep the same boss name material asset.");
             Scene scene = SceneManager.GetActiveScene();
             Assert(FindAll<GameBossIntroView>(scene).Length == 1 &&
                    FindAll<RectTransform>(scene).Count(rect => rect.name == BossIntro0Setup.OverlayName) == 1,
@@ -59,7 +60,7 @@ namespace TrickalFanGame.Editor
                 "The intro must reference the boss HUD, the room graph and the run session.");
             Assert(view.CanvasGroup != null && view.ShakeRoot != null && view.BossPanel != null &&
                    view.BossPortrait != null && view.BossNameText != null && view.PlayerPanel != null &&
-                   view.PlayerPortrait != null && view.PlayerNameText != null && view.VsText != null &&
+                   view.PlayerPortrait != null && view.PlayerNameText != null && view.VsArtwork != null &&
                    view.Flash != null, "Every intro element must be wired.");
             Assert(view.transform.parent == bossHud.transform.parent &&
                    view.transform.GetSiblingIndex() > bossHud.transform.GetSiblingIndex(),
@@ -70,18 +71,32 @@ namespace TrickalFanGame.Editor
                 "Every playable character needs a portrait for the player panel.");
 
             TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Week13FrontendSetup.FontPath);
-            TMP_Text[] texts = { view.BossNameText, view.PlayerNameText, view.VsText };
+            TMP_Text[] texts = { view.BossNameText, view.PlayerNameText };
             Assert(texts.All(text => text.font == font), "Intro texts must use the frontend TMP font.");
             Assert(font.HasCharacters(BossIntro0Setup.RequiredGlyphs(view.Characters)),
                 "The frontend font is missing boss or character name glyphs.");
             Assert(BossIntro0Setup.LoadBossNames().Length >= 3,
                 "All three bosses (부스러기, 새마음금고, 크레용 용사) must be found for their name glyphs.");
-            Material vs = view.VsText.fontSharedMaterial;
-            Assert(vs != null && AssetDatabase.GetAssetPath(vs) == BossIntro0Setup.VsMaterialPath &&
-                   vs.IsKeywordEnabled(ShaderUtilities.Keyword_Outline) &&
-                   vs.GetFloat(ShaderUtilities.ID_OutlineWidth) >= 0.2f,
-                "VS must use the saved outlined material " + BossIntro0Setup.VsMaterialPath + ".");
-            Assert(view.VsText.text == "VS", "The VS text must read VS.");
+            Assert(view.transform.Find("Dim") == null, "The intro artwork must overlay the live room.");
+            AssertArtwork(view.BossPanel.Find("Band")?.GetComponent<Image>(), BossIntro0Setup.BossRibbonPath, -1f);
+            AssertArtwork(view.PlayerPanel.Find("Band")?.GetComponent<Image>(), BossIntro0Setup.PlayerRibbonPath, 1f);
+            AssertArtwork(view.VsArtwork, BossIntro0Setup.VsPath, 1f);
+            Assert(view.BossPanel.anchoredPosition == new Vector2(598.5f, -201f) &&
+                   view.PlayerPanel.anchoredPosition == new Vector2(-582f, 121.5f) &&
+                   view.VsArtwork.rectTransform.anchoredPosition == new Vector2(36f, 19.5f),
+                "The panel and VS positions must match the approved HUD layout.");
+            Assert(view.PlayerPortrait.rectTransform.localScale.x == -1f &&
+                   view.BossPortrait.rectTransform.localScale.x == 1f,
+                "The player portrait must face inward.");
+            Assert(texts.All(text => text.fontSharedMaterial.IsKeywordEnabled(ShaderUtilities.Keyword_Outline)),
+                "The names must have outlines for legibility over the room and ribbons.");
+        }
+
+        private static void AssertArtwork(Image image, string path, float horizontalScale)
+        {
+            Assert(image != null && image.sprite != null && AssetDatabase.GetAssetPath(image.sprite) == path &&
+                   !image.raycastTarget && image.rectTransform.localScale.x == horizontalScale,
+                "Intro artwork is missing or configured incorrectly: " + path);
         }
 
         private static void VerifyRuntime(GameBossIntroView view)
@@ -106,10 +121,10 @@ namespace TrickalFanGame.Editor
                     "The player panel must show the character name and portrait.");
                 Assert(view.BossHud.IsIntroActive && view.BossHud.IntroFill == 0f,
                     "The boss HP bar must stay hidden and empty during the panels.");
-                Assert(view.BossPanel.anchoredPosition.x < view.BossRestPosition.x - 1000f &&
-                       view.PlayerPanel.anchoredPosition.x > view.PlayerRestPosition.x + 1000f,
+                Assert(view.BossPanel.anchoredPosition.x > view.BossRestPosition.x + 1000f &&
+                       view.PlayerPanel.anchoredPosition.x < view.PlayerRestPosition.x - 1000f,
                     "Both panels must start off screen on their own side.");
-                Assert(!view.VsText.gameObject.activeSelf, "VS must wait until the panels are in.");
+                Assert(!view.VsArtwork.gameObject.activeSelf, "VS must wait until the panels are in.");
 
                 view.Skip();
                 Assert(view.Elapsed == 0f, "A key held while walking in must not skip the first moment.");
@@ -120,8 +135,8 @@ namespace TrickalFanGame.Editor
                     "Both panels must be in place when the slide ends.");
 
                 AdvanceTo(view, GameBossIntroView.VsImpactAt + Step);
-                Assert(view.VsText.gameObject.activeSelf &&
-                       Mathf.Abs(view.VsText.transform.localScale.x - 1f) < 0.05f,
+                Assert(view.VsArtwork.gameObject.activeSelf &&
+                       Mathf.Abs(view.VsArtwork.transform.localScale.x - 1f) < 0.05f,
                     "VS must land at its normal size.");
                 Assert(view.Flash.color.a > 0.4f && view.ShakeRoot.anchoredPosition.magnitude > 0.01f,
                     "VS landing must flash and shake.");

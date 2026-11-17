@@ -64,7 +64,8 @@ namespace TrickalFanGame.Editor
             Assert(view.GetComponent<RectTransform>().sizeDelta == new Vector2(1920, 1080),
                 "HUD-3C overlay must cover the full reference canvas.");
             RectTransform panel = view.transform.Find("Pause Panel") as RectTransform;
-            Assert(panel != null && panel.sizeDelta == new Vector2(1120, 760),
+            Assert(panel != null && panel.sizeDelta == InGamePresentationSetup.PausePanelSize &&
+                panel.sizeDelta.x <= 1120f && panel.sizeDelta.y <= 760f,
                 "HUD-3C pause panel must fit the specified central popup range.");
             ScrollRect scroll = view.EntriesRoot.parent.GetComponent<ScrollRect>();
             Assert(scroll != null && scroll.vertical && !scroll.horizontal && scroll.content == view.EntriesRoot,

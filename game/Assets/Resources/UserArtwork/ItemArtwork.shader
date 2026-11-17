@@ -5,6 +5,7 @@ Shader "TrickalFanGame/ItemArtwork"
         [PerRendererData] _MainTex ("Artwork", 2D) = "white" {}
         _Card ("Rounded spell card", Float) = 0
         _Spent ("Used up (grey)", Float) = 0
+        _FrameColor ("Frame colour (by rarity)", Color) = (1,1,1,1)
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
         _StencilOp ("Stencil Operation", Float) = 0
@@ -34,6 +35,7 @@ Shader "TrickalFanGame/ItemArtwork"
             sampler2D _MainTex;
             float _Card;
             float _Spent;
+            fixed4 _FrameColor;
             float4 _ClipRect;
             v2f vert(appdata v)
             {
@@ -54,14 +56,14 @@ Shader "TrickalFanGame/ItemArtwork"
                     float d = length(max(q, 0)) + min(max(q.x, q.y), 0) - radius;
                     float aa = max(fwidth(d), 0.0005);
                     float outer = 1 - smoothstep(-aa, aa, d);
-                    // White frame of the card, about 4% of its side.
+                    // Frame of the card in its rarity colour, about 4% of its side.
                     float border = smoothstep(-0.04-aa, -0.04+aa, d);
-                    c.rgb = lerp(c.rgb, float3(1,1,1), border);
+                    c.rgb = lerp(c.rgb, _FrameColor.rgb, border);
                     c.a = outer;
                 }
                 else
                 {
-                    // A solid white silhouette follows the transparent artifact, about 3% of its side wide.
+                    // A solid silhouette in the rarity colour follows the transparent artifact, about 3% of its side wide.
                     // Two rings of samples keep the wide outline free of gaps on diagonals and thin shapes.
                     // A sample past the image's edge counts as transparent: otherwise art that nearly touches one
                     // edge wrapped around and drew a stray outline along the opposite edge.
@@ -78,7 +80,7 @@ Shader "TrickalFanGame/ItemArtwork"
                         a = max(a, tex2D(_MainTex, near).a * nearInside);
                     }
                     float alpha = max(c.a, a);
-                    c.rgb = lerp(float3(1,1,1), c.rgb, c.a / max(alpha, 0.001));
+                    c.rgb = lerp(_FrameColor.rgb, c.rgb, c.a / max(alpha, 0.001));
                     c.a = alpha;
                 }
                 // A used-up artifact (레비의 단도) turns grey and a little darker, its outline included.

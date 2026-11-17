@@ -426,8 +426,10 @@ namespace TrickalFanGame.Item
                         stats.AddProjectileBounce(
                             effect.IntegerAmount,
                             effect.Radius,
+                            effect.ScaleMultiplier,
                             effect.SecondaryMagnitude,
-                            effect.IntervalSeconds);
+                            effect.IntervalSeconds,
+                            effect.Magnitude);
                         break;
                     case ItemEffectType.SplitOnHit:
                         stats.ConfigureProjectileSplitOnHit(

@@ -42,7 +42,7 @@ namespace TrickalFanGame.Editor
             VerifyRoundTrip();
             Debug.Log($"Credits-0 verification passed: {RequiredAttribution.Length} CC BY 4.0 credits complete on " +
                       $"screen, {CreditsCatalog.AllEntries(sections).Count()} entries from Resources/Credits.json, " +
-                      "both routes in and the way back.");
+                      "the home route in and the way back.");
         }
 
         [MenuItem("Trickal Fan Game/Credits/Setup and Verify Credits Screen")]
@@ -191,23 +191,15 @@ namespace TrickalFanGame.Editor
             FrontendHomeView home = components.OfType<FrontendHomeView>().Single();
             Assert(title.CreditsView == view && title.CreditsPanel == view.gameObject,
                 "The title view must hold the credits screen.");
-            Assert(title.CreditsButton != null && title.CreditsButton.gameObject.scene == scene &&
-                   title.CreditsButton.name == CreditsScreenSetup.TitleButtonName,
-                "The title screen needs the credits button, so the credit stays reachable without a profile.");
-            Assert(title.CreditsButton.transform.parent == title.TitlePanel.transform,
-                "The title credits button must sit on the title panel.");
+            // Menu-2 user feedback: the title shows only GAME START; the credits route is the home menu.
+            Assert(title.CreditsButton == null && title.TitlePanel.transform.Find(CreditsScreenSetup.TitleButtonName) == null,
+                "The title screen must not show a credits button (Menu-2).");
             Assert(home.CreditsButton != null && home.CreditsButton.gameObject.scene == scene &&
                    home.CreditsButton.name == CreditsScreenSetup.HomeButtonName,
                 "The home menu needs the credits button, so the credit stays reachable after a run.");
-            Assert(title.CreditsButton.onClick.GetPersistentEventCount() == 0 &&
-                   home.CreditsButton.onClick.GetPersistentEventCount() == 0,
+            Assert(home.CreditsButton.onClick.GetPersistentEventCount() == 0,
                 "The credits routes must be wired once at runtime, not as persistent Scene calls.");
 
-            Assert(title.StartButton.navigation.mode == Navigation.Mode.Explicit &&
-                   title.StartButton.navigation.selectOnDown == title.CreditsButton &&
-                   title.CreditsButton.navigation.selectOnUp == title.StartButton,
-                "The title credits button must be reachable with the keyboard. Re-run Setup Credits Screen " +
-                "if Setup Frontend Flow has been run since.");
             Assert(home.QuitButton.navigation.selectOnDown == home.CreditsButton &&
                    home.CreditsButton.navigation.selectOnUp == home.QuitButton,
                 "The home credits button must be reachable with the keyboard. Re-run Setup Credits Screen " +

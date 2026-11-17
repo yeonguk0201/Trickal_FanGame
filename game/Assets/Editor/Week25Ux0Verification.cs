@@ -93,7 +93,7 @@ namespace TrickalFanGame.Editor
                 "In-game settings must match the Frontend settings panel. Frontend: " +
                 string.Join(", ", frontendControls) + " / Game: " + string.Join(", ", gameControls));
 
-            Button[] order = { view.ResumeButton, view.SettingsButton, view.RestartRunButton, view.LeaveRunButton };
+            Button[] order = Week25Ux0Setup.PauseButtonOrder(view, view.SettingsButton);
             List<Rect> rects = new();
             for (int i = 0; i < order.Length; i++)
             {

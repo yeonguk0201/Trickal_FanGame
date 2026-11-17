@@ -21,12 +21,16 @@ namespace TrickalFanGame.Editor
             Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "output", "menu-review"));
 
         // prepare receives the ReferenceFrame and shows the screen to capture.
-        public static string[] Capture(string name, Action<RectTransform> prepare)
+        public static string[] Capture(string name, Action<RectTransform> prepare) =>
+            Capture(name, Week13FrontendSetup.ScenePath, "FrontendCanvas", prepare);
+
+        // The same for another scene's canvas (the in-game presentation uses the Game HUD canvas).
+        public static string[] Capture(string name, string scenePath, string canvasName, Action<RectTransform> prepare)
         {
-            Scene scene = EditorSceneManager.OpenScene(Week13FrontendSetup.ScenePath, OpenSceneMode.Single);
+            Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
             try
             {
-                Canvas canvas = scene.GetRootGameObjects().Single(root => root.name == "FrontendCanvas").GetComponent<Canvas>();
+                Canvas canvas = scene.GetRootGameObjects().Single(root => root.name == canvasName).GetComponent<Canvas>();
                 var frame = (RectTransform)canvas.transform.Find("ReferenceFrame");
                 prepare(frame);
                 Directory.CreateDirectory(OutputFolder);
@@ -34,7 +38,7 @@ namespace TrickalFanGame.Editor
             }
             finally
             {
-                EditorSceneManager.OpenScene(Week13FrontendSetup.ScenePath, OpenSceneMode.Single);
+                EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
             }
         }
 
@@ -63,7 +67,7 @@ namespace TrickalFanGame.Editor
                 scaler.enabled = false; // re-enabling recomputes the scale for this render size
                 scaler.enabled = true;
                 Canvas.ForceUpdateCanvases();
-                frame.GetComponent<Frontend.FrontendLayout>()?.ApplyLayout();
+                if (frame.TryGetComponent(out Frontend.FrontendLayout layout)) layout.ApplyLayout();
                 LayoutRebuilder.ForceRebuildLayoutImmediate(frame);
                 foreach (TMP_Text text in frame.GetComponentsInChildren<TMP_Text>()) text.ForceMeshUpdate(true);
                 Canvas.ForceUpdateCanvases();

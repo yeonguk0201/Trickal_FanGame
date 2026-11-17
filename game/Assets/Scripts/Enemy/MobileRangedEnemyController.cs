@@ -32,11 +32,17 @@ namespace TrickalFanGame.Enemy
         private EnemyAttackPresentation presentation;
         private SpriteRenderer spriteRenderer;
         private readonly EnemyObstacleNavigator navigator = new();
+        private readonly RangedStanceKeeper stance = new();
         private EnemyObstacleNavigator.TerrainFootprint terrain;
         private float nextShotTime;
         private float presentationEndsAt;
         private int shotsRemaining;
         private int orbitDirection = 1;
+        private float lastOrbitReverseTime = float.NegativeInfinity;
+
+        public const float OrbitReverseCooldown = 0.6f;
+        // How far ahead an orbit step is checked for walls and for keeping the line of fire.
+        public const float OrbitProbeDistance = 0.6f;
 
         public float MoveSpeed => moveSpeed;
         public float DetectionRange => detectionRange;
@@ -70,10 +76,16 @@ namespace TrickalFanGame.Enemy
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if (collision == null || collision.collider == null) return;
+            if (collision == null || collision.collider == null || body == null) return;
             bool blocked = ((1 << collision.collider.gameObject.layer) & EnemyObstacleNavigator.ObstacleMask) != 0 ||
                            collision.collider.GetComponentInParent<EnemyBehaviorContext>() != null;
-            if (blocked) NotifyBlocked();
+            if (!blocked || collision.contactCount == 0) return;
+            // Only a contact that stops the orbit itself reverses it; sliding along a wall or brushing a neighbour
+            // re-enters contact every few frames and must not flip the enemy back and forth.
+            Vector2 moving = body.linearVelocity;
+            if (moving.sqrMagnitude <= 0.001f ||
+                Vector2.Dot(moving.normalized, collision.GetContact(0).normal) > -0.5f) return;
+            TryReverseOrbit(Time.time);
         }
 
         private void OnDisable()
@@ -106,6 +118,8 @@ namespace TrickalFanGame.Enemy
             shotsRemaining = 0;
             nextShotTime = 0f;
             orbitDirection = 1;
+            lastOrbitReverseTime = float.NegativeInfinity;
+            stance.Reset();
         }
 
         public void SetTarget(Transform configuredTarget)
@@ -152,6 +166,15 @@ namespace TrickalFanGame.Enemy
         public void NotifyBlocked()
         {
             orbitDirection *= -1;
+        }
+
+        // Orbit reversals from contacts or blocked steps wait out a cooldown so the enemy cannot shuffle in place.
+        private bool TryReverseOrbit(float currentTime)
+        {
+            if (currentTime < lastOrbitReverseTime + OrbitReverseCooldown) return false;
+            lastOrbitReverseTime = currentTime;
+            NotifyBlocked();
+            return true;
         }
 
         public bool IsBurstResting(float currentTime)
@@ -206,33 +229,94 @@ namespace TrickalFanGame.Enemy
                 return false;
             }
 
-            bool hasLineOfFire = EnemyObstacleNavigator.HasLineOfFire(
-                EnemyProjectile.LaunchOrigin(gameObject, transform.position, false), target.position);
-            if (!hasLineOfFire)
+            // Movement judges the same shot the burst will fire (Sansamo's flower, not its feet), so the enemy does
+            // not settle where it believes it can shoot but every shot is refused.
+            GetShotOrigins(out Vector2 root, out Vector2 origin, out Vector2 mirroredOrigin);
+            bool hasSight = HasShotLine(Vector2.zero, root, origin, mirroredOrigin);
+            if (stance.ShouldSeekSight(hasSight, currentTime))
             {
                 body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, terrain,
                     currentTime) * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
                 return false;
             }
 
+            if (!hasSight)
+            {
+                // Just lost sight: hold briefly instead of turning around at the shadow's edge.
+                body.linearVelocity = Vector2.zero;
+                return false;
+            }
+
             Vector2 direction = offset / distance;
-            Vector2 tangent = new(-direction.y, direction.x);
-            tangent *= orbitDirection;
             Vector2 radial = Vector2.zero;
-            if (distance > preferredDistance + distanceTolerance)
+            int radialMode = stance.UpdateRadial(distance, preferredDistance, distanceTolerance);
+            if (radialMode > 0)
                 radial = direction;
-            else if (distance < preferredDistance - distanceTolerance &&
+            else if (radialMode < 0 &&
                      EnemyObstacleNavigator.TryFindRetreatDirection(transform.position, -direction, terrain,
                          out Vector2 retreat))
                 radial = retreat;
 
-            Vector2 movement = radial == Vector2.zero
-                ? tangent
-                : radial + tangent * radialOrbitWeight;
+            // An orbit step that would walk into a wall or behind cover is not taken. Without this check the enemy
+            // circles out of sight, walks back into sight, and repeats every frame at an obstacle's edge.
+            Vector2 movement = ComposeMovement(direction, radial);
+            if (!IsStepSafe(movement, root, origin, mirroredOrigin))
+            {
+                movement = TryReverseOrbit(currentTime) ? ComposeMovement(direction, radial) : Vector2.zero;
+                if (!IsStepSafe(movement, root, origin, mirroredOrigin))
+                    movement = IsStepSafe(radial, root, origin, mirroredOrigin) ? radial : Vector2.zero;
+            }
+
             body.linearVelocity = movement.sqrMagnitude > 0.001f
                 ? movement.normalized * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this))
                 : Vector2.zero;
             return true;
+        }
+
+        private Vector2 ComposeMovement(Vector2 direction, Vector2 radial)
+        {
+            Vector2 tangent = new Vector2(-direction.y, direction.x) * orbitDirection;
+            return radial == Vector2.zero ? tangent : radial + tangent * radialOrbitWeight;
+        }
+
+        private bool IsStepSafe(Vector2 movement, Vector2 root, Vector2 origin, Vector2 mirroredOrigin)
+        {
+            if (movement.sqrMagnitude <= 0.001f) return false;
+            Vector2 step = movement.normalized * OrbitProbeDistance;
+            Vector2 position = transform.position;
+            return EnemyObstacleNavigator.HasClearPath(position, position + step, terrain) &&
+                   HasShotLine(step, root, origin, mirroredOrigin);
+        }
+
+        // The feet-side launch point, the visible launch point (Sansamo's flower when present), and that point with
+        // the sprite facing the other way. The flower sits off center and swaps sides when the enemy turns, so
+        // movement requires both sides to see the target; otherwise turning around alone would open or close the
+        // line and flip the movement back.
+        private void GetShotOrigins(out Vector2 root, out Vector2 origin, out Vector2 mirroredOrigin)
+        {
+            root = EnemyProjectile.LaunchOrigin(gameObject, transform.position, false);
+            SansamoPureMotion flower = GetComponent<SansamoPureMotion>();
+            origin = flower != null && flower.isActiveAndEnabled ? flower.LaunchPosition : root;
+            float mirrorX = spriteRenderer != null ? spriteRenderer.transform.position.x : transform.position.x;
+            mirroredOrigin = origin == root ? root : new Vector2(2f * mirrorX - origin.x, origin.y);
+        }
+
+        private bool HasShotLine(Vector2 step, Vector2 root, Vector2 origin, Vector2 mirroredOrigin)
+        {
+            Vector2 goal = target.position;
+            // A visible flower must not shoot through a wall just because the feet have line of sight.
+            return EnemyObstacleNavigator.HasLineOfFire(root + step, origin + step) &&
+                   EnemyObstacleNavigator.HasLineOfFire(origin + step, goal) &&
+                   (mirroredOrigin == origin ||
+                    (EnemyObstacleNavigator.HasLineOfFire(root + step, mirroredOrigin + step) &&
+                     EnemyObstacleNavigator.HasLineOfFire(mirroredOrigin + step, goal)));
+        }
+
+        private bool TryGetShotLine(out Vector2 origin)
+        {
+            GetShotOrigins(out Vector2 root, out origin, out _);
+            return EnemyObstacleNavigator.HasLineOfFire(root, origin) &&
+                   EnemyObstacleNavigator.HasLineOfFire(origin, target.position);
         }
 
         private void TickBurst(float currentTime)
@@ -254,12 +338,7 @@ namespace TrickalFanGame.Enemy
 
         private bool FirePredictive(float currentTime)
         {
-            SansamoPureMotion flower = GetComponent<SansamoPureMotion>();
-            Vector2 root = EnemyProjectile.LaunchOrigin(gameObject, transform.position, false);
-            Vector2 origin = flower != null && flower.isActiveAndEnabled ? flower.LaunchPosition : root;
-            // A visible flower must not shoot through a wall just because the feet have line of sight.
-            if (!EnemyObstacleNavigator.HasLineOfFire(root, origin) ||
-                !EnemyObstacleNavigator.HasLineOfFire(origin, target.position)) return false;
+            if (!TryGetShotLine(out Vector2 origin)) return false;
             Rigidbody2D targetBody = target.GetComponent<Rigidbody2D>();
             Vector2 targetVelocity = targetBody != null ? targetBody.linearVelocity : Vector2.zero;
             Vector2 direction = CalculatePredictiveDirection(origin, target.position, targetVelocity,

@@ -99,9 +99,8 @@ namespace TrickalFanGame.Editor
             RowLabel(panel, "DetailedStatsHudLabel", "DetailedStatsHudIcon", MenuArtSetup.IconList, -226);
             StyleToggle(view.DetailedStatsHudToggle, new Vector2(ToggleX, -226));
 
-            var back = (FrontendStartButton)view.BackButton;
-            Place((RectTransform)back.transform, new Vector2(0, -318), new Vector2(300, 84));
-            StyleButton(back, true, new Vector2(300, 84), 30);
+            // Same back button as character select; the panel is centred on the frame, so it lands in the same spot.
+            StyleBackButton((FrontendStartButton)view.BackButton);
         }
 
         private static void StyleSliderRow(FrontendSettingsView view, RectTransform panel, string prefix, Slider slider,

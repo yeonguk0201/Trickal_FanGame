@@ -87,6 +87,12 @@ namespace TrickalFanGame.Combat
         private DamageContext damageContext;
         private const int EnemyLayerMask = 1 << 6;
         private const float BounceContactDistance = 0.02f;
+        // The hop off a lone enemy (칸타의 팽이): it starts at this share of the shot speed, angled this far to
+        // alternate sides of straight back, and slows to a stop by the end of SameTargetDelaySeconds.
+        public const float RepeatHopSpeedRatio = 0.6f;
+        public const float RepeatHopSideAngleDegrees = 35f;
+        // Extra flight time for the way back, so a pushed enemy is still reached.
+        private const float RepeatReturnLifetimeMargin = 0.3f;
         private const float WallClearance = 0.02f;
 
         // How often this shot has hit each enemy. Only a bounce (Passive-0 §4.4) hits the same enemy again.
@@ -95,11 +101,15 @@ namespace TrickalFanGame.Combat
         private ProjectileBounceSettings bounceSettings;
         private ProjectileHomingSettings homingSettings;
         private int remainingBounces;
+        // Damage kept after the bounces so far (ProjectileBounceSettings): 1 until the first bounce.
+        private float bounceDamageMultiplier = 1f;
+        private int bouncesTaken;
         // The enemy the shot flies to after a bounce.
         private Health bounceTarget;
-        // With no other enemy near, the shot waits on the enemy it just hit and hits it again.
+        // With no other enemy near, the shot hops off the enemy it just hit and comes back to hit it again.
         private Health repeatTarget;
         private float repeatHitDelay;
+        private Vector2 repeatHopVelocity;
         private Vector2 flightVelocity;
         private Vector2 travelOrigin;
         private ProjectileSplitSettings splitSettings;
@@ -123,6 +133,7 @@ namespace TrickalFanGame.Combat
         public float Lifetime => resolvedLifetime;
         public float RemainingLifetime => remainingLifetime;
         public int RemainingBounces => remainingBounces;
+        public float BounceDamageMultiplier => bounceDamageMultiplier;
         public Health BounceTarget => bounceTarget;
         public Health RepeatTarget => repeatTarget;
         public ProjectileHomingSettings Homing => homingSettings;
@@ -152,7 +163,7 @@ namespace TrickalFanGame.Combat
             }
         }
 
-        // Returns true when the shot is waiting on an enemy or was used up by the hit it just made.
+        // Returns true when the shot is hopping off an enemy or was used up by the hit it just made.
         public bool TickBounce(float deltaTime)
         {
             if (repeatTarget != null)
@@ -165,14 +176,18 @@ namespace TrickalFanGame.Combat
                 }
 
                 repeatHitDelay -= Mathf.Max(0f, deltaTime);
-                if (repeatHitDelay <= 0f)
+                if (repeatHitDelay > 0f)
                 {
-                    Health target = repeatTarget;
-                    body.linearVelocity = flightVelocity;
-                    HitTarget(target);
+                    // The hop slows down to its top, like a spinning top knocked back.
+                    float delay = Mathf.Max(0.0001f, bounceSettings.SameTargetDelaySeconds);
+                    body.linearVelocity = repeatHopVelocity * Mathf.Clamp01(repeatHitDelay / delay);
+                    return true;
                 }
 
-                return true;
+                // At the top of the hop the shot flies back and hits the enemy on contact, wherever it was pushed.
+                Health target = repeatTarget;
+                repeatTarget = null;
+                ReturnTo(target);
             }
 
             if (bounceTarget == null)
@@ -400,6 +415,8 @@ namespace TrickalFanGame.Combat
             hitEffects = configuredHitEffects;
             bounceSettings = configuredBounce;
             remainingBounces = configuredBounce.IsEnabled ? configuredBounce.BounceCount : 0;
+            bounceDamageMultiplier = 1f;
+            bouncesTaken = 0;
             homingSettings = configuredHoming;
             HomingTarget = null;
             bounceTarget = null;
@@ -505,9 +522,9 @@ namespace TrickalFanGame.Combat
             repeatTarget = null;
             hitCounts.TryGetValue(target, out int earlierHits);
             hitCounts[target] = earlierHits + 1;
-            // A bounce that returns to an enemy deals less each time; a first hit is always whole.
-            DamageContext context = earlierHits > 0
-                ? damageContext.ScaleMultiplier(Mathf.Pow(bounceSettings.RepeatDamageRatio, earlierHits))
+            // Every bounce so far has cut the damage; the hit before the first bounce is always whole.
+            DamageContext context = bouncesTaken > 0
+                ? damageContext.ScaleMultiplier(bounceDamageMultiplier)
                 : damageContext;
             float impactDistance = Vector2.Distance(launchPosition, transform.position);
             float healthBeforeHit = target.CurrentHealth + target.CurrentShield;
@@ -567,14 +584,13 @@ namespace TrickalFanGame.Combat
                 }
 
                 remainingBounces--;
-                repeatTarget = from;
-                repeatHitDelay = bounceSettings.SameTargetDelaySeconds;
-                remainingLifetime = Mathf.Max(remainingLifetime, repeatHitDelay + Time.fixedDeltaTime);
-                body.linearVelocity = Vector2.zero;
+                TakeBounce(bounceSettings.RepeatDamageRatio);
+                StartRepeatHop(from);
                 return true;
             }
 
             remainingBounces--;
+            TakeBounce(bounceSettings.OtherEnemyDamageRatio);
             bounceTarget = next;
             IgnoreTargetColliders(next, false);
             Vector2 offset = next.transform.position - transform.position;
@@ -594,6 +610,50 @@ namespace TrickalFanGame.Combat
             }
 
             return true;
+        }
+
+        // Springs off a lone enemy: away from it, alternately to either side, at part of the shot speed.
+        private void StartRepeatHop(Health from)
+        {
+            repeatTarget = from;
+            repeatHitDelay = bounceSettings.SameTargetDelaySeconds;
+            Vector2 away = (Vector2)(transform.position - from.transform.position);
+            if (away.sqrMagnitude <= 0.0001f)
+            {
+                away = -flightVelocity;
+            }
+
+            float side = bouncesTaken % 2 == 0 ? -RepeatHopSideAngleDegrees : RepeatHopSideAngleDegrees;
+            repeatHopVelocity = Rotate(away.normalized, side) * (flightVelocity.magnitude * RepeatHopSpeedRatio);
+            body.linearVelocity = repeatHopVelocity;
+            remainingLifetime = Mathf.Max(remainingLifetime, repeatHitDelay + RepeatReturnLifetimeMargin);
+            travelOrigin = transform.position;
+        }
+
+        private void ReturnTo(Health target)
+        {
+            bounceTarget = target;
+            IgnoreTargetColliders(target, false);
+            Vector2 offset = target.transform.position - transform.position;
+            float speed = flightVelocity.magnitude;
+            if (offset.sqrMagnitude > 0.0001f)
+            {
+                SetFlightVelocity(offset.normalized * speed);
+            }
+
+            remainingLifetime = Mathf.Max(remainingLifetime,
+                offset.magnitude / Mathf.Max(0.0001f, speed) + RepeatReturnLifetimeMargin);
+            travelOrigin = transform.position;
+            if (maximumTravelDistance > 0f)
+            {
+                maximumTravelDistance = Mathf.Max(maximumTravelDistance, offset.magnitude + 1f);
+            }
+        }
+
+        private void TakeBounce(float damageRatio)
+        {
+            bouncesTaken++;
+            bounceDamageMultiplier *= damageRatio;
         }
 
         private Health FindBounceTarget(Health from)
@@ -649,7 +709,9 @@ namespace TrickalFanGame.Combat
 
             if (hitEffects.AppliesKnockback)
             {
-                BasicAttackKnockback.TryApply(target, flightVelocity, hitEffects.KnockbackBonus);
+                // A hit after a bounce pushes much less, so a bouncing shot does not scatter a crowd.
+                BasicAttackKnockback.TryApply(target, flightVelocity, hitEffects.KnockbackBonus,
+                    bouncesTaken > 0 ? ProjectileBounceSettings.BouncedKnockbackScale : 1f);
             }
         }
 

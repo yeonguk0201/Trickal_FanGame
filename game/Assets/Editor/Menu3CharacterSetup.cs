@@ -20,7 +20,7 @@ namespace TrickalFanGame.Editor
         public static readonly Vector2 SlotSize = new(150, 140);
         public const int RosterSlots = 8;
         public static readonly Vector2 ConfirmSize = new(360, 88);
-        public static readonly Vector2 BackSize = new(220, 64);
+        public static readonly Vector2 BackSize = MenuUiBuilder.BackSize;
         public const string ErpinPath = "Assets/Characters/erpin.asset";
         public const string ErpinSlotPortraitPath = "Assets/Resources/UserArtwork/erpin-high-grade.png";
         public const string HighGradeSkillIconPath = "Assets/Resources/UserArtwork/erpin-high-grade.png";
@@ -159,10 +159,7 @@ namespace TrickalFanGame.Editor
             var confirm = (FrontendStartButton)view.ConfirmButton;
             Place((RectTransform)confirm.transform, new Vector2(0, -444), ConfirmSize);
             StyleButton(confirm, true, ConfirmSize, 32);
-            var back = (FrontendStartButton)view.BackButton;
-            Place((RectTransform)back.transform, new Vector2(-790, -450), BackSize);
-            StyleButton(back, false, BackSize, 26);
-            BackArrow(back);
+            StyleBackButton((FrontendStartButton)view.BackButton);
 
             Undo.RecordObject(view, "Menu-3 presentation");
             view.ConfigurePresentation(details, previous, next, comingSoon, RosterSlots, statusPill.gameObject);

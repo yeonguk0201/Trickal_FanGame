@@ -83,16 +83,20 @@ namespace TrickalFanGame.Editor
                 "Frontend requires one Flow-4 launcher connected to Home and the enabled Game Scene.");
             Assert(view.StartButton.gameObject.scene == scene && view.StatusText.gameObject.scene == scene,
                 "Title references must stay inside Frontend.");
-            Assert(view.StartButton.GetComponent<RectTransform>().sizeDelta == new Vector2(280, 64), "Start button must be 280 x 64.");
+            // Menu-2 replaced the 280 x 64 temporary button with the clover start button art.
+            Assert(view.StartButton.GetComponent<RectTransform>().sizeDelta == Menu2HomeSetup.StartSize,
+                "Start button must use the Menu-2 start button size.");
             TMP_Text label = view.StartButton.GetComponentInChildren<TMP_Text>();
-            Assert(label != null && label.text == "GAME START" && label.fontSize == 24 && !label.raycastTarget,
+            Assert(label != null && label.text == "GAME START" && label.fontSize == Menu2HomeSetup.StartLabelSize && !label.raycastTarget,
                 "Start label differs from UI spec.");
             Assert(components.OfType<EventSystem>().Single().firstSelectedGameObject == view.StartButton.gameObject,
                 "Initial focus must point to GAME START.");
             Assert(view.StartButton.onClick.GetPersistentEventCount() == 0, "Unexpected persistent action on title button.");
             var serializedButton = new SerializedObject(view.StartButton);
-            Assert(serializedButton.FindProperty("hoverBorder").objectReferenceValue != null &&
-                serializedButton.FindProperty("focusBorder").objectReferenceValue != null, "Missing button border references.");
+            // Menu buttons show hover and focus by growing (MenuPopEffect) instead of outline borders.
+            Assert(serializedButton.FindProperty("hoverBorder").objectReferenceValue == null &&
+                serializedButton.FindProperty("focusBorder").objectReferenceValue == null &&
+                view.StartButton.GetComponent<MenuPopEffect>() != null, "Start button must grow on hover and focus.");
             ValidateHome(view.HomeView, scene);
             ValidateCharacterSelection(view.HomeView, scene);
             ValidateSkillUpgrade(view.HomeView, scene);
@@ -510,6 +514,13 @@ namespace TrickalFanGame.Editor
                 view.StartButton.onClick.Invoke();
                 if (view.NicknameView == null || !view.NicknameView.gameObject.activeInHierarchy)
                     throw new InvalidOperationException("A new local player did not reach nickname registration.");
+                // Menu-2: back returns to the title and GAME START reopens the nickname screen.
+                view.NicknameView.BackButton.onClick.Invoke();
+                if (view.NicknameView.gameObject.activeInHierarchy || !view.TitlePanel.activeInHierarchy)
+                    throw new InvalidOperationException("Nickname back did not return to the title.");
+                view.StartButton.onClick.Invoke();
+                if (!view.NicknameView.gameObject.activeInHierarchy)
+                    throw new InvalidOperationException("GAME START did not reopen nickname registration after back.");
 
                 var retryApi = new RetryRegistrationApiClient();
                 view.NicknameView.SetApiClient(retryApi);
@@ -518,7 +529,9 @@ namespace TrickalFanGame.Editor
                 view.NicknameView.SubmitButton.onClick.Invoke();
                 if (retryApi.Requests.Count != 1 || retryApi.Requests[0].clientProfileId != clientProfileId ||
                     LocalProfile.IsRegistered || !view.NicknameView.ErrorText.gameObject.activeInHierarchy ||
-                    !view.NicknameView.SubmitButton.interactable)
+                    !view.NicknameView.SubmitButton.interactable ||
+                    view.NicknameView.ProgressText.gameObject.activeInHierarchy ||
+                    !view.NicknameView.BackButton.interactable)
                     throw new InvalidOperationException("Failed registration did not preserve a retryable local profile request.");
 
                 view.NicknameView.SubmitButton.onClick.Invoke();

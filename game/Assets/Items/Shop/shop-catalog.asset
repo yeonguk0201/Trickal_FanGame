@@ -18,7 +18,7 @@ MonoBehaviour:
   epicPrice: 25
   consumables:
   - consumableId: heart
-    displayName: "\uD558\uD2B8"
+    displayName: "\uB538\uAE30\uB9DB \uCEA1\uC290"
     pickupPrefab: {fileID: 303849290133622444, guid: fe735d51964ab6243baf43f8c7221f9a, type: 3}
     price: 3
   - consumableId: key
@@ -29,3 +29,7 @@ MonoBehaviour:
     displayName: "\uD3ED\uD0C4"
     pickupPrefab: {fileID: 55609960391072830, guid: 523aa0bd7b8a129418565809a9f40126, type: 3}
     price: 5
+  - consumableId: sp
+    displayName: "\uC18C\uB2E4\uB9DB \uCEA1\uC290"
+    pickupPrefab: {fileID: 2738873779375130701, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
+    price: 3

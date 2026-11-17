@@ -49,6 +49,7 @@ namespace TrickalFanGame.Enemy
         private int relocationSequence;
         private bool strafeThisCycle;
         private readonly EnemyObstacleNavigator navigator = new();
+        private readonly RangedStanceKeeper stance = new();
         private EnemyObstacleNavigator.TerrainFootprint terrain;
 
         public LongRangeSniperState State { get; private set; }
@@ -131,6 +132,7 @@ namespace TrickalFanGame.Enemy
             projectileLifetime = Mathf.Max(0.01f, configuredProjectileLifetime);
             relocationSequence = 0;
             strafeDirection = 1;
+            stance.Reset();
             SetState(LongRangeSniperState.Idle);
         }
 
@@ -238,7 +240,9 @@ namespace TrickalFanGame.Enemy
         private void TickRelocating(float currentTime)
         {
             behavior.SetControllerMovementSuppressed(false);
-            if (!EnemyObstacleNavigator.HasLineOfFire(ShotOrigin, target.position))
+            Vector2 shotOrigin = ShotOrigin;
+            bool hasSight = EnemyObstacleNavigator.HasLineOfFire(shotOrigin, target.position);
+            if (stance.ShouldSeekSight(hasSight, currentTime))
             {
                 // Obstacle-0: hold the aim and walk around the obstacle until the line of fire opens.
                 body.linearVelocity = navigator.GetMoveDirection(transform.position, target.position, terrain,
@@ -246,18 +250,18 @@ namespace TrickalFanGame.Enemy
                 return;
             }
 
+            if (!hasSight)
+            {
+                // Just lost sight: hold briefly instead of turning around at the shadow's edge.
+                body.linearVelocity = Vector2.zero;
+                return;
+            }
+
             Vector2 offset = target.position - transform.position;
             float distance = offset.magnitude;
             Vector2 direction = distance > 0.001f ? offset / distance : Vector2.right;
-            Vector2 radial = Vector2.zero;
-            if (distance > preferredDistance + distanceTolerance)
-            {
-                radial = direction;
-            }
-            else if (distance < preferredDistance - distanceTolerance)
-            {
-                radial = -direction;
-            }
+            int radialMode = stance.UpdateRadial(distance, preferredDistance, distanceTolerance);
+            Vector2 radial = radialMode > 0 ? direction : radialMode < 0 ? -direction : Vector2.zero;
 
             if (currentTime >= nextDirectionReevaluation)
             {
@@ -272,6 +276,9 @@ namespace TrickalFanGame.Enemy
                 ? new Vector2(-direction.y, direction.x) * strafeDirection * strafeWeight
                 : Vector2.zero;
             Vector2 movement = radial + tangent;
+            // A step into a wall or behind cover is not taken; the enemy drops the strafe, then holds.
+            if (!IsStepSafe(movement, shotOrigin))
+                movement = IsStepSafe(radial, shotOrigin) ? radial : Vector2.zero;
             body.linearVelocity = movement.sqrMagnitude > 0.001f
                 ? movement.normalized * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this))
                 : Vector2.zero;
@@ -280,6 +287,15 @@ namespace TrickalFanGame.Enemy
             {
                 BeginAim(currentTime, direction);
             }
+        }
+
+        private bool IsStepSafe(Vector2 movement, Vector2 shotOrigin)
+        {
+            if (movement.sqrMagnitude <= 0.001f) return false;
+            Vector2 step = movement.normalized * MobileRangedEnemyController.OrbitProbeDistance;
+            Vector2 position = transform.position;
+            return EnemyObstacleNavigator.HasClearPath(position, position + step, terrain) &&
+                   EnemyObstacleNavigator.HasLineOfFire(shotOrigin + step, target.position);
         }
 
         private void BeginAim(float currentTime, Vector2 direction)

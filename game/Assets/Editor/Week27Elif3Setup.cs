@@ -91,6 +91,7 @@ namespace TrickalFanGame.Editor
             Undo.RecordObject(view, "Connect Elif-3 shop upgrades");
             view.ConfigureInvest(elifText, investButton, investLabel, investGroup, rows, notice);
             EnsureGlyphs(font);
+            if (view.UsesArtwork) ShopUiArtworkSetup.Apply(view);
 
             foreach (Component component in panel.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);

@@ -2,6 +2,7 @@ using TMPro;
 using TrickalFanGame.Data;
 using TrickalFanGame.Player;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace TrickalFanGame.Frontend
 {
@@ -11,10 +12,13 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private PlayerStats playerStats;
         [SerializeField] private CanvasGroup content;
         [SerializeField] private TMP_Text valuesText;
+        // The critical chance icon is the critical-number burst, which is drawn at runtime, so it is assigned here.
+        [SerializeField] private Image criticalChanceIcon;
 
         public PlayerStats PlayerStats => playerStats;
         public CanvasGroup Content => content;
         public TMP_Text ValuesText => valuesText;
+        public Image CriticalChanceIcon => criticalChanceIcon;
 
         public void Configure(PlayerStats configuredPlayerStats, CanvasGroup configuredContent, TMP_Text configuredValuesText)
         {
@@ -24,8 +28,24 @@ namespace TrickalFanGame.Frontend
             RefreshNow();
         }
 
+        public void ConfigureCriticalChanceIcon(Image configuredIcon)
+        {
+            criticalChanceIcon = configuredIcon;
+            // The burst sprite exists only at runtime; saving it into the scene would leave a missing reference.
+            if (Application.isPlaying) ApplyCriticalChanceIcon(criticalChanceIcon);
+        }
+
+        public static void ApplyCriticalChanceIcon(Image image)
+        {
+            if (image == null) return;
+            image.sprite = CriticalBurstSprites.Get(0);
+            image.preserveAspect = true;
+            image.color = Color.white;
+        }
+
         private void OnEnable()
         {
+            ApplyCriticalChanceIcon(criticalChanceIcon);
             LocalSettings.DetailedStatsHudChanged += RefreshNow;
             RefreshNow();
         }

@@ -17,7 +17,8 @@ namespace TrickalFanGame.Meta
     // Offline-1 (docs/30 §3.1 S4): sends this profile's queued writes oldest first, Runs and skill upgrades alike,
     // so the server sees them in the order they happened. Each confirmed write leaves the queue and its returned
     // progress becomes the confirmed cache. A skill upgrade the server refuses on its rules (no point, maximum level,
-    // stale target, no progress) is dropped and the server value is kept. Any other failure stops the flush and
+    // stale target, no progress) is dropped and the server value is kept, and so is a Run the server can never
+    // accept (IsRunRejectedForGood). Any other failure stops the flush and
     // leaves the rest queued for the next try. Repeated sends are safe: Runs by clientRunId, upgrades by target level.
     public static class PendingSync
     {
@@ -107,7 +108,40 @@ namespace TrickalFanGame.Meta
                 PlayerProgressClient.StoreConfirmedElifMeta(context.Nickname, response.data.meta);
                 Debug.Log($"[PendingSync] Pending Run saved: {response.data.runId}");
                 SendNext(context);
-            }, context.Stop);
+            }, error =>
+            {
+                if (!IsRunRejectedForGood(error))
+                {
+                    context.Stop(error);
+                    return;
+                }
+
+                // Sending this Run again can never succeed, and keeping it would block every write behind it.
+                LocalPendingRunStorage.Remove(request.clientRunId);
+                Debug.LogWarning($"[PendingSync] Dropped Run {request.clientRunId}: the server refused it ({error}).");
+                SendNext(context);
+            });
+        }
+
+        // Refusals that depend only on the Run itself (or on Runs already saved before it), so a resend gets the
+        // same answer. Refusals a later Backend deploy or registration can fix are not here and keep the Run
+        // queued: VALIDATION_ERROR (a field the Backend does not know yet), CHARACTER_NOT_FOUND/ITEM_NOT_FOUND (a
+        // catalog entry not deployed yet), INVALID_ELIF_DATA (elif limits are Backend rules), USER_NOT_FOUND and
+        // profile key errors (registration), and every network or 5xx failure.
+        public static readonly string[] RunRejectionCodes =
+        {
+            "INVALID_RUN_DATA",         // Times, item order or death reason contradict each other.
+            "RUN_IDEMPOTENCY_CONFLICT", // The server already saved this clientRunId with other data.
+            "ELIF_UPGRADE_LEVEL_GAP"    // A purchase builds on a level no saved Run bought; earlier ones went first.
+        };
+
+        // ApiClient reports a Backend error as "CODE: message".
+        public static bool IsRunRejectedForGood(string error)
+        {
+            if (string.IsNullOrEmpty(error)) return false;
+            int separator = error.IndexOf(':');
+            string code = (separator >= 0 ? error.Substring(0, separator) : error).Trim();
+            return Array.IndexOf(RunRejectionCodes, code) >= 0;
         }
 
         private static void SendSkillUpgrade(Context context, PendingSkillUpgrade upgrade)

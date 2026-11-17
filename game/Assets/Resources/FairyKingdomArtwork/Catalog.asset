@@ -365,6 +365,14 @@ MonoBehaviour:
       y: 101
       width: 1405
       height: 827
+  - id: trap-mud-cake
+    sprite: {fileID: 21300000, guid: 818d065119b94e8984ec931cb9d3a9fd, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 357
+      y: 26
+      width: 818
+      height: 983
   - id: trap-periodic-spikes
     sprite: {fileID: 21300000, guid: f5f0a7e8e1764197aa2fec3a01162244, type: 3}
     visibleRect:

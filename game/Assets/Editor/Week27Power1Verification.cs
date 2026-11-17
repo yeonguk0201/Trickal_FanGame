@@ -466,7 +466,8 @@ namespace TrickalFanGame.Editor
                     "The HUD must show the 권능 icon and three empty cells, with no key line while charging (UX-1).");
                 rig.Slot.AddCharge(3);
                 hud.RefreshNow();
-                Assert(hud.GaugeCells.Take(3).All(cell => cell.color == GamePowerHudView.FilledCellColor) &&
+                Assert(hud.GaugeCells.Take(3).All(cell => cell.color == hud.FilledColor &&
+                           cell.sprite == hud.FilledCellSprite) &&
                        hud.KeyText.gameObject.activeSelf && hud.KeyText.text == GamePowerHudView.UsableText,
                     "A full gauge must show filled cells and [R] 사용.");
             }

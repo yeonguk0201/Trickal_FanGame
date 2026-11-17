@@ -21,6 +21,9 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private Vector2 offset;
         [SerializeField] private string profileId;
         [SerializeField] private bool useSharedProfile = true;
+        // A raised surface the owner sits or floats above (the reward gift on its altar): the shadow stays at this
+        // height instead of the owner's feet and draws just under the owner, above the surface's own sprite.
+        [SerializeField] private Transform surface;
         private string appliedProfile;
         private bool defaultsCached;
         private float defaultWidth, defaultThickness, defaultOpacity;
@@ -41,7 +44,10 @@ namespace TrickalFanGame.Frontend
         public SpriteRenderer Visual => shadow;
         public string ProfileId => profileId;
 
+        public Transform Surface => surface;
+
         public void SetProfileId(string id) { profileId = id; appliedProfile = null; }
+        public void SetSurface(Transform value) => surface = value;
 
         // Called by physical world entities when enabled, including spawned pickups and rebuilt rooms.
         public static void AttachDuringPlay(GameObject owner)
@@ -155,7 +161,7 @@ namespace TrickalFanGame.Frontend
                     trap.HitSize.y * Mathf.Abs(scale.y), 0f));
             }
             float width = Mathf.Max(0.08f, floor.size.x * (pickup ? 0.8f : 0.95f)) * widthMultiplier;
-            float y = floor.min.y + Mathf.Min(0.08f, floor.size.y * 0.1f);
+            float y = surface != null ? surface.position.y : floor.min.y + Mathf.Min(0.08f, floor.size.y * 0.1f);
             if (floating) y -= 0.1f;
             shadow.transform.position = new Vector3(floor.center.x + offset.x, y + offset.y, transform.position.z);
             shadow.transform.rotation = Quaternion.identity;
@@ -164,7 +170,8 @@ namespace TrickalFanGame.Frontend
                 width * thickness / Mathf.Max(0.001f, Mathf.Abs(parentScale.y)), 1f);
             shadow.color = new Color(0f, 0f, 0f, floating ? opacity * 0.8f : opacity);
             shadow.sortingLayerID = source.sortingLayerID;
-            shadow.sortingOrder = Mathf.Min(FloorSortingOrder, source.sortingOrder - 1);
+            shadow.sortingOrder = surface != null ? source.sortingOrder - 1
+                : Mathf.Min(FloorSortingOrder, source.sortingOrder - 1);
         }
 
         // One smooth unit-square mask, shared by every ground and player-flight shadow.

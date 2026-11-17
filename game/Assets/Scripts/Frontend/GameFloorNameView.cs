@@ -15,6 +15,13 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private string regionName = "요정의 숲";
         [SerializeField] private string[] floorNameOverrides = Array.Empty<string>();
         [SerializeField, Min(0.1f)] private float displayDuration = 1.5f;
+        // In-game presentation: the banner clears in like lifting fog over fadeSeconds, holds, then fogs out over
+        // the last fadeSeconds of displayDuration (unscaled time).
+        [SerializeField, Min(0f)] private float fadeSeconds = DefaultFadeSeconds;
+        [SerializeField] private BannerMist mist;
+
+        public const float DefaultFadeSeconds = 0.5f;
+        public const float MaxFrameStep = 1f / 30f;
 
         private bool subscribed;
         private int lastAnnouncedFloor;
@@ -26,6 +33,8 @@ namespace TrickalFanGame.Frontend
         public TMP_Text AnnouncementText => announcementText;
         public string RegionName => regionName;
         public float DisplayDuration => displayDuration;
+        public float FadeSeconds => fadeSeconds;
+        public BannerMist Mist => mist;
         public float RemainingSeconds => remainingSeconds;
         public int LastAnnouncedFloor => lastAnnouncedFloor;
         public bool IsShowing { get; private set; }
@@ -53,6 +62,14 @@ namespace TrickalFanGame.Frontend
                 if (runProgress != null && runProgress.CurrentFloor > 0)
                     ShowFloor(runProgress.CurrentFloor);
             }
+        }
+
+        public void ConfigurePresentation(BannerMist configuredMist, float configuredDisplayDuration,
+            float configuredFadeSeconds)
+        {
+            mist = configuredMist;
+            displayDuration = Mathf.Max(0.1f, configuredDisplayDuration);
+            fadeSeconds = Mathf.Max(0f, configuredFadeSeconds);
         }
 
         public string ResolveFloorName(int floorNumber)
@@ -87,7 +104,9 @@ namespace TrickalFanGame.Frontend
 
         private void Update()
         {
-            Advance(Time.unscaledDeltaTime);
+            // The first frames after a cold scene load can each take a second or more (first asset and shader
+            // loads); counting them in full used up the whole banner before it was ever drawn on the first Run.
+            Advance(Mathf.Min(Time.unscaledDeltaTime, MaxFrameStep));
         }
 
         private void HandleRoomChanged(int floorNumber, int _)
@@ -109,7 +128,26 @@ namespace TrickalFanGame.Frontend
             if (announcementText != null) announcementText.text = displayName;
             remainingSeconds = displayDuration;
             IsShowing = true;
-            if (announcementCanvasGroup != null) announcementCanvasGroup.alpha = 1f;
+            ApplyFade();
+        }
+
+        // How far the banner is shown for the time left: rises over the first fadeSeconds and falls over the last,
+        // 1 in between. Without mist this is the alpha itself.
+        public static float FadeAlpha(float remaining, float duration, float fade)
+        {
+            if (remaining <= 0f) return 0f;
+            float half = Mathf.Min(fade, duration * 0.5f);
+            if (half <= 0f) return 1f;
+            float elapsed = duration - remaining;
+            return Mathf.Clamp01(Mathf.Min(elapsed / half, remaining / half));
+        }
+
+        private void ApplyFade()
+        {
+            float reveal = FadeAlpha(remainingSeconds, displayDuration, fadeSeconds);
+            if (announcementCanvasGroup != null)
+                announcementCanvasGroup.alpha = mist != null ? BannerMist.Alpha(reveal) : reveal;
+            if (mist != null) mist.Apply(reveal);
         }
 
         private void Advance(float unscaledDeltaTime)
@@ -117,6 +155,7 @@ namespace TrickalFanGame.Frontend
             if (!IsShowing || unscaledDeltaTime <= 0f) return;
             remainingSeconds -= unscaledDeltaTime;
             if (remainingSeconds <= 0f) HideAnnouncement();
+            else ApplyFade();
         }
 
         private void HideAnnouncement()

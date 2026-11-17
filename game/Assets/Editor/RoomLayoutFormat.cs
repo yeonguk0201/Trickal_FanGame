@@ -462,6 +462,8 @@ namespace TrickalFanGame.Editor
                     trapKind: RoomTrapKind.PeriodicSpikes, secondPhase: true),
                 new RoomLayoutSymbol('~', RoomLayoutCellKind.FloorTrap, "장판", trapKind: RoomTrapKind.DamagePuddle),
                 new RoomLayoutSymbol('w', RoomLayoutCellKind.FloorTrap, "거미줄", trapKind: RoomTrapKind.Spiderweb),
+                new RoomLayoutSymbol('m', RoomLayoutCellKind.FloorTrap, "진흙케이크 (1회용, Trap-2)",
+                    trapKind: RoomTrapKind.MudCake),
                 new RoomLayoutSymbol('*', RoomLayoutCellKind.ObstacleTrap, "불 (비행도 막음)",
                     trapKind: RoomTrapKind.Fire),
                 new RoomLayoutSymbol('Z', RoomLayoutCellKind.ObstacleTrap, "가시 돌", trapKind: RoomTrapKind.SpikedRock),

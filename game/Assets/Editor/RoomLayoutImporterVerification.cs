@@ -274,9 +274,10 @@ namespace TrickalFanGame.Editor
                 ('b', RoomTrapKind.PeriodicSpikes, true), ('~', RoomTrapKind.DamagePuddle, false),
                 ('w', RoomTrapKind.Spiderweb, false), ('*', RoomTrapKind.Fire, false),
                 ('Z', RoomTrapKind.SpikedRock, false), ('P', RoomTrapKind.PoisonMushroom, false),
+                ('m', RoomTrapKind.MudCake, false),
             };
             Assert(RoomLayoutFormat.Symbols.Values.Count(symbol => symbol.IsTrap) == trapSymbols.Length,
-                "The room format must define exactly the eight trap symbols.");
+                "The room format must define exactly the nine trap symbols.");
             foreach ((char symbol, RoomTrapKind kind, bool secondPhase) in trapSymbols)
             {
                 Assert(RoomLayoutFormat.Symbols.TryGetValue(symbol, out RoomLayoutSymbol entry) && entry.IsTrap &&

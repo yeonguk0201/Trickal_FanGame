@@ -64,8 +64,8 @@ namespace TrickalFanGame.Editor
                 "HUD-7B requires a pause-menu-size resume button (UX-0) inside the focus scope.");
             RectTransform statsPanel = view.FocusScope.Find("Detailed Stats") as RectTransform;
             RectTransform viewport = view.FocusScope.Find("Artifact Viewport") as RectTransform;
-            Assert(statsPanel != null && statsPanel.sizeDelta == new Vector2(300, 560) &&
-                viewport != null && viewport.sizeDelta == new Vector2(700, 520),
+            Assert(statsPanel != null && statsPanel.sizeDelta == InGamePresentationSetup.StatsBoxSize &&
+                viewport != null && viewport.sizeDelta == InGamePresentationSetup.ArtifactViewportSize,
                 "HUD-7B detailed stats and artifact list must fit the central popup without overlap.");
             EventSystem[] systems = FindAll<EventSystem>(scene);
             Assert(systems.Length == 1 && systems[0].GetComponent<InputSystemUIInputModule>() != null,

@@ -68,10 +68,13 @@ namespace TrickalFanGame.Editor
                 "Detailed stats HUD background must stay nearly transparent and non-interactive.");
             Assert(view.ValuesText.color.a >= 0.6f && view.ValuesText.color.a <= 0.72f,
                 "Detailed stats text must use the requested subdued opacity.");
-            Image[] placeholderIcons = panel.GetComponentsInChildren<Image>(true)
-                .Where(image => image.name.StartsWith("Placeholder Icon ", StringComparison.Ordinal)).ToArray();
-            Assert(placeholderIcons.Length == 4 && placeholderIcons.All(icon => !icon.raycastTarget && icon.color.a <= 0.6f),
-                "Four subdued temporary stat icons are required until final assets exist.");
+            // In-game presentation guide: the final icons (sword, bow, shoe, critical burst) replaced the letters.
+            Image[] statIcons = InGamePresentationSetup.HudStatKeys
+                .Select(key => panel.Find(InGamePresentationSetup.HudStatIconPrefix + key)?.GetComponent<Image>())
+                .ToArray();
+            Assert(statIcons.All(icon => icon != null && !icon.raycastTarget && icon.color == Color.white) &&
+                   statIcons.Take(3).All(icon => icon.sprite != null) && view.CriticalChanceIcon == statIcons[3],
+                "Detailed stats HUD needs the four stat icons in A · AS · M · C order.");
         }
 
         private static void ValidatePersistenceAndImmediateRefresh()

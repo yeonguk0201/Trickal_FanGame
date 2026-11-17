@@ -21,7 +21,7 @@ namespace TrickalFanGame.Editor
             Scene scene = EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath, OpenSceneMode.Single);
             ValidateScene(scene);
             VerifyRuntimeState(scene);
-            Debug.Log("Week 13 HUD-4C verification passed: floor-only names, one alert per floor, 1.5-second unscaled duration, and future floor-name overrides.");
+            Debug.Log("Week 13 HUD-4C verification passed: floor-only names, one alert per floor, unscaled banner duration, and future floor-name overrides.");
         }
 
         public static void SetupAndVerifyBatch()
@@ -58,10 +58,13 @@ namespace TrickalFanGame.Editor
             Assert(view.RegionName == Week13Hud4CSetup.RegionName &&
                 view.ResolveFloorName(1) == "요정의 숲 · 1층" && view.ResolveFloorName(3) == "요정의 숲 · 3층",
                 "HUD-4C must use the current numeric floor name without a room identifier.");
-            Assert(Mathf.Approximately(view.DisplayDuration, 1.5f),
-                "Floor entry notification must last 1.5 seconds.");
+            // In-game presentation: the banner fogs in and out, so it stays a little longer than the old 1.5 s.
+            Assert(Mathf.Approximately(view.DisplayDuration, InGamePresentationSetup.BannerDisplaySeconds),
+                "Floor entry notification must last the banner display time.");
             RectTransform panel = view.GetComponent<RectTransform>();
-            Assert(panel.sizeDelta == new Vector2(720, 104) && panel.anchoredPosition == new Vector2(0, 180),
+            // In-game presentation guide: the winged banner art, slightly above the screen centre.
+            Assert(panel.sizeDelta == InGamePresentationSetup.BannerSize &&
+                   panel.anchoredPosition == InGamePresentationSetup.BannerPosition,
                 "Floor entry notification must appear slightly above the screen center.");
             Assert(view.gameObject.activeSelf && view.enabled &&
                 Mathf.Approximately(view.AnnouncementCanvasGroup.alpha, 0f),

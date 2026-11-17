@@ -26,7 +26,11 @@ namespace TrickalFanGame.Editor
                 "Title plaque must draw behind the title.");
             Assert(view.SectionRowTemplate != null && !view.SectionRowTemplate.activeSelf, "Missing hidden section row template.");
             Assert(UsesSprite(view.EntryTemplate.GetComponent<Image>(), MenuArtSetup.PanelMain), "Credit rows must use the card art.");
-            Assert(UsesSprite(view.BackButton.GetComponent<Image>(), MenuArtSetup.ButtonPrimary), "Back must use the primary button art.");
+            Assert(UsesSprite(view.BackButton.GetComponent<Image>(), MenuArtSetup.ButtonSecondary) &&
+                   ((RectTransform)view.BackButton.transform).anchoredPosition == MenuUiBuilder.BackPosition &&
+                   ((RectTransform)view.BackButton.transform).sizeDelta == MenuUiBuilder.BackSize,
+                "Back must be the shared back button in the shared spot.");
+            Assert(view.transform.Find("ErpinSticker") == null, "The credits screen must not show the Erpin sticker.");
 
             GameObject clone = Object.Instantiate(view.gameObject);
             try

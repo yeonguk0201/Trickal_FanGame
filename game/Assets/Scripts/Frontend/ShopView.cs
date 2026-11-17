@@ -18,9 +18,10 @@ namespace TrickalFanGame.Frontend
     public sealed class ShopView : MonoBehaviour
     {
         public const string Title = "시스트의 상점";
-        public const string KeeperLine = "마음에 드신 상품이… 있을깝쇼?";
+        // The keeper lines break where the clover bubble needs two lines.
+        public const string KeeperLine = "마음에 드신 상품이…\n있을깝쇼?";
         public const string GoldiTitle = "골디의 상점";
-        public const string GoldiKeeperLine = "부담스럽게 생각마시고 천천히 둘러보세요";
+        public const string GoldiKeeperLine = "부담스럽게 생각마시고\n천천히 둘러보세요";
         public const string GoldSuffix = "골드";
         public const string FreeLabel = "무료";
         public const string SoldOutLabel = "판매 완료";
@@ -36,15 +37,20 @@ namespace TrickalFanGame.Frontend
         public const string ConsumableKind = "소모품";
         public const string ConsumableEffect = "구매하면 시스트 앞에 떨어집니다. 주워서 사용합니다.";
         public const string GoldiConsumableEffect = "구매하면 골디 앞에 떨어집니다. 주워서 사용합니다.";
-        public const string InputHint = "방향키 이동  ·  Enter 구매  ·  Esc 닫기";
+        public const string InputHint = "방향키 이동  ·  Enter 구매  ·  Q 투자  ·  Esc 닫기";
+        // Shop UI artwork: Enter or a click opens the purchase popup, and Enter there buys.
+        public const string ArtworkInputHint = "방향키 이동  ·  Enter 선택  ·  Q 투자  ·  Esc 닫기";
+        public const string ArtworkGoldiInputHint = "방향키 이동  ·  Enter 선택  ·  Esc 닫기";
+        public const string PurchaseTitle = "상품 구매";
+        public const string CancelLabel = "취소";
         // Elif-3 (contract 27 §4): elif offers and the invest screen of the general shop.
         public const string ElifSuffix = "엘리프";
         public const string ElifLockedLabel = "사용 불가";
         public const string NotEnoughElifMessage = "엘리프 부족";
         public const string ElifLockedMessage = "서버 잔액을 불러오지 못해 이번 Run은 엘리프를 쓸 수 없습니다";
         public const string ElifOfferNote = "엘리프로만 살 수 있는 상품입니다. 할인은 적용되지 않습니다.";
-        public const string InvestLabel = "투자 [Q]";
-        public const string InvestBackLabel = "상품 보기 [Q]";
+        public const string InvestLabel = "투자";
+        public const string InvestBackLabel = "상품 보기";
         public const string InvestBuyLabel = "투자";
         public const string InvestTitle = "상점 투자";
         public const string InvestKind = "상점 투자";
@@ -64,6 +70,9 @@ namespace TrickalFanGame.Frontend
         public static readonly Color GoldiPanelOutlineColor = new(1f, 0.87f, 0.3f, 1f);
         public static readonly Vector2 GoldiPanelOutlineDistance = new(5f, -5f);
         public static readonly Color GoldiTitleColor = new(1f, 0.87f, 0.3f, 1f);
+        // Shop UI artwork: titles on the cream plaque. The panel keeps its artwork colors in both shops.
+        public static readonly Color ArtworkTitleColor = new(0.35f, 0.23f, 0.23f, 1f);
+        public static readonly Color ArtworkGoldiTitleColor = new(0.48f, 0.35f, 0.06f, 1f);
 
         [SerializeField] private ShopSession session;
         [SerializeField] private CanvasGroup overlay;
@@ -91,14 +100,41 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private CanvasGroup investPanel;
         [SerializeField] private ShopUpgradeRowView[] investRows = Array.Empty<ShopUpgradeRowView>();
         [SerializeField] private TMP_Text investNoticeText;
+        [Header("Shop UI artwork")]
+        [SerializeField] private bool usesArtwork;
+        [SerializeField] private CanvasGroup confirmPopup;
+        [SerializeField] private TMP_Text confirmTitleText;
+        [SerializeField] private Image confirmIcon;
+        [SerializeField] private GameObject confirmIconGlow;
+        [SerializeField] private ShopHoverTarget confirmIconHover;
+        [SerializeField] private TMP_Text confirmNoteText;
+        [SerializeField] private Image confirmCurrencyIcon;
+        [SerializeField] private Button cancelButton;
+        [SerializeField] private Button dismissButton;
+        [SerializeField] private RectTransform tooltip;
+        [SerializeField] private CanvasGroup tooltipGroup;
+        [SerializeField] private TMP_Text tooltipNameText;
+        [SerializeField] private TMP_Text inputHintText;
+        [SerializeField] private Sprite goldSprite;
+        [SerializeField] private Sprite elifSprite;
+        [SerializeField] private float tooltipBaseHeight;
+        [SerializeField] private float tooltipEffectBaseHeight;
 
         private bool subscribed;
+        private bool confirmByKeyboard;
+        [SerializeField] private GameObject buyFocusMark;
+        [SerializeField] private GameObject cancelFocusMark;
+        [SerializeField] private ShopHoverTarget buyHover;
+        [SerializeField] private ShopHoverTarget cancelHover;
+        [SerializeField] private GameObject investFocusMark;
+        [SerializeField] private GameObject closeFocusMark;
         private int shownFrame = -1;
         private GameObject previousSelectedObject;
 
         public ShopSession Session => session;
         public CanvasGroup Overlay => overlay;
         public GraphicRaycaster GraphicRaycaster => graphicRaycaster;
+        public EventSystem UiEventSystem => uiEventSystem;
         public Image KeeperPortrait => keeperPortrait;
         public TMP_Text GoldText => goldText;
         public ShopOfferCellView[] Cells => cells;
@@ -121,6 +157,20 @@ namespace TrickalFanGame.Frontend
         public CanvasGroup InvestPanel => investPanel;
         public ShopUpgradeRowView[] InvestRows => investRows;
         public TMP_Text InvestNoticeText => investNoticeText;
+        public bool UsesArtwork => usesArtwork;
+        public CanvasGroup ConfirmPopup => confirmPopup;
+        public TMP_Text ConfirmTitleText => confirmTitleText;
+        public Image ConfirmIcon => confirmIcon;
+        public TMP_Text ConfirmNoteText => confirmNoteText;
+        public Image ConfirmCurrencyIcon => confirmCurrencyIcon;
+        public Button CancelButton => cancelButton;
+        public Button DismissButton => dismissButton;
+        public RectTransform Tooltip => tooltip;
+        public CanvasGroup TooltipGroup => tooltipGroup;
+        public TMP_Text TooltipNameText => tooltipNameText;
+        public TMP_Text InputHintText => inputHintText;
+        public bool IsConfirming { get; private set; }
+        public bool IsTooltipShown => tooltipGroup != null && tooltipGroup.alpha > 0f;
         public ShopKind ShownKind { get; private set; }
         public bool IsVisible { get; private set; }
         public int FocusedIndex { get; private set; }
@@ -184,6 +234,58 @@ namespace TrickalFanGame.Frontend
             SetInvesting(false);
         }
 
+        // Shop UI artwork: the purchase popup replaces the detail column. The detail texts and the buy button move
+        // into it: the name and price sit in the popup, the kind and effect in the tooltip that opens while the mouse
+        // rests on the item picture (or at once when Enter opened the popup).
+        public void ConfigureArtwork(CanvasGroup configuredPopup, TMP_Text configuredPopupTitle,
+            Image configuredPopupIcon, GameObject configuredIconGlow, ShopHoverTarget configuredIconHover,
+            TMP_Text configuredNote, Image configuredCurrencyIcon, Button configuredCancel, Button configuredDismiss,
+            RectTransform configuredTooltip, CanvasGroup configuredTooltipGroup, TMP_Text configuredTooltipName,
+            TMP_Text configuredInputHint, Sprite configuredGold, Sprite configuredElif)
+        {
+            Unsubscribe();
+            usesArtwork = true;
+            confirmPopup = configuredPopup;
+            confirmTitleText = configuredPopupTitle;
+            confirmIcon = configuredPopupIcon;
+            confirmIconGlow = configuredIconGlow;
+            confirmIconHover = configuredIconHover;
+            confirmNoteText = configuredNote;
+            confirmCurrencyIcon = configuredCurrencyIcon;
+            cancelButton = configuredCancel;
+            dismissButton = configuredDismiss;
+            tooltip = configuredTooltip;
+            tooltipGroup = configuredTooltipGroup;
+            tooltipNameText = configuredTooltipName;
+            inputHintText = configuredInputHint;
+            goldSprite = configuredGold;
+            elifSprite = configuredElif;
+            tooltipBaseHeight = tooltip != null ? tooltip.sizeDelta.y : 0f;
+            tooltipEffectBaseHeight = detailEffectText != null ? detailEffectText.rectTransform.sizeDelta.y : 0f;
+            Subscribe();
+            SetConfirming(false, false);
+            ApplyTheme(ShopKind.General);
+        }
+
+        public static string FormatCompactPriceLabel(ShopOfferStatus status, int price) => status switch
+        {
+            ShopOfferStatus.Empty => string.Empty,
+            ShopOfferStatus.SoldOut => SoldOutLabel,
+            ShopOfferStatus.ItemUnavailable => ItemUnavailableLabel,
+            _ => price > 0 ? price.ToString() : FreeLabel,
+        };
+
+        public static bool ShowsCurrencyIcon(ShopOfferStatus status, int price) =>
+            price > 0 && status is not (ShopOfferStatus.Empty or ShopOfferStatus.SoldOut or
+                ShopOfferStatus.ItemUnavailable or ShopOfferStatus.Free);
+
+        // The gold and elif lines: a number beside the picture with the artwork, the full text without it.
+        public string FormatGold(int gold) => usesArtwork ? gold.ToString() : $"보유 {gold} {GoldSuffix}";
+
+        public string FormatElif(int available, bool spendingAllowed) =>
+            !usesArtwork ? FormatElifBalance(available, spendingAllowed)
+            : spendingAllowed ? available.ToString() : $"{available} ({ElifLockedLabel})";
+
         public static string FormatUpgradeLevel(int level, int maxLevel) => $"{level} / {maxLevel}단계";
 
         public static string FormatUpgradeNext(ShopUpgradeDefinition definition, int level) =>
@@ -213,6 +315,16 @@ namespace TrickalFanGame.Frontend
 
         public static string GetTitle(ShopKind kind) => kind == ShopKind.Goldi ? GoldiTitle : Title;
         public static string GetKeeperLine(ShopKind kind) => kind == ShopKind.Goldi ? GoldiKeeperLine : KeeperLine;
+        // What a shop consumable does, keyed by its stable ID (shop-catalog.asset).
+        public static string DescribeConsumable(string consumableId) => consumableId switch
+        {
+            "heart" => "HP를 1칸 회복합니다.",
+            "sp" => "SP를 1칸 회복합니다.",
+            "bomb" => "폭탄 1개를 얻습니다. 장애물을 부수고 주변 적에게 피해를 줍니다.",
+            "key" => "열쇠 1개를 얻습니다. 잠긴 방이나 황금 상자를 열 수 있습니다.",
+            _ => string.Empty,
+        };
+
         public static string GetConsumableEffect(ShopKind kind) =>
             kind == ShopKind.Goldi ? GoldiConsumableEffect : ConsumableEffect;
 
@@ -221,10 +333,14 @@ namespace TrickalFanGame.Frontend
             bool goldi = kind == ShopKind.Goldi;
             ShownKind = kind;
             SetText(titleText, GetTitle(kind));
-            if (titleText != null) titleText.color = goldi ? GoldiTitleColor : TitleColor;
+            if (titleText != null)
+                titleText.color = usesArtwork ? goldi ? ArtworkGoldiTitleColor : ArtworkTitleColor
+                    : goldi ? GoldiTitleColor : TitleColor;
+            SetText(inputHintText, goldi ? ArtworkGoldiInputHint : ArtworkInputHint);
             SetText(keeperNameText, ShopKeeper.GetDisplayName(kind));
             SetText(keeperLineText, GetKeeperLine(kind));
             UserArtwork.Apply(keeperPortrait, UserArtwork.Load(ShopKeeper.GetArtworkKey(kind)));
+            if (usesArtwork) return;
             if (panelImage != null) panelImage.color = goldi ? GoldiPanelColor : PanelColor;
             if (panelOutline != null)
             {
@@ -259,6 +375,10 @@ namespace TrickalFanGame.Frontend
             if (!IsVisible) return;
             // The E press that opened the shop must not also buy the first offer.
             if (Time.frameCount != shownFrame) ReadKeyboard();
+            // A popup opened with Enter shows the tooltip at once; once the mouse moves, the tooltip follows the
+            // mouse resting on the item picture like a popup opened with a click.
+            if (confirmByKeyboard && Mouse.current != null && Mouse.current.delta.ReadValue().sqrMagnitude > 0f)
+                confirmByKeyboard = false;
             if (IsVisible) Refresh();
         }
 
@@ -268,9 +388,23 @@ namespace TrickalFanGame.Frontend
             if (keyboard == null) return;
             if (keyboard.escapeKey.wasPressedThisFrame)
             {
-                // Escape leaves the invest list first, then closes the shop.
-                if (IsInvesting) SetInvesting(false);
+                // Escape closes the purchase popup first, then leaves the invest list, then closes the shop.
+                if (IsConfirming) CancelConfirm();
+                else if (IsInvesting) SetInvesting(false);
                 else Close();
+                return;
+            }
+
+            bool submit = keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame ||
+                          keyboard.spaceKey.wasPressedThisFrame || keyboard.eKey.wasPressedThisFrame;
+            if (IsConfirming)
+            {
+                // Left and right choose between 취소 and 구매; Enter presses the chosen one.
+                if (keyboard.leftArrowKey.wasPressedThisFrame || keyboard.aKey.wasPressedThisFrame)
+                    SetConfirmChoice(false);
+                if (keyboard.rightArrowKey.wasPressedThisFrame || keyboard.dKey.wasPressedThisFrame)
+                    SetConfirmChoice(true);
+                if (submit) Submit(true);
                 return;
             }
 
@@ -280,28 +414,220 @@ namespace TrickalFanGame.Frontend
                 return;
             }
 
-            if (keyboard.leftArrowKey.wasPressedThisFrame || keyboard.aKey.wasPressedThisFrame) MoveFocus(-1, 0);
-            if (keyboard.rightArrowKey.wasPressedThisFrame || keyboard.dKey.wasPressedThisFrame) MoveFocus(1, 0);
-            if (keyboard.upArrowKey.wasPressedThisFrame || keyboard.wKey.wasPressedThisFrame) MoveFocus(0, -1);
-            if (keyboard.downArrowKey.wasPressedThisFrame || keyboard.sKey.wasPressedThisFrame) MoveFocus(0, 1);
-            if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame ||
-                keyboard.spaceKey.wasPressedThisFrame || keyboard.eKey.wasPressedThisFrame)
+            Vector2Int move = ReadRepeatedDirection(keyboard);
+            if (move != Vector2Int.zero) MoveFocus(move.x, move.y);
+            if (submit) Submit(true);
+        }
+
+        // Holding a direction repeats the move after a short delay, like a text cursor.
+        public const float MoveRepeatDelay = 0.35f;
+        public const float MoveRepeatInterval = 0.09f;
+        private Vector2Int heldDirection;
+        private float moveRepeatTimer;
+
+        private Vector2Int ReadRepeatedDirection(Keyboard keyboard)
+        {
+            Vector2Int pressed =
+                keyboard.leftArrowKey.wasPressedThisFrame || keyboard.aKey.wasPressedThisFrame ? Vector2Int.left
+                : keyboard.rightArrowKey.wasPressedThisFrame || keyboard.dKey.wasPressedThisFrame ? Vector2Int.right
+                : keyboard.upArrowKey.wasPressedThisFrame || keyboard.wKey.wasPressedThisFrame ? Vector2Int.down
+                : keyboard.downArrowKey.wasPressedThisFrame || keyboard.sKey.wasPressedThisFrame ? Vector2Int.up
+                : Vector2Int.zero;
+            if (pressed != Vector2Int.zero)
+            {
+                // Rows grow downward: up is dy -1 and down is dy +1.
+                heldDirection = pressed;
+                moveRepeatTimer = MoveRepeatDelay;
+                return pressed;
+            }
+
+            if (heldDirection == Vector2Int.zero || !IsHeld(keyboard, heldDirection))
+            {
+                heldDirection = Vector2Int.zero;
+                return Vector2Int.zero;
+            }
+
+            moveRepeatTimer -= Time.unscaledDeltaTime;
+            if (moveRepeatTimer > 0f) return Vector2Int.zero;
+            moveRepeatTimer += MoveRepeatInterval;
+            return heldDirection;
+        }
+
+        private static bool IsHeld(Keyboard keyboard, Vector2Int direction) =>
+            direction == Vector2Int.left ? keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed
+            : direction == Vector2Int.right ? keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed
+            : direction == Vector2Int.down ? keyboard.upArrowKey.isPressed || keyboard.wKey.isPressed
+            : keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed;
+
+        // Enter or a click on the focused offer. Without the artwork it buys at once; with it, it opens the
+        // purchase popup, and inside the popup it buys.
+        public void Submit(bool byKeyboard)
+        {
+            if (!IsVisible) return;
+            if (!usesArtwork)
             {
                 if (IsInvesting) TryInvestFocused();
                 else TryPurchaseFocused();
+                return;
             }
+
+            if (!IsConfirming && FocusedAction != ShopFocusAction.None)
+            {
+                ShopFocusAction action = FocusedAction;
+                FocusedAction = ShopFocusAction.None;
+                if (action == ShopFocusAction.Invest) ToggleInvesting();
+                else Close();
+                return;
+            }
+
+            if (!IsConfirming) OpenConfirm(byKeyboard);
+            else if (ConfirmChoosesBuy) ConfirmFocused();
+            else CancelConfirm();
+        }
+
+        // Which popup button Enter presses. The popup opens on 구매, so Enter twice still buys.
+        public bool ConfirmChoosesBuy { get; private set; } = true;
+
+        public void SetConfirmChoice(bool buy)
+        {
+            ConfirmChoosesBuy = buy;
+            ApplyConfirmChoice();
+        }
+
+        private void ApplyConfirmChoice()
+        {
+            if (buyFocusMark != null) buyFocusMark.SetActive(IsConfirming && ConfirmChoosesBuy);
+            if (cancelFocusMark != null) cancelFocusMark.SetActive(IsConfirming && !ConfirmChoosesBuy);
+        }
+
+        // The ring around the chosen popup button, and the mouse moving the choice like the arrow keys.
+        public void ConfigureConfirmChoice(GameObject configuredBuyMark, GameObject configuredCancelMark,
+            ShopHoverTarget configuredBuyHover, ShopHoverTarget configuredCancelHover)
+        {
+            Unsubscribe();
+            buyFocusMark = configuredBuyMark;
+            cancelFocusMark = configuredCancelMark;
+            buyHover = configuredBuyHover;
+            cancelHover = configuredCancelHover;
+            Subscribe();
+            ApplyConfirmChoice();
+        }
+
+        public GameObject BuyFocusMark => buyFocusMark;
+        public GameObject InvestFocusMark => investFocusMark;
+        public GameObject CloseFocusMark => closeFocusMark;
+
+        // The rings around 투자 and 닫기 when the keyboard focus moves below the grid.
+        public void ConfigureActionFocus(GameObject configuredInvestMark, GameObject configuredCloseMark)
+        {
+            investFocusMark = configuredInvestMark;
+            closeFocusMark = configuredCloseMark;
+            ApplyActionFocus();
+        }
+
+        private void ApplyActionFocus()
+        {
+            bool shown = IsVisible && !IsInvesting && !IsConfirming;
+            if (investFocusMark != null) investFocusMark.SetActive(shown && FocusedAction == ShopFocusAction.Invest);
+            if (closeFocusMark != null) closeFocusMark.SetActive(shown && FocusedAction == ShopFocusAction.Close);
+        }
+        public GameObject CancelFocusMark => cancelFocusMark;
+
+        private void OnBuyHovered(ShopHoverTarget _)
+        {
+            if (IsConfirming) SetConfirmChoice(true);
+        }
+
+        private void OnCancelHovered(ShopHoverTarget _)
+        {
+            if (IsConfirming) SetConfirmChoice(false);
+        }
+
+        // Opens the purchase popup for the focused offer or upgrade when the player can take it now.
+        public bool OpenConfirm(bool byKeyboard)
+        {
+            if (!usesArtwork || !IsVisible || IsConfirming || !CanConfirmFocused()) return false;
+            SetConfirming(true, byKeyboard);
+            return true;
+        }
+
+        public void CancelConfirm() => SetConfirming(false, false);
+
+        // Buys the offer (or the upgrade) shown in the popup and closes the popup.
+        public bool ConfirmFocused()
+        {
+            if (!IsConfirming) return false;
+            bool bought = IsInvesting
+                ? TryInvestFocused() == ShopUpgradeStatus.Purchased
+                : TryPurchaseFocused() == ShopPurchaseResult.Purchased;
+            SetConfirming(false, false);
+            return bought;
+        }
+
+        private bool CanConfirmFocused()
+        {
+            ShopRoom shop = session != null ? session.Shop : null;
+            if (shop == null || shop.Stock == null) return false;
+            if (IsInvesting)
+                return InvestFocusedIndex < ShopUpgrades.Catalog.Length && shop.GetUpgradeStatus(
+                    ShopUpgrades.Catalog[InvestFocusedIndex].UpgradeId) == ShopUpgradeStatus.Available;
+            return FocusedOffer != null &&
+                   shop.GetStatus(FocusedIndex, session.Inventory) is ShopOfferStatus.Available or ShopOfferStatus.Free;
+        }
+
+        private void SetConfirming(bool confirming, bool byKeyboard)
+        {
+            IsConfirming = confirming && confirmPopup != null;
+            confirmByKeyboard = IsConfirming && byKeyboard;
+            ConfirmChoosesBuy = true;
+            ApplyConfirmChoice();
+            if (confirmPopup != null)
+            {
+                confirmPopup.alpha = IsConfirming ? 1f : 0f;
+                confirmPopup.interactable = IsConfirming;
+                confirmPopup.blocksRaycasts = IsConfirming;
+            }
+            if (IsVisible) Refresh();
+            else ApplyTooltip();
+        }
+
+        private void ApplyTooltip()
+        {
+            if (tooltipGroup == null) return;
+            bool show = IsConfirming && !IsInvesting &&
+                        (confirmByKeyboard || (confirmIconHover != null && confirmIconHover.IsHovered));
+            tooltipGroup.alpha = show ? 1f : 0f;
+            tooltipGroup.blocksRaycasts = false;
+            tooltipGroup.interactable = false;
+        }
+
+        // Space kept below the effect text, inside the tooltip's bottom frame.
+        public const float TooltipBottomPadding = 30f;
+
+        // A long effect runs to several lines: the tooltip grows downward from its top edge, keeping the bottom
+        // padding below the last line. The effect text hangs from the tooltip's top edge.
+        private void FitTooltip()
+        {
+            if (tooltip == null || detailEffectText == null || tooltipBaseHeight <= 0f) return;
+            RectTransform effect = detailEffectText.rectTransform;
+            float preferred = detailEffectText.GetPreferredValues(detailEffectText.text, effect.rect.width, 0f).y;
+            float needed = -effect.anchoredPosition.y + preferred + TooltipBottomPadding;
+            tooltip.sizeDelta = new Vector2(tooltip.sizeDelta.x, Mathf.Max(tooltipBaseHeight, needed));
+            effect.sizeDelta = new Vector2(effect.sizeDelta.x, Mathf.Max(tooltipEffectBaseHeight, preferred));
         }
 
         public bool CanInvest => session != null && session.Shop != null && session.Shop.SellsUpgrades &&
                                  investPanel != null && investRows.Length > 0;
 
-        public bool ToggleInvesting() => SetInvesting(!IsInvesting);
+        public bool ToggleInvesting() => !IsConfirming && SetInvesting(!IsInvesting);
 
         // Opens or closes the invest list. Only the general shop (시스트) has it.
         public bool SetInvesting(bool investing)
         {
             bool next = investing && IsVisible && CanInvest;
             bool changed = next != IsInvesting;
+            if (changed && IsConfirming) SetConfirming(false, false);
+            if (changed) FocusedAction = ShopFocusAction.None;
             IsInvesting = next;
             if (changed)
             {
@@ -342,11 +668,19 @@ namespace TrickalFanGame.Frontend
         // Rows grow downward: dy = 1 moves to the row below. The focus stops at the grid edge.
         public void MoveFocus(int dx, int dy)
         {
-            if (!IsVisible) return;
+            if (!IsVisible || IsConfirming) return;
+            int rowCount = Math.Min(investRows.Length, ShopUpgrades.Catalog.Length);
             if (IsInvesting)
             {
-                if (dy != 0) SetInvestFocus(Mathf.Clamp(InvestFocusedIndex + dy, 0,
-                    Math.Min(investRows.Length, ShopUpgrades.Catalog.Length) - 1));
+                if (dy == 0 || rowCount == 0) return;
+                SetInvestFocus(usesArtwork
+                    ? (InvestFocusedIndex + dy + rowCount) % rowCount
+                    : Mathf.Clamp(InvestFocusedIndex + dy, 0, rowCount - 1));
+                return;
+            }
+            if (usesArtwork)
+            {
+                MoveArtworkFocus(dx, dy);
                 return;
             }
             int columns = ShopCatalog.GridColumns;
@@ -355,11 +689,69 @@ namespace TrickalFanGame.Frontend
             SetFocus(row * columns + column);
         }
 
+        // Shop UI artwork: the focus wraps around its row and its column. Below the grid the 투자 button sits under
+        // the second column and the 닫기 button under the third, so those columns reach them too.
+        private void MoveArtworkFocus(int dx, int dy)
+        {
+            int columns = ShopCatalog.GridColumns;
+            int rows = ShopCatalog.GridSlotCount / columns;
+            bool investShown = CanInvest && investButton != null && investButton.gameObject.activeSelf;
+            if (FocusedAction != ShopFocusAction.None)
+            {
+                if (dx != 0)
+                {
+                    // The button row holds 투자 (when shown) and 닫기.
+                    if (investShown)
+                        SetFocusedAction(FocusedAction == ShopFocusAction.Invest
+                            ? ShopFocusAction.Close
+                            : ShopFocusAction.Invest);
+                    return;
+                }
+                if (dy == 0) return;
+                int actionColumn = ActionColumn(FocusedAction);
+                SetFocus((dy > 0 ? 0 : rows - 1) * columns + actionColumn);
+                return;
+            }
+
+            int column = FocusedIndex % columns;
+            int row = FocusedIndex / columns;
+            if (dx != 0)
+            {
+                SetFocus(row * columns + (column + dx + columns) % columns);
+                return;
+            }
+            if (dy == 0) return;
+            ShopFocusAction below = column == ActionColumn(ShopFocusAction.Close) ? ShopFocusAction.Close
+                : column == ActionColumn(ShopFocusAction.Invest) && investShown ? ShopFocusAction.Invest
+                : ShopFocusAction.None;
+            int next = row + dy;
+            if (below != ShopFocusAction.None && (next == rows || next < 0))
+            {
+                SetFocusedAction(below);
+                return;
+            }
+            SetFocus(((next % rows) + rows) % rows * columns + column);
+        }
+
+        private static int ActionColumn(ShopFocusAction action) =>
+            action == ShopFocusAction.Invest ? 1 : ShopCatalog.GridColumns - 1;
+
+        // The 투자 or 닫기 button chosen with the keyboard; None while a cell has the focus.
+        public ShopFocusAction FocusedAction { get; private set; }
+
+        public void SetFocusedAction(ShopFocusAction action)
+        {
+            if (!IsVisible || IsInvesting || IsConfirming) return;
+            FocusedAction = action;
+            Refresh();
+        }
+
         public void SetFocus(int cellIndex)
         {
             if (!IsVisible || cellIndex < 0 || cellIndex >= ShopCatalog.GridSlotCount) return;
             if (cellIndex != FocusedIndex) SetFeedback(string.Empty);
             FocusedIndex = cellIndex;
+            FocusedAction = ShopFocusAction.None;
             Refresh();
         }
 
@@ -396,22 +788,19 @@ namespace TrickalFanGame.Frontend
                 if (cells[index] == null) continue;
                 ShopOffer offer = stock.GetOffer(index);
                 cells[index].Bind(index, offer, shop.GetStatus(index, session.Inventory), shop.GetPrice(offer),
-                    index == FocusedIndex && !IsInvesting);
+                    index == FocusedIndex && !IsInvesting && FocusedAction == ShopFocusAction.None);
             }
 
             if (goldText != null && shop.Progress != null)
-                goldText.text = $"보유 {shop.Progress.GetResourceCount(RunResourceType.Gold)} {GoldSuffix}";
+                goldText.text = FormatGold(shop.Progress.GetResourceCount(RunResourceType.Gold));
             if (elifText != null && shop.Progress != null)
-                elifText.text = FormatElifBalance(shop.Progress.AvailableElif, shop.Progress.IsElifSpendingAllowed);
+                elifText.text = FormatElif(shop.Progress.AvailableElif, shop.Progress.IsElifSpendingAllowed);
             if (investButton != null) investButton.gameObject.SetActive(CanInvest);
             if (investButtonLabel != null) investButtonLabel.text = IsInvesting ? InvestBackLabel : InvestLabel;
-            if (IsInvesting)
-            {
-                RefreshInvest(shop);
-                return;
-            }
-
-            RefreshDetail(shop, FocusedOffer, shop.GetStatus(FocusedIndex, session.Inventory));
+            if (IsInvesting) RefreshInvest(shop);
+            else RefreshDetail(shop, FocusedOffer, shop.GetStatus(FocusedIndex, session.Inventory));
+            ApplyTooltip();
+            ApplyActionFocus();
         }
 
         private void RefreshInvest(ShopRoom shop)
@@ -440,6 +829,22 @@ namespace TrickalFanGame.Frontend
                 : string.Empty;
             SetText(detailEffectText, $"{FormatUpgradeNext(focused, level)}{blocked}\n\n{InvestNotice}");
             SetText(detailPriceText, FormatUpgradeCost(focused, level));
+            if (!usesArtwork) return;
+            bool maxLevel = level >= focused.MaxLevel;
+            SetText(confirmTitleText, InvestTitle);
+            SetText(confirmNoteText, FormatUpgradeNext(focused, level));
+            SetText(detailPriceText, maxLevel ? MaxLevelLabel : focused.GetCost(level + 1).ToString());
+            SetPicture(confirmCurrencyIcon, maxLevel ? null : elifSprite);
+            if (confirmIcon != null) confirmIcon.enabled = false;
+            if (confirmIconGlow != null) confirmIconGlow.SetActive(false);
+        }
+
+        private static void SetPicture(Image image, Sprite sprite)
+        {
+            if (image == null) return;
+            image.sprite = sprite;
+            image.enabled = sprite != null;
+            image.preserveAspect = true;
         }
 
         private ShopOffer FocusedOffer
@@ -456,12 +861,16 @@ namespace TrickalFanGame.Frontend
             bool canBuy = status is ShopOfferStatus.Available or ShopOfferStatus.Free;
             if (buyButton != null) buyButton.interactable = canBuy;
             if (buyButtonLabel != null) buyButtonLabel.text = status == ShopOfferStatus.Free ? TakeLabel : BuyLabel;
+            SetText(confirmTitleText, PurchaseTitle);
             if (offer == null)
             {
                 SetText(detailNameText, string.Empty);
                 SetText(detailKindText, string.Empty);
                 SetText(detailEffectText, EmptyCellMessage);
                 SetText(detailPriceText, string.Empty);
+                SetText(tooltipNameText, string.Empty);
+                SetText(confirmNoteText, string.Empty);
+                SetPicture(confirmCurrencyIcon, null);
                 return;
             }
 
@@ -482,10 +891,53 @@ namespace TrickalFanGame.Frontend
             else
             {
                 SetText(detailKindText, ConsumableKind);
-                SetText(detailEffectText, GetConsumableEffect(shop.Kind));
+                SetText(detailEffectText, DescribeConsumable(offer.Consumable.ConsumableId));
             }
 
             SetText(detailPriceText, FormatPriceLabel(status, shop.GetPrice(offer), offer.IsElifPriced));
+            if (usesArtwork) RefreshPopup(shop, offer, status);
+        }
+
+        private void RefreshPopup(ShopRoom shop, ShopOffer offer, ShopOfferStatus status)
+        {
+            int price = shop.GetPrice(offer);
+            SetText(tooltipNameText, offer.DisplayName);
+            SetText(detailPriceText, FormatCompactPriceLabel(status, price));
+            SetPicture(confirmCurrencyIcon,
+                ShowsCurrencyIcon(status, price) ? offer.IsElifPriced ? elifSprite : goldSprite : null);
+            if (offer.Kind == ShopOfferKind.Item)
+            {
+                ItemDefinition item = offer.Item;
+                string maximum = item.MaxStacks > 0 ? item.MaxStacks.ToString() : "제한 없음";
+                int stacks = session.Inventory != null ? session.Inventory.GetStackCount(item.ItemId) : 0;
+                SetText(confirmNoteText, item.IsActivePower
+                    ? GamePowerHudView.BuildOfferLine(item)
+                    : $"현재 스택 {stacks} / {maximum}");
+                SetText(detailEffectText, ArtifactEffectDescription.Build(item));
+                // The tooltip's kind line names the rarity in Korean only, like the reward cards.
+                SetText(detailKindText,
+                    $"{ItemKindText.GetDisplayName(item.Kind)}  ·  {ItemRewardCardView.RewardRarityLabel(item.Rarity)}");
+            }
+            else
+            {
+                SetText(confirmNoteText, string.Empty);
+            }
+
+            // The popup shows the same picture as the focused cell.
+            Image source = FocusedIndex < cells.Length && cells[FocusedIndex] != null ? cells[FocusedIndex].Icon : null;
+            if (confirmIcon != null)
+            {
+                confirmIcon.enabled = source != null && source.sprite != null;
+                if (source != null)
+                {
+                    confirmIcon.sprite = source.sprite;
+                    confirmIcon.material = source.material;
+                    confirmIcon.color = source.color;
+                }
+                confirmIcon.preserveAspect = true;
+            }
+            if (confirmIconGlow != null) confirmIconGlow.SetActive(true);
+            FitTooltip();
         }
 
         private void OnSessionOpened()
@@ -497,17 +949,21 @@ namespace TrickalFanGame.Frontend
             if (activeEventSystem != null) activeEventSystem.SetSelectedGameObject(null);
             shownFrame = Time.frameCount;
             FocusedIndex = FirstOfferOnSale();
+            FocusedAction = ShopFocusAction.None;
             ApplyTheme(session.Shop != null ? session.Shop.Kind : ShopKind.General);
             SetFeedback(string.Empty);
             ApplyVisibility(true);
             SetInvesting(false);
+            SetConfirming(false, false);
             Refresh();
         }
 
         private void OnSessionClosed()
         {
+            SetConfirming(false, false);
             SetInvesting(false);
             ApplyVisibility(false);
+            ApplyActionFocus();
             EventSystem activeEventSystem = ActiveEventSystem;
             if (activeEventSystem != null)
                 activeEventSystem.SetSelectedGameObject(
@@ -529,12 +985,37 @@ namespace TrickalFanGame.Frontend
         private void OnCellClicked(ShopOfferCellView cell)
         {
             ClearSelection();
-            if (cell != null && !IsInvesting) SetFocus(cell.CellIndex);
+            if (cell == null || IsInvesting || IsConfirming) return;
+            SetFocus(cell.CellIndex);
+            if (usesArtwork) Submit(false);
+        }
+
+        private void OnCellHovered(ShopOfferCellView cell)
+        {
+            if (cell != null && !IsInvesting && !IsConfirming) SetFocus(cell.CellIndex);
+        }
+
+        private void OnInvestRowHovered(ShopUpgradeRowView row)
+        {
+            if (row != null && !IsConfirming) SetInvestFocus(row.RowIndex);
+        }
+
+        private void OnIconHoverChanged(ShopHoverTarget _) => ApplyTooltip();
+
+        private void OnCancelClicked()
+        {
+            ClearSelection();
+            CancelConfirm();
         }
 
         private void OnBuyClicked()
         {
             ClearSelection();
+            if (usesArtwork)
+            {
+                ConfirmFocused();
+                return;
+            }
             if (IsInvesting) TryInvestFocused();
             else TryPurchaseFocused();
         }
@@ -548,13 +1029,16 @@ namespace TrickalFanGame.Frontend
         private void OnInvestRowClicked(ShopUpgradeRowView row)
         {
             ClearSelection();
-            if (row != null) SetInvestFocus(row.RowIndex);
+            if (row == null || IsConfirming) return;
+            SetInvestFocus(row.RowIndex);
+            if (usesArtwork) Submit(false);
         }
 
         private void OnCloseClicked()
         {
             ClearSelection();
-            Close();
+            if (IsConfirming) CancelConfirm();
+            else Close();
         }
 
         private void ClearSelection()
@@ -585,12 +1069,29 @@ namespace TrickalFanGame.Frontend
             session.Opened += OnSessionOpened;
             session.Closed += OnSessionClosed;
             for (int index = 0; index < cells.Length; index++)
-                if (cells[index] != null) cells[index].Clicked += OnCellClicked;
+            {
+                if (cells[index] == null) continue;
+                cells[index].Clicked += OnCellClicked;
+                cells[index].Hovered += OnCellHovered;
+            }
             if (buyButton != null) buyButton.onClick.AddListener(OnBuyClicked);
             if (closeButton != null) closeButton.onClick.AddListener(OnCloseClicked);
             if (investButton != null) investButton.onClick.AddListener(OnInvestClicked);
             foreach (ShopUpgradeRowView row in investRows)
-                if (row != null) row.Clicked += OnInvestRowClicked;
+            {
+                if (row == null) continue;
+                row.Clicked += OnInvestRowClicked;
+                row.Hovered += OnInvestRowHovered;
+            }
+            if (cancelButton != null) cancelButton.onClick.AddListener(OnCancelClicked);
+            if (dismissButton != null) dismissButton.onClick.AddListener(OnCancelClicked);
+            if (confirmIconHover != null)
+            {
+                confirmIconHover.Entered += OnIconHoverChanged;
+                confirmIconHover.Exited += OnIconHoverChanged;
+            }
+            if (buyHover != null) buyHover.Entered += OnBuyHovered;
+            if (cancelHover != null) cancelHover.Entered += OnCancelHovered;
             subscribed = true;
         }
 
@@ -603,12 +1104,29 @@ namespace TrickalFanGame.Frontend
                 session.Closed -= OnSessionClosed;
             }
             for (int index = 0; index < cells.Length; index++)
-                if (cells[index] != null) cells[index].Clicked -= OnCellClicked;
+            {
+                if (cells[index] == null) continue;
+                cells[index].Clicked -= OnCellClicked;
+                cells[index].Hovered -= OnCellHovered;
+            }
             if (buyButton != null) buyButton.onClick.RemoveListener(OnBuyClicked);
             if (closeButton != null) closeButton.onClick.RemoveListener(OnCloseClicked);
             if (investButton != null) investButton.onClick.RemoveListener(OnInvestClicked);
             foreach (ShopUpgradeRowView row in investRows)
-                if (row != null) row.Clicked -= OnInvestRowClicked;
+            {
+                if (row == null) continue;
+                row.Clicked -= OnInvestRowClicked;
+                row.Hovered -= OnInvestRowHovered;
+            }
+            if (cancelButton != null) cancelButton.onClick.RemoveListener(OnCancelClicked);
+            if (dismissButton != null) dismissButton.onClick.RemoveListener(OnCancelClicked);
+            if (confirmIconHover != null)
+            {
+                confirmIconHover.Entered -= OnIconHoverChanged;
+                confirmIconHover.Exited -= OnIconHoverChanged;
+            }
+            if (buyHover != null) buyHover.Entered -= OnBuyHovered;
+            if (cancelHover != null) cancelHover.Entered -= OnCancelHovered;
             subscribed = false;
         }
 
@@ -616,5 +1134,13 @@ namespace TrickalFanGame.Frontend
         {
             if (target != null) target.text = value;
         }
+    }
+
+    // Shop UI artwork: the button below the grid that holds the keyboard focus.
+    public enum ShopFocusAction
+    {
+        None,
+        Invest,
+        Close,
     }
 }

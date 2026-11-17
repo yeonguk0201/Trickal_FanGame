@@ -47,6 +47,10 @@ namespace TrickalFanGame.Editor
             new("ChargingEnemy", "LowBloodSugarFairy"),
             new("LobbingFairy", "LowBloodSugarMadness"),
             new("LivelyLowBloodSugarFairy", "LivelyFairy"),
+            // 크레용사용's 졸개 (2026-11-11). 방패병 has no drawing yet and still disappears at once.
+            new("CrayonMageMinion", "CrayonMage"),
+            new("CrayonAxeMinion", "CrayonAxe"),
+            new("CrayonArcherMinion", "CrayonArcher"),
             new("TestBoss", "Buseureogi", BossFrameRoot, BossKnockScale),
             new("SaemaeumVaultBoss", "Vault", BossFrameRoot, BossKnockScale),
             // 잠복형 (2026-11-06) dies above ground, so its size comes from the full burst drawing.

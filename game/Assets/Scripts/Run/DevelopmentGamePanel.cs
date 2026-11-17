@@ -796,10 +796,13 @@ namespace TrickalFanGame.Run
                   (nearest.Kind == RoomTrapKind.PeriodicSpikes
                       ? $"  {nearest.StateAt(Time.time)}{(nearest.SecondPhase ? " (B)" : " (A)")}"
                       : string.Empty) +
+                  (nearest.Kind == RoomTrapKind.MudCake
+                      ? nearest.HasBurst ? $"  burst {Time.time - nearest.BurstTime:0.0}s" : "  intact"
+                      : string.Empty) +
                   (nearestObstacle != null
                       ? $"  {nearestObstacle.HitsTaken}/{nearestObstacle.RequiredHits} hits"
                       : string.Empty));
-            GUILayout.Label($"Web slow x{EnvironmentSlow.MultiplierOf(player):0.##}   " +
+            GUILayout.Label($"Web/mud slow x{EnvironmentSlow.MultiplierOf(player):0.##}   " +
                             $"gas clouds {room.GetComponentsInChildren<PoisonGasCloud>(false).Length}");
 #if UNITY_EDITOR
             const string trapFolder = "Assets/Prefabs/Traps";
@@ -928,6 +931,20 @@ namespace TrickalFanGame.Run
                 status = controller.SpawnExtraEnemy(minion, player.transform.position + Vector3.right * 2.5f) != null
                     ? "Spawned a crumb minion to the right of the player."
                     : "Crumb minion spawn failed.";
+            }
+            // 크레용사용's 마법사·도끼병·궁병 in a column to the right of the player, to see their drawn defeats (2026-11-11).
+            if (AssistedButton("Spawn crayon mage, axe, archer (drawn defeat)") && controller != null && player != null)
+            {
+                string[] crayons = { "CrayonMageMinion", "CrayonAxeMinion", "CrayonArcherMinion" };
+                int spawned = 0;
+                for (int i = 0; i < crayons.Length; i++)
+                {
+                    GameObject crayon = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                        "Assets/Prefabs/" + crayons[i] + ".prefab");
+                    Vector3 offset = Vector3.right * 3f + Vector3.up * (1.5f * (i - 1));
+                    if (controller.SpawnExtraEnemy(crayon, player.transform.position + offset) != null) spawned++;
+                }
+                status = $"Spawned {spawned} of {crayons.Length} crayon minions to the right of the player.";
             }
 
             // Enemy-8: 저혈당 요정-활발 three tiles above the player, so its left and right shots miss and the

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TrickalFanGame.Item;
+using TrickalFanGame.Player;
 using TrickalFanGame.Resource;
 using TrickalFanGame.Room;
 using TrickalFanGame.Shop;
@@ -72,15 +73,18 @@ namespace TrickalFanGame.Editor
                 "Item prices must be 10/15/20/25 gold by rarity.");
             Assert(catalog.Consumables.Select(entry => (entry.ConsumableId, entry.Price)).SequenceEqual(new[]
                    {
-                       ("heart", 3), ("key", 5), ("bomb", 5),
+                       ("heart", 3), ("key", 5), ("bomb", 5), ("sp", 3),
                    }),
-                "Consumable prices must be heart 3, key 5, bomb 5 gold.");
+                "Consumable prices must be heart 3, key 5, bomb 5, sp 3 gold.");
+            Assert(catalog.Consumables[0].DisplayName == "딸기맛 캡슐" && catalog.Consumables[3].DisplayName == "소다맛 캡슐",
+                "The heart and SP pickups must be sold as 딸기맛 캡슐 and 소다맛 캡슐.");
             Assert(catalog.Consumables[0].PickupPrefab.GetComponent<HealthPickup>() != null &&
                    catalog.Consumables[1].PickupPrefab.GetComponent<RunResourcePickup>()?.ResourceType ==
                    RunResourceType.Key &&
                    catalog.Consumables[2].PickupPrefab.GetComponent<RunResourcePickup>()?.ResourceType ==
-                   RunResourceType.Bomb,
-                "Shop consumables must drop the existing heart, key, and bomb floor pickups.");
+                   RunResourceType.Bomb &&
+                   catalog.Consumables[3].PickupPrefab.GetComponent<SPPickup>() != null,
+                "Shop consumables must drop the existing heart, key, bomb, and SP floor pickups.");
 
             GameObject prefabObject = AssetDatabase.LoadAssetAtPath<GameObject>(Week20Special4Setup.ShopRoomPrefabPath);
             ShopRoom prefab = prefabObject != null ? prefabObject.GetComponent<ShopRoom>() : null;
@@ -324,6 +328,7 @@ namespace TrickalFanGame.Editor
                 bool rightPickup = consumable.Consumable.ConsumableId switch
                 {
                     "heart" => drop != null && drop.GetComponent<HealthPickup>() != null,
+                    "sp" => drop != null && drop.GetComponent<SPPickup>() != null,
                     "key" => drop != null && drop.GetComponent<RunResourcePickup>()?.ResourceType == RunResourceType.Key,
                     "bomb" => drop != null && drop.GetComponent<RunResourcePickup>()?.ResourceType == RunResourceType.Bomb,
                     _ => false,
