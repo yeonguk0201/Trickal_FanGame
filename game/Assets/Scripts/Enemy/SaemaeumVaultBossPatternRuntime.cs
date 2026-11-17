@@ -142,7 +142,8 @@ namespace TrickalFanGame.Enemy
         public IReadOnlyList<BossSlimePuddle> SlimePuddles => slimePuddles;
         public IReadOnlyList<BossSlimeBlob> SlimeBlobs => slimeBlobs;
         private bool IsPhaseTwo => boss != null && boss.CurrentPhase >= 2;
-        public bool HealIsAvailable => boss != null && boss.CurrentPhase == 1;
+        public bool HealIsAvailable => boss != null && boss.CurrentPhase == 1 &&
+                                       health != null && !health.IsDead && health.MissingHealth > 0f;
         public Vector3 CurrentVisualScale => visualTransform != null ? visualTransform.localScale : Vector3.one;
 
         private void Awake()
@@ -239,7 +240,7 @@ namespace TrickalFanGame.Enemy
         {
             activeEndsAt = stateEndsAt;
             healPoseIndex = -1;
-            if (execution == BossPatternExecution.SaemaeumTreasureHeal && HealIsAvailable)
+            if (execution == BossPatternExecution.SaemaeumTreasureHeal && boss != null && boss.CurrentPhase == 1)
             {
                 if (state == BossActionState.Telegraph) healPoseIndex = 0;
                 else if (state == BossActionState.Active) healPoseIndex = 1;
@@ -376,12 +377,13 @@ namespace TrickalFanGame.Enemy
             SpriteRenderer source = GetComponentInChildren<SpriteRenderer>();
             int sortingLayer = source != null ? source.sortingLayerID : 0;
             int sortingOrder = source != null ? source.sortingOrder + 1 : 1;
+            Sprite projectile = Resources.Load<Sprite>("CombatEffects/saemaeum-jelly-projectile");
             for (int index = 0; index < landings.Count; index++)
             {
                 float radius = radii[index];
                 BossSlimeBlob blob = BossSlimeBlob.Launch(transform.position, landings[index],
                     lastTickTime + index * slimeLaunchStagger, slimeFlightDuration, slimeArcHeight, radius,
-                    BossSlimePuddle.PlaceholderSprite, sortingLayer, sortingOrder,
+                    projectile, sortingLayer, sortingOrder,
                     landing => SpawnSlimePuddle(landing, radius, sortingLayer));
                 slimeBlobs.Add(blob);
                 boss?.RegisterOwnedObject(blob.gameObject);
@@ -650,12 +652,14 @@ namespace TrickalFanGame.Enemy
             float startAngle = -FanSpreadDegrees * 0.5f;
             float step = ProjectilesPerVolley > 1 ? FanSpreadDegrees / (ProjectilesPerVolley - 1) : 0f;
             Sprite sprite = GetComponentInChildren<SpriteRenderer>()?.sprite;
+            Sprite ruby = Resources.Load<Sprite>("CombatEffects/saemaeum-ruby-projectile");
+            Sprite[] artwork = ruby != null ? new[] { ruby } : null;
             for (int index = 0; index < ProjectilesPerVolley; index++)
             {
                 Vector2 projectileDirection = Quaternion.Euler(0f, 0f, startAngle + step * index) * direction;
                 BossProjectile.Create(BossProjectile.FrontLaunchPoint(gameObject, projectileDirection),
                     projectileDirection * projectileSpeed, gameObject,
-                    boss.ProjectileDamageTier, sprite);
+                    boss.ProjectileDamageTier, sprite, artwork);
             }
         }
 

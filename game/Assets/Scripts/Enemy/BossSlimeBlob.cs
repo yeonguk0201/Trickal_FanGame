@@ -46,8 +46,8 @@ namespace TrickalFanGame.Enemy
             // A small puddle's lump is smaller, so the two sizes read apart in the air.
             visual.transform.localScale = Vector3.one * (0.7f * Mathf.Clamp(puddleRadius / 1.2f, 0.55f, 1f));
             SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
-            renderer.sprite = sprite;
-            renderer.color = new Color(1f, 0.86f, 0.32f, 0.95f);
+            renderer.sprite = sprite != null ? sprite : BossSlimePuddle.PlaceholderSprite;
+            renderer.color = sprite != null ? Color.white : new Color(1f, 0.86f, 0.32f, 0.95f);
             renderer.sortingLayerID = sortingLayerId;
             renderer.sortingOrder = sortingOrder;
             blob.body = visual.transform;

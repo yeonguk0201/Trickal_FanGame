@@ -8,8 +8,8 @@ namespace TrickalFanGame.Enemy
 {
     public sealed class BossProjectile : MonoBehaviour
     {
-        // Drawn boss shots (부스러기 cream) are shown at this world scale; the hitbox keeps BossScale.
-        public const float AuthoredArtworkWorldScale = 0.75f;
+        // Default visual scale for authored shots. The hitbox keeps BossScale.
+        public const float AuthoredArtworkWorldScale = 0.375f;
         public const float AuthoredFramesPerSecond = 10f;
 
         // Effect-0: a boss shot leaves the front of the drawn body toward its target, not the middle of it. The
@@ -34,7 +34,8 @@ namespace TrickalFanGame.Enemy
             GameObject source,
             EnemyDamageTier damageTier,
             Sprite sprite,
-            Sprite[] authoredFrames = null)
+            Sprite[] authoredFrames = null,
+            float artworkWorldScale = AuthoredArtworkWorldScale)
         {
             GameObject projectile = new GameObject("Boss Projectile");
             projectile.name = "Boss Projectile";
@@ -47,7 +48,7 @@ namespace TrickalFanGame.Enemy
                 // The drawing points right with its pivot on the cream head. Rotating a child leaves the hitbox alone.
                 GameObject art = new("Artwork");
                 art.transform.SetParent(projectile.transform, false);
-                art.transform.localScale = Vector3.one * (AuthoredArtworkWorldScale / ProjectileSizing.BossScale);
+                art.transform.localScale = Vector3.one * (artworkWorldScale / ProjectileSizing.BossScale);
                 if (initialVelocity.sqrMagnitude > 0.0001f)
                     art.transform.localRotation = Quaternion.Euler(0f, 0f,
                         Mathf.Atan2(initialVelocity.y, initialVelocity.x) * Mathf.Rad2Deg);

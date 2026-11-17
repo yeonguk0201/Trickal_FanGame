@@ -17,6 +17,7 @@ namespace TrickalFanGame.Enemy
         public const int DefaultObstaclesPerThrow = 3;
         public const int MinionsPerSummon = 4;
         public const int ObstaclesPerThrow = 3;
+        public const float CreamProjectileArtworkWorldScale = 0.5f;
         private const int RandomPlacementAttemptsPerObstacle = 32;
 
         [Header("Spawned content")]
@@ -378,7 +379,7 @@ namespace TrickalFanGame.Enemy
             if (direction.sqrMagnitude <= 0f) direction = Vector2.down;
             BossProjectile.Create(BossProjectile.FrontLaunchPoint(gameObject, direction), direction * projectileSpeed,
                 gameObject, boss.ProjectileDamageTier, GetComponentInChildren<SpriteRenderer>()?.sprite,
-                projectileFrames);
+                projectileFrames, CreamProjectileArtworkWorldScale);
         }
 
         private void StopMovement()

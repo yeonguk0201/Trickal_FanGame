@@ -438,7 +438,13 @@ namespace TrickalFanGame.Room
                 return;
             }
 
-            GameObject enemy = Instantiate(configuredPrefab, spawnPoint.position, spawnPoint.rotation, transform);
+            RoomNode roomNode = GetComponentInParent<RoomNode>();
+            Vector3 spawnPosition = configuredPrefab.GetComponent<BossController>() != null &&
+                                    roomNode != null && roomNode.Definition != null &&
+                                    roomNode.Definition.RoomType == RoomType.Boss
+                ? roomNode.transform.position
+                : spawnPoint.position;
+            GameObject enemy = Instantiate(configuredPrefab, spawnPosition, spawnPoint.rotation, transform);
             Health enemyHealth = enemy.GetComponent<Health>();
             if (enemyHealth == null)
             {

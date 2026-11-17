@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><title>차원문 4프레임 미리보기</title>
+<style>body{margin:0;background:#222632;color:#f5f3ff;font:16px system-ui;display:grid;justify-items:center;gap:18px;padding:30px}canvas{width:350px;max-width:90vw;background:#343c43;border-radius:18px}label{display:flex;gap:12px}button{padding:8px 20px}p{margin:0;color:#c7c4d1}</style>
+<h1>차원문 · 4프레임</h1><canvas id="preview"></canvas><label>프레임 속도 <input id="speed" type="range" min="2" max="12" value="6"><span id="rate">6 fps</span></label><button id="toggle">일시정지</button><p id="frame"></p><p>원화 애니메이션 후보 · Unity 연결 전</p>
+<script>
+const image=new Image(),canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),speed=document.querySelector('#speed');let running=true,frame=0,last=0;
+image.onload=()=>{canvas.width=image.width/2;canvas.height=image.height/2;requestAnimationFrame(draw)};image.src='portal-idle-4frames.png';
+function draw(t){if(running&&t-last>=1000/Number(speed.value)){frame=(frame+1)%4;last=t}ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,(frame%2)*canvas.width,Math.floor(frame/2)*canvas.height,canvas.width,canvas.height,0,0,canvas.width,canvas.height);document.querySelector('#frame').textContent=`프레임 ${frame+1} / 4`;requestAnimationFrame(draw)}
+speed.oninput=()=>document.querySelector('#rate').textContent=speed.value+' fps';document.querySelector('#toggle').onclick=e=>{running=!running;e.target.textContent=running?'일시정지':'재생'};
+</script></html>

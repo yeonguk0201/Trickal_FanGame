@@ -133,8 +133,9 @@ namespace TrickalFanGame.Frontend
             Advance(Time.unscaledDeltaTime);
         }
 
-        private void TryBegin()
+        public void TryBegin()
         {
+            if (IsPlaying || !isActiveAndEnabled) return;
             BossController boss = GameBossHudView.FindActiveBoss(roomGraph != null ? roomGraph.CurrentNode : null);
             if (boss == null || boss == introducedBoss) return;
             // Pause, hit stop or the result screen own the time scale right now: keep the bar hidden and start after.
