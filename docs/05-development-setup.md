@@ -2543,6 +2543,18 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 기대 결과: 불을 공격해 길을 열고 내부 적을 처리할 수 있으며, 주기 가시가 내려간 타이밍에 필수 경로를 통과할 수 있다. 같은 필수 경로를 `^`로 완전히 막은 방은 Validate 단계에서 거부되어야 한다. 임포터 통과만으로 실제 플레이 난이도·무피해 타이밍 검수가 완료된 것은 아니다.
 
 
+### 클로버 보상 선택 UI (2026-11-17)
+
+- `SampleScene`의 기존 보상 선택 Overlay에 카드·확정 버튼 원화와 Menu 공용 장식을 연결한다. 보상 추첨·지급 계약은 변경하지 않는다.
+- Edit Mode 재적용: `Trickal Fan Game > UI > Apply Clover Reward UI`. 보상 Overlay만 수정하고 Scene을 저장한다. 기존 이름의 오브젝트를 재사용한다.
+- 정적 화면 캡처: `Trickal Fan Game > UI > Capture Clover Reward UI`. `output/menu-review/reward-clover-1920x1080.png`, `reward-clover-1280x720.png`에 저장한다. 예시 아이템과 임시 카메라는 저장하지 않는다.
+- 배치: `TrickalFanGame.Editor.RewardUiArtworkSetup.ApplyVerifyAndCaptureBatch` (그래픽 필요, `-nographics` 제외). 적용 후 `Week16Reward2Verification.Verify`로 카드 내용·방향키 이동·확정·취소·후보 유지 재열기를 검사하고 두 해상도로 렌더한다.
+- Play 수동 확인: `SampleScene`에서 보상 제단에 상호작용해 창을 연다. 마우스 또는 좌우 방향키로 후보 선택 → 하단 선택으로 포커스를 옮겨도 선택 카드의 노란 테두리와 `[선택 중]`이 유지되어야 한다. 취소 후 재열기 시 후보가 유지되고, 확정은 1회만 지급되어야 한다. 실제 Play 미술·입력 확인은 별도다.
+
+- 보상 UI 후속 조정: 전용 `reward-title-plaque.png`를 비율 유지로 표시한다. 선택 중인 카드에만 상태 문구·클로버가 보이며, 등급은 한글만 표시한다. 카드 안 선택 버튼과 상하 안내 문구는 제거하고 하단 확정·취소만 유지한다. 카드 전체를 클릭하거나 방향키로 선택한다. 카드와 하단 버튼 사이에는 약 70px(1920×1080 기준)의 간격을 둔다.
+
+- 2026-11-18 보상 UI: 기존 디자인의 넓은 헤더 원화와 진한 금색 테두리 선택 카드 원화를 연결했다. 선택 카드에만 보라 리본 전체가 나타난다. 권능의 보상 카드 하단은 `방 N개 클리어로 충전`만 표시한다. 아이템 그림·상태 클로버를 우측으로 조정하고 설명 위 여백을 늘렸으며 취소 버튼은 선택 버튼의 불투명 영역 크기에 맞췄다. 검증 진입점은 위와 동일하다.
+
 ### 클로버 상점 UI (2026-11-18)
 
 - 원화: `output/art/shop-ui-v1/`(원본, gitignore)를 알파 영역으로 잘라 줄인 사본이 `game/Assets/Art/UI/Shop/`에 있다. 배치값은 UI 배치 편집기(`.agents/skills/ui-layout-editor`, `output/art/shop-ui-v1/shop-ui-layout-editor.html`, 저장 키 `shop-ui-v2`)에서 정한다.

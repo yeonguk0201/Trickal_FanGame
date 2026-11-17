@@ -63,15 +63,18 @@ namespace TrickalFanGame.Editor
                 "The configured overlay must start hidden and non-interactive.");
             RectTransform overlayRect = view.transform as RectTransform;
             Assert(overlayRect != null && Approximately(overlayRect.sizeDelta, Week16Reward2Setup.ReferenceResolution) &&
-                   view.FocusScope != null && Approximately(view.FocusScope.sizeDelta, Week16Reward2Setup.PanelSize),
+                   view.FocusScope != null && Approximately(view.FocusScope.sizeDelta, UsesCloverArtwork(view) ? RewardUiArtworkSetup.PanelSize : Week16Reward2Setup.PanelSize),
                 "Reward-2 must use the 1920x1080 reference frame and the fixed placeholder panel size.");
             Assert(view.Cards.All(card => Approximately(card.GetComponent<RectTransform>().sizeDelta,
-                       Week16Reward2Setup.CardSize)),
+                       UsesCloverArtwork(view) ? RewardUiArtworkSetup.CardSize : Week16Reward2Setup.CardSize)),
                 "Every placeholder reward card must use the documented replaceable card size.");
             Assert(eventSystem.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>() != null &&
                    view.GraphicRaycaster != null && view.UiEventSystem == eventSystem,
                 "Reward-2 requires the shared Input System EventSystem and Game HUD raycaster.");
         }
+
+        private static bool UsesCloverArtwork(ItemRewardSelectionView view) =>
+            view.FocusScope.Find("Title Artwork") != null;
 
         private static void ValidateContentFits(Scene scene)
         {
@@ -89,13 +92,12 @@ namespace TrickalFanGame.Editor
                 card.Bind(ItemRewardCandidate.ForItem(definition, Math.Max(0, definition.MaxStacks - 1)), playerHealth);
                 // Power-2: a cult leader power shows its charge and use key instead of stacks.
                 bool stackLineMatches = definition.IsActivePower
-                    ? card.StackText.text == GamePowerHudView.BuildOfferLine(definition)
+                    ? card.StackText.text == ItemRewardCardView.BuildPowerChargeLabel(definition)
                     : card.StackText.text.Contains("현재 스택", StringComparison.Ordinal);
                 Assert(!string.IsNullOrEmpty(ItemKindText.GetDisplayName(definition.Kind)) &&
                        card.KindText.text == ItemKindText.GetDisplayName(definition.Kind) &&
                        card.NameText.text == definition.DisplayName &&
-                       card.RarityText.text.Contains(definition.Rarity.ToString().ToUpperInvariant(),
-                           StringComparison.Ordinal) &&
+                       card.RarityText.text == ItemRewardCardView.RewardRarityLabel(definition.Rarity) &&
                        !string.IsNullOrWhiteSpace(card.EffectText.text) && stackLineMatches,
                     $"Reward card fields are incomplete for {definition.ItemId}.");
                 AssertFits(card.NameText, definition.ItemId + " name");
@@ -177,6 +179,16 @@ namespace TrickalFanGame.Editor
                 Assert(!session.State.IsCompleted &&
                        eventSystem.currentSelectedGameObject == view.ConfirmButton.gameObject,
                     "Activating a card must stage the candidate and move focus to the confirm button.");
+                if (UsesCloverArtwork(view))
+                    Assert(view.Cards[1].transform.Find("Selection Highlight").gameObject.activeSelf &&
+                           !view.Cards[0].transform.Find("Selection Highlight").gameObject.activeSelf &&
+                           view.Cards[1].StateText.text == "[선택 중]" &&
+                           view.Cards[1].StateText.gameObject.activeSelf &&
+                           !view.Cards[0].StateText.gameObject.activeSelf &&
+                           !view.Cards[0].transform.Find("State Clover").gameObject.activeSelf &&
+                           !view.Cards[0].transform.Find("State Ribbon").gameObject.activeSelf &&
+                           view.Cards[1].transform.Find("State Ribbon").gameObject.activeSelf,
+                        "The staged card must retain its unique highlight and label while confirm has focus.");
                 ExecuteEvents.Execute(view.ConfirmButton.gameObject, new BaseEventData(eventSystem),
                     ExecuteEvents.submitHandler);
                 Assert(session.State.IsCompleted && session.State.SelectedCandidateId == keyboardChoice.StableId &&

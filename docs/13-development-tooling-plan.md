@@ -783,6 +783,13 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 - Unity `RoomLayoutImporterVerification.VerifyWithRegressionsBatch` 통과: 기존 52개 방, 신규 장벽 허용/거부, Trap-1 및 Encounter·지형·상자·장애물 회귀. 로그 `tmp/room-layout-traversal-verification.log`: `Room Layout regression verification passed.`, 종료 코드 0. 실제 Play 검수는 미실시.
 
 
+### 클로버 보상 UI 적용·검토 메뉴 (2026-11-17)
+
+- 목적: 기존 보상 로직을 유지하며 개별 원화와 Menu 공용 컴포넌트를 재실행 가능한 Editor 구성으로 연결한다.
+- 구현: `RewardUiArtworkSetup.Setup`, `CapturePreview`, `ApplyVerifyAndCaptureBatch`. 기존 보상 검증기에 확정 버튼 포커스 중 선택 강조 유지 검사를 추가했다.
+- 검증: 보상 단독 검증과 1920×1080·1280×720 정적 렌더로 확인한다. 실제 Play 미술 검수는 별도이며 완료 표시하지 않는다.
+- 실행 메뉴와 로그 경로는 `docs/05-development-setup.md`의 클로버 보상 선택 UI 항목을 참고한다.
+
 ### UI 배치 편집기와 클로버 상점 UI (2026-11-18)
 
 - 목적: UI 시안을 레이어별로 움직여 볼 수 있는 단일 HTML 편집기로 위치를 정하고, 그 값을 Unity Setup에 그대로 옮긴다.

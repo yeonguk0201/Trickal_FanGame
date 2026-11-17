@@ -150,13 +150,20 @@ namespace TrickalFanGame.Frontend
         private void OnCardClicked(ItemRewardCardView card)
         {
             if (!visible || card?.Candidate == null) return;
-            focusedCandidate = card.Candidate;
+            SelectCandidate(card);
             ActiveEventSystem?.SetSelectedGameObject(confirmButton != null ? confirmButton.gameObject : card.gameObject);
         }
 
         private void OnCardFocused(ItemRewardCardView card)
         {
-            if (visible && card?.Candidate != null) focusedCandidate = card.Candidate;
+            if (visible && card?.Candidate != null) SelectCandidate(card);
+        }
+
+        private void SelectCandidate(ItemRewardCardView selected)
+        {
+            focusedCandidate = selected.Candidate;
+            foreach (ItemRewardCardView card in cards)
+                if (card != null) card.SetChosen(card == selected);
         }
 
         private void ConfirmSelection()
