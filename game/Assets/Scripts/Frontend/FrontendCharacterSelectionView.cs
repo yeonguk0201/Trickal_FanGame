@@ -39,6 +39,9 @@ namespace TrickalFanGame.Frontend
 
         public IReadOnlyList<FrontendCharacterCardView> Cards => cards;
         public CharacterDefinition SelectedCharacter => selectedCharacter;
+
+        public CharacterDefinition FindCharacter(string characterId) =>
+            characters.FirstOrDefault(character => character != null && character.CharacterId == characterId);
         public string SelectedCharacterId => selectedCharacter != null ? selectedCharacter.CharacterId : null;
         public TMP_Text StatusText => statusText;
         public Button ConfirmButton => confirmButton;

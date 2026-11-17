@@ -41,6 +41,8 @@ namespace TrickalFanGame.Resource
         public float FuseDuration => fuseDuration;
         public float ExplosionRadius => explosionRadius;
         public float EnemyDamage => enemyDamage;
+        private string sourceDisplayName;
+
         public float SelfDamage => selfDamage;
         public LayerMask EnemyLayers => enemyLayers;
         public bool HasExploded => hasExploded;
@@ -76,8 +78,9 @@ namespace TrickalFanGame.Resource
         // Bomb-Chain: the same unowned explosion without a bomb or fuse. Without a delay it explodes in this call;
         // with one (an obstacle caught in another explosion) it stays hidden until the delay ends, so chained
         // obstacles go off one after another.
-        public void ConfigureUnownedBlast(float currentTime, float configuredDelay)
+        public void ConfigureUnownedBlast(float currentTime, float configuredDelay, string damageSourceName = null)
         {
+            sourceDisplayName = damageSourceName;
             owner = null;
             ownerHealth = null;
             explodeAt = currentTime + Mathf.Max(0f, configuredDelay);
@@ -192,7 +195,8 @@ namespace TrickalFanGame.Resource
             if (!player.IsDead &&
                 ((Vector2)player.transform.position - center).sqrMagnitude <= explosionRadius * explosionRadius)
             {
-                player.TakeDamage(new DamageContext(gameObject, DamageSourceType.PlayerBomb, selfDamage));
+                player.TakeDamage(new DamageContext(gameObject, DamageSourceType.PlayerBomb, selfDamage,
+                    sourceDisplayName: sourceDisplayName));
             }
         }
 

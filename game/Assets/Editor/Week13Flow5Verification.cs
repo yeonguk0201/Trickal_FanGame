@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Data;
@@ -45,7 +46,27 @@ namespace TrickalFanGame.Editor
             Assert(transitions[0].FrontendScenePath == Week13FrontendSetup.ScenePath,
                 "Run result transition points to the wrong Frontend Scene.");
             EditorSceneManager.OpenScene(Week13FrontendSetup.ScenePath, OpenSceneMode.Single);
+            VerifyDefeatingEnemyName();
             Debug.Log("Week 13 Flow-5 verification passed: full-screen result UI, transition and Scene isolation.");
+        }
+
+        private static void VerifyDefeatingEnemyName()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/QuickRangedFairy.prefab");
+            Assert(prefab != null, "The projectile attribution verification needs the QuickRangedFairy prefab.");
+            GameObject enemy = Object.Instantiate(prefab);
+            DamageContext hit;
+            try
+            {
+                hit = new DamageContext(enemy, DamageSourceType.EnemyProjectile, 1f);
+            }
+            finally
+            {
+                Object.DestroyImmediate(enemy);
+            }
+
+            Assert(PlayerDeathReason.Describe(hit.WithImpactDistance(3f)) == "산사모-순수",
+                "A projectile must retain its enemy name after its owner is destroyed.");
         }
 
         public static void SetupAndVerifyBatch()
@@ -146,6 +167,8 @@ namespace TrickalFanGame.Editor
         private static int phase;
         private static string endedClientRunId;
         private static Flow5ApiClient apiClient;
+        private static readonly List<string> VisibleStages = new();
+        private static bool sawGroupedArtifactExperience;
 
         static Week13Flow5PlayVerification()
         {
@@ -251,7 +274,7 @@ namespace TrickalFanGame.Editor
                 "Initial result save did not preserve the ended Run clientRunId.");
             Week13Flow5Verification.Assert(LocalPendingRunStorage.Contains(endedClientRunId) &&
                 view.SaveStatus.text == FrontendRunResultView.OfflineSaveStatus && view.StageTitle.text == "RUN 결과" &&
-                view.StageBody.text.Contains("획득한 아티팩트"),
+                view.SummaryView.RewardCount == 0,
                 "Offline result did not immediately show local Run data and queue the request.");
 
             view.RetryRunButton.onClick.Invoke();
@@ -280,7 +303,10 @@ namespace TrickalFanGame.Editor
         private static void FastForwardExperience()
         {
             FrontendRunResultView view = Object.FindFirstObjectByType<FrontendRunResultView>();
-            if (view == null || !view.StageTitle.text.StartsWith("경험치", StringComparison.Ordinal)) return;
+            if (view == null || !view.IsAnimatingExperience || string.IsNullOrEmpty(view.ExperienceSource.text)) return;
+            Week13Flow5Verification.Assert(view.StageTitle.text == "RUN 기록" &&
+                view.ExperienceBar.gameObject.activeInHierarchy && view.ExperienceSource.text.Contains("층 도달"),
+                "The first experience source and gauge must appear within the Run record stage.");
             view.RequestAdvance();
             NextPhase();
         }
@@ -297,8 +323,8 @@ namespace TrickalFanGame.Editor
         {
             FrontendRunResultView view = Object.FindFirstObjectByType<FrontendRunResultView>();
             if (view == null || !view.IsSummaryVisible) return;
-            Week13Flow5Verification.Assert(view.StageBody.text.Contains("Lv. 3") &&
-                view.StageBody.text.Contains("item-01") && view.SaveStatus.text == "저장 완료",
+            Week13Flow5Verification.Assert(view.ResultProgress.level == 3 && view.SummaryView.ExperienceBar.gameObject.activeInHierarchy &&
+                view.SummaryView.RewardCount == 1 && view.SaveStatus.text == "저장 완료",
                 "Final summary lost confirmed progression, artifacts or save state.");
             view.RetryRunButton.onClick.Invoke();
             FrontendTitleView frontend = Object.FindFirstObjectByType<FrontendTitleView>();
@@ -314,8 +340,16 @@ namespace TrickalFanGame.Editor
         private static void PrepareHomeResult()
         {
             CreateRunRequest request = CreateRequest(Guid.NewGuid().ToString());
-            CharacterProgressDto startProgress = StartingProgress();
-            Week13Flow5Verification.Assert(RunResultContext.TryPrepare(request, startProgress, apiClient),
+            request.isCleared = true;
+            request.items = new[]
+            {
+                request.items[0],
+                new RunItemDto { itemId = "item-01", floor = 2, order = 2, acquiredAt = request.endedAt }
+            };
+            var rarities = new Dictionary<string, ItemRarity> { ["item-01"] = ItemRarity.Rare };
+            VisibleStages.Clear();
+            sawGroupedArtifactExperience = false;
+            Week13Flow5Verification.Assert(RunResultContext.TryPrepare(request, StartingProgress(), apiClient, rarities),
                 "Could not prepare the second result return verification.");
             apiClient.FailNextRun = false;
             SceneManager.LoadScene(SceneUtility.GetBuildIndexByScenePath(Week13FrontendSetup.ScenePath));
@@ -326,11 +360,23 @@ namespace TrickalFanGame.Editor
         {
             FrontendRunResultView view = Object.FindFirstObjectByType<FrontendRunResultView>();
             if (view == null || !view.IsShowing) return;
+            string stage = view.StageTitle.text;
+            if (VisibleStages.Count == 0 || VisibleStages[VisibleStages.Count - 1] != stage)
+                VisibleStages.Add(stage);
+
             if (!view.IsSummaryVisible)
             {
-                view.RequestAdvance();
+                if (stage == "RUN 기록" && view.ExperienceSource.text.Contains("희귀 아티팩트 2개") &&
+                    view.ExperienceSource.text.Contains("+60"))
+                    sawGroupedArtifactExperience = true;
                 return;
             }
+
+            string[] resultStages = { "RUN 기록", "LEVEL UP!", "스킬 포인트", "획득 아티팩트", "RUN 결과" };
+            Week13Flow5Verification.Assert(sawGroupedArtifactExperience &&
+                VisibleStages.Where(title => resultStages.Contains(title)).SequenceEqual(resultStages) &&
+                view.SummaryView.RewardCount == 1 && view.SummaryView.ExperienceValue.text == "50 / 600",
+                "Full clear result did not show grouped rarity XP, the ordered stages, or confirmed final data.");
             view.HomeButton.onClick.Invoke();
             FrontendTitleView frontend = Object.FindFirstObjectByType<FrontendTitleView>();
             Week13Flow5Verification.Assert(!RunResultContext.HasPending && Time.timeScale == 1f &&

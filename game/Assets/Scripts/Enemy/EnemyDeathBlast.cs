@@ -35,6 +35,7 @@ namespace TrickalFanGame.Enemy
         private readonly HashSet<Health> damaged = new();
         private readonly HashSet<Health> damagedEnemies = new();
         private GameObject source;
+        private string sourceDisplayName;
         private SpriteRenderer telegraph;
         // Drawn frames the stopped body plays over the warning (산사모-광기 crouch); empty keeps its last picture.
         private Sprite[] bodyFrames = System.Array.Empty<Sprite>();
@@ -69,6 +70,7 @@ namespace TrickalFanGame.Enemy
             owner.transform.position = position;
             EnemyDeathBlast blast = owner.AddComponent<EnemyDeathBlast>();
             blast.source = source;
+            blast.sourceDisplayName = EnemyDamageName.From(source);
             blast.Radius = Mathf.Max(0.01f, radius);
             blast.DamageUnits = Mathf.Max(1, damageUnits);
             blast.startTime = currentTime;
@@ -175,7 +177,7 @@ namespace TrickalFanGame.Enemy
                 if (player == null || player.IsDead || player.IsInvulnerable || !damaged.Add(player)) continue;
                 player.GetComponent<PlayerDeathReason>()?.SetReason(DeathReason);
                 player.TakeDamage(new DamageContext(source != null ? source : gameObject,
-                    DamageSourceType.EnemyContact, DamageUnits));
+                    DamageSourceType.EnemyContact, DamageUnits, sourceDisplayName: sourceDisplayName));
             }
 
             if (HitsEnemiesAndObstacles) HitEnemiesAndObstacles(center);

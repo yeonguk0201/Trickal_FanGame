@@ -54,6 +54,7 @@ namespace TrickalFanGame.Combat
         public event Action<DamageContext, DamageResult> DamageResolved;
         public event Action<float> ShieldChanged;
         public event Action Died;
+        public DamageContext KillingBlow { get; private set; }
         public event Action<float> Healed;
         public static event Action<Health, DamageContext, DamageResult> AnyDamageResolved;
         public static event Action<Health, DamageContext> AnyDamageBlocked;
@@ -190,6 +191,7 @@ namespace TrickalFanGame.Combat
 
         private void Die(DamageContext killingBlow)
         {
+            KillingBlow = killingBlow;
             IsDead = true;
             killingBlow.Source?.GetComponent<PlayerCombatEvents>()?.TryReportEnemyKilled(this, killingBlow);
             Died?.Invoke();

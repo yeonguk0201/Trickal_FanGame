@@ -44,6 +44,7 @@ namespace TrickalFanGame.Enemy
 
         private float nextHitTime;
         private PoisonPuddleBubbles bubbles;
+        private string sourceDisplayName;
 
         public static IReadOnlyList<EnemyChampionPuddle> Live
         {
@@ -66,12 +67,13 @@ namespace TrickalFanGame.Enemy
 
         public bool IsHarmful(float now) => !HasEnded && now >= ArmedAt && now < FadeAt;
 
-        public static EnemyChampionPuddle Spawn(Vector3 position, Transform parent, int floorNumber, float now)
+        public static EnemyChampionPuddle Spawn(Vector3 position, Transform parent, int floorNumber, float now, GameObject source = null)
         {
             GameObject host = new(ObjectName);
             host.transform.SetParent(parent, false);
             host.transform.position = position;
             EnemyChampionPuddle puddle = host.AddComponent<EnemyChampionPuddle>();
+            puddle.sourceDisplayName = EnemyDamageName.From(source);
             puddle.StartTime = now;
             puddle.nextHitTime = now + ArmDuration;
             puddle.DamageUnits = HealthUnits.GetEnemyDamageUnits(DamageTier, Mathf.Max(1, floorNumber));
@@ -139,7 +141,8 @@ namespace TrickalFanGame.Enemy
                     !Covers(player.FeetPosition))
                     continue;
                 target.GetComponent<PlayerDeathReason>()?.SetReason(DeathReason);
-                target.TakeDamage(new DamageContext(gameObject, DamageSourceType.EnemyContact, DamageUnits));
+                target.TakeDamage(new DamageContext(gameObject, DamageSourceType.EnemyContact, DamageUnits,
+                    sourceDisplayName: sourceDisplayName));
                 HitCount++;
                 nextHitTime = now + HitInterval;
                 return;

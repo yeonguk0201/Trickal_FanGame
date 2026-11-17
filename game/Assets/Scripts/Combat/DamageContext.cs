@@ -17,11 +17,14 @@ namespace TrickalFanGame.Combat
             float distanceDamageMinimum = 0f,
             float distanceDamageMaximum = 0f,
             float? impactDistance = null,
-            bool allowsHalfHeart = false)
+            bool allowsHalfHeart = false,
+            string sourceDisplayName = null)
         {
             AllowsHalfHeart = allowsHalfHeart;
             Source = source;
             SourceType = sourceType;
+            SourceDisplayName = sourceDisplayName ??
+                (Health.IsEnemyDamage(sourceType) ? Enemy.EnemyDamageName.From(source) : null);
             BaseDamage = Mathf.Max(0, baseDamage);
             Multiplier = Mathf.Max(0f, multiplier);
             DeliveryType = deliveryType;
@@ -38,6 +41,7 @@ namespace TrickalFanGame.Combat
 
         public GameObject Source { get; }
         public DamageSourceType SourceType { get; }
+        public string SourceDisplayName { get; }
         public float BaseDamage { get; }
         public float Multiplier { get; }
         public DamageDeliveryType DeliveryType { get; }
@@ -84,7 +88,8 @@ namespace TrickalFanGame.Combat
                 DistanceDamageMinimum,
                 DistanceDamageMaximum,
                 distance,
-                AllowsHalfHeart);
+                AllowsHalfHeart,
+                SourceDisplayName);
         }
 
         // Artifact-2: bonuses that depend on the target's state (burning, shocked), judged when the hit lands.
@@ -106,7 +111,8 @@ namespace TrickalFanGame.Combat
                 DistanceDamageMinimum,
                 DistanceDamageMaximum,
                 ImpactDistance,
-                AllowsHalfHeart);
+                AllowsHalfHeart,
+                SourceDisplayName);
         }
 
         public DamageContext ScaleMultiplier(float multiplier)
@@ -122,7 +128,8 @@ namespace TrickalFanGame.Combat
                 CriticalRollOverride,
                 DistanceDamageBonus,
                 DistanceDamageMinimum,
-                DistanceDamageMaximum);
+                DistanceDamageMaximum,
+                sourceDisplayName: SourceDisplayName);
         }
     }
 }
