@@ -122,6 +122,8 @@ namespace TrickalFanGame.Editor
             // Shop-1: the view switches these between the general shop and the 골디 shop when it opens.
             view.ConfigureTheme(title, keeperName, keeperLine, panelImage, panelOutline);
             EnsureGlyphs(font, catalog);
+            // Shop UI artwork: a re-run puts the plain layout back, so skin it again when the screen used the artwork.
+            if (view.UsesArtwork) ShopUiArtworkSetup.Apply(view);
 
             Undo.RecordObject(assembler, "Connect Shop-0 shop session");
             assembler.ConfigureShop(prefab, catalog);

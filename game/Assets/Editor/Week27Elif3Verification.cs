@@ -733,7 +733,7 @@ namespace TrickalFanGame.Editor
                 progress.TryAddResource(RunResourceType.Gold, RunResourceWallet.MaxCount);
                 Assert(session.TryOpen(shop, inventory) && view.IsVisible && !view.IsInvesting &&
                        view.InvestButton.gameObject.activeSelf && view.InvestButtonLabel.text == ShopView.InvestLabel &&
-                       view.ElifText.text == ShopView.FormatElifBalance(10, true),
+                       view.ElifText.text == view.FormatElif(10, true),
                     "The general shop screen must show the elif balance and the 투자 button.");
                 Assert(view.Cells[ShopStockState.FirstExtraSlot].Status == ShopOfferStatus.Empty,
                     "The last row must start empty.");
@@ -743,7 +743,7 @@ namespace TrickalFanGame.Editor
                        view.InvestFocusedIndex == 0 && view.InvestRows[0].IsFocused &&
                        view.InvestRows[0].NameText.text == "상품 칸 추가" &&
                        view.InvestRows[0].LevelText.text == ShopView.FormatUpgradeLevel(0, 3) &&
-                       view.InvestRows[0].CostText.text == "2 엘리프" &&
+                       view.InvestRows[0].CostText.text == (view.InvestRows[0].UsesArtwork ? "2" : "2 엘리프") &&
                        view.DetailNameText.text == "상품 칸 추가" && view.BuyButton.interactable &&
                        view.BuyButtonLabel.text == ShopView.InvestBuyLabel &&
                        view.DetailEffectText.text.Contains(ShopView.InvestNotice),
@@ -752,7 +752,7 @@ namespace TrickalFanGame.Editor
                     "While investing the grid must not sell.");
                 Assert(view.TryInvestFocused() == ShopUpgradeStatus.Purchased &&
                        view.FeedbackText.text == ShopView.InvestPurchasedMessage &&
-                       view.ElifText.text == ShopView.FormatElifBalance(8, true) &&
+                       view.ElifText.text == view.FormatElif(8, true) &&
                        view.InvestRows[0].LevelText.text == ShopView.FormatUpgradeLevel(1, 3) &&
                        shop.Stock.GetOffer(ShopStockState.FirstExtraSlot) != null,
                     "Investing must spend elif, raise the level and open the extra slot at once.");
@@ -767,9 +767,10 @@ namespace TrickalFanGame.Editor
                 ShopOfferCellView extraCell = view.Cells[ShopStockState.FirstExtraSlot];
                 ShopOffer firstGold = shop.Stock.Offers.First(offer => !offer.IsElifPriced);
                 Assert(extraCell.Offer == extra && extraCell.Content.alpha == 1f &&
-                       extraCell.PriceText.text == $"{ShopUpgrades.ApplyDiscount(extra.Price, 1)} 골드" &&
+                       extraCell.PriceText.text ==
+                       GoldPriceText(view, ShopUpgrades.ApplyDiscount(extra.Price, 1)) &&
                        view.Cells[firstGold.SlotIndex].PriceText.text ==
-                       $"{ShopUpgrades.ApplyDiscount(firstGold.Price, 1)} 골드",
+                       GoldPriceText(view, ShopUpgrades.ApplyDiscount(firstGold.Price, 1)),
                     "The grid must show the new extra offer and the discounted gold prices.");
                 session.Close();
                 Assert(!view.IsVisible && !view.IsInvesting, "Closing the shop must close the invest list.");
@@ -796,6 +797,10 @@ namespace TrickalFanGame.Editor
             floor = 1,
             order = order,
         };
+
+        // Shop UI artwork: a cell shows the number beside the gold picture instead of "10 골드".
+        private static string GoldPriceText(ShopView view, int price) =>
+            view.UsesArtwork ? price.ToString() : ShopView.FormatPrice(price);
 
         private static T[] FindAll<T>(Scene scene) where T : Component => scene.GetRootGameObjects()
             .SelectMany(root => root.GetComponentsInChildren<T>(true)).ToArray();

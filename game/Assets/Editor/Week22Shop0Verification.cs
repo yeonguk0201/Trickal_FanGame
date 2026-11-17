@@ -126,7 +126,9 @@ namespace TrickalFanGame.Editor
                        cell.FocusFrame != null && cell.Icon != null && cell.IconText != null &&
                        cell.NameText != null && cell.PriceText != null &&
                        cell.Button.navigation.mode == UnityEngine.UI.Navigation.Mode.None &&
-                       ((RectTransform)cell.transform).anchoredPosition == Week22Shop0Setup.CellPosition(index),
+                       ((RectTransform)cell.transform).anchoredPosition == (view.UsesArtwork
+                           ? ShopUiArtworkSetup.CellPosition(index)
+                           : Week22Shop0Setup.CellPosition(index)),
                     $"Shop cell {index + 1} must sit at its grid position with icon, name, price, and focus frame.");
             }
 
@@ -210,7 +212,7 @@ namespace TrickalFanGame.Editor
 
             // The grid shows the stored stock; the last row is empty.
             Assert(progress.GetResourceCount(RunResourceType.Gold) == 0 && view.FocusedIndex == 0 &&
-                   view.GoldText.text == "보유 0 골드",
+                   view.GoldText.text == view.FormatGold(0),
                 "The shop screen must open on the first offer and show the wallet.");
             for (int index = 0; index < view.Cells.Length; index++)
             {
@@ -225,7 +227,8 @@ namespace TrickalFanGame.Editor
                 ShopOffer offer = stock.Offers[index];
                 Assert(cell.Offer == offer && cell.Status == ShopOfferStatus.NotEnoughGold &&
                        cell.Content.alpha == 1f && cell.NameText.text == offer.DisplayName &&
-                       cell.PriceText.text == $"{offer.Price} 골드" && cell.IsFocused == (index == 0) &&
+                       cell.PriceText.text == PriceLabel(view, cell.Status, offer.Price) &&
+                       cell.IsFocused == (index == 0) &&
                        cell.FocusFrame.enabled == (index == 0),
                     $"Shop cell {index + 1} must show {offer.OfferId} at its gold price.");
                 // An Item shows its supplied artwork when there is one, and the short-ID placeholder otherwise.
@@ -238,10 +241,25 @@ namespace TrickalFanGame.Editor
                     "sprite.");
             }
 
-            // Focus moves one cell at a time and stops at the edges.
-            view.MoveFocus(-1, 0);
-            view.MoveFocus(0, -1);
-            Assert(view.FocusedIndex == 0, "The focus must stop at the top-left edge.");
+            // Focus moves one cell at a time. Without the artwork it stops at the edges; with it, it wraps around
+            // its row and column, and the second and third columns reach 투자 and 닫기 below the grid.
+            if (view.UsesArtwork)
+            {
+                view.MoveFocus(-1, 0);
+                Assert(view.FocusedIndex == 2, "Left from the first cell must wrap to the end of the row.");
+                view.MoveFocus(1, 0);
+                view.MoveFocus(0, -1);
+                Assert(view.FocusedIndex == 6 && view.FocusedAction == ShopFocusAction.None,
+                    "Up from the first column must wrap to its bottom cell.");
+                view.MoveFocus(0, 1);
+                Assert(view.FocusedIndex == 0, "Down from the bottom of the first column must wrap to its top.");
+            }
+            else
+            {
+                view.MoveFocus(-1, 0);
+                view.MoveFocus(0, -1);
+                Assert(view.FocusedIndex == 0, "The focus must stop at the top-left edge.");
+            }
             view.MoveFocus(1, 0);
             Assert(view.FocusedIndex == 1 && view.Cells[1].IsFocused && !view.Cells[0].IsFocused,
                 "Right must focus the next cell.");
@@ -249,10 +267,14 @@ namespace TrickalFanGame.Editor
             Assert(view.FocusedIndex == 4 && view.DetailNameText.text == stock.Offers[4].DisplayName &&
                    view.DetailKindText.text == ShopView.ConsumableKind,
                 "Down must focus the consumable row and describe it.");
-            view.MoveFocus(1, 0);
-            view.MoveFocus(1, 0);
-            view.MoveFocus(0, 1);
-            view.MoveFocus(0, 1);
+            if (view.UsesArtwork) ValidateArtworkButtonRow(view);
+            else
+            {
+                view.MoveFocus(1, 0);
+                view.MoveFocus(1, 0);
+                view.MoveFocus(0, 1);
+                view.MoveFocus(0, 1);
+            }
             Assert(view.FocusedIndex == 8 && view.Cells[8].IsFocused && !view.BuyButton.interactable &&
                    view.DetailEffectText.text == ShopView.EmptyCellMessage &&
                    view.TryPurchaseFocused() == ShopPurchaseResult.Unavailable &&
@@ -267,25 +289,28 @@ namespace TrickalFanGame.Editor
                    view.DetailKindText.text.Contains(ItemKindText.GetDisplayName(item.Item.Kind)) &&
                    view.DetailEffectText.text.StartsWith(ArtifactEffectDescription.Build(item.Item),
                        StringComparison.Ordinal) &&
-                   view.DetailPriceText.text == $"{item.Price} 골드" && !view.BuyButton.interactable &&
+                   view.DetailPriceText.text == PriceLabel(view, ShopOfferStatus.NotEnoughGold, item.Price) &&
+                   !view.BuyButton.interactable &&
                    view.BuyButtonLabel.text == ShopView.BuyLabel,
                 "The detail column must describe the focused Item and its price.");
             Assert(view.TryPurchaseFocused() == ShopPurchaseResult.NotEnoughGold &&
                    view.FeedbackText.text == ShopView.NotEnoughGoldMessage && !stock.IsPurchased(item.SlotIndex) &&
                    inventory.GetStackCount(item.Item.ItemId) == stacks,
                 "Without enough gold the shop screen must refuse and change nothing.");
+            if (view.UsesArtwork) ValidateArtworkRefusal(view, item);
 
             int budget = stock.Offers.Sum(offer => offer.Price);
             Assert(progress.TryAddResource(RunResourceType.Gold, budget) == budget, "Verification gold must fit.");
             view.Refresh();
-            Assert(view.GoldText.text == $"보유 {budget} 골드" && view.BuyButton.interactable &&
+            Assert(view.GoldText.text == view.FormatGold(budget) && view.BuyButton.interactable &&
                    view.Cells[item.SlotIndex].Status == ShopOfferStatus.Available,
                 "Gained gold must show at once and make the focused offer buyable.");
-            Assert(view.TryPurchaseFocused() == ShopPurchaseResult.Purchased &&
+            if (view.UsesArtwork) ValidateArtworkPopup(view, stock, item);
+            Assert(Buy(view) &&
                    view.FeedbackText.text == ShopView.PurchasedMessage && stock.IsPurchased(item.SlotIndex) &&
                    inventory.GetStackCount(item.Item.ItemId) == stacks + 1 &&
                    progress.GetResourceCount(RunResourceType.Gold) == budget - item.Price &&
-                   view.GoldText.text == $"보유 {budget - item.Price} 골드" &&
+                   view.GoldText.text == view.FormatGold(budget - item.Price) &&
                    view.Cells[item.SlotIndex].Status == ShopOfferStatus.SoldOut &&
                    view.Cells[item.SlotIndex].PriceText.text == ShopView.SoldOutLabel &&
                    !view.BuyButton.interactable && view.FocusedIndex == item.SlotIndex && session.IsOpen,
@@ -387,6 +412,95 @@ namespace TrickalFanGame.Editor
         {
             MethodInfo method = target.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
             method?.Invoke(target, null);
+        }
+
+        // Shop UI artwork: prices show a number beside the gold or elif picture instead of "10 골드".
+        private static string PriceLabel(ShopView view, ShopOfferStatus status, int price) =>
+            view.UsesArtwork ? ShopView.FormatCompactPriceLabel(status, price) : ShopView.FormatPriceLabel(status, price);
+
+        // With the artwork the offer is bought through the purchase popup: Enter opens it and Enter there buys.
+        private static bool Buy(ShopView view)
+        {
+            if (!view.UsesArtwork) return view.TryPurchaseFocused() == ShopPurchaseResult.Purchased;
+            return view.OpenConfirm(true) && view.ConfirmFocused() && !view.IsConfirming &&
+                   view.ConfirmPopup.alpha == 0f;
+        }
+
+        // From cell 5 (second row, third column) down to 닫기, across the button row, and back into the grid.
+        private static void ValidateArtworkButtonRow(ShopView view)
+        {
+            view.MoveFocus(1, 0);
+            view.MoveFocus(0, 1);
+            Assert(view.FocusedIndex == 8, "Down must reach the bottom cell of the third column.");
+            view.MoveFocus(0, 1);
+            Assert(view.FocusedAction == ShopFocusAction.Close && view.CloseFocusMark.activeSelf &&
+                   !view.Cells[8].IsFocused,
+                "Down from the third column's bottom cell must focus 닫기 and ring it.");
+            view.MoveFocus(-1, 0);
+            bool investShown = view.InvestButton != null && view.InvestButton.gameObject.activeSelf;
+            Assert(view.FocusedAction == (investShown ? ShopFocusAction.Invest : ShopFocusAction.Close) &&
+                   (!investShown || (view.InvestFocusMark.activeSelf && !view.CloseFocusMark.activeSelf)),
+                "Left on the button row must move to 투자 when it is shown.");
+            view.MoveFocus(0, 1);
+            Assert(view.FocusedAction == ShopFocusAction.None &&
+                   view.FocusedIndex == (investShown ? 1 : 2) && !view.CloseFocusMark.activeSelf,
+                "Down from a button must wrap to the top of its column.");
+            view.SetFocus(8);
+        }
+
+        private static void ValidateArtworkRefusal(ShopView view, ShopOffer item)
+        {
+            ShopOfferCellView cell = view.Cells[item.SlotIndex];
+            Assert(!view.OpenConfirm(true) && !view.IsConfirming && view.ConfirmPopup.alpha == 0f &&
+                   !cell.Button.interactable && cell.PriceText.color == ShopOfferCellView.ArtworkBlockedColor &&
+                   cell.CurrencyIcon.enabled && !view.FeedbackText.gameObject.activeSelf,
+                "An offer the player cannot pay must show a red price and must not open the purchase popup.");
+            int empty = Array.FindIndex(view.Cells, candidate => candidate.Offer == null);
+            Assert(empty >= 0 && view.Cells[empty].Frame.color.a < 1f && !view.Cells[empty].Button.interactable,
+                "An empty cell keeps a faded frame and opens nothing.");
+            view.SetFocus(empty);
+            Assert(!view.OpenConfirm(true), "An empty cell must not open the purchase popup.");
+            view.SetFocus(item.SlotIndex);
+        }
+
+        private static void ValidateArtworkPopup(ShopView view, ShopStockState stock, ShopOffer item)
+        {
+            Assert(view.Cells[item.SlotIndex].Button.interactable && view.OpenConfirm(true) && view.IsConfirming &&
+                   view.ConfirmPopup.alpha == 1f && view.ConfirmPopup.blocksRaycasts && view.IsTooltipShown &&
+                   view.ConfirmTitleText.text == ShopView.PurchaseTitle &&
+                   view.DetailNameText.text == item.DisplayName && view.TooltipNameText.text == item.DisplayName &&
+                   view.DetailPriceText.text == item.Price.ToString() && view.ConfirmCurrencyIcon.enabled &&
+                   view.ConfirmIcon.enabled && view.ConfirmIcon.sprite == view.Cells[item.SlotIndex].Icon.sprite &&
+                   view.DetailEffectText.text == ArtifactEffectDescription.Build(item.Item) &&
+                   view.ConfirmNoteText.text.StartsWith("현재 스택", StringComparison.Ordinal),
+                "Enter on a buyable offer must open the purchase popup with its name, price, picture and tooltip.");
+            RectTransform effect = view.DetailEffectText.rectTransform;
+            float needed = -effect.anchoredPosition.y + ShopView.TooltipBottomPadding +
+                           view.DetailEffectText.GetPreferredValues(view.DetailEffectText.text, effect.rect.width, 0f).y;
+            Assert(view.Tooltip.sizeDelta.y + 0.5f >= needed && effect.sizeDelta.y + 0.5f >=
+                   view.DetailEffectText.GetPreferredValues(view.DetailEffectText.text, effect.rect.width, 0f).y,
+                "The tooltip must fit its effect text with the bottom padding.");
+            Assert(view.ConfirmChoosesBuy && view.BuyFocusMark.activeSelf && !view.CancelFocusMark.activeSelf,
+                "The purchase popup must open with 구매 chosen and ringed.");
+            view.SetConfirmChoice(false);
+            Assert(!view.ConfirmChoosesBuy && !view.BuyFocusMark.activeSelf && view.CancelFocusMark.activeSelf,
+                "Left must move the choice and the ring to 취소.");
+            view.Submit(true);
+            Assert(!view.IsConfirming && !stock.IsPurchased(item.SlotIndex) && !view.BuyFocusMark.activeSelf &&
+                   !view.CancelFocusMark.activeSelf,
+                "Enter on 취소 must close the popup without buying.");
+            Assert(view.OpenConfirm(true) && view.ConfirmChoosesBuy,
+                "Reopening the popup must choose 구매 again.");
+            view.MoveFocus(1, 0);
+            Assert(view.FocusedIndex == item.SlotIndex && !view.ToggleInvesting(),
+                "The focus and the invest list must stay put while the purchase popup is open.");
+            view.CancelConfirm();
+            Assert(!view.IsConfirming && view.ConfirmPopup.alpha == 0f && !view.ConfirmPopup.blocksRaycasts &&
+                   !view.IsTooltipShown && !stock.IsPurchased(item.SlotIndex),
+                "Cancel must close the purchase popup without buying.");
+            Assert(view.OpenConfirm(false) && !view.IsTooltipShown,
+                "A popup opened with the mouse shows the tooltip only while the mouse rests on the item picture.");
+            view.CancelConfirm();
         }
 
         private static void Assert(bool condition, string message)

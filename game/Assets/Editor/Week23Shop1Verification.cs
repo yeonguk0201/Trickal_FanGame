@@ -258,20 +258,21 @@ namespace TrickalFanGame.Editor
                 "E at Goldi must open the shop screen.");
             Assert(!keeper.SpeechBubble.IsShown, "The greeting must hide while the shop screen is open.");
             Assert(view.ShownKind == ShopKind.Goldi && view.TitleText.text == ShopView.GoldiTitle &&
-                   view.TitleText.color == ShopView.GoldiTitleColor &&
                    view.KeeperNameText.text == ShopKeeper.GoldiDisplayName &&
                    view.KeeperLineText.text == ShopView.GoldiKeeperLine &&
-                   view.KeeperPortrait.sprite == goldiSprite && view.PanelImage.color == ShopView.GoldiPanelColor &&
-                   view.PanelOutline.effectColor == ShopView.GoldiPanelOutlineColor &&
-                   view.PanelOutline.effectDistance == ShopView.GoldiPanelOutlineDistance,
+                   view.KeeperPortrait.sprite == goldiSprite && PanelLooks(view, true),
                 "The Goldi shop screen must show Goldi's title, name, line, portrait and gold panel.");
             for (int index = 0; index < stock.Offers.Count; index++)
                 Assert(view.Cells[index].Offer == stock.Offers[index] &&
-                       view.Cells[index].PriceText.text == $"{stock.Offers[index].Price} 골드",
+                       view.Cells[index].PriceText.text == (view.UsesArtwork
+                           ? ShopView.FormatCompactPriceLabel(view.Cells[index].Status, stock.Offers[index].Price)
+                           : ShopView.FormatPriceLabel(view.Cells[index].Status, stock.Offers[index].Price)),
                     $"Goldi shop cell {index + 1} must show its stored offer at its gold price.");
             view.SetFocus(ShopCatalog.ItemOfferCount);
-            Assert(view.DetailEffectText.text == ShopView.GoldiConsumableEffect,
-                "A Goldi shop consumable must say it drops in front of Goldi.");
+            Assert(view.DetailEffectText.text ==
+                   ShopView.DescribeConsumable(stock.Offers[ShopCatalog.ItemOfferCount].Consumable.ConsumableId) &&
+                   view.DetailEffectText.text.Length > 0,
+                "A Goldi shop consumable must describe what it does.");
 
             // A purchase follows the general rules: refused without gold, then bought once.
             ShopOffer item = stock.Offers[0];
@@ -408,13 +409,26 @@ namespace TrickalFanGame.Editor
         private static void AssertGeneralLook(ShopView view, Sprite sistSprite)
         {
             Assert(view.ShownKind == ShopKind.General && view.TitleText.text == ShopView.Title &&
-                   view.TitleText.color == ShopView.TitleColor &&
                    view.KeeperNameText.text == ShopKeeper.DisplayName &&
                    view.KeeperLineText.text == ShopView.KeeperLine && view.KeeperPortrait.sprite == sistSprite &&
-                   view.PanelImage.color == ShopView.PanelColor &&
-                   view.PanelOutline.effectColor == ShopView.PanelOutlineColor &&
-                   view.PanelOutline.effectDistance == ShopView.PanelOutlineDistance,
+                   PanelLooks(view, false),
                 "The general shop screen must show 시스트's title, name, line, portrait and panel again.");
+        }
+
+        // Without the artwork the two shops differ by panel color and outline; with it the panel keeps its artwork
+        // and only the title color and the input hint change.
+        private static bool PanelLooks(ShopView view, bool goldi)
+        {
+            if (view.UsesArtwork)
+                return view.TitleText.color == (goldi ? ShopView.ArtworkGoldiTitleColor : ShopView.ArtworkTitleColor) &&
+                       view.PanelImage.color == Color.white && !view.PanelOutline.enabled &&
+                       view.InputHintText != null && view.InputHintText.text ==
+                       (goldi ? ShopView.ArtworkGoldiInputHint : ShopView.ArtworkInputHint);
+            return view.TitleText.color == (goldi ? ShopView.GoldiTitleColor : ShopView.TitleColor) &&
+                   view.PanelImage.color == (goldi ? ShopView.GoldiPanelColor : ShopView.PanelColor) &&
+                   view.PanelOutline.effectColor == (goldi ? ShopView.GoldiPanelOutlineColor : ShopView.PanelOutlineColor) &&
+                   view.PanelOutline.effectDistance ==
+                   (goldi ? ShopView.GoldiPanelOutlineDistance : ShopView.PanelOutlineDistance);
         }
 
         private static bool ResolvesCurrentShop(PlayerSingleUseEffects effects, out ShopStockState stock)

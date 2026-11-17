@@ -2594,3 +2594,13 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
   `erpin` 에셋의 메뉴 표시 필드가 비어 있을 때만 채운다(이미 고친 값은 유지).
 - **화면 캡처**: 메뉴 `Capture Menu-5 Settings`·`Capture Menu-5 Credits`·`Capture Menu-3 Screens` 또는 각 검증기의 `CaptureBatch`.
   `-nographics` 없이 실행한다. 결과는 `output/menu-review/<화면>-1920x1080.png`, `...-1280x720.png`. Scene은 저장하지 않고 다시 연다.
+
+### 클로버 상점 UI (2026-11-18)
+
+- 원화: `output/art/shop-ui-v1/`(원본, gitignore)를 알파 영역으로 잘라 줄인 사본이 `game/Assets/Art/UI/Shop/`에 있다. 배치값은 UI 배치 편집기(`.agents/skills/ui-layout-editor`, `output/art/shop-ui-v1/shop-ui-layout-editor.html`, 저장 키 `shop-ui-v2`)에서 정한다.
+- 배치 갱신: 편집기 `build.py`의 기본값을 바꾼 뒤 `python -I output/art/shop-ui-v1/editor/build.py`, `python -I output/art/shop-ui-v1/editor/export_unity.py`를 실행한다. 원화 사본과 생성 파일 `game/Assets/Editor/ShopUiArtworkLayout.cs`가 다시 만들어진다. 이 C# 파일은 직접 고치지 않는다.
+- Edit Mode 적용: `Trickal Fan Game > UI > Apply Clover Shop UI`. 상점 Overlay를 원화로 바꾸고 구매 확인 팝업(`Purchase Popup`)을 추가한 뒤 Scene을 저장한다. Shop-0·Elif-3 Setup을 다시 실행해도 원화가 적용된 상점이면 다시 입힌다.
+- 정적 화면 캡처: `Trickal Fan Game > UI > Capture Clover Shop UI`. `output/menu-review/shop-clover-*.png`(상점), `shop-clover-popup-*.png`(구매 팝업)를 1920×1080·1280×720으로 저장한다. 예시 상품은 저장하지 않는다.
+- 배치: `TrickalFanGame.Editor.ShopUiArtworkSetup.SetupVerifyAndCaptureBatch`(그래픽 필요, `-nographics` 제외). 적용 후 `Week22Shop0Verification`·`Week23Shop1Verification`·`Week27Elif3Verification`의 `Verify`를 실행하고 렌더한다. 검증만은 `ShopUiArtworkSetup.Verify`.
+- 동작: 마우스 호버나 방향키가 칸을 고른다. 방향키를 누르고 있으면 0.35초 뒤부터 0.09초마다 반복 이동한다. 좌우는 같은 줄, 위아래는 같은 열 안에서 순환하고, 2열 아래에는 투자, 3열 아래에는 닫기 버튼이 있어 위아래 순환에 포함된다(버튼 줄에서 좌우로 투자↔닫기, Enter로 누름). 투자 목록도 위아래로 순환한다. 클릭이나 Enter로 살 수 있는 상품이면 구매 팝업을 열고, 팝업은 구매가 선택된 채 열리고, 좌우 방향키(A/D)나 마우스 호버로 취소·구매를 고른다(보라 테두리). Enter는 고른 버튼을 누른다. Esc·취소·X는 팝업만 닫는다. 살 수 없는 상품(골드 부족 등)은 가격이 빨간색이고 팝업을 열지 않는다. 설명 말풍선은 팝업의 아이템 그림에 마우스를 올리면 보인다. Enter로 연 팝업은 바로 보이고, 마우스를 움직이면 그때부터 호버를 따른다. 말풍선은 설명 길이에 맞춰 아래 여백(`ShopView.TooltipBottomPadding`)을 남기고 아래로 늘어난다. 소모품 설명은 `ShopView.DescribeConsumable`의 효과 문구다. 투자 줄도 같은 팝업으로 확인한 뒤 투자한다.
+- Play 수동 확인(미실시): `SampleScene`에서 상점에 들어가 E로 연다. 호버·방향키 선택, 골드 부족 칸의 빨간 가격과 클릭 무반응, 구매 팝업 열기·구매·취소, 설명이 긴 아이템에서 말풍선이 아래로 늘어나는지, 투자 화면, 골디 상점(그림·제목·대사)을 확인한다.

@@ -73,4 +73,5 @@
 - 커밋 전에는 `.agents/skills/pre-commit-check/SKILL.md`로 이번 커밋 범위를 점검한다.
 - Prisma, API DTO 또는 Item·Character·Run ID 계약 변경 시 `.agents/skills/contract-drift-check/SKILL.md`를 사용한다.
 - Unity 변경 검증 시 `.agents/skills/unity-verification-runner/SKILL.md`로 관련 검증기와 실행 방법을 확인한다.
+- UI 시안을 편집 가능한 HTML 미리보기로 만들 때는 `.agents/skills/ui-layout-editor/SKILL.md`를 사용한다.
 - `.claude/hooks/protect-main.js`는 Claude 설정에 연결된 훅이다. Codex에서 자동 실행된다고 가정하지 않고, 커밋·푸시 전에 브랜치와 대상 ref를 직접 확인한다.

@@ -15,6 +15,10 @@ namespace TrickalFanGame.Frontend
         private static readonly Color CostColor = new(0.78f, 0.9f, 1f, 1f);
         private static readonly Color BlockedColor = new(1f, 0.45f, 0.4f, 1f);
         private static readonly Color DoneColor = new(0.6f, 0.65f, 0.72f, 1f);
+        // Shop UI artwork: dark text on the cream rows, with the elif picture beside the cost number.
+        public static readonly Color ArtworkCostColor = new(0.29f, 0.2f, 0.2f, 1f);
+        public static readonly Color ArtworkBlockedColor = new(0.82f, 0.34f, 0.29f, 1f);
+        public static readonly Color ArtworkDoneColor = new(0.55f, 0.48f, 0.44f, 1f);
 
         [SerializeField] private int rowIndex;
         [SerializeField] private Button button;
@@ -23,8 +27,11 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private TMP_Text levelText;
         [SerializeField] private TMP_Text effectText;
         [SerializeField] private TMP_Text costText;
+        [SerializeField] private Image costIcon;
+        [SerializeField] private ShopHoverTarget hover;
 
         private bool buttonBound;
+        private bool hoverBound;
 
         public int RowIndex => rowIndex;
         public string UpgradeId { get; private set; }
@@ -36,7 +43,11 @@ namespace TrickalFanGame.Frontend
         public TMP_Text LevelText => levelText;
         public TMP_Text EffectText => effectText;
         public TMP_Text CostText => costText;
+        public Image CostIcon => costIcon;
+        public ShopHoverTarget Hover => hover;
+        public bool UsesArtwork => costIcon != null;
         public event Action<ShopUpgradeRowView> Clicked;
+        public event Action<ShopUpgradeRowView> Hovered;
 
         public void ConfigureVisuals(int configuredIndex, Button configuredButton, Behaviour configuredFocusFrame,
             TMP_Text configuredName, TMP_Text configuredLevel, TMP_Text configuredEffect, TMP_Text configuredCost)
@@ -52,9 +63,28 @@ namespace TrickalFanGame.Frontend
             BindButton();
         }
 
+        // Shop UI artwork: the cost shows a number beside the elif picture, and hovering the row focuses it.
+        public void ConfigureArtwork(Image configuredCostIcon, ShopHoverTarget configuredHover)
+        {
+            UnbindHover();
+            costIcon = configuredCostIcon;
+            hover = configuredHover;
+            BindHover();
+        }
+
         private void Awake() => BindButton();
-        private void OnEnable() => BindButton();
-        private void OnDestroy() => UnbindButton();
+
+        private void OnEnable()
+        {
+            BindButton();
+            BindHover();
+        }
+
+        private void OnDestroy()
+        {
+            UnbindButton();
+            UnbindHover();
+        }
 
         public void Bind(ShopUpgradeDefinition definition, int level, ShopUpgradeStatus status, bool focused)
         {
@@ -66,13 +96,18 @@ namespace TrickalFanGame.Frontend
             SetText(nameText, definition.DisplayName);
             SetText(levelText, ShopView.FormatUpgradeLevel(level, definition.MaxLevel));
             SetText(effectText, ShopView.FormatUpgradeNext(definition, level));
-            SetText(costText, ShopView.FormatUpgradeCost(definition, level));
+            bool maxLevel = level >= definition.MaxLevel;
+            SetText(costText, UsesArtwork
+                ? maxLevel ? ShopView.MaxLevelLabel : definition.GetCost(level + 1).ToString()
+                : ShopView.FormatUpgradeCost(definition, level));
+            if (costIcon != null) costIcon.enabled = !maxLevel;
             if (costText != null)
                 costText.color = status switch
                 {
-                    ShopUpgradeStatus.Available => CostColor,
-                    ShopUpgradeStatus.MaxLevel or ShopUpgradeStatus.DevelopmentOverride => DoneColor,
-                    _ => BlockedColor,
+                    ShopUpgradeStatus.Available => UsesArtwork ? ArtworkCostColor : CostColor,
+                    ShopUpgradeStatus.MaxLevel or ShopUpgradeStatus.DevelopmentOverride =>
+                        UsesArtwork ? ArtworkDoneColor : DoneColor,
+                    _ => UsesArtwork ? ArtworkBlockedColor : BlockedColor,
                 };
         }
 
@@ -95,6 +130,21 @@ namespace TrickalFanGame.Frontend
             buttonBound = false;
         }
 
+        private void BindHover()
+        {
+            if (hoverBound || hover == null) return;
+            hover.Entered += NotifyHovered;
+            hoverBound = true;
+        }
+
+        private void UnbindHover()
+        {
+            if (!hoverBound || hover == null) return;
+            hover.Entered -= NotifyHovered;
+            hoverBound = false;
+        }
+
         private void NotifyClicked() => Clicked?.Invoke(this);
+        private void NotifyHovered(ShopHoverTarget _) => Hovered?.Invoke(this);
     }
 }
