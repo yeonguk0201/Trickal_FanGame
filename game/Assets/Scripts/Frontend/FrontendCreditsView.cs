@@ -50,6 +50,7 @@ namespace TrickalFanGame.Frontend
 
         private void OnEnable()
         {
+            FrontendHomeView.AddArtwork(transform, FrontendHomeView.HomeArtworkKey);
             if (backButton != null) backButton.onClick.AddListener(RequestBack);
             Build();
         }

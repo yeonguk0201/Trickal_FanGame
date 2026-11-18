@@ -15,8 +15,8 @@ namespace TrickalFanGame.Editor
         {
             string[] paths = AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets/Resources/UserArtwork" })
                 .Select(AssetDatabase.GUIDToAssetPath).ToArray();
-            Require(paths.Length == 91,
-                "Expected all 91 supplied PNGs, including the Goldi shop, gold pickup, permanent elif, six 권능 and the eighteen Pool-2 artifacts.");
+            // No total count: each feature below requires its own artwork by key, so adding PNGs never breaks this check.
+            Require(paths.Length > 0, "No supplied artwork found under Assets/Resources/UserArtwork.");
             foreach (string path in paths)
             {
                 Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
@@ -28,7 +28,10 @@ namespace TrickalFanGame.Editor
             }
             Shader shader = Resources.Load<Shader>("UserArtwork/ItemArtwork");
             Require(shader != null && !ShaderUtil.ShaderHasError(shader), "Artwork shader failed compilation.");
-            Require(UserArtwork.Load("goldi") != null, "Goldi artwork must be available for the Goldi shop (Shop-1).");
+            Require(UserArtwork.Load(TrickalFanGame.Frontend.FrontendHomeView.HomeArtworkKey) != null &&
+                UserArtwork.Load(TrickalFanGame.Frontend.FrontendHomeView.LibraryArtworkKey) != null,
+                "Menu backgrounds must be available for home/settings/credits and character selection/skill upgrade.");
+            Require(UserArtwork.Load("goldi") != null,"Goldi artwork must be available for the Goldi shop (Shop-1).");
             Require(UserArtwork.Load(TrickalFanGame.Resource.RunResourcePickup.GoldArtworkKey) != null,
                 "Gold pickup artwork must be available for the floor gold pickup.");
             Require(UserArtwork.Load(TrickalFanGame.Resource.PermanentElif.ArtworkKey) != null,
@@ -72,7 +75,7 @@ namespace TrickalFanGame.Editor
                     Require(display.sprite == UserArtwork.Load(key) && display.color == Color.white,
                         name + " must use the supplied capsule, including in the shop.");
                 }
-                Debug.Log("User artwork verification passed: 91 PNGs, Goldi shopkeeper, gold pickup, permanent elif, 79 item illustrations (six 권능 cards), four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
+                Debug.Log("User artwork verification passed: " + paths.Length + " PNGs, menu backgrounds, Goldi shopkeeper, gold pickup, permanent elif, 79 item illustrations (six 권능 cards), four HUD icons including Erpin high grade, capsule prefabs and frame shader.");
                 CapturePreview();
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }
