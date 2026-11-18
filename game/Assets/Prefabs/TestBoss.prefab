@@ -10,7 +10,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 51234915506268298, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1401736375333359698, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_Radius
+      value: 0.42
       objectReference: {fileID: 0}
     - target: {fileID: 1425538479244399715, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: knockbackWeight
@@ -24,13 +28,29 @@ PrefabInstance:
       propertyPath: maxHealth
       value: 250
       objectReference: {fileID: 0}
+    - target: {fileID: 3071009165361704786, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.2777778
+      objectReference: {fileID: 0}
+    - target: {fileID: 3071009165361704786, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.2777778
+      objectReference: {fileID: 0}
+    - target: {fileID: 3071009165361704786, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.2777778
+      objectReference: {fileID: 0}
+    - target: {fileID: 3071009165361704786, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.24333335
+      objectReference: {fileID: 0}
     - target: {fileID: 4184832910138919893, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_Radius
       value: 0.36
       objectReference: {fileID: 0}
     - target: {fileID: 4184832910138919893, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_ExcludeLayers.m_Bits
-      value: 0
+      value: 1280
       objectReference: {fileID: 0}
     - target: {fileID: 4592771066635862529, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       propertyPath: m_Sprite
@@ -153,6 +173,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5213069529628479123, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6309312184845676733}
+    - targetCorrespondingSourceObject: {fileID: 51234915506268298, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6137919331993324426}
   m_SourcePrefab: {fileID: 100100000, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
 --- !u!1 &421685952657128216 stripped
 GameObject:
@@ -202,6 +225,10 @@ MonoBehaviour:
   phaseTransitionDuration: 1.25
   phaseTwoTempoMultiplier: 0.72
   keepsOwnedObjectsOnDefeat: 1
+  feetHalfHeight: 0.42
+  feetHalfWidth: 0.7
+  feetOffsetX: 0
+  feetDrop: 0
 --- !u!114 &1341662532215233610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -317,6 +344,48 @@ MonoBehaviour:
   groundTreasures: []
   strideLength: 1.35
   hopHeight: 0.48
+--- !u!1 &5563264800795155713 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 51234915506268298, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}
+  m_PrefabInstance: {fileID: 5585213672097936779}
+  m_PrefabAsset: {fileID: 0}
+--- !u!70 &6137919331993324426
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5563264800795155713}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Size: {x: 1.4, y: 0.84}
+  m_Direction: 1
 --- !u!212 &8232130202244265866 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 4592771066635862529, guid: 43d6a8247c005ac4fb56f5797b9b2eca, type: 3}

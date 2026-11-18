@@ -78,8 +78,14 @@ namespace TrickalFanGame.Enemy
         private SpriteRenderer visual;
         private Transform target;
         private Rect arenaBounds;
+        // Where the feet may stand (the room's movement bounds). The slash light still spans arenaBounds.
+        private Rect standingBounds;
         private uint randomState;
         private float lastTickTime;
+        // MovePosition from Update only lands at the next physics step, and only the last call before it counts. The
+        // queued destination is the base for the next move in the same step, so speed does not depend on frame rate.
+        private Vector2 queuedMovePosition;
+        private float queuedMoveFixedTime = float.NaN;
         private Vector2 lockedDirection = Vector2.down;
         private bool slashPending;
         private bool slashResolved;
@@ -279,6 +285,7 @@ namespace TrickalFanGame.Enemy
             healthAtLastSummon = health != null ? health.CurrentHealth : 0f;
             ResetSwingState();
             ResetDashState();
+            queuedMoveFixedTime = float.NaN;
             ResolveArenaBounds();
             ApplyPhasePresentation();
         }
@@ -618,7 +625,7 @@ namespace TrickalFanGame.Enemy
                 if (!dashChainHitApplied && ResolveDirectionalHit(0f, ResolveBodyRadius() + travel, dashWidth,
                         dashDamageTier, DamageSourceType.EnemyContact, lockedDirection))
                     dashChainHitApplied = true;
-                body.MovePosition(ClampToArena((Vector2)transform.position +
+                QueueMove(ClampToArena(CurrentMovePosition +
                     lockedDirection * LimitDashTravelByPinnedTarget(travel)));
                 if (now < dashStateEndsAt) return;
                 completedDashes++;
@@ -703,15 +710,25 @@ namespace TrickalFanGame.Enemy
         private void MoveTowardTarget(float deltaTime, float speedMultiplier)
         {
             if (target == null || body == null || deltaTime <= 0f) return;
-            Vector2 offset = (Vector2)target.position - (Vector2)transform.position;
+            Vector2 origin = CurrentMovePosition;
+            Vector2 offset = (Vector2)target.position - origin;
             if (offset.sqrMagnitude <= 0.001f) return;
             float distance = offset.magnitude;
             float step = Mathf.Min(
                 CurrentApproachSpeed * speedMultiplier * EnemyStatusEffects.MoveSpeedMultiplierOf(this) * deltaTime,
                 distance - BossTargetSpacing.ResolveStopDistance(gameObject, target));
             if (step <= 0f) return;
-            Vector2 destination = ClampToArena((Vector2)transform.position + offset / distance * step);
+            QueueMove(ClampToArena(origin + offset / distance * step));
+        }
+
+        private Vector2 CurrentMovePosition =>
+            queuedMoveFixedTime == Time.fixedTime ? queuedMovePosition : (Vector2)transform.position;
+
+        private void QueueMove(Vector2 destination)
+        {
             body.MovePosition(destination);
+            queuedMovePosition = destination;
+            queuedMoveFixedTime = Time.fixedTime;
         }
 
         private bool ResolveDirectionalHit(float startOffset, float length, float width, EnemyDamageTier damageTier,
@@ -753,9 +770,14 @@ namespace TrickalFanGame.Enemy
                 GameObject prefab = minionPrefabs[index];
                 if (prefab == null) continue;
                 float angle = (360f * index / Mathf.Max(1, count) + NextRandom(30)) * Mathf.Deg2Rad;
-                Vector2 position = ClampToArena((Vector2)transform.position +
-                    new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * summonRadius);
+                Vector2 position = (Vector2)transform.position +
+                    new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * summonRadius;
                 GameObject minion = Instantiate(prefab, position, Quaternion.identity, transform.parent);
+                // Clamp by the minion's own feet: the boss's feet sit far below its root, so the boss's root area
+                // reaches above the top wall and would put a small minion's feet inside it.
+                Rect minionArea = EnemyFeet.StandingRootArea(minion, standingBounds);
+                minion.transform.position = new Vector3(Mathf.Clamp(position.x, minionArea.xMin, minionArea.xMax),
+                    Mathf.Clamp(position.y, minionArea.yMin, minionArea.yMax), minion.transform.position.z);
                 minion.name = prefab.name + " (Crayon Summon)";
                 minion.GetComponent<TestEnemy>()?.ConfigureReward(false);
                 minion.GetComponent<EnemyBehaviorContext>()?.BeginCombat(target);
@@ -1010,24 +1032,41 @@ namespace TrickalFanGame.Enemy
             RoomNode room = GetComponentInParent<RoomNode>();
             if (room != null && room.Profile != null)
             {
-                Rect local = new Rect(-room.Profile.InteriorSize * 0.5f, room.Profile.InteriorSize);
-                Vector2 minimum = room.transform.TransformPoint(local.min);
-                Vector2 maximum = room.transform.TransformPoint(local.max);
-                arenaBounds = Rect.MinMaxRect(Mathf.Min(minimum.x, maximum.x), Mathf.Min(minimum.y, maximum.y),
-                    Mathf.Max(minimum.x, maximum.x), Mathf.Max(minimum.y, maximum.y));
+                arenaBounds = ToWorld(room.transform, new Rect(-room.Profile.InteriorSize * 0.5f,
+                    room.Profile.InteriorSize));
+                Rect movement = room.Profile.MovementBounds;
+                standingBounds = movement.width > 0f && movement.height > 0f
+                    ? ToWorld(room.transform, movement)
+                    : Shrink(arenaBounds, arenaPadding);
                 return;
             }
             arenaBounds = new Rect((Vector2)transform.position - fallbackHalfExtents, fallbackHalfExtents * 2f);
+            standingBounds = Shrink(arenaBounds, arenaPadding);
         }
 
+        private static Rect ToWorld(Transform room, Rect local)
+        {
+            Vector2 minimum = room.TransformPoint(local.min);
+            Vector2 maximum = room.TransformPoint(local.max);
+            return Rect.MinMaxRect(Mathf.Min(minimum.x, maximum.x), Mathf.Min(minimum.y, maximum.y),
+                Mathf.Max(minimum.x, maximum.x), Mathf.Max(minimum.y, maximum.y));
+        }
+
+        private static Rect Shrink(Rect area, float padding)
+        {
+            float horizontal = Mathf.Min(padding, area.width * 0.49f);
+            float vertical = Mathf.Min(padding, area.height * 0.49f);
+            return Rect.MinMaxRect(area.xMin + horizontal, area.yMin + vertical, area.xMax - horizontal,
+                area.yMax - vertical);
+        }
+
+        // Boss-Pattern-0 (2026-11-19): the feet stay on the standing floor, so the hero nears walls like other enemies
+        // instead of keeping its whole body circle (plus padding) inside the room.
         private Vector2 ClampToArena(Vector2 position)
         {
-            Collider2D collider = GetComponent<Collider2D>();
-            Vector2 extents = collider != null ? (Vector2)collider.bounds.extents : Vector2.one * arenaPadding;
-            float horizontal = Mathf.Min(extents.x + arenaPadding, arenaBounds.width * 0.49f);
-            float vertical = Mathf.Min(extents.y + arenaPadding, arenaBounds.height * 0.49f);
-            return new Vector2(Mathf.Clamp(position.x, arenaBounds.xMin + horizontal, arenaBounds.xMax - horizontal),
-                Mathf.Clamp(position.y, arenaBounds.yMin + vertical, arenaBounds.yMax - vertical));
+            Rect area = EnemyFeet.StandingRootArea(gameObject, standingBounds);
+            return new Vector2(Mathf.Clamp(position.x, area.xMin, area.xMax),
+                Mathf.Clamp(position.y, area.yMin, area.yMax));
         }
 
         private void StopMovement()

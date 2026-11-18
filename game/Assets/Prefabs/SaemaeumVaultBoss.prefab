@@ -44,6 +44,7 @@ Transform:
   - {fileID: 7419532161904482244}
   - {fileID: 3093606885832080014}
   - {fileID: 7159970986748674629}
+  - {fileID: 8156784561432404247}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &5868499211473451791
@@ -89,7 +90,7 @@ CircleCollider2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1280
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
@@ -181,7 +182,7 @@ MonoBehaviour:
   displayName: "\uC0C8\uB9C8\uC74C\uAE08\uACE0"
   phaseCount: 2
   patterns:
-  - patternId: saemaeum-approach-treasure-throw
+  - patternId: saemaeum-approach-walk
     execution: 5
     telegraphDuration: 0.55
     additionalTelegraphDuration: 0
@@ -190,11 +191,11 @@ MonoBehaviour:
     reuseCooldown: 0.8
   - patternId: saemaeum-rage-jump-sequence
     execution: 6
-    telegraphDuration: 0.95
-    additionalTelegraphDuration: 0
-    activeDuration: 3.8
+    telegraphDuration: 0.01
+    additionalTelegraphDuration: 0.79
+    activeDuration: 5.9
     recoveryDuration: 1.15
-    reuseCooldown: 1.8
+    reuseCooldown: 2.5
   - patternId: saemaeum-eat-treasure
     execution: 7
     telegraphDuration: 0.8
@@ -209,6 +210,20 @@ MonoBehaviour:
     activeDuration: 1.4
     recoveryDuration: 0.8
     reuseCooldown: 4.5
+  - patternId: saemaeum-golden-pillars
+    execution: 13
+    telegraphDuration: 0.8
+    additionalTelegraphDuration: 0
+    activeDuration: 0.6
+    recoveryDuration: 0.6
+    reuseCooldown: 5
+  - patternId: saemaeum-gold-meteor
+    execution: 14
+    telegraphDuration: 0.9
+    additionalTelegraphDuration: 0
+    activeDuration: 0.3
+    recoveryDuration: 0.4
+    reuseCooldown: 0
   encounterSeed: 1
   attackInterval: 1.2
   projectileSpeed: 4
@@ -216,6 +231,10 @@ MonoBehaviour:
   phaseTransitionDuration: 1.1
   phaseTwoTempoMultiplier: 0.88
   keepsOwnedObjectsOnDefeat: 0
+  feetHalfHeight: 0.55
+  feetHalfWidth: 1.33
+  feetOffsetX: 0
+  feetDrop: 0
 --- !u!114 &1920493134593096256
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -230,32 +249,57 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.SaemaeumVaultBossPatternRuntime
   approachSpeed: 1.8
   phaseTwoSpeedMultiplier: 1.35
-  throwInterval: 0.55
-  projectileSpeed: 5.5
-  projectilesPerVolley: 5
-  volleysPerPattern: 5
-  fanSpreadDegrees: 48
-  phaseOneMinimumJumps: 3
-  phaseOneMaximumJumps: 5
-  phaseTwoMinimumJumps: 4
-  phaseTwoMaximumJumps: 6
-  phaseOneJumpDuration: 0.76
-  phaseTwoJumpDuration: 0.72
-  phaseOneJumpRest: 0.2
-  phaseTwoJumpRest: 0.15
+  phaseOneMinimumJumps: 2
+  phaseOneMaximumJumps: 2
+  phaseTwoMinimumJumps: 3
+  phaseTwoMaximumJumps: 3
+  phaseOneJumpDuration: 1.5
+  phaseTwoJumpDuration: 1.4
+  phaseOneJumpRest: 1
+  phaseTwoJumpRest: 0.85
+  preJumpCrouchDuration: 0.8
   jumpDistance: 5.5
   jumpHeight: 2
   landingRadius: 2.875
   landingDamageTier: 1
   landingKnockbackSpeed: 7
   landingKnockbackDuration: 0.2
+  phaseOneLandingBurstCount: 8
+  phaseTwoLandingBurstCount: 12
+  phaseOneLandingBurstSpeed: 4.5
+  phaseTwoLandingBurstSpeed: 5
+  landingBurstDamageTier: 0
+  landingBurstSpawnMargin: 0.2
+  phaseOnePillars: 4
+  phaseTwoPillars: 6
+  phaseOnePillarWarning: 0.8
+  phaseTwoPillarWarning: 0.7
+  pillarStagger: 0.12
+  pillarHitRadius: 0.6
+  pillarDamageTier: 0
+  pillarKnockbackSpeed: 7
+  pillarKnockbackDuration: 0.2
+  pillarRequiredHits: 5
+  pillarTargetEvery: 3
+  meteorMinimumDuration: 8
+  meteorMaximumDuration: 10
+  meteorOpeningCount: 5
+  meteorOpeningInterval: 0.35
+  meteorInterval: 0.45
+  meteorTargetEvery: 3
+  meteorWarning: 0.9
+  meteorRadius: 0.9
+  meteorDamageTier: 0
+  meteorKnockbackSpeed: 7
+  meteorKnockbackDuration: 0.2
+  meteorCooldownAfterRain: 8
   phaseOneLargeSlimes: 1
   phaseOneSmallSlimes: 4
   phaseTwoLargeSlimes: 2
   phaseTwoSmallSlimes: 5
   slimePuddleRadius: 1.2
   smallSlimePuddleRadius: 0.5
-  slimeSpeedMultiplier: 0.75
+  slimeSpeedMultiplier: 0.55
   slimeRequiredHits: 3
   maximumSlimePuddles: 14
   slimeFlightDuration: 0.7
@@ -352,6 +396,7 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: SaemaeumVaultBoss
   useSharedProfile: 1
+  surface: {fileID: 0}
 --- !u!114 &2917638869135839854
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -553,6 +598,125 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &4570632891101918115
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8156784561432404247}
+  - component: {fileID: 6558051184625714598}
+  - component: {fileID: 749559339935033725}
+  - component: {fileID: 783535931772068604}
+  m_Layer: 12
+  m_Name: Feet
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8156784561432404247
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4570632891101918115}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.2272222, z: 0}
+  m_LocalScale: {x: 0.2777778, y: 0.2777778, z: 0.2777778}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1068135327481586096}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &6558051184625714598
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4570632891101918115}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.55
+--- !u!114 &749559339935033725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4570632891101918115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b8dfcd924a4e4ea0727bad07748da9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyFeet
+--- !u!70 &783535931772068604
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4570632891101918115}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Size: {x: 2.66, y: 1.1}
+  m_Direction: 1
 --- !u!1 &4782152418808698028
 GameObject:
   m_ObjectHideFlags: 0

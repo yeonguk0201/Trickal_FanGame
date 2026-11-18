@@ -2566,3 +2566,15 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 배치: `TrickalFanGame.Editor.ShopUiArtworkSetup.SetupVerifyAndCaptureBatch`(그래픽 필요, `-nographics` 제외). 적용 후 `Week22Shop0Verification`·`Week23Shop1Verification`·`Week27Elif3Verification`의 `Verify`를 실행하고 렌더한다. 검증만은 `ShopUiArtworkSetup.Verify`.
 - 동작: 마우스 호버나 방향키가 칸을 고른다. 방향키를 누르고 있으면 0.35초 뒤부터 0.09초마다 반복 이동한다. 좌우는 같은 줄, 위아래는 같은 열 안에서 순환하고, 2열 아래에는 투자, 3열 아래에는 닫기 버튼이 있어 위아래 순환에 포함된다(버튼 줄에서 좌우로 투자↔닫기, Enter로 누름). 투자 목록도 위아래로 순환한다. 클릭이나 Enter로 살 수 있는 상품이면 구매 팝업을 열고, 팝업은 구매가 선택된 채 열리고, 좌우 방향키(A/D)나 마우스 호버로 취소·구매를 고른다(보라 테두리). Enter는 고른 버튼을 누른다. Esc·취소·X는 팝업만 닫는다. 살 수 없는 상품(골드 부족 등)은 가격이 빨간색이고 팝업을 열지 않는다. 설명 말풍선은 팝업의 아이템 그림에 마우스를 올리면 보인다. Enter로 연 팝업은 바로 보이고, 마우스를 움직이면 그때부터 호버를 따른다. 말풍선은 설명 길이에 맞춰 아래 여백(`ShopView.TooltipBottomPadding`)을 남기고 아래로 늘어난다. 소모품 설명은 `ShopView.DescribeConsumable`의 효과 문구다. 투자 줄도 같은 팝업으로 확인한 뒤 투자한다.
 - Play 수동 확인(미실시): `SampleScene`에서 상점에 들어가 E로 연다. 호버·방향키 선택, 골드 부족 칸의 빨간 가격과 클릭 무반응, 구매 팝업 열기·구매·취소, 설명이 긴 아이템에서 말풍선이 아래로 늘어나는지, 투자 화면, 골디 상점(그림·제목·대사)을 확인한다.
+
+### 보스 발 판정 조정 도구 (2026-11-19, Boss-Pattern-0)
+
+- 렌더: Unity 배치 `TrickalFanGame.Editor.BossFeetLayoutExporter.ExportBatch` (`-batchmode -quit`, 그래픽 렌더가 필요하므로
+  `-nographics` 제외). 층별 보스방(`room-boss-floor-1/2/3`)의 바닥과 앞쪽 생울타리, 보스의 서 있기·걷기·바닥에 붙은 뛰기 프레임,
+  `GroundShadow`, 플레이어를 `output/boss-feet-review/`에 PNG로 내보내고 몸 원·발 원·설 수 있는 영역 수치를 `manifest.json`에
+  담는다. 씬·Prefab은 저장하지 않는다. 같은 프로젝트를 연 Unity 에디터가 있으면 실행되지 않는다.
+- HTML: `python scripts/boss-feet-tuner/build.py` → `output/boss-feet-review/boss-feet-tuner.html`(이미지 내장, 오프라인).
+  보스·벽 위치·자세를 고르고 발 폭·발 높이·발 내림을 슬라이더나 키(←→ 폭, ↑↓ 높이, PageUp/PageDown 내림,
+  Shift 0.05)로 바꾸면 멈추는 자리가 바로 바뀐다. 폭과 높이가 같으면 원, 다르면 캡슐이다. 발 좌우 위치(그림을
+  뒤집지 않았을 때 기준, 뒤집으면 함께 뒤집힘)와 발 내림(음수는 위로)은 슬라이더나 캔버스의 초록 발 끌기로 바꾼다. 값은 브라우저에 자동 저장되고 "공유할 값"을 복사해 전달한다.
+- 확인 근거: 2026-11-19 Unity 6000.3.22f1 배치 종료 코드 0, 3개 보스 렌더, 헤드리스 Edge로 첫 화면 렌더 확인.

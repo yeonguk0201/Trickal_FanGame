@@ -105,7 +105,10 @@ namespace TrickalFanGame.Enemy
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.GetComponentInParent<DoorController>() != null)
+            // 새마음금고's gold pillars are cover: a boss shot stops on them.
+            BossSummonedObstacle obstacle = other.GetComponentInParent<BossSummonedObstacle>();
+            if (other.GetComponentInParent<DoorController>() != null ||
+                (obstacle != null && obstacle.BlocksBossProjectiles && !obstacle.IsBroken))
             {
                 StopAtBoundary();
             }

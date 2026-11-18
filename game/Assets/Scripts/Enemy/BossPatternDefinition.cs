@@ -10,7 +10,8 @@ namespace TrickalFanGame.Enemy
         BuseureogiApproachVolley,
         BuseureogiSummonMinions,
         BuseureogiThrowObstacle,
-        SaemaeumApproachThrow,
+        // Walks toward the player. Its fan throw was removed (2026-11-18); the serialized value is unchanged.
+        SaemaeumApproachWalk,
         SaemaeumJumpSequence,
         SaemaeumTreasureHeal,
         CrayonHeroMapSlash,
@@ -18,6 +19,8 @@ namespace TrickalFanGame.Enemy
         CrayonHeroApproachSwing,
         CrayonHeroDashChain,
         SaemaeumSlimeScatter,
+        SaemaeumGoldPillars,
+        SaemaeumGoldMeteor,
     }
 
     [Serializable]
