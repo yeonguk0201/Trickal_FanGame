@@ -22711,7 +22711,7 @@ MonoBehaviour:
   confirmButton: {fileID: 1140043613}
   graphicRaycaster: {fileID: 497379335}
   fallDuration: 0.6
-  holdAfterFall: 5
+  holdAfterFall: 3.6
   irisDuration: 1.2
   titleFadeDuration: 0.6
   confirmDelay: 0.4

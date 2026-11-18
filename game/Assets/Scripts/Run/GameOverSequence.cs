@@ -19,10 +19,13 @@ namespace TrickalFanGame.Run
             Falling,
             Holding,
             Closing,
+            Blackout,
             Title,
             AwaitingConfirm,
             Confirmed
         }
+
+        private const float BlackoutHoldDuration = 0.6f;
 
         [Header("UI")]
         [SerializeField] private CanvasGroup overlay;
@@ -39,7 +42,7 @@ namespace TrickalFanGame.Run
         // Length of the fall. With drawn defeat poses it matches PlayerWalkAnimator.DefeatDuration (4 x 0.15 s);
         // without them the character tilts over as a placeholder.
         [SerializeField, Min(0f)] private float fallDuration = 0.6f;
-        [SerializeField, Min(0f)] private float holdAfterFall = 5f;
+        [SerializeField, Min(0f)] private float holdAfterFall = 3.6f;
         [SerializeField, Min(0.01f)] private float irisDuration = 1.2f;
         [SerializeField, Min(0.01f)] private float titleFadeDuration = 0.6f;
         [SerializeField, Min(0f)] private float confirmDelay = 0.4f;
@@ -53,6 +56,7 @@ namespace TrickalFanGame.Run
         private float phaseElapsed;
         private Action confirmed;
         private Texture2D holeTexture;
+        private GameOverPresentation presentation;
 
         public Phase CurrentPhase { get; private set; } = Phase.Idle;
         public bool IsActive => CurrentPhase != Phase.Idle;
@@ -102,6 +106,7 @@ namespace TrickalFanGame.Run
         private void OnDestroy()
         {
             UnbindConfirm();
+            presentation?.Dispose();
             if (holeTexture != null) Destroy(holeTexture);
         }
 
@@ -134,7 +139,8 @@ namespace TrickalFanGame.Run
             ApplyFall(1f);
             ShowOverlay();
             ApplyIris(0f);
-            title.alpha = 1f;
+            BeginTitle();
+            RevealTitle(1f);
             EnterAwaitingConfirm();
             return true;
         }
@@ -159,7 +165,8 @@ namespace TrickalFanGame.Run
         public void Advance(float seconds)
         {
             if (!IsActive) return;
-            phaseElapsed += Mathf.Max(0f, seconds);
+            seconds = Mathf.Max(0f, seconds);
+            phaseElapsed += seconds;
             switch (CurrentPhase)
             {
                 case Phase.Falling:
@@ -177,18 +184,36 @@ namespace TrickalFanGame.Run
                 case Phase.Closing:
                     float t = Mathf.Clamp01(phaseElapsed / irisDuration);
                     ApplyIris(1f - t * t * t);
-                    if (t >= 1f) SetPhase(Phase.Title);
+                    if (t >= 1f) SetPhase(Phase.Blackout);
+                    break;
+                case Phase.Blackout:
+                    if (phaseElapsed >= BlackoutHoldDuration) BeginTitle();
                     break;
                 case Phase.Title:
-                    title.alpha = Mathf.Clamp01(phaseElapsed / titleFadeDuration);
+                    RevealTitle(Mathf.Clamp01(phaseElapsed / titleFadeDuration));
+                    presentation.Advance(seconds);
                     if (phaseElapsed >= titleFadeDuration + confirmDelay) EnterAwaitingConfirm();
                     break;
                 case Phase.AwaitingConfirm:
+                    presentation.Advance(seconds);
                     if (EventSystem.current != null &&
                         EventSystem.current.currentSelectedGameObject != confirmButton.gameObject)
                         EventSystem.current.SetSelectedGameObject(confirmButton.gameObject);
                     break;
             }
+        }
+
+        private void BeginTitle()
+        {
+            presentation ??= new GameOverPresentation(title, confirmButton);
+            SetPhase(Phase.Title);
+            RevealTitle(0f);
+        }
+
+        private void RevealTitle(float opacity)
+        {
+            title.alpha = opacity;
+            presentation.SetOpacity(opacity);
         }
 
         private void SetPhase(Phase phase)

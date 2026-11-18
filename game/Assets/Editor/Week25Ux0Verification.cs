@@ -144,8 +144,8 @@ namespace TrickalFanGame.Editor
                 "GAME OVER title is missing or uses another font.");
             Assert(confirm != null && confirm.text == "결과 보기" && confirm.font == font,
                 "GAME OVER confirm label is missing or uses another font.");
-            Assert(sequence.HoldAfterFall >= 4f && sequence.HoldAfterFall <= 6f,
-                "The pause after the fall should stay about five seconds.");
+            Assert(Mathf.Approximately(sequence.HoldAfterFall, 3.6f),
+                "The Game Scene must wait 3.6 seconds after the fall.");
         }
 
         private static void VerifyPauseSettingsFlow(GamePauseArtifactView view)
@@ -194,9 +194,39 @@ namespace TrickalFanGame.Editor
                 Assert(sequence.IrisRadius <= previousRadius, "The circular fade reopened while closing.");
                 previousRadius = sequence.IrisRadius;
             }
-            Assert(sequence.CurrentPhase == GameOverSequence.Phase.Title && sequence.IrisRadius <= 0.01f,
-                "The circular fade did not close fully before GAME OVER.");
+            Assert(sequence.CurrentPhase == GameOverSequence.Phase.Blackout && sequence.IrisRadius <= 0.01f,
+                "The circular fade must close fully before the blackout hold.");
+            sequence.Advance(0.59f);
+            Assert(sequence.CurrentPhase == GameOverSequence.Phase.Blackout && sequence.Overlay.alpha == 1f &&
+                   sequence.Title.alpha == 0f && !sequence.ConfirmButton.gameObject.activeSelf,
+                "The blackout must keep the title and confirm button hidden.");
+            sequence.Advance(0.02f);
+            Assert(sequence.CurrentPhase == GameOverSequence.Phase.Title && sequence.Title.alpha == 0f,
+                "The title fade must start after the blackout hold.");
             Assert(!sequence.ConfirmButton.gameObject.activeSelf, "The confirm input appeared before GAME OVER.");
+
+            TMP_Text title = sequence.Title.GetComponentInChildren<TMP_Text>();
+            Material titleMaterial = title.fontSharedMaterial;
+            Assert(titleMaterial.mainTexture == title.font.atlasTexture &&
+                   titleMaterial.IsKeywordEnabled("OUTLINE_ON") && titleMaterial.IsKeywordEnabled("UNDERLAY_ON"),
+                "The title material must use the shared font atlas with the outline and shadow variants.");
+            Transform backdrop = sequence.Overlay.transform.Find("Game Over Backdrop");
+            Image portrait = backdrop != null ? backdrop.Find("Erpin Defeat Portrait")?.GetComponent<Image>() : null;
+            Assert(portrait != null && portrait.sprite != null && portrait.sprite.name == "Erpin_Death_3" &&
+                   !portrait.raycastTarget && backdrop.GetSiblingIndex() < sequence.Title.transform.GetSiblingIndex(),
+                "The defeat portrait must render behind the title without taking input.");
+            CanvasGroup backdropGroup = backdrop.GetComponent<CanvasGroup>();
+            Assert(backdropGroup.alpha == 0f, "The backdrop must fade in after the iris closes.");
+            sequence.Advance(0.1f);
+            Assert(backdropGroup.alpha > 0f && backdropGroup.alpha == sequence.Title.alpha,
+                "The backdrop must fade in with the title.");
+            Assert(LetterLift(title, 0) > 1f && Mathf.Abs(LetterLift(title, 1)) < 0.01f,
+                "The first letter must lift before the second.");
+            sequence.Advance(0.12f);
+            title.ForceMeshUpdate();
+            Assert(LetterLift(title, 0) > LetterLift(title, 1) && LetterLift(title, 1) > 1f &&
+                   Mathf.Abs(LetterLift(title, 2)) < 0.01f,
+                "The wave must advance from left to right and survive a TMP mesh rebuild.");
 
             sequence.Advance(5f);
             Assert(sequence.IsAwaitingConfirm && sequence.Title.alpha == 1f &&
@@ -207,6 +237,13 @@ namespace TrickalFanGame.Editor
                 "GAME OVER must not open the result by time alone.");
             Assert(sequence.Confirm() && confirmations == 1, "Confirming GAME OVER did not open the result.");
             Assert(!sequence.Confirm() && confirmations == 1, "Confirming twice opened the result twice.");
+        }
+
+        private static float LetterLift(TMP_Text text, int index)
+        {
+            TMP_CharacterInfo character = text.textInfo.characterInfo[index];
+            Vector3[] vertices = text.textInfo.meshInfo[character.materialReferenceIndex].vertices;
+            return vertices[character.vertexIndex].y - character.vertex_BL.position.y;
         }
 
         private static string[] FrontendSettingsControlNames()
