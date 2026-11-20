@@ -230,6 +230,7 @@ GameObject:
   - component: {fileID: 1230439742369051024}
   - component: {fileID: 4214231554976169602}
   - component: {fileID: 747793689673476828}
+  - component: {fileID: 8366613321977565138}
   m_Layer: 6
   m_Name: CrayonHeroBoss
   m_TagString: Untagged
@@ -597,3 +598,102 @@ MonoBehaviour:
   profileId: CrayonHeroBoss
   useSharedProfile: 1
   surface: {fileID: 0}
+--- !u!114 &8366613321977565138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7891563656944652053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66f0a6042d44bca4caa0aa1ad5525229, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.CrayonHeroTruckDefeat
+  driveFrames:
+  - {fileID: 21300000, guid: 1f555254f7e48884082c92fe1b795e88, type: 3}
+  - {fileID: 21300000, guid: 30e30801bbeb4dd418564a3b3e309086, type: 3}
+  driveRects:
+  - serializedVersion: 2
+    x: -1.1035
+    y: 0
+    width: 2.207
+    height: 1.1095
+  - serializedVersion: 2
+    x: -1.2126
+    y: 0
+    width: 2.3161
+    height: 1.1065
+  impactFrames:
+  - {fileID: 21300000, guid: 519c78dc2a74082498ca8d129d40bc6b, type: 3}
+  - {fileID: 21300000, guid: d031e12c8de084e4eac9d3c230d1beda, type: 3}
+  - {fileID: 21300000, guid: 8e82b418f6e46704288b86b4e54cf8a5, type: 3}
+  - {fileID: 21300000, guid: b1fcdaa9a67718a42ac8a1197c5f03fb, type: 3}
+  - {fileID: 21300000, guid: a4e0cb8d99faa14459ed79cc9c307bd0, type: 3}
+  - {fileID: 21300000, guid: e179ece659fe8b34fb95610f3d815bb3, type: 3}
+  - {fileID: 21300000, guid: 3282a2ba68acc1544a12bbcbb59d178c, type: 3}
+  - {fileID: 21300000, guid: 959596c0469f0614d93727b0424b4984, type: 3}
+  impactRects:
+  - serializedVersion: 2
+    x: -0.9943
+    y: -0.0455
+    width: 3.1983
+    height: 1.2035
+  - serializedVersion: 2
+    x: -1.1156
+    y: -0.1122
+    width: 3.2892
+    height: 1.4036
+  - serializedVersion: 2
+    x: -1.0163
+    y: -0.1406
+    width: 3.1095
+    height: 1.5389
+  - serializedVersion: 2
+    x: -1.0163
+    y: -0.3312
+    width: 3.1355
+    height: 1.6717
+  - serializedVersion: 2
+    x: -0.9802
+    y: -0.0424
+    width: 2.7183
+    height: 1.3238
+  - serializedVersion: 2
+    x: -1.0394
+    y: -0.0367
+    width: 3.0633
+    height: 1.3772
+  - serializedVersion: 2
+    x: -1.0047
+    y: -0.0338
+    width: 2.9969
+    height: 1.3743
+  - serializedVersion: 2
+    x: -1.0163
+    y: -0.0193
+    width: 2.9334
+    height: 1.3714
+  impactSeconds:
+  - 0.12
+  - 0.12
+  - 0.14
+  - 0.11
+  - 0.11
+  - 0.12
+  - 0.14
+  - 0.16
+  anchorFromFeet: {x: -1.592, y: 0}
+  bodyVisibleShare: 0.4169922
+  bodyBottomShare: 0.2890625
+  waitSeconds: 0.35
+  approachSeconds: 0.55
+  approachDistance: 16
+  impactTravel: 0.3618
+  exitSeconds: 0.9
+  exitDistance: 30
+  exitAcceleration: 0.3
+  wheelFramesPerSecond: 16
+  shakePeak: 0.25
+  shakeSeconds: 0.3
+  victoryAfterImpact: 0.6

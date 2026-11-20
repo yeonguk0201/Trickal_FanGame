@@ -417,6 +417,30 @@ namespace TrickalFanGame.Run
                 return;
             }
 
+            // A clear waits for the boss's defeat presentation (truck, 에르핀's victory) before the result screen.
+            // The request is queued locally now, so quitting meanwhile still saves it once later.
+            if (isCleared && BossDefeatPresentation.Remaining > 0f && isActiveAndEnabled)
+            {
+                LocalPendingRunStorage.Save(pendingRequest);
+                statusMessage = "Run cleared. Victory presentation...";
+                StartCoroutine(OpenResultAfterBossDefeat());
+                return;
+            }
+
+            OpenResult();
+        }
+
+        // Game time, so a pause holds the result too; capped in case a presentation never ends.
+        public const float MaxBossDefeatWait = 8f;
+
+        private System.Collections.IEnumerator OpenResultAfterBossDefeat()
+        {
+            float waited = 0f;
+            while (BossDefeatPresentation.Remaining > 0f && waited < MaxBossDefeatWait)
+            {
+                waited += Time.deltaTime;
+                yield return null;
+            }
             OpenResult();
         }
 

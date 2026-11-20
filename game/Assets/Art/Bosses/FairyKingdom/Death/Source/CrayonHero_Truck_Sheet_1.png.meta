@@ -1,0 +1,3419 @@
+fileFormatVersion: 2
+guid: 5c3bef653f0b6be4b99fe9aa2ff3de4b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5961700650948662171
+    second: CrayonHero_Truck_Sheet_1_0
+  - first:
+      213: 657632360291855836
+    second: CrayonHero_Truck_Sheet_1_1
+  - first:
+      213: -5712292826175319755
+    second: CrayonHero_Truck_Sheet_1_2
+  - first:
+      213: 2058164316665340489
+    second: CrayonHero_Truck_Sheet_1_3
+  - first:
+      213: -2953030585703235649
+    second: CrayonHero_Truck_Sheet_1_4
+  - first:
+      213: -6572090275067645454
+    second: CrayonHero_Truck_Sheet_1_5
+  - first:
+      213: 3952211409040661540
+    second: CrayonHero_Truck_Sheet_1_6
+  - first:
+      213: 2025557394404773360
+    second: CrayonHero_Truck_Sheet_1_7
+  - first:
+      213: -6600264380872537563
+    second: CrayonHero_Truck_Sheet_1_8
+  - first:
+      213: 5336876290813526756
+    second: CrayonHero_Truck_Sheet_1_9
+  - first:
+      213: -8873727283666433463
+    second: CrayonHero_Truck_Sheet_1_10
+  - first:
+      213: -2554700248531335236
+    second: CrayonHero_Truck_Sheet_1_11
+  - first:
+      213: -3465781624254058652
+    second: CrayonHero_Truck_Sheet_1_12
+  - first:
+      213: 8247050826105087042
+    second: CrayonHero_Truck_Sheet_1_13
+  - first:
+      213: 5464879064406450864
+    second: CrayonHero_Truck_Sheet_1_14
+  - first:
+      213: -7984530003954960688
+    second: CrayonHero_Truck_Sheet_1_15
+  - first:
+      213: -1408471989235412661
+    second: CrayonHero_Truck_Sheet_1_16
+  - first:
+      213: 263892463980363681
+    second: CrayonHero_Truck_Sheet_1_17
+  - first:
+      213: 3114622938472270614
+    second: CrayonHero_Truck_Sheet_1_18
+  - first:
+      213: 3389460855755499451
+    second: CrayonHero_Truck_Sheet_1_19
+  - first:
+      213: -757774289463980739
+    second: CrayonHero_Truck_Sheet_1_20
+  - first:
+      213: 3892323781988104137
+    second: CrayonHero_Truck_Sheet_1_21
+  - first:
+      213: 4547981930754362090
+    second: CrayonHero_Truck_Sheet_1_22
+  - first:
+      213: 4122061510844641427
+    second: CrayonHero_Truck_Sheet_1_23
+  - first:
+      213: -3181610739899819758
+    second: CrayonHero_Truck_Sheet_1_24
+  - first:
+      213: 2789088169874444970
+    second: CrayonHero_Truck_Sheet_1_25
+  - first:
+      213: -7078719446015982077
+    second: CrayonHero_Truck_Sheet_1_26
+  - first:
+      213: 242917995768582624
+    second: CrayonHero_Truck_Sheet_1_27
+  - first:
+      213: -5275314969836761174
+    second: CrayonHero_Truck_Sheet_1_28
+  - first:
+      213: 9038846126218823327
+    second: CrayonHero_Truck_Sheet_1_29
+  - first:
+      213: -5211899699268579668
+    second: CrayonHero_Truck_Sheet_1_30
+  - first:
+      213: 7491560492414618136
+    second: CrayonHero_Truck_Sheet_1_31
+  - first:
+      213: -2157410957264208272
+    second: CrayonHero_Truck_Sheet_1_32
+  - first:
+      213: 3717316070641821970
+    second: CrayonHero_Truck_Sheet_1_33
+  - first:
+      213: 3903137164757679633
+    second: CrayonHero_Truck_Sheet_1_34
+  - first:
+      213: 954814390084572368
+    second: CrayonHero_Truck_Sheet_1_35
+  - first:
+      213: 8339310830805565483
+    second: CrayonHero_Truck_Sheet_1_36
+  - first:
+      213: 6959043265912964425
+    second: CrayonHero_Truck_Sheet_1_37
+  - first:
+      213: 6728553436658544921
+    second: CrayonHero_Truck_Sheet_1_38
+  - first:
+      213: -375496640974366767
+    second: CrayonHero_Truck_Sheet_1_39
+  - first:
+      213: -4936355477943349794
+    second: CrayonHero_Truck_Sheet_1_40
+  - first:
+      213: 7323700197589999843
+    second: CrayonHero_Truck_Sheet_1_41
+  - first:
+      213: -1365419851325540125
+    second: CrayonHero_Truck_Sheet_1_42
+  - first:
+      213: 3157020883401050308
+    second: CrayonHero_Truck_Sheet_1_43
+  - first:
+      213: 4613675270097684826
+    second: CrayonHero_Truck_Sheet_1_44
+  - first:
+      213: 7675385573216926796
+    second: CrayonHero_Truck_Sheet_1_45
+  - first:
+      213: 77330560112168297
+    second: CrayonHero_Truck_Sheet_1_46
+  - first:
+      213: 3707868154461962905
+    second: CrayonHero_Truck_Sheet_1_47
+  - first:
+      213: 8931946972803624067
+    second: CrayonHero_Truck_Sheet_1_48
+  - first:
+      213: 3142888045164985485
+    second: CrayonHero_Truck_Sheet_1_49
+  - first:
+      213: 8328015061203015294
+    second: CrayonHero_Truck_Sheet_1_50
+  - first:
+      213: 7301076869519111620
+    second: CrayonHero_Truck_Sheet_1_51
+  - first:
+      213: 9072727069394965966
+    second: CrayonHero_Truck_Sheet_1_52
+  - first:
+      213: 5486280283520027685
+    second: CrayonHero_Truck_Sheet_1_53
+  - first:
+      213: -8084806510866322545
+    second: CrayonHero_Truck_Sheet_1_54
+  - first:
+      213: -854175806754117821
+    second: CrayonHero_Truck_Sheet_1_55
+  - first:
+      213: -1458011082486652865
+    second: CrayonHero_Truck_Sheet_1_56
+  - first:
+      213: -778108238278214768
+    second: CrayonHero_Truck_Sheet_1_57
+  - first:
+      213: -2105662138788123377
+    second: CrayonHero_Truck_Sheet_1_58
+  - first:
+      213: -147847827401153973
+    second: CrayonHero_Truck_Sheet_1_59
+  - first:
+      213: 1583371080418629119
+    second: CrayonHero_Truck_Sheet_1_60
+  - first:
+      213: 5706524368920595759
+    second: CrayonHero_Truck_Sheet_1_61
+  - first:
+      213: -4614927838255515450
+    second: CrayonHero_Truck_Sheet_1_62
+  - first:
+      213: 6947497297666091771
+    second: CrayonHero_Truck_Sheet_1_63
+  - first:
+      213: 5484610229764903552
+    second: CrayonHero_Truck_Sheet_1_64
+  - first:
+      213: 9106297980861118795
+    second: CrayonHero_Truck_Sheet_1_65
+  - first:
+      213: 2167391921346027355
+    second: CrayonHero_Truck_Sheet_1_66
+  - first:
+      213: 5237292973963683059
+    second: CrayonHero_Truck_Sheet_1_67
+  - first:
+      213: 4516564946720277429
+    second: CrayonHero_Truck_Sheet_1_68
+  - first:
+      213: -857545776017855932
+    second: CrayonHero_Truck_Sheet_1_69
+  - first:
+      213: -112016417236858674
+    second: CrayonHero_Truck_Sheet_1_70
+  - first:
+      213: 3851813020206988563
+    second: CrayonHero_Truck_Sheet_1_71
+  - first:
+      213: 4823921836215270620
+    second: CrayonHero_Truck_Sheet_1_72
+  - first:
+      213: 7902475927841640345
+    second: CrayonHero_Truck_Sheet_1_73
+  - first:
+      213: -1722628924849748997
+    second: CrayonHero_Truck_Sheet_1_74
+  - first:
+      213: 9006212768168283147
+    second: CrayonHero_Truck_Sheet_1_75
+  - first:
+      213: -7270971260586585203
+    second: CrayonHero_Truck_Sheet_1_76
+  - first:
+      213: 5621600523854650482
+    second: CrayonHero_Truck_Sheet_1_77
+  - first:
+      213: 5542487007853805304
+    second: CrayonHero_Truck_Sheet_1_78
+  - first:
+      213: 8704290920747742625
+    second: CrayonHero_Truck_Sheet_1_79
+  - first:
+      213: -6801154622963873155
+    second: CrayonHero_Truck_Sheet_1_80
+  - first:
+      213: -9018543940581816815
+    second: CrayonHero_Truck_Sheet_1_81
+  - first:
+      213: -5203125377654424311
+    second: CrayonHero_Truck_Sheet_1_82
+  - first:
+      213: -5228902396627393736
+    second: CrayonHero_Truck_Sheet_1_83
+  - first:
+      213: 8365603521220303981
+    second: CrayonHero_Truck_Sheet_1_84
+  - first:
+      213: 3811077026644354241
+    second: CrayonHero_Truck_Sheet_1_85
+  - first:
+      213: 1405169434622254535
+    second: CrayonHero_Truck_Sheet_1_86
+  - first:
+      213: -389963124730347800
+    second: CrayonHero_Truck_Sheet_1_87
+  - first:
+      213: 7739779666872557612
+    second: CrayonHero_Truck_Sheet_1_88
+  - first:
+      213: 4190947724270009260
+    second: CrayonHero_Truck_Sheet_1_89
+  - first:
+      213: -2025339440505470695
+    second: CrayonHero_Truck_Sheet_1_90
+  - first:
+      213: 6325347217656621679
+    second: CrayonHero_Truck_Sheet_1_91
+  - first:
+      213: -200444608041786251
+    second: CrayonHero_Truck_Sheet_1_92
+  - first:
+      213: 2754442813929754514
+    second: CrayonHero_Truck_Sheet_1_93
+  - first:
+      213: -2032393178954133769
+    second: CrayonHero_Truck_Sheet_1_94
+  - first:
+      213: 6096561260765311854
+    second: CrayonHero_Truck_Sheet_1_95
+  - first:
+      213: 2495036403673524935
+    second: CrayonHero_Truck_Sheet_1_96
+  - first:
+      213: -5870675801442457222
+    second: CrayonHero_Truck_Sheet_1_97
+  - first:
+      213: 3668618823918754131
+    second: CrayonHero_Truck_Sheet_1_98
+  - first:
+      213: -3438590212498390509
+    second: CrayonHero_Truck_Sheet_1_99
+  - first:
+      213: 2533589923256475722
+    second: CrayonHero_Truck_Sheet_1_100
+  - first:
+      213: 2045353831384312125
+    second: CrayonHero_Truck_Sheet_1_101
+  - first:
+      213: -2735798675721892576
+    second: CrayonHero_Truck_Sheet_1_102
+  - first:
+      213: 8937374967030718561
+    second: CrayonHero_Truck_Sheet_1_103
+  - first:
+      213: -4154721484472433984
+    second: CrayonHero_Truck_Sheet_1_104
+  - first:
+      213: -3756608227011369874
+    second: CrayonHero_Truck_Sheet_1_105
+  - first:
+      213: 8770998390522523286
+    second: CrayonHero_Truck_Sheet_1_106
+  - first:
+      213: 1957987721143237884
+    second: CrayonHero_Truck_Sheet_1_107
+  - first:
+      213: 4244996953254847565
+    second: CrayonHero_Truck_Sheet_1_108
+  - first:
+      213: 8974697420121981190
+    second: CrayonHero_Truck_Sheet_1_109
+  - first:
+      213: 415006480574645846
+    second: CrayonHero_Truck_Sheet_1_110
+  - first:
+      213: 5753358082067491550
+    second: CrayonHero_Truck_Sheet_1_111
+  - first:
+      213: 4645384823257825545
+    second: CrayonHero_Truck_Sheet_1_112
+  - first:
+      213: -3162052688147805585
+    second: CrayonHero_Truck_Sheet_1_113
+  - first:
+      213: -662326645439195769
+    second: CrayonHero_Truck_Sheet_1_114
+  - first:
+      213: -5072787345233332270
+    second: CrayonHero_Truck_Sheet_1_115
+  - first:
+      213: -2194904550150140626
+    second: CrayonHero_Truck_Sheet_1_116
+  - first:
+      213: 6356940815413199385
+    second: CrayonHero_Truck_Sheet_1_117
+  - first:
+      213: 2501715864008651430
+    second: CrayonHero_Truck_Sheet_1_118
+  - first:
+      213: 8293625693979471522
+    second: CrayonHero_Truck_Sheet_1_119
+  - first:
+      213: -7944557662322178601
+    second: CrayonHero_Truck_Sheet_1_120
+  - first:
+      213: -4881575873011294127
+    second: CrayonHero_Truck_Sheet_1_121
+  - first:
+      213: -7639614011764044299
+    second: CrayonHero_Truck_Sheet_1_122
+  - first:
+      213: -3291995338938646347
+    second: CrayonHero_Truck_Sheet_1_123
+  - first:
+      213: -7334421192519289176
+    second: CrayonHero_Truck_Sheet_1_124
+  - first:
+      213: 2749541717457567304
+    second: CrayonHero_Truck_Sheet_1_125
+  - first:
+      213: 1270316495042218719
+    second: CrayonHero_Truck_Sheet_1_126
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_0
+      rect:
+        serializedVersion: 2
+        x: 165
+        y: 689
+        width: 15
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b939205d7273cb250800000000000000
+      internalID: 5961700650948662171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_1
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 683
+        width: 31
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdd6ffbb521602900800000000000000
+      internalID: 657632360291855836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_2
+      rect:
+        serializedVersion: 2
+        x: 213
+        y: 661
+        width: 112
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 531deca80fbd9b0b0800000000000000
+      internalID: -5712292826175319755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_3
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 697
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 942e8389a81109c10800000000000000
+      internalID: 2058164316665340489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_4
+      rect:
+        serializedVersion: 2
+        x: 368
+        y: 695
+        width: 35
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fbf7b40045ab407d0800000000000000
+      internalID: -2953030585703235649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_5
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 679
+        width: 23
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f13bca17be3bc4a0800000000000000
+      internalID: -6572090275067645454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_6
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 675
+        width: 32
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42c5d19365319d630800000000000000
+      internalID: 3952211409040661540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_7
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 703
+        width: 59
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fd89a5e7b93c1c10800000000000000
+      internalID: 2025557394404773360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_8
+      rect:
+        serializedVersion: 2
+        x: 471
+        y: 620
+        width: 85
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52acd6ae3862764a0800000000000000
+      internalID: -6600264380872537563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_9
+      rect:
+        serializedVersion: 2
+        x: 515
+        y: 685
+        width: 29
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e20524e5b4601a40800000000000000
+      internalID: 5336876290813526756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_10
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 707
+        width: 42
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94ace5fec003ad480800000000000000
+      internalID: -8873727283666433463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_11
+      rect:
+        serializedVersion: 2
+        x: 539
+        y: 693
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb700bac8a1eb8cd0800000000000000
+      internalID: -2554700248531335236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_12
+      rect:
+        serializedVersion: 2
+        x: 571
+        y: 679
+        width: 39
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46fa249a9f117efc0800000000000000
+      internalID: -3465781624254058652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_13
+      rect:
+        serializedVersion: 2
+        x: 619
+        y: 669
+        width: 124
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 244e5961809637270800000000000000
+      internalID: 8247050826105087042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_14
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 644
+        width: 37
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b26a6e0e8627db40800000000000000
+      internalID: 5464879064406450864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_15
+      rect:
+        serializedVersion: 2
+        x: 818
+        y: 705
+        width: 26
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d6f0d7e340413190800000000000000
+      internalID: -7984530003954960688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_16
+      rect:
+        serializedVersion: 2
+        x: 822
+        y: 677
+        width: 22
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b41198d203a147ce0800000000000000
+      internalID: -1408471989235412661
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_17
+      rect:
+        serializedVersion: 2
+        x: 828
+        y: 693
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1afb37e3cc889a300800000000000000
+      internalID: 263892463980363681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_18
+      rect:
+        serializedVersion: 2
+        x: 837
+        y: 632
+        width: 49
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61b4ce08f0d593b20800000000000000
+      internalID: 3114622938472270614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_19
+      rect:
+        serializedVersion: 2
+        x: 843
+        y: 710
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb7e56fa0b8c90f20800000000000000
+      internalID: 3389460855755499451
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_20
+      rect:
+        serializedVersion: 2
+        x: 865
+        y: 689
+        width: 57
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3d43907c48db75f0800000000000000
+      internalID: -757774289463980739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_21
+      rect:
+        serializedVersion: 2
+        x: 897
+        y: 665
+        width: 27
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c7b4387bdf440630800000000000000
+      internalID: 3892323781988104137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_22
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 699
+        width: 25
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aea4283487dad1f30800000000000000
+      internalID: 4547981930754362090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_23
+      rect:
+        serializedVersion: 2
+        x: 933
+        y: 689
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3907430ca11843930800000000000000
+      internalID: 4122061510844641427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_24
+      rect:
+        serializedVersion: 2
+        x: 939
+        y: 673
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21914b293e5a8d3d0800000000000000
+      internalID: -3181610739899819758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_25
+      rect:
+        serializedVersion: 2
+        x: 955
+        y: 683
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa25c9cc9e4d4b620800000000000000
+      internalID: 2789088169874444970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_26
+      rect:
+        serializedVersion: 2
+        x: 963
+        y: 669
+        width: 11
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30641932b2653cd90800000000000000
+      internalID: -7078719446015982077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_27
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 689
+        width: 18
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e1165f41a40f5300800000000000000
+      internalID: 242917995768582624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_28
+      rect:
+        serializedVersion: 2
+        x: 973
+        y: 667
+        width: 14
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aaf44981cf05ac6b0800000000000000
+      internalID: -5275314969836761174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_29
+      rect:
+        serializedVersion: 2
+        x: 989
+        y: 620
+        width: 70
+        height: 86
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9640b479ae607d70800000000000000
+      internalID: 9038846126218823327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_30
+      rect:
+        serializedVersion: 2
+        x: 1060
+        y: 624
+        width: 47
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cae812c56dc9ba7b0800000000000000
+      internalID: -5211899699268579668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_31
+      rect:
+        serializedVersion: 2
+        x: 1255
+        y: 675
+        width: 21
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81a49bb639e57f760800000000000000
+      internalID: 7491560492414618136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_32
+      rect:
+        serializedVersion: 2
+        x: 1287
+        y: 620
+        width: 72
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07e3bb13a265f02e0800000000000000
+      internalID: -2157410957264208272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_33
+      rect:
+        serializedVersion: 2
+        x: 1398
+        y: 670
+        width: 115
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 219e474654f869330800000000000000
+      internalID: 3717316070641821970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_34
+      rect:
+        serializedVersion: 2
+        x: 1512
+        y: 707
+        width: 18
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11eb107529aba2630800000000000000
+      internalID: 3903137164757679633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_35
+      rect:
+        serializedVersion: 2
+        x: 1522
+        y: 620
+        width: 122
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d41c6301ae204d00800000000000000
+      internalID: 954814390084572368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_36
+      rect:
+        serializedVersion: 2
+        x: 1569
+        y: 691
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b20cbbd540f2bb370800000000000000
+      internalID: 8339310830805565483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_37
+      rect:
+        serializedVersion: 2
+        x: 1738
+        y: 661
+        width: 25
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9450151dafc739060800000000000000
+      internalID: 6959043265912964425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_38
+      rect:
+        serializedVersion: 2
+        x: 1746
+        y: 620
+        width: 113
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 911344483bf906d50800000000000000
+      internalID: 6728553436658544921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_39
+      rect:
+        serializedVersion: 2
+        x: 1979
+        y: 677
+        width: 49
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d7de546bc7f9caf0800000000000000
+      internalID: -375496640974366767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_40
+      rect:
+        serializedVersion: 2
+        x: 2045
+        y: 689
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edd0224c8da8e7bb0800000000000000
+      internalID: -4936355477943349794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_41
+      rect:
+        serializedVersion: 2
+        x: 2053
+        y: 675
+        width: 102
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e06fcee68203a560800000000000000
+      internalID: 7323700197589999843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_42
+      rect:
+        serializedVersion: 2
+        x: 2065
+        y: 677
+        width: 12
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e8797821ed0d0de0800000000000000
+      internalID: -1365419851325540125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_43
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 557
+        width: 152
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c80c9f44cdffcb20800000000000000
+      internalID: 3157020883401050308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_44
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 663
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a594d2fb631170040800000000000000
+      internalID: 4613675270097684826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_45
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 600
+        width: 138
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4cb0cd4382748a60800000000000000
+      internalID: 7675385573216926796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_46
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 665
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96d84c51cbbb21100800000000000000
+      internalID: 77330560112168297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_47
+      rect:
+        serializedVersion: 2
+        x: 905
+        y: 640
+        width: 23
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99240bcf07ef47330800000000000000
+      internalID: 3707868154461962905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_48
+      rect:
+        serializedVersion: 2
+        x: 927
+        y: 657
+        width: 17
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38ce592c276a4fb70800000000000000
+      internalID: 8931946972803624067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_49
+      rect:
+        serializedVersion: 2
+        x: 1123
+        y: 612
+        width: 43
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8c71ec7608cd9b20800000000000000
+      internalID: 3142888045164985485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_50
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 547
+        width: 178
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e76db1f039d039370800000000000000
+      internalID: 8328015061203015294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_51
+      rect:
+        serializedVersion: 2
+        x: 1472
+        y: 667
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c5f185eab2a25560800000000000000
+      internalID: 7301076869519111620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_52
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 616
+        width: 73
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec59b53433dc8ed70800000000000000
+      internalID: 9072727069394965966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_53
+      rect:
+        serializedVersion: 2
+        x: 507
+        y: 638
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52cc07da9de232c40800000000000000
+      internalID: 5486280283520027685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_54
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 636
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8b2c02405ffccf80800000000000000
+      internalID: -8084806510866322545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_55
+      rect:
+        serializedVersion: 2
+        x: 802
+        y: 642
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34720be11ab5524f0800000000000000
+      internalID: -854175806754117821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_56
+      rect:
+        serializedVersion: 2
+        x: 893
+        y: 632
+        width: 19
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f30ecc535aa14cbe0800000000000000
+      internalID: -1458011082486652865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_57
+      rect:
+        serializedVersion: 2
+        x: 923
+        y: 630
+        width: 13
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09b3f9c0eaa9335f0800000000000000
+      internalID: -778108238278214768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_58
+      rect:
+        serializedVersion: 2
+        x: 1106
+        y: 640
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0d6b88e07f27c2e0800000000000000
+      internalID: -2105662138788123377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_59
+      rect:
+        serializedVersion: 2
+        x: 1182
+        y: 642
+        width: 24
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b42e0fe2f2db2fdf0800000000000000
+      internalID: -147847827401153973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_60
+      rect:
+        serializedVersion: 2
+        x: 1213
+        y: 622
+        width: 29
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff59afbcb9349f510800000000000000
+      internalID: 1583371080418629119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_61
+      rect:
+        serializedVersion: 2
+        x: 1241
+        y: 624
+        width: 27
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2d4f97dda5a13f40800000000000000
+      internalID: 5706524368920595759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_62
+      rect:
+        serializedVersion: 2
+        x: 1365
+        y: 643
+        width: 10
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c8f7b0059b74ffb0800000000000000
+      internalID: -4614927838255515450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_63
+      rect:
+        serializedVersion: 2
+        x: 1545
+        y: 645
+        width: 11
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bfaaf599bf77a6060800000000000000
+      internalID: 6947497297666091771
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_64
+      rect:
+        serializedVersion: 2
+        x: 1898
+        y: 651
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0825c9cf1ff3d1c40800000000000000
+      internalID: 5484610229764903552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_65
+      rect:
+        serializedVersion: 2
+        x: 1904
+        y: 624
+        width: 58
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b49751034c1106e70800000000000000
+      internalID: 9106297980861118795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_66
+      rect:
+        serializedVersion: 2
+        x: 1979
+        y: 582
+        width: 79
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5f91e8187f141e10800000000000000
+      internalID: 2167391921346027355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_67
+      rect:
+        serializedVersion: 2
+        x: 843
+        y: 616
+        width: 27
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f421c1263a9ea840800000000000000
+      internalID: 5237292973963683059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_68
+      rect:
+        serializedVersion: 2
+        x: 862
+        y: 626
+        width: 10
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b34e36a3ef0eae30800000000000000
+      internalID: 4516564946720277429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_69
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 625
+        width: 25
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44aa1d109a26914f0800000000000000
+      internalID: -857545776017855932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_70
+      rect:
+        serializedVersion: 2
+        x: 1367
+        y: 640
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec8c59979a9027ef0800000000000000
+      internalID: -112016417236858674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_71
+      rect:
+        serializedVersion: 2
+        x: 1906
+        y: 624
+        width: 14
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31d79aab883647530800000000000000
+      internalID: 3851813020206988563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_72
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 624
+        width: 27
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdc7cdf0a5302f240800000000000000
+      internalID: 4823921836215270620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_73
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 630
+        width: 10
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99f831dbcfb3bad60800000000000000
+      internalID: 7902475927841640345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_74
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 624
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf38486ae1ef718e0800000000000000
+      internalID: -1722628924849748997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_75
+      rect:
+        serializedVersion: 2
+        x: 788
+        y: 618
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0c0242bbce7cfc70800000000000000
+      internalID: 9006212768168283147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_76
+      rect:
+        serializedVersion: 2
+        x: 794
+        y: 616
+        width: 22
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8399a86922581b90800000000000000
+      internalID: -7270971260586585203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_77
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 616
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27c918554efe30e40800000000000000
+      internalID: 5621600523854650482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_78
+      rect:
+        serializedVersion: 2
+        x: 869
+        y: 614
+        width: 15
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fef75b719edaec40800000000000000
+      internalID: 5542487007853805304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_79
+      rect:
+        serializedVersion: 2
+        x: 965
+        y: 625
+        width: 18
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a5b3d0a97adbc870800000000000000
+      internalID: 8704290920747742625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_80
+      rect:
+        serializedVersion: 2
+        x: 981
+        y: 628
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7a8bbb87e17d91a0800000000000000
+      internalID: -6801154622963873155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_81
+      rect:
+        serializedVersion: 2
+        x: 997
+        y: 620
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1168e5e7112b7d280800000000000000
+      internalID: -9018543940581816815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_82
+      rect:
+        serializedVersion: 2
+        x: 1002
+        y: 620
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90d761f4909cac7b0800000000000000
+      internalID: -5203125377654424311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_83
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 616
+        width: 18
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 833e5d369f43f67b0800000000000000
+      internalID: -5228902396627393736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_84
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 620
+        width: 20
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6cd7166418981470800000000000000
+      internalID: 8365603521220303981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_85
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 628
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c4e9c02d5aa3e430800000000000000
+      internalID: 3811077026644354241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_86
+      rect:
+        serializedVersion: 2
+        x: 1367
+        y: 628
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7cd55e7e72a208310800000000000000
+      internalID: 1405169434622254535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_87
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 2172
+        height: 625
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ee32faaa92969af0800000000000000
+      internalID: -389963124730347800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_88
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 588
+        width: 14
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c20eab39998396b60800000000000000
+      internalID: 7739779666872557612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_89
+      rect:
+        serializedVersion: 2
+        x: 722
+        y: 599
+        width: 17
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cab785920cc392a30800000000000000
+      internalID: 4190947724270009260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_90
+      rect:
+        serializedVersion: 2
+        x: 1112
+        y: 612
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9114513728c84e3e0800000000000000
+      internalID: -2025339440505470695
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_91
+      rect:
+        serializedVersion: 2
+        x: 1158
+        y: 612
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6aad6508c528c750800000000000000
+      internalID: 6325347217656621679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_92
+      rect:
+        serializedVersion: 2
+        x: 1561
+        y: 613
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 574e684e0b0e73df0800000000000000
+      internalID: -200444608041786251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_93
+      rect:
+        serializedVersion: 2
+        x: 1567
+        y: 612
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29f0966452fb93620800000000000000
+      internalID: 2754442813929754514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_94
+      rect:
+        serializedVersion: 2
+        x: 354
+        y: 594
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7fe038cfb2d7bc3e0800000000000000
+      internalID: -2032393178954133769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_95
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 598
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e63f25b6a265b9450800000000000000
+      internalID: 6096561260765311854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_96
+      rect:
+        serializedVersion: 2
+        x: 760
+        y: 592
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7cae0aec36620a220800000000000000
+      internalID: 2495036403673524935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_97
+      rect:
+        serializedVersion: 2
+        x: 1014
+        y: 596
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a796a87767b278ea0800000000000000
+      internalID: -5870675801442457222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_98
+      rect:
+        serializedVersion: 2
+        x: 1092
+        y: 600
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3591df7126d89e230800000000000000
+      internalID: 3668618823918754131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_99
+      rect:
+        serializedVersion: 2
+        x: 1118
+        y: 596
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31206ef8b6ca740d0800000000000000
+      internalID: -3438590212498390509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_100
+      rect:
+        serializedVersion: 2
+        x: 1263
+        y: 594
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4026369c9e192320800000000000000
+      internalID: 2533589923256475722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_101
+      rect:
+        serializedVersion: 2
+        x: 1359
+        y: 602
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3965af097e826c10800000000000000
+      internalID: 2045353831384312125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_102
+      rect:
+        serializedVersion: 2
+        x: 1359
+        y: 561
+        width: 32
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02dcc9c699d780ad0800000000000000
+      internalID: -2735798675721892576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_103
+      rect:
+        serializedVersion: 2
+        x: 1548
+        y: 594
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 160a5562e2fe70c70800000000000000
+      internalID: 8937374967030718561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_104
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 576
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c2465192d67756c0800000000000000
+      internalID: -4154721484472433984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_105
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 576
+        width: 15
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e646dac88b8dddbc0800000000000000
+      internalID: -3756608227011369874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_106
+      rect:
+        serializedVersion: 2
+        x: 1086
+        y: 584
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69e2e90c098d8b970800000000000000
+      internalID: 8770998390522523286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_107
+      rect:
+        serializedVersion: 2
+        x: 1092
+        y: 594
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfcb151657b2c2b10800000000000000
+      internalID: 1957987721143237884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_108
+      rect:
+        serializedVersion: 2
+        x: 1977
+        y: 586
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d44ee5fec3249ea30800000000000000
+      internalID: 4244996953254847565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_109
+      rect:
+        serializedVersion: 2
+        x: 2065
+        y: 564
+        width: 30
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6014cfce0c78c8c70800000000000000
+      internalID: 8974697420121981190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_110
+      rect:
+        serializedVersion: 2
+        x: 2079
+        y: 584
+        width: 16
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 656032ef13662c500800000000000000
+      internalID: 415006480574645846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_111
+      rect:
+        serializedVersion: 2
+        x: 1217
+        y: 581
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eda614b61b808df40800000000000000
+      internalID: 5753358082067491550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_112
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 75
+        width: 30
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 901064b62e8b77040800000000000000
+      internalID: 4645384823257825545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_113
+      rect:
+        serializedVersion: 2
+        x: 509
+        y: 69
+        width: 13
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6a81e955d12e14d0800000000000000
+      internalID: -3162052688147805585
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_114
+      rect:
+        serializedVersion: 2
+        x: 521
+        y: 79
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7851255dc61fec6f0800000000000000
+      internalID: -662326645439195769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_115
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 71
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d7354a49c6d999b0800000000000000
+      internalID: -5072787345233332270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_116
+      rect:
+        serializedVersion: 2
+        x: 1108
+        y: 63
+        width: 11
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2d8964d0f12a81e0800000000000000
+      internalID: -2194904550150140626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_117
+      rect:
+        serializedVersion: 2
+        x: 1713
+        y: 81
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 912c2e8bdf3683850800000000000000
+      internalID: 6356940815413199385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_118
+      rect:
+        serializedVersion: 2
+        x: 1721
+        y: 79
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a2f13bd251e7b220800000000000000
+      internalID: 2501715864008651430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_119
+      rect:
+        serializedVersion: 2
+        x: 1788
+        y: 69
+        width: 13
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2aee2bd80a0e81370800000000000000
+      internalID: 8293625693979471522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_120
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 49
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d5cdafe5e24fb190800000000000000
+      internalID: -7944557662322178601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_121
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 47
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1506b017b98214cb0800000000000000
+      internalID: -4881575873011294127
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_122
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 47
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fd05bf5883aaf590800000000000000
+      internalID: -7639614011764044299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_123
+      rect:
+        serializedVersion: 2
+        x: 806
+        y: 49
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b002545eab7052d0800000000000000
+      internalID: -3291995338938646347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_124
+      rect:
+        serializedVersion: 2
+        x: 1438
+        y: 39
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a67acae8c6e63a90800000000000000
+      internalID: -7334421192519289176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_125
+      rect:
+        serializedVersion: 2
+        x: 1748
+        y: 47
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84efc24df95582620800000000000000
+      internalID: 2749541717457567304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonHero_Truck_Sheet_1_126
+      rect:
+        serializedVersion: 2
+        x: 1303
+        y: 33
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fda8f4f2f1211a110800000000000000
+      internalID: 1270316495042218719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CrayonHero_Truck_Sheet_1_0: 5961700650948662171
+      CrayonHero_Truck_Sheet_1_1: 657632360291855836
+      CrayonHero_Truck_Sheet_1_10: -8873727283666433463
+      CrayonHero_Truck_Sheet_1_100: 2533589923256475722
+      CrayonHero_Truck_Sheet_1_101: 2045353831384312125
+      CrayonHero_Truck_Sheet_1_102: -2735798675721892576
+      CrayonHero_Truck_Sheet_1_103: 8937374967030718561
+      CrayonHero_Truck_Sheet_1_104: -4154721484472433984
+      CrayonHero_Truck_Sheet_1_105: -3756608227011369874
+      CrayonHero_Truck_Sheet_1_106: 8770998390522523286
+      CrayonHero_Truck_Sheet_1_107: 1957987721143237884
+      CrayonHero_Truck_Sheet_1_108: 4244996953254847565
+      CrayonHero_Truck_Sheet_1_109: 8974697420121981190
+      CrayonHero_Truck_Sheet_1_11: -2554700248531335236
+      CrayonHero_Truck_Sheet_1_110: 415006480574645846
+      CrayonHero_Truck_Sheet_1_111: 5753358082067491550
+      CrayonHero_Truck_Sheet_1_112: 4645384823257825545
+      CrayonHero_Truck_Sheet_1_113: -3162052688147805585
+      CrayonHero_Truck_Sheet_1_114: -662326645439195769
+      CrayonHero_Truck_Sheet_1_115: -5072787345233332270
+      CrayonHero_Truck_Sheet_1_116: -2194904550150140626
+      CrayonHero_Truck_Sheet_1_117: 6356940815413199385
+      CrayonHero_Truck_Sheet_1_118: 2501715864008651430
+      CrayonHero_Truck_Sheet_1_119: 8293625693979471522
+      CrayonHero_Truck_Sheet_1_12: -3465781624254058652
+      CrayonHero_Truck_Sheet_1_120: -7944557662322178601
+      CrayonHero_Truck_Sheet_1_121: -4881575873011294127
+      CrayonHero_Truck_Sheet_1_122: -7639614011764044299
+      CrayonHero_Truck_Sheet_1_123: -3291995338938646347
+      CrayonHero_Truck_Sheet_1_124: -7334421192519289176
+      CrayonHero_Truck_Sheet_1_125: 2749541717457567304
+      CrayonHero_Truck_Sheet_1_126: 1270316495042218719
+      CrayonHero_Truck_Sheet_1_13: 8247050826105087042
+      CrayonHero_Truck_Sheet_1_14: 5464879064406450864
+      CrayonHero_Truck_Sheet_1_15: -7984530003954960688
+      CrayonHero_Truck_Sheet_1_16: -1408471989235412661
+      CrayonHero_Truck_Sheet_1_17: 263892463980363681
+      CrayonHero_Truck_Sheet_1_18: 3114622938472270614
+      CrayonHero_Truck_Sheet_1_19: 3389460855755499451
+      CrayonHero_Truck_Sheet_1_2: -5712292826175319755
+      CrayonHero_Truck_Sheet_1_20: -757774289463980739
+      CrayonHero_Truck_Sheet_1_21: 3892323781988104137
+      CrayonHero_Truck_Sheet_1_22: 4547981930754362090
+      CrayonHero_Truck_Sheet_1_23: 4122061510844641427
+      CrayonHero_Truck_Sheet_1_24: -3181610739899819758
+      CrayonHero_Truck_Sheet_1_25: 2789088169874444970
+      CrayonHero_Truck_Sheet_1_26: -7078719446015982077
+      CrayonHero_Truck_Sheet_1_27: 242917995768582624
+      CrayonHero_Truck_Sheet_1_28: -5275314969836761174
+      CrayonHero_Truck_Sheet_1_29: 9038846126218823327
+      CrayonHero_Truck_Sheet_1_3: 2058164316665340489
+      CrayonHero_Truck_Sheet_1_30: -5211899699268579668
+      CrayonHero_Truck_Sheet_1_31: 7491560492414618136
+      CrayonHero_Truck_Sheet_1_32: -2157410957264208272
+      CrayonHero_Truck_Sheet_1_33: 3717316070641821970
+      CrayonHero_Truck_Sheet_1_34: 3903137164757679633
+      CrayonHero_Truck_Sheet_1_35: 954814390084572368
+      CrayonHero_Truck_Sheet_1_36: 8339310830805565483
+      CrayonHero_Truck_Sheet_1_37: 6959043265912964425
+      CrayonHero_Truck_Sheet_1_38: 6728553436658544921
+      CrayonHero_Truck_Sheet_1_39: -375496640974366767
+      CrayonHero_Truck_Sheet_1_4: -2953030585703235649
+      CrayonHero_Truck_Sheet_1_40: -4936355477943349794
+      CrayonHero_Truck_Sheet_1_41: 7323700197589999843
+      CrayonHero_Truck_Sheet_1_42: -1365419851325540125
+      CrayonHero_Truck_Sheet_1_43: 3157020883401050308
+      CrayonHero_Truck_Sheet_1_44: 4613675270097684826
+      CrayonHero_Truck_Sheet_1_45: 7675385573216926796
+      CrayonHero_Truck_Sheet_1_46: 77330560112168297
+      CrayonHero_Truck_Sheet_1_47: 3707868154461962905
+      CrayonHero_Truck_Sheet_1_48: 8931946972803624067
+      CrayonHero_Truck_Sheet_1_49: 3142888045164985485
+      CrayonHero_Truck_Sheet_1_5: -6572090275067645454
+      CrayonHero_Truck_Sheet_1_50: 8328015061203015294
+      CrayonHero_Truck_Sheet_1_51: 7301076869519111620
+      CrayonHero_Truck_Sheet_1_52: 9072727069394965966
+      CrayonHero_Truck_Sheet_1_53: 5486280283520027685
+      CrayonHero_Truck_Sheet_1_54: -8084806510866322545
+      CrayonHero_Truck_Sheet_1_55: -854175806754117821
+      CrayonHero_Truck_Sheet_1_56: -1458011082486652865
+      CrayonHero_Truck_Sheet_1_57: -778108238278214768
+      CrayonHero_Truck_Sheet_1_58: -2105662138788123377
+      CrayonHero_Truck_Sheet_1_59: -147847827401153973
+      CrayonHero_Truck_Sheet_1_6: 3952211409040661540
+      CrayonHero_Truck_Sheet_1_60: 1583371080418629119
+      CrayonHero_Truck_Sheet_1_61: 5706524368920595759
+      CrayonHero_Truck_Sheet_1_62: -4614927838255515450
+      CrayonHero_Truck_Sheet_1_63: 6947497297666091771
+      CrayonHero_Truck_Sheet_1_64: 5484610229764903552
+      CrayonHero_Truck_Sheet_1_65: 9106297980861118795
+      CrayonHero_Truck_Sheet_1_66: 2167391921346027355
+      CrayonHero_Truck_Sheet_1_67: 5237292973963683059
+      CrayonHero_Truck_Sheet_1_68: 4516564946720277429
+      CrayonHero_Truck_Sheet_1_69: -857545776017855932
+      CrayonHero_Truck_Sheet_1_7: 2025557394404773360
+      CrayonHero_Truck_Sheet_1_70: -112016417236858674
+      CrayonHero_Truck_Sheet_1_71: 3851813020206988563
+      CrayonHero_Truck_Sheet_1_72: 4823921836215270620
+      CrayonHero_Truck_Sheet_1_73: 7902475927841640345
+      CrayonHero_Truck_Sheet_1_74: -1722628924849748997
+      CrayonHero_Truck_Sheet_1_75: 9006212768168283147
+      CrayonHero_Truck_Sheet_1_76: -7270971260586585203
+      CrayonHero_Truck_Sheet_1_77: 5621600523854650482
+      CrayonHero_Truck_Sheet_1_78: 5542487007853805304
+      CrayonHero_Truck_Sheet_1_79: 8704290920747742625
+      CrayonHero_Truck_Sheet_1_8: -6600264380872537563
+      CrayonHero_Truck_Sheet_1_80: -6801154622963873155
+      CrayonHero_Truck_Sheet_1_81: -9018543940581816815
+      CrayonHero_Truck_Sheet_1_82: -5203125377654424311
+      CrayonHero_Truck_Sheet_1_83: -5228902396627393736
+      CrayonHero_Truck_Sheet_1_84: 8365603521220303981
+      CrayonHero_Truck_Sheet_1_85: 3811077026644354241
+      CrayonHero_Truck_Sheet_1_86: 1405169434622254535
+      CrayonHero_Truck_Sheet_1_87: -389963124730347800
+      CrayonHero_Truck_Sheet_1_88: 7739779666872557612
+      CrayonHero_Truck_Sheet_1_89: 4190947724270009260
+      CrayonHero_Truck_Sheet_1_9: 5336876290813526756
+      CrayonHero_Truck_Sheet_1_90: -2025339440505470695
+      CrayonHero_Truck_Sheet_1_91: 6325347217656621679
+      CrayonHero_Truck_Sheet_1_92: -200444608041786251
+      CrayonHero_Truck_Sheet_1_93: 2754442813929754514
+      CrayonHero_Truck_Sheet_1_94: -2032393178954133769
+      CrayonHero_Truck_Sheet_1_95: 6096561260765311854
+      CrayonHero_Truck_Sheet_1_96: 2495036403673524935
+      CrayonHero_Truck_Sheet_1_97: -5870675801442457222
+      CrayonHero_Truck_Sheet_1_98: 3668618823918754131
+      CrayonHero_Truck_Sheet_1_99: -3438590212498390509
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

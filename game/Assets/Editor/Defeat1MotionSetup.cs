@@ -140,10 +140,12 @@ namespace TrickalFanGame.Editor
 
         // Every frame of a set shares one canvas, scale and pivot, taken from the reference frame: its visible
         // bottom sits at groundY (local units) and its visible centre on x = 0.
-        private static Sprite[] ImportShared(Func<int, string> pathOf, RectInt reference, float ppu, float groundY)
+        // Also used for 에르핀's six victory frames (CrayonHeroTruckDefeatSetup).
+        internal static Sprite[] ImportShared(Func<int, string> pathOf, RectInt reference, float ppu, float groundY,
+            int count = FrameCount)
         {
-            var sprites = new Sprite[FrameCount];
-            for (int i = 0; i < FrameCount; i++)
+            var sprites = new Sprite[count];
+            for (int i = 0; i < count; i++)
             {
                 string path = pathOf(i);
                 var (w, h) = PngSize(path);

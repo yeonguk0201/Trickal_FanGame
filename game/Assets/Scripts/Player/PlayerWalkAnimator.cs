@@ -20,6 +20,15 @@ namespace TrickalFanGame.Player
         private readonly Sprite[] defeatFrames = new Sprite[DefeatFrameCount];
         private bool hasDefeatFrames;
         private float diedAt = float.NaN;
+        // Victory (user drawing, 2026-11-19): a six-frame jump for joy where she stands when a boss dies, played
+        // twice; the last pose then stays until she moves, attacks or uses a skill.
+        private const string VictoryResourcePath = "Characters/Erpin_Victory";
+        public const int VictoryFrameCount = 6;
+        public const float VictoryFrameSeconds = 0.11f;
+        public const int VictoryLoops = 2;
+        private readonly Sprite[] victoryFrames = new Sprite[VictoryFrameCount];
+        private bool hasVictoryFrames;
+        private float victoryStartsAt = float.NaN;
         private readonly Sprite[] highGradeFrames = new Sprite[8];
         private PlayerActionState actionState;
         private PlayerUltimate ultimate;
@@ -49,6 +58,10 @@ namespace TrickalFanGame.Player
 
         public bool IsPlayingSkill => isPlayingSkill;
         public bool HasDefeatFrames => hasDefeatFrames;
+        public bool HasVictoryFrames => hasVictoryFrames;
+        public float VictoryDuration => VictoryFrameCount * VictoryLoops * VictoryFrameSeconds;
+        public bool IsVictoryPending => !float.IsNaN(victoryStartsAt);
+        public Sprite GetVictoryFrame(int index) => victoryFrames[index];
         public float DefeatDuration => DefeatFrameCount * DefeatFrameSeconds;
         public Sprite GetDefeatFrame(int index) => defeatFrames[index];
         public Sprite IdleSprite => idleSprite;
@@ -71,6 +84,13 @@ namespace TrickalFanGame.Player
                 hasDefeatFrames &= defeatFrames[i] != null;
             }
             if (health != null) health.Died += OnDied;
+            Sprite[] victorySprites = Resources.LoadAll<Sprite>(VictoryResourcePath);
+            hasVictoryFrames = true;
+            for (int i = 0; i < VictoryFrameCount; i++)
+            {
+                victoryFrames[i] = FindSprite(victorySprites, $"Erpin_Victory_{i}");
+                hasVictoryFrames &= victoryFrames[i] != null;
+            }
             Sprite[] highGradeSprites = Resources.LoadAll<Sprite>(HighGradeResourcePath);
             hasHighGradeFrames = true;
             for (int i = 0; i < highGradeFrames.Length; i++)
@@ -93,6 +113,35 @@ namespace TrickalFanGame.Player
         {
             diedAt = Time.unscaledTime;
             isPlayingSkill = false;
+            victoryStartsAt = float.NaN;
+        }
+
+        // A boss died: jump for joy after delay seconds (game time, so a pause holds it). False when she cannot.
+        public bool PlayVictory(float delay)
+        {
+            if (!hasVictoryFrames || (health != null && health.IsDead)) return false;
+            victoryStartsAt = Time.time + Mathf.Max(0f, delay);
+            return true;
+        }
+
+        // secondsSinceStart < 0 is the wait before the jump: the normal drawing still shows.
+        public bool TickVictory(float secondsSinceStart)
+        {
+            if (!hasVictoryFrames || float.IsNaN(victoryStartsAt) || (health != null && health.IsDead)) return false;
+            if (secondsSinceStart < 0f) return false;
+            int index = Mathf.FloorToInt(secondsSinceStart / VictoryFrameSeconds);
+            if (index >= VictoryFrameCount * VictoryLoops)
+            {
+                bool busy = isPlayingSkill || (movement != null && (movement.IsMoving || movement.IsAimingAttack));
+                if (busy)
+                {
+                    victoryStartsAt = float.NaN;
+                    return false;
+                }
+                index = VictoryFrameCount - 1;
+            }
+            spriteRenderer.sprite = victoryFrames[index % VictoryFrameCount];
+            return true;
         }
 
         // Unscaled, like the GAME OVER sequence that waits on it, so a stopped game clock cannot freeze the fall.
@@ -123,6 +172,7 @@ namespace TrickalFanGame.Player
 
             isPlayingSkill = true;
             skillElapsed = 0f;
+            victoryStartsAt = float.NaN;
         }
 
         private void LateUpdate()
@@ -134,6 +184,7 @@ namespace TrickalFanGame.Player
 
             if (TickDefeat(float.IsNaN(diedAt) ? 0f : Time.unscaledTime - diedAt)) return;
             if (TickHighGrade(Time.deltaTime)) return;
+            if (!float.IsNaN(victoryStartsAt) && TickVictory(Time.time - victoryStartsAt)) return;
 
             if (isPlayingSkill && TickSkill(Time.deltaTime))
             {

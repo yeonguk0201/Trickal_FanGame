@@ -65,17 +65,18 @@ namespace TrickalFanGame.Enemy
         public EnemyDefeatView SpawnView(Vector2 direction)
         {
             if (frames == null || frames.Length == 0) return null;
-            SpriteRenderer body = FindBody();
+            SpriteRenderer body = FindBody(gameObject);
             return body != null ? EnemyDefeatView.Spawn(this, body, direction) : null;
         }
 
-        private SpriteRenderer FindBody()
+        // The renderer that shows the enemy's drawing (not its ground shadow). Also used by CrayonHeroTruckDefeat.
+        public static SpriteRenderer FindBody(GameObject enemy)
         {
-            var artwork = GetComponent<FairyKingdomArtworkView>();
+            var artwork = enemy.GetComponent<FairyKingdomArtworkView>();
             if (artwork != null && artwork.Visual != null) return artwork.Visual;
-            SpriteRenderer own = GetComponent<SpriteRenderer>();
+            SpriteRenderer own = enemy.GetComponent<SpriteRenderer>();
             if (own != null && own.sprite != null) return own;
-            foreach (SpriteRenderer candidate in GetComponentsInChildren<SpriteRenderer>())
+            foreach (SpriteRenderer candidate in enemy.GetComponentsInChildren<SpriteRenderer>())
                 if (candidate.sprite != null && candidate.gameObject.name != GroundShadow.ObjectName) return candidate;
             return null;
         }

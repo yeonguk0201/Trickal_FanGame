@@ -947,6 +947,15 @@ namespace TrickalFanGame.Run
                 }
                 status = $"Spawned {spawned} of {crayons.Length} crayon minions to the right of the player.";
             }
+            // Defeat-6 (2026-11-19): 에르핀's victory jump, which a boss's death plays (황금 용사's truck: Boss room →
+            // Kill current wave).
+            if (AssistedButton("Play Erpin victory (boss defeat)") && player != null)
+            {
+                var erpin = player.GetComponent<TrickalFanGame.Player.PlayerWalkAnimator>();
+                status = erpin != null && erpin.PlayVictory(0f)
+                    ? "Erpin jumps for joy; she keeps the last pose until she moves."
+                    : "Erpin victory frames are missing or she is down.";
+            }
 
             // Enemy-8: 저혈당 요정-활발 three tiles above the player, so its left and right shots miss and the
             // downward one comes straight at the player.

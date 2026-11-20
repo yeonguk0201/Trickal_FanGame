@@ -480,7 +480,26 @@ namespace TrickalFanGame.Enemy
             SetState(BossActionState.Defeated, 0f);
             if (keepsOwnedObjectsOnDefeat) ReleaseOwnedObjects();
             else CleanupOwnedObjects();
+            PlayDefeatPresentation();
             Died?.Invoke();
+        }
+
+        // 에르핀 jumps for joy where she stands (after 황금 용사's truck has hit, when this boss has one). Held before
+        // Died so a cleared run already knows to wait for it before the result screen.
+        public const float VictoryDelay = 0.5f;
+
+        private void PlayDefeatPresentation()
+        {
+            if (!Application.isPlaying) return;
+            float victoryDelay = VictoryDelay;
+            if (TryGetComponent(out CrayonHeroTruckDefeat truck) && truck.HasFrames)
+            {
+                victoryDelay = truck.VictoryDelay;
+                BossDefeatPresentation.Hold(truck.Duration);
+            }
+            PlayerWalkAnimator erpin = FindFirstObjectByType<PlayerWalkAnimator>();
+            if (erpin != null && erpin.PlayVictory(victoryDelay))
+                BossDefeatPresentation.Hold(victoryDelay + erpin.VictoryDuration);
         }
 
         private int NextRandom(int maximumExclusive)
