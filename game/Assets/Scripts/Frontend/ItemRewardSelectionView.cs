@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Item;
 using UnityEngine;
@@ -30,6 +31,9 @@ namespace TrickalFanGame.Frontend
         private float hideAtUnscaledTime = -1f;
         private GameObject previousSelectedObject;
         private ItemRewardCandidate focusedCandidate;
+        // Sound-3: the selection last heard. A move between two objects inside the overlay (cards, 확인, 취소) pops
+        // once; the first card taking focus on open and a click handing focus to 확인 stay silent.
+        private GameObject lastFocusedObject;
 
         public ItemRewardSelectionSession Session => session;
         public CanvasGroup Overlay => overlay;
@@ -85,7 +89,20 @@ namespace TrickalFanGame.Frontend
         private void LateUpdate()
         {
             if (visible && hideAtUnscaledTime < 0f) EnsureFocusNow();
+            if (visible) TrackFocusMove();
         }
+
+        private void TrackFocusMove()
+        {
+            GameObject current = ActiveEventSystem?.currentSelectedGameObject;
+            if (current == lastFocusedObject) return;
+            if (hideAtUnscaledTime < 0f && IsInFocusScope(lastFocusedObject) && IsInFocusScope(current))
+                CombatSfx.Play(CombatSfxCue.UiFocusMove);
+            lastFocusedObject = current;
+        }
+
+        private bool IsInFocusScope(GameObject target) =>
+            target != null && focusScope != null && target.transform.IsChildOf(focusScope);
 
         public void Show(ItemRewardSelectionState selectionState)
         {
@@ -110,6 +127,7 @@ namespace TrickalFanGame.Frontend
             if (confirmButton != null) confirmButton.interactable = visibleCount > 0;
             ApplyVisibility(true);
             FocusFirstCard();
+            lastFocusedObject = ActiveEventSystem?.currentSelectedGameObject;
         }
 
         public void EnsureFocusNow()
@@ -152,6 +170,7 @@ namespace TrickalFanGame.Frontend
             if (!visible || card?.Candidate == null) return;
             SelectCandidate(card);
             ActiveEventSystem?.SetSelectedGameObject(confirmButton != null ? confirmButton.gameObject : card.gameObject);
+            lastFocusedObject = ActiveEventSystem?.currentSelectedGameObject;
         }
 
         private void OnCardFocused(ItemRewardCardView card)

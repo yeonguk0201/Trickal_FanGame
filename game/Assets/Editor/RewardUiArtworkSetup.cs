@@ -15,6 +15,7 @@ namespace TrickalFanGame.Editor
         public static readonly Vector2 PanelSize = new(1800, 900);
         public static readonly Vector2 CardSize = new(550, 560);
         private const string Folder = "Assets/Art/UI/Reward/";
+        public const float FocusedButtonScale = 1.1f;
 
         [MenuItem("Trickal Fan Game/UI/Apply Clover Reward UI")]
         public static void Setup()
@@ -118,6 +119,9 @@ namespace TrickalFanGame.Editor
             if (secondary) Skin(button.gameObject, MenuArtSetup.ButtonSecondary, Color.white, true, 84);
             else { image.sprite = sprite; image.type = Image.Type.Simple; image.color = Color.white; }
             button.colors = Colors();
+            // The tint stays white, so without this a focused 확인/취소 looked the same as an idle one. Like the
+            // menu buttons, hover and keyboard focus grow the button instead of drawing an outline.
+            Highlight(button, null, FocusedButtonScale);
             Style(rect.Find("Label").GetComponent<TMP_Text>(), 0, 0, 300, 65, 37, secondary ? Ink : RibbonText);
         }
 

@@ -21,6 +21,11 @@ namespace TrickalFanGame.Frontend
         private bool pressed;
 
         public float HoverScale => hoverScale;
+        public bool IsFocused => focused;
+
+        // For a screen that reads the keyboard itself and never selects the control (the shop's 투자 and 닫기):
+        // that screen tells the control when its own focus lands on it.
+        public void SetKeyboardFocus(bool value) => focused = value;
         public Transform Target => target != null ? target : transform;
 
         public void Configure(Transform scaled, float scale, float press = 0.95f)

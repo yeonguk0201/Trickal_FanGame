@@ -433,17 +433,20 @@ namespace TrickalFanGame.Editor
             view.MoveFocus(0, 1);
             Assert(view.FocusedIndex == 8, "Down must reach the bottom cell of the third column.");
             view.MoveFocus(0, 1);
-            Assert(view.FocusedAction == ShopFocusAction.Close && view.CloseFocusMark.activeSelf &&
-                   !view.Cells[8].IsFocused,
-                "Down from the third column's bottom cell must focus 닫기 and ring it.");
+            Assert(view.FocusedAction == ShopFocusAction.Close &&
+                   view.IsActionButtonFocused(ShopFocusAction.Close) && !view.Cells[8].IsFocused,
+                "Down from the third column's bottom cell must focus 닫기 and mark it.");
             view.MoveFocus(-1, 0);
             bool investShown = view.InvestButton != null && view.InvestButton.gameObject.activeSelf;
             Assert(view.FocusedAction == (investShown ? ShopFocusAction.Invest : ShopFocusAction.Close) &&
-                   (!investShown || (view.InvestFocusMark.activeSelf && !view.CloseFocusMark.activeSelf)),
+                   (!investShown || (view.IsActionButtonFocused(ShopFocusAction.Invest) &&
+                                     !view.IsActionButtonFocused(ShopFocusAction.Close))),
                 "Left on the button row must move to 투자 when it is shown.");
             view.MoveFocus(0, 1);
             Assert(view.FocusedAction == ShopFocusAction.None &&
-                   view.FocusedIndex == (investShown ? 1 : 2) && !view.CloseFocusMark.activeSelf,
+                   view.FocusedIndex == (investShown ? 1 : 2) &&
+                   !view.IsActionButtonFocused(ShopFocusAction.Close) &&
+                   !view.IsActionButtonFocused(ShopFocusAction.Invest),
                 "Down from a button must wrap to the top of its column.");
             view.SetFocus(8);
         }

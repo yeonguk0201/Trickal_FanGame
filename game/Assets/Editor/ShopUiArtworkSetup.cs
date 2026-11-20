@@ -137,11 +137,10 @@ namespace TrickalFanGame.Editor
                 view.InvestButtonLabel.text = ShopView.InvestLabel;
             }
             SkinButton(view.CloseButton, "button-close", "close-button");
-            // The keyboard focus reaches 투자 and 닫기 below the grid; a plum ring marks the chosen one.
-            GameObject closeRing = ButtonRing(view.CloseButton, "button-close", "close-button", SelectedRingColor);
-            GameObject investRing = view.InvestButton != null
-                ? ButtonRing(view.InvestButton, "button-invest", "invest-button", SelectedRingColor)
-                : null;
+            // The keyboard focus reaches 투자 and 닫기 below the grid. Like the reward screen's buttons, the chosen
+            // one (and the one under the mouse) grows a little instead of wearing a ring.
+            GrowOnFocus(view.CloseButton);
+            if (view.InvestButton != null) GrowOnFocus(view.InvestButton);
             Style(view.CloseButton.transform.Find("Label").GetComponent<TMP_Text>(), "close-label", 36f, Color.white,
                 parent: "close-button");
 
@@ -154,7 +153,7 @@ namespace TrickalFanGame.Editor
                 panel.Find(front)?.SetAsLastSibling();
 
             ApplyPopup(view, star, gold, elif);
-            view.ConfigureActionFocus(investRing, closeRing);
+            view.ConfigureActionFocus(null, null);
             EnsureGlyphs();
 
             foreach (Component component in view.GetComponentsInChildren<Component>(true))
@@ -472,6 +471,18 @@ namespace TrickalFanGame.Editor
             button.colors = ButtonColors();
         }
 
+        public const float FocusedButtonScale = 1.1f;
+
+        // Replaces an older focus ring with the menu grow, keeping the shop's own hover and press tint.
+        private static void GrowOnFocus(Button button)
+        {
+            Transform ring = button.transform.Find("Focus Ring");
+            if (ring != null) Undo.DestroyObjectImmediate(ring.gameObject);
+            Highlight(button, null, FocusedButtonScale);
+            Undo.RecordObject(button, "Colors " + button.name);
+            button.colors = ButtonColors();
+        }
+
         // A selection ring cut from the button's own silhouette (export_unity.py), sliced like the button so its
         // corners follow the button's. Hidden until the view shows it.
         private static GameObject ButtonRing(Button button, string sprite, string box, Color color)
@@ -623,8 +634,8 @@ namespace TrickalFanGame.Editor
             view.KeeperLineText.text = ShopView.KeeperLine;
             if (!popup)
             {
-                // The capture shows the keyboard ring on 닫기 next to the selected first cell.
-                view.CloseFocusMark.SetActive(true);
+                // The capture shows the keyboard focus on 닫기 next to the selected first cell.
+                view.CloseButton.transform.localScale = Vector3.one * FocusedButtonScale;
                 return;
             }
 

@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Item;
 using TrickalFanGame.Resource;
 using TrickalFanGame.Shop;
@@ -386,8 +387,9 @@ namespace TrickalFanGame.Frontend
             if (Time.frameCount != shownFrame) ReadKeyboard();
             // A popup opened with Enter shows the tooltip at once; once the mouse moves, the tooltip follows the
             // mouse resting on the item picture like a popup opened with a click.
-            if (confirmByKeyboard && Mouse.current != null && Mouse.current.delta.ReadValue().sqrMagnitude > 0f)
+            if (confirmByKeyboard && PointerMovedThisFrame)
                 confirmByKeyboard = false;
+            if (keyboardOwnsFocus && PointerMovedThisFrame) keyboardOwnsFocus = false;
             if (IsVisible) Refresh();
         }
 
@@ -395,6 +397,7 @@ namespace TrickalFanGame.Frontend
         {
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null) return;
+            if (keyboard.anyKey.wasPressedThisFrame) keyboardOwnsFocus = true;
             if (keyboard.escapeKey.wasPressedThisFrame)
             {
                 // Escape closes the purchase popup first, then leaves the invest list, then closes the shop.
@@ -499,6 +502,7 @@ namespace TrickalFanGame.Frontend
 
         public void SetConfirmChoice(bool buy)
         {
+            if (IsConfirming && buy != ConfirmChoosesBuy) PlayFocusMove();
             ConfirmChoosesBuy = buy;
             ApplyConfirmChoice();
         }
@@ -536,21 +540,52 @@ namespace TrickalFanGame.Frontend
 
         private void ApplyActionFocus()
         {
-            bool shown = IsVisible && !IsInvesting && !IsConfirming;
-            if (investFocusMark != null) investFocusMark.SetActive(shown && FocusedAction == ShopFocusAction.Invest);
-            if (closeFocusMark != null) closeFocusMark.SetActive(shown && FocusedAction == ShopFocusAction.Close);
+            bool shown = IsVisible && !IsConfirming;
+            bool invest = shown && FocusedAction == ShopFocusAction.Invest;
+            bool close = shown && FocusedAction == ShopFocusAction.Close;
+            if (investFocusMark != null) investFocusMark.SetActive(invest);
+            if (closeFocusMark != null) closeFocusMark.SetActive(close);
+            // Shop UI artwork: like the menu buttons, a focused 투자 or 닫기 grows instead of wearing a ring.
+            SetButtonFocus(investButton, invest);
+            SetButtonFocus(closeButton, close);
+        }
+
+        private static void SetButtonFocus(Button button, bool focused)
+        {
+            if (button != null && button.TryGetComponent(out MenuPopEffect pop)) pop.SetKeyboardFocus(focused);
+        }
+
+        public bool IsActionButtonFocused(ShopFocusAction action)
+        {
+            Button button = action == ShopFocusAction.Invest ? investButton
+                : action == ShopFocusAction.Close ? closeButton
+                : null;
+            if (button == null) return false;
+            if (button.TryGetComponent(out MenuPopEffect pop)) return pop.IsFocused;
+            GameObject mark = action == ShopFocusAction.Invest ? investFocusMark : closeFocusMark;
+            return mark != null && mark.activeSelf;
         }
         public GameObject CancelFocusMark => cancelFocusMark;
 
         private void OnBuyHovered(ShopHoverTarget _)
         {
-            if (IsConfirming) SetConfirmChoice(true);
+            if (IsConfirming && !IsStillPointerEnter) SetConfirmChoice(true);
         }
 
         private void OnCancelHovered(ShopHoverTarget _)
         {
-            if (IsConfirming) SetConfirmChoice(false);
+            if (IsConfirming && !IsStillPointerEnter) SetConfirmChoice(false);
         }
+
+        // Set by a key press, cleared when the mouse moves. While the keyboard drives the focus, a pointer enter
+        // the mouse did not move into comes from a raycast blocker going away under a resting cursor (the purchase
+        // popup closing, the invest list toggling) and must not take the focus from the keyboard's cell.
+        private bool keyboardOwnsFocus;
+
+        private static bool PointerMovedThisFrame =>
+            Mouse.current != null && Mouse.current.delta.ReadValue().sqrMagnitude > 0f;
+
+        private bool IsStillPointerEnter => keyboardOwnsFocus && !PointerMovedThisFrame;
 
         // Opens the purchase popup for the focused offer or upgrade when the player can take it now.
         public bool OpenConfirm(bool byKeyboard)
@@ -659,8 +694,10 @@ namespace TrickalFanGame.Frontend
         {
             if (!IsInvesting || rowIndex < 0 || rowIndex >= Math.Min(investRows.Length, ShopUpgrades.Catalog.Length))
                 return;
+            if (rowIndex != InvestFocusedIndex || FocusedAction != ShopFocusAction.None) PlayFocusMove();
             if (rowIndex != InvestFocusedIndex) SetFeedback(string.Empty);
             InvestFocusedIndex = rowIndex;
+            FocusedAction = ShopFocusAction.None;
             Refresh();
         }
 
@@ -681,10 +718,29 @@ namespace TrickalFanGame.Frontend
             int rowCount = Math.Min(investRows.Length, ShopUpgrades.Catalog.Length);
             if (IsInvesting)
             {
-                if (dy == 0 || rowCount == 0) return;
-                SetInvestFocus(usesArtwork
-                    ? (InvestFocusedIndex + dy + rowCount) % rowCount
-                    : Mathf.Clamp(InvestFocusedIndex + dy, 0, rowCount - 1));
+                if (rowCount == 0) return;
+                if (!usesArtwork)
+                {
+                    if (dy != 0) SetInvestFocus(Mathf.Clamp(InvestFocusedIndex + dy, 0, rowCount - 1));
+                    return;
+                }
+
+                // The rows and the button row below them (돌아가기, 닫기) form one column: down from the last row
+                // reaches 돌아가기, down from the buttons wraps to the first row, and left and right cross the buttons.
+                if (FocusedAction != ShopFocusAction.None)
+                {
+                    if (dx != 0)
+                        SetFocusedAction(FocusedAction == ShopFocusAction.Invest
+                            ? ShopFocusAction.Close
+                            : ShopFocusAction.Invest);
+                    else if (dy != 0) SetInvestFocus(dy > 0 ? 0 : rowCount - 1);
+                    return;
+                }
+
+                if (dy == 0) return;
+                int nextRow = InvestFocusedIndex + dy;
+                if (nextRow < 0 || nextRow >= rowCount) SetFocusedAction(ShopFocusAction.Invest);
+                else SetInvestFocus(nextRow);
                 return;
             }
             if (usesArtwork)
@@ -750,7 +806,8 @@ namespace TrickalFanGame.Frontend
 
         public void SetFocusedAction(ShopFocusAction action)
         {
-            if (!IsVisible || IsInvesting || IsConfirming) return;
+            if (!IsVisible || IsConfirming) return;
+            if (action != FocusedAction) PlayFocusMove();
             FocusedAction = action;
             Refresh();
         }
@@ -758,6 +815,7 @@ namespace TrickalFanGame.Frontend
         public void SetFocus(int cellIndex)
         {
             if (!IsVisible || cellIndex < 0 || cellIndex >= ShopCatalog.GridSlotCount) return;
+            if (cellIndex != FocusedIndex || FocusedAction != ShopFocusAction.None) PlayFocusMove();
             if (cellIndex != FocusedIndex) SetFeedback(string.Empty);
             FocusedIndex = cellIndex;
             FocusedAction = ShopFocusAction.None;
@@ -781,6 +839,9 @@ namespace TrickalFanGame.Frontend
             Refresh();
             return result;
         }
+
+        // Sound-3: one pop each time the focus actually lands somewhere new.
+        private static void PlayFocusMove() => CombatSfx.Play(CombatSfxCue.UiFocusMove);
 
         public void Close()
         {
@@ -822,7 +883,8 @@ namespace TrickalFanGame.Frontend
                 investRows[index].gameObject.SetActive(definition != null);
                 if (definition == null) continue;
                 investRows[index].Bind(definition, shop.Progress.GetShopUpgradeLevel(definition.UpgradeId),
-                    shop.GetUpgradeStatus(definition.UpgradeId), index == InvestFocusedIndex);
+                    shop.GetUpgradeStatus(definition.UpgradeId),
+                    index == InvestFocusedIndex && FocusedAction == ShopFocusAction.None);
             }
 
             ShopUpgradeDefinition focused = ShopUpgrades.Catalog[InvestFocusedIndex];
@@ -956,6 +1018,7 @@ namespace TrickalFanGame.Frontend
             // Button must not also receive Submit.
             if (activeEventSystem != null) activeEventSystem.SetSelectedGameObject(null);
             shownFrame = Time.frameCount;
+            keyboardOwnsFocus = false;
             FocusedIndex = FirstOfferOnSale();
             FocusedAction = ShopFocusAction.None;
             ApplyTheme(session.Shop != null ? session.Shop.Kind : ShopKind.General);
@@ -1000,12 +1063,12 @@ namespace TrickalFanGame.Frontend
 
         private void OnCellHovered(ShopOfferCellView cell)
         {
-            if (cell != null && !IsInvesting && !IsConfirming) SetFocus(cell.CellIndex);
+            if (cell != null && !IsInvesting && !IsConfirming && !IsStillPointerEnter) SetFocus(cell.CellIndex);
         }
 
         private void OnInvestRowHovered(ShopUpgradeRowView row)
         {
-            if (row != null && !IsConfirming) SetInvestFocus(row.RowIndex);
+            if (row != null && !IsConfirming && !IsStillPointerEnter) SetInvestFocus(row.RowIndex);
         }
 
         private void OnIconHoverChanged(ShopHoverTarget _) => ApplyTooltip();

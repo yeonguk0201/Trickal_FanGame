@@ -760,6 +760,25 @@ namespace TrickalFanGame.Editor
                 Assert(view.InvestFocusedIndex == 1 && view.DetailNameText.text == "상점 할인" &&
                        view.TryInvestFocused() == ShopUpgradeStatus.Purchased && shop.DiscountLevel == 1,
                     "Down must focus 상점 할인 and buy it.");
+                if (view.UsesArtwork)
+                {
+                    // The keyboard reaches the button row below the invest list and comes back to its top.
+                    int rowCount = Math.Min(view.InvestRows.Length, ShopUpgrades.Catalog.Length);
+                    for (int step = view.InvestFocusedIndex; step < rowCount; step++) view.MoveFocus(0, 1);
+                    Assert(view.FocusedAction == ShopFocusAction.Invest &&
+                           view.IsActionButtonFocused(ShopFocusAction.Invest) &&
+                           view.InvestRows.All(row => !row.IsFocused),
+                        "Down from the last invest row must focus 돌아가기 and clear the row focus.");
+                    view.MoveFocus(1, 0);
+                    Assert(view.FocusedAction == ShopFocusAction.Close &&
+                           view.IsActionButtonFocused(ShopFocusAction.Close) &&
+                           !view.IsActionButtonFocused(ShopFocusAction.Invest),
+                        "Right on the invest button row must move to 닫기.");
+                    view.MoveFocus(0, 1);
+                    Assert(view.FocusedAction == ShopFocusAction.None && view.InvestFocusedIndex == 0 &&
+                           view.InvestRows[0].IsFocused && !view.IsActionButtonFocused(ShopFocusAction.Close),
+                        "Down from the invest button row must wrap to the first invest row.");
+                }
 
                 Assert(view.SetInvesting(false) && !view.IsInvesting && view.InvestPanel.alpha == 0f,
                     "Leaving the invest list must show the grid again.");
