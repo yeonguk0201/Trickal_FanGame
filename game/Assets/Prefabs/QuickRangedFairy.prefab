@@ -188,6 +188,7 @@ MonoBehaviour:
     height: 0.9553429
   flowerUv: {x: 0.42, y: 0.91}
   strideLength: 1.05
+  projectileSprite: {fileID: 21300000, guid: 8d815213ccec4927bf32212e698a5d38, type: 3}
 --- !u!114 &3566873441221346852
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -225,3 +226,4 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: QuickRangedFairy
   useSharedProfile: 1
+  surface: {fileID: 0}

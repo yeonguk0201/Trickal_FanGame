@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Frontend;
 using UnityEditor;
@@ -66,6 +67,12 @@ namespace TrickalFanGame.Editor
                 controller.TickBehavior(100f);
                 Require(projectile != null && Vector2.Distance(projectile.transform.position, motion.LaunchPosition) < 0.001f,
                     "Projectile must spawn at the flower, not at the feet.");
+                SpriteRenderer shot = projectile.GetComponent<SpriteRenderer>();
+                Require(motion.ProjectileSprite != null &&
+                        AssetDatabase.GetAssetPath(motion.ProjectileSprite) == SansamoPureMotionSetup.ProjectilePath &&
+                        shot.sprite == motion.ProjectileSprite && shot.color == Color.white &&
+                        Mathf.Approximately(projectile.transform.localScale.x, ProjectileSizing.DrawnEnemyScale),
+                    "Pure Sansamo must fire its drawn pollen shot untinted at the drawn-shot size.");
                 Require(root.GetComponent<Rigidbody2D>().linearVelocity.sqrMagnitude > 0.01f,
                     "First shot must retain orbit movement.");
                 var body = root.GetComponent<Rigidbody2D>();

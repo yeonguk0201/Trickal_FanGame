@@ -10,6 +10,9 @@ namespace TrickalFanGame.Editor
     {
         public const string AtlasPath = "Assets/Art/Enemies/FairyKingdom/Walking/SansamoPure_Walk.png";
         public const string PrefabPath = "Assets/Prefabs/QuickRangedFairy.prefab";
+        public const string ProjectilePath = "Assets/Art/Enemies/FairyKingdom/Attacking/SansamoPure_Projectile.png";
+        // The pollen ball body (about 300 of 512 px) is about one local unit, the shot's hitbox diameter.
+        public const float ProjectilePixelsPerUnit = 300f;
 
         [MenuItem("Trickal Fan Game/Artwork/Setup Sansamo Pure Motion")]
         public static void Setup()
@@ -47,6 +50,7 @@ namespace TrickalFanGame.Editor
                     (maxX - minX + 1f) / cell, (maxY - minY + 1f) / cell);
             }
             finally { UnityEngine.Object.DestroyImmediate(pixels); }
+            Sprite projectile = ImportProjectile();
             Material material = AssetDatabase.LoadAssetAtPath<Material>(EnemyMovementAnimationSetup.MaterialPath);
             if (material == null || ShaderUtil.ShaderHasError(material.shader))
                 throw new InvalidOperationException("Missing/invalid enemy movement material.");
@@ -56,11 +60,33 @@ namespace TrickalFanGame.Editor
                 SansamoPureMotion motion = root.GetComponent<SansamoPureMotion>();
                 if (motion == null) motion = root.AddComponent<SansamoPureMotion>();
                 motion.Configure(texture, material, content);
+                motion.ConfigureProjectile(projectile);
                 if (PrefabUtility.SaveAsPrefabAsset(root, PrefabPath) == null)
                     throw new InvalidOperationException("Could not save pure Sansamo motion.");
             }
             finally { PrefabUtility.UnloadPrefabContents(root); }
             AssetDatabase.SaveAssets();
+        }
+
+        private static Sprite ImportProjectile()
+        {
+            AssetDatabase.ImportAsset(ProjectilePath, ImportAssetOptions.ForceSynchronousImport);
+            var importer = AssetImporter.GetAtPath(ProjectilePath) as TextureImporter;
+            if (importer == null) throw new InvalidOperationException("Missing pure Sansamo pollen shot.");
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spritePixelsPerUnit = ProjectilePixelsPerUnit;
+            importer.mipmapEnabled = false; importer.alphaIsTransparency = true;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.filterMode = FilterMode.Bilinear; importer.wrapMode = TextureWrapMode.Clamp;
+            TextureImporterSettings settings = new();
+            importer.ReadTextureSettings(settings);
+            settings.spriteAlignment = (int)SpriteAlignment.Center;
+            importer.SetTextureSettings(settings);
+            importer.SaveAndReimport();
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(ProjectilePath);
+            if (sprite == null) throw new InvalidOperationException("Pure Sansamo pollen shot is not a sprite.");
+            return sprite;
         }
 
         public static void SetupAndVerifyBatch()

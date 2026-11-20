@@ -15,6 +15,8 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private Rect contentRect;
         [SerializeField] private Vector2 flowerUv = new(0.42f, 0.91f);
         [SerializeField, Min(0.1f)] private float strideLength = 1.05f;
+        // The drawn pollen shot the flower fires; empty keeps the old tinted copy of the enemy drawing.
+        [SerializeField] private Sprite projectileSprite;
         private SpriteRenderer source;
         private MobileRangedEnemyController controller;
         private Health health;
@@ -32,6 +34,7 @@ namespace TrickalFanGame.Enemy
         private float cycle, firedAt = float.NegativeInfinity;
         private bool moving, originalHidden;
         public Texture2D WalkAtlas => walkAtlas;
+        public Sprite ProjectileSprite => projectileSprite;
         public Mesh PoseMesh => mesh;
         public Material MotionMaterial => material;
         public Sprite PoseSprite => built;
@@ -40,6 +43,8 @@ namespace TrickalFanGame.Enemy
 
         public void Configure(Texture2D atlas, Material sharedMaterial, Rect normalizedContent)
         { walkAtlas = atlas; material = sharedMaterial; contentRect = normalizedContent; }
+
+        public void ConfigureProjectile(Sprite sprite) => projectileSprite = sprite;
 
         private void OnEnable()
         {
