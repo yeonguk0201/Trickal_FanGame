@@ -13,8 +13,7 @@ namespace TrickalFanGame.Enemy
     public sealed class SaemaeumGoldMeteor : MonoBehaviour
     {
         public const string ObjectName = "Saemaeum Gold Meteor";
-        // Placeholder until a drawn gold lump exists.
-        public const string ArtworkId = "obstacle-gold-rock";
+        public const string ArtworkId = SaemaeumGoldMeteorArtwork.FallPath;
         public const float FallDuration = 0.4f;
         public const float FallHeight = 7f;
         public const float LumpWidth = 1.1f;
@@ -72,7 +71,8 @@ namespace TrickalFanGame.Enemy
             GameObject lumpObject = new("Gold Lump");
             lumpObject.transform.SetParent(host.transform, false);
             meteor.lump = lumpObject.AddComponent<SpriteRenderer>();
-            meteor.lump.sprite = FairyKingdomArtwork.Fit(ArtworkId, LumpWidth);
+            meteor.lump.sprite = SaemaeumGoldMeteorArtwork.FallFrame(0);
+            lumpObject.transform.localRotation = Quaternion.Euler(0f, 0f, SaemaeumGoldMeteorArtwork.FallRotation);
             meteor.lump.sortingLayerID = sortingLayerId;
             // A falling lump draws over every body below it.
             meteor.lump.sortingOrder = bodySortingOrder + 2;
@@ -103,6 +103,9 @@ namespace TrickalFanGame.Enemy
                 float fallStart = impactAt - Mathf.Min(FallDuration, warning);
                 float fall = Mathf.Clamp01((now - fallStart) / Mathf.Max(0.01f, impactAt - fallStart));
                 lump.enabled = now >= fallStart;
+                int frame = Mathf.FloorToInt(Mathf.Max(0f, now - fallStart) /
+                    SaemaeumGoldMeteorArtwork.FrameDuration) % 4;
+                lump.sprite = SaemaeumGoldMeteorArtwork.FallFrame(frame);
                 // It speeds up all the way down.
                 lump.transform.localPosition = Vector3.up * (FallHeight * (1f - fall * fall));
             }
@@ -124,8 +127,11 @@ namespace TrickalFanGame.Enemy
             CombatSfx.Play(CombatSfxCue.VaultMeteorImpact);
             LastBrokenObstacles = BossSummonedObstacle.BreakInCircle(transform.position, radius);
             HurtPlayerOnMark();
-            if (lump != null && lump.sprite != null)
-                LandingDustEffect.Play(transform.position, LumpWidth * 1.3f, null, lump);
+            if (Application.isPlaying && lump != null)
+            {
+                lump.enabled = false;
+                SaemaeumGoldMeteorImpact.Create(transform.position, lump, source);
+            }
             if (Application.isPlaying) Destroy(gameObject);
             else DestroyImmediate(gameObject);
         }

@@ -279,7 +279,7 @@ MonoBehaviour:
   pillarDamageTier: 0
   pillarKnockbackSpeed: 7
   pillarKnockbackDuration: 0.2
-  pillarRequiredHits: 5
+  pillarRequiredHits: 2
   pillarTargetEvery: 3
   meteorMinimumDuration: 8
   meteorMaximumDuration: 10

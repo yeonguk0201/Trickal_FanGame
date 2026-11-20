@@ -18,7 +18,7 @@ namespace TrickalFanGame.Enemy
         public const string ObjectName = "Saemaeum Gold Pillar";
         public const string MarkName = "Saemaeum Gold Pillar Mark";
         public const string ObstacleId = "saemaeum-gold-pillar";
-        // Placeholder until a drawn gold pillar exists: the gold rock and its damage frames.
+        // Retain the existing logical kind; this summon has dedicated artwork rather than the room gold rock.
         public const string ArtworkVariantId = "gold-rock";
         public const float BodyRadius = 0.42f;
         public const float VisualWidth = 1f;
@@ -37,6 +37,8 @@ namespace TrickalFanGame.Enemy
         private Transform target;
         private SpriteRenderer mark;
         private Transform visual;
+        private SpriteRenderer drawing;
+        private DestructibleObstacle destructible;
         private int sortingLayerId;
 
         public bool HasEmerged { get; private set; }
@@ -94,7 +96,7 @@ namespace TrickalFanGame.Enemy
 
             if (visual == null) return;
             float rise = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((now - emergeAt) / RiseDuration));
-            visual.localPosition = new Vector3(0f, Mathf.Lerp(-0.35f, 0f, rise), 0f);
+            visual.localPosition = new Vector3(0f, -0.2f + Mathf.Lerp(-0.35f, 0f, rise), 0f);
             visual.localScale = new Vector3(1f, Mathf.Lerp(0.35f, 1f, rise), 1f);
         }
 
@@ -102,6 +104,31 @@ namespace TrickalFanGame.Enemy
         {
             if (Time.timeScale <= 0f) return;
             Tick(Time.time);
+        }
+
+        private void LateUpdate() => RefreshArtwork();
+
+        public void RefreshArtwork()
+        {
+            if (drawing == null || destructible == null || destructible.IsBroken) return;
+            drawing.sprite = destructible.HitsTaken > 0
+                ? SaemaeumGoldPillarArtwork.Frame(0) : SaemaeumGoldPillarArtwork.Intact;
+            drawing.color = Color.white;
+        }
+
+        private void OnBroken(DestructibleObstacle _)
+        {
+            if (!Application.isPlaying || drawing == null) return;
+            // Freeze the standing pose even when broken during its rise. Room/boss cleanup owns the remnants.
+            Tick(emergeAt + RiseDuration);
+            Transform room = source != null ? source.transform.parent : transform.parent;
+            SaemaeumGoldPillarBreakEffect effect = SaemaeumGoldPillarBreakEffect.Create(drawing, room);
+            source?.GetComponent<BossController>()?.RegisterOwnedObject(effect.gameObject);
+        }
+
+        private void OnDestroy()
+        {
+            if (destructible != null) destructible.Broken -= OnBroken;
         }
 
         private void Emerge()
@@ -121,7 +148,8 @@ namespace TrickalFanGame.Enemy
             visualObject.transform.SetParent(transform, false);
             visual = visualObject.transform;
             SpriteRenderer renderer = visualObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = FairyKingdomArtwork.Fit("obstacle-" + ArtworkVariantId, VisualWidth);
+            drawing = renderer;
+            renderer.sprite = SaemaeumGoldPillarArtwork.Intact;
             renderer.sortingLayerID = sortingLayerId;
             renderer.sortingOrder = 0;
 
@@ -130,8 +158,8 @@ namespace TrickalFanGame.Enemy
             DestructibleObstacle obstacle = gameObject.AddComponent<DestructibleObstacle>();
             obstacle.Configure(ObstacleId, requiredHits, null, renderer);
             obstacle.ConfigureFixedKind(ArtworkVariantId, Color.white, Color.white, false, 0, Color.white);
-            gameObject.AddComponent<FairyKingdomArtworkView>()
-                .Configure("obstacle-" + ArtworkVariantId, FairyKingdomArtworkMode.Obstacle, renderer, VisualWidth);
+            destructible = obstacle;
+            obstacle.Broken += OnBroken;
             Obstacle = gameObject.AddComponent<BossSummonedObstacle>();
             Obstacle.Configure(true);
             source?.GetComponent<BossController>()?.RegisterOwnedObject(gameObject);
@@ -139,7 +167,7 @@ namespace TrickalFanGame.Enemy
 
             HurtPlayerOnMark();
             if (renderer.sprite != null)
-                LandingDustEffect.Play((Vector2)transform.position + Vector2.down * renderer.sprite.bounds.extents.y,
+                LandingDustEffect.Play((Vector2)transform.position + Vector2.down * 0.2f,
                     VisualWidth * 0.9f, transform, renderer);
         }
 

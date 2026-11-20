@@ -131,9 +131,9 @@ namespace TrickalFanGame.Editor
                    Mathf.Approximately(GetPrivateField<float>(runtime, "phaseTwoPillarWarning"), 0.7f) &&
                    Mathf.Approximately(runtime.PillarStagger, 0.12f) &&
                    Mathf.Approximately(runtime.PillarHitRadius, 0.6f) &&
-                   runtime.PillarDamageTier == EnemyDamageTier.Light && runtime.PillarRequiredHits == 5 &&
+                   runtime.PillarDamageTier == EnemyDamageTier.Light && runtime.PillarRequiredHits == 2 &&
                    runtime.PillarTargetEvery == 3,
-                "Boss-2 gold pillars must be 4 / 6 per cast, warn 0.8 / 0.7, hurt lightly, break after 5 hits and " +
+                "Boss-2 gold pillars must be 4 / 6 per cast, warn 0.8 / 0.7, hurt lightly, break after 2 hits and " +
                 "aim one in three at the player.");
             Assert(Mathf.Approximately(runtime.MeteorMinimumDuration, 8f) &&
                    Mathf.Approximately(runtime.MeteorMaximumDuration, 10f) && runtime.MeteorOpeningCount == 5 &&
@@ -352,7 +352,7 @@ namespace TrickalFanGame.Editor
                 Collider2D body = first.GetComponent<Collider2D>();
                 Assert(first.gameObject.layer == LayerMask.NameToLayer("Environment") && obstacle != null &&
                        body != null && !body.isTrigger && first.Obstacle != null &&
-                       first.Obstacle.BlocksBossProjectiles && obstacle.RequiredHits == 5 &&
+                       first.Obstacle.BlocksBossProjectiles && obstacle.RequiredHits == 2 &&
                        obstacle.DropTable == null && obstacle.TryValidate(out _),
                     "An emerged pillar must be a solid, hit-counted Environment obstacle that blocks boss shots.");
                 Assert(first.GetComponent<Health>() == null && first.GetComponentInChildren<Health>() == null,
@@ -367,11 +367,10 @@ namespace TrickalFanGame.Editor
                 Assert(shot == null, "A gold pillar must stop the boss's shots.");
 
                 // Hits are counted, not damage.
-                for (int hit = 1; hit < 5; hit++)
-                    Assert(obstacle.RegisterPlayerHit() && !obstacle.IsBroken, "A pillar must survive four hits.");
+                Assert(obstacle.RegisterPlayerHit() && !obstacle.IsBroken, "A pillar must survive its first hit.");
                 Assert(obstacle.RegisterPlayerHit() && obstacle.IsBroken &&
                        !BossSummonedObstacle.Live.Contains(first.Obstacle),
-                    "A pillar must break on its fifth hit.");
+                    "A pillar must break on its second hit.");
 
                 // The boss walking into a pillar breaks it.
                 SaemaeumGoldPillar second = pillars[1];

@@ -2587,6 +2587,21 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 후면 오로라 추가: 미리보기의 `Portal layer` / `Aurora layer`로 개별 표시, 12초 시간 슬라이더로 반복·정지 확인. 실제 Game Scene에서 `PortalAurora`의 크기·밝기·속도를 조절할 수 있다. 후광 색은 포탈 원화 고리에서 자동으로 가져온다.
 - 렌더 포함 단독 배치: `TrickalFanGame.Editor.FloorPortalArtworkVerification.VerifyAndCaptureBatch`. 이미지 출력 `game/Logs/portal-aurora-preview.png`.
 
+### 새마음금고 황금 기둥 원화 검증 (2026-11-20)
+
+- Edit Mode 메뉴: `Trickal Fan Game/Effects/Verify Saemaeum Gold Pillar Artwork`.
+- 배치: `TrickalFanGame.Editor.SaemaeumGoldPillarArtworkVerification.Verify`. 별도 Setup이나 Scene 저장 없이 전용 원화·균열·파괴 셀·2타 제거를 검사한다.
+- 성공 로그: `Saemaeum gold pillar artwork verification passed: intact, cracked, three breakup cells, two-hit removal.`
+- Play 수동 확인: Game Scene에서 `F1 → — Boss room — → Boss F2`로 이동해 새마음금고 기둥 소환을 기다린다. 사각 금 기둥과 뾰족한 흙이 표시되고 첫 타격 후 균열 유지, 두 번째 타격 후 충돌 즉시 제거와 0.3초 파괴·소멸을 확인한다. 보스가 밟거나 착지해 부술 때도 같은 연출이 나오는지, 방 이동 뒤 파편이 남지 않는지 확인한다.
+- 규격·실행 결과: `docs/art-prompts/saemaeum-gold-pillar-v1/runtime-integration.md`.
+
+### 새마음금고 메테오 원화 연결 검증 (2026-11-20)
+
+- 메뉴: Trickal Fan Game/Effects/Verify Saemaeum Gold Meteor Artwork
+- 배치 메서드: TrickalFanGame.Editor.SaemaeumGoldMeteorArtworkVerification.Verify
+- 일체형 낙하 4프레임, 본체 피벗·수직 방향, 착지 4프레임·알파 소멸을 검사한다. 6000.3.22f1 배치 통과.
+- 실제 Play 검수: docs/art-prompts/saemaeum-gold-meteor-v1/unity-integration.md 참고. 미술 수용 대기.
+
 ## 사운드 믹서
 
 효과음이 BGM에 묻히는지 게임 기본 볼륨에서 듣고 조절하는 오프라인 페이지다.

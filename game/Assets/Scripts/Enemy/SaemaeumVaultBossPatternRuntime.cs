@@ -59,7 +59,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private EnemyDamageTier pillarDamageTier = EnemyDamageTier.Light;
         [SerializeField, Min(0f)] private float pillarKnockbackSpeed = 7f;
         [SerializeField, Min(0.01f)] private float pillarKnockbackDuration = 0.2f;
-        [SerializeField, Min(1)] private int pillarRequiredHits = 5;
+        [SerializeField, Min(1)] private int pillarRequiredHits = 2;
         [SerializeField, Min(1)] private int pillarTargetEvery = 3;
 
         [Header("Gold meteor (phase two)")]

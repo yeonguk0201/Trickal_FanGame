@@ -810,6 +810,18 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 - 실행 방법은 `docs/05-development-setup.md`의 같은 이름 항목.
 
 - 후면 오로라 지원: 같은 런타임 메시·셰이더의 12초 시계 및 레이어별 표시, 단독 검사와 정지 화면 렌더 배치 추가. 실제 Play 미술 검수는 별도.
+
+### 새마음금고 기둥 전용 원화 검증 (2026-11-20)
+
+- `SaemaeumGoldPillarArtworkVerification.Verify` 구현·배치 통과. 원화·2×2 셀 로드, 균열 표시, 공통 피벗·배율, 파괴 순서·완전 감쇠, 2타 비활성화와 재타격 거부를 검사한다.
+- 실행 메뉴와 실제 Play 확인 경로는 `docs/05-development-setup.md`의 새마음금고 황금 기둥 원화 검증 절을 따른다. 실제 화면 검수는 대기 상태다.
+
+### 새마음금고 메테오 원화 검증기 (2026-11-20)
+
+- SaemaeumGoldMeteorArtworkVerification.Verify 구현 및 단독 Unity 배치 통과.
+- 리소스 해상도·임포트, 낙하 셀 순서·기준점·방향, 폭발 4단계·완전 소멸을 확인한다.
+- 실제 실행법: docs/05-development-setup.md. Play 미술 검수는 자동 검증과 별도이며 대기 상태다.
+
 ### 사운드 믹서 (2026-11-20, Sound-3)
 
 - [x] `tools/sound-mixer/build.py`: `CombatSfxSetup.Cues`(큐·파일·볼륨·재생 간격·길이 상한)와 BGM 경로를 읽어
