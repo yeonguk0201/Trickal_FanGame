@@ -1,0 +1,2145 @@
+fileFormatVersion: 2
+guid: 58adb37a4ec873e4981bb2dce6a5a94c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -991357772188183846
+    second: Erpin_Flight_Sheet_0
+  - first:
+      213: -7362627908027729850
+    second: Erpin_Flight_Sheet_1
+  - first:
+      213: -4673458786531919802
+    second: Erpin_Flight_Sheet_2
+  - first:
+      213: 3569168916329983259
+    second: Erpin_Flight_Sheet_3
+  - first:
+      213: -1347635628389491235
+    second: Erpin_Flight_Sheet_4
+  - first:
+      213: -5352841946226459674
+    second: Erpin_Flight_Sheet_5
+  - first:
+      213: 9053797567798269865
+    second: Erpin_Flight_Sheet_6
+  - first:
+      213: -8523844579920170653
+    second: Erpin_Flight_Sheet_7
+  - first:
+      213: -7415020397152135406
+    second: Erpin_Flight_Sheet_8
+  - first:
+      213: -7486208069149415355
+    second: Erpin_Flight_Sheet_9
+  - first:
+      213: -7256528032010191365
+    second: Erpin_Flight_Sheet_10
+  - first:
+      213: 394167403143809292
+    second: Erpin_Flight_Sheet_11
+  - first:
+      213: -190952324147563546
+    second: Erpin_Flight_Sheet_12
+  - first:
+      213: -387259465558041558
+    second: Erpin_Flight_Sheet_13
+  - first:
+      213: -2721431016782518377
+    second: Erpin_Flight_Sheet_14
+  - first:
+      213: 2757573437320550471
+    second: Erpin_Flight_Sheet_15
+  - first:
+      213: 4425290991843158824
+    second: Erpin_Flight_Sheet_16
+  - first:
+      213: -9022316689422978723
+    second: Erpin_Flight_Sheet_17
+  - first:
+      213: -5228940570074592804
+    second: Erpin_Flight_Sheet_18
+  - first:
+      213: 3114879897050357696
+    second: Erpin_Flight_Sheet_19
+  - first:
+      213: 6839296054584221935
+    second: Erpin_Flight_Sheet_20
+  - first:
+      213: -1102865000588372303
+    second: Erpin_Flight_Sheet_21
+  - first:
+      213: -7252388054211951514
+    second: Erpin_Flight_Sheet_22
+  - first:
+      213: 1206525252532631749
+    second: Erpin_Flight_Sheet_23
+  - first:
+      213: 7163903604639728378
+    second: Erpin_Flight_Sheet_24
+  - first:
+      213: 7255867709054357752
+    second: Erpin_Flight_Sheet_25
+  - first:
+      213: -2713875133389443922
+    second: Erpin_Flight_Sheet_26
+  - first:
+      213: 8111949576180044485
+    second: Erpin_Flight_Sheet_27
+  - first:
+      213: -7910111808943448874
+    second: Erpin_Flight_Sheet_28
+  - first:
+      213: 7017572697877232530
+    second: Erpin_Flight_Sheet_29
+  - first:
+      213: -4181999989992350040
+    second: Erpin_Flight_Sheet_30
+  - first:
+      213: 1671225316591905154
+    second: Erpin_Flight_Sheet_31
+  - first:
+      213: 3825787524185866528
+    second: Erpin_Flight_Sheet_32
+  - first:
+      213: -7373696690593448003
+    second: Erpin_Flight_Sheet_33
+  - first:
+      213: -1147160934079907869
+    second: Erpin_Flight_Sheet_34
+  - first:
+      213: -9012043037326559021
+    second: Erpin_Flight_Sheet_35
+  - first:
+      213: -14835544158837241
+    second: Erpin_Flight_Sheet_36
+  - first:
+      213: -7251435781271697092
+    second: Erpin_Flight_Sheet_37
+  - first:
+      213: -8211215702486703521
+    second: Erpin_Flight_Sheet_38
+  - first:
+      213: 2652348644686286931
+    second: Erpin_Flight_Sheet_39
+  - first:
+      213: 1318987369067335732
+    second: Erpin_Flight_Sheet_40
+  - first:
+      213: -434776639015671314
+    second: Erpin_Flight_Sheet_41
+  - first:
+      213: 1941515963619515858
+    second: Erpin_Flight_Sheet_42
+  - first:
+      213: 7830932327196230735
+    second: Erpin_Flight_Sheet_43
+  - first:
+      213: -4433474465563553110
+    second: Erpin_Flight_Sheet_44
+  - first:
+      213: 4080165003526613829
+    second: Erpin_Flight_Sheet_45
+  - first:
+      213: -3263336469139040980
+    second: Erpin_Flight_Sheet_46
+  - first:
+      213: 2259129074674564540
+    second: Erpin_Flight_Sheet_47
+  - first:
+      213: 7059476609451038910
+    second: Erpin_Flight_Sheet_48
+  - first:
+      213: -867224006501791227
+    second: Erpin_Flight_Sheet_49
+  - first:
+      213: -6451240772677749418
+    second: Erpin_Flight_Sheet_50
+  - first:
+      213: -2666271107912848789
+    second: Erpin_Flight_Sheet_51
+  - first:
+      213: 1589134866837522319
+    second: Erpin_Flight_Sheet_52
+  - first:
+      213: -9161762291085463179
+    second: Erpin_Flight_Sheet_53
+  - first:
+      213: -1485461796837651294
+    second: Erpin_Flight_Sheet_54
+  - first:
+      213: 2420921299634485190
+    second: Erpin_Flight_Sheet_55
+  - first:
+      213: -1463774190538477810
+    second: Erpin_Flight_Sheet_56
+  - first:
+      213: 8389526774727154505
+    second: Erpin_Flight_Sheet_57
+  - first:
+      213: -8801523493669425953
+    second: Erpin_Flight_Sheet_58
+  - first:
+      213: -910659953791635750
+    second: Erpin_Flight_Sheet_59
+  - first:
+      213: -4436149259398198809
+    second: Erpin_Flight_Sheet_60
+  - first:
+      213: 2051589178355086356
+    second: Erpin_Flight_Sheet_61
+  - first:
+      213: -2431366720635644009
+    second: Erpin_Flight_Sheet_62
+  - first:
+      213: -4527916548778257036
+    second: Erpin_Flight_Sheet_63
+  - first:
+      213: -5023637433952185891
+    second: Erpin_Flight_Sheet_64
+  - first:
+      213: 2775651328807812789
+    second: Erpin_Flight_Sheet_65
+  - first:
+      213: -3666829539834667786
+    second: Erpin_Flight_Sheet_66
+  - first:
+      213: 3553866434938382672
+    second: Erpin_Flight_Sheet_67
+  - first:
+      213: -7443861537349978511
+    second: Erpin_Flight_Sheet_68
+  - first:
+      213: -345330016259212552
+    second: Erpin_Flight_Sheet_69
+  - first:
+      213: 8226801057975951700
+    second: Erpin_Flight_Sheet_70
+  - first:
+      213: 1656048089450567659
+    second: Erpin_Flight_Sheet_71
+  - first:
+      213: 3690909071512075023
+    second: Erpin_Flight_Sheet_72
+  - first:
+      213: 5903198801217373898
+    second: Erpin_Flight_Sheet_73
+  - first:
+      213: 8980622704475659393
+    second: Erpin_Flight_Sheet_74
+  - first:
+      213: -3686552204194072998
+    second: Erpin_Flight_Sheet_75
+  - first:
+      213: 3087287999226471534
+    second: Erpin_Flight_Sheet_76
+  - first:
+      213: 1515465035917280513
+    second: Erpin_Flight_Sheet_77
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 745
+        width: 377
+        height: 339
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad2966fcb5dfd32f0800000000000000
+      internalID: -991357772188183846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 356
+        width: 361
+        height: 392
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64831a03de0b2d990800000000000000
+      internalID: -7362627908027729850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 735
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6483654aef9842fb0800000000000000
+      internalID: -4673458786531919802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 726
+        width: 60
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1de639183c388130800000000000000
+      internalID: 3569168916329983259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 744
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddd1f2b398c3c4de0800000000000000
+      internalID: -1347635628389491235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 370
+        width: 381
+        height: 716
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6eb7c584c92e6b5b0800000000000000
+      internalID: -5352841946226459674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 682
+        y: 684
+        width: 95
+        height: 86
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a759e83bec85ad70800000000000000
+      internalID: 9053797567798269865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 728
+        y: 370
+        width: 353
+        height: 377
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 361383d048835b980800000000000000
+      internalID: -8523844579920170653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 738
+        y: 742
+        width: 363
+        height: 330
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21798793c3e881990800000000000000
+      internalID: -7415020397152135406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 739
+        width: 348
+        height: 339
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 548afabbc65ab1890800000000000000
+      internalID: -7486208069149415355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 1120
+        y: 700
+        width: 78
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bfd3e5d9332ab4b90800000000000000
+      internalID: -7256528032010191365
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 1223
+        y: 745
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c09cc6e2a2d587500800000000000000
+      internalID: 394167403143809292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 1269
+        y: 700
+        width: 45
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e336267fd9995df0800000000000000
+      internalID: -190952324147563546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 1307
+        y: 761
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2c518f519d20aaf0800000000000000
+      internalID: -387259465558041558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 1325
+        y: 728
+        width: 56
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 797a2f3b8e88b3ad0800000000000000
+      internalID: -2721431016782518377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 1388
+        y: 734
+        width: 27
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7485b855e6ed44620800000000000000
+      internalID: 2757573437320550471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 1414
+        y: 736
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82b2c8cf5bac96d30800000000000000
+      internalID: 4425290991843158824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 690
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d517dd3f5ca4ac280800000000000000
+      internalID: -9022316689422978723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 1066
+        y: 670
+        width: 29
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd9431171421f67b0800000000000000
+      internalID: -5228940570074592804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 1082
+        y: 362
+        width: 359
+        height: 374
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cf11b553c64a3b20800000000000000
+      internalID: 3114879897050357696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 400
+        width: 47
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe02937868f0aee50800000000000000
+      internalID: 6839296054584221935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 442
+        width: 29
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b618bc0026d1b0f0800000000000000
+      internalID: -1102865000588372303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 658
+        y: 388
+        width: 49
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 664096f4d775a5b90800000000000000
+      internalID: -7252388054211951514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 390
+        width: 11
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c8feb123507eb010800000000000000
+      internalID: 1206525252532631749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 384
+        width: 22
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af201b75f5c4b6360800000000000000
+      internalID: 7163903604639728378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 390
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f09967fc3502b460800000000000000
+      internalID: 7255867709054357752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 374
+        y: 393
+        width: 8
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eac6e85e1f0665ad0800000000000000
+      internalID: -2713875133389443922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 394
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c2971c192f639070800000000000000
+      internalID: 8111949576180044485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 716
+        y: 396
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6dc9d462833a93290800000000000000
+      internalID: -7910111808943448874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 1004
+        y: 368
+        width: 85
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29bb372203d636160800000000000000
+      internalID: 7017572697877232530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 1351
+        y: 390
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ae91d19a2d86f5c0800000000000000
+      internalID: -4181999989992350040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 1363
+        y: 398
+        width: 24
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 289a9172292613710800000000000000
+      internalID: 1671225316591905154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_32
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 373
+        height: 375
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 021483dbb7de71530800000000000000
+      internalID: 3825787524185866528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_33
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 325
+        width: 39
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbf34bb6ded5ba990800000000000000
+      internalID: -7373696690593448003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_34
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 370
+        width: 27
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e736f755377410f0800000000000000
+      internalID: -1147160934079907869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_35
+      rect:
+        serializedVersion: 2
+        x: 233
+        y: 358
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d83e9bfa9acee280800000000000000
+      internalID: -9012043037326559021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_36
+      rect:
+        serializedVersion: 2
+        x: 239
+        y: 362
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 706ec54b62b4bcff0800000000000000
+      internalID: -14835544158837241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_37
+      rect:
+        serializedVersion: 2
+        x: 263
+        y: 374
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c394eb1a399bd5b90800000000000000
+      internalID: -7251435781271697092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_38
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 370
+        width: 12
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f52ab2fc2d6eb0e80800000000000000
+      internalID: -8211215702486703521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_39
+      rect:
+        serializedVersion: 2
+        x: 730
+        y: 0
+        width: 359
+        height: 375
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 350d3032a090fc420800000000000000
+      internalID: 2652348644686286931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_40
+      rect:
+        serializedVersion: 2
+        x: 835
+        y: 363
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4305c7c160cfd4210800000000000000
+      internalID: 1318987369067335732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_41
+      rect:
+        serializedVersion: 2
+        x: 879
+        y: 374
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee925da43fc57f9f0800000000000000
+      internalID: -434776639015671314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_42
+      rect:
+        serializedVersion: 2
+        x: 943
+        y: 362
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2dd9a497b76a1fa10800000000000000
+      internalID: 1941515963619515858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_43
+      rect:
+        serializedVersion: 2
+        x: 1060
+        y: 370
+        width: 10
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4487a6267f0dac60800000000000000
+      internalID: 7830932327196230735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_44
+      rect:
+        serializedVersion: 2
+        x: 1068
+        y: 374
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa2d15f86722972c0800000000000000
+      internalID: -4433474465563553110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_45
+      rect:
+        serializedVersion: 2
+        x: 1166
+        y: 364
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54b2f2cf378af9830800000000000000
+      internalID: 4080165003526613829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_46
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 342
+        width: 24
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c25d36e65cc46b2d0800000000000000
+      internalID: -3263336469139040980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_47
+      rect:
+        serializedVersion: 2
+        x: 1327
+        y: 374
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbdfbbd8ce90a5f10800000000000000
+      internalID: 2259129074674564540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_48
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 356
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb81286d29c48f160800000000000000
+      internalID: 7059476609451038910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_49
+      rect:
+        serializedVersion: 2
+        x: 369
+        y: 0
+        width: 360
+        height: 371
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50a05cf5c5007f3f0800000000000000
+      internalID: -867224006501791227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_50
+      rect:
+        serializedVersion: 2
+        x: 436
+        y: 364
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 655b60882b69876a0800000000000000
+      internalID: -6451240772677749418
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_51
+      rect:
+        serializedVersion: 2
+        x: 627
+        y: 356
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6aa7f9cd808ffad0800000000000000
+      internalID: -2666271107912848789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_52
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 0
+        width: 360
+        height: 365
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f87c906edbdbd0610800000000000000
+      internalID: 1589134866837522319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_53
+      rect:
+        serializedVersion: 2
+        x: 1376
+        y: 339
+        width: 34
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5713843ccb1ead080800000000000000
+      internalID: -9161762291085463179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_54
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 232
+        width: 7
+        height: 112
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ac0418bd54926be0800000000000000
+      internalID: -1485461796837651294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_55
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 329
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c7f3ed6817d89120800000000000000
+      internalID: 2420921299634485190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_56
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 329
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0fa19d0121afabe0800000000000000
+      internalID: -1463774190538477810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_57
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 326
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94b9d39e6269d6470800000000000000
+      internalID: 8389526774727154505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_58
+      rect:
+        serializedVersion: 2
+        x: 368
+        y: 335
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdc2495d305bad580800000000000000
+      internalID: -8801523493669425953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_59
+      rect:
+        serializedVersion: 2
+        x: 692
+        y: 325
+        width: 41
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ade631fc89fac53f0800000000000000
+      internalID: -910659953791635750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_60
+      rect:
+        serializedVersion: 2
+        x: 1418
+        y: 323
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e945f690c1af62c0800000000000000
+      internalID: -4436149259398198809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_61
+      rect:
+        serializedVersion: 2
+        x: 1084
+        y: 305
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 414f3e8ec75b87c10800000000000000
+      internalID: 2051589178355086356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_62
+      rect:
+        serializedVersion: 2
+        x: 722
+        y: 289
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7975ec979dc024ed0800000000000000
+      internalID: -2431366720635644009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_63
+      rect:
+        serializedVersion: 2
+        x: 726
+        y: 272
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 475957983eb9921c0800000000000000
+      internalID: -4527916548778257036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_64
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 38
+        width: 5
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd1dce4ce54784ab0800000000000000
+      internalID: -5023637433952185891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_65
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 25
+        width: 21
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5be3ee17d28158620800000000000000
+      internalID: 2775651328807812789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_66
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 18
+        width: 57
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fcde3216fdcc1dc0800000000000000
+      internalID: -3666829539834667786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_67
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 18
+        width: 53
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 059afa181bed15130800000000000000
+      internalID: 3553866434938382672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_68
+      rect:
+        serializedVersion: 2
+        x: 1335
+        y: 31
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 176bf0dfe5712b890800000000000000
+      internalID: -7443861537349978511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_69
+      rect:
+        serializedVersion: 2
+        x: 1349
+        y: 0
+        width: 53
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8faf69a0e24253bf0800000000000000
+      internalID: -345330016259212552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_70
+      rect:
+        serializedVersion: 2
+        x: 1388
+        y: 35
+        width: 29
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 451e67a89f77b2270800000000000000
+      internalID: 8226801057975951700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_71
+      rect:
+        serializedVersion: 2
+        x: 1394
+        y: 15
+        width: 21
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be75aa696f67bf610800000000000000
+      internalID: 1656048089450567659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_72
+      rect:
+        serializedVersion: 2
+        x: 1414
+        y: 40
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0b7eb9ce3eb83330800000000000000
+      internalID: 3690909071512075023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_73
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 23
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac6c21188006ce150800000000000000
+      internalID: 5903198801217373898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_74
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 0
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18c5412b4c491ac70800000000000000
+      internalID: 8980622704475659393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_75
+      rect:
+        serializedVersion: 2
+        x: 637
+        y: 27
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a56341f6d4cb6dcc0800000000000000
+      internalID: -3686552204194072998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_76
+      rect:
+        serializedVersion: 2
+        x: 1020
+        y: 21
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e646831041048da20800000000000000
+      internalID: 3087287999226471534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Flight_Sheet_77
+      rect:
+        serializedVersion: 2
+        x: 1348
+        y: 13
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 105cf5fbb63080510800000000000000
+      internalID: 1515465035917280513
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Erpin_Flight_Sheet_0: -991357772188183846
+      Erpin_Flight_Sheet_1: -7362627908027729850
+      Erpin_Flight_Sheet_10: -7256528032010191365
+      Erpin_Flight_Sheet_11: 394167403143809292
+      Erpin_Flight_Sheet_12: -190952324147563546
+      Erpin_Flight_Sheet_13: -387259465558041558
+      Erpin_Flight_Sheet_14: -2721431016782518377
+      Erpin_Flight_Sheet_15: 2757573437320550471
+      Erpin_Flight_Sheet_16: 4425290991843158824
+      Erpin_Flight_Sheet_17: -9022316689422978723
+      Erpin_Flight_Sheet_18: -5228940570074592804
+      Erpin_Flight_Sheet_19: 3114879897050357696
+      Erpin_Flight_Sheet_2: -4673458786531919802
+      Erpin_Flight_Sheet_20: 6839296054584221935
+      Erpin_Flight_Sheet_21: -1102865000588372303
+      Erpin_Flight_Sheet_22: -7252388054211951514
+      Erpin_Flight_Sheet_23: 1206525252532631749
+      Erpin_Flight_Sheet_24: 7163903604639728378
+      Erpin_Flight_Sheet_25: 7255867709054357752
+      Erpin_Flight_Sheet_26: -2713875133389443922
+      Erpin_Flight_Sheet_27: 8111949576180044485
+      Erpin_Flight_Sheet_28: -7910111808943448874
+      Erpin_Flight_Sheet_29: 7017572697877232530
+      Erpin_Flight_Sheet_3: 3569168916329983259
+      Erpin_Flight_Sheet_30: -4181999989992350040
+      Erpin_Flight_Sheet_31: 1671225316591905154
+      Erpin_Flight_Sheet_32: 3825787524185866528
+      Erpin_Flight_Sheet_33: -7373696690593448003
+      Erpin_Flight_Sheet_34: -1147160934079907869
+      Erpin_Flight_Sheet_35: -9012043037326559021
+      Erpin_Flight_Sheet_36: -14835544158837241
+      Erpin_Flight_Sheet_37: -7251435781271697092
+      Erpin_Flight_Sheet_38: -8211215702486703521
+      Erpin_Flight_Sheet_39: 2652348644686286931
+      Erpin_Flight_Sheet_4: -1347635628389491235
+      Erpin_Flight_Sheet_40: 1318987369067335732
+      Erpin_Flight_Sheet_41: -434776639015671314
+      Erpin_Flight_Sheet_42: 1941515963619515858
+      Erpin_Flight_Sheet_43: 7830932327196230735
+      Erpin_Flight_Sheet_44: -4433474465563553110
+      Erpin_Flight_Sheet_45: 4080165003526613829
+      Erpin_Flight_Sheet_46: -3263336469139040980
+      Erpin_Flight_Sheet_47: 2259129074674564540
+      Erpin_Flight_Sheet_48: 7059476609451038910
+      Erpin_Flight_Sheet_49: -867224006501791227
+      Erpin_Flight_Sheet_5: -5352841946226459674
+      Erpin_Flight_Sheet_50: -6451240772677749418
+      Erpin_Flight_Sheet_51: -2666271107912848789
+      Erpin_Flight_Sheet_52: 1589134866837522319
+      Erpin_Flight_Sheet_53: -9161762291085463179
+      Erpin_Flight_Sheet_54: -1485461796837651294
+      Erpin_Flight_Sheet_55: 2420921299634485190
+      Erpin_Flight_Sheet_56: -1463774190538477810
+      Erpin_Flight_Sheet_57: 8389526774727154505
+      Erpin_Flight_Sheet_58: -8801523493669425953
+      Erpin_Flight_Sheet_59: -910659953791635750
+      Erpin_Flight_Sheet_6: 9053797567798269865
+      Erpin_Flight_Sheet_60: -4436149259398198809
+      Erpin_Flight_Sheet_61: 2051589178355086356
+      Erpin_Flight_Sheet_62: -2431366720635644009
+      Erpin_Flight_Sheet_63: -4527916548778257036
+      Erpin_Flight_Sheet_64: -5023637433952185891
+      Erpin_Flight_Sheet_65: 2775651328807812789
+      Erpin_Flight_Sheet_66: -3666829539834667786
+      Erpin_Flight_Sheet_67: 3553866434938382672
+      Erpin_Flight_Sheet_68: -7443861537349978511
+      Erpin_Flight_Sheet_69: -345330016259212552
+      Erpin_Flight_Sheet_7: -8523844579920170653
+      Erpin_Flight_Sheet_70: 8226801057975951700
+      Erpin_Flight_Sheet_71: 1656048089450567659
+      Erpin_Flight_Sheet_72: 3690909071512075023
+      Erpin_Flight_Sheet_73: 5903198801217373898
+      Erpin_Flight_Sheet_74: 8980622704475659393
+      Erpin_Flight_Sheet_75: -3686552204194072998
+      Erpin_Flight_Sheet_76: 3087287999226471534
+      Erpin_Flight_Sheet_77: 1515465035917280513
+      Erpin_Flight_Sheet_8: -7415020397152135406
+      Erpin_Flight_Sheet_9: -7486208069149415355
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

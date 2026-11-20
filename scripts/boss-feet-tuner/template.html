@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>보스 발 판정 조정</title>
+<style>
+  :root {
+    --bg: #f4f1ea; --panel: #fffdf8; --ink: #2b2620; --muted: #6f665b; --line: #ddd4c4;
+    --accent: #c2410c; --feet: #16a34a; --body: #2563eb; --stand: #d97706;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1a17; --panel: #262320; --ink: #f1ece4; --muted: #b3a998; --line: #3d3833;
+      --accent: #fb923c; --feet: #4ade80; --body: #60a5fa; --stand: #fbbf24;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 "Pretendard", "Noto Sans KR", system-ui, sans-serif; }
+  header { padding: 14px 16px 6px; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; padding: 12px 16px 24px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  button, select { font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+  button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .stage-wrap { background: #000; border-radius: 10px; overflow: hidden; position: relative; }
+  #stage { position: relative; width: 100%; }
+  #stage img, #stage svg { position: absolute; left: 0; top: 0; pointer-events: none; image-rendering: auto; }
+  #stage .room { width: 100%; height: auto; position: relative; display: block; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .panel h2 { font-size: 15px; margin: 0 0 8px; }
+  .row { margin: 10px 0; }
+  .row label { display: flex; justify-content: space-between; font-weight: 600; }
+  .row small { color: var(--muted); display: block; }
+  input[type=range] { width: 100%; }
+  input[type=number] { width: 80px; font: inherit; padding: 2px 6px; border: 1px solid var(--line);
+    border-radius: 6px; background: transparent; color: inherit; }
+  .checks label { display: block; font-weight: 400; }
+  .legend span { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+  textarea { width: 100%; min-height: 110px; font: 12px/1.4 ui-monospace, monospace; border: 1px solid var(--line);
+    border-radius: 8px; background: transparent; color: inherit; padding: 8px; }
+  .stats { font-variant-numeric: tabular-nums; color: var(--muted); }
+  .stats b { color: var(--ink); }
+  .buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>보스 발 판정 조정</h1>
+  <p>실제 보스방·보스 프레임·그림자를 Unity에서 렌더한 그림입니다. 발 크기와 내림 값을 바꾸면 게임 규칙(발이 설 수 있는 영역 안에 머묾)대로 멈추는 위치가 바로 바뀝니다.</p>
+</header>
+<main>
+  <section>
+    <div class="tabs" id="bossTabs"></div>
+    <div class="tabs" id="edgeTabs"></div>
+    <div class="stage-wrap"><div id="stage"></div></div>
+  </section>
+  <aside class="panel">
+    <h2 id="bossTitle"></h2>
+    <div class="row">
+      <label>발 폭(가로 반지름) <input type="number" id="widthNum" step="0.01" min="0.1" max="1.4"></label>
+      <input type="range" id="width" min="0.1" max="1.4" step="0.01">
+      <small>옆 벽에서 몸 중심이 벽과 떨어지는 거리입니다. 작을수록 옆 벽에 더 붙습니다.</small>
+    </div>
+    <div class="row">
+      <label>발 높이(세로 반지름) <input type="number" id="heightNum" step="0.01" min="0.1" max="1.4"></label>
+      <input type="range" id="height" min="0.1" max="1.4" step="0.01">
+      <small>위쪽 벽에서 발 바닥이 벽 선과 떨어지는 거리의 절반입니다. 작을수록 위쪽 벽에 더 붙습니다.
+        폭과 같으면 원, 다르면 가로·세로로 긴 캡슐(양 끝이 둥근 타원 모양)이 됩니다.</small>
+      <div class="buttons"><button id="matchCircle">폭에 맞춰 원으로</button></div>
+    </div>
+    <div class="row">
+      <label>발 좌우 위치 <input type="number" id="offsetXNum" step="0.01" min="-1.2" max="1.2"></label>
+      <input type="range" id="offsetX" min="-1.2" max="1.2" step="0.01">
+      <small>그림 그대로일 때 기준입니다(+는 화면 오른쪽). 게임에서 그림이 좌우로 뒤집히면 발 위치도 함께 뒤집힙니다.
+        망토처럼 한쪽으로 튀어나온 부분을 빼고 실제로 디딘 자리에 맞춥니다.</small>
+    </div>
+    <div class="row">
+      <label>발 내림 <input type="number" id="dropNum" step="0.01" min="-1" max="1.2"></label>
+      <input type="range" id="drop" min="-1" max="1.2" step="0.01">
+      <small>발을 몸 원 바닥보다 아래(+)나 위(−)로 옮깁니다. 그려진 발바닥에 맞추면 자연스럽습니다. 위쪽 벽에는 그만큼 더 올라가고, 아래쪽 벽에는 그만큼 덜 내려갑니다.</small>
+    </div>
+    <div class="row">
+      <label>그림 방향</label>
+      <div class="buttons"><button id="faceRight">그림 그대로</button><button id="faceLeft">좌우 뒤집기</button></div>
+      <small>캔버스의 초록 발을 끌어서 위치를 옮길 수도 있습니다.</small>
+    </div>
+    <div class="row">
+      <label>자세</label>
+      <select id="pose"></select>
+    </div>
+    <div class="row checks">
+      <label><input type="checkbox" id="showBody" checked> <span class="legend"><span style="background:var(--body)"></span></span>몸 원(피격·접촉)</label>
+      <label><input type="checkbox" id="showFeet" checked> <span class="legend"><span style="background:var(--feet)"></span></span>발(벽·장애물)</label>
+      <label><input type="checkbox" id="showStand" checked> <span class="legend"><span style="background:var(--stand)"></span></span>설 수 있는 영역</label>
+      <label><input type="checkbox" id="showPlayer" checked> 플레이어 비교</label>
+      <label><input type="checkbox" id="showFront" checked> 앞쪽 생울타리</label>
+    </div>
+    <div class="row stats" id="stats"></div>
+    <div class="buttons">
+      <button id="resetBoss">이 보스 되돌리기</button>
+      <button id="resetAll">전체 되돌리기</button>
+    </div>
+    <div class="row">
+      <label>공유할 값</label>
+      <textarea id="output" readonly></textarea>
+      <div class="buttons"><button id="copy">복사</button></div>
+    </div>
+  </aside>
+</main>
+<script>
+const MANIFEST = /*MANIFEST*/null;
+const IMAGES = /*IMAGES*/null;
+const PPU = MANIFEST.pixelsPerUnit, CANVAS = MANIFEST.actorCanvas;
+const STORE = "boss-feet-tuner-v3";
+const EDGES = [
+  ["top", "위쪽 벽"], ["bottom", "아래쪽 벽"], ["left", "왼쪽 벽"], ["right", "오른쪽 벽"],
+  ["topLeft", "왼쪽 위 모서리"], ["bottomRight", "오른쪽 아래 모서리"],
+];
+// Width and height start equal to the current radius, which is the circle the game uses today.
+const original = Object.fromEntries(MANIFEST.bosses.map(b => [b.id,
+  { width: b.feetHalfWidth ?? b.feetRadius, height: b.feetHalfHeight ?? b.feetRadius,
+    offsetX: b.feetOffsetX ?? 0, drop: b.feetDrop }]));
+let values = structuredClone(original);
+try { Object.assign(values, JSON.parse(localStorage.getItem(STORE) || "{}")); } catch (e) {}
+let current = MANIFEST.bosses[0].id, edge = "top", poseIndex = 0;
+
+const $ = id => document.getElementById(id);
+const FIELDS = [["width", "widthNum"], ["height", "heightNum"], ["offsetX", "offsetXNum"], ["drop", "dropNum"]];
+let facingLeft = false;
+const boss = () => MANIFEST.bosses.find(b => b.id === current);
+function save() { try { localStorage.setItem(STORE, JSON.stringify(values)); } catch (e) {} }
+
+// EnemyFeet.StandingRootArea: the feet (circle, or capsule when width != height) sit at the bottom of the body,
+// dropped by `drop`. Their half width keeps them off the side walls, their half height off the top and bottom.
+// The offset is for the drawing as exported (flipX off); flipping mirrors the drawing and the feet offset together.
+function rootFor(b, v, where) {
+  const hw = v.width, hh = Math.min(v.height, b.bodyRadius), offY = -(b.bodyRadius - hh + v.drop);
+  const offX = facingLeft ? -v.offsetX : v.offsetX;
+  const xMin = b.standXMin + hw - offX, xMax = b.standXMax - hw - offX;
+  const yMin = b.standYMin + hh - offY, yMax = b.standYMax - hh - offY;
+  const cx = 0;
+  return {
+    top: [cx, yMax], bottom: [cx, yMin], left: [xMin, 0], right: [xMax, 0],
+    topLeft: [xMin, yMax], bottomRight: [xMax, yMin],
+  }[where].concat([hw, hh, offY, offX]);
+}
+
+function playerFor(b, where, bossX, bossY) {
+  const fr = MANIFEST.playerFeetRadius, fo = MANIFEST.playerFeetOffsetY;
+  const yTop = b.standYMax - fr - fo, yBottom = b.standYMin + fr - fo;
+  const xLeft = b.standXMin + fr, xRight = b.standXMax - fr;
+  switch (where) {
+    case "top": return [bossX + 3.2, yTop];
+    case "bottom": return [bossX + 3.2, yBottom];
+    case "left": return [xLeft, bossY - 2.6];
+    case "right": return [xRight, bossY - 2.6];
+    case "topLeft": return [bossX + 3.2, yTop];
+    default: return [bossX - 3.2, yBottom];
+  }
+}
+
+function render() {
+  const b = boss(), v = values[b.id];
+  $("bossTitle").textContent = b.name;
+  for (const [id, num] of FIELDS) {
+    $(id).value = v[id]; $(num).value = v[id].toFixed(2);
+  }
+  const stage = $("stage");
+  stage.innerHTML = "";
+  const room = new Image(); room.src = IMAGES[b.roomFile]; room.className = "room"; room.alt = b.name + " 보스방";
+  stage.appendChild(room);
+  const W = b.roomWidth, H = b.roomHeight;
+  const place = (src, x, y, size, mirror) => {
+    const img = new Image(); img.src = src; img.alt = "";
+    if (mirror) img.style.transform = "scaleX(-1)";
+    img.style.left = ((x - size / 2 + W / 2) / W * 100) + "%";
+    img.style.top = ((H / 2 - (y + size / 2)) / H * 100) + "%";
+    img.style.width = (size / W * 100) + "%";
+    stage.appendChild(img); return img;
+  };
+  const [bx, by, hw, hh, offY, offX] = rootFor(b, v, edge);
+  const pose = b.poses[Math.min(poseIndex, b.poses.length - 1)];
+  const actors = [{ y: by, draw: () => { place(IMAGES[b.shadowFile], bx, by, CANVAS, facingLeft);
+    place(IMAGES[pose.file], bx, by, CANVAS, facingLeft); } }];
+  if ($("showPlayer").checked) {
+    const [px, py] = playerFor(b, edge, bx, by);
+    actors.push({ y: py, draw: () => { place(IMAGES[MANIFEST.playerShadowFile], px, py, CANVAS);
+      place(IMAGES[MANIFEST.playerFile], px, py, CANVAS); } });
+  }
+  actors.sort((a, c) => c.y - a.y).forEach(a => a.draw());
+  if ($("showFront").checked) {
+    const front = new Image(); front.src = IMAGES[b.roomForegroundFile]; front.alt = "";
+    front.style.width = "100%"; stage.appendChild(front);
+  }
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `${-W / 2} ${-H / 2} ${W} ${H}`);
+  svg.setAttribute("width", "100%"); svg.setAttribute("height", "100%");
+  svg.style.height = "100%";
+  const css = getComputedStyle(document.documentElement);
+  const add = (tag, attrs) => { const el = document.createElementNS(svg.namespaceURI, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]); svg.appendChild(el); };
+  if ($("showStand").checked)
+    add("rect", { x: b.standXMin, y: -b.standYMax, width: b.standXMax - b.standXMin, height: b.standYMax - b.standYMin,
+      fill: "none", stroke: css.getPropertyValue("--stand"), "stroke-width": 0.05, "stroke-dasharray": "0.25 0.15" });
+  if ($("showBody").checked)
+    add("circle", { cx: bx, cy: -by, r: b.bodyRadius, fill: "none", stroke: css.getPropertyValue("--body"), "stroke-width": 0.05 });
+  if ($("showFeet").checked)
+    add("rect", { id: "feetShape", x: bx + offX - hw, y: -(by + offY) - hh, width: 2 * hw, height: 2 * hh,
+      rx: Math.min(hw, hh), fill: "rgba(22,163,74,0.18)", stroke: css.getPropertyValue("--feet"), "stroke-width": 0.06,
+      style: "pointer-events: all; cursor: move" });
+  stage.appendChild(svg);
+  const feetShape = svg.querySelector("#feetShape");
+  if (feetShape) feetShape.addEventListener("pointerdown", startDrag);
+
+  const shape = Math.abs(hw - hh) < 0.005 ? "원" : hw > hh ? "가로로 긴 캡슐" : "세로로 긴 캡슐";
+  $("stats").innerHTML =
+    `발 모양 <b>${shape}</b> · 몸 원 반지름 <b>${b.bodyRadius.toFixed(2)}</b><br>` +
+    `위쪽 벽: 발 바닥이 벽 선보다 <b>${(2 * hh).toFixed(2)}</b> 아래에서 멈춤<br>` +
+    `아래쪽 벽: 몸 원 바닥이 벽 선보다 <b>${v.drop.toFixed(2)}</b> 위에서 멈춤<br>` +
+    `옆 벽: 발 중심이 몸 중심에서 <b>${offX.toFixed(2)}</b> 옆, 발 끝이 벽에 닿음`;
+  const same = (x, k) => Math.abs(values[x.id][k] - original[x.id][k]) < 0.0001;
+  const changed = MANIFEST.bosses.filter(x => ["width", "height", "offsetX", "drop"].some(k => !same(x, k)));
+  const json = { version: 3, offsetXForUnflippedDrawing: true, bosses: Object.fromEntries(MANIFEST.bosses.map(x => [x.id,
+    { feetHalfWidth: values[x.id].width, feetHalfHeight: values[x.id].height, feetOffsetX: values[x.id].offsetX,
+      feetDrop: values[x.id].drop }])) };
+  const text = changed.length
+    ? changed.map(x => `${x.name}: 발 폭 ${values[x.id].width.toFixed(2)}, 발 높이 ${values[x.id].height.toFixed(2)}, ` +
+        `발 좌우 ${values[x.id].offsetX.toFixed(2)}(그림 그대로일 때, +는 오른쪽), 발 내림 ${values[x.id].drop.toFixed(2)}`).join("\n") +
+      "\n로 바꿔줘."
+    : "바꾼 값이 없습니다.";
+  $("faceRight").setAttribute("aria-pressed", !facingLeft);
+  $("faceLeft").setAttribute("aria-pressed", facingLeft);
+  $("output").value = text + "\n\n" + JSON.stringify(json, null, 2);
+  document.querySelectorAll("#bossTabs button").forEach(el => el.setAttribute("aria-pressed", el.dataset.id === current));
+  document.querySelectorAll("#edgeTabs button").forEach(el => el.setAttribute("aria-pressed", el.dataset.id === edge));
+}
+
+function refreshPoses() {
+  const sel = $("pose"); sel.innerHTML = "";
+  boss().poses.forEach((p, i) => { const o = document.createElement("option"); o.value = i; o.textContent = p.name; sel.appendChild(o); });
+  poseIndex = Math.min(poseIndex, boss().poses.length - 1); sel.value = poseIndex;
+}
+
+MANIFEST.bosses.forEach(b => {
+  const el = document.createElement("button"); el.textContent = b.name; el.dataset.id = b.id;
+  el.onclick = () => { current = b.id; poseIndex = 0; refreshPoses(); render(); }; $("bossTabs").appendChild(el);
+});
+EDGES.forEach(([id, name]) => {
+  const el = document.createElement("button"); el.textContent = name; el.dataset.id = id;
+  el.onclick = () => { edge = id; render(); }; $("edgeTabs").appendChild(el);
+});
+for (const [id, num] of FIELDS) {
+  const set = value => { const n = Math.round(parseFloat(value) * 100) / 100; if (!isNaN(n)) { values[current][id] = n; save(); render(); } };
+  $(id).oninput = e => set(e.target.value);
+  $(num).onchange = e => set(e.target.value);
+}
+$("pose").onchange = e => { poseIndex = +e.target.value; render(); };
+["showBody", "showFeet", "showStand", "showPlayer", "showFront"].forEach(id => $(id).onchange = render);
+// Dragging the feet moves them against the body: sideways sets the offset, up and down sets the drop.
+function startDrag(event) {
+  event.preventDefault();
+  const svg = event.currentTarget.ownerSVGElement, v = values[current];
+  const startX = event.clientX, startY = event.clientY, from = { offsetX: v.offsetX, drop: v.drop };
+  const unitsPerPixel = boss().roomWidth / svg.getBoundingClientRect().width;
+  const move = e => {
+    const dx = (e.clientX - startX) * unitsPerPixel, dy = (e.clientY - startY) * unitsPerPixel;
+    v.offsetX = Math.max(-1.2, Math.min(1.2, Math.round((from.offsetX + (facingLeft ? -dx : dx)) * 100) / 100));
+    v.drop = Math.max(-1, Math.min(1.2, Math.round((from.drop + dy) * 100) / 100));
+    render();
+  };
+  const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); save(); };
+  window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+}
+$("faceRight").onclick = () => { facingLeft = false; render(); };
+$("faceLeft").onclick = () => { facingLeft = true; render(); };
+$("matchCircle").onclick = () => { values[current].height = values[current].width; save(); render(); };
+$("resetBoss").onclick = () => { values[current] = { ...original[current] }; save(); render(); };
+$("resetAll").onclick = () => { values = structuredClone(original); save(); render(); };
+$("copy").onclick = async () => { try { await navigator.clipboard.writeText($("output").value); } catch (e) { $("output").select(); } };
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+  const step = e.shiftKey ? 0.05 : 0.01, v = values[current];
+  const nudge = (k, d, min) => { v[k] = Math.max(min, Math.round((v[k] + d) * 100) / 100); };
+  if (e.key === "ArrowUp") nudge("height", step, 0.1);
+  else if (e.key === "ArrowDown") nudge("height", -step, 0.1);
+  else if (e.key === "ArrowRight") nudge("width", step, 0.1);
+  else if (e.key === "ArrowLeft") nudge("width", -step, 0.1);
+  else if (e.key === "PageUp") nudge("drop", step, 0);
+  else if (e.key === "PageDown") nudge("drop", -step, -1);
+  else return;
+  e.preventDefault(); save(); render();
+});
+refreshPoses(); render();
+</script>
+</body>
+</html>

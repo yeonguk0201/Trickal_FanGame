@@ -308,6 +308,7 @@ namespace TrickalFanGame.Room
         private bool Open(ChestOpenMethod method)
         {
             if (!runState.TryOpenChest(chestId)) return false;
+            TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.ChestOpen);
             ApplyVisuals();
             Opened?.Invoke(this, method);
             return true;

@@ -68,6 +68,17 @@ namespace TrickalFanGame.Editor
             Assert(view.Cards.All(card => Approximately(card.GetComponent<RectTransform>().sizeDelta,
                        UsesCloverArtwork(view) ? RewardUiArtworkSetup.CardSize : Week16Reward2Setup.CardSize)),
                 "Every placeholder reward card must use the documented replaceable card size.");
+            if (UsesCloverArtwork(view))
+            {
+                foreach (Button button in new[] { view.ConfirmButton, view.CancelButton })
+                {
+                    MenuPopEffect pop = button.GetComponent<MenuPopEffect>();
+                    Assert(pop != null && button.GetComponents<MenuPopEffect>().Length == 1 &&
+                           Mathf.Approximately(pop.HoverScale, RewardUiArtworkSetup.FocusedButtonScale) &&
+                           pop.Target == button.transform,
+                        $"The clover {button.name} must grow once when hovered or keyboard-focused.");
+                }
+            }
             Assert(eventSystem.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>() != null &&
                    view.GraphicRaycaster != null && view.UiEventSystem == eventSystem,
                 "Reward-2 requires the shared Input System EventSystem and Game HUD raycaster.");

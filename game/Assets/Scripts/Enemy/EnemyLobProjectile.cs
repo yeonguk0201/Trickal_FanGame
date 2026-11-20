@@ -143,6 +143,7 @@ namespace TrickalFanGame.Enemy
             lob.Mark.sortingOrder = MarkSortingOrder;
 
             lob.Tick(now);
+            EnemyProjectile.PlayAttackSound(source);
             return lob;
         }
 

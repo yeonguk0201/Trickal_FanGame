@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using TrickalFanGame.Frontend;
+using TrickalFanGame.Player;
 using TrickalFanGame.Run;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace TrickalFanGame.Editor
 {
@@ -28,11 +30,13 @@ namespace TrickalFanGame.Editor
             VerifyPauseSettingsLayout(view, frontendControls, font);
             VerifyGameOverLayout(scene, session, sequence, font);
             VerifyPauseSettingsFlow(view);
+            VerifyVictoryTiming(sequence);
             VerifyGameOverTiming(sequence);
 
             EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath, OpenSceneMode.Single);
             Debug.Log("Week 25 UX-0 verification passed: pause settings share the Frontend panel and LocalSettings, " +
-                      "focus stays in the open layer, and the GAME OVER sequence waits for the confirm input.");
+                      "focus stays in the open layer, and the GAME OVER and VICTORY sequences wait for the confirm " +
+                      "input.");
         }
 
         public static void SetupAndVerifyBatch()
@@ -144,8 +148,8 @@ namespace TrickalFanGame.Editor
                 "GAME OVER title is missing or uses another font.");
             Assert(confirm != null && confirm.text == "결과 보기" && confirm.font == font,
                 "GAME OVER confirm label is missing or uses another font.");
-            Assert(sequence.HoldAfterFall >= 4f && sequence.HoldAfterFall <= 6f,
-                "The pause after the fall should stay about five seconds.");
+            Assert(Mathf.Approximately(sequence.HoldAfterFall, 3.6f),
+                "The Game Scene must wait 3.6 seconds after the fall.");
         }
 
         private static void VerifyPauseSettingsFlow(GamePauseArtifactView view)
@@ -168,6 +172,57 @@ namespace TrickalFanGame.Editor
             {
                 if (view.IsPaused) view.Resume();
                 Time.timeScale = previousTimeScale;
+            }
+        }
+
+        // The last boss's clear runs the same overlay on a copy, so the scene's own sequence stays fresh for GAME OVER.
+        private static void VerifyVictoryTiming(GameOverSequence source)
+        {
+            GameObject copy = Object.Instantiate(source.gameObject);
+            var player = new GameObject("Victory Verification Player");
+            try
+            {
+                GameOverSequence sequence = copy.GetComponent<GameOverSequence>();
+                PlayerActionState actionState = player.AddComponent<PlayerActionState>();
+                int confirmations = 0;
+                Assert(sequence.TryBeginVictory(player.transform, () => confirmations++) && sequence.IsVictory &&
+                       sequence.IsCelebrating, "VICTORY must start with 에르핀's celebration.");
+                Assert(!sequence.TryBegin(null, () => confirmations++), "GAME OVER started during VICTORY.");
+                Assert(actionState.IsVictoryBlocked && !actionState.CanMove && !actionState.CanBasicAttack,
+                    "에르핀 must stand still during VICTORY.");
+                // Edit Mode holds no boss defeat presentation, so the celebration ends on the first step.
+                sequence.Advance(0.01f);
+                Assert(sequence.CurrentPhase == GameOverSequence.Phase.Holding && sequence.Overlay.alpha == 0f,
+                    "The hold must follow the celebration.");
+                sequence.Advance(sequence.HoldAfterVictory - 0.1f);
+                Assert(sequence.CurrentPhase == GameOverSequence.Phase.Holding,
+                    "The circular fade started before the victory hold ended.");
+                sequence.Advance(0.2f);
+                Assert(sequence.CurrentPhase == GameOverSequence.Phase.Closing && sequence.Overlay.alpha == 1f,
+                    "The circular fade did not start after the victory hold.");
+                sequence.Advance(sequence.IrisDuration + 0.01f);
+                sequence.Advance(0.61f);
+                Assert(sequence.CurrentPhase == GameOverSequence.Phase.Title, "VICTORY did not reach its title.");
+                TMP_Text title = sequence.Title.GetComponentInChildren<TMP_Text>();
+                Assert(title.text == "VICTORY", "The victory title must read VICTORY.");
+                Transform backdrop = sequence.Overlay.transform.Find("Game Over Backdrop");
+                Image portrait = backdrop != null
+                    ? backdrop.Find("Erpin Victory Portrait")?.GetComponent<Image>()
+                    : null;
+                Assert(portrait != null && portrait.sprite != null && portrait.sprite.name == "Erpin_Victory_3",
+                    "VICTORY must show 에르핀's jump for joy.");
+                sequence.Advance(5f);
+                Assert(sequence.IsAwaitingConfirm && sequence.ConfirmButton.gameObject.activeSelf &&
+                       sequence.ConfirmButton.interactable, "VICTORY did not show its confirm input.");
+                sequence.Advance(600f);
+                Assert(sequence.IsAwaitingConfirm && confirmations == 0,
+                    "VICTORY must not open the result by time alone.");
+                Assert(sequence.Confirm() && confirmations == 1, "Confirming VICTORY did not open the result.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(copy);
+                Object.DestroyImmediate(player);
             }
         }
 
@@ -194,9 +249,39 @@ namespace TrickalFanGame.Editor
                 Assert(sequence.IrisRadius <= previousRadius, "The circular fade reopened while closing.");
                 previousRadius = sequence.IrisRadius;
             }
-            Assert(sequence.CurrentPhase == GameOverSequence.Phase.Title && sequence.IrisRadius <= 0.01f,
-                "The circular fade did not close fully before GAME OVER.");
+            Assert(sequence.CurrentPhase == GameOverSequence.Phase.Blackout && sequence.IrisRadius <= 0.01f,
+                "The circular fade must close fully before the blackout hold.");
+            sequence.Advance(0.59f);
+            Assert(sequence.CurrentPhase == GameOverSequence.Phase.Blackout && sequence.Overlay.alpha == 1f &&
+                   sequence.Title.alpha == 0f && !sequence.ConfirmButton.gameObject.activeSelf,
+                "The blackout must keep the title and confirm button hidden.");
+            sequence.Advance(0.02f);
+            Assert(sequence.CurrentPhase == GameOverSequence.Phase.Title && sequence.Title.alpha == 0f,
+                "The title fade must start after the blackout hold.");
             Assert(!sequence.ConfirmButton.gameObject.activeSelf, "The confirm input appeared before GAME OVER.");
+
+            TMP_Text title = sequence.Title.GetComponentInChildren<TMP_Text>();
+            Material titleMaterial = title.fontSharedMaterial;
+            Assert(titleMaterial.mainTexture == title.font.atlasTexture &&
+                   titleMaterial.IsKeywordEnabled("OUTLINE_ON") && titleMaterial.IsKeywordEnabled("UNDERLAY_ON"),
+                "The title material must use the shared font atlas with the outline and shadow variants.");
+            Transform backdrop = sequence.Overlay.transform.Find("Game Over Backdrop");
+            Image portrait = backdrop != null ? backdrop.Find("Erpin Defeat Portrait")?.GetComponent<Image>() : null;
+            Assert(portrait != null && portrait.sprite != null && portrait.sprite.name == "Erpin_Death_3" &&
+                   !portrait.raycastTarget && backdrop.GetSiblingIndex() < sequence.Title.transform.GetSiblingIndex(),
+                "The defeat portrait must render behind the title without taking input.");
+            CanvasGroup backdropGroup = backdrop.GetComponent<CanvasGroup>();
+            Assert(backdropGroup.alpha == 0f, "The backdrop must fade in after the iris closes.");
+            sequence.Advance(0.1f);
+            Assert(backdropGroup.alpha > 0f && backdropGroup.alpha == sequence.Title.alpha,
+                "The backdrop must fade in with the title.");
+            Assert(LetterLift(title, 0) > 1f && Mathf.Abs(LetterLift(title, 1)) < 0.01f,
+                "The first letter must lift before the second.");
+            sequence.Advance(0.12f);
+            title.ForceMeshUpdate();
+            Assert(LetterLift(title, 0) > LetterLift(title, 1) && LetterLift(title, 1) > 1f &&
+                   Mathf.Abs(LetterLift(title, 2)) < 0.01f,
+                "The wave must advance from left to right and survive a TMP mesh rebuild.");
 
             sequence.Advance(5f);
             Assert(sequence.IsAwaitingConfirm && sequence.Title.alpha == 1f &&
@@ -207,6 +292,13 @@ namespace TrickalFanGame.Editor
                 "GAME OVER must not open the result by time alone.");
             Assert(sequence.Confirm() && confirmations == 1, "Confirming GAME OVER did not open the result.");
             Assert(!sequence.Confirm() && confirmations == 1, "Confirming twice opened the result twice.");
+        }
+
+        private static float LetterLift(TMP_Text text, int index)
+        {
+            TMP_CharacterInfo character = text.textInfo.characterInfo[index];
+            Vector3[] vertices = text.textInfo.meshInfo[character.materialReferenceIndex].vertices;
+            return vertices[character.vertexIndex].y - character.vertex_BL.position.y;
         }
 
         private static string[] FrontendSettingsControlNames()

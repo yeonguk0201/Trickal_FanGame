@@ -23,6 +23,8 @@ namespace TrickalFanGame.Enemy
         private DamageContext damageContext;
         private float expiresAt;
         private bool isLaunched;
+        // A shot stops once, so it counts at most one hit on the cover it meets.
+        private bool blocked;
 
         public bool IsLaunched => isLaunched;
         public SpriteRenderer Artwork => artwork;
@@ -105,8 +107,15 @@ namespace TrickalFanGame.Enemy
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.GetComponentInParent<DoorController>() != null)
+            if (blocked) return;
+            // 새마음금고's gold pillars are cover: a boss shot stops on them. Since 2026-11-21 every blocked shot
+            // counts one hit on the pillar, like a player attack, so cover wears away (it felt too safe).
+            BossSummonedObstacle obstacle = other.GetComponentInParent<BossSummonedObstacle>();
+            bool coverHit = obstacle != null && obstacle.BlocksBossProjectiles && !obstacle.IsBroken;
+            if (other.GetComponentInParent<DoorController>() != null || coverHit)
             {
+                blocked = true;
+                if (coverHit) obstacle.Obstacle.RegisterPlayerHit(transform.position);
                 StopAtBoundary();
             }
         }

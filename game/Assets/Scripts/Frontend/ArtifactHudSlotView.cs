@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace TrickalFanGame.Frontend
 {
     [DisallowMultipleComponent]
-    public sealed class ArtifactHudSlotView : MonoBehaviour
+    public sealed class ArtifactHudSlotView : MonoBehaviour, IHudDescribed
     {
         private static readonly Color CommonColor = new(0.36f, 0.4f, 0.46f, 1f);
         private static readonly Color UncommonColor = new(0.24f, 0.62f, 0.38f, 1f);
@@ -25,6 +25,11 @@ namespace TrickalFanGame.Frontend
         public TMP_Text IconText => iconText;
         public Image StackBadge => stackBadge;
         public TMP_Text StackText => stackText;
+        public RectTransform HoverArea => (RectTransform)transform;
+
+        // The mouse resting on the slot shows the artifact's description (PickupDescriptionView).
+        private void OnEnable() => HudDescribedRegistry.Register(this);
+        private void OnDisable() => HudDescribedRegistry.Unregister(this);
 
         public void ConfigureVisuals(Image configuredIcon, TMP_Text configuredIconText,
             Image configuredStackBadge, TMP_Text configuredStackText)

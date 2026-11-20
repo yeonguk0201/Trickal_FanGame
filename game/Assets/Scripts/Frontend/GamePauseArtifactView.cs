@@ -199,6 +199,7 @@ namespace TrickalFanGame.Frontend
         private void LateUpdate()
         {
             bool confirmingAction = pendingRunAction != PendingRunAction.None;
+            if (confirmingAction) FitConfirmationBackdrop();
             Transform activeScope = confirmingAction ? confirmationFocusScope : focusScope;
             Selectable fallback = confirmingAction ? cancelLeaveButton : resumeButton;
             if (IsSettingsOpen)
@@ -228,7 +229,7 @@ namespace TrickalFanGame.Frontend
         {
             // UX-0: once the Run has ended (death sequence, result transition) the pause menu stays closed.
             if (IsPaused || Time.timeScale <= 0f || (runSession != null && runSession.HasEnded) ||
-                FindFirstObjectByType<ItemRewardSelectionSession>()?.IsOpen == true ||
+                FindFirstObjectByType<ItemRewardSelectionSession>()?.BlocksPause == true ||
                 FindFirstObjectByType<ShopSession>()?.BlocksPause == true) return false;
             previousTimeScale = Time.timeScale;
             previousSelectedObject = EventSystem.current != null
@@ -306,6 +307,9 @@ namespace TrickalFanGame.Frontend
             ClearEntries();
             if (inventory != null && entriesRoot != null && entryTemplate != null)
             {
+                // The held 교주의 권능 and spell first: the HUD shows only their icons.
+                if (inventory.TryGetComponent(out PlayerPowerSlot power)) AddHeldEntry(power.HeldDefinition);
+                if (inventory.TryGetComponent(out PlayerSpellSlot spell)) AddHeldEntry(spell.HeldDefinition);
                 foreach (ItemDefinition definition in inventory.AcquiredDefinitions)
                 {
                     ArtifactPauseListEntryView entry = Instantiate(entryTemplate, entriesRoot);
@@ -318,6 +322,16 @@ namespace TrickalFanGame.Frontend
             }
 
             if (emptyText != null) emptyText.gameObject.SetActive(entries.Count == 0);
+        }
+
+        private void AddHeldEntry(ItemDefinition definition)
+        {
+            if (definition == null) return;
+            ArtifactPauseListEntryView entry = Instantiate(entryTemplate, entriesRoot);
+            entry.name = "Held Detail " + definition.ItemId;
+            entry.gameObject.SetActive(true);
+            entry.BindHeld(definition);
+            entries.Add(entry);
         }
 
         private void ClearEntries()
@@ -526,9 +540,27 @@ namespace TrickalFanGame.Frontend
         private void ApplyLeaveConfirmationVisibility(bool visible)
         {
             if (leaveConfirmation == null) return;
+            if (visible) FitConfirmationBackdrop();
             leaveConfirmation.alpha = visible ? 1f : 0f;
             leaveConfirmation.interactable = visible;
             leaveConfirmation.blocksRaycasts = visible;
+        }
+
+        // The reference frame may letterbox at wide/tall aspect ratios. Convert the entire canvas viewport
+        // into this parent's space, so the modal dims the game as well as the pause panel.
+        private void FitConfirmationBackdrop()
+        {
+            if (leaveConfirmation == null || leaveConfirmation.transform is not RectTransform rect ||
+                rect.parent is not RectTransform parent) return;
+            Canvas canvas = rect.GetComponentInParent<Canvas>()?.rootCanvas;
+            if (canvas == null) return;
+            Camera camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            Rect viewport = canvas.pixelRect;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, viewport.min, camera, out Vector2 min) ||
+                !RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, viewport.max, camera, out Vector2 max)) return;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.localPosition = new Vector3((min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f, 0f);
+            rect.sizeDelta = max - min;
         }
 
         private void RestorePreviousFocus()

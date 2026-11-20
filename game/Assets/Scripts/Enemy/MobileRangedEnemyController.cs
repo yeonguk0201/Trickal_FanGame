@@ -347,9 +347,13 @@ namespace TrickalFanGame.Enemy
             if (!EnemyObstacleNavigator.HasLineOfFire(origin, predictedPoint))
                 direction = ((Vector2)target.position - origin).normalized;
 
+            // 산사모 순수 fires its drawn pollen shot from the flower; others keep a tinted copy of their drawing.
+            SansamoPureMotion flower = GetComponent<SansamoPureMotion>();
+            Sprite drawnProjectile = flower != null && flower.isActiveAndEnabled ? flower.ProjectileSprite : null;
             EnemyProjectile projectile = EnemyProjectile.Create(origin, direction, gameObject,
                 projectileDamageTier, projectileSpeed, projectileLifetime,
-                spriteRenderer != null ? spriteRenderer.sprite : null);
+                drawnProjectile != null ? drawnProjectile : spriteRenderer != null ? spriteRenderer.sprite : null,
+                drawnProjectile != null);
             presentation?.SetPhase(EnemyAttackPhase.Active);
             presentationEndsAt = currentTime + Mathf.Min(0.08f, shotInterval);
             ProjectileFired?.Invoke(projectile);

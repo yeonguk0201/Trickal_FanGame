@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Player;
@@ -425,9 +426,18 @@ namespace TrickalFanGame.Room
             EncounterRuntimeWave wave = encounterWaves[waveIndex];
             CurrentWaveNumber = waveIndex + 1;
             WaveStarted?.Invoke(CurrentWaveNumber);
+            int aliveBefore = AliveEnemyCount;
+            bool bossWave = false;
             for (int index = 0; index < wave.EnemyPrefabs.Count; index++)
+            {
+                if (wave.EnemyPrefabs[index] != null && wave.EnemyPrefabs[index].GetComponent<BossController>() != null)
+                    bossWave = true;
                 SpawnEnemy(wave.EnemyPrefabs[index], wave.SpawnPoints[index], wave.VariantAt(index),
                     EnemyVariantRules.SlotOf(waveIndex, index));
+            }
+
+            // Sound-2: a wave appearing. A boss has the VS intro instead.
+            if (!bossWave && AliveEnemyCount > aliveBefore) CombatSfx.Play(CombatSfxCue.EnemyAppear);
         }
 
         private void SpawnEnemy(GameObject configuredPrefab, Transform spawnPoint,

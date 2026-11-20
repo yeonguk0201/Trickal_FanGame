@@ -18231,7 +18231,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 0
+  m_TextWrappingMode: 3
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -26686,88 +26686,220 @@ MonoBehaviour:
   combatSfx:
   - cue: 0
     clip: {fileID: 8300000, guid: 4bbd4ac1502ee9d4ba4030ec5eb8acc8, type: 3}
-    volume: 0.5
+    volume: 0.25
     minimumInterval: 0.03
   - cue: 1
-    clip: {fileID: 8300000, guid: 00fadfeb4c741494fac7f0d3b6175ef7, type: 3}
-    volume: 0.7
+    clip: {fileID: 8300000, guid: cadff989fec4f3546bd86870c891df88, type: 3}
+    volume: 0.76
     minimumInterval: 0.05
   - cue: 11
-    clip: {fileID: 8300000, guid: ecdc94464de57564e9934977b6353ce5, type: 3}
-    volume: 0.9
+    clip: {fileID: 8300000, guid: acad324e1210464449118bf33856a5d2, type: 3}
+    volume: 0.37
     minimumInterval: 0.05
   - cue: 10
-    clip: {fileID: 8300000, guid: 628f0f57788e58040ac2f42f24d68212, type: 3}
-    volume: 0.5
+    clip: {fileID: 8300000, guid: 0fb302e105eb11f4589bdcd8b4ea462f, type: 3}
+    volume: 0.49
     minimumInterval: 0.12
   - cue: 2
     clip: {fileID: 8300000, guid: 15c2149dd276c3e4c91bf427817210c2, type: 3}
-    volume: 0.85
+    volume: 0.65
     minimumInterval: 0.1
   - cue: 3
     clip: {fileID: 8300000, guid: 199f95577b08f904bad6d6b6c4abc930, type: 3}
-    volume: 0.95
+    volume: 0.61
     minimumInterval: 0.05
   - cue: 4
-    clip: {fileID: 8300000, guid: eefeabdf74374a840a1d910a0cecc013, type: 3}
-    volume: 0.62
+    clip: {fileID: 8300000, guid: d358b704a2ff5bc4391fc173e51ccac4, type: 3}
+    volume: 0.71
     minimumInterval: 0.02
   - cue: 5
-    clip: {fileID: 8300000, guid: 1c74edf7b8c75b0478b37575f9db045a, type: 3}
-    volume: 0.85
+    clip: {fileID: 8300000, guid: e07a87f961517084a964d9183c329c15, type: 3}
+    volume: 0.79
     minimumInterval: 0.03
   - cue: 6
     clip: {fileID: 8300000, guid: 3a92800d506c2f344873c5906c8a79af, type: 3}
-    volume: 0.6
+    volume: 0.49
     minimumInterval: 0.1
-  - cue: 7
-    clip: {fileID: 8300000, guid: 76c9deb18f20fef45928da60cbd59893, type: 3}
-    volume: 0.7
-    minimumInterval: 0.1
-  - cue: 8
-    clip: {fileID: 8300000, guid: b14d9862a65aea44e91ceed5c2329da5, type: 3}
+  - cue: 48
+    clip: {fileID: 8300000, guid: dcfe7b8465a37b54eb33fc687975a2f7, type: 3}
     volume: 0.7
     minimumInterval: 0.1
   - cue: 9
-    clip: {fileID: 8300000, guid: 48474c0894b0a1b4a99cd7576e95e8f9, type: 3}
-    volume: 0.9
+    clip: {fileID: 8300000, guid: bb6253bbfef04f344bf2fbb1454d365c, type: 3}
+    volume: 0.47
     minimumInterval: 0.1
   - cue: 12
     clip: {fileID: 8300000, guid: dd3cbc0343ea8a64da9535ae195edeee, type: 3}
-    volume: 0.8
+    volume: 0.56
     minimumInterval: 0.15
   - cue: 13
     clip: {fileID: 8300000, guid: 8e29d9eb8c025c24eb00d5118da9f4ff, type: 3}
-    volume: 0.85
+    volume: 0.79
     minimumInterval: 0.06
   - cue: 14
     clip: {fileID: 8300000, guid: 8c94a5873b920294dbe6ac9c4764873b, type: 3}
-    volume: 0.7
+    volume: 0.49
     minimumInterval: 0.06
   - cue: 15
-    clip: {fileID: 8300000, guid: 2fb3cb160d753ba419d6e9b7fd94ee94, type: 3}
-    volume: 0.9
+    clip: {fileID: 8300000, guid: 201705fa47530c44ea32edc1fffd4d85, type: 3}
+    volume: 0.83
     minimumInterval: 0.15
   - cue: 20
-    clip: {fileID: 8300000, guid: 68b63c0d9a847944f85d0c1e7359b3da, type: 3}
-    volume: 0.95
+    clip: {fileID: 8300000, guid: 41614c197bef4ff4fb1dbc84149f15c3, type: 3}
+    volume: 0.61
+    minimumInterval: 0.15
+  - cue: 26
+    clip: {fileID: 8300000, guid: ee548d568052d254081824547859a7d0, type: 3}
+    volume: 0.74
     minimumInterval: 0.15
   - cue: 16
     clip: {fileID: 8300000, guid: 928331464dab1694cb953d685d65551e, type: 3}
-    volume: 0.7
+    volume: 0.46
     minimumInterval: 0.12
   - cue: 17
     clip: {fileID: 8300000, guid: a24b6809b379b5444bb9363feb71009e, type: 3}
-    volume: 0.7
+    volume: 0.59
     minimumInterval: 0.15
   - cue: 18
     clip: {fileID: 8300000, guid: f077896f422c69842b20fb272258aee0, type: 3}
     volume: 0.7
     minimumInterval: 0.15
   - cue: 19
-    clip: {fileID: 8300000, guid: ad5803b43890f724b807d93009d641ac, type: 3}
+    clip: {fileID: 8300000, guid: 6626c83d361d8aa4fbf0392bb1522d16, type: 3}
     volume: 0.75
     minimumInterval: 0.06
+  - cue: 21
+    clip: {fileID: 8300000, guid: 7cddffb7ebe593341abb41a7c799d3db, type: 3}
+    volume: 0.47
+    minimumInterval: 0.08
+  - cue: 22
+    clip: {fileID: 8300000, guid: 0e924c42338bb594d95af31a43c694c4, type: 3}
+    volume: 0.8
+    minimumInterval: 0.1
+  - cue: 53
+    clip: {fileID: 8300000, guid: fbf753477e883c64cbf3f2b652f251ec, type: 3}
+    volume: 0.6
+    minimumInterval: 0.1
+  - cue: 54
+    clip: {fileID: 8300000, guid: 6693a000f53966f49bace30167880a18, type: 3}
+    volume: 0.6
+    minimumInterval: 0.1
+  - cue: 52
+    clip: {fileID: 8300000, guid: 3663138bd8f85554d824862cdd7b2f5b, type: 3}
+    volume: 0.6
+    minimumInterval: 0.1
+  - cue: 55
+    clip: {fileID: 8300000, guid: 1a021d5d1f6736f4dba8e3569f775113, type: 3}
+    volume: 0.6
+    minimumInterval: 0.15
+  - cue: 51
+    clip: {fileID: 8300000, guid: 0b8654cc1a56ee44682d4ddf6db017b4, type: 3}
+    volume: 0.7
+    minimumInterval: 0.15
+  - cue: 23
+    clip: {fileID: 8300000, guid: 818e50abf28c86941bc2ddf0736309d9, type: 3}
+    volume: 1
+    minimumInterval: 0.05
+  - cue: 24
+    clip: {fileID: 8300000, guid: edf4a5ffd68b6d446bcec6f208346da7, type: 3}
+    volume: 0.59
+    minimumInterval: 0.08
+  - cue: 25
+    clip: {fileID: 8300000, guid: f23974f7ae503f842bc749e1e2048446, type: 3}
+    volume: 0.75
+    minimumInterval: 0.05
+  - cue: 27
+    clip: {fileID: 8300000, guid: fa17c9a0ade027a448dc37a7689778af, type: 3}
+    volume: 0.69
+    minimumInterval: 0.15
+  - cue: 28
+    clip: {fileID: 8300000, guid: d921b09d64d88e5479ec2a609d3a9b0b, type: 3}
+    volume: 0.77
+    minimumInterval: 0.05
+  - cue: 29
+    clip: {fileID: 8300000, guid: c06ae5da6e8d5d24f9d26bcb40b0eef4, type: 3}
+    volume: 0.5
+    minimumInterval: 0.1
+  - cue: 30
+    clip: {fileID: 8300000, guid: df29c0012b59c204ebcd0a0ecfe0bd8f, type: 3}
+    volume: 0.9
+    minimumInterval: 0.1
+  - cue: 31
+    clip: {fileID: 8300000, guid: d7cab3263ba9e88458e95700fa45693f, type: 3}
+    volume: 0.45
+    minimumInterval: 0.1
+  - cue: 32
+    clip: {fileID: 8300000, guid: 6a44b511fcad5e446b8ec2911de87d78, type: 3}
+    volume: 0.6
+    minimumInterval: 0.1
+  - cue: 33
+    clip: {fileID: 8300000, guid: 7daffcc2d998c484ca35b11814a93f6b, type: 3}
+    volume: 0.85
+    minimumInterval: 0.1
+  - cue: 34
+    clip: {fileID: 8300000, guid: 4c4d7c43bad4d4341b48271f935f299a, type: 3}
+    volume: 0.9
+    minimumInterval: 0.15
+  - cue: 35
+    clip: {fileID: 8300000, guid: 31f2014c3d545e34685026f1abcec864, type: 3}
+    volume: 0.57
+    minimumInterval: 0.15
+  - cue: 36
+    clip: {fileID: 8300000, guid: d3a7dc044759fff4f8ff8be4ffc1065b, type: 3}
+    volume: 0.56
+    minimumInterval: 0.15
+  - cue: 37
+    clip: {fileID: 8300000, guid: d729ab61bf7f12a47904ffbd0493013a, type: 3}
+    volume: 1
+    minimumInterval: 0.05
+  - cue: 38
+    clip: {fileID: 8300000, guid: 4f4f828e6e4cf7a4da0b532cd1e26edb, type: 3}
+    volume: 0.6
+    minimumInterval: 0.1
+  - cue: 39
+    clip: {fileID: 8300000, guid: 52716e0c856726244999add331fe9f20, type: 3}
+    volume: 0.6
+    minimumInterval: 0.03
+  - cue: 40
+    clip: {fileID: 8300000, guid: 854a4db893fd5df43a0d45707e77bbdb, type: 3}
+    volume: 0.7
+    minimumInterval: 0.05
+  - cue: 41
+    clip: {fileID: 8300000, guid: deb870fe624555c4ca56de8483443797, type: 3}
+    volume: 0.7
+    minimumInterval: 0.08
+  - cue: 42
+    clip: {fileID: 8300000, guid: 2c5e02101068a554b9d92d606c613ec8, type: 3}
+    volume: 0.7
+    minimumInterval: 0.15
+  - cue: 43
+    clip: {fileID: 8300000, guid: 04db967cc68e3d145a9315856485c7e6, type: 3}
+    volume: 1
+    minimumInterval: 0.1
+  - cue: 44
+    clip: {fileID: 8300000, guid: ddae035624e8af540aadca3dd0b99bbe, type: 3}
+    volume: 0.07
+    minimumInterval: 0.1
+  - cue: 50
+    clip: {fileID: 8300000, guid: f0a3be7c35eaddb48883b30d9544e603, type: 3}
+    volume: 0.57
+    minimumInterval: 0.1
+  - cue: 49
+    clip: {fileID: 8300000, guid: 4dead4f73bef2e446bc18ada553d7257, type: 3}
+    volume: 0.57
+    minimumInterval: 0.1
+  - cue: 45
+    clip: {fileID: 8300000, guid: bbc361fd80a017f4a916bc7bbd99fcad, type: 3}
+    volume: 0.75
+    minimumInterval: 0.15
+  - cue: 46
+    clip: {fileID: 8300000, guid: b219b97ab0b250e4680b575f66e7b880, type: 3}
+    volume: 0.8
+    minimumInterval: 0.03
+  - cue: 47
+    clip: {fileID: 8300000, guid: 04de50d6a5e726646bd6d9533aee12cd, type: 3}
+    volume: 0.73
+    minimumInterval: 0.15
 --- !u!4 &1711810918
 Transform:
   m_ObjectHideFlags: 0

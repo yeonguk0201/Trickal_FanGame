@@ -1349,22 +1349,24 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   Scene의 설정 패널을 그대로 복사해 일시정지 오버레이 위 `In-Game Settings` 층에 둔다(같은 `FrontendSettingsView`·같은
   `LocalSettings`). 다시 실행하면 복사본을 지우고 새로 복사하므로 Frontend 설정 패널을 바꾼 뒤에도 재실행으로 맞출 수 있다.
   같은 Setup이 `Game Over Canvas`(정렬 60, HUD 위)와 `GameOverSequence`를 만들고 `RunSession`에 연결한다. 사망하면
-  쓰러짐(임시: 캐릭터가 옆으로 넘어짐, `fallDuration` 0.6초) → 5초 대기(`holdAfterFall`) → 플레이어 중심 원형 페이드
-  아웃(`irisDuration` 1.2초) → `GAME OVER` → `결과 보기` 입력 → 결과 화면 순서로 진행하며, 시간만으로는 결과 화면으로
+  쓰러짐(0.6초) → 3.6초 대기(`holdAfterFall`) → 플레이어 중심 원형 페이드
+  아웃(`irisDuration` 1.2초) → 검은 화면 0.6초 → `GAME OVER` → `결과 보기` 입력 → 결과 화면 순서로 진행하며, 시간만으로는 결과 화면으로
   넘어가지 않는다. 사망 순간 결과 요청을 로컬 대기열에 넣어 연출 중 종료해도 같은 `clientRunId`로 한 번만 저장된다. 연출 중
-  보스는 멈추고 일시정지는 열리지 않는다. 쓰러짐 원화가 생기면 `GameOverSequence.ApplyFall`의 임시 회전을 그 연출로 바꾸고
-  `fallDuration`을 원화 길이에 맞춘다.
+  보스는 멈추고 일시정지는 열리지 않는다. 쓰러짐에는 에르핀 사망 원화를 사용한다.
   자동 검증 메뉴는 `Trickal Fan Game > Week 25 > Verify UX-0 In-game Settings and Game Over`, 배치는 Unity `-batchmode -quit
   -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week25Ux0Verification.SetupAndVerifyBatch -logFile <로그 경로>`다.
   Setup 2회 중복 없음·Scene GUID 보존, Frontend와 같은 설정 컨트롤 목록·글꼴, 버튼 순서·겹침·내비게이션, 설정을 연 동안
-  일시정지 유지와 Run 행동 차단, 닫기·재개 복귀, GAME OVER 캔버스 순서·전체 화면·숨김 시작, 쓰러짐→5초 대기→원형 페이드가
-  줄어들기만 하며 완전히 닫힘→확인 입력 표시, 600초가 지나도 자동 전환 없음, 확인 1회만 결과 전환을 검사한다. 회귀는
+  일시정지 유지와 Run 행동 차단, 닫기·재개 복귀, GAME OVER 캔버스 순서·전체 화면·숨김 시작, 쓰러짐 뒤 3.6초 대기와
+  원형 페이드가 완전히 닫힌 뒤 0.6초 대기, 확인 입력 표시, 600초가 지나도 자동 전환 없음, 확인 1회만 결과 전환을 검사한다. 회귀는
   `VerifyWithRegressionsBatch`(HUD-7C·7D, Flow-5의 `Verify`)이고, 실제 사망→GAME OVER 확인→결과 화면 저장 1회는
   `Week13Flow5PlayVerification.RunBatch`가 확인한다. 2026-10-21 `SetupAndVerifyBatch`·`VerifyWithRegressionsBatch`와 Flow-5
   Play 배치가 종료 코드 0으로 통과했다.
   수동 확인: Game Scene Play → `Esc` → `설정`에서 음량·해상도·전체 화면·상세 스탯을 바꾸고 `뒤로`·`Esc`로 일시정지 메뉴에
   돌아오는지, 해상도를 바꾼 뒤에도 키보드 포커스가 설정 패널 안에 남는지, 개발 패널(`F1`) `— Room —`의 `Die (GAME OVER sequence)`나 적에게 사망한 뒤 쓰러짐→
-  약 5초→원형 페이드→`GAME OVER`→`결과 보기`(Enter·클릭)→결과 화면이 이어지는지 1920×1080·1280×720에서 본다. 사용자 Play 확인 완료(2026-10-21).
+  3.6초 대기→원형 페이드→0.6초 암전→`GAME OVER`→`결과 보기`(Enter·클릭)→결과 화면이 이어지는지 1920×1080·1280×720에서 본다.
+  게임오버 화면에는 에르핀 사망 원화와 보라빛 배경이 나타난다. 타이틀의 각 글자가 왼쪽부터
+  차례로 올라갔다 내려오고, 확인 입력을 기다리는 동안 2.2초 주기로 반복한다. 기존 Game Scene을 바로 Play해 확인할 수 있다.
+  단독 `Week25Ux0Verification.Verify`는 원화 연결, 타이틀과 배경의 동시 페이드, 글자별 시차와 TMP 메시 재생성 후 위치를 검사한다.
 
 - UX-1 HUD 재배치·미니맵·획득 전 설명: 메뉴 `Trickal Fan Game > Week 27 > Setup UX-1 Right HUD, Minimap and Pickup
   Description`이 HUD-1·HUD-2 Setup을 먼저 다시 돌린 뒤 좌상단(교주의 권능 → 체력·SP → 그 아래 골드·열쇠·폭탄), 상세 스탯
@@ -2563,4 +2565,82 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 정적 화면 캡처: `Trickal Fan Game > UI > Capture Clover Shop UI`. `output/menu-review/shop-clover-*.png`(상점), `shop-clover-popup-*.png`(구매 팝업)를 1920×1080·1280×720으로 저장한다. 예시 상품은 저장하지 않는다.
 - 배치: `TrickalFanGame.Editor.ShopUiArtworkSetup.SetupVerifyAndCaptureBatch`(그래픽 필요, `-nographics` 제외). 적용 후 `Week22Shop0Verification`·`Week23Shop1Verification`·`Week27Elif3Verification`의 `Verify`를 실행하고 렌더한다. 검증만은 `ShopUiArtworkSetup.Verify`.
 - 동작: 마우스 호버나 방향키가 칸을 고른다. 방향키를 누르고 있으면 0.35초 뒤부터 0.09초마다 반복 이동한다. 좌우는 같은 줄, 위아래는 같은 열 안에서 순환하고, 2열 아래에는 투자, 3열 아래에는 닫기 버튼이 있어 위아래 순환에 포함된다(버튼 줄에서 좌우로 투자↔닫기, Enter로 누름). 투자 목록도 위아래로 순환한다. 클릭이나 Enter로 살 수 있는 상품이면 구매 팝업을 열고, 팝업은 구매가 선택된 채 열리고, 좌우 방향키(A/D)나 마우스 호버로 취소·구매를 고른다(보라 테두리). Enter는 고른 버튼을 누른다. Esc·취소·X는 팝업만 닫는다. 살 수 없는 상품(골드 부족 등)은 가격이 빨간색이고 팝업을 열지 않는다. 설명 말풍선은 팝업의 아이템 그림에 마우스를 올리면 보인다. Enter로 연 팝업은 바로 보이고, 마우스를 움직이면 그때부터 호버를 따른다. 말풍선은 설명 길이에 맞춰 아래 여백(`ShopView.TooltipBottomPadding`)을 남기고 아래로 늘어난다. 소모품 설명은 `ShopView.DescribeConsumable`의 효과 문구다. 투자 줄도 같은 팝업으로 확인한 뒤 투자한다.
-- Play 수동 확인(미실시): `SampleScene`에서 상점에 들어가 E로 연다. 호버·방향키 선택, 골드 부족 칸의 빨간 가격과 클릭 무반응, 구매 팝업 열기·구매·취소, 설명이 긴 아이템에서 말풍선이 아래로 늘어나는지, 투자 화면, 골디 상점(그림·제목·대사)을 확인한다.
+- Play 수동 확인(2026-11-18 사용자 확인 완료. 버튼 선택 테두리의 마지막 모양·색 수정은 정적 렌더로만 확인): `SampleScene`에서 상점에 들어가 E로 연다. 호버·방향키 선택, 골드 부족 칸의 빨간 가격과 클릭 무반응, 구매 팝업 열기·구매·취소, 설명이 긴 아이템에서 말풍선이 아래로 늘어나는지, 투자 화면, 골디 상점(그림·제목·대사)을 확인한다.
+
+### 보스룸 포탈 v2 미리보기 (2026-11-19)
+- 메뉴: `Trickal Fan Game/Effects/Preview Boss Room Portal`.
+- 별도 Preview Scene에서 실제 런타임 스프라이트·재질을 사용한다. 재생/정지, 시간 슬라이더, 속도, 카메라 크기, Restart 제공.
+- 검사: `Trickal Fan Game/Effects/Verify Boss Room Portal` (`FloorPortalArtworkVerification.Verify`).
+- 실제 배경과 캐릭터 가림은 Game Scene → F1 → Boss F1/F2에서 별도 Play 확인.
+
+### 보스 발 판정 조정 도구 (2026-11-19, Boss-Pattern-0)
+
+- 렌더: Unity 배치 `TrickalFanGame.Editor.BossFeetLayoutExporter.ExportBatch` (`-batchmode -quit`, 그래픽 렌더가 필요하므로
+  `-nographics` 제외). 층별 보스방(`room-boss-floor-1/2/3`)의 바닥과 앞쪽 생울타리, 보스의 서 있기·걷기·바닥에 붙은 뛰기 프레임,
+  `GroundShadow`, 플레이어를 `output/boss-feet-review/`에 PNG로 내보내고 몸 원·발 원·설 수 있는 영역 수치를 `manifest.json`에
+  담는다. 씬·Prefab은 저장하지 않는다. 같은 프로젝트를 연 Unity 에디터가 있으면 실행되지 않는다.
+- HTML: `python scripts/boss-feet-tuner/build.py` → `output/boss-feet-review/boss-feet-tuner.html`(이미지 내장, 오프라인).
+  보스·벽 위치·자세를 고르고 발 폭·발 높이·발 내림을 슬라이더나 키(←→ 폭, ↑↓ 높이, PageUp/PageDown 내림,
+  Shift 0.05)로 바꾸면 멈추는 자리가 바로 바뀐다. 폭과 높이가 같으면 원, 다르면 캡슐이다. 발 좌우 위치(그림을
+  뒤집지 않았을 때 기준, 뒤집으면 함께 뒤집힘)와 발 내림(음수는 위로)은 슬라이더나 캔버스의 초록 발 끌기로 바꾼다. 값은 브라우저에 자동 저장되고 "공유할 값"을 복사해 전달한다.
+- 확인 근거: 2026-11-19 Unity 6000.3.22f1 배치 종료 코드 0, 3개 보스 렌더, 헤드리스 Edge로 첫 화면 렌더 확인.
+- 후면 오로라 추가: 미리보기의 `Portal layer` / `Aurora layer`로 개별 표시, 12초 시간 슬라이더로 반복·정지 확인. 실제 Game Scene에서 `PortalAurora`의 크기·밝기·속도를 조절할 수 있다. 후광 색은 포탈 원화 고리에서 자동으로 가져온다.
+- 렌더 포함 단독 배치: `TrickalFanGame.Editor.FloorPortalArtworkVerification.VerifyAndCaptureBatch`. 이미지 출력 `game/Logs/portal-aurora-preview.png`.
+
+### 새마음금고 황금 기둥 원화 검증 (2026-11-20)
+
+- Edit Mode 메뉴: `Trickal Fan Game/Effects/Verify Saemaeum Gold Pillar Artwork`.
+- 배치: `TrickalFanGame.Editor.SaemaeumGoldPillarArtworkVerification.Verify`. 별도 Setup이나 Scene 저장 없이 전용 원화·경미한 파손·큰 균열·파괴 셀·3타 제거를 검사한다.
+- 성공 로그: `Saemaeum gold pillar artwork verification passed: six cells, two damage states, four breakup cells, hold and fade, three-hit removal.`
+- Play 수동 확인: Game Scene에서 `F1 → — Boss room — → Boss F2`로 이동해 새마음금고 기둥 소환을 기다린다. 사각 금 기둥과 뾰족한 흙이 표시되고 첫 타격 후 경미한 파손, 두 번째 타격 후 큰 균열 유지, 세 번째 타격 후 충돌 즉시 제거, 파괴 4셀(0.48초) 뒤 마지막 셀 0.35초 유지와 0.45초 페이드 아웃(그림자도 함께)을 확인한다. 보스가 밟거나 착지해 부술 때도 같은 연출이 나오는지, 방 이동 뒤 파편이 남지 않는지 확인한다.
+- 규격·실행 결과: `docs/art-prompts/saemaeum-gold-pillar-v1/runtime-integration.md`.
+
+### 새마음금고 메테오 원화 연결 검증 (2026-11-20)
+
+- 메뉴: Trickal Fan Game/Effects/Verify Saemaeum Gold Meteor Artwork
+- 배치 메서드: TrickalFanGame.Editor.SaemaeumGoldMeteorArtworkVerification.Verify
+- 일체형 낙하 4프레임, 35° 대각 낙하(왼쪽 위 → 오른쪽 아래)·0.6초 낙하, 착지 4프레임·마지막 셀 0.1초 유지 후 0.25초 페이드(기둥 잔해보다 빨리 사라짐)를 검사한다.
+- 실제 Play 검수: docs/art-prompts/saemaeum-gold-meteor-v1/unity-integration.md 참고. 미술 수용 대기.
+
+### 보스 연출 조정 (2026-11-20, 베타 5번)
+
+- 새마음금고 2페이즈 예고: 사용자 원화 4프레임(놀람·짜증·포효·씩씩댐)을 `Assets/Resources/CombatEffects/saemaeum-vault-phase-two.png`(2×2, 셀 1024, PPU 400, 중앙 피벗, `Vault_Hop_0`의 상자 위치·크기에 맞춤)로 넣었다. 페이즈 전환 1.6초 동안 재생하고(포효 프레임에 떨림), 이 동안 무적이며 맞으면 "0"이 뜬다(`Health.AnyDamageBlocked`).
+- 새마음금고 착지 충격파: `SaemaeumLandingShockwave`. 착지할 때 보스 그림자 위치에서 얇은 밝은 고리와 넓은 금빛 고리가 바닥 타원으로 퍼져 착지 반경의 1.1배에서 사라진다(0.5초, 피해 없음, 보스 소유로 방 이동 시 정리).
+- 황금 기둥 그림자: 방 금바위(`obstacle-gold-rock`) 프로필을 쓰던 것을 전용 `saemaeum-gold-pillar` 프로필로 분리했다. 그림자 검수 페이지 144번 "새마음금고 황금 기둥"(143번은 함께 빠져 있던 머드케이크 함정)에서 사용자가 정한 값(너비 1.97, 두께 0.36, 위치 (0, 0.21), 진하기 0.67, 2026-11-20)을 `GroundShadowProfiles.json`에 반영했다. 페이지 재생성: `GroundShadowPreviewExporter.ExportBatch` → `python scripts/build-ground-shadow-review.py`.
+- 크레용사용 검 공격 중 이동(2026-11-20): 검을 들어 올림·내려침·마무리(0.2초) 동안 이동 속도 0.6배(`swingMoveSpeedMultiplier`). 휘두르기 전 다가가는 동안은 원래 속도.
+- 크레용사용: 걷기 보폭 1.6 → 2.6(같은 이동 속도에서 다리 움직임 약 60%), 변신 전환 1.25초 → 2.9초(크레용사용 동작 조정 도구 사용자 값: 프레임 0.30/0.70/1.00/0.25초 + 각성 모습 경직 0.65초·떨림 0.02, 전체 무적, 맞으면 "0").
+- 보스 걷기 프레임 깜빡임(2026-11-20): 물리는 50Hz인데 보스 이동은 화면 프레임마다 한 번 예약되므로, 50fps 아래(에디터 큰 방 등)에서는 물리 틱 일부가 "이동 없음"으로 보여 걷기 주기가 매번 0번 프레임으로 돌아갔다. `BossMovementAnimator`는 이제 이동 없는 물리 틱이 5번(0.1초) 이어져야 멈춤으로 보고, 빈 틱에는 현재 자세를 유지한다(크레용사용·새마음금고·부스러기 공통). 빌드(60fps 이상)에서는 원래 정상.
+- 검증: `SaemaeumGoldPillarArtworkVerification.Verify`, `SaemaeumGoldMeteorArtworkVerification.Verify`, `CrayonHeroAttackAnimationVerification.Verify`, `Week15Boss2Verification.Verify`.
+- Play 수동 확인: Game Scene → `F1` → `— Boss room —` → `Boss F2`(새마음금고: 체력 절반에서 분노 4프레임·무적 0 표시, 착지 고리, 메테오 대각 낙하·속도·잔해 페이드, 기둥 파괴 후 유지·페이드) / `Boss F3`(크레용사용: 넓은 방 걷기 다리 속도, 변신 길이·경직, 변신 중 0 표시).
+
+### 크레용사용 동작 조정 도구 (2026-11-20)
+
+- 생성: `python -I scripts/crayon-motion-tuner/build.py` → `output/crayon-motion-tuner/crayon-motion-tuner.html`(프레임 내장, 파일로 바로 열림). Pillow 필요.
+- 걷기: `CrayonHero_Walk_*`·`CrayonHero_Golden_Walk_*`를 PPU 400 × 보스 배율 3.6 크기로 1단위 눈금 바닥 위에서 실제 이동 속도로 걷게 한다. 보폭(8프레임 한 주기 이동 거리)·이동 속도·1/2페이즈를 바꾸고 초당 프레임을 표시한다. 게임 규칙은 `BossMovementAnimator`의 `cycle += 이동거리 / strideLength`.
+- 변신: `CrayonHero_Awaken_0~3` 각 프레임 길이, 경직 길이, 3번 프레임 번쩍임, 경직 떨림 세기를 조절하고 타임라인·재생 위치로 확인한다.
+- 값은 브라우저에 자동 저장되며 "공유할 값"을 복사해 전달한다. 게임에는 자동 반영되지 않는다.
+
+## 사운드 믹서
+
+효과음이 BGM에 묻히는지 게임 기본 볼륨에서 듣고 조절하는 오프라인 페이지다.
+
+1. 저장소 루트에서 `python tools/sound-mixer/build.py`를 실행한다. 큐를 추가·변경한 뒤에도 다시 실행한다.
+2. 생성된 `tmp/sound-mixer.html`을 Edge 또는 Chrome으로 연다. 파일을 다른 폴더로 옮기면 음원 상대 경로가 깨진다.
+3. 전투 BGM을 재생한 상태에서 효과음의 `재생`(겹쳐 재생 가능)과 `반복`(게임 주기 간격)을 눌러 듣고 슬라이더로 조절한다.
+4. `변경값 복사`로 나온 `CombatSfxSetup.Cues` 줄을 반영하고 `TrickalFanGame.Editor.CombatSfxVerification.SetupAndVerifyBatch`를
+   실행한다. BGM 믹스 게인은 현재 게임에 대응 값이 없어 주석으로만 나오며, 반영하려면 코드 변경이 필요하다.
+5. 새 음원을 들어 볼 때는 파일을 `tmp/sound-candidates/`에 넣고 `tools/sound-mixer/build.py`의 `CANDIDATES`에 한 줄을
+   추가한 뒤 다시 빌드한다. "새 후보 비교"에서 `후보`·`현재`를 번갈아 듣고, 고른 값은 `// 후보 …` 줄로 내보내진다.
+   겹쳐 울리는 소리는 `CANDIDATE_SCENES`에 장면으로 적고 `editable=True`면 겹마다 시작 시점을 조절할 수 있다.
+
+
+### NPC·아이템 UI 외형 보정
+
+- Edit Mode에서 `Trickal Fan Game > Menu > Setup NPC and Item UI Polish`: 기존 Game Scene과 상점 Prefab에 NPC 이름 숨김, 폭을 제한하고 대사 줄 수에 따라 세로로 늘어나는 기본 말풍선, 메뉴 원화 기반 재시작·나가기 확인창, 아이템 설명·획득 알림의 둥근 모서리를 적용한다. 기존 HUD를 재생성하지 않는다.
+- 단독 검사: `Trickal Fan Game > Menu > Verify NPC and Item UI Polish` (`TrickalFanGame.Editor.InGameUiPolishVerification.Verify`).
+- 배치 구성·검사: `TrickalFanGame.Editor.InGameUiPolishVerification.SetupAndVerifyBatch`. 렌더 참고 이미지: `CaptureBatch` (그래픽 필요), `output/menu-review/ingame-restart-confirmation-*.png`, `ingame-rounded-item-description-*.png`.
+- Play 수동 확인: Game Scene에서 상점 NPC에 접근해 이름 없이 말풍선과 `[E]상점열기`가 보이는지 확인한다. `ESC > 처음부터 다시하기`에서 게임 가장자리까지 어두워지고 `계속 플레이`·`ESC`로 확인창만 닫히는지 확인한다. 창 비율을 가로·세로로 바꿔도 전체 화면 암전이 유지되어야 한다. `F1 > — Artifact — > Drop`으로 고급 아티팩트를 생성해 접근하면 `고급`만 표시되고, 획득 알림과 접근 설명창의 모서리가 둥글어야 한다. 실제 Play 미술·입력 확인은 자동 검사와 별도로 기록한다.
+
+- 기본 말풍선 후속 확인: 위 Setup을 실행한 다음 Verify를 실행한다. 짧은 대사·긴 대사·여러 줄 대사에서 최대 폭 유지, 내용에 따른 높이 확장과 텍스트 잘림 여부를 검사한다. NPC 접근 시 작은 기본 말풍선과 `[E]상점열기`가 보이고 `E` 입력으로 상점이 열리는지 Play에서 확인한다. 배치 참고 렌더는 그래픽을 켠 `InGameUiPolishVerification.CaptureNpcBatch`로 `output/menu-review/npc-simple-bubble-{short,long}.png`에 저장한다. 이번 후속 수정은 열린 Editor의 프로젝트 잠금으로 자동 검증·렌더 미실행이다.
+
+- 기본 인사 `뭐 하나 사시려구요?`는 한 줄에 들어가도록 최대 텍스트 폭을 2.0 월드 단위로 조정했다. 더 긴 대사는 계속 줄바꿈과 높이 확장을 사용한다.

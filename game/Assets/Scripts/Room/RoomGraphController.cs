@@ -78,6 +78,8 @@ namespace TrickalFanGame.Room
             }
 
             if (!TryMoveBetweenRooms(source, destination, entryPoint.position, transitioningPlayer)) return false;
+            // Sound-3: walking through a doorway. Pits and teleport spells keep their own sounds.
+            TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.RoomTransition);
             returnBlockedDestination = source;
             returnBlockedUntil = Time.unscaledTime + returnDoorwayBlockDuration;
             return true;

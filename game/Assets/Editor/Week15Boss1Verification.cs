@@ -101,18 +101,23 @@ namespace TrickalFanGame.Editor
             GameObject prefab = Load<GameObject>(prefabPath);
             Rigidbody2D body = prefab != null ? prefab.GetComponent<Rigidbody2D>() : null;
             CircleCollider2D collider = prefab != null ? prefab.GetComponent<CircleCollider2D>() : null;
-            TestEnemy obstacle = prefab != null ? prefab.GetComponent<TestEnemy>() : null;
-            int enemyLayer = LayerMask.NameToLayer("Enemy");
-            Assert(prefab != null && prefab.layer == LayerMask.NameToLayer("Enemy") &&
+            DestructibleObstacle obstacle = prefab != null ? prefab.GetComponent<DestructibleObstacle>() : null;
+            BossSummonedObstacle summoned = prefab != null ? prefab.GetComponent<BossSummonedObstacle>() : null;
+            int environmentLayer = LayerMask.NameToLayer("Environment");
+            Assert(prefab != null && prefab.layer == environmentLayer &&
                    prefab.GetComponent<SpriteRenderer>()?.sprite == Load<Sprite>(spritePath) &&
-                   prefab.GetComponent<Health>() != null && obstacle != null &&
-                   !obstacle.AllowsSPDrop && obstacle.DestroyOnBossCollision &&
+                   obstacle != null && obstacle.RequiredHits == BossPattern0Setup.BuseureogiObstacleRequiredHits &&
+                   obstacle.DropTable == null && summoned != null && !summoned.BlocksBossProjectiles &&
                    body != null && body.bodyType == RigidbodyType2D.Static &&
-                   collider != null && !collider.isTrigger && collider.layerOverridePriority > 0 &&
-                   (collider.includeLayers.value & 1 << enemyLayer) != 0 &&
-                   Physics2D.GetIgnoreLayerCollision(enemyLayer, enemyLayer) &&
-                   !Physics2D.GetIgnoreLayerCollision(LayerMask.NameToLayer("Player"), enemyLayer),
-                $"Obstacle prefab is not visible, solid, destructible, and player-attackable: {prefabPath}.");
+                   collider != null && !collider.isTrigger &&
+                   // The player meets obstacles with its feet collider, like room rocks.
+                   !Physics2D.GetIgnoreLayerCollision(LayerMask.NameToLayer("PlayerFeet"), environmentLayer) &&
+                   !Physics2D.GetIgnoreLayerCollision(LayerMask.NameToLayer("Enemy"), environmentLayer),
+                $"Obstacle prefab is not visible, solid, hit-counted, and player-attackable: {prefabPath}.");
+            // An obstacle, not an enemy: without Health, kills, on-hit items, status effects and homing skip it.
+            Assert(prefab.GetComponent<Health>() == null && prefab.GetComponent<TestEnemy>() == null,
+                $"Buseureogi obstacles must not be enemies (no Health or TestEnemy): {prefabPath}.");
+            Assert(obstacle.TryValidate(out string error), error);
         }
 
         private static void ValidateBossBreaksObstacle()
@@ -121,20 +126,27 @@ namespace TrickalFanGame.Editor
                 Load<GameObject>(Week15Boss0Setup.BossPrefabPath)) as GameObject;
             GameObject obstacleObject = PrefabUtility.InstantiatePrefab(
                 Load<GameObject>(Week15Boss1Setup.CreamPrefabPath)) as GameObject;
+            GameObject hitObject = PrefabUtility.InstantiatePrefab(
+                Load<GameObject>(Week15Boss1Setup.DoughPrefabPath)) as GameObject;
             try
             {
-                Health obstacleHealth = obstacleObject.GetComponent<Health>();
-                TestEnemy obstacle = obstacleObject.GetComponent<TestEnemy>();
-                Invoke(obstacleHealth, "Awake");
-                Invoke(obstacle, "Awake");
+                BossSummonedObstacle obstacle = obstacleObject.GetComponent<BossSummonedObstacle>();
                 Assert(!obstacle.TryBreakForBoss(null),
                     "Only a BossController may break a Buseureogi obstacle on contact.");
                 Assert(obstacle.TryBreakForBoss(bossObject.GetComponent<BossController>()) && obstacleObject == null,
                     "Buseureogi must destroy its own solid obstacle instead of being blocked by it.");
+
+                // Hits are counted, not damage: the first hit leaves it standing, the second breaks it.
+                DestructibleObstacle counted = hitObject.GetComponent<DestructibleObstacle>();
+                Assert(counted.RegisterPlayerHit() && !counted.IsBroken && counted.HitsTaken == 1,
+                    "A Buseureogi obstacle must survive its first player hit.");
+                Assert(counted.RegisterPlayerHit() && counted.IsBroken,
+                    "A Buseureogi obstacle must break on its second player hit, whatever the damage.");
             }
             finally
             {
                 if (obstacleObject != null) UnityEngine.Object.DestroyImmediate(obstacleObject);
+                if (hitObject != null) UnityEngine.Object.DestroyImmediate(hitObject);
                 if (bossObject != null) UnityEngine.Object.DestroyImmediate(bossObject);
             }
         }

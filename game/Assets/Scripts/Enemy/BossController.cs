@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TrickalFanGame.Enemy
 {
@@ -37,6 +38,16 @@ namespace TrickalFanGame.Enemy
 
         [Header("Defeat")]
         [SerializeField] private bool keepsOwnedObjectsOnDefeat;
+        // The feet that meet walls, obstacles and pits (EnemyFeet), in world units, set per boss from its drawing
+        // (Boss-Pattern-0, 2026-11-19). Equal half width and height make a circle, different ones a capsule.
+        [FormerlySerializedAs("feetRadius")]
+        [SerializeField, Min(0.05f)] private float feetHalfHeight = 0.5f;
+        // 0 keeps the feet round: the half width follows the half height.
+        [SerializeField, Min(0f)] private float feetHalfWidth;
+        // Sideways offset for the drawing as authored (unflipped); it mirrors when the drawing flips.
+        [SerializeField] private float feetOffsetX;
+        // How far the feet sit below the bottom of the body circle, toward the drawn soles (negative raises them).
+        [SerializeField] private float feetDrop;
 
         private readonly List<GameObject> ownedObjects = new();
         private Health health;
@@ -207,6 +218,19 @@ namespace TrickalFanGame.Enemy
 
         // Enemy-7: a defeated boss can leave what it made (부스러기's 쫄따구, obstacles and projectiles). They stop
         // being the boss's and move under its parent, so they still go away with the room.
+        public float FeetHalfHeight => Mathf.Max(0.05f, feetHalfHeight);
+        public float FeetHalfWidth => feetHalfWidth > 0f ? Mathf.Max(0.05f, feetHalfWidth) : FeetHalfHeight;
+        public float FeetOffsetX => feetOffsetX;
+        public float FeetDrop => feetDrop;
+
+        public void ConfigureFeet(float halfWidth, float halfHeight, float offsetX = 0f, float drop = 0f)
+        {
+            feetHalfHeight = Mathf.Max(0.05f, halfHeight);
+            feetHalfWidth = Mathf.Max(0.05f, halfWidth);
+            feetOffsetX = offsetX;
+            feetDrop = drop;
+        }
+
         public void ConfigureDefeat(bool configuredKeepsOwnedObjects)
         {
             keepsOwnedObjectsOnDefeat = configuredKeepsOwnedObjects;
@@ -456,7 +480,24 @@ namespace TrickalFanGame.Enemy
             SetState(BossActionState.Defeated, 0f);
             if (keepsOwnedObjectsOnDefeat) ReleaseOwnedObjects();
             else CleanupOwnedObjects();
+            PlayDefeatPresentation();
             Died?.Invoke();
+        }
+
+        // When 에르핀 may jump for joy (after 황금 용사's truck has hit, when this boss has one). Set before Died so the
+        // run's VICTORY sequence, which only the last boss's clear starts, finds it. Other bosses play no victory.
+        public const float VictoryDelay = 0.5f;
+
+        private void PlayDefeatPresentation()
+        {
+            if (!Application.isPlaying) return;
+            float victoryDelay = VictoryDelay;
+            if (TryGetComponent(out CrayonHeroTruckDefeat truck) && truck.HasFrames)
+            {
+                victoryDelay = truck.VictoryDelay;
+                BossDefeatPresentation.Hold(truck.Duration);
+            }
+            BossDefeatPresentation.CueVictory(victoryDelay);
         }
 
         private int NextRandom(int maximumExclusive)

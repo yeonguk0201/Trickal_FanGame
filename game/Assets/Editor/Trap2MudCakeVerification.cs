@@ -40,10 +40,12 @@ namespace TrickalFanGame.Editor
             ValidateBurstFrames();
             ValidateStepBurst();
             ValidateFlyingAndBomb();
+            ValidateAttackBurst();
             Debug.Log("Trap-2 verification passed: 진흙케이크 is a collider-free floor trap bound to its drawing; the " +
                       "first grounded step bursts it once for half a heart to what stands on it (enemies uncredited), " +
                       "flying bodies skip it, the burst plays four frames on the cake's ground line and holds a puddle " +
-                      "that slows grounded bodies by 30% for 4s while fading, a bomb bursts it without the hit and a " +
+                      "that slows grounded bodies by 30% for 4s while fading, a bomb or one player attack bursts it " +
+                      "without the hit and a " +
                       "burst cake stays gone on a rebuild. Play art review pending.");
         }
 
@@ -247,6 +249,57 @@ namespace TrickalFanGame.Editor
                     "A bomb must burst only the cakes it reaches, without the trap hit, and not count them as webs.");
             }
             finally { fixture.Dispose(); }
+        }
+
+        // Like an obstacle, one player attack bursts a cake, without the trap hit.
+        private static void ValidateAttackBurst()
+        {
+            Week25Trap0Verification.Fixture fixture = new("Trap-2 Mud Cake Attack");
+            try
+            {
+                float time = Time.time;
+                RoomRunState state = new("floor-01-room-11");
+                Vector2 cakePosition = Origin + Vector2.right * 20f;
+                RoomTrap hit = fixture.PlaceTrap(RoomTrapKind.MudCake, cakePosition, "mud-21", false, state);
+                RoomTrap missed = fixture.PlaceTrap(RoomTrapKind.MudCake, cakePosition + Vector2.right * 4f, "mud-22",
+                    false, state);
+                fixture.StandOn(Origin + Vector2.left * 20f);
+                Assert(RoomTrap.BurstMudCakesByAttackInCircle(cakePosition + Vector2.left * 1.2f, 0.5f, time) == 0 &&
+                       !hit.HasBurst,
+                    "An attack that does not reach the cake must leave it intact.");
+                Assert(RoomTrap.BurstMudCakesByAttackInCircle(cakePosition + Vector2.left * 0.9f, 0.5f, time) == 1 &&
+                       hit.HasBurst && hit.BurstTime == time && state.IsTrapRemoved("mud-21") &&
+                       !missed.HasBurst && !state.IsTrapRemoved("mud-22") && fixture.PlayerUnits == 10f,
+                    "One player attack reaching the cake must burst it without the trap hit, and only that cake.");
+                Assert(RoomTrap.BurstMudCakesByAttackInCircle(cakePosition, 0.5f, time + 0.1f) == 0 &&
+                       hit.BurstTime == time,
+                    "A burst cake must not burst again.");
+
+                // The player's shot bursts the cake under it and is used up; an enemy shot leaves it alone.
+                Vector2 shotCake = cakePosition + Vector2.down * 4f;
+                RoomTrap shot = fixture.PlaceTrap(RoomTrapKind.MudCake, shotCake, "mud-23", false, state);
+                Projectile enemyShot = CreateShot(shotCake, DamageSourceType.EnemyProjectile);
+                Assert(enemyShot.BurstMudCakesUnder(time) == 0 && !enemyShot.IsSpent && !shot.HasBurst,
+                    "An enemy shot must not burst the cake.");
+                Object.DestroyImmediate(enemyShot.gameObject);
+                Projectile playerShot = CreateShot(shotCake + Vector2.left * 0.6f, DamageSourceType.PlayerProjectile);
+                Assert(playerShot.BurstMudCakesUnder(time) == 1 && playerShot == null && shot.HasBurst &&
+                       state.IsTrapRemoved("mud-23"),
+                    "The player's shot must burst the cake it reaches and disappear.");
+            }
+            finally { fixture.Dispose(); }
+        }
+
+        private static Projectile CreateShot(Vector2 position, DamageSourceType sourceType)
+        {
+            GameObject shot = new("Trap-2 Shot", typeof(Rigidbody2D), typeof(CircleCollider2D), typeof(Projectile));
+            shot.transform.position = position;
+            shot.GetComponent<Rigidbody2D>().gravityScale = 0f;
+            ProjectileSizing.Apply(shot.transform, shot.GetComponent<CircleCollider2D>(),
+                ProjectileSizing.PlayerBasicScale);
+            Projectile projectile = shot.GetComponent<Projectile>();
+            projectile.Launch(Vector2.right, null, new DamageContext(shot, sourceType, 1f));
+            return projectile;
         }
 
         private static void Assert(bool condition, string message)

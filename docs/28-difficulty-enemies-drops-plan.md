@@ -545,7 +545,28 @@
       열 간격이 아니라 그림 조각 단위로 나눴다(`scripts/split-crayon-minion-death.py`, 작은 효과선은 가장 가까운 큰 조각을
       따른다). 확인용으로 `F1` 패널에 `Spawn crayon mage, axe, archer (drawn defeat)`를 더했다. 자동 검증 배치: 미실행(Unity
       다중 인스턴스 잠금, 연결은 사용자가 메뉴로 실행). 사용자 Play 확인(2026-11-11): "좋다, 문제없다".
-    - 남은 것: 누루링·자폭형·부스러기 쫄따구·크레용 용사·크레용 방패병은 쓰러짐 그림이 없어 지금처럼 바로 사라진다.
+    - Defeat-5 크레용 방패병(2026-11-19, 사용자 원화): `CrayonShieldMinion`에 방패를 놓치며 쓰러지는 네 장
+      (`Death/CrayonShield_Death_0~3`, 원본 `Death/Source/CrayonShield_Death_Sheet.png`)을 연결했다. 시트는
+      `scripts/split-crayon-minion-death.py CrayonShield=<시트>`로 자른다. `F1` 패널 버튼은
+      `Spawn crayon mage, axe, archer, shield (drawn defeat)`로 넓혔다. 자동 검증:
+      `EnemyDefeatArtworkSetup.ApplyAndVerifyBatch` 통과(2026-11-19, 16개 Prefab). 사용자 Play 확인: 미확인.
+    - Defeat-6 황금 용사 트럭 쓰러짐·에르핀 승리(2026-11-19~20, 사용자 원화): 크레용 용사가 죽으면 그 자리에 서 있던
+      모습이 0.35초 남고, 왼쪽 맵 밖에서 트럭(바퀴 2장)이 달려와 충돌 8장(1왼→1오→2왼→3왼→3오→2오→4왼→4오)을 보인 뒤
+      오른쪽 맵 밖으로 빠져나간다(`CrayonHeroTruckDefeat`, 보스 키 비례, 충돌 순간 화면 흔들림). 보스가 죽으면 에르핀은
+      선 자리에서 승리 6장을 두 번 뛰고 마지막 그림을 움직일 때까지 유지한다(`PlayerWalkAnimator.PlayVictory`, 보스 사망
+      0.5초 뒤, 트럭 보스는 충돌 0.6초 뒤). 마지막 층 클리어는 이 연출이 끝난 뒤 결과창을 연다(기록은 먼저 로컬 저장).
+      타이밍은 편집기(`output/crayon-hero-truck-defeat/truck-defeat-editor.html`) 기본값을 사용자가 승인(2026-11-20).
+      원화는 `scripts/split-truck-defeat-and-erpin-victory.py`로 자르고 `Trickal Fan Game/Artwork/Apply Truck Defeat And
+      Erpin Victory`로 연결한다. 확인: `F1` → 보스방 `Boss F<n>` → `Kill current wave`, 승리만 `Play Erpin victory (boss
+      defeat)`. 자동 검증: `CrayonHeroTruckDefeatSetup.ApplyAndVerifyBatch`, `Defeat1MotionSetup.VerifyWithRegressionsBatch`,
+      `HitFeedbackVerification.Verify` 통과(2026-11-20). 사용자 Play 확인: 미확인.
+      2026-11-20 사용자 변경: 승리 연출은 크레용 용사가 아니라 **마지막 보스**(마지막 층 보스방 클리어) 기준이다. 다른 보스는
+      승리 점프가 없다. 에르핀 점프는 트럭 충돌 8장이 끝난 0.15초 뒤 시작하고(`VictoryAfterImpact`), 연출 동안 에르핀은
+      멈추고 무적이며 결과창으로 넘어갈 때까지 승리 점프를 반복한다(2026-11-20 사용자 요청). 첫 두 번 점프가 끝나면 1.2초 뒤 GAME OVER처럼 에르핀 중심 원형으로 닫히고 금빛 `VICTORY` 화면(승리 3번 프레임
+      초상) → `결과 보기` 입력 → 결과창(`GameOverSequence.TryBeginVictory`). 확인: `F1` → 마지막 층 `Boss F<n>` →
+      `Kill current wave`, 점프만 `Play Erpin victory (jump only)`. 자동 검증: `CrayonHeroTruckDefeatSetup.ApplyAndVerifyBatch`,
+      `Week25Ux0Verification.Verify`(VICTORY 흐름 추가) 통과(2026-11-20). 사용자 Play 확인(2026-11-20).
+    - 남은 것: 누루링·자폭형·부스러기 쫄따구는 쓰러짐 그림이 없어 지금처럼 바로 사라진다.
 - 새 적 원화(자폭형·곡사형·잠복형)는 사용자가 준비한다. 원화 전에는 임시 그림으로 로직부터 만든다.
 - Curve-1~Variant-2와 Drop-0·1은 Play-2 기록 전에 끝내야 그 기록이 기준선으로 남는다(§6).
 

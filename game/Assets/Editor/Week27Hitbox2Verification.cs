@@ -31,12 +31,12 @@ namespace TrickalFanGame.Editor
             "SelfDestructFairy", "LobbingFairy", "AmbushFairy",
         };
 
-        // Bosses, stationary boss props, fliers (쥬비, 대왕쥬비) and bodies no wider than the feet keep one circle.
-        private static readonly string[] BodyOnlyPrefabs =
-        {
-            "CrayonHeroBoss", "SaemaeumVaultBoss", "TestBoss", "JyubiEnemy", "JyubiKing", "NururingSplit",
-            "BuseureogiCreamObstacle", "BuseureogiDoughObstacle",
-        };
+        // Bosses walk on the same feet since Boss-Pattern-0 (2026-11-19); their bodies keep their own sizes.
+        private static readonly string[] BossFeetPrefabs = { "CrayonHeroBoss", "SaemaeumVaultBoss", "TestBoss" };
+
+        // Fliers (쥬비, 대왕쥬비) and bodies no wider than the feet keep one circle. 부스러기's cream and dough left this
+        // list on 2026-11-19: they are obstacles (DestructibleObstacle), not enemies, so they have no TestEnemy.
+        private static readonly string[] BodyOnlyPrefabs = { "JyubiEnemy", "JyubiKing", "NururingSplit" };
 
         // Walk probes: 불효자손, 산사모 and a ranged enemy, the three named in the bug report.
         private static readonly string[] WalkingPrefabs = { "TestEnemy", "SansamoEnemy", "RangedEnemy" };
@@ -86,7 +86,8 @@ namespace TrickalFanGame.Editor
             ValidateLaneWalks();
             Debug.Log($"Hitbox-2 verification passed: the {EnemyFeet.LayerName} layer collides with terrain only, " +
                       $"{FeetPrefabs.Length} normal enemy Prefabs have one feet circle of radius {EnemyFeet.Radius} " +
-                      $"under an unchanged body of radius {BodyRadius} that ignores terrain, bosses keep one circle, " +
+                      $"under an unchanged body of radius {BodyRadius} that ignores terrain, {BossFeetPrefabs.Length} bosses " +
+                      "walk on the same feet, " +
                       "walls stop the feet, shots from an enemy pressed under a wall launch clear of it, and enemies plan and walk through one-cell lanes between obstacles and " +
                       "beside a wall from any start offset.");
         }
@@ -120,14 +121,15 @@ namespace TrickalFanGame.Editor
         {
             string[] paths = Week27Hitbox2Setup.EnemyPrefabPaths();
             Dictionary<string, string> byName = paths.ToDictionary(Path.GetFileNameWithoutExtension, path => path);
-            foreach (string name in FeetPrefabs.Concat(BodyOnlyPrefabs))
+            foreach (string name in FeetPrefabs.Concat(BossFeetPrefabs).Concat(BodyOnlyPrefabs))
                 Assert(byName.ContainsKey(name), $"Hitbox-2 expects the enemy Prefab '{name}'.");
 
             int terrainMask = EnemyFeet.TerrainMask;
             foreach (string path in paths)
             {
                 string name = Path.GetFileNameWithoutExtension(path);
-                bool expectsFeet = FeetPrefabs.Contains(name);
+                bool isBoss = BossFeetPrefabs.Contains(name);
+                bool expectsFeet = FeetPrefabs.Contains(name) || isBoss;
                 Assert(expectsFeet || BodyOnlyPrefabs.Contains(name),
                     $"{path} is a new enemy Prefab. Add it to the Hitbox-2 feet or body-only list.");
 
@@ -156,25 +158,33 @@ namespace TrickalFanGame.Editor
                         $"{name} must have exactly one active feet child, found {feet.Length}.");
                     Assert(!EnemyFeet.Ensure(contents, out _),
                         $"{name} feet differ from the Hitbox-2 layer, place or size. Run the setup.");
-                    Assert(feet[0].GetComponents<Collider2D>().Length == 1, $"{name} feet must hold one collider.");
-                    Assert(Mathf.Approximately(body.radius, BodyRadius) && body.offset == Vector2.zero,
+                    // A boss whose feet are wider than tall also carries a capsule around the feet circle.
+                    bool capsule = isBoss && EnemyFeet.IsCapsule(EnemyFeet.HalfSizeFor(contents));
+                    Assert(feet[0].GetComponents<Collider2D>().Length == (capsule ? 2 : 1) &&
+                           (feet[0].Capsule != null) == capsule,
+                        $"{name} feet must hold {(capsule ? "a circle and a capsule" : "one circle")}.");
+                    Assert(isBoss || (Mathf.Approximately(body.radius, BodyRadius) && body.offset == Vector2.zero),
                         $"{name} body (hurtbox and contact) must stay a circle of radius {BodyRadius}.");
                     Assert((body.excludeLayers.value & terrainMask) == terrainMask,
                         $"{name} body must leave terrain to the feet.");
 
                     float bodyWorld = EnemyFeet.WorldRadiusOf(body);
                     Vector2 root = contents.transform.position;
-                    Assert(Mathf.Abs(feet[0].WorldRadius - EnemyFeet.Radius) < 0.001f,
-                        $"{name} feet must be {EnemyFeet.Radius} wide in world units, found {feet[0].WorldRadius:F3}.");
-                    float feetBottom = feet[0].WorldCenter.y - feet[0].WorldRadius;
-                    Assert(Mathf.Abs(feetBottom - (root.y - bodyWorld)) < 0.001f &&
-                           Mathf.Abs(feet[0].WorldCenter.x - root.x) < 0.001f,
-                        $"{name} feet must sit centered at the bottom of the body.");
+                    // A boss sets its own feet size (Boss-Pattern-0), always larger than a normal enemy's.
+                    float expectedFeet = EnemyFeet.RadiusFor(contents);
+                    Assert(!isBoss || expectedFeet > EnemyFeet.Radius + 0.001f,
+                        $"{name} boss feet must be larger than a normal enemy's {EnemyFeet.Radius}.");
+                    Assert(Mathf.Abs(feet[0].WorldRadius - expectedFeet) < 0.001f,
+                        $"{name} feet must be {expectedFeet} wide in world units, found {feet[0].WorldRadius:F3}.");
+                    float feetBottom = feet[0].WorldCenter.y - EnemyFeet.HalfSizeFor(contents).y;
+                    Assert(Mathf.Abs(feetBottom - (root.y - bodyWorld - EnemyFeet.DropFor(contents))) < 0.001f &&
+                           Mathf.Abs(feet[0].WorldCenter.x - root.x - EnemyFeet.OffsetXFor(contents)) < 0.001f,
+                        $"{name} feet must sit at the bottom of the body (with a boss's own offset).");
 
                     EnemyObstacleNavigator.TerrainFootprint footprint =
                         EnemyObstacleNavigator.ResolveFootprint(contents);
                     Assert(footprint.Collider == feet[0].Collider &&
-                           Mathf.Abs(footprint.Radius - EnemyFeet.Radius) < 0.001f &&
+                           Mathf.Abs(footprint.Radius - expectedFeet) < 0.001f &&
                            Vector2.Distance(footprint.Offset, feet[0].WorldCenter - root) < 0.001f,
                         $"{name} must plan its path with the feet circle.");
                 }

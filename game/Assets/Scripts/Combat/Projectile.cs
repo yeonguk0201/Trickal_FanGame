@@ -155,12 +155,31 @@ namespace TrickalFanGame.Combat
             }
 
             TickHoming(Time.fixedDeltaTime);
+            if (BurstMudCakesUnder(Time.time) > 0)
+            {
+                return;
+            }
+
             if (maximumTravelDistance > 0f &&
                 ((Vector2)transform.position - travelOrigin).sqrMagnitude >=
                 maximumTravelDistance * maximumTravelDistance)
             {
                 StopAtBoundary();
             }
+        }
+
+        // A 진흙케이크 has no collider, so the player's shot looks for cakes under it every physics step. One touch
+        // bursts the cake and, like an obstacle, uses the shot up (RoomTrap.BurstMudCakesByAttackInCircle).
+        public int BurstMudCakesUnder(float currentTime)
+        {
+            if (isSpent || damageContext.SourceType != DamageSourceType.PlayerProjectile) return 0;
+            CircleCollider2D circle = GetComponent<CircleCollider2D>();
+            float radius = circle != null ? circle.radius * Mathf.Abs(transform.lossyScale.x) : 0f;
+            int burst = RoomTrap.BurstMudCakesByAttackInCircle(transform.position, radius, currentTime);
+            // The cake plays its own burst frames, so no hit spark.
+            if (burst > 0) DestroyProjectile();
+
+            return burst;
         }
 
         // Returns true when the shot is hopping off an enemy or was used up by the hit it just made.
@@ -466,13 +485,13 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
-            // A boss slime puddle counts the hit and lets the shot fly on, so puddles never shield the boss. A shot
-            // fired from inside a puddle leaves that puddle alone: the player has to step out to clear it.
+            // A boss slime puddle counts the hit and lets the shot fly on, so puddles never shield the boss. Since
+            // 2026-11-21 a shot fired from inside a puddle counts too (players could not tell why it would not pop).
             TrickalFanGame.Enemy.BossSlimePuddle puddle =
                 collider.GetComponentInParent<TrickalFanGame.Enemy.BossSlimePuddle>();
             if (puddle != null)
             {
-                if (!puddle.Contains(launchPosition) && puddle.RegisterPlayerHit())
+                if (puddle.RegisterPlayerHit())
                 {
                     HitSpark.Play(transform.position, flightVelocity, puddle);
                 }
@@ -484,7 +503,7 @@ namespace TrickalFanGame.Combat
             if (obstacle != null)
             {
                 // Same burst as an enemy hit, but only when the hit counted (not on bomb-only obstacles).
-                if (DestructibleObstacle.TryHitCollider(collider))
+                if (DestructibleObstacle.TryHitCollider(collider, null, transform.position))
                 {
                     HitSpark.Play(transform.position, flightVelocity, obstacle);
                 }

@@ -25,3 +25,10 @@ Animation: clearly articulated alternating steps, NOT eight static copies and NO
 MOST IMPORTANT: red cape has a visibly DIFFERENT flowing silhouette and folds in EVERY frame: wave passes from shoulders to free tail with delayed secondary motion, alternately lifts/curls outward and relaxes lower, then lifts again across the cycle. Cloth is attached consistently behind neck, never becomes a second limb; cape stays behind body and shield. Natural graceful loop, not random shape changes. Scarf tips subtle secondary flutter. Preserve exact design with no added ornaments and no duplicated limbs. Actual transparent alpha background.
 ```
 
+## 바닥선 맞춤 (2026-11-20)
+
+- 사용자 Play 확인: 걸을 때 기본 이미지보다 살짝 떠서 그림자 위에 있는 것처럼 보임.
+- 원인: 시트 셀을 같은 위치(6,34)로 옮겨서 프레임마다 장화 바닥이 432~464행으로 달랐고, 모두 기본 이미지(`Boss_크레용사용.png`, 1000 PPU, 피벗 아래 0.565단위 = 400 PPU 기준 482행)보다 위였다. 월드에서 약 0.16~0.45단위 떠 있고 걷는 동안 몸 전체가 오르내렸다.
+- 조치: 8장 각각을 그대로 아래로만 옮겨(18~50px) 장화 바닥(알파 200 이상 최저 행)을 482행에 맞췄다. 크기·리샘플링 변경 없음. 셀 분리 때 남은 장화 아래 옅은 잔여 픽셀 일부는 캔버스 밖으로 잘렸다. 머리 오르내림(±8px)은 원래 그림대로 남는다.
+- 황금 걷기 8장은 각성 기본 이미지와 차이 0.01 이하(월드 약 0.04)라 그대로 둔다.
+- 검증: `CrayonHeroAttackAnimationVerification.Verify`(보스 이동 검증 포함) 통과. 실제 Play 확인 대기.

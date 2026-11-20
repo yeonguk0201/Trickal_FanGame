@@ -417,6 +417,40 @@ namespace TrickalFanGame.Run
                 return;
             }
 
+            // The last boss's clear: 에르핀's jump for joy after the boss's defeat presentation (truck), the iris,
+            // VICTORY and its confirm input before the result screen. Queued locally now, like a death.
+            if (isCleared && gameOverSequence != null &&
+                gameOverSequence.TryBeginVictory(playerHealth != null ? playerHealth.transform : null,
+                    OnGameOverConfirmed))
+            {
+                LocalPendingRunStorage.Save(pendingRequest);
+                statusMessage = "Run cleared. VICTORY.";
+                return;
+            }
+
+            // Without the sequence a clear still waits for the boss's defeat presentation before the result screen.
+            if (isCleared && BossDefeatPresentation.Remaining > 0f && isActiveAndEnabled)
+            {
+                LocalPendingRunStorage.Save(pendingRequest);
+                statusMessage = "Run cleared. Victory presentation...";
+                StartCoroutine(OpenResultAfterBossDefeat());
+                return;
+            }
+
+            OpenResult();
+        }
+
+        // Game time, so a pause holds the result too; capped in case a presentation never ends.
+        public const float MaxBossDefeatWait = 8f;
+
+        private System.Collections.IEnumerator OpenResultAfterBossDefeat()
+        {
+            float waited = 0f;
+            while (BossDefeatPresentation.Remaining > 0f && waited < MaxBossDefeatWait)
+            {
+                waited += Time.deltaTime;
+                yield return null;
+            }
             OpenResult();
         }
 

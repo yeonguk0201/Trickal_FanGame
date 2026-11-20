@@ -115,7 +115,7 @@ namespace TrickalFanGame.Player
         {
             if (IsDashing)
             {
-                DestructibleObstacle.TryHitCollider(collision.collider, impactedObstacles);
+                DestructibleObstacle.TryHitCollider(collision.collider, impactedObstacles, transform.position);
             }
 
             TryImpact(collision.collider.GetComponentInParent<Health>(), Time.time);
@@ -277,6 +277,7 @@ namespace TrickalFanGame.Player
 
             DestructibleObstacle.HitInCircle(transform.position, impactRadius, impactedObstacles);
             TrickalFanGame.Enemy.BossSlimePuddle.HitInCircle(transform.position, impactRadius, impactedPuddles);
+            RoomTrap.BurstMudCakesByAttackInCircle(transform.position, impactRadius, Time.time);
         }
 
         private void ApplyToTarget(Health target)

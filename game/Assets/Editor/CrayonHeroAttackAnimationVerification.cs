@@ -257,14 +257,32 @@ namespace TrickalFanGame.Editor
                         "Awakening artwork must share canvas and PPU.");
                     VerifyIsolatedArtwork(frame);
                 }
+                float[] lengths = { 0.3f, 0.7f, 1f, 0.25f };
+                Require(Mathf.Approximately(boss.PhaseTransitionDuration, 2.9f) &&
+                        Mathf.Approximately(runtime.AwakeningDuration, 2.9f) &&
+                        Mathf.Approximately(runtime.AwakeningStagger, 0.65f) &&
+                        Mathf.Approximately(runtime.AwakeningTremble, 0.02f) &&
+                        Mathf.Approximately(animator.AwakeningTransformDuration, 2.25f),
+                    "Golden transformation must use the tuned 0.30/0.70/1.00/0.25s frames and 0.65s stagger (2.9s).");
                 Invoke(boss, "SetState", BossActionState.PhaseTransition, Time.time + boss.PhaseTransitionDuration);
+                float frameStart = 0f;
                 for (int i = 0; i < 4; i++)
                 {
-                    Set(boss, "stateEndsAt", Time.time + boss.PhaseTransitionDuration * (1f - (i + 0.1f) / 4f));
-                    animator.RenderPose(0f, false);
-                    Require(animator.Artwork.sprite == animator.GetAwakeningFrame(i),
-                        "Transformation must follow the actual phase transition deadline.");
+                    Require(Mathf.Approximately(runtime.AwakeningFrameDuration(i), lengths[i]),
+                        "Each transformation frame must keep its tuned length.");
+                    foreach (float into in new[] { 0.02f, lengths[i] - 0.02f })
+                    {
+                        Set(boss, "stateEndsAt", Time.time + boss.PhaseTransitionDuration - (frameStart + into));
+                        animator.RenderPose(0f, false);
+                        Require(animator.Artwork.sprite == animator.GetAwakeningFrame(i),
+                            "Transformation must hold each frame for its own tuned length.");
+                    }
+                    frameStart += lengths[i];
                 }
+                Set(boss, "stateEndsAt", Time.time + runtime.AwakeningStagger * 0.5f);
+                animator.RenderPose(0f, false);
+                Require(animator.Artwork.sprite == animator.GetAwakeningFrame(3) && animator.Artwork.transform.localScale.y < 1f,
+                    "The stagger after the transformation must hold the awakened pose with a visible sag.");
                 Set(boss, "currentPhase", 2);
                 Invoke(boss, "SetState", BossActionState.Idle, 0f);
                 Invoke(runtime, "ApplyPhasePresentation");

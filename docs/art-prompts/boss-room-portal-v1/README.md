@@ -42,3 +42,6 @@
 - Play 수동 확인: Game Scene → F1 → `— Boss room —` → `Boss F1` 또는 `Boss F2`. 처치 전 포탈이 보이지 않는지 확인하고 `Kill current wave` 또는 실제 처치 후 방 중앙에서 서서히 나타나는지 확인한다. 중앙 드롭이 포탈 바깥으로 이동해 획득 가능한지, 포탈 진입 시 다음 층으로 이동하는지 확인한다.
 - 실제 Play 미술 검수는 대기 중.
 - 최종 자동 검증: Unity 6000.3.22f1 배치 종료 코드 0. `Boss room portal verification passed` 및 `Week 16 Reward-3 verification passed` 확인. 로그: `game/Logs/portal-verification.log`.
+
+## 후속 버전 (2026-11-19)
+- 사용자 GIF 검수에서 전체가 흔들려 보이는 문제로 v1 표현을 대체했다. 현재 적용은 `../boss-room-portal-v2/README.md` 참조.

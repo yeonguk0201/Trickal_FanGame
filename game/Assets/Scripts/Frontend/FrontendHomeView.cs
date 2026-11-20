@@ -20,6 +20,8 @@ namespace TrickalFanGame.Frontend
         public const string SettingsTitle = "설정";
         public const string PreparationMessage = "다음 작업에서 기능이 연결됩니다.";
         public const string QuitMessage = "게임을 종료합니다.";
+        public const string HomeArtworkKey = "home-background"; // home, settings, credits
+        public const string LibraryArtworkKey = "menu-library-background"; // character selection, skill upgrade
 
         [SerializeField] private GameObject homePanel;
         [SerializeField] private TMP_Text welcomeText;
@@ -138,12 +140,22 @@ namespace TrickalFanGame.Frontend
 
         private void ApplyHomeArtwork()
         {
-            if (homePanel == null || homePanel.transform.Find("Home Artwork") != null) return;
-            Sprite sprite = UserArtwork.Load("home-background");
+            if (homePanel != null) AddArtwork(homePanel.transform, HomeArtworkKey);
+            // Settings opens over the home root, so the root carries the home picture behind it.
+            AddArtwork(transform, HomeArtworkKey);
+            if (characterSelectionView != null) AddArtwork(characterSelectionView.transform, LibraryArtworkKey);
+            if (skillUpgradeView != null) AddArtwork(skillUpgradeView.transform, LibraryArtworkKey);
+        }
+
+        // Full-screen artwork placed under the panel's own children, covering the setup-time menu skin.
+        public static void AddArtwork(Transform parent, string key)
+        {
+            if (parent.Find("Home Artwork") != null) return;
+            Sprite sprite = UserArtwork.Load(key);
             if (sprite == null) return;
             GameObject background = new("Home Artwork", typeof(RectTransform), typeof(Image), typeof(AspectRatioFitter));
             RectTransform rect = (RectTransform)background.transform;
-            rect.SetParent(homePanel.transform, false);
+            rect.SetParent(parent, false);
             rect.SetAsFirstSibling();
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;

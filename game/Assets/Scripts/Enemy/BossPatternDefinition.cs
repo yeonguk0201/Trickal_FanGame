@@ -10,7 +10,9 @@ namespace TrickalFanGame.Enemy
         BuseureogiApproachVolley,
         BuseureogiSummonMinions,
         BuseureogiThrowObstacle,
-        SaemaeumApproachThrow,
+        // Walks toward the player. Its fan throw was removed (2026-11-18) and came back as a three-shot fan
+        // (2026-11-21); the serialized value is unchanged.
+        SaemaeumApproachWalk,
         SaemaeumJumpSequence,
         SaemaeumTreasureHeal,
         CrayonHeroMapSlash,
@@ -18,6 +20,12 @@ namespace TrickalFanGame.Enemy
         CrayonHeroApproachSwing,
         CrayonHeroDashChain,
         SaemaeumSlimeScatter,
+        SaemaeumGoldPillars,
+        SaemaeumGoldMeteor,
+        // 2026-11-21: phase two rings the player with gold pillars; the jump sequence always follows.
+        SaemaeumGoldCage,
+        // 2026-11-21: stands still and sweeps rows of gold pillars across the floor (line, # or three-way fan).
+        SaemaeumPillarWave,
     }
 
     [Serializable]

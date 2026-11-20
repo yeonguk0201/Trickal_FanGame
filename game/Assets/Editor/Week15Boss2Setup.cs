@@ -52,12 +52,13 @@ namespace TrickalFanGame.Editor
                 SetFloat(contents.GetComponent<Health>(), "maxHealth", 800f);
                 BossController boss = contents.GetComponent<BossController>();
                 boss.ConfigureHud("새마음금고", 2);
-                boss.ConfigurePhaseTwo(1.1f, 0.88f);
+                // 1.6s since 2026-11-20: the drawn phase-two warning (invulnerable) plays over the transition.
+                boss.ConfigurePhaseTwo(1.6f, 0.88f);
                 boss.SetProjectileDamageTier(EnemyDamageTier.Medium);
                 boss.ConfigurePatterns(new[]
                 {
                     new BossPatternDefinition("saemaeum-approach-treasure-throw",
-                        BossPatternExecution.SaemaeumApproachThrow, 0.55f, 3.0f, 0.75f, 0.8f),
+                        BossPatternExecution.SaemaeumApproachWalk, 0.55f, 3.0f, 0.75f, 0.8f),
                     new BossPatternDefinition("saemaeum-rage-jump-sequence",
                         BossPatternExecution.SaemaeumJumpSequence, 0.95f, 3.8f, 1.15f, 1.8f),
                     new BossPatternDefinition("saemaeum-eat-treasure",
@@ -69,8 +70,8 @@ namespace TrickalFanGame.Editor
                 SaemaeumVaultBossPatternRuntime runtime =
                     contents.GetComponent<SaemaeumVaultBossPatternRuntime>();
                 if (runtime == null) runtime = contents.AddComponent<SaemaeumVaultBossPatternRuntime>();
-                runtime.ConfigureMovement(1.8f, 1.35f, 0.55f, 5.5f);
-                runtime.ConfigureVolley(5, 5, 48f);
+                // Retired: BossPattern0Setup owns the current Saemaeum patterns (three-shot fan throw since 2026-11-21).
+                runtime.ConfigureMovement(1.8f, 1.35f);
                 runtime.ConfigureJumps(3, 5, 4, 6, 5.5f, 2.875f, EnemyDamageTier.Medium, 7f, 0.2f,
                     0.76f, 0.72f, 0.20f, 0.15f);
                 runtime.ConfigureHealing(138f, 4);

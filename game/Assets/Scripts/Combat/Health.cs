@@ -1,4 +1,5 @@
 using System;
+using TrickalFanGame.Audio;
 using UnityEngine;
 
 namespace TrickalFanGame.Combat
@@ -180,20 +181,28 @@ namespace TrickalFanGame.Combat
 
             if (CurrentHealth > 0f)
             {
-                context.Source?.GetComponent<PlayerCombatEvents>()?
-                    .TryReportBasicAttackHit(this, context, removedHealth);
+                ResolvePlayerCombatEvents(context.Source)?.TryReportBasicAttackHit(this, context, removedHealth);
                 return;
             }
 
-            context.Source?.GetComponent<PlayerCombatEvents>()?.TryReportBasicAttackHit(this, context, removedHealth);
+            ResolvePlayerCombatEvents(context.Source)?.TryReportBasicAttackHit(this, context, removedHealth);
             Die(context);
         }
+
+        // A blow's source can be destroyed before the death it causes lands (the undying champion dies 3 seconds
+        // after its downing blow). C# ?. skips Unity's destroyed-object check, so GetComponent on that source threw
+        // before Died went out and the room never cleared; this compare honours it.
+        private static PlayerCombatEvents ResolvePlayerCombatEvents(GameObject source) =>
+            source != null && source.TryGetComponent(out PlayerCombatEvents events) ? events : null;
 
         private void Die(DamageContext killingBlow)
         {
             KillingBlow = killingBlow;
             IsDead = true;
-            killingBlow.Source?.GetComponent<PlayerCombatEvents>()?.TryReportEnemyKilled(this, killingBlow);
+            ResolvePlayerCombatEvents(killingBlow.Source)?.TryReportEnemyKilled(this, killingBlow);
+            // Sound-1: every enemy death, whatever dealt the blow. The player
+            // is the one Health that carries PlayerCombatEvents.
+            if (GetComponent<PlayerCombatEvents>() == null) CombatSfx.Play(CombatSfxCue.EnemyDefeated);
             Died?.Invoke();
         }
 

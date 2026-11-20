@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Data;
 using TrickalFanGame.Item;
 using TrickalFanGame.Meta;
@@ -346,6 +347,7 @@ namespace TrickalFanGame.Frontend
             {
                 levelUpView.SetLevelUp(start.level, end.level);
                 ShowStage(levelUpView);
+                CombatSfx.Play(CombatSfxCue.LevelUp);
                 yield return WaitOnStage(RunResultStageView.LevelUpLightPeriod);
             }
 

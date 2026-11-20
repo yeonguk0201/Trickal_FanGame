@@ -1,0 +1,455 @@
+fileFormatVersion: 2
+guid: d7d1af3f66c866e47aaa71c212a9cd02
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3412763567459405891
+    second: Erpin_Victory_Sheet_0
+  - first:
+      213: -6673382186071810138
+    second: Erpin_Victory_Sheet_1
+  - first:
+      213: -5020793104188785830
+    second: Erpin_Victory_Sheet_2
+  - first:
+      213: 4000702781775160248
+    second: Erpin_Victory_Sheet_3
+  - first:
+      213: -3614902032350614086
+    second: Erpin_Victory_Sheet_4
+  - first:
+      213: -745010776755243167
+    second: Erpin_Victory_Sheet_5
+  - first:
+      213: 8643640524420267165
+    second: Erpin_Victory_Sheet_6
+  - first:
+      213: 7593459230331559198
+    second: Erpin_Victory_Sheet_7
+  - first:
+      213: 159069162477629412
+    second: Erpin_Victory_Sheet_8
+  - first:
+      213: -3859466974648656837
+    second: Erpin_Victory_Sheet_9
+  - first:
+      213: -8656426279227723571
+    second: Erpin_Victory_Sheet_10
+  - first:
+      213: 5845333070167377712
+    second: Erpin_Victory_Sheet_11
+  - first:
+      213: 6230265471608737912
+    second: Erpin_Victory_Sheet_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 384
+        width: 281
+        height: 321
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbfef23fd9d63a0d0800000000000000
+      internalID: -3412763567459405891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 459
+        y: 383
+        width: 282
+        height: 287
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6af15c442426363a0800000000000000
+      internalID: -6673382186071810138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 920
+        y: 399
+        width: 285
+        height: 311
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5bb816e54f825ab0800000000000000
+      internalID: -5020793104188785830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 1107
+        y: 390
+        width: 15
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b320afbbf9558730800000000000000
+      internalID: 4000702781775160248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 1119
+        y: 385
+        width: 17
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abd67ef01c945ddc0800000000000000
+      internalID: -3614902032350614086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 11
+        y: 243
+        width: 42
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1677aa155a039a5f0800000000000000
+      internalID: -745010776755243167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 56
+        width: 299
+        height: 288
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9cbd30d24164f770800000000000000
+      internalID: 8643640524420267165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 249
+        width: 39
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1dd25820f2616960800000000000000
+      internalID: 7593459230331559198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 232
+        width: 39
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4efa23c7f80253200800000000000000
+      internalID: 159069162477629412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 503
+        y: 29
+        width: 286
+        height: 305
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3c17b12c3b607ac0800000000000000
+      internalID: -3859466974648656837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 871
+        y: 11
+        width: 283
+        height: 324
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc0764aa9223ed780800000000000000
+      internalID: -8656426279227723571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 728
+        y: 14
+        width: 16
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0378b29157bce1150800000000000000
+      internalID: 5845333070167377712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Erpin_Victory_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 743
+        y: 11
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 870de93ef69567650800000000000000
+      internalID: 6230265471608737912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Erpin_Victory_Sheet_0: -3412763567459405891
+      Erpin_Victory_Sheet_1: -6673382186071810138
+      Erpin_Victory_Sheet_10: -8656426279227723571
+      Erpin_Victory_Sheet_11: 5845333070167377712
+      Erpin_Victory_Sheet_12: 6230265471608737912
+      Erpin_Victory_Sheet_2: -5020793104188785830
+      Erpin_Victory_Sheet_3: 4000702781775160248
+      Erpin_Victory_Sheet_4: -3614902032350614086
+      Erpin_Victory_Sheet_5: -745010776755243167
+      Erpin_Victory_Sheet_6: 8643640524420267165
+      Erpin_Victory_Sheet_7: 7593459230331559198
+      Erpin_Victory_Sheet_8: 159069162477629412
+      Erpin_Victory_Sheet_9: -3859466974648656837
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

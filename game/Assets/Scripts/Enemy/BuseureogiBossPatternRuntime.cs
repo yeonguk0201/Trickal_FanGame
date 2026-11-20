@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Room;
 using TrickalFanGame.Run;
@@ -278,6 +279,7 @@ namespace TrickalFanGame.Enemy
                 context?.BeginCombat(target);
                 spawned++;
             }
+            if (spawned > 0) CombatSfx.Play(CombatSfxCue.EnemyAppear);
             return spawned;
         }
 
@@ -353,6 +355,8 @@ namespace TrickalFanGame.Enemy
                 spawned++;
             }
             ClearPendingObstacleTelegraph();
+            // Sound-2: every obstacle of a throw lands on the same frame; one sound covers them.
+            if (spawned > 0) CombatSfx.Play(CombatSfxCue.BossObstacleLanding);
             return spawned > 0;
         }
 

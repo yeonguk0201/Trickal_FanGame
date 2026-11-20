@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Frontend;
 using TrickalFanGame.Room;
@@ -181,6 +182,8 @@ namespace TrickalFanGame.Enemy
             }
 
             if (HitsEnemiesAndObstacles) HitEnemiesAndObstacles(center);
+            // Sound-3: the same blast as a bomb going off (자폭형, the crumb minion's death blast).
+            CombatSfx.Play(CombatSfxCue.BombExplosion);
 
             // Sorted from the picture before it hides, so the burst sits around the body art.
             CrumbDeathBlastEffect.Play(center, Radius, transform.parent, Body != null ? Body : telegraph);

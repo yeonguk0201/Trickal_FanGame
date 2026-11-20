@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
 using TrickalFanGame.Room;
@@ -36,6 +37,15 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float swingDirectionLockDuration = 0.12f;
         [SerializeField] private EnemyDamageTier swingDamageTier = EnemyDamageTier.Medium;
         [SerializeField, Min(1f)] private float swingRecognitionMultiplier = 1.4f;
+        // While a sword swing winds up, strikes and follows through, the hero keeps walking at this share of its
+        // speed (2026-11-20 user: 40% slower). Walking up to the player before a swing stays at full speed.
+        [SerializeField, Range(0f, 1f)] private float swingMoveSpeedMultiplier = 0.6f;
+        public float SwingMoveSpeedMultiplier => swingMoveSpeedMultiplier;
+        public void ConfigureSwingMoveSpeed(float multiplier) => swingMoveSpeedMultiplier = Mathf.Clamp01(multiplier);
+        // Matches the follow-through pose (attack pose 3) after each strike.
+        private const float SwingFollowThroughDuration = 0.2f;
+        public bool IsSwingAttacking => swingPreparing || lastTickTime - attackFollowThroughStartedAt < SwingFollowThroughDuration;
+        private float SwingMoveMultiplier => IsSwingAttacking ? swingMoveSpeedMultiplier : 1f;
 
         [Header("Dash chain")]
         [SerializeField, Min(0.1f)] private float dashSpeed = 15f;
@@ -57,7 +67,34 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0f)] private float arenaPadding = 0.7f;
         [SerializeField] private Vector2 fallbackHalfExtents = new Vector2(7.5f, 5.5f);
         [SerializeField] private Sprite awakenedSprite;
+        // The phase transition (BossController.PhaseTransitionDuration) plays the four transformation frames for these
+        // lengths, then a stagger in the new form, all invulnerable. Values from the 크레용사용 motion tuner
+        // (2026-11-20 user): 0.30 / 0.70 / 1.00 / 0.25 + 0.65 stagger, tremble 0.02.
+        [SerializeField] private float[] awakeningFrameDurations = { 0.3f, 0.7f, 1f, 0.25f };
+        [SerializeField, Min(0f)] private float awakeningStagger = 0.65f;
+        [SerializeField, Min(0f)] private float awakeningTremble = 0.02f;
         private Sprite normalSprite;
+        public float AwakeningStagger => awakeningStagger;
+        public float AwakeningTremble => awakeningTremble;
+        public float AwakeningFrameDuration(int index) =>
+            awakeningFrameDurations != null && index >= 0 && index < awakeningFrameDurations.Length
+                ? Mathf.Max(0.01f, awakeningFrameDurations[index]) : 0.25f;
+        public float AwakeningDuration
+        {
+            get
+            {
+                float total = awakeningStagger;
+                for (int i = 0; i < 4; i++) total += AwakeningFrameDuration(i);
+                return total;
+            }
+        }
+        public void ConfigureAwakening(float[] frameDurations, float stagger, float tremble)
+        {
+            awakeningFrameDurations = frameDurations != null && frameDurations.Length == 4
+                ? (float[])frameDurations.Clone() : new[] { 0.3f, 0.7f, 1f, 0.25f };
+            awakeningStagger = Mathf.Max(0f, stagger);
+            awakeningTremble = Mathf.Max(0f, tremble);
+        }
         public Sprite AwakenedSprite => awakenedSprite;
         public void ConfigureAwakenedArtwork(Sprite sprite) => awakenedSprite = sprite;
 
@@ -78,8 +115,14 @@ namespace TrickalFanGame.Enemy
         private SpriteRenderer visual;
         private Transform target;
         private Rect arenaBounds;
+        // Where the feet may stand (the room's movement bounds). The slash light still spans arenaBounds.
+        private Rect standingBounds;
         private uint randomState;
         private float lastTickTime;
+        // MovePosition from Update only lands at the next physics step, and only the last call before it counts. The
+        // queued destination is the base for the next move in the same step, so speed does not depend on frame rate.
+        private Vector2 queuedMovePosition;
+        private float queuedMoveFixedTime = float.NaN;
         private Vector2 lockedDirection = Vector2.down;
         private bool slashPending;
         private bool slashResolved;
@@ -112,6 +155,22 @@ namespace TrickalFanGame.Enemy
         private float chargeStartedAt;
         private float chargeImpactAt;
         private bool chargingSlash;
+
+        // Sound pass 2026-11-21: the slam is one swing with two layers landing after it, at the offsets set by ear in
+        // tools/sound-mixer; the charge hums on a voice cut by the slam; the transformation plays its first
+        // seconds and fades.
+        public const float SlamMagicDelay = 0.27f;
+        public const float SlamClashDelay = 0.39f;
+        public const float TransformSoundSeconds = 3f;
+        public const float TransformFadeSeconds = 1.5f;
+        private int chargeVoice;
+        public bool IsChargeSoundActive => chargeVoice != 0;
+
+        private void StopChargeSound(float fadeSeconds = 0.08f)
+        {
+            CombatSfx.StopVoice(chargeVoice, fadeSeconds);
+            chargeVoice = 0;
+        }
 
         // Pose groups: swing 0..3, dash 4..7, slam 8..11, stronger charge stages 12..13.
         public int AttackPoseIndex => attackPoseIndex;
@@ -203,6 +262,7 @@ namespace TrickalFanGame.Enemy
             StopMovement();
             ClearTelegraph();
             ClearRecognitionDebug();
+            StopChargeSound(0f);
             if (health != null) health.SetInvulnerable(false);
         }
 
@@ -279,6 +339,7 @@ namespace TrickalFanGame.Enemy
             healthAtLastSummon = health != null ? health.CurrentHealth : 0f;
             ResetSwingState();
             ResetDashState();
+            queuedMoveFixedTime = float.NaN;
             ResolveArenaBounds();
             ApplyPhasePresentation();
         }
@@ -311,6 +372,8 @@ namespace TrickalFanGame.Enemy
             ResolveComponents();
             if (state == BossActionState.PhaseTransition)
             {
+                StopChargeSound();
+                CombatSfx.PlayVoiceFor(CombatSfxCue.BossCrayonTransform, TransformSoundSeconds, TransformFadeSeconds);
                 ResetAttackArtwork();
                 StopMovement();
                 ClearTelegraph();
@@ -334,6 +397,8 @@ namespace TrickalFanGame.Enemy
                     chargeStartedAt = lastTickTime;
                     chargeImpactAt = stateEndsAt + slashLockedDelay;
                     attackPoseIndex = 8;
+                    StopChargeSound(0f);
+                    chargeVoice = CombatSfx.PlayVoice(CombatSfxCue.BossCrayonCharge);
                     StopMovement();
                     UpdateAimDirection();
                     ShowMapSlashTelegraph();
@@ -359,6 +424,7 @@ namespace TrickalFanGame.Enemy
 
             if (state == BossActionState.Recovery)
             {
+                StopChargeSound();
                 chargingSlash = false;
                 summonPoseIndex = execution == BossPatternExecution.CrayonHeroSummonMinions ? 3 : -1;
                 attackPoseIndex = execution == BossPatternExecution.CrayonHeroMapSlash ? 11 : -1;
@@ -385,6 +451,7 @@ namespace TrickalFanGame.Enemy
 
             if (state == BossActionState.Defeated)
             {
+                StopChargeSound();
                 ResetAttackArtwork();
                 StopMovement();
                 ClearTelegraph();
@@ -392,6 +459,7 @@ namespace TrickalFanGame.Enemy
             else if (state == BossActionState.Idle)
             {
                 // A stun (Jjangsem-2) or a cancelled fight drops the pattern under way; it restarts from its telegraph.
+                StopChargeSound();
                 ResetAttackArtwork();
                 StopMovement();
                 ClearTelegraph();
@@ -493,7 +561,7 @@ namespace TrickalFanGame.Enemy
                     summonPoseIndex = -1;
                 }
                 if (execution == BossPatternExecution.CrayonHeroApproachSwing)
-                    MoveTowardTarget(deltaTime, 1f);
+                    MoveTowardTarget(deltaTime, SwingMoveMultiplier);
                 return;
             }
 
@@ -551,6 +619,12 @@ namespace TrickalFanGame.Enemy
                 float lightHeight = Mathf.Clamp(ResolveEffectBodyWidth() * 1.6f, 5f, 9f);
                 SlamLightEffect.PlayPath(warning, lightHeight, transform, visual, arenaBounds);
             }
+            // Golden phase slams three directions at once; one sound covers them. The charge stops as the swing
+            // lands, and the magic burst and the clash follow it.
+            StopChargeSound(0.05f);
+            CombatSfx.Play(CombatSfxCue.BossSwordSlam);
+            CombatSfx.PlayAfter(CombatSfxCue.BossSwordSlamMagic, SlamMagicDelay);
+            CombatSfx.PlayAfter(CombatSfxCue.BossSwordSlamClash, SlamClashDelay);
             slashResolved = true;
             slashPending = false;
             chargingSlash = false;
@@ -566,7 +640,7 @@ namespace TrickalFanGame.Enemy
                 attackPoseIndex = now - attackFollowThroughStartedAt < 0.08f ? 2 :
                     now - attackFollowThroughStartedAt < 0.2f ? 3 : -1;
             if (target == null || completedSwings >= swingCountTarget) return;
-            MoveTowardTarget(deltaTime, 1f);
+            MoveTowardTarget(deltaTime, SwingMoveMultiplier);
             Vector2 offset = (Vector2)target.position - (Vector2)transform.position;
             if (!swingPreparing)
             {
@@ -600,6 +674,7 @@ namespace TrickalFanGame.Enemy
                 lockedDirection * (SwingStartOffset + swingRange * 0.5f),
                 swingRange * 2f, Mathf.Max(swingWidth * 2f, ResolveEffectBodyWidth() * 1.2f), 0.35f, transform, visual,
                 angle: Mathf.Atan2(lockedDirection.y, lockedDirection.x) * Mathf.Rad2Deg);
+            CombatSfx.Play(CombatSfxCue.BossSwordSwing);
             completedSwings++;
             attackPoseIndex = 2;
             attackFollowThroughStartedAt = now;
@@ -618,7 +693,7 @@ namespace TrickalFanGame.Enemy
                 if (!dashChainHitApplied && ResolveDirectionalHit(0f, ResolveBodyRadius() + travel, dashWidth,
                         dashDamageTier, DamageSourceType.EnemyContact, lockedDirection))
                     dashChainHitApplied = true;
-                body.MovePosition(ClampToArena((Vector2)transform.position +
+                QueueMove(ClampToArena(CurrentMovePosition +
                     lockedDirection * LimitDashTravelByPinnedTarget(travel)));
                 if (now < dashStateEndsAt) return;
                 completedDashes++;
@@ -647,6 +722,8 @@ namespace TrickalFanGame.Enemy
             dashInMotion = true;
             attackPoseIndex = completedDashes % 2 == 0 ? 5 : 7;
             dashStateEndsAt = now + dashDuration;
+            // Every dash of the chain swings the sword as it launches.
+            CombatSfx.Play(CombatSfxCue.BossSwordSwing);
             ShowDashTelegraph();
             SetAllTelegraphColors(new Color(1f, 0.12f, 0.05f, 0.9f),
                 new Color(1f, 0.45f, 0.05f, 0.95f));
@@ -703,15 +780,25 @@ namespace TrickalFanGame.Enemy
         private void MoveTowardTarget(float deltaTime, float speedMultiplier)
         {
             if (target == null || body == null || deltaTime <= 0f) return;
-            Vector2 offset = (Vector2)target.position - (Vector2)transform.position;
+            Vector2 origin = CurrentMovePosition;
+            Vector2 offset = (Vector2)target.position - origin;
             if (offset.sqrMagnitude <= 0.001f) return;
             float distance = offset.magnitude;
             float step = Mathf.Min(
                 CurrentApproachSpeed * speedMultiplier * EnemyStatusEffects.MoveSpeedMultiplierOf(this) * deltaTime,
                 distance - BossTargetSpacing.ResolveStopDistance(gameObject, target));
             if (step <= 0f) return;
-            Vector2 destination = ClampToArena((Vector2)transform.position + offset / distance * step);
+            QueueMove(ClampToArena(origin + offset / distance * step));
+        }
+
+        private Vector2 CurrentMovePosition =>
+            queuedMoveFixedTime == Time.fixedTime ? queuedMovePosition : (Vector2)transform.position;
+
+        private void QueueMove(Vector2 destination)
+        {
             body.MovePosition(destination);
+            queuedMovePosition = destination;
+            queuedMoveFixedTime = Time.fixedTime;
         }
 
         private bool ResolveDirectionalHit(float startOffset, float length, float width, EnemyDamageTier damageTier,
@@ -753,15 +840,22 @@ namespace TrickalFanGame.Enemy
                 GameObject prefab = minionPrefabs[index];
                 if (prefab == null) continue;
                 float angle = (360f * index / Mathf.Max(1, count) + NextRandom(30)) * Mathf.Deg2Rad;
-                Vector2 position = ClampToArena((Vector2)transform.position +
-                    new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * summonRadius);
+                Vector2 position = (Vector2)transform.position +
+                    new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * summonRadius;
                 GameObject minion = Instantiate(prefab, position, Quaternion.identity, transform.parent);
+                // Clamp by the minion's own feet: the boss's feet sit far below its root, so the boss's root area
+                // reaches above the top wall and would put a small minion's feet inside it.
+                Rect minionArea = EnemyFeet.StandingRootArea(minion, standingBounds);
+                minion.transform.position = new Vector3(Mathf.Clamp(position.x, minionArea.xMin, minionArea.xMax),
+                    Mathf.Clamp(position.y, minionArea.yMin, minionArea.yMax), minion.transform.position.z);
                 minion.name = prefab.name + " (Crayon Summon)";
                 minion.GetComponent<TestEnemy>()?.ConfigureReward(false);
                 minion.GetComponent<EnemyBehaviorContext>()?.BeginCombat(target);
                 livingMinions.Add(minion);
                 boss?.RegisterOwnedObject(minion);
             }
+            // Sound pass 2026-11-21: the drawn sword is this boss's own summon sound, in place of the generic appear pop.
+            if (count > 0) CombatSfx.Play(CombatSfxCue.BossCrayonSummon);
         }
 
         private void UpdateAimDirection()
@@ -1010,24 +1104,41 @@ namespace TrickalFanGame.Enemy
             RoomNode room = GetComponentInParent<RoomNode>();
             if (room != null && room.Profile != null)
             {
-                Rect local = new Rect(-room.Profile.InteriorSize * 0.5f, room.Profile.InteriorSize);
-                Vector2 minimum = room.transform.TransformPoint(local.min);
-                Vector2 maximum = room.transform.TransformPoint(local.max);
-                arenaBounds = Rect.MinMaxRect(Mathf.Min(minimum.x, maximum.x), Mathf.Min(minimum.y, maximum.y),
-                    Mathf.Max(minimum.x, maximum.x), Mathf.Max(minimum.y, maximum.y));
+                arenaBounds = ToWorld(room.transform, new Rect(-room.Profile.InteriorSize * 0.5f,
+                    room.Profile.InteriorSize));
+                Rect movement = room.Profile.MovementBounds;
+                standingBounds = movement.width > 0f && movement.height > 0f
+                    ? ToWorld(room.transform, movement)
+                    : Shrink(arenaBounds, arenaPadding);
                 return;
             }
             arenaBounds = new Rect((Vector2)transform.position - fallbackHalfExtents, fallbackHalfExtents * 2f);
+            standingBounds = Shrink(arenaBounds, arenaPadding);
         }
 
+        private static Rect ToWorld(Transform room, Rect local)
+        {
+            Vector2 minimum = room.TransformPoint(local.min);
+            Vector2 maximum = room.TransformPoint(local.max);
+            return Rect.MinMaxRect(Mathf.Min(minimum.x, maximum.x), Mathf.Min(minimum.y, maximum.y),
+                Mathf.Max(minimum.x, maximum.x), Mathf.Max(minimum.y, maximum.y));
+        }
+
+        private static Rect Shrink(Rect area, float padding)
+        {
+            float horizontal = Mathf.Min(padding, area.width * 0.49f);
+            float vertical = Mathf.Min(padding, area.height * 0.49f);
+            return Rect.MinMaxRect(area.xMin + horizontal, area.yMin + vertical, area.xMax - horizontal,
+                area.yMax - vertical);
+        }
+
+        // Boss-Pattern-0 (2026-11-19): the feet stay on the standing floor, so the hero nears walls like other enemies
+        // instead of keeping its whole body circle (plus padding) inside the room.
         private Vector2 ClampToArena(Vector2 position)
         {
-            Collider2D collider = GetComponent<Collider2D>();
-            Vector2 extents = collider != null ? (Vector2)collider.bounds.extents : Vector2.one * arenaPadding;
-            float horizontal = Mathf.Min(extents.x + arenaPadding, arenaBounds.width * 0.49f);
-            float vertical = Mathf.Min(extents.y + arenaPadding, arenaBounds.height * 0.49f);
-            return new Vector2(Mathf.Clamp(position.x, arenaBounds.xMin + horizontal, arenaBounds.xMax - horizontal),
-                Mathf.Clamp(position.y, arenaBounds.yMin + vertical, arenaBounds.yMax - vertical));
+            Rect area = EnemyFeet.StandingRootArea(gameObject, standingBounds);
+            return new Vector2(Mathf.Clamp(position.x, area.xMin, area.xMax),
+                Mathf.Clamp(position.y, area.yMin, area.yMax));
         }
 
         private void StopMovement()

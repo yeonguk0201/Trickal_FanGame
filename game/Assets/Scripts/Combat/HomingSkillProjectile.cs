@@ -119,7 +119,7 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
-            DestructibleObstacle.TryHitCollider(other, hitObstacles);
+            DestructibleObstacle.TryHitCollider(other, hitObstacles, transform.position);
             bool isPortalDoor = other.GetComponentInParent<DoorController>() != null;
             bool isSolidBoundary = !other.isTrigger;
             if (!hasAssignedTarget && (isPortalDoor || isSolidBoundary))
@@ -161,6 +161,7 @@ namespace TrickalFanGame.Combat
 
             DestructibleObstacle.HitInCircle(transform.position, explosionRadius, hitObstacles);
             TrickalFanGame.Enemy.BossSlimePuddle.HitInCircle(transform.position, explosionRadius);
+            RoomTrap.BurstMudCakesByAttackInCircle(transform.position, explosionRadius, Time.time);
             DestroyProjectile();
         }
 

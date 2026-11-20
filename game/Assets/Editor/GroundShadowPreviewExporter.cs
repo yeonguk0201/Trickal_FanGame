@@ -154,8 +154,10 @@ namespace TrickalFanGame.Editor
                 Capture(Prefab("LivelyLowBloodSugarFairy"), "LivelyLowBloodSugarFairy", "저혈당 요정 - 활발",
                     "적·보스", "LivelyLowBloodSugarFairy.prefab");
                 string[] trapNames = { "바닥 가시", "주기 가시", "불", "피해 장판", "거미줄", "가시 돌", "독버섯" };
+                // Only the first seven kinds here; later kinds are appended at the end so numbers stay stable.
                 foreach (RoomTrapKind kind in Enum.GetValues(typeof(RoomTrapKind)))
                 {
+                    if ((int)kind >= trapNames.Length) continue;
                     string path = Week25Trap0Setup.PrefabPath(kind);
                     Capture(Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)),
                         RoomTrap.ArtworkIdOf(kind), trapNames[(int)kind], "함정", path);
@@ -182,6 +184,13 @@ namespace TrickalFanGame.Editor
                     altarSource, null, owner => owner.transform.Find(InGamePresentationSetup.GiftName).gameObject,
                     owner => new Renderer[] { owner.transform.Find(InGamePresentationSetup.AltarSpriteName)
                         .GetComponent<SpriteRenderer>() });
+                // Trap-2 머드케이크, appended after the earlier reviewed numbers.
+                string mudPath = Week25Trap0Setup.PrefabPath(RoomTrapKind.MudCake);
+                Capture(Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(mudPath)),
+                    RoomTrap.ArtworkIdOf(RoomTrapKind.MudCake), "머드케이크", "함정", mudPath);
+                // 새마음금고 황금 기둥 (2026-11-20): a boss summon with its own drawing, standing fully risen.
+                Capture(GoldPillar(), SaemaeumGoldPillar.ShadowProfileId, "새마음금고 황금 기둥", "보스 소환물",
+                    "SaemaeumGoldPillar.Create");
                 File.WriteAllText(Path.Combine(folder, "manifest.json"), JsonUtility.ToJson(manifest, true),
                     new System.Text.UTF8Encoding(false));
                 Debug.Log($"Ground shadow review exported: {manifest.entries.Count} actual gameplay appearances, " +
@@ -196,6 +205,17 @@ namespace TrickalFanGame.Editor
             if (prefab == null) throw new InvalidOperationException("Missing prefab: " + name);
             return Object.Instantiate(prefab);
         }
+        private static GameObject GoldPillar()
+        {
+            SaemaeumGoldPillar pillar = SaemaeumGoldPillar.Create(Vector2.zero, 0f, 0f, 0.6f,
+                TrickalFanGame.Combat.EnemyDamageTier.Light, 7f, 0.2f, 3, null, null, 0);
+            pillar.Tick(0f);
+            pillar.Tick(1f);
+            pillar.RefreshArtwork();
+            if (!pillar.HasEmerged) throw new InvalidOperationException("The review gold pillar did not rise.");
+            return pillar.gameObject;
+        }
+
         // The altar and gift as the room prefabs carry them, gift at its resting height.
         private static GameObject RewardAltar()
         {

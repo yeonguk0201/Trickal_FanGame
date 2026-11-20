@@ -367,6 +367,7 @@ namespace TrickalFanGame.Editor
             (TMP_Text[] statValues, Image critical) = StylePauseStats(panel);
             StylePauseArtifacts(panel);
             StylePauseButtons(view, panel);
+            InGameUiPolishSetup.StyleConfirmation(view);
             return new PauseParts(seedValue, statValues, critical);
         }
 
