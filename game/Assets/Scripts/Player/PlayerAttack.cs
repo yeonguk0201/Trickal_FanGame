@@ -65,6 +65,7 @@ namespace TrickalFanGame.Player
 
             DestructibleObstacle.HitInCircle(center, attackRadius);
             TrickalFanGame.Enemy.BossSlimePuddle.HitInCircle(center, attackRadius);
+            RoomTrap.BurstMudCakesByAttackInCircle(center, attackRadius, Time.time);
         }
 
         internal static bool TryReadAttackDirection(out Vector2 direction)

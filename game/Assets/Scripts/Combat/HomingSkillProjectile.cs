@@ -161,6 +161,7 @@ namespace TrickalFanGame.Combat
 
             DestructibleObstacle.HitInCircle(transform.position, explosionRadius, hitObstacles);
             TrickalFanGame.Enemy.BossSlimePuddle.HitInCircle(transform.position, explosionRadius);
+            RoomTrap.BurstMudCakesByAttackInCircle(transform.position, explosionRadius, Time.time);
             DestroyProjectile();
         }
 

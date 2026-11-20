@@ -38,8 +38,8 @@ namespace TrickalFanGame.Room
     //   hurt only the player, on contact.
     // - 진흙케이크 (Trap-2) is a one-use floor kind. The first grounded body whose feet reach the drawing bursts it:
     //   everyone on the cake then takes the trap hit once, and the burst leaves a mud puddle (the last burst frame)
-    //   that slows grounded bodies on it until it fades. A bomb bursts it without the hit. A burst cake never
-    //   returns on a revisit.
+    //   that slows grounded bodies on it until it fades. A bomb or one player attack bursts it without the hit. A
+    //   burst cake never returns on a revisit.
     // Traps keep working after the room is cleared.
     [DisallowMultipleComponent]
     public sealed class RoomTrap : MonoBehaviour
@@ -224,6 +224,7 @@ namespace TrickalFanGame.Room
             playerHealth = configuredPlayer != null ? configuredPlayer.GetComponent<Health>() : null;
             obstacle = GetComponent<DestructibleObstacle>();
             SubscribeFireBreak();
+            RegisterMudCake();
             if (kind == RoomTrapKind.Fire && obstacle != null && obstacle.IsBroken)
                 EnsureFireRemnant(currentTime, true);
             RestartCycle(currentTime);
@@ -249,6 +250,7 @@ namespace TrickalFanGame.Room
                 PoisonPuddleBubbles.Attach(transform, hitSize * 0.5f, PuddleBubbleCount, visual);
             RestartCycle(Time.time);
             SubscribeFireBreak();
+            RegisterMudCake();
         }
 
         private void SubscribeFireBreak()
@@ -261,6 +263,7 @@ namespace TrickalFanGame.Room
 
         private void OnDestroy()
         {
+            LiveMudCakes.Remove(this);
             if (obstacle != null) obstacle.Broken -= OnMushroomBroken;
             if (obstacle != null) obstacle.Broken -= OnFireBroken;
             if (FireRemnant != null)
@@ -381,6 +384,36 @@ namespace TrickalFanGame.Room
             float t = Mathf.Clamp01((elapsed - start) / MudPuddleGrowSeconds);
             t = 1f - (1f - t) * (1f - t);
             return Mathf.Lerp(1f, MudPuddleGrownScale, t);
+        }
+
+        // Player attacks (2026-11-21): like an obstacle, one hit of a basic attack, a shot, a skill explosion or the
+        // ultimate impact bursts an intact cake, without the trap hit (as a bomb). The attack area reaches the cake
+        // when it overlaps the cake's hit ellipse grown by the area's radius. A shot is used up, as on an obstacle.
+        public static int BurstMudCakesByAttackInCircle(Vector2 center, float radius, float currentTime)
+        {
+            if (LiveMudCakes.Count == 0) return 0;
+            LiveMudCakes.RemoveWhere(trap => trap == null);
+            int burst = 0;
+            // Burst never changes the set.
+            foreach (RoomTrap trap in LiveMudCakes)
+            {
+                if (!trap.isActiveAndEnabled || trap.IsRemoved || trap.HasBurst) continue;
+                Vector2 offset = center - (Vector2)trap.transform.position;
+                float x = offset.x / (trap.hitSize.x * 0.5f + radius);
+                float y = offset.y / (trap.hitSize.y * 0.5f + radius);
+                if (x * x + y * y > 1f) continue;
+                if (trap.Burst(currentTime, false)) burst++;
+            }
+
+            return burst;
+        }
+
+        private static readonly HashSet<RoomTrap> LiveMudCakes = new();
+
+        private void RegisterMudCake()
+        {
+            if (kind == RoomTrapKind.MudCake) LiveMudCakes.Add(this);
+            else LiveMudCakes.Remove(this);
         }
 
         // Bursts a 진흙케이크 once. A step hurts everything standing on the cake; a bomb only bursts it.

@@ -155,12 +155,31 @@ namespace TrickalFanGame.Combat
             }
 
             TickHoming(Time.fixedDeltaTime);
+            if (BurstMudCakesUnder(Time.time) > 0)
+            {
+                return;
+            }
+
             if (maximumTravelDistance > 0f &&
                 ((Vector2)transform.position - travelOrigin).sqrMagnitude >=
                 maximumTravelDistance * maximumTravelDistance)
             {
                 StopAtBoundary();
             }
+        }
+
+        // A 진흙케이크 has no collider, so the player's shot looks for cakes under it every physics step. One touch
+        // bursts the cake and, like an obstacle, uses the shot up (RoomTrap.BurstMudCakesByAttackInCircle).
+        public int BurstMudCakesUnder(float currentTime)
+        {
+            if (isSpent || damageContext.SourceType != DamageSourceType.PlayerProjectile) return 0;
+            CircleCollider2D circle = GetComponent<CircleCollider2D>();
+            float radius = circle != null ? circle.radius * Mathf.Abs(transform.lossyScale.x) : 0f;
+            int burst = RoomTrap.BurstMudCakesByAttackInCircle(transform.position, radius, currentTime);
+            // The cake plays its own burst frames, so no hit spark.
+            if (burst > 0) DestroyProjectile();
+
+            return burst;
         }
 
         // Returns true when the shot is hopping off an enemy or was used up by the hit it just made.

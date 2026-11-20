@@ -277,6 +277,7 @@ namespace TrickalFanGame.Player
 
             DestructibleObstacle.HitInCircle(transform.position, impactRadius, impactedObstacles);
             TrickalFanGame.Enemy.BossSlimePuddle.HitInCircle(transform.position, impactRadius, impactedPuddles);
+            RoomTrap.BurstMudCakesByAttackInCircle(transform.position, impactRadius, Time.time);
         }
 
         private void ApplyToTarget(Health target)
