@@ -228,7 +228,7 @@ namespace TrickalFanGame.Frontend
         {
             // UX-0: once the Run has ended (death sequence, result transition) the pause menu stays closed.
             if (IsPaused || Time.timeScale <= 0f || (runSession != null && runSession.HasEnded) ||
-                FindFirstObjectByType<ItemRewardSelectionSession>()?.IsOpen == true ||
+                FindFirstObjectByType<ItemRewardSelectionSession>()?.BlocksPause == true ||
                 FindFirstObjectByType<ShopSession>()?.BlocksPause == true) return false;
             previousTimeScale = Time.timeScale;
             previousSelectedObject = EventSystem.current != null

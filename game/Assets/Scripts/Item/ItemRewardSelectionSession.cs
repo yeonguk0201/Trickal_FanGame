@@ -19,12 +19,15 @@ namespace TrickalFanGame.Item
         private RunProgress subscribedProgress;
         private Vector3 powerDropPosition;
         private Transform powerDropParent;
+        private int cancelledFrame = -1;
 
         public ItemRewardSelectionState State => state;
         public IReadOnlyList<ItemRewardCandidate> Candidates =>
             state != null ? state.Candidates : Array.Empty<ItemRewardCandidate>();
         public bool IsOpen => state != null && !state.IsCompleted &&
                               ReferenceEquals(runProgress?.PendingRewardSelection, state);
+        // The Escape that closes the selection must not also open the pause menu in the same frame.
+        public bool BlocksPause => IsOpen || cancelledFrame == Time.frameCount;
         public event Action<ItemRewardSelectionState> Opened;
         public event Action<ItemRewardSelectionState, ItemRewardCandidate> Completed;
         public event Action<ItemRewardSelectionState> Cancelled;
@@ -143,6 +146,7 @@ namespace TrickalFanGame.Item
         public bool TryCancel()
         {
             if (!IsOpen || !runProgress.DeactivateRewardSelection(state)) return false;
+            cancelledFrame = Time.frameCount;
             SyncActionBlock();
             Cancelled?.Invoke(state);
             return true;

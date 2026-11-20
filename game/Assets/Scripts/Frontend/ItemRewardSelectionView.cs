@@ -5,6 +5,7 @@ using TrickalFanGame.Combat;
 using TrickalFanGame.Item;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace TrickalFanGame.Frontend
@@ -84,6 +85,8 @@ namespace TrickalFanGame.Frontend
         {
             if (visible && hideAtUnscaledTime >= 0f && Time.unscaledTime >= hideAtUnscaledTime)
                 HideNow();
+            // Escape closes the selection like 취소; the same candidates come back when the reward is opened again.
+            else if (visible && Keyboard.current?.escapeKey.wasPressedThisFrame == true) CancelSelection();
         }
 
         private void LateUpdate()

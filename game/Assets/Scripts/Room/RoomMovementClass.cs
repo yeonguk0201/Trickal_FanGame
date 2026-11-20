@@ -6,7 +6,8 @@ namespace TrickalFanGame.Room
     // Flight-0: the movement block classes a walking or flying body meets.
     // - Wall: room walls, doors, chests and high obstacles (an obstacle that blocks flight, such as a tree).
     //   Nothing walks or flies through them.
-    // - Low obstacle: a DestructibleObstacle or RoomStaticObstacle that does not block flight. They stay on the
+    // - Low obstacle: a DestructibleObstacle or RoomStaticObstacle that does not block flight, or an emptied reward
+    //   altar's footprint (RewardAltarDepth.BlocksFlight). They stay on the
     //   Environment layer, so walking bodies, projectiles and lines of fire still stop at them; only a flying player
     //   passes over them.
     // - Pit: the Pit layer (Terrain-0). Walking bodies stop at it, projectiles and a flying player pass over it.
@@ -26,7 +27,15 @@ namespace TrickalFanGame.Room
         {
             return collider != null && !collider.isTrigger &&
                    ((collider.TryGetComponent(out DestructibleObstacle obstacle) && !obstacle.BlocksFlight) ||
-                    (collider.TryGetComponent(out RoomStaticObstacle fixedObstacle) && !fixedObstacle.BlocksFlight));
+                    (collider.TryGetComponent(out RoomStaticObstacle fixedObstacle) && !fixedObstacle.BlocksFlight) ||
+                    IsEmptyRewardAltar(collider));
+        }
+
+        private static bool IsEmptyRewardAltar(Collider2D collider)
+        {
+            TrickalFanGame.Item.RewardAltarDepth altar =
+                collider.GetComponentInParent<TrickalFanGame.Item.RewardAltarDepth>(true);
+            return altar != null && altar.Footprint == collider && !altar.BlocksFlight;
         }
 
         public static bool IsOverPit(Vector2 point) => Physics2D.OverlapPoint(point, PitMask) != null;

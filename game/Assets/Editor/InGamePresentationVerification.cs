@@ -33,6 +33,7 @@ namespace TrickalFanGame.Editor
             VerifyStatsHud(frame);
             VerifyPause(scene);
             VerifyRewardAltars();
+            VerifyAltarFlight();
             Debug.Log("In-game presentation verification passed: banner, 권능 slot, stat icons, pause window, reward altar.");
         }
 
@@ -317,6 +318,58 @@ namespace TrickalFanGame.Editor
                     "Feet past the footprint's back edge are behind the altar; at its front or front side they are not.");
             }
             finally { Object.DestroyImmediate(visual); }
+        }
+
+        // Flight passes over an emptied altar only: with its reward still on it, the footprint is not a low obstacle.
+        private static void VerifyAltarFlight()
+        {
+            RewardRoom source = RoomPrefabPaths().Select(path => AssetDatabase.LoadAssetAtPath<GameObject>(path)
+                .GetComponentInChildren<RewardRoom>(true)).First(reward => reward != null);
+            GameObject copy = Object.Instantiate(source.gameObject);
+            GameObject flyer = null;
+            try
+            {
+                copy.SetActive(true); // room prefabs keep the reward off until the assembler picks a treasure room
+                RewardRoom reward = copy.GetComponent<RewardRoom>();
+                RewardAltarDepth depth = copy.GetComponentInChildren<RewardAltarDepth>(true);
+                Assert(depth != null && depth.Footprint != null, "The reward copy is missing its altar footprint.");
+                copy.transform.position = new Vector3(60f, 60f, 0f); // away from anything else in the open scene
+                flyer = new GameObject("Altar flight probe", typeof(Rigidbody2D), typeof(CircleCollider2D));
+                flyer.GetComponent<Rigidbody2D>().gravityScale = 0f;
+                flyer.transform.position = depth.Footprint.transform.position + Vector3.up * 0.8f;
+                Physics2D.SyncTransforms();
+                PlayerFlight flight = flyer.AddComponent<PlayerFlight>();
+                Assert(flight.TryStartFlying(), "The probe could not start flying.");
+                Collider2D probe = flyer.GetComponent<CircleCollider2D>();
+
+                reward.BindRunState(new RoomRunState("altar-flight-check"));
+                flight.IgnoreNearbyLowObstacles();
+                Assert(!reward.HasRewarded && depth.BlocksFlight && !RoomMovementClass.IsLowObstacle(depth.Footprint) &&
+                       !Physics2D.GetIgnoreCollision(probe, depth.Footprint),
+                    "An altar still holding its reward must stop a flying player.");
+                RoomRunState claimed = new("altar-flight-check");
+                claimed.MarkArtifactClaimed();
+                reward.BindRunState(claimed);
+                flight.IgnoreNearbyLowObstacles();
+                Assert(reward.HasRewarded && !depth.BlocksFlight && RoomMovementClass.IsLowObstacle(depth.Footprint) &&
+                       Physics2D.GetIgnoreCollision(probe, depth.Footprint),
+                    "An emptied altar must be a low obstacle a flying player passes over.");
+                int front = depth.FrontSortingOrder;
+                int walking = PlayerMovement.BodySortingOrder;
+                int flying = walking + PlayerFlight.FlyingSortingOrderBoost;
+                Assert(RewardAltarDepth.SortingOrderFor(true, false, true, front) > walking &&
+                       RewardAltarDepth.SortingOrderFor(true, true, true, front) > flying &&
+                       RewardAltarDepth.SortingOrderFor(true, true, true, front) < PlayerMovement.AboveBodySortingOrder &&
+                       RewardAltarDepth.SortingOrderFor(true, true, false, front) < flying &&
+                       RewardAltarDepth.SortingOrderFor(false, true, true, front) < walking,
+                    "Behind a rewarded altar both walking and flying players are covered; an emptied altar stays " +
+                    "under a flying player; in front the altar is under the player.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(copy);
+                if (flyer != null) Object.DestroyImmediate(flyer);
+            }
         }
 
         private static void VerifyRewardAltars()
