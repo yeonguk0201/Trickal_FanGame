@@ -100,8 +100,8 @@ namespace TrickalFanGame.Editor
             TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Week13FrontendSetup.FontPath);
             Assert(font != null && font.HasCharacters(GamePowerHudView.OfferFixedText),
                 "The Frontend font must contain the 권능 offer line glyphs.");
-            Assert(GamePowerHudView.BuildOfferLine(Load(Week27Power1Setup.PoppinStarId)) == "충전 2방 · [R] 사용 · 1개만 보유",
-                "A 권능 card shows its gauge, key and single-slot rule instead of artifact stacks.");
+            Assert(GamePowerHudView.BuildOfferLine(Load(Week27Power1Setup.PoppinStarId)) == "충전 2방",
+                "A 권능 card shows only its charge rooms instead of artifact stacks.");
         }
 
         private static void ValidateGeneration()

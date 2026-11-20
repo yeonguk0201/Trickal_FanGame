@@ -31,7 +31,6 @@ namespace TrickalFanGame.Editor
         public static readonly Vector2 IconPosition = new(-11, 14);
         public static readonly Vector2 GaugeColumnPosition = new(57, 14);
         public static readonly Vector2 GaugeColumnSize = new(20, IconSize);
-        public static readonly Vector2 KeyPosition = new(-11, -54);
         // UX-1: top left, beside the hearts, with a vertical gauge.
         public static Vector2 HudPosition => Week27Ux1Setup.PowerPosition;
         public static Vector2 HudSize => Week27Ux1Setup.PowerSize;
@@ -239,8 +238,17 @@ namespace TrickalFanGame.Editor
             }
             GamePowerHudView.LayoutGauge(cells, MaximumGaugeCells);
 
-            TMP_Text key = Text(panel, "Use Key", GamePowerHudView.UsableText, KeyPosition,
-                new Vector2(Week27Ux1Setup.PowerSize.x, 24), 16, font);
+            // The "R" strip across the icon's bottom, like the spell and skill tiles. The view sizes it to the drawn
+            // artwork at runtime; this is the full-square placement.
+            Vector2 keyCenter = IconPosition + new Vector2(0, -IconSize * 0.5f + GamePowerHudView.KeyStripHeight * 0.5f);
+            Image keyBacking = Component<Image>(Rect(panel, "Key Backing", keyCenter,
+                new Vector2(IconSize, GamePowerHudView.KeyStripHeight)).gameObject);
+            keyBacking.color = GamePowerHudView.KeyBackingColor;
+            keyBacking.raycastTarget = false;
+            TMP_Text key = Text(panel, "Use Key", GamePowerHudView.KeyLabel, keyCenter,
+                new Vector2(IconSize - 8, GamePowerHudView.KeyStripHeight - 2), 16, font);
+            key.fontStyle = FontStyles.Bold;
+            key.color = Color.white;
 
             // In-game presentation guide: the track artwork outside, the existing mask and cells inside, and the thin
             // frame behind the icon while no 권능 is held. Charged cells get the sky-blue cell artwork at runtime.
@@ -257,11 +265,14 @@ namespace TrickalFanGame.Editor
             empty.color = Color.white;
             empty.raycastTarget = false;
             MenuUiBuilder.DrawBehind(empty.transform, icon.transform);
+            keyBacking.transform.SetSiblingIndex(icon.transform.GetSiblingIndex() + 1);
+            key.transform.SetSiblingIndex(keyBacking.transform.GetSiblingIndex() + 1);
 
             GamePowerHudView view = Component<GamePowerHudView>(panel.gameObject);
             view.Configure(slot, icon, null, null, key, cells);
             view.ConfigureArtwork(empty.gameObject,
                 InGamePresentationSetup.LoadSprite(InGamePresentationSetup.PowerGaugeFill));
+            view.ConfigureKeyBacking(keyBacking);
             foreach (Component component in panel.GetComponentsInChildren<Component>(true))
                 EditorUtility.SetDirty(component);
         }

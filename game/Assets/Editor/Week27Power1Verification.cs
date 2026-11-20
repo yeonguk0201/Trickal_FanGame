@@ -453,6 +453,7 @@ namespace TrickalFanGame.Editor
                 GamePowerHudView hud = hudClone.GetComponent<GamePowerHudView>();
                 hud.Configure(rig.Slot, hud.Icon, hud.NameText, hud.GaugeText, hud.KeyText, hud.GaugeCells.ToArray());
                 Assert(hud.Icon.sprite == null && !hud.KeyText.gameObject.activeSelf &&
+                       (hud.KeyBacking == null || !hud.KeyBacking.gameObject.activeSelf) &&
                        hud.GaugeCells.All(cell => !cell.gameObject.activeSelf),
                     "An empty 권능 slot must show an empty icon without gauge cells or a use key.");
 
@@ -462,14 +463,24 @@ namespace TrickalFanGame.Editor
                 Assert(hud.Icon.sprite == UserArtwork.Load(blanket.ItemId) &&
                        hud.GaugeCells.Count(cell => cell.gameObject.activeSelf) == 3 &&
                        hud.GaugeCells.Take(3).All(cell => cell.color == GamePowerHudView.EmptyCellColor) &&
-                       !hud.KeyText.gameObject.activeSelf,
-                    "The HUD must show the 권능 icon and three empty cells, with no key line while charging (UX-1).");
+                       hud.KeyText.gameObject.activeSelf && hud.KeyText.text == GamePowerHudView.KeyLabel &&
+                       hud.KeyBacking != null && hud.KeyBacking.gameObject.activeSelf &&
+                       !hud.IsShowingUsable && hud.Icon.color == GamePowerHudView.UnusableTint,
+                    "A charging 권능 must show its icon greyed with the R strip and three empty cells.");
+                RectTransform iconRect = hud.Icon.rectTransform;
+                RectTransform strip = hud.KeyBacking.rectTransform;
+                float aspect = hud.Icon.sprite.rect.width / hud.Icon.sprite.rect.height;
+                float drawnWidth = Mathf.Min(iconRect.sizeDelta.x, iconRect.sizeDelta.y * aspect);
+                Assert(Mathf.Abs(strip.sizeDelta.x - drawnWidth) < 0.01f &&
+                       strip.sizeDelta.y == GamePowerHudView.KeyStripHeight,
+                    "The R strip must span the drawn artwork's width.");
                 rig.Slot.AddCharge(3);
                 hud.RefreshNow();
                 Assert(hud.GaugeCells.Take(3).All(cell => cell.color == hud.FilledColor &&
                            cell.sprite == hud.FilledCellSprite) &&
-                       hud.KeyText.gameObject.activeSelf && hud.KeyText.text == GamePowerHudView.UsableText,
-                    "A full gauge must show filled cells and [R] 사용.");
+                       hud.KeyText.gameObject.activeSelf && hud.KeyText.text == GamePowerHudView.KeyLabel &&
+                       hud.IsShowingUsable && hud.Icon.color == Color.white,
+                    "A full gauge must show filled cells and the un-greyed icon with the R strip.");
             }
             finally
             {
@@ -520,7 +531,7 @@ namespace TrickalFanGame.Editor
 
             GamePowerHudView[] huds = FindAll<GamePowerHudView>(scene);
             Assert(huds.Length == 1 && huds[0].Slot == slots[0] && huds[0].Icon != null &&
-                   huds[0].KeyText != null &&
+                   huds[0].KeyText != null && huds[0].KeyBacking != null &&
                    huds[0].GaugeCells.Count == Week27Power1Setup.MaximumGaugeCells &&
                    huds[0].GaugeCells.All(cell => cell != null),
                 "The Game HUD must have exactly one 권능 view bound to the player slot with five gauge cells.");
