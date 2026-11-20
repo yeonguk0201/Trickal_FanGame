@@ -545,6 +545,11 @@
       열 간격이 아니라 그림 조각 단위로 나눴다(`scripts/split-crayon-minion-death.py`, 작은 효과선은 가장 가까운 큰 조각을
       따른다). 확인용으로 `F1` 패널에 `Spawn crayon mage, axe, archer (drawn defeat)`를 더했다. 자동 검증 배치: 미실행(Unity
       다중 인스턴스 잠금, 연결은 사용자가 메뉴로 실행). 사용자 Play 확인(2026-11-11): "좋다, 문제없다".
+    - Defeat-5 크레용 방패병(2026-11-19, 사용자 원화): `CrayonShieldMinion`에 방패를 놓치며 쓰러지는 네 장
+      (`Death/CrayonShield_Death_0~3`, 원본 `Death/Source/CrayonShield_Death_Sheet.png`)을 연결했다. 시트는
+      `scripts/split-crayon-minion-death.py CrayonShield=<시트>`로 자른다. `F1` 패널 버튼은
+      `Spawn crayon mage, axe, archer, shield (drawn defeat)`로 넓혔다. 자동 검증:
+      `EnemyDefeatArtworkSetup.ApplyAndVerifyBatch` 통과(2026-11-19, 16개 Prefab). 사용자 Play 확인: 미확인.
     - 남은 것: 누루링·자폭형·부스러기 쫄따구·크레용 용사·크레용 방패병은 쓰러짐 그림이 없어 지금처럼 바로 사라진다.
 - 새 적 원화(자폭형·곡사형·잠복형)는 사용자가 준비한다. 원화 전에는 임시 그림으로 로직부터 만든다.
 - Curve-1~Variant-2와 Drop-0·1은 Play-2 기록 전에 끝내야 그 기록이 기준선으로 남는다(§6).

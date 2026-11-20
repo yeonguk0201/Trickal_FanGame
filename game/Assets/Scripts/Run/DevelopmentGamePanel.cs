@@ -932,16 +932,17 @@ namespace TrickalFanGame.Run
                     ? "Spawned a crumb minion to the right of the player."
                     : "Crumb minion spawn failed.";
             }
-            // 크레용사용's 마법사·도끼병·궁병 in a column to the right of the player, to see their drawn defeats (2026-11-11).
-            if (AssistedButton("Spawn crayon mage, axe, archer (drawn defeat)") && controller != null && player != null)
+            // 크레용사용's 마법사·도끼병·궁병·방패병 in a column to the right of the player, to see their drawn defeats
+            // (2026-11-11; 방패병 2026-11-19).
+            if (AssistedButton("Spawn crayon mage, axe, archer, shield (drawn defeat)") && controller != null && player != null)
             {
-                string[] crayons = { "CrayonMageMinion", "CrayonAxeMinion", "CrayonArcherMinion" };
+                string[] crayons = { "CrayonMageMinion", "CrayonAxeMinion", "CrayonArcherMinion", "CrayonShieldMinion" };
                 int spawned = 0;
                 for (int i = 0; i < crayons.Length; i++)
                 {
                     GameObject crayon = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
                         "Assets/Prefabs/" + crayons[i] + ".prefab");
-                    Vector3 offset = Vector3.right * 3f + Vector3.up * (1.5f * (i - 1));
+                    Vector3 offset = Vector3.right * 3f + Vector3.up * (1.5f * (i - 1.5f));
                     if (controller.SpawnExtraEnemy(crayon, player.transform.position + offset) != null) spawned++;
                 }
                 status = $"Spawned {spawned} of {crayons.Length} crayon minions to the right of the player.";

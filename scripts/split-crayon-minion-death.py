@@ -1,10 +1,11 @@
-# Splits the user's crayon minion defeat sheets (2026-11-11: 마법사, 도끼병, 궁병) into Unity frames.
+# Splits the user's crayon minion defeat sheets (2026-11-11: 마법사, 도끼병, 궁병; 2026-11-19: 방패병) into Unity frames.
 # A staff, arrow or broken-off half can reach into the next frame's columns, so the sheet is not cut at column
 # gaps: each large connected drawing piece goes to the quarter of the sheet that holds its centre, and each small
 # mark (motion lines, sparks) to the frame of the large piece nearest to it, since marks can sit on the quarter line. Every frame is
 # centred on one shared canvas and keeps the sheet's ground line, like the other defeat frames (the bottom-centre
 # pivot is set by EnemyDefeatArtworkSetup).
 # Usage: python scripts/split-crayon-minion-death.py <mage sheet> <axe sheet> <archer sheet>
+#    or: python scripts/split-crayon-minion-death.py CrayonShield=<shield sheet> [Name=<sheet> ...]
 import shutil
 import sys
 from pathlib import Path
@@ -12,7 +13,7 @@ from pathlib import Path
 from PIL import Image
 
 DEATH = Path(__file__).resolve().parents[1] / 'game' / 'Assets' / 'Art' / 'Enemies' / 'FairyKingdom' / 'Death'
-NAMES = ('CrayonMage', 'CrayonAxe', 'CrayonArcher')
+NAMES = ('CrayonMage', 'CrayonAxe', 'CrayonArcher', 'CrayonShield')
 ALPHA = 16
 FRAMES = 4
 # Pixels; below this a piece is a mark that follows its nearest large piece.
@@ -88,7 +89,15 @@ def split(name, sheet_path):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 1 + len(NAMES):
-        raise SystemExit('usage: <mage sheet> <axe sheet> <archer sheet>')
-    for name, path in zip(NAMES, sys.argv[1:]):
+    args = sys.argv[1:]
+    if args and all('=' in a for a in args):
+        jobs = [a.split('=', 1) for a in args]
+        unknown = [n for n, _ in jobs if n not in NAMES]
+        if unknown:
+            raise SystemExit(f'unknown names {unknown}; expected one of {NAMES}')
+    elif len(args) == 3:
+        jobs = list(zip(NAMES[:3], args))
+    else:
+        raise SystemExit('usage: <mage sheet> <axe sheet> <archer sheet> | Name=<sheet> ...')
+    for name, path in jobs:
         split(name, path)

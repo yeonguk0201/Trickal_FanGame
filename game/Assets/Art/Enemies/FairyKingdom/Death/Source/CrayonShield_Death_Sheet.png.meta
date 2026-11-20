@@ -1,0 +1,3783 @@
+fileFormatVersion: 2
+guid: bf7652731a1fa8941b4c943b3a531fc8
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8355008128764529375
+    second: CrayonShield_Death_Sheet_0
+  - first:
+      213: 952411021395623593
+    second: CrayonShield_Death_Sheet_1
+  - first:
+      213: -8656191024333395801
+    second: CrayonShield_Death_Sheet_2
+  - first:
+      213: -8501992398995937400
+    second: CrayonShield_Death_Sheet_3
+  - first:
+      213: 446961655068550624
+    second: CrayonShield_Death_Sheet_4
+  - first:
+      213: -3203880623533369543
+    second: CrayonShield_Death_Sheet_5
+  - first:
+      213: 7545330265403373991
+    second: CrayonShield_Death_Sheet_6
+  - first:
+      213: -6567106554170578805
+    second: CrayonShield_Death_Sheet_7
+  - first:
+      213: 5950226760659264270
+    second: CrayonShield_Death_Sheet_8
+  - first:
+      213: 1054931346992457794
+    second: CrayonShield_Death_Sheet_9
+  - first:
+      213: -8738713250943420765
+    second: CrayonShield_Death_Sheet_10
+  - first:
+      213: -2730682359418462312
+    second: CrayonShield_Death_Sheet_11
+  - first:
+      213: 5884307322311768229
+    second: CrayonShield_Death_Sheet_12
+  - first:
+      213: 5410745687818072375
+    second: CrayonShield_Death_Sheet_13
+  - first:
+      213: -1151325750831328989
+    second: CrayonShield_Death_Sheet_14
+  - first:
+      213: -7026713054108653327
+    second: CrayonShield_Death_Sheet_15
+  - first:
+      213: 1426364760426574285
+    second: CrayonShield_Death_Sheet_16
+  - first:
+      213: 8883826773736513915
+    second: CrayonShield_Death_Sheet_17
+  - first:
+      213: -702545622799239619
+    second: CrayonShield_Death_Sheet_18
+  - first:
+      213: 1629654205984826556
+    second: CrayonShield_Death_Sheet_19
+  - first:
+      213: -4059172853876945342
+    second: CrayonShield_Death_Sheet_20
+  - first:
+      213: -7460160005367231823
+    second: CrayonShield_Death_Sheet_21
+  - first:
+      213: -2879371244770530475
+    second: CrayonShield_Death_Sheet_22
+  - first:
+      213: 7968667850776349406
+    second: CrayonShield_Death_Sheet_23
+  - first:
+      213: 362017995227860987
+    second: CrayonShield_Death_Sheet_24
+  - first:
+      213: 2771723218449906397
+    second: CrayonShield_Death_Sheet_25
+  - first:
+      213: 4908997598218931004
+    second: CrayonShield_Death_Sheet_26
+  - first:
+      213: 531735724713763871
+    second: CrayonShield_Death_Sheet_27
+  - first:
+      213: 3132546490608465553
+    second: CrayonShield_Death_Sheet_28
+  - first:
+      213: 1590105383795615799
+    second: CrayonShield_Death_Sheet_29
+  - first:
+      213: 595286339532321158
+    second: CrayonShield_Death_Sheet_30
+  - first:
+      213: 4831313401444642634
+    second: CrayonShield_Death_Sheet_31
+  - first:
+      213: 5688009971220271237
+    second: CrayonShield_Death_Sheet_32
+  - first:
+      213: -253774893916849870
+    second: CrayonShield_Death_Sheet_33
+  - first:
+      213: -4180199952800425907
+    second: CrayonShield_Death_Sheet_34
+  - first:
+      213: 6403399517627783301
+    second: CrayonShield_Death_Sheet_35
+  - first:
+      213: -2885629272318066975
+    second: CrayonShield_Death_Sheet_36
+  - first:
+      213: 4932087961894106579
+    second: CrayonShield_Death_Sheet_37
+  - first:
+      213: -1012473755591825853
+    second: CrayonShield_Death_Sheet_38
+  - first:
+      213: -5019107292761113984
+    second: CrayonShield_Death_Sheet_39
+  - first:
+      213: -2983651986372372925
+    second: CrayonShield_Death_Sheet_40
+  - first:
+      213: 5572974655841180006
+    second: CrayonShield_Death_Sheet_41
+  - first:
+      213: 4404545711261807908
+    second: CrayonShield_Death_Sheet_42
+  - first:
+      213: -1755441562882215396
+    second: CrayonShield_Death_Sheet_43
+  - first:
+      213: -2748088050872990369
+    second: CrayonShield_Death_Sheet_44
+  - first:
+      213: -2662047928922691245
+    second: CrayonShield_Death_Sheet_45
+  - first:
+      213: 8920690102504875871
+    second: CrayonShield_Death_Sheet_46
+  - first:
+      213: -5590046146361730372
+    second: CrayonShield_Death_Sheet_47
+  - first:
+      213: 8584224160535948907
+    second: CrayonShield_Death_Sheet_48
+  - first:
+      213: -493958397653753610
+    second: CrayonShield_Death_Sheet_49
+  - first:
+      213: 3254125800153230647
+    second: CrayonShield_Death_Sheet_50
+  - first:
+      213: -7892873485464784823
+    second: CrayonShield_Death_Sheet_51
+  - first:
+      213: -4710447447312298921
+    second: CrayonShield_Death_Sheet_52
+  - first:
+      213: 6055278915647363522
+    second: CrayonShield_Death_Sheet_53
+  - first:
+      213: -3339803147194217484
+    second: CrayonShield_Death_Sheet_54
+  - first:
+      213: -2100560808248929048
+    second: CrayonShield_Death_Sheet_55
+  - first:
+      213: 1927107353003570999
+    second: CrayonShield_Death_Sheet_56
+  - first:
+      213: -8013302131597160971
+    second: CrayonShield_Death_Sheet_57
+  - first:
+      213: -2161063612823509015
+    second: CrayonShield_Death_Sheet_58
+  - first:
+      213: -1770121897922002804
+    second: CrayonShield_Death_Sheet_59
+  - first:
+      213: 4718480452530454923
+    second: CrayonShield_Death_Sheet_60
+  - first:
+      213: -7751840444211615496
+    second: CrayonShield_Death_Sheet_61
+  - first:
+      213: -1621489605315074495
+    second: CrayonShield_Death_Sheet_62
+  - first:
+      213: -7741667508520459509
+    second: CrayonShield_Death_Sheet_63
+  - first:
+      213: 5952187231993118477
+    second: CrayonShield_Death_Sheet_64
+  - first:
+      213: 4765457797569182094
+    second: CrayonShield_Death_Sheet_65
+  - first:
+      213: -5146201563063906142
+    second: CrayonShield_Death_Sheet_66
+  - first:
+      213: -7150666897991497312
+    second: CrayonShield_Death_Sheet_67
+  - first:
+      213: -3344303722942718390
+    second: CrayonShield_Death_Sheet_68
+  - first:
+      213: -6682366449041917317
+    second: CrayonShield_Death_Sheet_69
+  - first:
+      213: -6147115319334499948
+    second: CrayonShield_Death_Sheet_70
+  - first:
+      213: -7998149649589950684
+    second: CrayonShield_Death_Sheet_71
+  - first:
+      213: 959878296271299153
+    second: CrayonShield_Death_Sheet_72
+  - first:
+      213: 1670304558226882226
+    second: CrayonShield_Death_Sheet_73
+  - first:
+      213: 3288703366536476809
+    second: CrayonShield_Death_Sheet_74
+  - first:
+      213: 433854300500215838
+    second: CrayonShield_Death_Sheet_75
+  - first:
+      213: -982249556251038335
+    second: CrayonShield_Death_Sheet_76
+  - first:
+      213: -8017789384280721053
+    second: CrayonShield_Death_Sheet_77
+  - first:
+      213: 666863003381262527
+    second: CrayonShield_Death_Sheet_78
+  - first:
+      213: 4794143102560202728
+    second: CrayonShield_Death_Sheet_79
+  - first:
+      213: 5548511235606750691
+    second: CrayonShield_Death_Sheet_80
+  - first:
+      213: 8444289704875169537
+    second: CrayonShield_Death_Sheet_81
+  - first:
+      213: -6553584025068080781
+    second: CrayonShield_Death_Sheet_82
+  - first:
+      213: 5276773722157255104
+    second: CrayonShield_Death_Sheet_83
+  - first:
+      213: -2786485304830140203
+    second: CrayonShield_Death_Sheet_84
+  - first:
+      213: 6948360088027565989
+    second: CrayonShield_Death_Sheet_85
+  - first:
+      213: 2996740594423429306
+    second: CrayonShield_Death_Sheet_86
+  - first:
+      213: 8148188017209110461
+    second: CrayonShield_Death_Sheet_87
+  - first:
+      213: -926150714302131700
+    second: CrayonShield_Death_Sheet_88
+  - first:
+      213: 1428200815340435600
+    second: CrayonShield_Death_Sheet_89
+  - first:
+      213: -1608335606385183411
+    second: CrayonShield_Death_Sheet_90
+  - first:
+      213: 3109232701928393388
+    second: CrayonShield_Death_Sheet_91
+  - first:
+      213: 2693777907596092527
+    second: CrayonShield_Death_Sheet_92
+  - first:
+      213: 7694213577063183440
+    second: CrayonShield_Death_Sheet_93
+  - first:
+      213: -3997811567312001996
+    second: CrayonShield_Death_Sheet_94
+  - first:
+      213: 7123766276029637767
+    second: CrayonShield_Death_Sheet_95
+  - first:
+      213: -8881793330789910777
+    second: CrayonShield_Death_Sheet_96
+  - first:
+      213: -6027170510865727628
+    second: CrayonShield_Death_Sheet_97
+  - first:
+      213: 1962128521394799737
+    second: CrayonShield_Death_Sheet_98
+  - first:
+      213: 5872152302640831482
+    second: CrayonShield_Death_Sheet_99
+  - first:
+      213: 5044455321707934693
+    second: CrayonShield_Death_Sheet_100
+  - first:
+      213: 4158426053907947211
+    second: CrayonShield_Death_Sheet_101
+  - first:
+      213: -3487998102118107610
+    second: CrayonShield_Death_Sheet_102
+  - first:
+      213: 8843346619705024361
+    second: CrayonShield_Death_Sheet_103
+  - first:
+      213: -3937638136689674991
+    second: CrayonShield_Death_Sheet_104
+  - first:
+      213: -7403540964533687444
+    second: CrayonShield_Death_Sheet_105
+  - first:
+      213: -9100498905400319417
+    second: CrayonShield_Death_Sheet_106
+  - first:
+      213: 8254608065457467154
+    second: CrayonShield_Death_Sheet_107
+  - first:
+      213: 5401264802522441280
+    second: CrayonShield_Death_Sheet_108
+  - first:
+      213: -3428004578661863486
+    second: CrayonShield_Death_Sheet_109
+  - first:
+      213: 285089432360218408
+    second: CrayonShield_Death_Sheet_110
+  - first:
+      213: 1762922354593224979
+    second: CrayonShield_Death_Sheet_111
+  - first:
+      213: 4187564287258182217
+    second: CrayonShield_Death_Sheet_112
+  - first:
+      213: -8327490395699639118
+    second: CrayonShield_Death_Sheet_113
+  - first:
+      213: 4124484847686567719
+    second: CrayonShield_Death_Sheet_114
+  - first:
+      213: 3410512456156460409
+    second: CrayonShield_Death_Sheet_115
+  - first:
+      213: -3435033209897730404
+    second: CrayonShield_Death_Sheet_116
+  - first:
+      213: -7453072637752313365
+    second: CrayonShield_Death_Sheet_117
+  - first:
+      213: 3631436495861992493
+    second: CrayonShield_Death_Sheet_118
+  - first:
+      213: -5104636493009479965
+    second: CrayonShield_Death_Sheet_119
+  - first:
+      213: -6943588498685401170
+    second: CrayonShield_Death_Sheet_120
+  - first:
+      213: -2057063668412302092
+    second: CrayonShield_Death_Sheet_121
+  - first:
+      213: -7470287717211300578
+    second: CrayonShield_Death_Sheet_122
+  - first:
+      213: -1195046124550578606
+    second: CrayonShield_Death_Sheet_123
+  - first:
+      213: -2617195151349505032
+    second: CrayonShield_Death_Sheet_124
+  - first:
+      213: -3613583319899992587
+    second: CrayonShield_Death_Sheet_125
+  - first:
+      213: 1106907676057753232
+    second: CrayonShield_Death_Sheet_126
+  - first:
+      213: 7092391651742327301
+    second: CrayonShield_Death_Sheet_127
+  - first:
+      213: -1462117009585598928
+    second: CrayonShield_Death_Sheet_128
+  - first:
+      213: -3159002148702517844
+    second: CrayonShield_Death_Sheet_129
+  - first:
+      213: 1997303610373426241
+    second: CrayonShield_Death_Sheet_130
+  - first:
+      213: -7330660669905600005
+    second: CrayonShield_Death_Sheet_131
+  - first:
+      213: -6303199147486207598
+    second: CrayonShield_Death_Sheet_132
+  - first:
+      213: 5534945640617104839
+    second: CrayonShield_Death_Sheet_133
+  - first:
+      213: -4858018605437289460
+    second: CrayonShield_Death_Sheet_134
+  - first:
+      213: 7914891988062379196
+    second: CrayonShield_Death_Sheet_135
+  - first:
+      213: -5029840280135608389
+    second: CrayonShield_Death_Sheet_136
+  - first:
+      213: -4847658269055253822
+    second: CrayonShield_Death_Sheet_137
+  - first:
+      213: -2395511256750773994
+    second: CrayonShield_Death_Sheet_138
+  - first:
+      213: 4304658254703859044
+    second: CrayonShield_Death_Sheet_139
+  - first:
+      213: -1055324377110534658
+    second: CrayonShield_Death_Sheet_140
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 681
+        width: 72
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdac28a50a3f2f370800000000000000
+      internalID: 8355008128764529375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 715
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9aef37227c4a73d00800000000000000
+      internalID: 952411021395623593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 343
+        y: 552
+        width: 227
+        height: 164
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a8eea630280fd780800000000000000
+      internalID: -8656191024333395801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 1218
+        y: 594
+        width: 116
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 887a6c665fad20a80800000000000000
+      internalID: -8501992398995937400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 1440
+        y: 576
+        width: 206
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e5e496d14de33600800000000000000
+      internalID: 446961655068550624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 661
+        width: 18
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 937598b3c878983d0800000000000000
+      internalID: -3203880623533369543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 585
+        y: 632
+        width: 108
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a93f5646e566b860800000000000000
+      internalID: 7545330265403373991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 883
+        y: 490
+        width: 216
+        height: 199
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b88e58c0263fcd4a0800000000000000
+      internalID: -6567106554170578805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 901
+        y: 687
+        width: 37
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e036e1296b3739250800000000000000
+      internalID: 5950226760659264270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 1003
+        y: 688
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 248e8e7887ed3ae00800000000000000
+      internalID: 1054931346992457794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 1016
+        y: 675
+        width: 9
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a6b483199ad9b680800000000000000
+      internalID: -8738713250943420765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 1020
+        y: 675
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89fdf64acdaaa1ad0800000000000000
+      internalID: -2730682359418462312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 1164
+        y: 600
+        width: 52
+        height: 110
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a87f9f455249a150800000000000000
+      internalID: 5884307322311768229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 1341
+        y: 673
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7317f542984d61b40800000000000000
+      internalID: 5410745687818072375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 1398
+        y: 637
+        width: 27
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32150f0645ba500f0800000000000000
+      internalID: -1151325750831328989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 1569
+        y: 675
+        width: 15
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f8e047d4b91c7e90800000000000000
+      internalID: -7026713054108653327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 1808
+        y: 659
+        width: 33
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc17c5141377bc310800000000000000
+      internalID: 1426364760426574285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 1850
+        y: 526
+        width: 221
+        height: 172
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b716ba6d161b94b70800000000000000
+      internalID: 8883826773736513915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 165
+        y: 661
+        width: 29
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d36bb827a7e0046f0800000000000000
+      internalID: -702545622799239619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 649
+        width: 28
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb46276bdd1bd9610800000000000000
+      internalID: 1629654205984826556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 624
+        width: 100
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24e81cabbcbeaa7c0800000000000000
+      internalID: -4059172853876945342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 828
+        y: 622
+        width: 63
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ba82803000387890800000000000000
+      internalID: -7460160005367231823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 835
+        y: 647
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55b6af2cb1b6a08d0800000000000000
+      internalID: -2879371244770530475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 1070
+        y: 590
+        width: 94
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eda8992c035669e60800000000000000
+      internalID: 7968667850776349406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 1172
+        y: 663
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bff0bd7d275260500800000000000000
+      internalID: 362017995227860987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 1325
+        y: 606
+        width: 44
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddab86bf493277620800000000000000
+      internalID: 2771723218449906397
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 1609
+        y: 667
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3bc51d7e43402440800000000000000
+      internalID: 4908997598218931004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 1738
+        y: 558
+        width: 49
+        height: 114
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f14e2f903da116700800000000000000
+      internalID: 531735724713763871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 1784
+        y: 602
+        width: 53
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1963d1faf6a097b20800000000000000
+      internalID: 3132546490608465553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 19
+        width: 554
+        height: 636
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 738e29cfb60311610800000000000000
+      internalID: 1590105383795615799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 643
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 681777795c1e24800800000000000000
+      internalID: 595286339532321158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 642
+        width: 59
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4f21b3f0f54c0340800000000000000
+      internalID: 4831313401444642634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_32
+      rect:
+        serializedVersion: 2
+        x: 1174
+        y: 651
+        width: 18
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 580d675beeedfee40800000000000000
+      internalID: 5688009971220271237
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_33
+      rect:
+        serializedVersion: 2
+        x: 1261
+        y: 630
+        width: 13
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2397c2b14196a7cf0800000000000000
+      internalID: -253774893916849870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_34
+      rect:
+        serializedVersion: 2
+        x: 1448
+        y: 640
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d48d9336a42fcf5c0800000000000000
+      internalID: -4180199952800425907
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_35
+      rect:
+        serializedVersion: 2
+        x: 1611
+        y: 642
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5889c134fe17dd850800000000000000
+      internalID: 6403399517627783301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_36
+      rect:
+        serializedVersion: 2
+        x: 563
+        y: 616
+        width: 15
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ee330e277f24f7d0800000000000000
+      internalID: -2885629272318066975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_37
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 603
+        width: 55
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d5bda9bedb427440800000000000000
+      internalID: 4932087961894106579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_38
+      rect:
+        serializedVersion: 2
+        x: 1444
+        y: 624
+        width: 23
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3462b8dcb78f2f1f0800000000000000
+      internalID: -1012473755591825853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_39
+      rect:
+        serializedVersion: 2
+        x: 1623
+        y: 608
+        width: 19
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08ab665728c885ab0800000000000000
+      internalID: -5019107292761113984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_40
+      rect:
+        serializedVersion: 2
+        x: 1645
+        y: 612
+        width: 31
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 346d2e29350f796d0800000000000000
+      internalID: -2983651986372372925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_41
+      rect:
+        serializedVersion: 2
+        x: 1735
+        y: 634
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6691baf2cee275d40800000000000000
+      internalID: 5572974655841180006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_42
+      rect:
+        serializedVersion: 2
+        x: 1778
+        y: 626
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 425fab4fcf6102d30800000000000000
+      internalID: 4404545711261807908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_43
+      rect:
+        serializedVersion: 2
+        x: 2083
+        y: 526
+        width: 74
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c12f274033b63a7e0800000000000000
+      internalID: -1755441562882215396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_44
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 618
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f55483c4a74dcd9d0800000000000000
+      internalID: -2748088050872990369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_45
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 618
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 359af7543818e0bd0800000000000000
+      internalID: -2662047928922691245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_46
+      rect:
+        serializedVersion: 2
+        x: 1178
+        y: 616
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5765276268accb70800000000000000
+      internalID: 8920690102504875871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_47
+      rect:
+        serializedVersion: 2
+        x: 1180
+        y: 618
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cba5110b5aa2c62b0800000000000000
+      internalID: -5590046146361730372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_48
+      rect:
+        serializedVersion: 2
+        x: 1231
+        y: 612
+        width: 9
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6e2211946a412770800000000000000
+      internalID: 8584224160535948907
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_49
+      rect:
+        serializedVersion: 2
+        x: 1275
+        y: 606
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f0e606547b1529f0800000000000000
+      internalID: -493958397653753610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_50
+      rect:
+        serializedVersion: 2
+        x: 1289
+        y: 593
+        width: 15
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73d21949c2af82d20800000000000000
+      internalID: 3254125800153230647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_51
+      rect:
+        serializedVersion: 2
+        x: 1335
+        y: 612
+        width: 12
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 940b5c91261e67290800000000000000
+      internalID: -7892873485464784823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_52
+      rect:
+        serializedVersion: 2
+        x: 1665
+        y: 606
+        width: 15
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75c0ec1f00121aeb0800000000000000
+      internalID: -4710447447312298921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_53
+      rect:
+        serializedVersion: 2
+        x: 1679
+        y: 616
+        width: 23
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c9d21f671ca80450800000000000000
+      internalID: 6055278915647363522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_54
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 596
+        width: 23
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fbc1cf8bb2a6a1d0800000000000000
+      internalID: -3339803147194217484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_55
+      rect:
+        serializedVersion: 2
+        x: 551
+        y: 0
+        width: 508
+        height: 615
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e4173bf21f49d2e0800000000000000
+      internalID: -2100560808248929048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_56
+      rect:
+        serializedVersion: 2
+        x: 1102
+        y: 574
+        width: 12
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73732d36de57eba10800000000000000
+      internalID: 1927107353003570999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_57
+      rect:
+        serializedVersion: 2
+        x: 1239
+        y: 602
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fd4548ea280bc090800000000000000
+      internalID: -8013302131597160971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_58
+      rect:
+        serializedVersion: 2
+        x: 1245
+        y: 602
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e7e1ac081c5202e0800000000000000
+      internalID: -2161063612823509015
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_59
+      rect:
+        serializedVersion: 2
+        x: 1266
+        y: 600
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c80083923834f67e0800000000000000
+      internalID: -1770121897922002804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_60
+      rect:
+        serializedVersion: 2
+        x: 1589
+        y: 500
+        width: 103
+        height: 105
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b81c3b4d8f86b7140800000000000000
+      internalID: 4718480452530454923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_61
+      rect:
+        serializedVersion: 2
+        x: 1681
+        y: 590
+        width: 19
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f8a24fdf2eeb6490800000000000000
+      internalID: -7751840444211615496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_62
+      rect:
+        serializedVersion: 2
+        x: 481
+        y: 528
+        width: 39
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 146e4348bcf4f79e0800000000000000
+      internalID: -1621489605315074495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_63
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 566
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0364790b62109490800000000000000
+      internalID: -7741667508520459509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_64
+      rect:
+        serializedVersion: 2
+        x: 539
+        y: 560
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0fb09f50ca6a9250800000000000000
+      internalID: 5952187231993118477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_65
+      rect:
+        serializedVersion: 2
+        x: 1060
+        y: 0
+        width: 560
+        height: 593
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e89f9305e9e422240800000000000000
+      internalID: 4765457797569182094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_66
+      rect:
+        serializedVersion: 2
+        x: 1086
+        y: 578
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a01403b1f40598b0800000000000000
+      internalID: -5146201563063906142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_67
+      rect:
+        serializedVersion: 2
+        x: 1679
+        y: 562
+        width: 25
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a98216975ab3cc90800000000000000
+      internalID: -7150666897991497312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_68
+      rect:
+        serializedVersion: 2
+        x: 1681
+        y: 578
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4e9bfc9b75a691d0800000000000000
+      internalID: -3344303722942718390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_69
+      rect:
+        serializedVersion: 2
+        x: 1719
+        y: 549
+        width: 20
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7a3ed98e177343a0800000000000000
+      internalID: -6682366449041917317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_70
+      rect:
+        serializedVersion: 2
+        x: 1999
+        y: 570
+        width: 57
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49984b59f2f01baa0800000000000000
+      internalID: -6147115319334499948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_71
+      rect:
+        serializedVersion: 2
+        x: 2112
+        y: 544
+        width: 17
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 427a6cb054dd00190800000000000000
+      internalID: -7998149649589950684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_72
+      rect:
+        serializedVersion: 2
+        x: 2116
+        y: 557
+        width: 7
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 152abdc893c225d00800000000000000
+      internalID: 959878296271299153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_73
+      rect:
+        serializedVersion: 2
+        x: 521
+        y: 530
+        width: 11
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2be34d3652d1e2710800000000000000
+      internalID: 1670304558226882226
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_74
+      rect:
+        serializedVersion: 2
+        x: 1565
+        y: 546
+        width: 27
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 988b90e9942d3ad20800000000000000
+      internalID: 3288703366536476809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_75
+      rect:
+        serializedVersion: 2
+        x: 2064
+        y: 550
+        width: 21
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e184799003c550600800000000000000
+      internalID: 433854300500215838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_76
+      rect:
+        serializedVersion: 2
+        x: 2089
+        y: 516
+        width: 18
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18d2fd69b395e52f0800000000000000
+      internalID: -982249556251038335
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_77
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 522
+        width: 11
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 369bc0af8071bb090800000000000000
+      internalID: -8017789384280721053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_78
+      rect:
+        serializedVersion: 2
+        x: 495
+        y: 500
+        width: 32
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb8e36e4e5c214900800000000000000
+      internalID: 666863003381262527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_79
+      rect:
+        serializedVersion: 2
+        x: 525
+        y: 505
+        width: 23
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ef6d7650c7388240800000000000000
+      internalID: 4794143102560202728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_80
+      rect:
+        serializedVersion: 2
+        x: 1084
+        y: 530
+        width: 11
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e5aa9e4295400d40800000000000000
+      internalID: 5548511235606750691
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_81
+      rect:
+        serializedVersion: 2
+        x: 1639
+        y: 15
+        width: 508
+        height: 513
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 107929f2fb4203570800000000000000
+      internalID: 8444289704875169537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_82
+      rect:
+        serializedVersion: 2
+        x: 1673
+        y: 509
+        width: 46
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37174243d0efc05a0800000000000000
+      internalID: -6553584025068080781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_83
+      rect:
+        serializedVersion: 2
+        x: 2057
+        y: 526
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c98c452ebdda3940800000000000000
+      internalID: 5276773722157255104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_84
+      rect:
+        serializedVersion: 2
+        x: 2121
+        y: 520
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d0e0c1f06a6459d0800000000000000
+      internalID: -2786485304830140203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_85
+      rect:
+        serializedVersion: 2
+        x: 1038
+        y: 439
+        width: 27
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5af8262afa88d6060800000000000000
+      internalID: 6948360088027565989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_86
+      rect:
+        serializedVersion: 2
+        x: 1595
+        y: 407
+        width: 47
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab8f99671bf869920800000000000000
+      internalID: 2996740594423429306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_87
+      rect:
+        serializedVersion: 2
+        x: 1621
+        y: 472
+        width: 21
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbfe7d8a4dd241170800000000000000
+      internalID: 8148188017209110461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_88
+      rect:
+        serializedVersion: 2
+        x: 1631
+        y: 440
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c021c8115d6a523f0800000000000000
+      internalID: -926150714302131700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_89
+      rect:
+        serializedVersion: 2
+        x: 1030
+        y: 256
+        width: 19
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0983a4a131df1d310800000000000000
+      internalID: 1428200815340435600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_90
+      rect:
+        serializedVersion: 2
+        x: 1045
+        y: 136
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d457ccd894b0ea9e0800000000000000
+      internalID: -1608335606385183411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_91
+      rect:
+        serializedVersion: 2
+        x: 1420
+        y: 65
+        width: 134
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: caa48724ba6362b20800000000000000
+      internalID: 3109232701928393388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_92
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 65
+        width: 37
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f646f061cb8326520800000000000000
+      internalID: 2693777907596092527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_93
+      rect:
+        serializedVersion: 2
+        x: 633
+        y: 93
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 054b6de8b7657ca60800000000000000
+      internalID: 7694213577063183440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_94
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 97
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 434ab639f8be488c0800000000000000
+      internalID: -3997811567312001996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_95
+      rect:
+        serializedVersion: 2
+        x: 658
+        y: 87
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78467a94fa3bcd260800000000000000
+      internalID: 7123766276029637767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_96
+      rect:
+        serializedVersion: 2
+        x: 1001
+        y: 93
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70775ddf5088db480800000000000000
+      internalID: -8881793330789910777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_97
+      rect:
+        serializedVersion: 2
+        x: 1058
+        y: 96
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47f732b8a503b5ca0800000000000000
+      internalID: -6027170510865727628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_98
+      rect:
+        serializedVersion: 2
+        x: 1058
+        y: 87
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97446619e71ea3b10800000000000000
+      internalID: 1962128521394799737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_99
+      rect:
+        serializedVersion: 2
+        x: 1319
+        y: 83
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afb16e148631e7150800000000000000
+      internalID: 5872152302640831482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_100
+      rect:
+        serializedVersion: 2
+        x: 1341
+        y: 98
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e3fabf6361810640800000000000000
+      internalID: 5044455321707934693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_101
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 88
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bce99e7b672b5b930800000000000000
+      internalID: 4158426053907947211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_102
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 77
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6267302d434289fc0800000000000000
+      internalID: -3487998102118107610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_103
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 65
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96f5b2585e0e9ba70800000000000000
+      internalID: 8843346619705024361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_104
+      rect:
+        serializedVersion: 2
+        x: 517
+        y: 82
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 115b4982af2ba59c0800000000000000
+      internalID: -3937638136689674991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_105
+      rect:
+        serializedVersion: 2
+        x: 631
+        y: 79
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6baae8e7b6514990800000000000000
+      internalID: -7403540964533687444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_106
+      rect:
+        serializedVersion: 2
+        x: 638
+        y: 80
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74268c8467884b180800000000000000
+      internalID: -9100498905400319417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_107
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 82
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21faaadfc424e8270800000000000000
+      internalID: 8254608065457467154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_108
+      rect:
+        serializedVersion: 2
+        x: 1362
+        y: 85
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 046ab2488b525fa40800000000000000
+      internalID: 5401264802522441280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_109
+      rect:
+        serializedVersion: 2
+        x: 631
+        y: 75
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cf62708ff74d60d0800000000000000
+      internalID: -3428004578661863486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_110
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 65
+        width: 15
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82f6c090457d4f300800000000000000
+      internalID: 285089432360218408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_111
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 77
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 319df188a88277810800000000000000
+      internalID: 1762922354593224979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_112
+      rect:
+        serializedVersion: 2
+        x: 985
+        y: 75
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 942c22858873d1a30800000000000000
+      internalID: 4187564287258182217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_113
+      rect:
+        serializedVersion: 2
+        x: 1365
+        y: 71
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bc88d52b9fce6c80800000000000000
+      internalID: -8327490395699639118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_114
+      rect:
+        serializedVersion: 2
+        x: 631
+        y: 61
+        width: 24
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 727c6d3dd1d1d3930800000000000000
+      internalID: 4124484847686567719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_115
+      rect:
+        serializedVersion: 2
+        x: 652
+        y: 65
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 975304b5203945f20800000000000000
+      internalID: 3410512456156460409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_116
+      rect:
+        serializedVersion: 2
+        x: 908
+        y: 55
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9e3064ce7f4450d0800000000000000
+      internalID: -3435033209897730404
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_117
+      rect:
+        serializedVersion: 2
+        x: 915
+        y: 49
+        width: 17
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be9f69d8ced519890800000000000000
+      internalID: -7453072637752313365
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_118
+      rect:
+        serializedVersion: 2
+        x: 1005
+        y: 65
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2c4e38b044756230800000000000000
+      internalID: 3631436495861992493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_119
+      rect:
+        serializedVersion: 2
+        x: 939
+        y: 36
+        width: 11
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e69ca6b720b829b0800000000000000
+      internalID: -5104636493009479965
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_120
+      rect:
+        serializedVersion: 2
+        x: 1263
+        y: 47
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea76e559c0b63af90800000000000000
+      internalID: -6943588498685401170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_121
+      rect:
+        serializedVersion: 2
+        x: 1679
+        y: 35
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fc3ceb0e77d373e0800000000000000
+      internalID: -2057063668412302092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_122
+      rect:
+        serializedVersion: 2
+        x: 1727
+        y: 47
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1d18a586e4345890800000000000000
+      internalID: -7470287717211300578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_123
+      rect:
+        serializedVersion: 2
+        x: 571
+        y: 15
+        width: 27
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25e94ff91e75a6fe0800000000000000
+      internalID: -1195046124550578606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_124
+      rect:
+        serializedVersion: 2
+        x: 613
+        y: 31
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f320f750eaddabd0800000000000000
+      internalID: -2617195151349505032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_125
+      rect:
+        serializedVersion: 2
+        x: 943
+        y: 31
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fd851bbd19f9ddc0800000000000000
+      internalID: -3613583319899992587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_126
+      rect:
+        serializedVersion: 2
+        x: 949
+        y: 35
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 096539eaaa68c5f00800000000000000
+      internalID: 1106907676057753232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_127
+      rect:
+        serializedVersion: 2
+        x: 963
+        y: 18
+        width: 11
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5022c0251ac3d6260800000000000000
+      internalID: 7092391651742327301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_128
+      rect:
+        serializedVersion: 2
+        x: 979
+        y: 31
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03e089f835485bbe0800000000000000
+      internalID: -1462117009585598928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_129
+      rect:
+        serializedVersion: 2
+        x: 987
+        y: 31
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca504e96848f824d0800000000000000
+      internalID: -3159002148702517844
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_130
+      rect:
+        serializedVersion: 2
+        x: 1221
+        y: 15
+        width: 29
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14cc9ec2d09d7bb10800000000000000
+      internalID: 1997303610373426241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_131
+      rect:
+        serializedVersion: 2
+        x: 1671
+        y: 31
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf18951d5f2444a90800000000000000
+      internalID: -7330660669905600005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_132
+      rect:
+        serializedVersion: 2
+        x: 1713
+        y: 33
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2912a8965c98688a0800000000000000
+      internalID: -6303199147486207598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_133
+      rect:
+        serializedVersion: 2
+        x: 1719
+        y: 31
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c554181cb310dc40800000000000000
+      internalID: 5534945640617104839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_134
+      rect:
+        serializedVersion: 2
+        x: 1722
+        y: 0
+        width: 51
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0cfba631d9d49cb0800000000000000
+      internalID: -4858018605437289460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_135
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 23
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbc1b08045857dd60800000000000000
+      internalID: 7914891988062379196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_136
+      rect:
+        serializedVersion: 2
+        x: 461
+        y: 25
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb7d0991aea623ab0800000000000000
+      internalID: -5029840280135608389
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_137
+      rect:
+        serializedVersion: 2
+        x: 647
+        y: 15
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c20a700d78a9bcb0800000000000000
+      internalID: -4847658269055253822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_138
+      rect:
+        serializedVersion: 2
+        x: 1253
+        y: 0
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 619abe5343f61ced0800000000000000
+      internalID: -2395511256750773994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_139
+      rect:
+        serializedVersion: 2
+        x: 1711
+        y: 14
+        width: 18
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 465931720e73dbb30800000000000000
+      internalID: 4304658254703859044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrayonShield_Death_Sheet_140
+      rect:
+        serializedVersion: 2
+        x: 233
+        y: 17
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef52483021cba51f0800000000000000
+      internalID: -1055324377110534658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CrayonShield_Death_Sheet_0: 8355008128764529375
+      CrayonShield_Death_Sheet_1: 952411021395623593
+      CrayonShield_Death_Sheet_10: -8738713250943420765
+      CrayonShield_Death_Sheet_100: 5044455321707934693
+      CrayonShield_Death_Sheet_101: 4158426053907947211
+      CrayonShield_Death_Sheet_102: -3487998102118107610
+      CrayonShield_Death_Sheet_103: 8843346619705024361
+      CrayonShield_Death_Sheet_104: -3937638136689674991
+      CrayonShield_Death_Sheet_105: -7403540964533687444
+      CrayonShield_Death_Sheet_106: -9100498905400319417
+      CrayonShield_Death_Sheet_107: 8254608065457467154
+      CrayonShield_Death_Sheet_108: 5401264802522441280
+      CrayonShield_Death_Sheet_109: -3428004578661863486
+      CrayonShield_Death_Sheet_11: -2730682359418462312
+      CrayonShield_Death_Sheet_110: 285089432360218408
+      CrayonShield_Death_Sheet_111: 1762922354593224979
+      CrayonShield_Death_Sheet_112: 4187564287258182217
+      CrayonShield_Death_Sheet_113: -8327490395699639118
+      CrayonShield_Death_Sheet_114: 4124484847686567719
+      CrayonShield_Death_Sheet_115: 3410512456156460409
+      CrayonShield_Death_Sheet_116: -3435033209897730404
+      CrayonShield_Death_Sheet_117: -7453072637752313365
+      CrayonShield_Death_Sheet_118: 3631436495861992493
+      CrayonShield_Death_Sheet_119: -5104636493009479965
+      CrayonShield_Death_Sheet_12: 5884307322311768229
+      CrayonShield_Death_Sheet_120: -6943588498685401170
+      CrayonShield_Death_Sheet_121: -2057063668412302092
+      CrayonShield_Death_Sheet_122: -7470287717211300578
+      CrayonShield_Death_Sheet_123: -1195046124550578606
+      CrayonShield_Death_Sheet_124: -2617195151349505032
+      CrayonShield_Death_Sheet_125: -3613583319899992587
+      CrayonShield_Death_Sheet_126: 1106907676057753232
+      CrayonShield_Death_Sheet_127: 7092391651742327301
+      CrayonShield_Death_Sheet_128: -1462117009585598928
+      CrayonShield_Death_Sheet_129: -3159002148702517844
+      CrayonShield_Death_Sheet_13: 5410745687818072375
+      CrayonShield_Death_Sheet_130: 1997303610373426241
+      CrayonShield_Death_Sheet_131: -7330660669905600005
+      CrayonShield_Death_Sheet_132: -6303199147486207598
+      CrayonShield_Death_Sheet_133: 5534945640617104839
+      CrayonShield_Death_Sheet_134: -4858018605437289460
+      CrayonShield_Death_Sheet_135: 7914891988062379196
+      CrayonShield_Death_Sheet_136: -5029840280135608389
+      CrayonShield_Death_Sheet_137: -4847658269055253822
+      CrayonShield_Death_Sheet_138: -2395511256750773994
+      CrayonShield_Death_Sheet_139: 4304658254703859044
+      CrayonShield_Death_Sheet_14: -1151325750831328989
+      CrayonShield_Death_Sheet_140: -1055324377110534658
+      CrayonShield_Death_Sheet_15: -7026713054108653327
+      CrayonShield_Death_Sheet_16: 1426364760426574285
+      CrayonShield_Death_Sheet_17: 8883826773736513915
+      CrayonShield_Death_Sheet_18: -702545622799239619
+      CrayonShield_Death_Sheet_19: 1629654205984826556
+      CrayonShield_Death_Sheet_2: -8656191024333395801
+      CrayonShield_Death_Sheet_20: -4059172853876945342
+      CrayonShield_Death_Sheet_21: -7460160005367231823
+      CrayonShield_Death_Sheet_22: -2879371244770530475
+      CrayonShield_Death_Sheet_23: 7968667850776349406
+      CrayonShield_Death_Sheet_24: 362017995227860987
+      CrayonShield_Death_Sheet_25: 2771723218449906397
+      CrayonShield_Death_Sheet_26: 4908997598218931004
+      CrayonShield_Death_Sheet_27: 531735724713763871
+      CrayonShield_Death_Sheet_28: 3132546490608465553
+      CrayonShield_Death_Sheet_29: 1590105383795615799
+      CrayonShield_Death_Sheet_3: -8501992398995937400
+      CrayonShield_Death_Sheet_30: 595286339532321158
+      CrayonShield_Death_Sheet_31: 4831313401444642634
+      CrayonShield_Death_Sheet_32: 5688009971220271237
+      CrayonShield_Death_Sheet_33: -253774893916849870
+      CrayonShield_Death_Sheet_34: -4180199952800425907
+      CrayonShield_Death_Sheet_35: 6403399517627783301
+      CrayonShield_Death_Sheet_36: -2885629272318066975
+      CrayonShield_Death_Sheet_37: 4932087961894106579
+      CrayonShield_Death_Sheet_38: -1012473755591825853
+      CrayonShield_Death_Sheet_39: -5019107292761113984
+      CrayonShield_Death_Sheet_4: 446961655068550624
+      CrayonShield_Death_Sheet_40: -2983651986372372925
+      CrayonShield_Death_Sheet_41: 5572974655841180006
+      CrayonShield_Death_Sheet_42: 4404545711261807908
+      CrayonShield_Death_Sheet_43: -1755441562882215396
+      CrayonShield_Death_Sheet_44: -2748088050872990369
+      CrayonShield_Death_Sheet_45: -2662047928922691245
+      CrayonShield_Death_Sheet_46: 8920690102504875871
+      CrayonShield_Death_Sheet_47: -5590046146361730372
+      CrayonShield_Death_Sheet_48: 8584224160535948907
+      CrayonShield_Death_Sheet_49: -493958397653753610
+      CrayonShield_Death_Sheet_5: -3203880623533369543
+      CrayonShield_Death_Sheet_50: 3254125800153230647
+      CrayonShield_Death_Sheet_51: -7892873485464784823
+      CrayonShield_Death_Sheet_52: -4710447447312298921
+      CrayonShield_Death_Sheet_53: 6055278915647363522
+      CrayonShield_Death_Sheet_54: -3339803147194217484
+      CrayonShield_Death_Sheet_55: -2100560808248929048
+      CrayonShield_Death_Sheet_56: 1927107353003570999
+      CrayonShield_Death_Sheet_57: -8013302131597160971
+      CrayonShield_Death_Sheet_58: -2161063612823509015
+      CrayonShield_Death_Sheet_59: -1770121897922002804
+      CrayonShield_Death_Sheet_6: 7545330265403373991
+      CrayonShield_Death_Sheet_60: 4718480452530454923
+      CrayonShield_Death_Sheet_61: -7751840444211615496
+      CrayonShield_Death_Sheet_62: -1621489605315074495
+      CrayonShield_Death_Sheet_63: -7741667508520459509
+      CrayonShield_Death_Sheet_64: 5952187231993118477
+      CrayonShield_Death_Sheet_65: 4765457797569182094
+      CrayonShield_Death_Sheet_66: -5146201563063906142
+      CrayonShield_Death_Sheet_67: -7150666897991497312
+      CrayonShield_Death_Sheet_68: -3344303722942718390
+      CrayonShield_Death_Sheet_69: -6682366449041917317
+      CrayonShield_Death_Sheet_7: -6567106554170578805
+      CrayonShield_Death_Sheet_70: -6147115319334499948
+      CrayonShield_Death_Sheet_71: -7998149649589950684
+      CrayonShield_Death_Sheet_72: 959878296271299153
+      CrayonShield_Death_Sheet_73: 1670304558226882226
+      CrayonShield_Death_Sheet_74: 3288703366536476809
+      CrayonShield_Death_Sheet_75: 433854300500215838
+      CrayonShield_Death_Sheet_76: -982249556251038335
+      CrayonShield_Death_Sheet_77: -8017789384280721053
+      CrayonShield_Death_Sheet_78: 666863003381262527
+      CrayonShield_Death_Sheet_79: 4794143102560202728
+      CrayonShield_Death_Sheet_8: 5950226760659264270
+      CrayonShield_Death_Sheet_80: 5548511235606750691
+      CrayonShield_Death_Sheet_81: 8444289704875169537
+      CrayonShield_Death_Sheet_82: -6553584025068080781
+      CrayonShield_Death_Sheet_83: 5276773722157255104
+      CrayonShield_Death_Sheet_84: -2786485304830140203
+      CrayonShield_Death_Sheet_85: 6948360088027565989
+      CrayonShield_Death_Sheet_86: 2996740594423429306
+      CrayonShield_Death_Sheet_87: 8148188017209110461
+      CrayonShield_Death_Sheet_88: -926150714302131700
+      CrayonShield_Death_Sheet_89: 1428200815340435600
+      CrayonShield_Death_Sheet_9: 1054931346992457794
+      CrayonShield_Death_Sheet_90: -1608335606385183411
+      CrayonShield_Death_Sheet_91: 3109232701928393388
+      CrayonShield_Death_Sheet_92: 2693777907596092527
+      CrayonShield_Death_Sheet_93: 7694213577063183440
+      CrayonShield_Death_Sheet_94: -3997811567312001996
+      CrayonShield_Death_Sheet_95: 7123766276029637767
+      CrayonShield_Death_Sheet_96: -8881793330789910777
+      CrayonShield_Death_Sheet_97: -6027170510865727628
+      CrayonShield_Death_Sheet_98: 1962128521394799737
+      CrayonShield_Death_Sheet_99: 5872152302640831482
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
