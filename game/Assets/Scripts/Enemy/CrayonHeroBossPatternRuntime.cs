@@ -37,6 +37,15 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float swingDirectionLockDuration = 0.12f;
         [SerializeField] private EnemyDamageTier swingDamageTier = EnemyDamageTier.Medium;
         [SerializeField, Min(1f)] private float swingRecognitionMultiplier = 1.4f;
+        // While a sword swing winds up, strikes and follows through, the hero keeps walking at this share of its
+        // speed (2026-11-20 user: 40% slower). Walking up to the player before a swing stays at full speed.
+        [SerializeField, Range(0f, 1f)] private float swingMoveSpeedMultiplier = 0.6f;
+        public float SwingMoveSpeedMultiplier => swingMoveSpeedMultiplier;
+        public void ConfigureSwingMoveSpeed(float multiplier) => swingMoveSpeedMultiplier = Mathf.Clamp01(multiplier);
+        // Matches the follow-through pose (attack pose 3) after each strike.
+        private const float SwingFollowThroughDuration = 0.2f;
+        public bool IsSwingAttacking => swingPreparing || lastTickTime - attackFollowThroughStartedAt < SwingFollowThroughDuration;
+        private float SwingMoveMultiplier => IsSwingAttacking ? swingMoveSpeedMultiplier : 1f;
 
         [Header("Dash chain")]
         [SerializeField, Min(0.1f)] private float dashSpeed = 15f;
@@ -58,7 +67,34 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0f)] private float arenaPadding = 0.7f;
         [SerializeField] private Vector2 fallbackHalfExtents = new Vector2(7.5f, 5.5f);
         [SerializeField] private Sprite awakenedSprite;
+        // The phase transition (BossController.PhaseTransitionDuration) plays the four transformation frames for these
+        // lengths, then a stagger in the new form, all invulnerable. Values from the 크레용사용 motion tuner
+        // (2026-11-20 user): 0.30 / 0.70 / 1.00 / 0.25 + 0.65 stagger, tremble 0.02.
+        [SerializeField] private float[] awakeningFrameDurations = { 0.3f, 0.7f, 1f, 0.25f };
+        [SerializeField, Min(0f)] private float awakeningStagger = 0.65f;
+        [SerializeField, Min(0f)] private float awakeningTremble = 0.02f;
         private Sprite normalSprite;
+        public float AwakeningStagger => awakeningStagger;
+        public float AwakeningTremble => awakeningTremble;
+        public float AwakeningFrameDuration(int index) =>
+            awakeningFrameDurations != null && index >= 0 && index < awakeningFrameDurations.Length
+                ? Mathf.Max(0.01f, awakeningFrameDurations[index]) : 0.25f;
+        public float AwakeningDuration
+        {
+            get
+            {
+                float total = awakeningStagger;
+                for (int i = 0; i < 4; i++) total += AwakeningFrameDuration(i);
+                return total;
+            }
+        }
+        public void ConfigureAwakening(float[] frameDurations, float stagger, float tremble)
+        {
+            awakeningFrameDurations = frameDurations != null && frameDurations.Length == 4
+                ? (float[])frameDurations.Clone() : new[] { 0.3f, 0.7f, 1f, 0.25f };
+            awakeningStagger = Mathf.Max(0f, stagger);
+            awakeningTremble = Mathf.Max(0f, tremble);
+        }
         public Sprite AwakenedSprite => awakenedSprite;
         public void ConfigureAwakenedArtwork(Sprite sprite) => awakenedSprite = sprite;
 
@@ -501,7 +537,7 @@ namespace TrickalFanGame.Enemy
                     summonPoseIndex = -1;
                 }
                 if (execution == BossPatternExecution.CrayonHeroApproachSwing)
-                    MoveTowardTarget(deltaTime, 1f);
+                    MoveTowardTarget(deltaTime, SwingMoveMultiplier);
                 return;
             }
 
@@ -576,7 +612,7 @@ namespace TrickalFanGame.Enemy
                 attackPoseIndex = now - attackFollowThroughStartedAt < 0.08f ? 2 :
                     now - attackFollowThroughStartedAt < 0.2f ? 3 : -1;
             if (target == null || completedSwings >= swingCountTarget) return;
-            MoveTowardTarget(deltaTime, 1f);
+            MoveTowardTarget(deltaTime, SwingMoveMultiplier);
             Vector2 offset = (Vector2)target.position - (Vector2)transform.position;
             if (!swingPreparing)
             {

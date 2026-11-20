@@ -773,6 +773,15 @@
       "offsetX": 0.0,
       "offsetY": 0.0,
       "opacity": 0.26
+    },
+    {
+      "number": 144,
+      "id": "saemaeum-gold-pillar",
+      "widthMultiplier": 1.97,
+      "thickness": 0.36,
+      "offsetX": 0.0,
+      "offsetY": 0.21,
+      "opacity": 0.67
     }
   ]
 }

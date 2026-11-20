@@ -52,7 +52,8 @@ namespace TrickalFanGame.Editor
                 SetFloat(contents.GetComponent<Health>(), "maxHealth", 800f);
                 BossController boss = contents.GetComponent<BossController>();
                 boss.ConfigureHud("새마음금고", 2);
-                boss.ConfigurePhaseTwo(1.1f, 0.88f);
+                // 1.6s since 2026-11-20: the drawn phase-two warning (invulnerable) plays over the transition.
+                boss.ConfigurePhaseTwo(1.6f, 0.88f);
                 boss.SetProjectileDamageTier(EnemyDamageTier.Medium);
                 boss.ConfigurePatterns(new[]
                 {

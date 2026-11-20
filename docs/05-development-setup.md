@@ -2590,17 +2590,35 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 ### 새마음금고 황금 기둥 원화 검증 (2026-11-20)
 
 - Edit Mode 메뉴: `Trickal Fan Game/Effects/Verify Saemaeum Gold Pillar Artwork`.
-- 배치: `TrickalFanGame.Editor.SaemaeumGoldPillarArtworkVerification.Verify`. 별도 Setup이나 Scene 저장 없이 전용 원화·균열·파괴 셀·2타 제거를 검사한다.
-- 성공 로그: `Saemaeum gold pillar artwork verification passed: intact, cracked, three breakup cells, two-hit removal.`
-- Play 수동 확인: Game Scene에서 `F1 → — Boss room — → Boss F2`로 이동해 새마음금고 기둥 소환을 기다린다. 사각 금 기둥과 뾰족한 흙이 표시되고 첫 타격 후 균열 유지, 두 번째 타격 후 충돌 즉시 제거와 0.3초 파괴·소멸을 확인한다. 보스가 밟거나 착지해 부술 때도 같은 연출이 나오는지, 방 이동 뒤 파편이 남지 않는지 확인한다.
+- 배치: `TrickalFanGame.Editor.SaemaeumGoldPillarArtworkVerification.Verify`. 별도 Setup이나 Scene 저장 없이 전용 원화·경미한 파손·큰 균열·파괴 셀·3타 제거를 검사한다.
+- 성공 로그: `Saemaeum gold pillar artwork verification passed: six cells, two damage states, four breakup cells, hold and fade, three-hit removal.`
+- Play 수동 확인: Game Scene에서 `F1 → — Boss room — → Boss F2`로 이동해 새마음금고 기둥 소환을 기다린다. 사각 금 기둥과 뾰족한 흙이 표시되고 첫 타격 후 경미한 파손, 두 번째 타격 후 큰 균열 유지, 세 번째 타격 후 충돌 즉시 제거, 파괴 4셀(0.48초) 뒤 마지막 셀 0.35초 유지와 0.45초 페이드 아웃(그림자도 함께)을 확인한다. 보스가 밟거나 착지해 부술 때도 같은 연출이 나오는지, 방 이동 뒤 파편이 남지 않는지 확인한다.
 - 규격·실행 결과: `docs/art-prompts/saemaeum-gold-pillar-v1/runtime-integration.md`.
 
 ### 새마음금고 메테오 원화 연결 검증 (2026-11-20)
 
 - 메뉴: Trickal Fan Game/Effects/Verify Saemaeum Gold Meteor Artwork
 - 배치 메서드: TrickalFanGame.Editor.SaemaeumGoldMeteorArtworkVerification.Verify
-- 일체형 낙하 4프레임, 본체 피벗·수직 방향, 착지 4프레임·알파 소멸을 검사한다. 6000.3.22f1 배치 통과.
+- 일체형 낙하 4프레임, 35° 대각 낙하(왼쪽 위 → 오른쪽 아래)·0.6초 낙하, 착지 4프레임·마지막 셀 0.1초 유지 후 0.25초 페이드(기둥 잔해보다 빨리 사라짐)를 검사한다.
 - 실제 Play 검수: docs/art-prompts/saemaeum-gold-meteor-v1/unity-integration.md 참고. 미술 수용 대기.
+
+### 보스 연출 조정 (2026-11-20, 베타 5번)
+
+- 새마음금고 2페이즈 예고: 사용자 원화 4프레임(놀람·짜증·포효·씩씩댐)을 `Assets/Resources/CombatEffects/saemaeum-vault-phase-two.png`(2×2, 셀 1024, PPU 400, 중앙 피벗, `Vault_Hop_0`의 상자 위치·크기에 맞춤)로 넣었다. 페이즈 전환 1.6초 동안 재생하고(포효 프레임에 떨림), 이 동안 무적이며 맞으면 "0"이 뜬다(`Health.AnyDamageBlocked`).
+- 새마음금고 착지 충격파: `SaemaeumLandingShockwave`. 착지할 때 보스 그림자 위치에서 얇은 밝은 고리와 넓은 금빛 고리가 바닥 타원으로 퍼져 착지 반경의 1.1배에서 사라진다(0.5초, 피해 없음, 보스 소유로 방 이동 시 정리).
+- 황금 기둥 그림자: 방 금바위(`obstacle-gold-rock`) 프로필을 쓰던 것을 전용 `saemaeum-gold-pillar` 프로필로 분리했다. 그림자 검수 페이지 144번 "새마음금고 황금 기둥"(143번은 함께 빠져 있던 머드케이크 함정)에서 사용자가 정한 값(너비 1.97, 두께 0.36, 위치 (0, 0.21), 진하기 0.67, 2026-11-20)을 `GroundShadowProfiles.json`에 반영했다. 페이지 재생성: `GroundShadowPreviewExporter.ExportBatch` → `python scripts/build-ground-shadow-review.py`.
+- 크레용사용 검 공격 중 이동(2026-11-20): 검을 들어 올림·내려침·마무리(0.2초) 동안 이동 속도 0.6배(`swingMoveSpeedMultiplier`). 휘두르기 전 다가가는 동안은 원래 속도.
+- 크레용사용: 걷기 보폭 1.6 → 2.6(같은 이동 속도에서 다리 움직임 약 60%), 변신 전환 1.25초 → 2.9초(크레용사용 동작 조정 도구 사용자 값: 프레임 0.30/0.70/1.00/0.25초 + 각성 모습 경직 0.65초·떨림 0.02, 전체 무적, 맞으면 "0").
+- 보스 걷기 프레임 깜빡임(2026-11-20): 물리는 50Hz인데 보스 이동은 화면 프레임마다 한 번 예약되므로, 50fps 아래(에디터 큰 방 등)에서는 물리 틱 일부가 "이동 없음"으로 보여 걷기 주기가 매번 0번 프레임으로 돌아갔다. `BossMovementAnimator`는 이제 이동 없는 물리 틱이 5번(0.1초) 이어져야 멈춤으로 보고, 빈 틱에는 현재 자세를 유지한다(크레용사용·새마음금고·부스러기 공통). 빌드(60fps 이상)에서는 원래 정상.
+- 검증: `SaemaeumGoldPillarArtworkVerification.Verify`, `SaemaeumGoldMeteorArtworkVerification.Verify`, `CrayonHeroAttackAnimationVerification.Verify`, `Week15Boss2Verification.Verify`.
+- Play 수동 확인: Game Scene → `F1` → `— Boss room —` → `Boss F2`(새마음금고: 체력 절반에서 분노 4프레임·무적 0 표시, 착지 고리, 메테오 대각 낙하·속도·잔해 페이드, 기둥 파괴 후 유지·페이드) / `Boss F3`(크레용사용: 넓은 방 걷기 다리 속도, 변신 길이·경직, 변신 중 0 표시).
+
+### 크레용사용 동작 조정 도구 (2026-11-20)
+
+- 생성: `python -I scripts/crayon-motion-tuner/build.py` → `output/crayon-motion-tuner/crayon-motion-tuner.html`(프레임 내장, 파일로 바로 열림). Pillow 필요.
+- 걷기: `CrayonHero_Walk_*`·`CrayonHero_Golden_Walk_*`를 PPU 400 × 보스 배율 3.6 크기로 1단위 눈금 바닥 위에서 실제 이동 속도로 걷게 한다. 보폭(8프레임 한 주기 이동 거리)·이동 속도·1/2페이즈를 바꾸고 초당 프레임을 표시한다. 게임 규칙은 `BossMovementAnimator`의 `cycle += 이동거리 / strideLength`.
+- 변신: `CrayonHero_Awaken_0~3` 각 프레임 길이, 경직 길이, 3번 프레임 번쩍임, 경직 떨림 세기를 조절하고 타임라인·재생 위치로 확인한다.
+- 값은 브라우저에 자동 저장되며 "공유할 값"을 복사해 전달한다. 게임에는 자동 반영되지 않는다.
 
 ## 사운드 믹서
 

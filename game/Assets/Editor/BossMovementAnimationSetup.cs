@@ -12,6 +12,8 @@ namespace TrickalFanGame.Editor
             Week15Boss0Setup.BossPrefabPath, Week15Boss2Setup.BossPrefabPath, Week15Boss3Setup.BossPrefabPath,
         };
 
+        public const float CrayonStrideLength = 2.6f;
+
         [MenuItem("Trickal Fan Game/Artwork/Setup Boss Movement Animations")]
         public static void Setup()
         {
@@ -57,7 +59,8 @@ namespace TrickalFanGame.Editor
                     }
                     animator.Configure((BossMovementStyle)i, source, i == 1 ? vaultBody : null,
                         i == 2 ? frames : Array.Empty<Sprite>(), treasures,
-                        i == 2 ? 1.6f : 1.35f, i == 0 ? 0.48f : 0.42f, i < 2 ? hopFrames[i] : null);
+                        // Crayon stride 2.6 since 2026-11-20 (user Play check: the legs moved too fast in large rooms).
+                        i == 2 ? CrayonStrideLength : 1.35f, i == 0 ? 0.48f : 0.42f, i < 2 ? hopFrames[i] : null);
                     if (i == 1)
                     {
                         animator.ConfigureHealing(healFrames);

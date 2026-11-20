@@ -59,6 +59,9 @@ namespace TrickalFanGame.Frontend
             if (chest != null) return "chest-" + chest.Kind + "-" + chest.IsOpened;
             var trap = owner.GetComponent<RoomTrap>();
             if (trap != null) return RoomTrap.ArtworkIdOf(trap.Kind);
+            // 새마음금고 황금 기둥 keeps the gold-rock kind but has its own drawing and shadow.
+            if (owner.GetComponent<TrickalFanGame.Enemy.SaemaeumGoldPillar>() != null)
+                return TrickalFanGame.Enemy.SaemaeumGoldPillar.ShadowProfileId;
             var obstacle = owner.GetComponent<DestructibleObstacle>();
             if (obstacle != null && string.IsNullOrEmpty(explicitId))
             {

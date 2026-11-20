@@ -141,7 +141,7 @@ namespace TrickalFanGame.Editor
                 SetEnum(serialized, "pillarDamageTier", (int)EnemyDamageTier.Light);
                 SetFloat(serialized, "pillarKnockbackSpeed", 7f);
                 SetFloat(serialized, "pillarKnockbackDuration", 0.2f);
-                SetInt(serialized, "pillarRequiredHits", 2);
+                SetInt(serialized, "pillarRequiredHits", 3);
                 SetInt(serialized, "pillarTargetEvery", 3);
 
                 SetFloat(serialized, "meteorMinimumDuration", 8f);

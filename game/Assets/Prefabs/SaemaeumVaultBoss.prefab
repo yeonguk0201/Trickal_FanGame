@@ -228,7 +228,7 @@ MonoBehaviour:
   attackInterval: 1.2
   projectileSpeed: 4
   projectileDamageTier: 1
-  phaseTransitionDuration: 1.1
+  phaseTransitionDuration: 1.6
   phaseTwoTempoMultiplier: 0.88
   keepsOwnedObjectsOnDefeat: 0
   feetHalfHeight: 0.55
@@ -279,7 +279,7 @@ MonoBehaviour:
   pillarDamageTier: 0
   pillarKnockbackSpeed: 7
   pillarKnockbackDuration: 0.2
-  pillarRequiredHits: 2
+  pillarRequiredHits: 3
   pillarTargetEvery: 3
   meteorMinimumDuration: 8
   meteorMaximumDuration: 10

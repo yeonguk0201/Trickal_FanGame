@@ -59,7 +59,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField] private EnemyDamageTier pillarDamageTier = EnemyDamageTier.Light;
         [SerializeField, Min(0f)] private float pillarKnockbackSpeed = 7f;
         [SerializeField, Min(0.01f)] private float pillarKnockbackDuration = 0.2f;
-        [SerializeField, Min(1)] private int pillarRequiredHits = 2;
+        [SerializeField, Min(1)] private int pillarRequiredHits = 3;
         [SerializeField, Min(1)] private int pillarTargetEvery = 3;
 
         [Header("Gold meteor (phase two)")]
@@ -364,6 +364,20 @@ namespace TrickalFanGame.Enemy
         public void OnPatternStateChanged(BossActionState state, BossPatternExecution execution, float stateEndsAt)
         {
             activeEndsAt = stateEndsAt;
+            // 2페이즈 예고 (2026-11-20): the vault stops, glares and roars, and takes no damage until phase two
+            // starts. Blocked hits show "0" through Health.AnyDamageBlocked. BossMovementAnimator draws the poses.
+            if (state == BossActionState.PhaseTransition)
+            {
+                StopEating();
+                healPoseIndex = -1;
+                EndJump();
+                ClearLandingTelegraph();
+                StopMovement();
+                ResetPresentation();
+                if (health != null) health.SetInvulnerable(true);
+                return;
+            }
+            if (health != null) health.SetInvulnerable(false);
             if (state != BossActionState.Active || execution != BossPatternExecution.SaemaeumTreasureHeal) StopEating();
             healPoseIndex = -1;
             if (execution == BossPatternExecution.SaemaeumTreasureHeal && boss != null && boss.CurrentPhase == 1)
@@ -859,6 +873,7 @@ namespace TrickalFanGame.Enemy
             jumpWhistleVoice = 0;
             CombatSfx.Play(CombatSfxCue.VaultJumpLanding);
             GetComponent<BossMovementAnimator>()?.NotifyLanding();
+            PlayLandingShockwave(impactPosition);
             BossSummonedObstacle.BreakInCircle(impactPosition, landingRadius);
             FireLandingBurst(impactPosition, landingIndex);
             if (target == null || ((Vector2)target.position - impactPosition).sqrMagnitude >
@@ -876,6 +891,17 @@ namespace TrickalFanGame.Enemy
                 direction = impactPosition - (Vector2)transform.position;
             if (direction.sqrMagnitude <= 0.001f) direction = Vector2.up;
             receiver.Apply(direction, landingKnockbackSpeed, landingKnockbackDuration, 0f);
+        }
+
+        public SaemaeumLandingShockwave LastShockwave { get; private set; }
+
+        // Spreads from under the landed body's ground shadow, where the landing mark was drawn.
+        private void PlayLandingShockwave(Vector2 impactPosition)
+        {
+            SpriteRenderer source = GetComponentInChildren<SpriteRenderer>();
+            LastShockwave = SaemaeumLandingShockwave.Create(impactPosition + GroundShadowOffset(), landingRadius,
+                source != null ? source.sortingLayerID : 0);
+            boss?.RegisterOwnedObject(LastShockwave.gameObject);
         }
 
         private void TickHealing(float now)
@@ -1104,6 +1130,7 @@ namespace TrickalFanGame.Enemy
 
         private void OnDisable()
         {
+            if (health != null) health.SetInvulnerable(false);
             StopEating();
             healPoseIndex = -1;
             EndJump();

@@ -78,6 +78,7 @@ namespace TrickalFanGame.Editor
                    runtime.SwingStartOffset > collider.bounds.extents.x &&
                    Mathf.Approximately(runtime.SwingTriggerRange, runtime.SwingAttackReach * 1.4f) &&
                    Mathf.Approximately(runtime.CurrentApproachSpeed, 3.2f) &&
+                   Mathf.Approximately(runtime.SwingMoveSpeedMultiplier, 0.6f) &&
                    runtime.SwingDamageTier == EnemyDamageTier.Medium &&
                    runtime.DashDamageTier == EnemyDamageTier.Light &&
                    prefab.GetComponent<ContactDamage>()?.DamageTier == EnemyDamageTier.Light &&

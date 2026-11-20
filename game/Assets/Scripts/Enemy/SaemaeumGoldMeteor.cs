@@ -14,8 +14,13 @@ namespace TrickalFanGame.Enemy
     {
         public const string ObjectName = "Saemaeum Gold Meteor";
         public const string ArtworkId = SaemaeumGoldMeteorArtwork.FallPath;
-        public const float FallDuration = 0.4f;
+        // 0.6s since 2026-11-20 (user Play check: at 0.4s the lump hit almost as soon as it appeared).
+        public const float FallDuration = 0.6f;
         public const float FallHeight = 7f;
+        // Comes in from the upper left, this many degrees off vertical, toward the lower right (2026-11-20).
+        public const float FallAngle = 35f;
+        // Unit vector from the landing point back up the fall path.
+        public static Vector2 FallPathUp => new(-Mathf.Sin(FallAngle * Mathf.Deg2Rad), Mathf.Cos(FallAngle * Mathf.Deg2Rad));
         public const float LumpWidth = 1.1f;
 
         private float shownAt;
@@ -72,7 +77,8 @@ namespace TrickalFanGame.Enemy
             lumpObject.transform.SetParent(host.transform, false);
             meteor.lump = lumpObject.AddComponent<SpriteRenderer>();
             meteor.lump.sprite = SaemaeumGoldMeteorArtwork.FallFrame(0);
-            lumpObject.transform.localRotation = Quaternion.Euler(0f, 0f, SaemaeumGoldMeteorArtwork.FallRotation);
+            // The drawn tail points straight up at FallRotation; turn it along the slanted path.
+            lumpObject.transform.localRotation = Quaternion.Euler(0f, 0f, SaemaeumGoldMeteorArtwork.FallRotation + FallAngle);
             meteor.lump.sortingLayerID = sortingLayerId;
             // A falling lump draws over every body below it.
             meteor.lump.sortingOrder = bodySortingOrder + 2;
@@ -106,8 +112,9 @@ namespace TrickalFanGame.Enemy
                 int frame = Mathf.FloorToInt(Mathf.Max(0f, now - fallStart) /
                     SaemaeumGoldMeteorArtwork.FrameDuration) % 4;
                 lump.sprite = SaemaeumGoldMeteorArtwork.FallFrame(frame);
-                // It speeds up all the way down.
-                lump.transform.localPosition = Vector3.up * (FallHeight * (1f - fall * fall));
+                // It speeds up all the way down the slanted path; FallHeight stays the vertical drop.
+                Vector2 path = FallPathUp / FallPathUp.y;
+                lump.transform.localPosition = (Vector3)(path * (FallHeight * (1f - fall * fall)));
             }
 
             if (now >= impactAt) Land();

@@ -39,6 +39,12 @@ namespace TrickalFanGame.Enemy
         private bool originalRenderingOff;
         private float cycle;
         private bool moving;
+        // Physics steps in a row without travel. Below 50fps a frame can run two physics steps while the runtimes
+        // queue one move per frame, so the second step sees no travel even though the boss keeps walking. The stride
+        // only stops after this many still steps (0.1s), instead of snapping back to its first pose on every gap
+        // (2026-11-20: legs flickered and looked too fast in large rooms in the Editor).
+        public const int StillStepsBeforeStop = 5;
+        private int stillSteps = StillStepsBeforeStop;
         private float impactAge = 1f;
         private float impactStrength;
         private bool initialized;
@@ -85,6 +91,39 @@ namespace TrickalFanGame.Enemy
         public int TreasureCount => groundTreasures.Length;
         public SpriteRenderer GetTreasure(int i) => groundTreasures[i];
         public bool IsAnimating => moving;
+        // Share of the crayon hero's phase transition spent transforming; the stagger after it is the rest.
+        public float AwakeningTransformDuration
+        {
+            get
+            {
+                Initialize();
+                BossController owner = boss != null ? boss : GetComponent<BossController>();
+                CrayonHeroBossPatternRuntime runtime = knight != null ? knight : GetComponent<CrayonHeroBossPatternRuntime>();
+                if (owner == null) return 0.001f;
+                float stagger = runtime != null ? Mathf.Min(runtime.AwakeningStagger, owner.PhaseTransitionDuration * 0.5f) : 0f;
+                return Mathf.Max(0.001f, owner.PhaseTransitionDuration - stagger);
+            }
+        }
+        // Which transformation frame shows at this point of the transition. The runtime's per-frame lengths are
+        // stretched or squeezed to fit the transition's transformation part, so a different configured transition
+        // length still plays every frame in proportion.
+        public int AwakeningFrameAt(float elapsed, out float frameStart, out float frameLength)
+        {
+            float transformTime = AwakeningTransformDuration;
+            CrayonHeroBossPatternRuntime runtime = knight != null ? knight : GetComponent<CrayonHeroBossPatternRuntime>();
+            float authored = 0f;
+            for (int i = 0; i < 4; i++) authored += runtime != null ? runtime.AwakeningFrameDuration(i) : 1f;
+            float fit = transformTime / Mathf.Max(0.001f, authored);
+            frameStart = 0f;
+            for (int i = 0; i < 4; i++)
+            {
+                frameLength = (runtime != null ? runtime.AwakeningFrameDuration(i) : 1f) * fit;
+                if (i == 3 || elapsed < frameStart + frameLength) return i;
+                frameStart += frameLength;
+            }
+            frameLength = 0f;
+            return 3;
+        }
         public bool HasLandingImpulse => impactAge < 0.24f && impactStrength > 0f;
 
         public void Configure(BossMovementStyle motion, SpriteRenderer renderer, Sprite separateBody,
@@ -130,6 +169,7 @@ namespace TrickalFanGame.Enemy
             previousPosition = body.position;
             cycle = 0f;
             moving = false;
+            stillSteps = StillStepsBeforeStop;
             impactAge = 1f;
             impactStrength = 0f;
             displayedHopPosition = Vector3.zero;
@@ -150,9 +190,12 @@ namespace TrickalFanGame.Enemy
             bool suppressed = boss.IsActionSuppressed || boss.State == BossActionState.PhaseTransition ||
                               boss.State == BossActionState.Defeated || (vault != null && vault.IsJumping) ||
                               (knight != null && knight.IsDashInMotion);
-            moving = !suppressed && distance > 0.0001f && distance < 0.7f;
+            bool travelled = !suppressed && distance > 0.0001f && distance < 0.7f;
+            stillSteps = travelled ? 0 : suppressed ? StillStepsBeforeStop : Mathf.Min(stillSteps + 1, StillStepsBeforeStop);
+            moving = !suppressed && stillSteps < StillStepsBeforeStop;
             float previousCycle = cycle;
-            cycle = moving ? Mathf.Repeat(cycle + distance / strideLength, 1f) : 0f;
+            // Only real travel advances the stride, so a gap step holds the current pose.
+            cycle = !moving ? 0f : travelled ? Mathf.Repeat(cycle + distance / strideLength, 1f) : cycle;
             // Sound-3: the ordinary vault hop leaves the ground at 18% of its stride (the drawn takeoff pose).
             if (style == BossMovementStyle.VaultHop && moving &&
                 ((previousCycle < 0.18f && cycle >= 0.18f) || (cycle < previousCycle && cycle >= 0.18f)))
@@ -222,14 +265,29 @@ namespace TrickalFanGame.Enemy
             {
                 if (boss.State == BossActionState.PhaseTransition && awakeningFrames.Length == 4)
                 {
+                    // The transformation plays over the start of the transition; the rest is a short stagger in
+                    // the new form, still invulnerable (2026-11-20).
                     float elapsed = boss.PhaseTransitionDuration - Mathf.Max(0f, boss.StateEndsAt - Time.time);
-                    int frame = Mathf.Clamp(Mathf.FloorToInt(elapsed / Mathf.Max(0.001f, boss.PhaseTransitionDuration) * 4f), 0, 3);
+                    float transformTime = AwakeningTransformDuration;
+                    int frame = AwakeningFrameAt(elapsed, out float frameStart, out float frameLength);
                     if (awakeningFrames[frame] != null) artwork.sprite = awakeningFrames[frame];
-                    if (frame == 2)
+                    if (frame == 2 && elapsed < transformTime)
                     {
-                        float settle = Mathf.Clamp01(elapsed / Mathf.Max(0.001f, boss.PhaseTransitionDuration) * 4f - 2f);
+                        float settle = Mathf.Clamp01((elapsed - frameStart) / frameLength);
                         artwork.color = Color.Lerp(new Color(1.4f, 1.4f, 1.4f, source.color.a), source.color, settle);
                         artwork.transform.localScale = Vector3.one * Mathf.Lerp(1.035f, 1f, settle);
+                    }
+                    else if (elapsed >= transformTime)
+                    {
+                        // Stagger: holds the new form, trembling and sagging a little, then steadies.
+                        float stagger = Mathf.Clamp01((elapsed - transformTime) /
+                            Mathf.Max(0.001f, boss.PhaseTransitionDuration - transformTime));
+                        float strength = 1f - stagger;
+                        float scale = Mathf.Abs(source.transform.lossyScale.x);
+                        artwork.transform.localPosition = new Vector3(
+                            Mathf.Sin(Time.time * 55f) * (knight != null ? knight.AwakeningTremble : 0.035f) * strength /
+                            Mathf.Max(0.001f, scale), 0f, 0f);
+                        artwork.transform.localScale = new Vector3(1f + 0.025f * strength, 1f - 0.03f * strength, 1f);
                     }
                     return;
                 }
@@ -265,6 +323,21 @@ namespace TrickalFanGame.Enemy
                 if (animate && walkFrames.Length > 0)
                     artwork.sprite = walkFrames[Mathf.FloorToInt(Mathf.Repeat(progress, 1f) * walkFrames.Length)];
                 return;
+            }
+            if (style == BossMovementStyle.VaultHop && vault != null && boss.State == BossActionState.PhaseTransition)
+            {
+                // 2페이즈 예고: startled, annoyed, roaring with a shudder, seething.
+                float warning = Mathf.Clamp01(1f - Mathf.Max(0f, boss.StateEndsAt - Time.time) /
+                    Mathf.Max(0.001f, boss.PhaseTransitionDuration));
+                Sprite angry = SaemaeumVaultPhaseTwoArtwork.Frame(SaemaeumVaultPhaseTwoArtwork.FrameAt(warning));
+                if (angry != null)
+                {
+                    artwork.sprite = angry;
+                    float scale = Mathf.Abs(source.transform.lossyScale.x);
+                    artwork.transform.localPosition = new Vector3(
+                        SaemaeumVaultPhaseTwoArtwork.ShakeAt(warning, Time.time) / Mathf.Max(0.001f, scale), 0f, 0f);
+                    return;
+                }
             }
             if (style == BossMovementStyle.VaultHop && vault != null && vault.HealPoseIndex >= 0 &&
                 healFrames.Length == 4 && healFrames[vault.HealPoseIndex] != null &&

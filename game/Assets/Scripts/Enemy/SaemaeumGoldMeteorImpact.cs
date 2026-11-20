@@ -5,7 +5,12 @@ namespace TrickalFanGame.Enemy
     // Visual only: damage and obstacle destruction remain in the meteor's single Land call.
     public sealed class SaemaeumGoldMeteorImpact : MonoBehaviour
     {
-        public const float Duration = 0.34f;
+        // The dust cell rests briefly and then fades (2026-11-20), sooner than the gold pillar's remnants.
+        public const float LastFrameAt = 0.22f;
+        public const float HoldDuration = 0.1f;
+        public const float FadeDuration = 0.25f;
+        public const float FadeStartsAt = LastFrameAt + HoldDuration;
+        public const float Duration = FadeStartsAt + FadeDuration;
         private SpriteRenderer visual;
         private float age;
         public SpriteRenderer Visual => visual;
@@ -27,10 +32,11 @@ namespace TrickalFanGame.Enemy
 
         public void RenderAt(float elapsed)
         {
-            int index = elapsed < 0.04f ? 0 : elapsed < 0.12f ? 1 : elapsed < 0.22f ? 2 : 3;
+            int index = elapsed < 0.04f ? 0 : elapsed < 0.12f ? 1 : elapsed < LastFrameAt ? 2 : 3;
             visual.sprite = SaemaeumGoldMeteorArtwork.ImpactFrame(index);
-            visual.color = new Color(1f, 1f, 1f,
-                elapsed < 0.22f ? 1f : Mathf.Clamp01((Duration - elapsed) / 0.12f));
+            float fade = elapsed >= Duration ? 1f : Mathf.Clamp01((elapsed - FadeStartsAt) / FadeDuration);
+            // Eases out so the dust thins smoothly instead of cutting off.
+            visual.color = new Color(1f, 1f, 1f, 1f - fade * fade * (3f - 2f * fade));
         }
 
         private void Update()

@@ -108,6 +108,10 @@ namespace TrickalFanGame.Editor
                     for (int pile = 0; pile < animator.TreasureCount; pile++)
                         Require(animator.GetTreasure(pile).flipX, "Vault ground layers must mirror together with its body.");
                     Invoke(animator, "FixedUpdate");
+                    Require(animator.IsAnimating,
+                        "One physics step without travel (two steps in a sub-50fps frame) must not reset the stride.");
+                    for (int still = 1; still < BossMovementAnimator.StillStepsBeforeStop; still++)
+                        Invoke(animator, "FixedUpdate");
                     Require(!animator.IsAnimating, "A stationary/blocked boss must stop the stride.");
                     Require(animator.Source.flipX, "A stationary boss must keep facing.");
                     body.position += Vector2.left * 0.03f;

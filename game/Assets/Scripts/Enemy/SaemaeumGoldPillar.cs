@@ -20,6 +20,8 @@ namespace TrickalFanGame.Enemy
         public const string ObstacleId = "saemaeum-gold-pillar";
         // Retain the existing logical kind; this summon has dedicated artwork rather than the room gold rock.
         public const string ArtworkVariantId = "gold-rock";
+        // Its own reviewed ground shadow (GroundShadowProfiles.json), not the room gold rock's.
+        public const string ShadowProfileId = "saemaeum-gold-pillar";
         public const float BodyRadius = 0.42f;
         public const float VisualWidth = 1f;
         public const float RiseDuration = 0.18f;
@@ -111,8 +113,9 @@ namespace TrickalFanGame.Enemy
         public void RefreshArtwork()
         {
             if (drawing == null || destructible == null || destructible.IsBroken) return;
-            drawing.sprite = destructible.HitsTaken > 0
-                ? SaemaeumGoldPillarArtwork.Frame(0) : SaemaeumGoldPillarArtwork.Intact;
+            drawing.sprite = destructible.HitsTaken >= 2 ? SaemaeumGoldPillarArtwork.Frame(1)
+                : destructible.HitsTaken == 1 ? SaemaeumGoldPillarArtwork.LightlyDamaged
+                : SaemaeumGoldPillarArtwork.Intact;
             drawing.color = Color.white;
         }
 
@@ -122,7 +125,8 @@ namespace TrickalFanGame.Enemy
             // Freeze the standing pose even when broken during its rise. Room/boss cleanup owns the remnants.
             Tick(emergeAt + RiseDuration);
             Transform room = source != null ? source.transform.parent : transform.parent;
-            SaemaeumGoldPillarBreakEffect effect = SaemaeumGoldPillarBreakEffect.Create(drawing, room);
+            SpriteRenderer shadow = TryGetComponent(out GroundShadow ground) ? ground.Visual : null;
+            SaemaeumGoldPillarBreakEffect effect = SaemaeumGoldPillarBreakEffect.Create(drawing, room, shadow);
             source?.GetComponent<BossController>()?.RegisterOwnedObject(effect.gameObject);
         }
 

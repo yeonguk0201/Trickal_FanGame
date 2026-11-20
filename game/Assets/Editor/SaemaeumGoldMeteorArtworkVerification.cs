@@ -35,21 +35,26 @@ namespace TrickalFanGame.Editor
             {
                 meteor = SaemaeumGoldMeteor.Create(new Vector2(2f, 3f), false, 0f, 1f, 0.9f,
                     EnemyDamageTier.Light, 7f, 0.2f, null, null, 0, 4);
-                meteor.Tick(0.59f);
+                Assert(Mathf.Approximately(SaemaeumGoldMeteor.FallDuration, 0.6f) &&
+                       Mathf.Approximately(SaemaeumGoldMeteor.FallAngle, 35f), "The fall must last 0.6s at 35 degrees.");
+                float fallStart = 1f - SaemaeumGoldMeteor.FallDuration;
+                meteor.Tick(fallStart - 0.01f);
                 Assert(!meteor.Lump.enabled && meteor.Mark.enabled, "Show only the warning before the fall.");
                 float previousHeight = float.PositiveInfinity;
+                float slope = Mathf.Tan(SaemaeumGoldMeteor.FallAngle * Mathf.Deg2Rad);
                 for (int i = 0; i < 4; i++)
                 {
-                    meteor.Tick(0.601f + i * SaemaeumGoldMeteorArtwork.FrameDuration);
+                    meteor.Tick(fallStart + 0.001f + i * SaemaeumGoldMeteorArtwork.FrameDuration);
                     Assert(meteor.Lump.enabled && meteor.Lump.sprite == SaemaeumGoldMeteorArtwork.FallFrame(i),
                         "Falling meteor must loop the authored four cells.");
-                    Assert(meteor.Lump.transform.localPosition.x == 0f &&
-                           meteor.Lump.transform.localPosition.y < previousHeight,
-                        "The rock anchor must descend vertically toward the fixed mark.");
-                    previousHeight = meteor.Lump.transform.localPosition.y;
+                    Vector3 offset = meteor.Lump.transform.localPosition;
+                    Assert(offset.x < 0f && Mathf.Abs(-offset.x - offset.y * slope) < 0.001f && offset.y < previousHeight,
+                        "The rock anchor must come down from the upper left along the 35 degree path to the mark.");
+                    previousHeight = offset.y;
                 }
                 Vector3 direction = meteor.Lump.transform.TransformDirection(new Vector3(1f, 1f, 0f).normalized);
-                Assert(Vector3.Dot(direction, Vector3.up) > 0.999f, "The tail must point up along the fall path.");
+                Assert(Vector2.Dot(direction, SaemaeumGoldMeteor.FallPathUp) > 0.999f,
+                    "The tail must point back up along the slanted fall path.");
                 burst = SaemaeumGoldMeteorImpact.Create(meteor.Landing, meteor.Lump, null);
                 float[] times = { 0f, 0.05f, 0.13f, 0.23f };
                 for (int i = 0; i < 4; i++)
@@ -58,6 +63,14 @@ namespace TrickalFanGame.Editor
                     Assert(burst.Visual.sprite == SaemaeumGoldMeteorArtwork.ImpactFrame(i),
                         "Impact must play flash, peak, fragments and fading dust in order.");
                 }
+                burst.RenderAt(SaemaeumGoldMeteorImpact.FadeStartsAt - 0.01f);
+                Assert(burst.Visual.sprite == SaemaeumGoldMeteorArtwork.ImpactFrame(3) && burst.Visual.color.a == 1f,
+                    "The last impact cell must rest fully visible before fading.");
+                burst.RenderAt(SaemaeumGoldMeteorImpact.FadeStartsAt + SaemaeumGoldMeteorImpact.FadeDuration * 0.5f);
+                Assert(burst.Visual.color.a > 0.2f && burst.Visual.color.a < 0.8f, "The impact must fade gradually.");
+                Assert(SaemaeumGoldMeteorImpact.Duration - SaemaeumGoldMeteorImpact.LastFrameAt <
+                       SaemaeumGoldPillarBreakEffect.Duration - SaemaeumGoldPillarBreakEffect.FrameDuration * 2f,
+                    "The meteor dust must vanish sooner than the pillar remnants.");
                 burst.RenderAt(SaemaeumGoldMeteorImpact.Duration);
                 Assert(burst.Visual.color.a == 0f && burst.GetComponent<Collider2D>() == null &&
                        burst.transform.position == new Vector3(2f, 3f, 0f),
@@ -70,7 +83,7 @@ namespace TrickalFanGame.Editor
                 if (meteor != null) UnityEngine.Object.DestroyImmediate(meteor.gameObject);
                 if (burst != null) UnityEngine.Object.DestroyImmediate(burst.gameObject);
             }
-            Debug.Log("Saemaeum gold meteor artwork verification passed: four falling cells, vertical anchor, four impact cells and fade.");
+            Debug.Log("Saemaeum gold meteor artwork verification passed: four falling cells, 35 degree 0.6s fall, four impact cells, hold and fade.");
         }
 
         private static void Assert(bool condition, string message)

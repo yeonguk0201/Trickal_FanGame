@@ -422,7 +422,7 @@ MonoBehaviour:
   attackInterval: 1.2
   projectileSpeed: 4
   projectileDamageTier: 1
-  phaseTransitionDuration: 1.25
+  phaseTransitionDuration: 2.9
   phaseTwoTempoMultiplier: 0.78
   keepsOwnedObjectsOnDefeat: 0
   feetHalfHeight: 0.4
@@ -480,6 +480,7 @@ MonoBehaviour:
   swingDirectionLockDuration: 0.12
   swingDamageTier: 1
   swingRecognitionMultiplier: 1.4
+  swingMoveSpeedMultiplier: 0.6
   dashSpeed: 15
   dashDuration: 0.17
   dashRetargetDuration: 0.1
@@ -495,6 +496,13 @@ MonoBehaviour:
   arenaPadding: 0.7
   fallbackHalfExtents: {x: 7.5, y: 5.5}
   awakenedSprite: {fileID: 21300000, guid: 7badf55ec3f541969562e7b933298707, type: 3}
+  awakeningFrameDurations:
+  - 0.3
+  - 0.7
+  - 1
+  - 0.25
+  awakeningStagger: 0.65
+  awakeningTremble: 0.02
 --- !u!114 &4214231554976169602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -577,7 +585,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 02853204a17ac11468455902c6321ae2, type: 3}
   - {fileID: 21300000, guid: e86f25c3eabc45140ac8f164536136eb, type: 3}
   groundTreasures: []
-  strideLength: 1.6
+  strideLength: 2.6
   hopHeight: 0.42
 --- !u!114 &747793689673476828
 MonoBehaviour:

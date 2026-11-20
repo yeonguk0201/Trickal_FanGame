@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>크레용사용 동작 조정</title>
+<style>
+  :root {
+    --bg: #f4f1ea; --panel: #fffdf8; --ink: #2b2620; --muted: #6f665b; --line: #ddd4c4;
+    --accent: #c2410c; --track: #e9e2d4;
+    --seg0: #94a3b8; --seg1: #60a5fa; --seg2: #f59e0b; --seg3: #a78bfa; --seg4: #f87171;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1a17; --panel: #262320; --ink: #f1ece4; --muted: #b3a998; --line: #3d3833;
+      --accent: #fb923c; --track: #34302b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 "Pretendard", "Noto Sans KR", system-ui, sans-serif; }
+  header { padding: 14px 16px 4px; }
+  h1 { font-size: 18px; margin: 0 0 2px; }
+  header p { margin: 0; color: var(--muted); }
+  main { display: grid; gap: 14px; padding: 12px 16px 24px; max-width: 1280px; }
+  section { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 14px; }
+  @media (max-width: 900px) { section { grid-template-columns: 1fr; } }
+  .stage { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+  canvas { width: 100%; height: auto; display: block; border-radius: 8px; background: #7fb85a; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  h2 { font-size: 15px; margin: 0 0 6px; }
+  .row { margin: 9px 0; }
+  .row label { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
+  .row small { color: var(--muted); display: block; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  input[type=number] { width: 72px; font: inherit; padding: 1px 6px; border: 1px solid var(--line);
+    border-radius: 6px; background: transparent; color: inherit; }
+  button { font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 5px 10px; cursor: pointer; }
+  button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .stats { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .stats b { color: var(--ink); }
+  .timeline { position: relative; height: 26px; border-radius: 6px; overflow: hidden; display: flex;
+    margin-top: 8px; background: var(--track); }
+  .timeline div { height: 100%; font-size: 11px; color: #111; display: flex; align-items: center;
+    justify-content: center; white-space: nowrap; overflow: hidden; border-right: 1px solid rgba(0,0,0,.25); }
+  .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); }
+  textarea { width: 100%; min-height: 120px; font: 12px/1.4 ui-monospace, monospace; border: 1px solid var(--line);
+    border-radius: 8px; background: transparent; color: inherit; padding: 8px; }
+  .output { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>크레용사용 동작 조정</h1>
+  <p>게임 프레임을 실제 크기·실제 이동 속도로 재생합니다. 값은 브라우저에 자동 저장되고, 아래 "공유할 값"을 복사해 보내 주세요.</p>
+</header>
+<main>
+  <section>
+    <div class="stage">
+      <h2>걷기</h2>
+      <canvas id="walkCanvas" width="960" height="300"></canvas>
+      <div class="buttons">
+        <button id="walkPlay">일시정지</button>
+        <button id="walkStep">한 프레임</button>
+        <button data-rate="0.25">0.25배속</button><button data-rate="0.5">0.5배속</button><button data-rate="1">1배속</button>
+      </div>
+      <p class="stats" id="walkStats"></p>
+    </div>
+    <aside class="panel">
+      <h2>걷기 값</h2>
+      <div class="row">
+        <label>보폭(걸음 한 주기 이동 거리) <input type="number" id="strideNum" step="0.1" min="0.5" max="12"></label>
+        <input type="range" id="stride" min="0.5" max="12" step="0.1">
+        <small>8프레임 걸음 한 바퀴 동안 이동하는 거리(Unity 단위)입니다. 클수록 다리가 천천히 움직입니다. 바닥 눈금은 1단위입니다.</small>
+      </div>
+      <div class="row">
+        <label>이동 속도 <input type="number" id="speedNum" step="0.1" min="0.5" max="8"></label>
+        <input type="range" id="speed" min="0.5" max="8" step="0.1">
+        <small>현재 게임 값은 3.2입니다(2페이즈는 1.35배). 다리 속도만 바꾸려면 보폭만 조절하세요.</small>
+      </div>
+      <div class="row">
+        <label>모습</label>
+        <div class="buttons"><button id="formNormal">1페이즈</button><button id="formGolden">2페이즈(황금, ×1.35)</button></div>
+      </div>
+    </aside>
+  </section>
+
+  <section>
+    <div class="stage">
+      <h2>변신</h2>
+      <canvas id="awakenCanvas" width="960" height="420"></canvas>
+      <div class="timeline" id="timeline"><span class="playhead" id="playhead"></span></div>
+      <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="재생 위치">
+      <div class="buttons">
+        <button id="awakenPlay">일시정지</button>
+        <button id="awakenLoop" aria-pressed="true">반복</button>
+        <button data-arate="0.25">0.25배속</button><button data-arate="0.5">0.5배속</button><button data-arate="1">1배속</button>
+      </div>
+      <p class="stats" id="awakenStats"></p>
+    </div>
+    <aside class="panel">
+      <h2>변신 값</h2>
+      <div id="frameRows"></div>
+      <div class="row">
+        <label>번쩍임(3번 프레임) <input type="checkbox" id="flash"></label>
+        <small>3번 프레임이 1.4배 밝기·1.035배 크기에서 원래대로 돌아옵니다(현재 게임 동작).</small>
+      </div>
+      <div class="row">
+        <label>경직 떨림 세기 <input type="number" id="trembleNum" step="0.005" min="0" max="0.2"></label>
+        <input type="range" id="tremble" min="0" max="0.2" step="0.005">
+        <small>경직 동안 좌우로 떨리는 폭(Unity 단위). 경직이 끝날수록 약해집니다.</small>
+      </div>
+      <div class="buttons"><button id="resetAll">게임 값으로 되돌리기</button></div>
+    </aside>
+  </section>
+
+  <section>
+    <div class="panel output">
+      <h2>공유할 값</h2>
+      <textarea id="output" readonly></textarea>
+      <div class="buttons"><button id="copy">복사</button></div>
+    </div>
+  </section>
+</main>
+<script>
+const D = /*DATA*/null;
+const STORE = "crayon-motion-tuner-v1";
+const FRAME_NAMES = ["1번 · 준비", "2번 · 빛 모음", "3번 · 칼 들기(번쩍)", "4번 · 각성 완료", "경직(각성 모습)"];
+const transformTime = D.awakeningFrameDurations.reduce((a, b) => a + b, 0);
+const original = {
+  stride: D.stride, speed: D.speed, golden: false,
+  durations: D.awakeningFrameDurations.concat([D.stagger]),
+  flash: true, tremble: D.tremble,
+};
+let v = structuredClone(original);
+try { Object.assign(v, JSON.parse(localStorage.getItem(STORE) || "{}")); } catch (e) {}
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify(v)); } catch (e) {} };
+const $ = id => document.getElementById(id);
+const images = {};
+const img = f => { if (!images[f.src]) { const i = new Image(); i.src = f.src; images[f.src] = i; } return images[f.src]; };
+const PPU = D.pixelsPerUnit;
+
+// ---------- walk ----------
+let walkRate = 1, walkPlaying = true, walkCycle = 0, walkX = 0, lastWalk = performance.now();
+const walkCanvas = $("walkCanvas"), wctx = walkCanvas.getContext("2d");
+const WORLD_W = walkCanvas.width / PPU;
+function drawGround(ctx, w, h, groundY) {
+  ctx.fillStyle = "#86bf5f"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#79b153"; ctx.fillRect(0, groundY - 6, w, h);
+  ctx.strokeStyle = "rgba(40,70,20,.45)"; ctx.lineWidth = 2;
+  for (let u = 0; u <= w / PPU; u++) {
+    const x = u * PPU; ctx.beginPath(); ctx.moveTo(x, groundY + 4); ctx.lineTo(x, groundY + (u % 5 === 0 ? 22 : 12)); ctx.stroke();
+  }
+  ctx.fillStyle = "rgba(40,70,20,.7)"; ctx.font = "11px sans-serif";
+  for (let u = 0; u <= w / PPU; u += 5) ctx.fillText(u + "", u * PPU + 3, groundY + 34);
+}
+function drawSprite(ctx, f, cx, footY, opts = {}) {
+  const i = img(f); if (!i.complete) return;
+  const size = f.world * PPU, sx = opts.scaleX ?? 1, sy = opts.scaleY ?? 1;
+  ctx.save();
+  // Sprites pivot at the canvas center, as in Unity; footY is where that center sits.
+  ctx.translate(cx + (opts.offsetX ?? 0) * PPU, footY);
+  ctx.scale(sx, sy);
+  if (opts.brightness && opts.brightness !== 1) ctx.filter = `brightness(${opts.brightness})`;
+  ctx.drawImage(i, -size / 2, -size / 2, size, size);
+  ctx.restore();
+}
+function walkFrames() { return v.golden ? D.goldenWalk : D.walk; }
+function walkSpeed() { return v.speed * (v.golden ? D.phaseTwoMultiplier : 1); }
+function renderWalk(now) {
+  const dt = Math.max(0, Math.min(0.1, (now - lastWalk) / 1000)) * walkRate; lastWalk = now;
+  if (walkPlaying) advanceWalk(dt);
+  const w = walkCanvas.width, h = walkCanvas.height, groundY = h - 50;
+  drawGround(wctx, w, h, groundY);
+  const frames = walkFrames(), index = Math.floor(walkCycle * frames.length) % frames.length;
+  const f = frames[index];
+  // As in Unity every frame shares the root pivot, so the sheet's first frame sets the ground line.
+  const centerY = groundY - frames[0].foot * PPU;
+  const loopWidth = w + 260;  // walks left from the middle and wraps around
+  const x = (((w / 2 + 130 - walkX * PPU) % loopWidth) + loopWidth) % loopWidth - 130;
+  drawSprite(wctx, f, x, centerY);
+  wctx.fillStyle = "rgba(0,0,0,.6)"; wctx.font = "12px sans-serif";
+  wctx.fillText(`프레임 ${index + 1}/8`, 10, 18);
+  const cyclesPerSecond = walkSpeed() / v.stride;
+  $("walkStats").innerHTML = `한 걸음 주기 <b>${(1 / cyclesPerSecond).toFixed(2)}초</b> · 초당 프레임 <b>${(cyclesPerSecond * 8).toFixed(1)}</b>` +
+    ` · 이동 속도 <b>${walkSpeed().toFixed(2)}</b> (게임 현재: 보폭 ${D.stride}, 초당 ${(D.speed / D.stride * 8).toFixed(1)}프레임)`;
+}
+function advanceWalk(dt) {
+  const distance = walkSpeed() * dt;
+  walkX += distance;
+  walkCycle = (walkCycle + distance / v.stride) % 1;
+}
+
+// ---------- awakening ----------
+let aRate = 1, aPlaying = true, aLoop = true, aTime = 0, lastA = performance.now();
+const PRE = 0.6, POST = 0.8;
+const awakenCanvas = $("awakenCanvas"), actx = awakenCanvas.getContext("2d");
+const total = () => v.durations.reduce((a, b) => a + b, 0);
+function renderAwaken(now) {
+  const dt = Math.max(0, Math.min(0.1, (now - lastA) / 1000)) * aRate; lastA = now;
+  const span = PRE + total() + POST;
+  if (aPlaying) { aTime += dt; if (aTime >= span) aTime = aLoop ? 0 : span; }
+  const w = awakenCanvas.width, h = awakenCanvas.height, groundY = h - 40;
+  drawGround(actx, w, h, groundY);
+  const t = aTime - PRE;
+  let label, f, opts = {};
+  if (t < 0) { f = D.walk[0]; label = "변신 전(1페이즈 서 있기)"; }
+  else if (t >= total()) { f = D.awakened; label = "변신 후(2페이즈 시작)"; }
+  else {
+    let start = 0, seg = 0;
+    while (seg < 4 && t >= start + v.durations[seg]) { start += v.durations[seg]; seg++; }
+    const local = t - start;
+    if (seg < 4) {
+      f = D.awaken[seg]; label = FRAME_NAMES[seg];
+      if (seg === 2 && v.flash) {
+        const settle = Math.min(1, local / Math.max(0.001, v.durations[2]));
+        opts.brightness = 1.4 + (1 - 1.4) * settle;
+        opts.scaleX = opts.scaleY = 1.035 + (1 - 1.035) * settle;
+      }
+    } else {
+      f = D.awaken[3]; label = FRAME_NAMES[4];
+      const strength = 1 - Math.min(1, local / Math.max(0.001, v.durations[4]));
+      opts.offsetX = Math.sin(now / 1000 * 55) * v.tremble * strength;
+      opts.scaleX = 1 + 0.025 * strength; opts.scaleY = 1 - 0.03 * strength;
+    }
+  }
+  const centerY = groundY - (t < 0 ? D.walk[0].foot : D.awakened.foot) * PPU;
+  drawSprite(actx, f, w / 2, centerY, opts);
+  actx.fillStyle = "rgba(0,0,0,.65)"; actx.font = "13px sans-serif";
+  actx.fillText(label + (t >= 0 && t < total() ? `  ${t.toFixed(2)}s / ${total().toFixed(2)}s` : ""), 10, 20);
+  $("playhead").style.left = (Math.max(0, Math.min(1, t / total())) * 100) + "%";
+  if (document.activeElement !== $("scrub")) $("scrub").value = Math.round(aTime / span * 1000);
+}
+function buildTimeline() {
+  const tl = $("timeline"); [...tl.querySelectorAll("div")].forEach(e => e.remove());
+  v.durations.forEach((d, i) => {
+    const seg = document.createElement("div");
+    seg.style.width = (d / total() * 100) + "%"; seg.style.background = `var(--seg${i})`;
+    seg.textContent = i < 4 ? `${i + 1}` : "경직"; seg.title = `${FRAME_NAMES[i]} ${d.toFixed(2)}s`;
+    tl.insertBefore(seg, $("playhead"));
+  });
+  $("awakenStats").innerHTML = `변신 <b>${(total() - v.durations[4]).toFixed(2)}초</b> + 경직 <b>${v.durations[4].toFixed(2)}초</b>` +
+    ` = 전체 무적 <b>${total().toFixed(2)}초</b> (게임 현재: ${D.awakeningFrameDurations.map(x => x.toFixed(2)).join(" / ")} + 경직 ${D.stagger}초)`;
+}
+function buildFrameRows() {
+  $("frameRows").innerHTML = v.durations.map((d, i) => `
+    <div class="row">
+      <label>${FRAME_NAMES[i]} <input type="number" data-num="${i}" step="0.05" min="0.05" max="3"></label>
+      <input type="range" data-dur="${i}" min="0.05" max="3" step="0.05">
+    </div>`).join("");
+  document.querySelectorAll("[data-dur]").forEach(el => el.oninput = e => setDuration(+el.dataset.dur, e.target.value));
+  document.querySelectorAll("[data-num]").forEach(el => el.onchange = e => setDuration(+el.dataset.num, e.target.value));
+}
+function setDuration(i, value) {
+  const n = Math.round(parseFloat(value) * 100) / 100;
+  if (isNaN(n) || n <= 0) return;
+  v.durations[i] = n; save(); sync();
+}
+
+// ---------- shared ----------
+function sync() {
+  for (const [id, key] of [["stride", "stride"], ["speed", "speed"], ["tremble", "tremble"]]) {
+    $(id).value = v[key]; $(id + "Num").value = v[key];
+  }
+  document.querySelectorAll("[data-dur]").forEach(el => el.value = v.durations[+el.dataset.dur]);
+  document.querySelectorAll("[data-num]").forEach(el => el.value = v.durations[+el.dataset.num].toFixed(2));
+  $("flash").checked = v.flash;
+  $("formNormal").setAttribute("aria-pressed", !v.golden);
+  $("formGolden").setAttribute("aria-pressed", v.golden);
+  buildTimeline();
+  const d = v.durations.map(x => x.toFixed(2));
+  $("output").value =
+    `크레용사용 걷기: 보폭 ${v.stride.toFixed(1)}, 이동 속도 ${v.speed.toFixed(1)} (초당 ${(v.speed / v.stride * 8).toFixed(1)}프레임)\n` +
+    `크레용사용 변신: 1번 ${d[0]}초, 2번 ${d[1]}초, 3번 ${d[2]}초, 4번 ${d[3]}초, 경직 ${d[4]}초 ` +
+    `(전체 ${total().toFixed(2)}초), 번쩍임 ${v.flash ? "켬" : "끔"}, 경직 떨림 ${v.tremble.toFixed(3)}\n로 바꿔줘.\n\n` +
+    JSON.stringify({ version: 1, walkStride: v.stride, walkSpeed: v.speed, awakeningFrameDurations: v.durations.slice(0, 4),
+      awakeningStagger: v.durations[4], flash: v.flash, staggerTremble: v.tremble }, null, 2);
+}
+for (const [id, key, min] of [["stride", "stride", 0.5], ["speed", "speed", 0.5], ["tremble", "tremble", 0]]) {
+  const set = value => { const n = parseFloat(value); if (!isNaN(n) && n >= min) { v[key] = n; save(); sync(); } };
+  $(id).oninput = e => set(e.target.value);
+  $(id + "Num").onchange = e => set(e.target.value);
+}
+$("flash").onchange = e => { v.flash = e.target.checked; save(); sync(); };
+$("formNormal").onclick = () => { v.golden = false; save(); sync(); };
+$("formGolden").onclick = () => { v.golden = true; save(); sync(); };
+$("walkPlay").onclick = () => { walkPlaying = !walkPlaying; $("walkPlay").textContent = walkPlaying ? "일시정지" : "재생"; };
+$("walkStep").onclick = () => { walkPlaying = false; $("walkPlay").textContent = "재생"; advanceWalk(v.stride / walkSpeed() / 8); };
+document.querySelectorAll("[data-rate]").forEach(b => b.onclick = () => {
+  walkRate = +b.dataset.rate; document.querySelectorAll("[data-rate]").forEach(x => x.setAttribute("aria-pressed", x === b)); });
+document.querySelectorAll("[data-arate]").forEach(b => b.onclick = () => {
+  aRate = +b.dataset.arate; document.querySelectorAll("[data-arate]").forEach(x => x.setAttribute("aria-pressed", x === b)); });
+$("awakenPlay").onclick = () => { aPlaying = !aPlaying; $("awakenPlay").textContent = aPlaying ? "일시정지" : "재생"; };
+$("awakenLoop").onclick = () => { aLoop = !aLoop; $("awakenLoop").setAttribute("aria-pressed", aLoop); if (aLoop && aTime >= PRE + total() + POST) aTime = 0; };
+$("scrub").oninput = e => { aPlaying = false; $("awakenPlay").textContent = "재생"; aTime = e.target.value / 1000 * (PRE + total() + POST); };
+$("resetAll").onclick = () => { v = structuredClone(original); save(); buildFrameRows(); sync(); };
+$("copy").onclick = async () => { try { await navigator.clipboard.writeText($("output").value); } catch (e) { $("output").select(); } };
+document.querySelector('[data-rate="1"]').setAttribute("aria-pressed", true);
+document.querySelector('[data-arate="1"]').setAttribute("aria-pressed", true);
+buildFrameRows(); sync();
+function loop(now) { renderWalk(now); renderAwaken(now); requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -32,6 +32,7 @@ namespace TrickalFanGame.Editor
             ValidateWallAndCornerLandings();
             ValidateStandingAreaAndLandingShadow();
             ValidateLandingTelegraphCleanup();
+            ValidatePhaseTwoWarningAndLandingShockwave();
             ValidateFloorTwoRuntimeBinding();
             Week15Boss1Verification.Verify();
             Debug.Log("Week 15 Boss-2 verification passed: Saemaeum Vault keeps its own sprite/prefab, " +
@@ -131,9 +132,9 @@ namespace TrickalFanGame.Editor
                    Mathf.Approximately(GetPrivateField<float>(runtime, "phaseTwoPillarWarning"), 0.7f) &&
                    Mathf.Approximately(runtime.PillarStagger, 0.12f) &&
                    Mathf.Approximately(runtime.PillarHitRadius, 0.6f) &&
-                   runtime.PillarDamageTier == EnemyDamageTier.Light && runtime.PillarRequiredHits == 2 &&
+                   runtime.PillarDamageTier == EnemyDamageTier.Light && runtime.PillarRequiredHits == 3 &&
                    runtime.PillarTargetEvery == 3,
-                "Boss-2 gold pillars must be 4 / 6 per cast, warn 0.8 / 0.7, hurt lightly, break after 2 hits and " +
+                "Boss-2 gold pillars must be 4 / 6 per cast, warn 0.8 / 0.7, hurt lightly, break after 3 hits and " +
                 "aim one in three at the player.");
             Assert(Mathf.Approximately(runtime.MeteorMinimumDuration, 8f) &&
                    Mathf.Approximately(runtime.MeteorMaximumDuration, 10f) && runtime.MeteorOpeningCount == 5 &&
@@ -352,7 +353,7 @@ namespace TrickalFanGame.Editor
                 Collider2D body = first.GetComponent<Collider2D>();
                 Assert(first.gameObject.layer == LayerMask.NameToLayer("Environment") && obstacle != null &&
                        body != null && !body.isTrigger && first.Obstacle != null &&
-                       first.Obstacle.BlocksBossProjectiles && obstacle.RequiredHits == 2 &&
+                       first.Obstacle.BlocksBossProjectiles && obstacle.RequiredHits == 3 &&
                        obstacle.DropTable == null && obstacle.TryValidate(out _),
                     "An emerged pillar must be a solid, hit-counted Environment obstacle that blocks boss shots.");
                 Assert(first.GetComponent<Health>() == null && first.GetComponentInChildren<Health>() == null,
@@ -368,9 +369,10 @@ namespace TrickalFanGame.Editor
 
                 // Hits are counted, not damage.
                 Assert(obstacle.RegisterPlayerHit() && !obstacle.IsBroken, "A pillar must survive its first hit.");
+                Assert(obstacle.RegisterPlayerHit() && !obstacle.IsBroken, "A pillar must survive its second hit.");
                 Assert(obstacle.RegisterPlayerHit() && obstacle.IsBroken &&
                        !BossSummonedObstacle.Live.Contains(first.Obstacle),
-                    "A pillar must break on its second hit.");
+                    "A pillar must break on its third hit.");
 
                 // The boss walking into a pillar breaks it.
                 SaemaeumGoldPillar second = pillars[1];
@@ -884,6 +886,64 @@ namespace TrickalFanGame.Editor
             }
             finally
             {
+                UnityEngine.Object.DestroyImmediate(target);
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        // 2026-11-20: the drawn phase-two warning keeps the vault invulnerable, and each landing sends out a
+        // visual-only ring that ends just past the landing radius and is cleared with the boss.
+        private static void ValidatePhaseTwoWarningAndLandingShockwave()
+        {
+            BossController prefabBoss = AssetDatabase.LoadAssetAtPath<GameObject>(Week15Boss2Setup.BossPrefabPath)
+                .GetComponent<BossController>();
+            Assert(Mathf.Approximately(prefabBoss.PhaseTransitionDuration, 1.6f),
+                "Boss-2 phase-two warning must last 1.6s.");
+            for (int i = 0; i < SaemaeumVaultPhaseTwoArtwork.FrameCount; i++)
+            {
+                Sprite frame = SaemaeumVaultPhaseTwoArtwork.Frame(i);
+                Assert(frame != null && frame.rect.size == new Vector2(1024f, 1024f) &&
+                       Mathf.Approximately(frame.pixelsPerUnit, 400f) && frame.pivot == new Vector2(512f, 512f),
+                    "Phase-two warning poses must share the movement frames' 400 PPU and centered pivot.");
+            }
+            Assert(SaemaeumVaultPhaseTwoArtwork.FrameAt(0f) == 0 && SaemaeumVaultPhaseTwoArtwork.FrameAt(0.2f) == 1 &&
+                   SaemaeumVaultPhaseTwoArtwork.FrameAt(0.5f) == 2 && SaemaeumVaultPhaseTwoArtwork.FrameAt(0.9f) == 3,
+                "Phase-two warning must play startled, annoyed, roaring, seething in order.");
+
+            GameObject root = CreateRuntimeBoss(out BossController boss,
+                out SaemaeumVaultBossPatternRuntime runtime, out Health health, out GameObject target);
+            try
+            {
+                runtime.BeginCombat(target.transform, 31, 0f);
+                runtime.OnPatternStateChanged(BossActionState.PhaseTransition, BossPatternExecution.SignalOnly, 1.6f);
+                Assert(health.IsInvulnerable, "The vault must be invulnerable during its phase-two warning.");
+                runtime.OnPatternStateChanged(BossActionState.Telegraph,
+                    BossPatternExecution.SaemaeumJumpSequence, 2.4f);
+                Assert(!health.IsInvulnerable, "The vault must take damage again once phase two starts.");
+
+                // No treasure ring here, so the only boss-owned object is the landing ring itself.
+                runtime.ConfigureLandingBurst(0, 0, 4.5f, 5f, EnemyDamageTier.Light, 0.2f);
+                InvokeWith(runtime, "ResolveLanding", new Vector2(-3f, 2f), 0);
+                SaemaeumLandingShockwave wave = runtime.LastShockwave;
+                Assert(wave != null && wave.GetComponentInChildren<Collider2D>() == null &&
+                       (Vector2)wave.transform.position == new Vector2(-3f, 2f) + runtime.GroundShadowOffset() &&
+                       Mathf.Approximately(wave.Radius, runtime.LandingRadius) && boss.OwnedObjectCount == 1,
+                    "A landing must spread a boss-owned, collision-free ring from the landed shadow.");
+                wave.RenderAt(0.02f);
+                float early = wave.Front.transform.localScale.x;
+                wave.RenderAt(SaemaeumLandingShockwave.Duration * 0.99f);
+                Assert(wave.Front.transform.localScale.x > early * 4f &&
+                       wave.Front.transform.localScale.x <= runtime.LandingRadius * 2f * SaemaeumLandingShockwave.FrontReach + 0.001f &&
+                       Mathf.Approximately(wave.Front.transform.localScale.y, wave.Front.transform.localScale.x * EnemyLobProjectile.MarkAspect) &&
+                       wave.Front.color.a < 0.05f && wave.Front.sortingOrder < 0,
+                    "The ring must burst out along the floor to just past the landing radius and fade under bodies.");
+                boss.CancelCombat();
+                Assert(boss.OwnedObjectCount == 0 && runtime.LastShockwave == null,
+                    "Room cleanup must remove a running landing ring.");
+            }
+            finally
+            {
+                if (runtime.LastShockwave != null) UnityEngine.Object.DestroyImmediate(runtime.LastShockwave.gameObject);
                 UnityEngine.Object.DestroyImmediate(target);
                 UnityEngine.Object.DestroyImmediate(root);
             }
