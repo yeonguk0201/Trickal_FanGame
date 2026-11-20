@@ -29,9 +29,10 @@ namespace TrickalFanGame.Editor
             Require(defeat.AnchorFromFeet.x < 0f, "The truck must come from the left of the boss.");
             Require(defeat.ApproachDistance >= 12.5f && defeat.ExitDistance >= 25f,
                 "The truck must start and end outside the 25-unit-wide boss room.");
-            float expectedVictory = defeat.WaitSeconds + defeat.ApproachSeconds + CrayonHeroTruckDefeatSetup.VictoryAfterImpact;
+            float expectedVictory = defeat.ImpactStart + defeat.ImpactDuration +
+                                    CrayonHeroTruckDefeatSetup.VictoryAfterImpact;
             Require(Mathf.Abs(defeat.VictoryDelay - expectedVictory) < 0.001f && defeat.VictoryDelay < defeat.Duration,
-                "에르핀 must jump after the hit and before the truck has gone.");
+                "에르핀 must jump after the crash frames and before the truck has gone.");
 
             VerifyView(prefab, defeat);
             VerifyErpinVictory();

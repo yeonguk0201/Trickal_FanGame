@@ -42,6 +42,7 @@ namespace TrickalFanGame.Editor
             VerifyResources(scene, frame);
             VerifyMinimap(scene);
             VerifyDescription(scene, frame);
+            VerifyHudHover(scene, frame);
 
             EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath, OpenSceneMode.Single);
             Debug.Log("Week 27 UX-1 verification passed: right HUD column without overlaps at 1920x1080 and " +
@@ -391,6 +392,83 @@ namespace TrickalFanGame.Editor
                 foreach (GameObject target in created)
                     if (target != null) Object.DestroyImmediate(target);
             }
+        }
+
+        // 2026-11-20: the mouse resting on a held 권능, spell or artifact HUD icon shows the same description panel
+        // beside it; nothing describes on hover while paused (ESC menu).
+        private static void VerifyHudHover(Scene scene, RectTransform frame)
+        {
+            foreach (Type type in new[]
+                     {
+                         typeof(GamePowerHudView), typeof(GameSpellSlotHudView), typeof(ArtifactHudSlotView)
+                     })
+                Assert(typeof(IHudDescribed).IsAssignableFrom(type), type.Name + " must describe on hover.");
+            PickupDescriptionView configured =
+                Week27Ux1Setup.FindSingle<PickupDescriptionView>(scene, "pickup description");
+            ItemDefinition power = FindItem(item => item.Kind == ItemKind.Active);
+            Assert(power != null, "The hover check needs a 권능 asset.");
+
+            List<GameObject> created = new();
+            HoverTarget hud = null;
+            float timeScale = Time.timeScale;
+            try
+            {
+                GameObject panelClone = Object.Instantiate(configured.gameObject, frame);
+                created.Add(panelClone);
+                PickupDescriptionView view = panelClone.GetComponent<PickupDescriptionView>();
+                GameObject player = new("UX-1 Hover Player");
+                created.Add(player);
+                view.Configure(player.transform, frame, view.KindText, view.RarityText, view.NameText, view.EffectText,
+                    view.DetailText, view.DetectionRadius);
+                CanvasGroup group = view.GetComponent<CanvasGroup>();
+
+                hud = new HoverTarget(created, frame, new Vector2(700f, -440f), power);
+                HudDescribedRegistry.Register(hud);
+                Vector2 onHud = HudDescribedRegistry.ScreenRect(hud.HoverArea).center;
+
+                Time.timeScale = 1f;
+                Assert(view.RefreshHudHover(onHud) && ReferenceEquals(view.HoveredHud, hud) && view.Shown == null &&
+                       group.alpha > 0.99f && view.NameText.text == power.DisplayName &&
+                       view.EffectText.text == ArtifactEffectDescription.Build(power) &&
+                       view.DetailText.text == GamePowerHudView.BuildOfferLine(power),
+                    "Resting the mouse on the 권능 icon must describe the held 권능 with its charge line.");
+                AssertInsideFrame(view, frame);
+                Assert(!view.RefreshHudHover(null) && view.HoveredHud == null, "No mouse must describe nothing.");
+
+                Time.timeScale = 0f;
+                Assert(!view.RefreshHudHover(onHud), "Nothing may describe on hover while paused (ESC menu).");
+                Time.timeScale = 1f;
+                hud.Group.alpha = 0f;
+                Assert(!view.RefreshHudHover(onHud), "A faded-out HUD icon must not describe.");
+            }
+            finally
+            {
+                Time.timeScale = timeScale;
+                HudDescribedRegistry.Unregister(hud);
+                foreach (GameObject target in created)
+                    if (target != null) Object.DestroyImmediate(target);
+            }
+        }
+
+        private sealed class HoverTarget : IHudDescribed
+        {
+            public HoverTarget(List<GameObject> created, RectTransform frame, Vector2 position,
+                ItemDefinition definition)
+            {
+                var owner = new GameObject("UX-1 Hover Target", typeof(RectTransform), typeof(CanvasGroup));
+                created.Add(owner);
+                HoverArea = (RectTransform)owner.transform;
+                HoverArea.SetParent(frame, false);
+                HoverArea.anchorMin = HoverArea.anchorMax = HoverArea.pivot = new Vector2(0.5f, 0.5f);
+                HoverArea.anchoredPosition = position;
+                HoverArea.sizeDelta = new Vector2(80f, 80f);
+                Group = owner.GetComponent<CanvasGroup>();
+                Definition = definition;
+            }
+
+            public RectTransform HoverArea { get; }
+            public ItemDefinition Definition { get; }
+            public CanvasGroup Group { get; }
         }
 
         private static void AssertInsideFrame(PickupDescriptionView view, RectTransform frame)

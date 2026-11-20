@@ -9,7 +9,7 @@ namespace TrickalFanGame.Frontend
     // key once the gauge is full. The name and the "0/4" count are optional (UX-1 shows the icon and cells only).
     // Final placement and resolution checks belong to UX-1.
     [DisallowMultipleComponent]
-    public sealed class GamePowerHudView : MonoBehaviour
+    public sealed class GamePowerHudView : MonoBehaviour, IHudDescribed
     {
         public const string KindLabel = "교주의 권능";
         public const string EmptyText = "없음";
@@ -56,6 +56,9 @@ namespace TrickalFanGame.Frontend
         public Sprite FilledCellSprite => filledCellSprite;
         // The colour a charged cell draws with: white over the cell artwork, the plain sky blue without it.
         public Color FilledColor => filledCellSprite != null ? Color.white : FilledCellColor;
+        // The mouse resting on the 권능 icon shows its description (PickupDescriptionView).
+        public RectTransform HoverArea => icon != null ? icon.rectTransform : (RectTransform)transform;
+        public ItemDefinition Definition => slot != null ? slot.HeldDefinition : null;
 
         public void Configure(PlayerPowerSlot configuredSlot, Image configuredIcon, TMP_Text configuredNameText,
             TMP_Text configuredGaugeText, TMP_Text configuredKeyText, Image[] configuredGaugeCells)
@@ -83,11 +86,16 @@ namespace TrickalFanGame.Frontend
         private void OnEnable()
         {
             Subscribe();
+            HudDescribedRegistry.Register(this);
             hasRendered = false;
             RefreshNow();
         }
 
-        private void OnDisable() => Unsubscribe();
+        private void OnDisable()
+        {
+            Unsubscribe();
+            HudDescribedRegistry.Unregister(this);
+        }
 
         // Usability follows pause, death and room conditions that raise no event, so it is polled.
         private void Update() => RefreshNow();

@@ -9,7 +9,7 @@ namespace TrickalFanGame.Frontend
     // held spell's artwork (an empty tile when nothing is held), "SHIFT" at the bottom, and a dark overlay while the
     // held spell cannot be used. Final placement and resolution checks belong to UX-1.
     [DisallowMultipleComponent]
-    public sealed class GameSpellSlotHudView : MonoBehaviour
+    public sealed class GameSpellSlotHudView : MonoBehaviour, IHudDescribed
     {
         public const string KeyLabel = "SHIFT";
         public const string AllFixedText = KeyLabel;
@@ -30,6 +30,9 @@ namespace TrickalFanGame.Frontend
         public Image UnusableOverlay => unusableOverlay;
         public bool IsShowingUsable => renderedUsable;
         public bool IsShowingItem => icon != null && icon.enabled;
+        // The mouse resting on the spell tile shows the held spell's description (PickupDescriptionView).
+        public RectTransform HoverArea => icon != null ? icon.rectTransform : (RectTransform)transform;
+        public ItemDefinition Definition => slot != null ? slot.HeldDefinition : null;
 
         public void Configure(PlayerSpellSlot configuredSlot, Image configuredIcon, TMP_Text configuredKeyText,
             Image configuredUnusableOverlay)
@@ -47,11 +50,16 @@ namespace TrickalFanGame.Frontend
         private void OnEnable()
         {
             Subscribe();
+            HudDescribedRegistry.Register(this);
             hasRendered = false;
             RefreshNow();
         }
 
-        private void OnDisable() => Unsubscribe();
+        private void OnDisable()
+        {
+            Unsubscribe();
+            HudDescribedRegistry.Unregister(this);
+        }
 
         // Usability follows pause, death and room conditions that raise no event, so it is polled.
         private void Update() => RefreshNow();

@@ -8,8 +8,10 @@ using UnityEngine.UI;
 namespace TrickalFanGame.Run
 {
     // UX-0: player death → fall → hold → circular fade (iris) → GAME OVER → the player confirms → result.
-    // Runs on unscaled time so a stopped game clock cannot stall it. The result screen opens only after the
-    // confirm input; nothing advances to it by time alone.
+    // Last boss cleared: 에르핀 stops and keeps jumping for joy (after 황금 용사's truck has hit) → hold → the same iris on her →
+    // VICTORY → the player confirms → result. Only the run's final clear starts it, so a later floor count needs no
+    // change here. Runs on unscaled time so a stopped game clock cannot stall it. The result screen opens only after
+    // the confirm input; nothing advances to it by time alone.
     [DisallowMultipleComponent]
     public sealed class GameOverSequence : MonoBehaviour
     {
@@ -17,6 +19,8 @@ namespace TrickalFanGame.Run
         {
             Idle,
             Falling,
+            // VICTORY only: 에르핀's jump for joy and the boss's defeat presentation (the truck) play out.
+            Celebrating,
             Holding,
             Closing,
             Blackout,
@@ -46,6 +50,11 @@ namespace TrickalFanGame.Run
         [SerializeField, Min(0.01f)] private float irisDuration = 1.2f;
         [SerializeField, Min(0.01f)] private float titleFadeDuration = 0.6f;
         [SerializeField, Min(0f)] private float confirmDelay = 0.4f;
+        // VICTORY: how long she holds her last joyful pose after the presentation before the iris closes.
+        [SerializeField, Min(0f)] private float holdAfterVictory = 1.2f;
+
+        // VICTORY waits at most this long for the boss's defeat presentation, in case it never ends.
+        public const float MaxCelebrationWait = 8f;
 
         private Transform focusTarget;
         private Camera focusCamera;
@@ -57,9 +66,13 @@ namespace TrickalFanGame.Run
         private Action confirmed;
         private Texture2D holeTexture;
         private GameOverPresentation presentation;
+        private bool victoryCueRead;
 
         public Phase CurrentPhase { get; private set; } = Phase.Idle;
         public bool IsActive => CurrentPhase != Phase.Idle;
+        public bool IsVictory { get; private set; }
+        public bool IsCelebrating => CurrentPhase == Phase.Celebrating;
+        public float HoldAfterVictory => holdAfterVictory;
         public bool IsAwaitingConfirm => CurrentPhase == Phase.AwaitingConfirm;
         public float FallDuration => fallDuration;
         public bool UsesDrawnFall => drawnFall;
@@ -117,6 +130,7 @@ namespace TrickalFanGame.Run
             focusTarget = target;
             focusCamera = Camera.main;
             confirmed = onConfirmed;
+            IsVictory = false;
             StopBosses();
             if (focusTarget != null)
             {
@@ -132,10 +146,29 @@ namespace TrickalFanGame.Run
             return true;
         }
 
+        // The last boss's clear. target is the player: she stops, cannot be hurt, and jumps for joy once the boss's
+        // victory cue arrives (read on the first step, since the room may clear just before the boss's own death
+        // handler runs in the same frame).
+        public bool TryBeginVictory(Transform target, Action onConfirmed)
+        {
+            if (IsActive || overlay == null || confirmButton == null) return false;
+
+            focusTarget = target;
+            focusCamera = Camera.main;
+            confirmed = onConfirmed;
+            IsVictory = true;
+            drawnFall = true;
+            victoryCueRead = false;
+            LockPlayer(true);
+            SetPhase(Phase.Celebrating);
+            return true;
+        }
+
         // Verification and quick skip: jumps straight to the confirm prompt.
         public bool SkipToConfirm()
         {
             if (!IsActive || CurrentPhase >= Phase.AwaitingConfirm) return false;
+            if (IsVictory && !victoryCueRead) StartVictoryJump();
             ApplyFall(1f);
             ShowOverlay();
             ApplyIris(0f);
@@ -173,8 +206,13 @@ namespace TrickalFanGame.Run
                     ApplyFall(fallDuration <= 0f ? 1f : Mathf.Clamp01(phaseElapsed / fallDuration));
                     if (phaseElapsed >= fallDuration) SetPhase(Phase.Holding);
                     break;
+                case Phase.Celebrating:
+                    if (!victoryCueRead) StartVictoryJump();
+                    if (BossDefeatPresentation.Remaining <= 0f || phaseElapsed >= MaxCelebrationWait)
+                        SetPhase(Phase.Holding);
+                    break;
                 case Phase.Holding:
-                    if (phaseElapsed >= holdAfterFall)
+                    if (phaseElapsed >= (IsVictory ? holdAfterVictory : holdAfterFall))
                     {
                         ShowOverlay();
                         SetPhase(Phase.Closing);
@@ -203,9 +241,34 @@ namespace TrickalFanGame.Run
             }
         }
 
+        private void StartVictoryJump()
+        {
+            victoryCueRead = true;
+            if (focusTarget == null) return;
+            PlayerWalkAnimator erpin = focusTarget.GetComponent<PlayerWalkAnimator>();
+            float delay = BossDefeatPresentation.VictoryCueRemaining;
+            // She keeps jumping through the iris; the iris waits for her first two jumps.
+            if (erpin != null && erpin.PlayVictory(delay, true))
+                BossDefeatPresentation.Hold(delay + erpin.VictoryDuration);
+        }
+
+        // VICTORY: she stands still and nothing left in the room can hurt her while the sequence runs.
+        private void LockPlayer(bool locked)
+        {
+            if (focusTarget == null) return;
+            if (focusTarget.TryGetComponent(out PlayerActionState actionState)) actionState.SetVictoryBlocked(locked);
+            if (focusTarget.TryGetComponent(out Combat.Health health)) health.SetInvulnerable(locked);
+            if (locked && focusTarget.TryGetComponent(out PlayerMovement movement)) movement.StopImmediately();
+        }
+
         private void BeginTitle()
         {
-            presentation ??= new GameOverPresentation(title, confirmButton);
+            if (presentation != null && presentation.IsVictory != IsVictory)
+            {
+                presentation.Dispose();
+                presentation = null;
+            }
+            presentation ??= new GameOverPresentation(title, confirmButton, IsVictory);
             SetPhase(Phase.Title);
             RevealTitle(0f);
         }

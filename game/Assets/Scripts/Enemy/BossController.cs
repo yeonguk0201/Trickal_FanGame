@@ -484,8 +484,8 @@ namespace TrickalFanGame.Enemy
             Died?.Invoke();
         }
 
-        // 에르핀 jumps for joy where she stands (after 황금 용사's truck has hit, when this boss has one). Held before
-        // Died so a cleared run already knows to wait for it before the result screen.
+        // When 에르핀 may jump for joy (after 황금 용사's truck has hit, when this boss has one). Set before Died so the
+        // run's VICTORY sequence, which only the last boss's clear starts, finds it. Other bosses play no victory.
         public const float VictoryDelay = 0.5f;
 
         private void PlayDefeatPresentation()
@@ -497,9 +497,7 @@ namespace TrickalFanGame.Enemy
                 victoryDelay = truck.VictoryDelay;
                 BossDefeatPresentation.Hold(truck.Duration);
             }
-            PlayerWalkAnimator erpin = FindFirstObjectByType<PlayerWalkAnimator>();
-            if (erpin != null && erpin.PlayVictory(victoryDelay))
-                BossDefeatPresentation.Hold(victoryDelay + erpin.VictoryDuration);
+            BossDefeatPresentation.CueVictory(victoryDelay);
         }
 
         private int NextRandom(int maximumExclusive)

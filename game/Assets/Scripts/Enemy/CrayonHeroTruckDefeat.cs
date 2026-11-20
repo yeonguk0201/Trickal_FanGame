@@ -37,7 +37,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(1f)] private float wheelFramesPerSecond = 16f;
         [SerializeField, Min(0f)] private float shakePeak = 0.25f;
         [SerializeField, Min(0f)] private float shakeSeconds = 0.3f;
-        // 에르핀 jumps for joy this long after the truck hits.
+        // 에르핀 jumps for joy this long after the crash frames end (the truck has hit and is driving off).
         [SerializeField, Min(0f)] private float victoryAfterImpact = 0.6f;
 
         private Health health;
@@ -71,7 +71,7 @@ namespace TrickalFanGame.Enemy
             }
         }
         public float Duration => ImpactStart + ImpactDuration + exitSeconds;
-        public float VictoryDelay => ImpactStart + victoryAfterImpact;
+        public float VictoryDelay => ImpactStart + ImpactDuration + victoryAfterImpact;
 
         public bool HasFrames =>
             driveFrames != null && driveFrames.Length > 0 && driveRects != null && driveRects.Length == driveFrames.Length &&

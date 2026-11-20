@@ -417,8 +417,18 @@ namespace TrickalFanGame.Run
                 return;
             }
 
-            // A clear waits for the boss's defeat presentation (truck, 에르핀's victory) before the result screen.
-            // The request is queued locally now, so quitting meanwhile still saves it once later.
+            // The last boss's clear: 에르핀's jump for joy after the boss's defeat presentation (truck), the iris,
+            // VICTORY and its confirm input before the result screen. Queued locally now, like a death.
+            if (isCleared && gameOverSequence != null &&
+                gameOverSequence.TryBeginVictory(playerHealth != null ? playerHealth.transform : null,
+                    OnGameOverConfirmed))
+            {
+                LocalPendingRunStorage.Save(pendingRequest);
+                statusMessage = "Run cleared. VICTORY.";
+                return;
+            }
+
+            // Without the sequence a clear still waits for the boss's defeat presentation before the result screen.
             if (isCleared && BossDefeatPresentation.Remaining > 0f && isActiveAndEnabled)
             {
                 LocalPendingRunStorage.Save(pendingRequest);

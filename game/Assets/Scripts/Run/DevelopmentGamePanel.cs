@@ -947,9 +947,9 @@ namespace TrickalFanGame.Run
                 }
                 status = $"Spawned {spawned} of {crayons.Length} crayon minions to the right of the player.";
             }
-            // Defeat-6 (2026-11-19): 에르핀's victory jump, which a boss's death plays (황금 용사's truck: Boss room →
-            // Kill current wave).
-            if (AssistedButton("Play Erpin victory (boss defeat)") && player != null)
+            // Defeat-6 (2026-11-19): 에르핀's victory jump on its own. The last boss's clear plays it after the truck,
+            // then the iris and VICTORY (last floor's Boss room → Kill current wave); other bosses play no victory.
+            if (AssistedButton("Play Erpin victory (jump only)") && player != null)
             {
                 var erpin = player.GetComponent<TrickalFanGame.Player.PlayerWalkAnimator>();
                 status = erpin != null && erpin.PlayVictory(0f)

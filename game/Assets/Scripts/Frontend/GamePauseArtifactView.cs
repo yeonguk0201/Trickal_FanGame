@@ -306,6 +306,9 @@ namespace TrickalFanGame.Frontend
             ClearEntries();
             if (inventory != null && entriesRoot != null && entryTemplate != null)
             {
+                // The held 교주의 권능 and spell first: the HUD shows only their icons.
+                if (inventory.TryGetComponent(out PlayerPowerSlot power)) AddHeldEntry(power.HeldDefinition);
+                if (inventory.TryGetComponent(out PlayerSpellSlot spell)) AddHeldEntry(spell.HeldDefinition);
                 foreach (ItemDefinition definition in inventory.AcquiredDefinitions)
                 {
                     ArtifactPauseListEntryView entry = Instantiate(entryTemplate, entriesRoot);
@@ -318,6 +321,16 @@ namespace TrickalFanGame.Frontend
             }
 
             if (emptyText != null) emptyText.gameObject.SetActive(entries.Count == 0);
+        }
+
+        private void AddHeldEntry(ItemDefinition definition)
+        {
+            if (definition == null) return;
+            ArtifactPauseListEntryView entry = Instantiate(entryTemplate, entriesRoot);
+            entry.name = "Held Detail " + definition.ItemId;
+            entry.gameObject.SetActive(true);
+            entry.BindHeld(definition);
+            entries.Add(entry);
         }
 
         private void ClearEntries()

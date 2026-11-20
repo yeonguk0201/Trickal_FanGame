@@ -116,11 +116,16 @@ namespace TrickalFanGame.Player
             victoryStartsAt = float.NaN;
         }
 
-        // A boss died: jump for joy after delay seconds (game time, so a pause holds it). False when she cannot.
-        public bool PlayVictory(float delay)
+        // The run's VICTORY (2026-11-20 user request): she keeps jumping until the scene changes.
+        public bool IsVictoryLooping { get; private set; }
+
+        // Jump for joy after delay seconds (game time, so a pause holds it). False when she cannot. Without loop
+        // she jumps VictoryLoops times and keeps the last pose; with loop she jumps on without end.
+        public bool PlayVictory(float delay, bool loop = false)
         {
             if (!hasVictoryFrames || (health != null && health.IsDead)) return false;
             victoryStartsAt = Time.time + Mathf.Max(0f, delay);
+            IsVictoryLooping = loop;
             return true;
         }
 
@@ -130,7 +135,7 @@ namespace TrickalFanGame.Player
             if (!hasVictoryFrames || float.IsNaN(victoryStartsAt) || (health != null && health.IsDead)) return false;
             if (secondsSinceStart < 0f) return false;
             int index = Mathf.FloorToInt(secondsSinceStart / VictoryFrameSeconds);
-            if (index >= VictoryFrameCount * VictoryLoops)
+            if (!IsVictoryLooping && index >= VictoryFrameCount * VictoryLoops)
             {
                 bool busy = isPlayingSkill || (movement != null && (movement.IsMoving || movement.IsAimingAttack));
                 if (busy)

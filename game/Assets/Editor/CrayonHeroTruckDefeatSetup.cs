@@ -49,7 +49,9 @@ namespace TrickalFanGame.Editor
         public static readonly Vector2 AnchorFromFeet = new(-1.592f, 0f);
         public const float WaitSeconds = 0.35f, ApproachSeconds = 0.55f, ApproachDistance = 16f;
         public const float ImpactTravel = 0.3618f, ExitSeconds = 0.9f, ExitDistance = 30f, ExitAcceleration = 0.3f;
-        public const float WheelFps = 16f, ShakePeak = 0.25f, ShakeSeconds = 0.3f, VictoryAfterImpact = 0.6f;
+        public const float WheelFps = 16f, ShakePeak = 0.25f, ShakeSeconds = 0.3f;
+        // 에르핀 jumps once the crash frames end, while the truck drives off (2026-11-20 user request).
+        public const float VictoryAfterImpact = 0.15f;
 
         [MenuItem("Trickal Fan Game/Artwork/Apply Truck Defeat And Erpin Victory")]
         public static void Apply()

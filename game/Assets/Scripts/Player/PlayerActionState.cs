@@ -20,7 +20,9 @@ namespace TrickalFanGame.Player
         public bool IsRewardSelectionBlocked { get; private set; }
         // Shop-0: the shop UI is open. Blocks the same actions as a pending reward selection.
         public bool IsShopBlocked { get; private set; }
-        public bool IsInputBlocked => IsRewardSelectionBlocked || IsShopBlocked;
+        // The last boss is down and the VICTORY sequence runs: 에르핀 stands still for her jump for joy.
+        public bool IsVictoryBlocked { get; private set; }
+        public bool IsInputBlocked => IsRewardSelectionBlocked || IsShopBlocked || IsVictoryBlocked;
 
         public bool IsDashing => Phase == PlayerActionPhase.UltimateDashing;
         public bool IsImpactRecovering => Phase == PlayerActionPhase.UltimateImpactRecovery;
@@ -48,6 +50,12 @@ namespace TrickalFanGame.Player
         public void SetShopBlocked(bool blocked)
         {
             IsShopBlocked = blocked;
+        }
+
+        public void SetVictoryBlocked(bool blocked)
+        {
+            if (blocked && !IsVictoryBlocked && Phase != PlayerActionPhase.Normal) ForceNormal();
+            IsVictoryBlocked = blocked;
         }
 
         public bool TryBeginUltimate(Vector2 initialDirection, float speedMultiplier)

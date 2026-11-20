@@ -704,4 +704,4 @@ MonoBehaviour:
   wheelFramesPerSecond: 16
   shakePeak: 0.25
   shakeSeconds: 0.3
-  victoryAfterImpact: 0.6
+  victoryAfterImpact: 0.15

@@ -560,6 +560,12 @@
       Erpin Victory`로 연결한다. 확인: `F1` → 보스방 `Boss F<n>` → `Kill current wave`, 승리만 `Play Erpin victory (boss
       defeat)`. 자동 검증: `CrayonHeroTruckDefeatSetup.ApplyAndVerifyBatch`, `Defeat1MotionSetup.VerifyWithRegressionsBatch`,
       `HitFeedbackVerification.Verify` 통과(2026-11-20). 사용자 Play 확인: 미확인.
+      2026-11-20 사용자 변경: 승리 연출은 크레용 용사가 아니라 **마지막 보스**(마지막 층 보스방 클리어) 기준이다. 다른 보스는
+      승리 점프가 없다. 에르핀 점프는 트럭 충돌 8장이 끝난 0.15초 뒤 시작하고(`VictoryAfterImpact`), 연출 동안 에르핀은
+      멈추고 무적이며 결과창으로 넘어갈 때까지 승리 점프를 반복한다(2026-11-20 사용자 요청). 첫 두 번 점프가 끝나면 1.2초 뒤 GAME OVER처럼 에르핀 중심 원형으로 닫히고 금빛 `VICTORY` 화면(승리 3번 프레임
+      초상) → `결과 보기` 입력 → 결과창(`GameOverSequence.TryBeginVictory`). 확인: `F1` → 마지막 층 `Boss F<n>` →
+      `Kill current wave`, 점프만 `Play Erpin victory (jump only)`. 자동 검증: `CrayonHeroTruckDefeatSetup.ApplyAndVerifyBatch`,
+      `Week25Ux0Verification.Verify`(VICTORY 흐름 추가) 통과(2026-11-20). 사용자 Play 확인(2026-11-20).
     - 남은 것: 누루링·자폭형·부스러기 쫄따구는 쓰러짐 그림이 없어 지금처럼 바로 사라진다.
 - 새 적 원화(자폭형·곡사형·잠복형)는 사용자가 준비한다. 원화 전에는 임시 그림으로 로직부터 만든다.
 - Curve-1~Variant-2와 Drop-0·1은 Play-2 기록 전에 끝내야 그 기록이 기준선으로 남는다(§6).
