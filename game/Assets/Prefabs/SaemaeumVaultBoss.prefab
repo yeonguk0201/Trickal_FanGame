@@ -224,6 +224,20 @@ MonoBehaviour:
     activeDuration: 0.3
     recoveryDuration: 0.4
     reuseCooldown: 0
+  - patternId: saemaeum-gold-cage
+    execution: 15
+    telegraphDuration: 0.8
+    additionalTelegraphDuration: 0
+    activeDuration: 0.6
+    recoveryDuration: 0.4
+    reuseCooldown: 10
+  - patternId: saemaeum-pillar-wave
+    execution: 16
+    telegraphDuration: 0.6
+    additionalTelegraphDuration: 0
+    activeDuration: 1.4
+    recoveryDuration: 0.6
+    reuseCooldown: 6
   encounterSeed: 1
   attackInterval: 1.2
   projectileSpeed: 4
@@ -249,6 +263,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.SaemaeumVaultBossPatternRuntime
   approachSpeed: 1.8
   phaseTwoSpeedMultiplier: 1.35
+  approachVolleys: 5
+  approachThrowInterval: 0.55
+  approachProjectilesPerVolley: 3
+  approachSpreadDegrees: 30
+  approachProjectileSpeed: 5.5
   phaseOneMinimumJumps: 2
   phaseOneMaximumJumps: 2
   phaseTwoMinimumJumps: 3
@@ -258,20 +277,21 @@ MonoBehaviour:
   phaseOneJumpRest: 1
   phaseTwoJumpRest: 0.85
   preJumpCrouchDuration: 0.8
-  jumpDistance: 5.5
+  jumpDistance: 7
   jumpHeight: 2
   landingRadius: 2.875
   landingDamageTier: 1
   landingKnockbackSpeed: 7
   landingKnockbackDuration: 0.2
-  phaseOneLandingBurstCount: 8
-  phaseTwoLandingBurstCount: 12
+  phaseOneLandingBurstCount: 12
+  phaseTwoLandingBurstCount: 16
   phaseOneLandingBurstSpeed: 4.5
   phaseTwoLandingBurstSpeed: 5
   landingBurstDamageTier: 0
   landingBurstSpawnMargin: 0.2
-  phaseOnePillars: 4
-  phaseTwoPillars: 6
+  landingLeavesSlime: 1
+  phaseOnePillars: 7
+  phaseTwoPillars: 9
   phaseOnePillarWarning: 0.8
   phaseTwoPillarWarning: 0.7
   pillarStagger: 0.12
@@ -281,12 +301,25 @@ MonoBehaviour:
   pillarKnockbackDuration: 0.2
   pillarRequiredHits: 3
   pillarTargetEvery: 3
+  cagePillars: 14
+  cageRadius: 2.4
+  cageWarning: 0.8
+  cageStagger: 0.02
+  cageLifetime: 6
+  waveSpacing: 1.2
+  waveSpeed: 12
+  waveWarning: 0.55
+  waveLifetime: 5
+  waveGridOffset: 1.8
+  waveGridHalfLength: 4.2
+  waveFanDegrees: 30
   meteorMinimumDuration: 8
   meteorMaximumDuration: 10
   meteorOpeningCount: 5
   meteorOpeningInterval: 0.35
   meteorInterval: 0.45
   meteorTargetEvery: 3
+  meteorLeadsPlayer: 1
   meteorWarning: 0.9
   meteorRadius: 0.9
   meteorDamageTier: 0
@@ -301,7 +334,7 @@ MonoBehaviour:
   smallSlimePuddleRadius: 0.5
   slimeSpeedMultiplier: 0.55
   slimeRequiredHits: 3
-  maximumSlimePuddles: 14
+  maximumSlimePuddles: 48
   slimeFlightDuration: 0.7
   slimeLaunchStagger: 0.08
   slimeArcHeight: 2.4

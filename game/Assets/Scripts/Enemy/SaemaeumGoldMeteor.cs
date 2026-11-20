@@ -39,6 +39,8 @@ namespace TrickalFanGame.Enemy
 
         public bool HasLanded { get; private set; }
         public bool TargetsPlayer { get; private set; }
+        // Lands where the player was heading when its shadow appeared (SaemaeumGoldRain).
+        public bool LeadsPlayer { get; internal set; }
         public float ImpactAt => impactAt;
         public float Radius => radius;
         public Vector2 Landing => transform.position;

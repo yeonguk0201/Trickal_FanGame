@@ -70,7 +70,7 @@ namespace TrickalFanGame.Editor
                 SaemaeumVaultBossPatternRuntime runtime =
                     contents.GetComponent<SaemaeumVaultBossPatternRuntime>();
                 if (runtime == null) runtime = contents.AddComponent<SaemaeumVaultBossPatternRuntime>();
-                // Retired: BossPattern0Setup owns the current Saemaeum patterns (no fan throw since 2026-11-18).
+                // Retired: BossPattern0Setup owns the current Saemaeum patterns (three-shot fan throw since 2026-11-21).
                 runtime.ConfigureMovement(1.8f, 1.35f);
                 runtime.ConfigureJumps(3, 5, 4, 6, 5.5f, 2.875f, EnemyDamageTier.Medium, 7f, 0.2f,
                     0.76f, 0.72f, 0.20f, 0.15f);

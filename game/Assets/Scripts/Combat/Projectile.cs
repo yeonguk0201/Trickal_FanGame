@@ -485,13 +485,13 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
-            // A boss slime puddle counts the hit and lets the shot fly on, so puddles never shield the boss. A shot
-            // fired from inside a puddle leaves that puddle alone: the player has to step out to clear it.
+            // A boss slime puddle counts the hit and lets the shot fly on, so puddles never shield the boss. Since
+            // 2026-11-21 a shot fired from inside a puddle counts too (players could not tell why it would not pop).
             TrickalFanGame.Enemy.BossSlimePuddle puddle =
                 collider.GetComponentInParent<TrickalFanGame.Enemy.BossSlimePuddle>();
             if (puddle != null)
             {
-                if (!puddle.Contains(launchPosition) && puddle.RegisterPlayerHit())
+                if (puddle.RegisterPlayerHit())
                 {
                     HitSpark.Play(transform.position, flightVelocity, puddle);
                 }

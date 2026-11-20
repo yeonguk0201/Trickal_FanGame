@@ -42,8 +42,12 @@ namespace TrickalFanGame.Enemy
         private SpriteRenderer drawing;
         private DestructibleObstacle destructible;
         private int sortingLayerId;
+        // 0 keeps the pillar until something breaks it; otherwise it crumbles this long after it bursts out.
+        private float lifetime;
 
         public bool HasEmerged { get; private set; }
+        public float MarkShownAt => markShownAt;
+        public float Lifetime => lifetime;
         public float EmergeAt => emergeAt;
         public float HitRadius => hitRadius;
         public int RequiredHits => requiredHits;
@@ -56,7 +60,7 @@ namespace TrickalFanGame.Enemy
 
         public static SaemaeumGoldPillar Create(Vector2 position, float markShownAt, float emergeAt, float hitRadius,
             EnemyDamageTier damageTier, float knockbackSpeed, float knockbackDuration, int requiredHits,
-            GameObject source, Transform target, int sortingLayerId, bool targetsPlayer = false)
+            GameObject source, Transform target, int sortingLayerId, bool targetsPlayer = false, float lifetime = 0f)
         {
             var host = new GameObject(ObjectName);
             host.transform.position = position;
@@ -72,6 +76,7 @@ namespace TrickalFanGame.Enemy
             pillar.target = target;
             pillar.sortingLayerId = sortingLayerId;
             pillar.TargetsPlayer = targetsPlayer;
+            pillar.lifetime = Mathf.Max(0f, lifetime);
 
             GameObject markObject = new(MarkName);
             markObject.transform.SetParent(host.transform, false);
@@ -83,6 +88,8 @@ namespace TrickalFanGame.Enemy
             pillar.mark.color = EnemyLobProjectile.MarkColor(0f);
             pillar.mark.sortingLayerID = sortingLayerId;
             pillar.mark.sortingOrder = MarkSortingOrder;
+            // A pillar in a sweeping row shows its mark only when the row reaches it.
+            pillar.mark.enabled = markShownAt <= Time.time || !Application.isPlaying;
             return pillar;
         }
 
@@ -91,11 +98,17 @@ namespace TrickalFanGame.Enemy
             if (!HasEmerged)
             {
                 float warning = Mathf.Max(0.01f, emergeAt - markShownAt);
+                if (mark != null) mark.enabled = now >= markShownAt;
                 if (mark != null) mark.color = EnemyLobProjectile.MarkColor(Mathf.Clamp01((now - markShownAt) / warning));
                 if (now >= emergeAt) Emerge();
                 return;
             }
 
+            if (lifetime > 0f && now >= emergeAt + lifetime && Obstacle != null && !Obstacle.IsBroken)
+            {
+                Obstacle.Break();
+                return;
+            }
             if (visual == null) return;
             float rise = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((now - emergeAt) / RiseDuration));
             visual.localPosition = new Vector3(0f, -0.2f + Mathf.Lerp(-0.35f, 0f, rise), 0f);
@@ -161,7 +174,8 @@ namespace TrickalFanGame.Enemy
             body.radius = BodyRadius;
             DestructibleObstacle obstacle = gameObject.AddComponent<DestructibleObstacle>();
             obstacle.Configure(ObstacleId, requiredHits, null, renderer);
-            obstacle.ConfigureFixedKind(ArtworkVariantId, Color.white, Color.white, false, 0, Color.white);
+            // A high obstacle like a tree (2026-11-21): a flying player (Sist's wings) cannot pass over it either.
+            obstacle.ConfigureFixedKind(ArtworkVariantId, Color.white, Color.white, true, 0, Color.white);
             destructible = obstacle;
             obstacle.Broken += OnBroken;
             Obstacle = gameObject.AddComponent<BossSummonedObstacle>();

@@ -14,7 +14,7 @@ namespace TrickalFanGame.Editor
             // Saemaeum Vault first; it runs the Buseureogi verification at its end.
             Week15Boss2Verification.Verify();
             ValidateBossFeet();
-            Debug.Log("Boss-Pattern-0 verification passed: Saemaeum Vault walks without throwing, jumps 2 / 3 times " +
+            Debug.Log("Boss-Pattern-0 verification passed: Saemaeum Vault walks throwing three-shot fans, jumps 2 / 3 times " +
                       "with a turning treasure ring, raises hit-counted gold pillars, rains gold in phase two and " +
                       "slows to 0.55x; Buseureogi obstacles are two-hit obstacles, not enemies.");
         }

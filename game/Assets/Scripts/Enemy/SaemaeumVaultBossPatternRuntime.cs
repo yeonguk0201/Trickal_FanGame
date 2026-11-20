@@ -12,10 +12,16 @@ namespace TrickalFanGame.Enemy
     [RequireComponent(typeof(BossController), typeof(Rigidbody2D), typeof(Health))]
     public sealed class SaemaeumVaultBossPatternRuntime : MonoBehaviour, IBossPatternRuntime
     {
-        // The approach walks toward the player without throwing anything (the fan throw was removed 2026-11-18).
+        // The approach walks toward the player. The fan throw removed 2026-11-18 came back 2026-11-21 (the fight was
+        // too easy) as a narrower three-shot fan instead of the old five.
         [Header("Approach walk")]
         [SerializeField, Min(0f)] private float approachSpeed = 1.8f;
         [SerializeField, Min(1f)] private float phaseTwoSpeedMultiplier = 1.35f;
+        [SerializeField, Min(0)] private int approachVolleys = 5;
+        [SerializeField, Min(0.05f)] private float approachThrowInterval = 0.55f;
+        [SerializeField, Min(1)] private int approachProjectilesPerVolley = 3;
+        [SerializeField, Range(0f, 180f)] private float approachSpreadDegrees = 30f;
+        [SerializeField, Min(0.1f)] private float approachProjectileSpeed = 5.5f;
 
         [Header("Jump sequence")]
         [SerializeField, Min(1)] private int phaseOneMinimumJumps = 2;
@@ -31,7 +37,8 @@ namespace TrickalFanGame.Enemy
         // The boss crouches this long before every jump after the first: the end of the rest turns into the wind-up.
         // The first jump crouches through the pattern's own warning (Boss-Pattern-0 sets it to the same 0.8s).
         [SerializeField, Min(0f)] private float preJumpCrouchDuration = 0.8f;
-        [SerializeField, Min(0.1f)] private float jumpDistance = 5.5f;
+        // 7 since 2026-11-21 (was 5.5): the jumps reach farther.
+        [SerializeField, Min(0.1f)] private float jumpDistance = 7f;
         [SerializeField, Min(0.1f)] private float jumpHeight = 2f;
         [SerializeField, Min(0.1f)] private float landingRadius = 2.875f;
         [SerializeField] private EnemyDamageTier landingDamageTier = EnemyDamageTier.Medium;
@@ -39,19 +46,24 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float landingKnockbackDuration = 0.2f;
         // Every landing scatters treasure on a ring just outside the landing radius. Each jump turns the ring by half
         // a gap, so the safe gaps move.
-        [SerializeField, Min(0)] private int phaseOneLandingBurstCount = 8;
-        [SerializeField, Min(0)] private int phaseTwoLandingBurstCount = 12;
+        // 12 / 16 since 2026-11-21 (was 8 / 12).
+        [SerializeField, Min(0)] private int phaseOneLandingBurstCount = 12;
+        [SerializeField, Min(0)] private int phaseTwoLandingBurstCount = 16;
         [SerializeField, Min(0.1f)] private float phaseOneLandingBurstSpeed = 4.5f;
         [SerializeField, Min(0.1f)] private float phaseTwoLandingBurstSpeed = 5.0f;
         [SerializeField] private EnemyDamageTier landingBurstDamageTier = EnemyDamageTier.Light;
         [SerializeField, Min(0f)] private float landingBurstSpawnMargin = 0.2f;
+        // 2026-11-21: every landing leaves slime over its whole radius: one large puddle where the boss lands and a
+        // ring of small puddles, touching each other, filling the rest out to the landing radius.
+        [SerializeField] private bool landingLeavesSlime = true;
 
         [Header("Gold pillars")]
         // Pillars burst out of the floor at random spots (no spacing, no cap), except that one in pillarTargetEvery,
         // starting with the first, rises under the player. The boss breaks them by walking into them or landing near
         // them; the player breaks them by hits.
-        [SerializeField, Min(0)] private int phaseOnePillars = 4;
-        [SerializeField, Min(0)] private int phaseTwoPillars = 6;
+        // 7 / 9 since 2026-11-21 (was 4 / 6).
+        [SerializeField, Min(0)] private int phaseOnePillars = 7;
+        [SerializeField, Min(0)] private int phaseTwoPillars = 9;
         [SerializeField, Min(0f)] private float phaseOnePillarWarning = 0.8f;
         [SerializeField, Min(0f)] private float phaseTwoPillarWarning = 0.7f;
         [SerializeField, Min(0f)] private float pillarStagger = 0.12f;
@@ -62,6 +74,27 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(1)] private int pillarRequiredHits = 3;
         [SerializeField, Min(1)] private int pillarTargetEvery = 3;
 
+        [Header("Gold cage (phase two)")]
+        // 2026-11-21: a ring of pillars closes around the player, then the jump sequence always follows. The gaps
+        // between pillars are narrower than the player's feet; spots outside the standing area or under the boss are
+        // left out, where the wall or the boss closes the ring instead.
+        [SerializeField, Min(3)] private int cagePillars = 14;
+        [SerializeField, Min(0.5f)] private float cageRadius = 2.4f;
+        [SerializeField, Min(0f)] private float cageWarning = 0.8f;
+        [SerializeField, Min(0f)] private float cageStagger = 0.02f;
+        [SerializeField, Min(0f)] private float cageLifetime = 6f;
+
+        [Header("Pillar wave")]
+        // 2026-11-21: the boss stands still and rows of pillars sweep across the floor, each mark appearing as the row
+        // reaches it: a line through the player, a # around the player, or a three-way fan toward the player.
+        [SerializeField, Min(0.84f)] private float waveSpacing = 1.2f;
+        [SerializeField, Min(0.1f)] private float waveSpeed = 12f;
+        [SerializeField, Min(0f)] private float waveWarning = 0.55f;
+        [SerializeField, Min(0f)] private float waveLifetime = 5f;
+        [SerializeField, Min(0.5f)] private float waveGridOffset = 1.8f;
+        [SerializeField, Min(1f)] private float waveGridHalfLength = 4.2f;
+        [SerializeField, Range(0f, 90f)] private float waveFanDegrees = 30f;
+
         [Header("Gold meteor (phase two)")]
         // 8-10s since 2026-11-19 (user Play check: 5-7s ended too soon).
         [SerializeField, Min(0.1f)] private float meteorMinimumDuration = 8f;
@@ -71,6 +104,9 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float meteorInterval = 0.45f;
         // One lump in this many aims at the player, starting with the first.
         [SerializeField, Min(1)] private int meteorTargetEvery = 3;
+        // 2026-11-21: the lump right after each aimed one lands where the player will be when it hits, following
+        // their current movement. A player standing still gets it on their spot.
+        [SerializeField] private bool meteorLeadsPlayer = true;
         [SerializeField, Min(0.01f)] private float meteorWarning = 0.9f;
         [SerializeField, Min(0.05f)] private float meteorRadius = 0.9f;
         [SerializeField] private EnemyDamageTier meteorDamageTier = EnemyDamageTier.Light;
@@ -90,8 +126,9 @@ namespace TrickalFanGame.Enemy
         // 0.55 since 2026-11-18: the slow got stronger when the jump pattern got easier.
         [SerializeField, Range(0f, 1f)] private float slimeSpeedMultiplier = 0.55f;
         [SerializeField, Min(1)] private int slimeRequiredHits = BossSlimePuddle.DefaultRequiredHits;
-        // Puddles stay until the player pops them; past this many, the oldest one dries up.
-        [SerializeField, Min(1)] private int maximumSlimePuddles = 14;
+        // Puddles stay until the player pops them; past this many, the oldest one dries up. 40 since 2026-11-21
+        // (was 14): each landing now leaves 15 puddles, three landings in phase two.
+        [SerializeField, Min(1)] private int maximumSlimePuddles = 48;
         [SerializeField, Min(0.05f)] private float slimeFlightDuration = 0.7f;
         [SerializeField, Min(0f)] private float slimeLaunchStagger = 0.08f;
         [SerializeField, Min(0f)] private float slimeArcHeight = 2.4f;
@@ -160,6 +197,36 @@ namespace TrickalFanGame.Enemy
         private readonly List<SaemaeumGoldPillar> pillars = new();
         private SaemaeumGoldRain goldRain;
         private float meteorReadyAt;
+        private int firedApproachVolleys;
+        private float nextApproachThrowAt;
+
+        public int ApproachVolleys => Mathf.Max(0, approachVolleys);
+        public int FiredApproachVolleys => firedApproachVolleys;
+        public float ApproachThrowInterval => approachThrowInterval;
+        public int ApproachProjectilesPerVolley => Mathf.Max(1, approachProjectilesPerVolley);
+        public float ApproachSpreadDegrees => Mathf.Clamp(approachSpreadDegrees, 0f, 180f);
+        public float ApproachProjectileSpeed => approachProjectileSpeed;
+        public bool MeteorLeadsPlayer => meteorLeadsPlayer;
+        // Set by the gold cage; only the jump sequence may follow until it starts.
+        private bool jumpQueued;
+        private SaemaeumPillarWaveShape? forcedWaveShape;
+
+        public bool JumpQueued => jumpQueued;
+        public int CagePillars => Mathf.Max(3, cagePillars);
+        public float CageRadius => cageRadius;
+        public float CageWarning => cageWarning;
+        public float CageLifetime => cageLifetime;
+        public float WaveSpacing => waveSpacing;
+        public float WaveSpeed => waveSpeed;
+        public float WaveWarning => waveWarning;
+        public float WaveLifetime => waveLifetime;
+        public float WaveGridOffset => waveGridOffset;
+        public float WaveGridHalfLength => waveGridHalfLength;
+        public float WaveFanDegrees => waveFanDegrees;
+        public SaemaeumPillarWaveShape LastWaveShape { get; private set; }
+
+        // Verification and development tools: the next wave uses this shape instead of a random one.
+        public void ForceNextWaveShape(SaemaeumPillarWaveShape shape) => forcedWaveShape = shape;
 
         public int HealUses => healUses;
         public float HealPerUse => healPerUse;
@@ -340,6 +407,7 @@ namespace TrickalFanGame.Enemy
             randomState = SeedToState(seed);
             lastTickTime = now;
             healUses = 0;
+            jumpQueued = false;
             meteorReadyAt = now;
             goldRain = null;
             pillars.Clear();
@@ -353,8 +421,11 @@ namespace TrickalFanGame.Enemy
             ResetPresentation();
         }
 
-        public bool CanSelect(BossPatternExecution execution) => execution switch
+        public bool CanSelect(BossPatternExecution execution) => jumpQueued
+            ? execution == BossPatternExecution.SaemaeumJumpSequence
+            : execution switch
         {
+            BossPatternExecution.SaemaeumGoldCage => IsPhaseTwo,
             BossPatternExecution.SaemaeumTreasureHeal => HealIsAvailable,
             BossPatternExecution.SaemaeumGoldMeteor => IsPhaseTwo && lastTickTime >= meteorReadyAt &&
                                                       (goldRain == null || goldRain.IsFinished),
@@ -401,7 +472,8 @@ namespace TrickalFanGame.Enemy
                 return;
             }
             if (state == BossActionState.Telegraph && execution is BossPatternExecution.SaemaeumSlimeScatter
-                    or BossPatternExecution.SaemaeumGoldPillars or BossPatternExecution.SaemaeumGoldMeteor)
+                    or BossPatternExecution.SaemaeumGoldPillars or BossPatternExecution.SaemaeumGoldMeteor
+                    or BossPatternExecution.SaemaeumGoldCage or BossPatternExecution.SaemaeumPillarWave)
             {
                 // Gathers itself low before spitting.
                 StopMovement();
@@ -427,6 +499,9 @@ namespace TrickalFanGame.Enemy
             switch (execution)
             {
                 case BossPatternExecution.SaemaeumApproachWalk:
+                    firedApproachVolleys = 0;
+                    nextApproachThrowAt = lastTickTime;
+                    FireApproachVolleysDue(lastTickTime);
                     return true;
                 case BossPatternExecution.SaemaeumJumpSequence:
                     StartJumpSequence();
@@ -439,6 +514,12 @@ namespace TrickalFanGame.Enemy
                     return true;
                 case BossPatternExecution.SaemaeumGoldMeteor:
                     StartGoldRain();
+                    return true;
+                case BossPatternExecution.SaemaeumGoldCage:
+                    SummonCage();
+                    return true;
+                case BossPatternExecution.SaemaeumPillarWave:
+                    SummonPillarWave();
                     return true;
                 case BossPatternExecution.SaemaeumTreasureHeal:
                     if (!HealIsAvailable) return true;
@@ -476,6 +557,8 @@ namespace TrickalFanGame.Enemy
                     TickSlimeScatter(now);
                     break;
                 case BossPatternExecution.SaemaeumGoldPillars:
+                case BossPatternExecution.SaemaeumGoldCage:
+                case BossPatternExecution.SaemaeumPillarWave:
                     StopMovement();
                     // Slams the floor as the marks appear, then stands up again.
                     jumpCycleFrameIndex = now - actionStartedAt < 0.2f ? 7 : -1;
@@ -511,6 +594,42 @@ namespace TrickalFanGame.Enemy
             float bounce = 0.5f + 0.5f * Mathf.Sin(now * 9f);
             ApplyScale(GetComponent<BossMovementAnimator>() != null
                 ? idleScale : Vector2.Lerp(idleScale, bounceSquashScale, bounce));
+            FireApproachVolleysDue(now);
+        }
+
+        private float CurrentApproachThrowInterval =>
+            approachThrowInterval * (boss != null ? boss.CurrentTempoMultiplier : 1f);
+
+        // The first volley leaves as the walk starts, then one every interval until the volleys run out.
+        private void FireApproachVolleysDue(float now)
+        {
+            int safety = 0;
+            while (firedApproachVolleys < ApproachVolleys && now >= nextApproachThrowAt && safety++ < 16)
+            {
+                FireApproachVolley();
+                firedApproachVolleys++;
+                nextApproachThrowAt += Mathf.Max(0.05f, CurrentApproachThrowInterval);
+            }
+        }
+
+        // A narrow fan centered on the player.
+        private void FireApproachVolley()
+        {
+            if (target == null || boss == null) return;
+            Vector2 direction = (Vector2)target.position - (Vector2)transform.position;
+            direction = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.down;
+            int count = ApproachProjectilesPerVolley;
+            float spread = count > 1 ? ApproachSpreadDegrees : 0f;
+            float step = count > 1 ? spread / (count - 1) : 0f;
+            Sprite sprite = GetComponentInChildren<SpriteRenderer>()?.sprite;
+            Sprite ruby = Resources.Load<Sprite>("CombatEffects/saemaeum-ruby-projectile");
+            Sprite[] artwork = ruby != null ? new[] { ruby } : null;
+            for (int index = 0; index < count; index++)
+            {
+                Vector2 shot = Quaternion.Euler(0f, 0f, -spread * 0.5f + step * index) * direction;
+                BossProjectile.Create(BossProjectile.FrontLaunchPoint(gameObject, shot),
+                    shot * approachProjectileSpeed, gameObject, boss.ProjectileDamageTier, sprite, artwork);
+            }
         }
 
         // Random spots anywhere in the arena with no cap on how many stand, so an unlucky throw can wall the player
@@ -590,6 +709,113 @@ namespace TrickalFanGame.Enemy
             return candidate;
         }
 
+        private void SummonCage()
+        {
+            StopMovement();
+            actionStartedAt = lastTickTime;
+            jumpQueued = true;
+            if (target == null) return;
+            pillars.RemoveAll(item => item == null);
+            List<Vector2> taken = StandingPillarSpots();
+            float bodyReach = BossBodyReach();
+            int sortingLayer = PillarSortingLayer();
+            Vector2 center = ResolveTargetGround();
+            int count = CagePillars;
+            for (int index = 0; index < count; index++)
+            {
+                float angle = Mathf.PI * 2f * index / count;
+                Vector2 spot = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * cageRadius;
+                if (!arenaBounds.Contains(spot) || OverlapsPillar(spot, taken) ||
+                    (spot - (Vector2)transform.position).sqrMagnitude < bodyReach * bodyReach) continue;
+                taken.Add(spot);
+                SpawnPillar(spot, lastTickTime, lastTickTime + cageWarning + index * cageStagger, sortingLayer,
+                    cageLifetime);
+            }
+        }
+
+        // Rows sweep outward at waveSpeed; each pillar's mark shows when the row reaches it and it bursts one
+        // warning later. Spots off the standing area, on another pillar or under the boss are skipped.
+        private void SummonPillarWave()
+        {
+            StopMovement();
+            actionStartedAt = lastTickTime;
+            SaemaeumPillarWaveShape shape = forcedWaveShape ?? (SaemaeumPillarWaveShape)NextRandom(3);
+            forcedWaveShape = null;
+            LastWaveShape = shape;
+            pillars.RemoveAll(item => item == null);
+            Vector2 origin = transform.position;
+            Vector2 player = target != null ? ResolveTargetGround() : origin + Vector2.down * 3f;
+            Vector2 toward = player - origin;
+            toward = toward.sqrMagnitude > 0.001f ? toward.normalized : Vector2.down;
+            float bodyReach = BossBodyReach();
+            float reach = arenaBounds.width + arenaBounds.height;
+            var rows = new List<(Vector2 Start, Vector2 Direction, float Length)>();
+            switch (shape)
+            {
+                case SaemaeumPillarWaveShape.Line:
+                    rows.Add((origin + toward * bodyReach, toward, reach));
+                    break;
+                case SaemaeumPillarWaveShape.Fan:
+                    foreach (float turn in new[] { -waveFanDegrees, 0f, waveFanDegrees })
+                    {
+                        Vector2 direction = Quaternion.Euler(0f, 0f, turn) * toward;
+                        rows.Add((origin + direction * bodyReach, direction, reach));
+                    }
+                    break;
+                default:
+                    // Two rows each way around the player; each sweeps from one end to the other.
+                    float half = waveGridHalfLength;
+                    foreach (float side in new[] { -waveGridOffset, waveGridOffset })
+                    {
+                        rows.Add((player + new Vector2(-half, side), Vector2.right, half * 2f));
+                        rows.Add((player + new Vector2(side, half), Vector2.down, half * 2f));
+                    }
+                    break;
+            }
+
+            List<Vector2> taken = StandingPillarSpots();
+            int sortingLayer = PillarSortingLayer();
+            foreach (var row in rows)
+            {
+                for (float distance = 0f; distance <= row.Length + 0.001f; distance += waveSpacing)
+                {
+                    Vector2 spot = row.Start + row.Direction * distance;
+                    if (!arenaBounds.Contains(spot) || OverlapsPillar(spot, taken) ||
+                        (spot - origin).sqrMagnitude < bodyReach * bodyReach) continue;
+                    taken.Add(spot);
+                    float shownAt = lastTickTime + distance / waveSpeed;
+                    SpawnPillar(spot, shownAt, shownAt + waveWarning, sortingLayer, waveLifetime);
+                }
+            }
+        }
+
+        private List<Vector2> StandingPillarSpots()
+        {
+            var taken = new List<Vector2>();
+            foreach (SaemaeumGoldPillar standing in pillars)
+                if (standing != null && (standing.Obstacle == null || !standing.Obstacle.IsBroken))
+                    taken.Add(standing.transform.position);
+            return taken;
+        }
+
+        private float BossBodyReach() => (EnemyFeet.TryGetBody(gameObject, out CircleCollider2D bodyCircle)
+            ? EnemyFeet.WorldRadiusOf(bodyCircle) : 0.8f) + SaemaeumGoldPillar.BodyRadius;
+
+        private int PillarSortingLayer()
+        {
+            SpriteRenderer source = GetComponentInChildren<SpriteRenderer>();
+            return source != null ? source.sortingLayerID : 0;
+        }
+
+        private void SpawnPillar(Vector2 position, float shownAt, float emergeAt, int sortingLayer, float lifetime)
+        {
+            SaemaeumGoldPillar pillar = SaemaeumGoldPillar.Create(position, shownAt, emergeAt, pillarHitRadius,
+                pillarDamageTier, pillarKnockbackSpeed, pillarKnockbackDuration, PillarRequiredHits, gameObject,
+                target, sortingLayer, false, lifetime);
+            pillars.Add(pillar);
+            boss?.RegisterOwnedObject(pillar.gameObject);
+        }
+
         private void StartGoldRain()
         {
             StopMovement();
@@ -597,7 +823,7 @@ namespace TrickalFanGame.Enemy
             float duration = Mathf.Lerp(meteorMinimumDuration, MeteorMaximumDuration, NextRandom01());
             var settings = new SaemaeumGoldRain.Settings(duration, MeteorOpeningCount, meteorOpeningInterval,
                 meteorInterval, MeteorTargetEvery, meteorWarning, meteorRadius, meteorDamageTier,
-                meteorKnockbackSpeed, meteorKnockbackDuration);
+                meteorKnockbackSpeed, meteorKnockbackDuration, meteorLeadsPlayer);
             SpriteRenderer source = GetComponentInChildren<SpriteRenderer>();
             goldRain = SaemaeumGoldRain.Begin(boss, target, ShrinkArenaBy(meteorRadius * 0.5f), lastTickTime,
                 (uint)NextRandom(int.MaxValue) | 1u, settings, source != null ? source.sortingLayerID : 0,
@@ -722,6 +948,7 @@ namespace TrickalFanGame.Enemy
 
         private void StartJumpSequence()
         {
+            jumpQueued = false;
             EndJump();
             StopMovement();
             jumpColliders = GetComponentsInChildren<Collider2D>();
@@ -876,6 +1103,7 @@ namespace TrickalFanGame.Enemy
             PlayLandingShockwave(impactPosition);
             BossSummonedObstacle.BreakInCircle(impactPosition, landingRadius);
             FireLandingBurst(impactPosition, landingIndex);
+            if (landingLeavesSlime) SpawnLandingSlime(impactPosition + GroundShadowOffset());
             if (target == null || ((Vector2)target.position - impactPosition).sqrMagnitude >
                 landingRadius * landingRadius) return;
             Health targetHealth = target.GetComponentInParent<Health>();
@@ -891,6 +1119,28 @@ namespace TrickalFanGame.Enemy
                 direction = impactPosition - (Vector2)transform.position;
             if (direction.sqrMagnitude <= 0.001f) direction = Vector2.up;
             receiver.Apply(direction, landingKnockbackSpeed, landingKnockbackDuration, 0f);
+        }
+
+        public bool LandingLeavesSlime => landingLeavesSlime;
+
+        // Small puddles sit on one ring just inside the landing radius, as many as fit touching each other.
+        public float LandingSlimeRingRadius =>
+            Mathf.Max(slimePuddleRadius + smallSlimePuddleRadius, landingRadius - smallSlimePuddleRadius);
+        public int LandingSmallSlimeCount => Mathf.Max(3,
+            Mathf.FloorToInt(2f * Mathf.PI * LandingSlimeRingRadius / (smallSlimePuddleRadius * 2f)));
+
+        private void SpawnLandingSlime(Vector2 center)
+        {
+            int sortingLayer = PillarSortingLayer();
+            SpawnSlimePuddle(center, slimePuddleRadius, sortingLayer);
+            int count = LandingSmallSlimeCount;
+            float ring = LandingSlimeRingRadius;
+            for (int index = 0; index < count; index++)
+            {
+                float angle = Mathf.PI * 2f * index / count;
+                Vector2 spot = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * ring;
+                if (arenaBounds.Contains(spot)) SpawnSlimePuddle(spot, smallSlimePuddleRadius, sortingLayer);
+            }
         }
 
         public SaemaeumLandingShockwave LastShockwave { get; private set; }
@@ -1171,5 +1421,15 @@ namespace TrickalFanGame.Enemy
             uint state = unchecked((uint)seed) ^ 0x5AE4A117u;
             return state == 0u ? 0x85EBCA6Bu : state;
         }
+    }
+}
+
+namespace TrickalFanGame.Enemy
+{
+    public enum SaemaeumPillarWaveShape
+    {
+        Line,
+        Grid,
+        Fan,
     }
 }

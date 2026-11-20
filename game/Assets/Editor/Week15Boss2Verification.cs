@@ -18,10 +18,12 @@ namespace TrickalFanGame.Editor
             Week18Obstacle2Setup.OpenGameScene();
             ValidatePrefabAndTallRoom();
             ValidateElasticReadabilityAndSeededJumps();
-            ValidateApproachWalkWithoutThrow();
+            ValidateApproachWalkThrow();
             ValidateLandingBurst();
             ValidateGoldPillars();
             ValidateGoldMeteorRain();
+            ValidateGoldCage();
+            ValidatePillarWaves();
             ValidateUnlimitedPhaseOneHealingAndPhaseTwo();
             ValidateLandingDamageAndKnockback();
             ValidateSlimeScatter();
@@ -36,9 +38,9 @@ namespace TrickalFanGame.Editor
             ValidateFloorTwoRuntimeBinding();
             Week15Boss1Verification.Verify();
             Debug.Log("Week 15 Boss-2 verification passed: Saemaeum Vault keeps its own sprite/prefab, " +
-                      "walks without throwing, jumps 2 / 3 times with a turning treasure ring outside each " +
+                      "walks throwing three-shot fans, jumps 2 / 3 times with a turning treasure ring outside each " +
                       "landing, heals 138 only in phase one, slows with slime to 0.55x, raises hit-counted gold " +
-                      "pillars that block its shots and break under its landings, and rains gold lumps in phase two.");
+                      "pillars that block its shots (each blocked shot cracking them) and break under its landings, and rains gold lumps in phase two.");
         }
 
         public static void SetupAndVerifyBatch()
@@ -79,8 +81,8 @@ namespace TrickalFanGame.Editor
             Assert(Mathf.Approximately(prefab.transform.localScale.x, Week15Boss1Setup.BossScale) &&
                    Mathf.Approximately(prefab.transform.localScale.y, Week15Boss1Setup.BossScale),
                 "Saemaeum Vault must use the doubled boss body scale.");
-            Assert(boss.DisplayName == "새마음금고" && boss.PhaseCount == 2 && boss.Patterns.Count == 6,
-                "Boss-2 HUD identity or its six-pattern/two-phase contract is missing.");
+            Assert(boss.DisplayName == "새마음금고" && boss.PhaseCount == 2 && boss.Patterns.Count == 8,
+                "Boss-2 HUD identity or its eight-pattern/two-phase contract is missing.");
             Assert(boss.Patterns.Select(pattern => pattern.Execution).SequenceEqual(new[]
                 {
                     BossPatternExecution.SaemaeumApproachWalk,
@@ -89,20 +91,23 @@ namespace TrickalFanGame.Editor
                     BossPatternExecution.SaemaeumSlimeScatter,
                     BossPatternExecution.SaemaeumGoldPillars,
                     BossPatternExecution.SaemaeumGoldMeteor,
+                    BossPatternExecution.SaemaeumGoldCage,
+                    BossPatternExecution.SaemaeumPillarWave,
                 }), "Boss-2 patterns are not bound in the authored order.");
             Assert(boss.Patterns.Select(pattern => pattern.PatternId).SequenceEqual(new[]
                 {
                     "saemaeum-approach-walk", "saemaeum-rage-jump-sequence", "saemaeum-eat-treasure",
                     "saemaeum-slime-scatter", "saemaeum-golden-pillars", "saemaeum-gold-meteor",
+                    "saemaeum-gold-cage", "saemaeum-pillar-wave",
                 }), "Boss-2 pattern IDs changed; the removed fan throw ID must not be reused.");
             Assert(runtime.LargeSlimeCountThisPhase == 1 && runtime.SmallSlimeCountThisPhase == 4 &&
                    Mathf.Approximately(runtime.SlimePuddleRadius, 1.2f) &&
                    Mathf.Approximately(runtime.SmallSlimePuddleRadius, 0.5f) &&
                    Mathf.Approximately(runtime.SlimeSpeedMultiplier, 0.55f) && runtime.SlimeRequiredHits == 3 &&
-                   runtime.MaximumSlimePuddles == 14,
+                   runtime.MaximumSlimePuddles == 48 && runtime.LandingLeavesSlime,
                 "Boss-2 slime scatter must spit one large (1.2) and four obstacle-sized (0.5) puddles that slow " +
                 "to 0.55x and pop after 3 hits.");
-            Assert(Mathf.Approximately(runtime.JumpDistance, 5.5f) &&
+            Assert(Mathf.Approximately(runtime.JumpDistance, 7f) &&
                    runtime.PhaseOneMinimumJumps == 2 && runtime.PhaseOneMaximumJumps == 2 &&
                    runtime.PhaseTwoMinimumJumps == 3 && runtime.PhaseTwoMaximumJumps == 3 &&
                    Mathf.Approximately(runtime.PhaseOneJumpDuration, 1.5f) &&
@@ -119,32 +124,33 @@ namespace TrickalFanGame.Editor
             Assert(Mathf.Abs(jump.GetTelegraphDuration(1f) - 0.8f) < 0.01f &&
                    Mathf.Abs(jump.GetTelegraphDuration(0.88f) - 0.8f) < 0.01f,
                 "The first jump must crouch for 0.8s in both phases.");
-            Assert(GetPrivateField<int>(runtime, "phaseOneLandingBurstCount") == 8 &&
-                   GetPrivateField<int>(runtime, "phaseTwoLandingBurstCount") == 12 &&
+            Assert(GetPrivateField<int>(runtime, "phaseOneLandingBurstCount") == 12 &&
+                   GetPrivateField<int>(runtime, "phaseTwoLandingBurstCount") == 16 &&
                    Mathf.Approximately(GetPrivateField<float>(runtime, "phaseOneLandingBurstSpeed"), 4.5f) &&
                    Mathf.Approximately(GetPrivateField<float>(runtime, "phaseTwoLandingBurstSpeed"), 5.0f) &&
                    runtime.LandingBurstDamageTier == EnemyDamageTier.Light &&
                    Mathf.Approximately(runtime.LandingBurstSpawnRadius, 2.875f + 0.2f),
-                "Boss-2 landings must scatter 8 / 12 light treasure shots at 4.5 / 5.0 just outside the radius.");
-            Assert(GetPrivateField<int>(runtime, "phaseOnePillars") == 4 &&
-                   GetPrivateField<int>(runtime, "phaseTwoPillars") == 6 &&
+                "Boss-2 landings must scatter 12 / 16 light treasure shots at 4.5 / 5.0 just outside the radius.");
+            Assert(GetPrivateField<int>(runtime, "phaseOnePillars") == 7 &&
+                   GetPrivateField<int>(runtime, "phaseTwoPillars") == 9 &&
                    Mathf.Approximately(GetPrivateField<float>(runtime, "phaseOnePillarWarning"), 0.8f) &&
                    Mathf.Approximately(GetPrivateField<float>(runtime, "phaseTwoPillarWarning"), 0.7f) &&
                    Mathf.Approximately(runtime.PillarStagger, 0.12f) &&
                    Mathf.Approximately(runtime.PillarHitRadius, 0.6f) &&
                    runtime.PillarDamageTier == EnemyDamageTier.Light && runtime.PillarRequiredHits == 3 &&
                    runtime.PillarTargetEvery == 3,
-                "Boss-2 gold pillars must be 4 / 6 per cast, warn 0.8 / 0.7, hurt lightly, break after 3 hits and " +
+                "Boss-2 gold pillars must be 7 / 9 per cast, warn 0.8 / 0.7, hurt lightly, break after 3 hits and " +
                 "aim one in three at the player.");
             Assert(Mathf.Approximately(runtime.MeteorMinimumDuration, 8f) &&
                    Mathf.Approximately(runtime.MeteorMaximumDuration, 10f) && runtime.MeteorOpeningCount == 5 &&
                    Mathf.Approximately(runtime.MeteorOpeningInterval, 0.35f) &&
                    Mathf.Approximately(runtime.MeteorInterval, 0.45f) && runtime.MeteorTargetEvery == 3 &&
+                   runtime.MeteorLeadsPlayer &&
                    Mathf.Approximately(runtime.MeteorWarning, 0.9f) &&
                    Mathf.Approximately(runtime.MeteorRadius, 0.9f) &&
                    runtime.MeteorDamageTier == EnemyDamageTier.Light &&
                    Mathf.Approximately(runtime.MeteorCooldownAfterRain, 8f),
-                "Boss-2 gold rain must last 8-10s: five lumps 0.35s apart, then one every 0.45s, one in three aimed.");
+                "Boss-2 gold rain must last 8-10s: five lumps 0.35s apart, then one every 0.45s, one in three aimed and the next one leading.");
             TextureImporter importer = AssetImporter.GetAtPath(Week15Boss2Setup.BossSpritePath) as TextureImporter;
             Assert(importer != null && importer.alphaIsTransparency && importer.mipmapEnabled == false,
                 "Boss-2 sprite must preserve transparency and disable mipmaps.");
@@ -202,28 +208,44 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        private static void ValidateApproachWalkWithoutThrow()
+        // 2026-11-21: the walk throws again, a narrow three-shot fan aimed at the player, five volleys per walk.
+        private static void ValidateApproachWalkThrow()
         {
             GameObject root = CreateRuntimeBoss(out BossController boss,
                 out SaemaeumVaultBossPatternRuntime runtime, out _, out GameObject target);
             try
             {
+                Assert(runtime.ApproachVolleys == 5 && runtime.ApproachProjectilesPerVolley == 3 &&
+                       Mathf.Approximately(runtime.ApproachThrowInterval, 0.55f) &&
+                       Mathf.Approximately(runtime.ApproachSpreadDegrees, 30f) &&
+                       Mathf.Approximately(runtime.ApproachProjectileSpeed, 5.5f),
+                    "Boss-2 approach must throw five volleys of three shots, 30 degrees wide, 0.55s apart at 5.5.");
                 runtime.BeginCombat(target.transform, 42, 0f);
                 runtime.OnPatternStateChanged(BossActionState.Active,
                     BossPatternExecution.SaemaeumApproachWalk, 3f);
                 Assert(runtime.TryExecute(BossPatternExecution.SaemaeumApproachWalk),
                     "Boss-2 approach walk did not execute.");
+                List<BossProjectile> first = FindBossProjectiles();
+                Assert(runtime.FiredApproachVolleys == 1 && first.Count == 3,
+                    $"Boss-2 approach must throw its first three-shot volley at once. shots={first.Count}.");
+                Vector2 toPlayer = ((Vector2)target.transform.position - (Vector2)root.transform.position).normalized;
+                List<float> angles = first.Select(shot => Vector2.SignedAngle(toPlayer,
+                    GetPrivateField<Vector2>(shot, "velocity"))).OrderBy(angle => angle).ToList();
+                Assert(Mathf.Abs(angles[0] + 15f) < 0.5f && Mathf.Abs(angles[1]) < 0.5f &&
+                       Mathf.Abs(angles[2] - 15f) < 0.5f,
+                    $"Boss-2 approach fan must center on the player. angles={string.Join(",", angles)}.");
                 for (int step = 1; step <= 30; step++)
                     runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumApproachWalk, step * 0.1f);
                 Vector2 velocity = root.GetComponent<Rigidbody2D>().linearVelocity;
                 Assert(velocity.x > 0.1f && Mathf.Abs(velocity.y) < 0.01f,
                     "Boss-2 approach must still walk toward the player.");
-                Assert(boss.OwnedObjectCount == 0 &&
-                       UnityEngine.Object.FindObjectsByType<BossProjectile>(FindObjectsSortMode.None).Length == 0,
-                    "Boss-2 approach must not throw anything any more.");
+                int shots = FindBossProjectiles().Count;
+                Assert(runtime.FiredApproachVolleys == 5 && shots == 15,
+                    $"Boss-2 approach must stop after five volleys. volleys={runtime.FiredApproachVolleys}, shots={shots}.");
             }
             finally
             {
+                foreach (BossProjectile shot in FindBossProjectiles()) UnityEngine.Object.DestroyImmediate(shot.gameObject);
                 boss.CancelCombat();
                 UnityEngine.Object.DestroyImmediate(target);
                 UnityEngine.Object.DestroyImmediate(root);
@@ -251,7 +273,7 @@ namespace TrickalFanGame.Editor
                     runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence,
                         duration + 0.001f);
                     List<BossProjectile> first = FindBossProjectiles();
-                    int expected = phaseTwo ? 12 : 8;
+                    int expected = phaseTwo ? 16 : 12;
                     float speed = phaseTwo ? 5.0f : 4.5f;
                     Vector2 landing = target.transform.position;
                     Assert(first.Count == expected, $"Each landing must scatter {expected} shots. got={first.Count}.");
@@ -268,6 +290,21 @@ namespace TrickalFanGame.Editor
                     }
                     Assert(runtime.LandingBurstDamageTier == EnemyDamageTier.Light,
                         "Landing shots must deal light damage.");
+
+                    // 2026-11-21: the landing leaves one large puddle on the spot and a touching ring of small ones
+                    // out to the landing radius.
+                    List<BossSlimePuddle> puddles = runtime.SlimePuddles.ToList();
+                    int smallCount = runtime.LandingSmallSlimeCount;
+                    Assert(smallCount == 14 && Mathf.Approximately(runtime.LandingSlimeRingRadius, 2.375f) &&
+                           puddles.Count == 1 + smallCount,
+                        $"A landing must leave one large and 14 small puddles. got={puddles.Count}.");
+                    Assert(Vector2.Distance(puddles[0].transform.position, landing) < 0.001f &&
+                           Mathf.Approximately(puddles[0].Radius, 1.2f),
+                        "The large landing puddle must lie where the boss landed.");
+                    foreach (BossSlimePuddle small in puddles.Skip(1))
+                        Assert(Mathf.Approximately(small.Radius, 0.5f) &&
+                               Mathf.Abs(Vector2.Distance(small.transform.position, landing) - 2.375f) < 0.001f,
+                            "Small landing puddles must ring the large one inside the landing radius.");
 
                     // Lands, stands, then crouches for the last 0.8s of the rest before the next jump.
                     runtime.TickPattern(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence,
@@ -312,7 +349,7 @@ namespace TrickalFanGame.Editor
                 runtime.OnPatternStateChanged(BossActionState.Active, BossPatternExecution.SaemaeumGoldPillars, 0.6f);
                 Assert(runtime.TryExecute(BossPatternExecution.SaemaeumGoldPillars), "Gold pillars did not execute.");
                 List<SaemaeumGoldPillar> pillars = runtime.Pillars.ToList();
-                Assert(pillars.Count == 4, "Phase one must raise four gold pillars.");
+                Assert(pillars.Count == 7, "Phase one must raise seven gold pillars.");
                 Rect arena = GetPrivateField<Rect>(runtime, "arenaBounds");
                 for (int index = 0; index < pillars.Count; index++)
                 {
@@ -345,6 +382,10 @@ namespace TrickalFanGame.Editor
                            before - HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 1)) &&
                        target.GetComponent<KnockbackReceiver>().IsKnockedBack,
                     "A pillar bursting under the player must deal light damage and knock back once.");
+                Collider2D pillarBody = first.GetComponent<Collider2D>();
+                Assert(pillarBody.GetComponent<DestructibleObstacle>().BlocksFlight &&
+                       !RoomMovementClass.IsLowObstacle(pillarBody),
+                    "A gold pillar must be a high obstacle like a tree that a flying player cannot pass over.");
                 first.Tick(first.EmergeAt + 1f);
                 Assert(Mathf.Approximately(targetHealth.CurrentHealth,
                         before - HealthUnits.GetEnemyDamageUnits(EnemyDamageTier.Light, 1)),
@@ -361,14 +402,14 @@ namespace TrickalFanGame.Editor
                 SpriteRenderer drawing = first.GetComponentInChildren<SpriteRenderer>();
                 Assert(drawing != null && drawing.sprite != null, "An emerged pillar must be drawn.");
 
-                // Boss shots stop on a pillar.
+                // Boss shots stop on a pillar, and each one it blocks wears it down like a player hit (2026-11-21).
                 BossProjectile shot = BossProjectile.Create(first.transform.position + Vector3.left * 2f,
                     Vector2.right * 5f, root, EnemyDamageTier.Light, null);
                 InvokeWith(shot, "OnTriggerEnter2D", body);
-                Assert(shot == null, "A gold pillar must stop the boss's shots.");
+                Assert(shot == null && obstacle.HitsTaken == 1 && !obstacle.IsBroken,
+                    "A gold pillar must stop the boss's shot and take one hit from it.");
 
                 // Hits are counted, not damage.
-                Assert(obstacle.RegisterPlayerHit() && !obstacle.IsBroken, "A pillar must survive its first hit.");
                 Assert(obstacle.RegisterPlayerHit() && !obstacle.IsBroken, "A pillar must survive its second hit.");
                 Assert(obstacle.RegisterPlayerHit() && obstacle.IsBroken &&
                        !BossSummonedObstacle.Live.Contains(first.Obstacle),
@@ -398,9 +439,9 @@ namespace TrickalFanGame.Editor
                 runtime.TryExecute(BossPatternExecution.SaemaeumGoldPillars);
                 AssertPillarsApart(runtime.Pillars.Where(item => item != null && item.gameObject.activeSelf).ToList(),
                     "a second cast next to standing pillars");
-                Assert(runtime.Pillars.Count(item => item != null && !item.HasEmerged) == pending + 6 &&
+                Assert(runtime.Pillars.Count(item => item != null && !item.HasEmerged) == pending + 9 &&
                        Mathf.Approximately(runtime.PillarWarningThisPhase, 0.7f),
-                    "Phase two must raise six pillars after a 0.7s warning.");
+                    "Phase two must raise nine pillars after a 0.7s warning.");
                 boss.CancelCombat();
                 Assert(runtime.Pillars.All(item => item == null) && BossSummonedObstacle.Live.Count == 0,
                     "Leaving the boss fight must remove every pillar and mark.");
@@ -444,6 +485,12 @@ namespace TrickalFanGame.Editor
                        Vector2.Distance(rain.Meteors[0].Landing, target.transform.position) < 0.001f,
                     "The first lump must fall on the player at once.");
 
+                // The player runs right, so the leading lump lands ahead of them by one warning of movement.
+                Rigidbody2D targetBody = target.GetComponent<Rigidbody2D>();
+                targetBody.linearVelocity = new Vector2(1f, 0f);
+                Assert(Vector2.Distance(targetBody.linearVelocity, new Vector2(1f, 0f)) < 0.001f,
+                    "The test player's velocity could not be set.");
+
                 // The boss is free again after the short cast; the rain goes on by itself.
                 runtime.OnPatternStateChanged(BossActionState.Recovery, BossPatternExecution.SaemaeumGoldMeteor, 0.7f);
                 Rect arena = GetPrivateField<Rect>(runtime, "arenaBounds");
@@ -462,10 +509,16 @@ namespace TrickalFanGame.Editor
                 {
                     Assert(all[index].TargetsPlayer == (index % 3 == 0),
                         "Exactly one lump in three, starting with the first, must aim at the player.");
+                    Assert(all[index].LeadsPlayer == (index % 3 == 1),
+                        "The lump right after each aimed one must lead the player's movement.");
                     Assert(arena.Contains(all[index].Landing), "Every lump must land inside the arena.");
                     Assert(Mathf.Approximately(all[index].ImpactAt - SaemaeumGoldRain.ShadowOffset(index, 5, 0.35f, 0.45f),
                             0.9f), "Every lump must land 0.9s after its shadow appears.");
                 }
+
+                Assert(Vector2.Distance(all[1].Landing, (Vector2)target.transform.position + new Vector2(0.9f, 0f)) < 0.001f,
+                    $"The leading lump must land where the player will be at impact. landing={all[1].Landing}.");
+                targetBody.linearVelocity = Vector2.zero;
 
                 // The aimed lump hurts the player standing on its mark.
                 Health targetHealth = target.GetComponent<Health>();
@@ -513,6 +566,149 @@ namespace TrickalFanGame.Editor
                 boss.CancelCombat();
                 UnityEngine.Object.DestroyImmediate(target);
                 UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        // 2026-11-21: phase two rings the player with pillars whose gaps the player's feet cannot pass, the pillars
+        // crumble on their own later, and only the jump sequence may follow the cage.
+        private static void ValidateGoldCage()
+        {
+            GameObject root = CreateRuntimeBoss(out BossController boss,
+                out SaemaeumVaultBossPatternRuntime runtime, out _, out GameObject target);
+            try
+            {
+                Assert(runtime.CagePillars == 14 && Mathf.Approximately(runtime.CageRadius, 2.4f) &&
+                       Mathf.Approximately(runtime.CageWarning, 0.8f) &&
+                       Mathf.Approximately(runtime.CageLifetime, 6f),
+                    "The gold cage must ring the player with 14 pillars 2.4 away, warn 0.8s and last 6s.");
+                float gap = 2f * Mathf.PI * runtime.CageRadius / runtime.CagePillars -
+                            SaemaeumGoldPillar.BodyRadius * 2f;
+                Assert(gap < TrickalFanGame.Player.PlayerFeet.Radius * 2f,
+                    $"The gold cage gaps ({gap}) must be narrower than the player's feet.");
+
+                target.transform.position = new Vector2(3.7f, 0.5f);
+                runtime.BeginCombat(target.transform, 23, 0f);
+                Assert(!runtime.CanSelect(BossPatternExecution.SaemaeumGoldCage),
+                    "The gold cage must not be used in phase one.");
+                boss.SetPhase(2);
+                Assert(runtime.CanSelect(BossPatternExecution.SaemaeumGoldCage),
+                    "The gold cage must be available in phase two.");
+                runtime.OnPatternStateChanged(BossActionState.Active, BossPatternExecution.SaemaeumGoldCage, 0.6f);
+                Assert(runtime.TryExecute(BossPatternExecution.SaemaeumGoldCage), "The gold cage did not execute.");
+                List<SaemaeumGoldPillar> cage = runtime.Pillars.ToList();
+                Assert(cage.Count == 14, $"An open cage must raise all 14 pillars, found {cage.Count}.");
+                foreach (SaemaeumGoldPillar pillar in cage)
+                    Assert(Mathf.Abs(Vector2.Distance(pillar.transform.position, target.transform.position) - 2.4f) <
+                           0.001f && pillar.EmergeAt >= 0.8f - 0.001f && pillar.EmergeAt <= 0.8f + 14 * 0.02f &&
+                           Mathf.Approximately(pillar.Lifetime, 6f),
+                        "Cage pillars must stand on the ring around the player and burst after the warning.");
+                AssertPillarsApart(cage, "the gold cage");
+
+                Assert(runtime.JumpQueued && runtime.CanSelect(BossPatternExecution.SaemaeumJumpSequence) &&
+                       !runtime.CanSelect(BossPatternExecution.SaemaeumApproachWalk) &&
+                       !runtime.CanSelect(BossPatternExecution.SaemaeumPillarWave) &&
+                       !runtime.CanSelect(BossPatternExecution.SaemaeumGoldCage),
+                    "Only the jump sequence may follow the gold cage.");
+
+                SaemaeumGoldPillar crumbling = cage[0];
+                crumbling.Tick(crumbling.EmergeAt);
+                Assert(crumbling.HasEmerged && crumbling.Obstacle != null, "The cage pillar did not burst out.");
+                crumbling.Tick(crumbling.EmergeAt + 5.9f);
+                Assert(crumbling != null && !crumbling.Obstacle.IsBroken, "A cage pillar crumbled too early.");
+                crumbling.Tick(crumbling.EmergeAt + 6f);
+                Assert(crumbling == null, "A cage pillar must crumble 6s after it bursts out.");
+
+                runtime.OnPatternStateChanged(BossActionState.Active, BossPatternExecution.SaemaeumJumpSequence, 5f);
+                Assert(runtime.TryExecute(BossPatternExecution.SaemaeumJumpSequence), "The follow-up jump failed.");
+                Assert(!runtime.JumpQueued && runtime.CanSelect(BossPatternExecution.SaemaeumApproachWalk),
+                    "The other patterns must return once the jump starts.");
+            }
+            finally
+            {
+                boss.CancelCombat();
+                UnityEngine.Object.DestroyImmediate(target);
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        // 2026-11-21: the boss stands still and rows of pillars sweep out, each mark appearing as the row reaches it.
+        private static void ValidatePillarWaves()
+        {
+            foreach (SaemaeumPillarWaveShape shape in new[]
+                         { SaemaeumPillarWaveShape.Line, SaemaeumPillarWaveShape.Grid, SaemaeumPillarWaveShape.Fan })
+            {
+                GameObject root = CreateRuntimeBoss(out BossController boss,
+                    out SaemaeumVaultBossPatternRuntime runtime, out _, out GameObject target);
+                try
+                {
+                    Assert(Mathf.Approximately(runtime.WaveSpacing, 1.2f) &&
+                           Mathf.Approximately(runtime.WaveSpeed, 12f) &&
+                           Mathf.Approximately(runtime.WaveWarning, 0.55f) &&
+                           Mathf.Approximately(runtime.WaveLifetime, 5f) &&
+                           Mathf.Approximately(runtime.WaveGridOffset, 1.8f) &&
+                           Mathf.Approximately(runtime.WaveGridHalfLength, 4.2f) &&
+                           Mathf.Approximately(runtime.WaveFanDegrees, 30f),
+                        "Pillar waves must keep their 1.2 spacing, 12/s sweep, 0.55s warning and 5s lifetime.");
+                    Assert(1.2f - SaemaeumGoldPillar.BodyRadius * 2f < TrickalFanGame.Player.PlayerFeet.Radius * 2f,
+                        "Pillar wave rows must be too tight for the player's feet.");
+                    if (shape == SaemaeumPillarWaveShape.Grid) target.transform.position = new Vector2(3f, 0f);
+                    runtime.BeginCombat(target.transform, 31, 0f);
+                    Vector2 player = target.transform.position;
+                    runtime.ForceNextWaveShape(shape);
+                    runtime.OnPatternStateChanged(BossActionState.Telegraph,
+                        BossPatternExecution.SaemaeumPillarWave, 0.6f);
+                    Assert(runtime.JumpCycleFrameIndex == 1, "The pillar wave must crouch during its warning.");
+                    runtime.OnPatternStateChanged(BossActionState.Active, BossPatternExecution.SaemaeumPillarWave, 1.4f);
+                    Assert(runtime.TryExecute(BossPatternExecution.SaemaeumPillarWave), "The pillar wave did not run.");
+                    Assert(runtime.LastWaveShape == shape, $"The forced {shape} wave was not used.");
+                    List<SaemaeumGoldPillar> wave = runtime.Pillars.ToList();
+                    // Rows from the boss start just outside its body, where the nearest pillar stands.
+                    float rowStart = wave.Count > 0 ? wave.Min(pillar => ((Vector2)pillar.transform.position).magnitude) : 0f;
+                    Rect arena = GetPrivateField<Rect>(runtime, "arenaBounds");
+                    Assert(wave.Count >= (shape == SaemaeumPillarWaveShape.Line ? 4 : 12),
+                        $"The {shape} wave raised only {wave.Count} pillars.");
+                    AssertPillarsApart(wave, $"the {shape} wave");
+                    foreach (SaemaeumGoldPillar pillar in wave)
+                    {
+                        Vector2 spot = pillar.transform.position;
+                        Assert(arena.Contains(spot) && Mathf.Approximately(pillar.EmergeAt - pillar.MarkShownAt, 0.55f) &&
+                               Mathf.Approximately(pillar.Lifetime, 5f),
+                            $"A {shape} wave pillar must stand in the arena and burst 0.55s after its mark.");
+                        if (shape == SaemaeumPillarWaveShape.Grid)
+                        {
+                            Assert(Mathf.Abs(Mathf.Abs(spot.x - player.x) - 1.8f) < 0.001f ||
+                                   Mathf.Abs(Mathf.Abs(spot.y - player.y) - 1.8f) < 0.001f,
+                                $"A # wave pillar at {spot} is off its four rows.");
+                        }
+                        else
+                        {
+                            float turn = Vector2.SignedAngle(player, spot);
+                            bool onRow = Mathf.Abs(turn) < 0.5f || (shape == SaemaeumPillarWaveShape.Fan &&
+                                Mathf.Abs(Mathf.Abs(turn) - 30f) < 0.5f);
+                            Assert(onRow, $"A {shape} wave pillar at {spot} is off its row (turn {turn}).");
+                            Assert(Mathf.Abs(pillar.MarkShownAt - (spot.magnitude - rowStart) / 12f) < 0.01f,
+                                "Row marks must appear as the sweep reaches them, nearest first.");
+                        }
+                    }
+                    if (shape == SaemaeumPillarWaveShape.Fan)
+                        foreach (float row in new[] { -30f, 0f, 30f })
+                            Assert(wave.Any(pillar => Mathf.Abs(Vector2.SignedAngle(player,
+                                    pillar.transform.position) - row) < 0.5f),
+                                $"The fan wave is missing its {row} degree row.");
+
+                    SaemaeumGoldPillar last = wave.OrderBy(pillar => pillar.MarkShownAt).Last();
+                    Assert(last.MarkShownAt > 0.1f, "The wave must sweep, not mark every spot at once.");
+                    last.Tick(0f);
+                    Assert(last.Mark != null && !last.Mark.enabled, "A far mark must stay hidden until the row reaches it.");
+                    last.Tick(last.MarkShownAt);
+                    Assert(last.Mark.enabled, "A mark must show when the row reaches it.");
+                }
+                finally
+                {
+                    boss.CancelCombat();
+                    UnityEngine.Object.DestroyImmediate(target);
+                    UnityEngine.Object.DestroyImmediate(root);
+                }
             }
         }
 
@@ -616,7 +812,7 @@ namespace TrickalFanGame.Editor
                 float landed = runtime.SlimeFlightDuration + 4 * runtime.SlimeLaunchStagger + 0.01f;
                 foreach (BossSlimeBlob blob in runtime.SlimeBlobs.ToArray()) blob.Tick(landed);
                 Assert(runtime.SlimePuddles.Count == 5 && BossSlimePuddle.Live.Count == 5,
-                    "Every landed lump must leave one slime puddle.");
+                    $"Every landed lump must leave one slime puddle. own={runtime.SlimePuddles.Count}, live={BossSlimePuddle.Live.Count}.");
                 Assert(Mathf.Approximately(runtime.SlimePuddles[0].Radius, 1.2f) &&
                        runtime.SlimePuddles.Skip(1).All(item => Mathf.Approximately(item.Radius, 0.5f)),
                     "The large puddle must land first, on the player, followed by four obstacle-sized ones.");
@@ -667,7 +863,7 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateLandingDamageAndKnockback()
         {
-            GameObject root = CreateRuntimeBoss(out BossController _,
+            GameObject root = CreateRuntimeBoss(out BossController boss,
                 out SaemaeumVaultBossPatternRuntime runtime, out _, out GameObject target);
             try
             {
@@ -690,6 +886,8 @@ namespace TrickalFanGame.Editor
             }
             finally
             {
+                // The landing leaves slime puddles owned by the boss.
+                boss.CancelCombat();
                 UnityEngine.Object.DestroyImmediate(target);
                 UnityEngine.Object.DestroyImmediate(root);
             }
@@ -921,13 +1119,14 @@ namespace TrickalFanGame.Editor
                     BossPatternExecution.SaemaeumJumpSequence, 2.4f);
                 Assert(!health.IsInvulnerable, "The vault must take damage again once phase two starts.");
 
-                // No treasure ring here, so the only boss-owned object is the landing ring itself.
+                // No treasure ring here, so the boss owns only the landing ring and the landing's slime puddles.
                 runtime.ConfigureLandingBurst(0, 0, 4.5f, 5f, EnemyDamageTier.Light, 0.2f);
                 InvokeWith(runtime, "ResolveLanding", new Vector2(-3f, 2f), 0);
                 SaemaeumLandingShockwave wave = runtime.LastShockwave;
                 Assert(wave != null && wave.GetComponentInChildren<Collider2D>() == null &&
                        (Vector2)wave.transform.position == new Vector2(-3f, 2f) + runtime.GroundShadowOffset() &&
-                       Mathf.Approximately(wave.Radius, runtime.LandingRadius) && boss.OwnedObjectCount == 1,
+                       Mathf.Approximately(wave.Radius, runtime.LandingRadius) &&
+                       boss.OwnedObjectCount == 1 + runtime.SlimePuddles.Count,
                     "A landing must spread a boss-owned, collision-free ring from the landed shadow.");
                 wave.RenderAt(0.02f);
                 float early = wave.Front.transform.localScale.x;

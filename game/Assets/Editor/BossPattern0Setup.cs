@@ -33,7 +33,8 @@ namespace TrickalFanGame.Editor
 
         public static BossPatternDefinition[] SaemaeumPatterns() => new BossPatternDefinition[]
         {
-            // The fan throw was removed; the walk keeps its slot under a new ID so the old one is not reused.
+            // The walk keeps its slot under a new ID so the old one is not reused. Its throw came back on 2026-11-21 as
+            // a three-shot fan (runtime approach* fields).
             new("saemaeum-approach-walk", BossPatternExecution.SaemaeumApproachWalk, 0.55f, 3.0f, 0.75f, 0.8f),
             // The warning is the first jump's 0.8s crouch, fixed so phase two's faster tempo does not shorten it
             // (0.01 scaled + 0.79 fixed). The active time follows the real landings (2 / 3 jumps).
@@ -44,6 +45,10 @@ namespace TrickalFanGame.Editor
             new("saemaeum-golden-pillars", BossPatternExecution.SaemaeumGoldPillars, 0.8f, 0.6f, 0.6f, 5.0f),
             // Phase two only. The runtime holds it back until 8s after the last lump of a rain lands.
             new("saemaeum-gold-meteor", BossPatternExecution.SaemaeumGoldMeteor, 0.9f, 0.3f, 0.4f, 0f),
+            // 2026-11-21. Phase two only: rings the player with pillars, and the runtime lets only the jump follow.
+            new("saemaeum-gold-cage", BossPatternExecution.SaemaeumGoldCage, 0.8f, 0.6f, 0.4f, 10f),
+            // 2026-11-21. Stands still while rows of pillars sweep out (line, # or three-way fan).
+            new("saemaeum-pillar-wave", BossPatternExecution.SaemaeumPillarWave, 0.6f, 1.4f, 0.6f, 6f),
         };
 
         [MenuItem("Trickal Fan Game/Beta/Setup Boss-Pattern-0 Saemaeum Patterns")]
@@ -125,15 +130,16 @@ namespace TrickalFanGame.Editor
                 SetFloat(serialized, "phaseOneJumpRest", 1.0f);
                 SetFloat(serialized, "phaseTwoJumpRest", 0.85f);
 
-                SetInt(serialized, "phaseOneLandingBurstCount", 8);
-                SetInt(serialized, "phaseTwoLandingBurstCount", 12);
+                SetFloat(serialized, "jumpDistance", 7f);
+                SetInt(serialized, "phaseOneLandingBurstCount", 12);
+                SetInt(serialized, "phaseTwoLandingBurstCount", 16);
                 SetFloat(serialized, "phaseOneLandingBurstSpeed", 4.5f);
                 SetFloat(serialized, "phaseTwoLandingBurstSpeed", 5.0f);
                 SetEnum(serialized, "landingBurstDamageTier", (int)EnemyDamageTier.Light);
                 SetFloat(serialized, "landingBurstSpawnMargin", 0.2f);
 
-                SetInt(serialized, "phaseOnePillars", 4);
-                SetInt(serialized, "phaseTwoPillars", 6);
+                SetInt(serialized, "phaseOnePillars", 7);
+                SetInt(serialized, "phaseTwoPillars", 9);
                 SetFloat(serialized, "phaseOnePillarWarning", 0.8f);
                 SetFloat(serialized, "phaseTwoPillarWarning", 0.7f);
                 SetFloat(serialized, "pillarStagger", 0.12f);
@@ -156,8 +162,30 @@ namespace TrickalFanGame.Editor
                 SetFloat(serialized, "meteorKnockbackSpeed", 7f);
                 SetFloat(serialized, "meteorKnockbackDuration", 0.2f);
                 SetFloat(serialized, "meteorCooldownAfterRain", 8f);
+                SetBool(serialized, "meteorLeadsPlayer", true);
+
+                SetInt(serialized, "cagePillars", 14);
+                SetFloat(serialized, "cageRadius", 2.4f);
+                SetFloat(serialized, "cageWarning", 0.8f);
+                SetFloat(serialized, "cageStagger", 0.02f);
+                SetFloat(serialized, "cageLifetime", 6f);
+                SetFloat(serialized, "waveSpacing", 1.2f);
+                SetFloat(serialized, "waveSpeed", 12f);
+                SetFloat(serialized, "waveWarning", 0.55f);
+                SetFloat(serialized, "waveLifetime", 5f);
+                SetFloat(serialized, "waveGridOffset", 1.8f);
+                SetFloat(serialized, "waveGridHalfLength", 4.2f);
+                SetFloat(serialized, "waveFanDegrees", 30f);
+
+                SetInt(serialized, "approachVolleys", 5);
+                SetFloat(serialized, "approachThrowInterval", 0.55f);
+                SetInt(serialized, "approachProjectilesPerVolley", 3);
+                SetFloat(serialized, "approachSpreadDegrees", 30f);
+                SetFloat(serialized, "approachProjectileSpeed", 5.5f);
 
                 SetFloat(serialized, "slimeSpeedMultiplier", 0.55f);
+                SetInt(serialized, "maximumSlimePuddles", 48);
+                SetBool(serialized, "landingLeavesSlime", true);
                 serialized.ApplyModifiedPropertiesWithoutUndo();
 
                 if (PrefabUtility.SaveAsPrefabAsset(contents, Week15Boss2Setup.BossPrefabPath) == null)
@@ -202,6 +230,9 @@ namespace TrickalFanGame.Editor
 
         private static void SetFloat(SerializedObject serialized, string name, float value) =>
             Property(serialized, name).floatValue = value;
+
+        private static void SetBool(SerializedObject serialized, string name, bool value) =>
+            Property(serialized, name).boolValue = value;
 
         private static void SetEnum(SerializedObject serialized, string name, int value) =>
             Property(serialized, name).enumValueIndex = value;

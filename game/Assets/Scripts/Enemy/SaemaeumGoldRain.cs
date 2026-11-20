@@ -6,8 +6,9 @@ namespace TrickalFanGame.Enemy
 {
     // 새마음금고 황금 메테오 (phase two): after the boss's short cast, gold lumps keep falling for a while on their own,
     // so the boss can use its other patterns meanwhile. The first few come quickly one after another, then one
-    // lands at a steady interval. Every few lumps one aims at where the player stands when its shadow appears; the
-    // rest land at random in the arena. The rain stops when its time is up or its boss is gone.
+    // lands at a steady interval. Every few lumps one aims at where the player stands when its shadow appears, and
+    // (2026-11-21) the lump right after it leads the player: it lands where their current movement carries them by
+    // the impact. The rest land at random in the arena. The rain stops when its time is up or its boss is gone.
     [DisallowMultipleComponent]
     public sealed class SaemaeumGoldRain : MonoBehaviour
     {
@@ -17,8 +18,9 @@ namespace TrickalFanGame.Enemy
         {
             public Settings(float duration, int openingCount, float openingInterval, float interval,
                 int targetEvery, float warning, float radius, EnemyDamageTier damageTier, float knockbackSpeed,
-                float knockbackDuration)
+                float knockbackDuration, bool leadsPlayer = false)
             {
+                LeadsPlayer = leadsPlayer;
                 Duration = Mathf.Max(0.01f, duration);
                 OpeningCount = Mathf.Max(0, openingCount);
                 OpeningInterval = Mathf.Max(0.01f, openingInterval);
@@ -41,6 +43,7 @@ namespace TrickalFanGame.Enemy
             public EnemyDamageTier DamageTier { get; }
             public float KnockbackSpeed { get; }
             public float KnockbackDuration { get; }
+            public bool LeadsPlayer { get; }
         }
 
         private readonly List<SaemaeumGoldMeteor> meteors = new();
@@ -123,13 +126,31 @@ namespace TrickalFanGame.Enemy
         private void SpawnMeteor(float shownAt)
         {
             bool aimed = SpawnedCount % settings.TargetEvery == 0 && target != null;
-            Vector2 landing = aimed ? ClampToArea(EnemyLobProjectile.GroundPoint(target)) : RandomPoint();
+            bool leads = !aimed && IsLeadSlot(SpawnedCount, settings.TargetEvery, settings.LeadsPlayer) &&
+                         target != null;
+            Vector2 landing = aimed ? ClampToArea(EnemyLobProjectile.GroundPoint(target))
+                : leads ? ClampToArea(EnemyLobProjectile.GroundPoint(target) + TargetVelocity() * settings.Warning)
+                : RandomPoint();
             SaemaeumGoldMeteor meteor = SaemaeumGoldMeteor.Create(landing, aimed, shownAt,
                 shownAt + settings.Warning, settings.Radius, settings.DamageTier, settings.KnockbackSpeed,
                 settings.KnockbackDuration, boss != null ? boss.gameObject : null, target, sortingLayerId,
                 bodySortingOrder);
+            meteor.LeadsPlayer = leads;
             meteors.Add(meteor);
             boss?.RegisterOwnedObject(meteor.gameObject);
+        }
+
+        // The lump right after each aimed one, when the cycle has room for a random lump as well.
+        public static bool IsLeadSlot(int index, int targetEvery, bool leadsPlayer) =>
+            leadsPlayer && targetEvery >= 2 && index % targetEvery == 1;
+
+        private Vector2 TargetVelocity()
+        {
+            if (target == null) return Vector2.zero;
+            Player.PlayerMovement movement = target.GetComponentInParent<Player.PlayerMovement>();
+            if (movement != null) return movement.CurrentVelocity;
+            Rigidbody2D body = target.GetComponentInParent<Rigidbody2D>();
+            return body != null ? body.linearVelocity : Vector2.zero;
         }
 
         private void Stop()
