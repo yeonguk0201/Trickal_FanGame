@@ -18,6 +18,10 @@ namespace TrickalFanGame.Room
         private readonly List<Collider2D> nearbyPickups = new();
         private readonly HashSet<Transform> movedPickups = new();
         private Sprite[] frames;
+        private Material portalMaterial;
+        private Material originalMaterial;
+        private PortalAurora aurora;
+        private static readonly int PortalPhase = Shader.PropertyToID("_PortalPhase");
         private float visibleTime;
         public bool IsRevealed => IsUnlocked && visibleTime >= RevealDuration;
 
@@ -88,6 +92,12 @@ namespace TrickalFanGame.Room
         private void OnDestroy()
         {
             ReleaseRuntimeBindings();
+            if (portalMaterial != null)
+            {
+                if (indicator != null) indicator.sharedMaterial = originalMaterial;
+                if (Application.isPlaying) Destroy(portalMaterial);
+                else DestroyImmediate(portalMaterial);
+            }
             if (frames != null)
                 foreach (Sprite frame in frames)
                     if (frame != null)
@@ -176,6 +186,20 @@ namespace TrickalFanGame.Room
                 frames[i].name = $"Portal idle {i + 1}";
             }
             indicator.sprite = frames[0];
+            Shader shader = Resources.Load<Shader>("CombatEffects/PortalInterior");
+            if (shader == null)
+            {
+                Debug.LogError("Portal interior shader is missing.", this);
+                return;
+            }
+            originalMaterial = indicator.sharedMaterial;
+            portalMaterial = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
+            portalMaterial.SetVector("_CellSize", new Vector4((float)width / sheet.width,
+                (float)height / sheet.height, 0f, 0f));
+            indicator.sharedMaterial = portalMaterial;
+            aurora = GetComponent<PortalAurora>();
+            if (aurora == null) aurora = gameObject.AddComponent<PortalAurora>();
+            aurora.Configure(indicator);
         }
 
         private void Update()
@@ -231,8 +255,10 @@ namespace TrickalFanGame.Room
             indicator.enabled = IsUnlocked;
             float reveal = Mathf.SmoothStep(0f, 1f, visibleTime / RevealDuration);
             indicator.color = new Color(1f, 1f, 1f, reveal);
-            if (frames != null)
-                indicator.sprite = frames[Mathf.FloorToInt(visibleTime * 6f) % frames.Length];
+            if (aurora != null) aurora.Evaluate(visibleTime, IsUnlocked ? reveal : 0f);
+            // Keep the mesh, alpha and outer ring fixed; only blend the inner water-like light.
+            if (portalMaterial != null)
+                portalMaterial.SetFloat(PortalPhase, visibleTime * 2f % 4f);
         }
 
         private void SetUnlocked(bool unlocked)

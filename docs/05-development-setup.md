@@ -2567,6 +2567,12 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 동작: 마우스 호버나 방향키가 칸을 고른다. 방향키를 누르고 있으면 0.35초 뒤부터 0.09초마다 반복 이동한다. 좌우는 같은 줄, 위아래는 같은 열 안에서 순환하고, 2열 아래에는 투자, 3열 아래에는 닫기 버튼이 있어 위아래 순환에 포함된다(버튼 줄에서 좌우로 투자↔닫기, Enter로 누름). 투자 목록도 위아래로 순환한다. 클릭이나 Enter로 살 수 있는 상품이면 구매 팝업을 열고, 팝업은 구매가 선택된 채 열리고, 좌우 방향키(A/D)나 마우스 호버로 취소·구매를 고른다(보라 테두리). Enter는 고른 버튼을 누른다. Esc·취소·X는 팝업만 닫는다. 살 수 없는 상품(골드 부족 등)은 가격이 빨간색이고 팝업을 열지 않는다. 설명 말풍선은 팝업의 아이템 그림에 마우스를 올리면 보인다. Enter로 연 팝업은 바로 보이고, 마우스를 움직이면 그때부터 호버를 따른다. 말풍선은 설명 길이에 맞춰 아래 여백(`ShopView.TooltipBottomPadding`)을 남기고 아래로 늘어난다. 소모품 설명은 `ShopView.DescribeConsumable`의 효과 문구다. 투자 줄도 같은 팝업으로 확인한 뒤 투자한다.
 - Play 수동 확인(미실시): `SampleScene`에서 상점에 들어가 E로 연다. 호버·방향키 선택, 골드 부족 칸의 빨간 가격과 클릭 무반응, 구매 팝업 열기·구매·취소, 설명이 긴 아이템에서 말풍선이 아래로 늘어나는지, 투자 화면, 골디 상점(그림·제목·대사)을 확인한다.
 
+### 보스룸 포탈 v2 미리보기 (2026-11-19)
+- 메뉴: `Trickal Fan Game/Effects/Preview Boss Room Portal`.
+- 별도 Preview Scene에서 실제 런타임 스프라이트·재질을 사용한다. 재생/정지, 시간 슬라이더, 속도, 카메라 크기, Restart 제공.
+- 검사: `Trickal Fan Game/Effects/Verify Boss Room Portal` (`FloorPortalArtworkVerification.Verify`).
+- 실제 배경과 캐릭터 가림은 Game Scene → F1 → Boss F1/F2에서 별도 Play 확인.
+
 ### 보스 발 판정 조정 도구 (2026-11-19, Boss-Pattern-0)
 
 - 렌더: Unity 배치 `TrickalFanGame.Editor.BossFeetLayoutExporter.ExportBatch` (`-batchmode -quit`, 그래픽 렌더가 필요하므로
@@ -2578,6 +2584,8 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
   Shift 0.05)로 바꾸면 멈추는 자리가 바로 바뀐다. 폭과 높이가 같으면 원, 다르면 캡슐이다. 발 좌우 위치(그림을
   뒤집지 않았을 때 기준, 뒤집으면 함께 뒤집힘)와 발 내림(음수는 위로)은 슬라이더나 캔버스의 초록 발 끌기로 바꾼다. 값은 브라우저에 자동 저장되고 "공유할 값"을 복사해 전달한다.
 - 확인 근거: 2026-11-19 Unity 6000.3.22f1 배치 종료 코드 0, 3개 보스 렌더, 헤드리스 Edge로 첫 화면 렌더 확인.
+- 후면 오로라 추가: 미리보기의 `Portal layer` / `Aurora layer`로 개별 표시, 12초 시간 슬라이더로 반복·정지 확인. 실제 Game Scene에서 `PortalAurora`의 크기·밝기·속도를 조절할 수 있다. 후광 색은 포탈 원화 고리에서 자동으로 가져온다.
+- 렌더 포함 단독 배치: `TrickalFanGame.Editor.FloorPortalArtworkVerification.VerifyAndCaptureBatch`. 이미지 출력 `game/Logs/portal-aurora-preview.png`.
 
 ## 사운드 믹서
 
