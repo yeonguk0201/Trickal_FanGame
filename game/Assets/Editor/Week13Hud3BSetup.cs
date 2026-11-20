@@ -43,6 +43,7 @@ namespace TrickalFanGame.Editor
             Image panelImage = Component<Image>(panel.gameObject);
             panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.92f);
             panelImage.raycastTarget = false;
+            InGameUiPolishSetup.RoundDescription(panelImage);
             CanvasGroup canvasGroup = Component<CanvasGroup>(panel.gameObject);
             canvasGroup.alpha = 0f;
             canvasGroup.interactable = false;

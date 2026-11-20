@@ -133,7 +133,7 @@ namespace TrickalFanGame.Frontend
         {
             Color rarityColor = RarityTextColor(definition.Rarity);
             SetText(kindText, ItemKindText.GetDisplayName(definition.Kind));
-            SetText(rarityText, ItemRewardCardView.RarityLabel(definition.Rarity));
+            SetText(rarityText, ItemRewardCardView.RewardRarityLabel(definition.Rarity));
             if (rarityText != null) rarityText.color = rarityColor;
             SetText(nameText, definition.DisplayName);
             if (nameText != null) nameText.color = rarityColor;

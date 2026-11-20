@@ -47,7 +47,7 @@ namespace TrickalFanGame.Editor
         public const string KeeperObjectName = "Shopkeeper";
         public static readonly Vector2 KeeperPosition = new(0f, 0.6f);
         public static readonly Vector2 KeeperTriggerSize = new(3.2f, 3.2f);
-        public static readonly Vector2 KeeperBubbleTailTip = new(0f, 1.3f);
+        public static readonly Vector2 KeeperBubbleTailTip = new(0f, 0.8f);
 
         [MenuItem("Trickal Fan Game/Week 20/Setup Special-4 Shop")]
         public static void Setup()
@@ -225,6 +225,7 @@ namespace TrickalFanGame.Editor
             TextMeshPro label = Text(keeperObject.transform, "Label", font, new Vector2(0f, 1f), 3f,
                 new Color(1f, 0.93f, 0.62f, 1f));
             label.text = ShopKeeper.DisplayName;
+            label.gameObject.SetActive(false);
             TextMeshPro prompt = Text(keeperObject.transform, "Prompt", font, new Vector2(0f, -1f), 3f,
                 new Color(0.9f, 0.98f, 1f, 1f));
             prompt.text = ShopKeeper.OpenPrompt;

@@ -30,7 +30,7 @@ namespace TrickalFanGame.Shop
         public const float BodyRadius = PlayerFeet.BodyRadius;
         // The longer side of the player's sprite in world units (Character_Erpin: 1254 px at 1000 px per unit).
         public const float PortraitWorldSize = 1.254f;
-        public const string OpenPrompt = "[E] 상점 열기";
+        public const string OpenPrompt = "[E]상점열기";
 
         [SerializeField] private SpriteRenderer portrait;
         [SerializeField] private TextMeshPro nameLabel;
@@ -85,7 +85,11 @@ namespace TrickalFanGame.Shop
         private void ApplyLook()
         {
             ShopKind kind = owner != null ? owner.Kind : ShopKind.General;
-            if (nameLabel != null) nameLabel.text = GetDisplayName(kind);
+            if (nameLabel != null)
+            {
+                nameLabel.text = GetDisplayName(kind);
+                nameLabel.gameObject.SetActive(false);
+            }
             TrickalFanGame.Frontend.UserArtwork.ApplyPickup(portrait, GetArtworkKey(kind));
             FitPortrait();
         }
@@ -138,7 +142,11 @@ namespace TrickalFanGame.Shop
 
         private void RefreshPrompt()
         {
-            if (prompt != null) prompt.gameObject.SetActive(CanInteract);
+            if (prompt != null)
+            {
+                prompt.text = OpenPrompt;
+                prompt.gameObject.SetActive(CanInteract);
+            }
             if (speechBubble == null) return;
             // The greeting shows while the player is near and the shop screen is closed.
             if (isPlayerInside && (session == null || !session.IsOpen))

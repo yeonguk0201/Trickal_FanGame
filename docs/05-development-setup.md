@@ -2633,3 +2633,14 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
    추가한 뒤 다시 빌드한다. "새 후보 비교"에서 `후보`·`현재`를 번갈아 듣고, 고른 값은 `// 후보 …` 줄로 내보내진다.
    겹쳐 울리는 소리는 `CANDIDATE_SCENES`에 장면으로 적고 `editable=True`면 겹마다 시작 시점을 조절할 수 있다.
 
+
+### NPC·아이템 UI 외형 보정
+
+- Edit Mode에서 `Trickal Fan Game > Menu > Setup NPC and Item UI Polish`: 기존 Game Scene과 상점 Prefab에 NPC 이름 숨김, 폭을 제한하고 대사 줄 수에 따라 세로로 늘어나는 기본 말풍선, 메뉴 원화 기반 재시작·나가기 확인창, 아이템 설명·획득 알림의 둥근 모서리를 적용한다. 기존 HUD를 재생성하지 않는다.
+- 단독 검사: `Trickal Fan Game > Menu > Verify NPC and Item UI Polish` (`TrickalFanGame.Editor.InGameUiPolishVerification.Verify`).
+- 배치 구성·검사: `TrickalFanGame.Editor.InGameUiPolishVerification.SetupAndVerifyBatch`. 렌더 참고 이미지: `CaptureBatch` (그래픽 필요), `output/menu-review/ingame-restart-confirmation-*.png`, `ingame-rounded-item-description-*.png`.
+- Play 수동 확인: Game Scene에서 상점 NPC에 접근해 이름 없이 말풍선과 `[E]상점열기`가 보이는지 확인한다. `ESC > 처음부터 다시하기`에서 게임 가장자리까지 어두워지고 `계속 플레이`·`ESC`로 확인창만 닫히는지 확인한다. 창 비율을 가로·세로로 바꿔도 전체 화면 암전이 유지되어야 한다. `F1 > — Artifact — > Drop`으로 고급 아티팩트를 생성해 접근하면 `고급`만 표시되고, 획득 알림과 접근 설명창의 모서리가 둥글어야 한다. 실제 Play 미술·입력 확인은 자동 검사와 별도로 기록한다.
+
+- 기본 말풍선 후속 확인: 위 Setup을 실행한 다음 Verify를 실행한다. 짧은 대사·긴 대사·여러 줄 대사에서 최대 폭 유지, 내용에 따른 높이 확장과 텍스트 잘림 여부를 검사한다. NPC 접근 시 작은 기본 말풍선과 `[E]상점열기`가 보이고 `E` 입력으로 상점이 열리는지 Play에서 확인한다. 배치 참고 렌더는 그래픽을 켠 `InGameUiPolishVerification.CaptureNpcBatch`로 `output/menu-review/npc-simple-bubble-{short,long}.png`에 저장한다. 이번 후속 수정은 열린 Editor의 프로젝트 잠금으로 자동 검증·렌더 미실행이다.
+
+- 기본 인사 `뭐 하나 사시려구요?`는 한 줄에 들어가도록 최대 텍스트 폭을 2.0 월드 단위로 조정했다. 더 긴 대사는 계속 줄바꿈과 높이 확장을 사용한다.

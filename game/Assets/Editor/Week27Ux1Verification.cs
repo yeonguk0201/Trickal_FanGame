@@ -346,7 +346,7 @@ namespace TrickalFanGame.Editor
                     "Only the nearest item inside the range may be described.");
                 Assert(view.NameText.text == artifact.DisplayName &&
                        view.KindText.text == ItemKindText.GetDisplayName(artifact.Kind) &&
-                       view.RarityText.text == ItemRewardCardView.RarityLabel(artifact.Rarity) &&
+                       view.RarityText.text == ItemRewardCardView.RewardRarityLabel(artifact.Rarity) &&
                        view.EffectText.text == ArtifactEffectDescription.Build(artifact) &&
                        !view.DetailText.gameObject.activeSelf,
                     "The description must show the artifact's kind, name, rarity text and effect.");

@@ -15,9 +15,9 @@ namespace TrickalFanGame.Character
     [DisallowMultipleComponent]
     public sealed class NpcSpeechBubble : MonoBehaviour
     {
-        public const float OutlineWidth = 0.05f;
-        public const float TailSize = 0.2f;
-        public static readonly Vector2 Padding = new(0.22f, 0.13f);
+        public const float OutlineWidth = 0.025f;
+        public const float TailSize = 0.13f;
+        public static readonly Vector2 Padding = new(0.14f, 0.10f);
         public static readonly Color FillColor = Color.white;
         public static readonly Color OutlineColor = Color.black;
 
@@ -26,6 +26,7 @@ namespace TrickalFanGame.Character
         [SerializeField] private SpriteRenderer tailOutline;
         [SerializeField] private SpriteRenderer tailFill;
         [SerializeField] private TextMeshPro text;
+        public const float MaxTextWidth = 2.0f;
 
         public SpriteRenderer Outline => outline;
         public SpriteRenderer Fill => fill;
@@ -49,11 +50,14 @@ namespace TrickalFanGame.Character
         public void Show(string line)
         {
             if (text == null || fill == null || outline == null) return;
+            bool needsLayout = !gameObject.activeSelf || text.text != line || fill.size == Vector2.zero;
             if (!gameObject.activeSelf) gameObject.SetActive(true);
-            if (text.text != line || fill.size == Vector2.zero)
+            if (needsLayout)
             {
                 text.text = line;
-                Layout(text.GetPreferredValues(line));
+                float width = Mathf.Min(MaxTextWidth, text.GetPreferredValues(line).x + 0.02f);
+                Vector2 preferred = text.GetPreferredValues(line, width, Mathf.Infinity);
+                Layout(new Vector2(width, preferred.y));
             }
         }
 

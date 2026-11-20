@@ -12,7 +12,7 @@ namespace TrickalFanGame.Editor
     {
         public const string SpritePath = "Assets/Art/Npc/speech-bubble.png";
         public const string BubbleObjectName = "Speech Bubble";
-        public const float FontSize = 2.6f;
+        public const float FontSize = 2.2f;
         // Above the keeper's name label and prompt (4).
         public const int SortingOrder = 5;
         private const float PixelsPerUnit = 200f;
@@ -73,7 +73,7 @@ namespace TrickalFanGame.Editor
             text.font = font;
             text.fontSize = FontSize;
             text.alignment = TextAlignmentOptions.Center;
-            text.textWrappingMode = TextWrappingModes.NoWrap;
+            text.textWrappingMode = TextWrappingModes.Normal;
             text.color = NpcSpeechBubble.OutlineColor;
             text.sortingOrder = SortingOrder + 3;
             textObject.transform.localScale = Vector3.one;
@@ -93,6 +93,7 @@ namespace TrickalFanGame.Editor
             boxObject.transform.localRotation = Quaternion.identity;
             boxObject.transform.localScale = Vector3.one;
             SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(boxObject);
+            renderer.enabled = true;
             renderer.sprite = sprite;
             renderer.drawMode = SpriteDrawMode.Sliced;
             renderer.color = color;
@@ -107,6 +108,7 @@ namespace TrickalFanGame.Editor
             tailObject.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
             tailObject.transform.localScale = Vector3.one * (side / sprite.bounds.size.x);
             SpriteRenderer renderer = GetOrAdd<SpriteRenderer>(tailObject);
+            renderer.enabled = true;
             renderer.sprite = sprite;
             renderer.drawMode = SpriteDrawMode.Simple;
             renderer.color = color;

@@ -373,7 +373,7 @@ namespace TrickalFanGame.Editor
                 $"{keeper.NameLabel.text}'s talking range must reach a player standing against the body.");
         }
 
-        // Near a keeper its greeting shows in a white bubble with a black outline, sized to the line; away it hides.
+        // Near a keeper its greeting wraps inside a compact plain bubble; away it hides.
         private static void AssertGreets(ShopKeeper goldi, ShopKeeper sist, PlayerInventory inventory, Health health,
             PlayerActionState actionState)
         {
@@ -387,20 +387,16 @@ namespace TrickalFanGame.Editor
                        bubble.TailFill != null && bubble.TailOutline != null && bubble.Text != null,
                     $"{keeper.NameLabel.text} needs a hidden speech bubble with box, outline, tail and text.");
                 keeper.SetPlayerPresence(true, inventory, health, actionState);
-                Vector2 textSize = bubble.Text.GetPreferredValues(bubble.Line);
+                Vector2 textSize = bubble.Text.GetPreferredValues(bubble.Line, NpcSpeechBubble.MaxTextWidth, Mathf.Infinity);
                 Assert(bubble.IsShown && bubble.Line == ShopKeeper.GetGreetingLine(kind) &&
                        bubble.Fill.color == Color.white && bubble.Outline.color == Color.black &&
-                       bubble.TailFill.color == Color.white && bubble.TailOutline.color == Color.black &&
+                       bubble.Outline.enabled && bubble.TailFill.enabled && bubble.TailOutline.enabled &&
+                       !keeper.NameLabel.gameObject.activeSelf &&
                        bubble.Text.color == Color.black && textSize.x > 0.5f &&
-                       bubble.Fill.size.x >= textSize.x && bubble.Fill.size.y >= textSize.y &&
-                       Mathf.Approximately(bubble.Outline.size.x - bubble.Fill.size.x, NpcSpeechBubble.OutlineWidth * 2f) &&
-                       bubble.Outline.sortingOrder < bubble.Fill.sortingOrder &&
-                       bubble.Fill.sortingOrder < bubble.TailFill.sortingOrder &&
-                       bubble.TailFill.sortingOrder < bubble.Text.sortingOrder &&
-                       bubble.Fill.transform.position.y - bubble.Fill.size.y * 0.5f >
-                       keeper.NameLabel.transform.position.y,
-                    $"{keeper.NameLabel.text} must greet in a white, black-outlined bubble that fits its line above " +
-                    $"the name label; text {textSize}, box {bubble.Fill.size}.");
+                       bubble.Fill.size.x <= NpcSpeechBubble.MaxTextWidth + NpcSpeechBubble.Padding.x * 2f + 0.001f &&
+                       bubble.Fill.size.y >= textSize.y &&
+                       bubble.Fill.sortingOrder < bubble.Text.sortingOrder,
+                    $"{keeper.NameLabel.text} must greet inside the compact plain bubble, with the NPC name hidden.");
                 keeper.SetPlayerPresence(false, null, null);
                 Assert(!bubble.IsShown, $"{keeper.NameLabel.text}'s greeting must hide when the player leaves.");
             }
