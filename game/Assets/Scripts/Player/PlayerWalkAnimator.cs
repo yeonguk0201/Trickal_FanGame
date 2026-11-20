@@ -241,9 +241,12 @@ namespace TrickalFanGame.Player
             {
                 elapsed -= frameDuration;
                 frameIndex = (frameIndex + 1) % FrameCount;
-                // Sound-3: frames 1 and 3 are the feet touching down, two steps per walk cycle. No steps in the air.
+                // Sound-3: frames 1 and 3 are the feet touching down, two steps per walk cycle. No steps in the air;
+                // Sound pass 2026-11-21: flying beats the wings once per cycle (frame 1) instead.
                 if (frameIndex % 2 == 1 && !flying)
                     TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.PlayerStep);
+                else if (frameIndex == 1 && flying)
+                    TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.PlayerWingFlap);
             }
 
             spriteRenderer.sprite = SelectFrames(movement.FacingDirection)[frameIndex];

@@ -57,7 +57,7 @@ namespace TrickalFanGame.Editor
         // preloaded one-shot. A streamed hit sound arrives late.
         private static void VerifyClips()
         {
-            foreach (CombatSfxCue cue in Enum.GetValues(typeof(CombatSfxCue)).Cast<CombatSfxCue>())
+            foreach (CombatSfxCue cue in ActiveCues())
             {
                 string path = CombatSfxSetup.PathFor(cue);
                 AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
@@ -80,7 +80,10 @@ namespace TrickalFanGame.Editor
             foreach (CombatSfxCue cue in all)
             {
                 int count = CombatSfxSetup.Cues.Count(entry => entry.Cue == cue);
-                Assert(count == 1, $"{cue} must appear exactly once in the cue table, found {count}.");
+                int expected = CombatSfxSetup.IsRetired(cue) ? 0 : 1;
+                Assert(count == expected, CombatSfxSetup.IsRetired(cue)
+                    ? $"{cue} is retired and must not appear in the cue table, found {count}."
+                    : $"{cue} must appear exactly once in the cue table, found {count}.");
             }
 
             foreach ((CombatSfxCue cue, string file, float volume, float interval, float cap)
@@ -100,12 +103,13 @@ namespace TrickalFanGame.Editor
             Assert(GuardOf(CombatSfxCue.SkillLowerBurst) < 0.07f,
                 "The lower-grade burst guard must stay under the gap between two blasts.");
 
-            // Each foot repeats every other cadence, so its guard has to fit
-            // inside that, or the run would lose steps.
-            float footInterval = CombatSfxSetup.DashStepInterval * 2f;
-            Assert(GuardOf(CombatSfxCue.SkillUpperStepLeft) < footInterval &&
-                   GuardOf(CombatSfxCue.SkillUpperStepRight) < footInterval,
-                $"A step guard must stay under {footInterval:0.###}s, the gap between two falls of the same foot.");
+            // Sound pass 2026-11-21: the slam's later layers land after the swing, in order.
+            Assert(CrayonHeroBossPatternRuntime.SlamMagicDelay > 0f &&
+                   CrayonHeroBossPatternRuntime.SlamClashDelay > CrayonHeroBossPatternRuntime.SlamMagicDelay,
+                "The slam's magic layer must follow the swing and come before the clash.");
+            Assert(CrayonHeroBossPatternRuntime.TransformFadeSeconds > 0f &&
+                   CrayonHeroBossPatternRuntime.TransformFadeSeconds <= CrayonHeroBossPatternRuntime.TransformSoundSeconds,
+                "The transformation must fade out within the time it plays.");
 
             // The lower-grade skill was raised deliberately; keep it above
             // the basic attack so it does not sink back under the music.
@@ -119,6 +123,12 @@ namespace TrickalFanGame.Editor
             // so the table numbers alone cannot order them).
             Assert(GuardOf(CombatSfxCue.EnemyTickDamage) > GuardOf(CombatSfxCue.HitEnemy),
                 "The tick cue needs a longer guard than the blast: a whole pack ticks at once.");
+        }
+
+        private static CombatSfxCue[] ActiveCues()
+        {
+            return Enum.GetValues(typeof(CombatSfxCue)).Cast<CombatSfxCue>()
+                .Where(cue => !CombatSfxSetup.IsRetired(cue)).ToArray();
         }
 
         private static float GuardOf(CombatSfxCue cue)
@@ -144,7 +154,9 @@ namespace TrickalFanGame.Editor
             Assert(controllers.Length == 1, $"{scenePath} must contain exactly one GameAudioController.");
             GameAudioController controller = controllers[0];
 
-            foreach (CombatSfxCue cue in Enum.GetValues(typeof(CombatSfxCue)).Cast<CombatSfxCue>())
+            foreach (CombatSfxCue cue in CombatSfxSetup.RetiredCues)
+                Assert(controller.GetCombatClip(cue) == null, $"{scenePath} still wires the retired cue {cue}.");
+            foreach (CombatSfxCue cue in ActiveCues())
             {
                 AudioClip clip = controller.GetCombatClip(cue);
                 Assert(clip != null, $"{scenePath} has no clip wired for {cue}.");
@@ -197,6 +209,19 @@ namespace TrickalFanGame.Editor
                     "A cue with no guard must play every time it is asked for.");
                 Assert(!controller.PlayCombatCue(CombatSfxCue.PlayerHurt),
                     "A cue with no entry must report that nothing played.");
+
+                // Sound pass 2026-11-21: a delayed layer waits, then plays once.
+                int before = controller.GetCombatCuePlayCount(CombatSfxCue.BasicAttack);
+                controller.PlayCombatCueAfter(CombatSfxCue.BasicAttack, 5f);
+                Assert(controller.PendingCueCount == 1 &&
+                       controller.GetCombatCuePlayCount(CombatSfxCue.BasicAttack) == before,
+                    "A delayed cue must wait instead of playing at once.");
+                Invoke(controller, "TickPendingCues", Time.unscaledTime + 1f);
+                Assert(controller.PendingCueCount == 1, "A delayed cue must not play before its time.");
+                Invoke(controller, "TickPendingCues", Time.unscaledTime + 6f);
+                Assert(controller.PendingCueCount == 0 &&
+                       controller.GetCombatCuePlayCount(CombatSfxCue.BasicAttack) == before + 1,
+                    "A delayed cue must play once when its time comes.");
             }
             finally
             {
@@ -304,7 +329,7 @@ namespace TrickalFanGame.Editor
                     Assert(router.GetRequestCount(CombatSfxCue.PowerCast) == 1,
                         "Using the 권능 must ask for the power cue.");
 
-                    VerifyDashSteps(router);
+                    VerifyDashRun(router);
                 }
                 finally
                 {
@@ -394,25 +419,22 @@ namespace TrickalFanGame.Editor
                 Assert(!GameAudioController.IsCancelButtonName(name), $"{name} must keep the click.");
         }
 
-        // The run has to last as long as the dash does, and the two feet have
-        // to alternate, or a long dash falls silent or repeats one sample.
-        private static void VerifyDashSteps(PlayerCombatAudio router)
+        // Sound pass 2026-11-21: the running starts with the dash and stops with it, however
+        // the dash ends, so a long dash never falls silent and a short one
+        // never leaves the loop running.
+        private static void VerifyDashRun(PlayerCombatAudio router)
         {
-            router.ConfigureDashSteps(CombatSfxSetup.DashStepInterval);
-            Assert(Mathf.Approximately(router.DashStepInterval, CombatSfxSetup.DashStepInterval),
-                "The router must take the cadence the setup configures.");
-
-            router.BeginDashSteps(0f);
-            // Six seconds of dash, pumped a frame at a time.
-            for (float t = 0f; t <= 6f; t += 1f / 60f) router.PumpDashSteps(t);
-
-            int left = router.GetRequestCount(CombatSfxCue.SkillUpperStepLeft);
-            int right = router.GetRequestCount(CombatSfxCue.SkillUpperStepRight);
-            int expected = (int)(6f / CombatSfxSetup.DashStepInterval);
-            Assert(left + right >= expected - 1,
-                $"A six-second dash must keep stepping: expected about {expected} falls, got {left + right}.");
-            Assert(Mathf.Abs(left - right) <= 1,
-                $"The feet must alternate, got {left} left and {right} right.");
+            Assert(PlayerCombatAudio.DashRunPitch >= 1f && PlayerCombatAudio.DashRunPitch <= 2.5f,
+                "The dash run plays sped up (1x..2.5x) to keep up with the dash; a slower or chipmunk run is a typo.");
+            foreach (UltimateEndReason reason in new[] { UltimateEndReason.Impact, UltimateEndReason.Timeout })
+            {
+                int runs = router.GetRequestCount(CombatSfxCue.SkillUpperRun);
+                Raise(router, "OnDashStarted");
+                Assert(router.GetRequestCount(CombatSfxCue.SkillUpperRun) == runs + 1 && router.IsDashRunActive,
+                    "Starting the dash must start the running loop.");
+                Raise(router, "OnDashEnded", reason);
+                Assert(!router.IsDashRunActive, $"A dash that ends by {reason} must stop the running loop.");
+            }
         }
 
         private static void Report(PlayerCombatEvents events, Health target, DamageContext damage, float applied)
@@ -436,6 +458,13 @@ namespace TrickalFanGame.Editor
             if (target == null) return;
             target.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.Invoke(target, Array.Empty<object>());
+        }
+
+        private static void Invoke(object target, string method, params object[] arguments)
+        {
+            MethodInfo found = target.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic);
+            if (found == null) throw new InvalidOperationException($"{target.GetType().Name}.{method} is gone.");
+            found.Invoke(target, arguments);
         }
 
         private static void Assert(bool condition, string message)

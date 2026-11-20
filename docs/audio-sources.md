@@ -144,7 +144,10 @@ Pop-Up by IENBA -- https://freesound.org/s/545477/ -- License: Attribution 4.0
   낮다. 검증기가 두 조건을 모두 확인한다.
 - 플레이어가 받는 틱(장판, 독가스)은 `PlayerHurt`로 울린다. `EnemyTickDamage`는 적 전용이다.
 
-### 돌진 발소리는 반복 재생이다 (2026-10-19 수정)
+### 돌진 발소리는 반복 재생이다 (2026-10-19 수정, 2026-11-21 대체)
+
+> 2026-11-21 사운드 교체에서 이 구조는 달리기 음원 루프로 바뀌었다. 아래는 당시 기록이다. 현재 구조는
+> 맨 아래 "2026-11-21 사운드 교체" 항목을 본다.
 
 고학년 돌진은 적에 닿을 때까지 이어지고 최대 10초다. 고정 길이 음원 하나로는 덮을 수 없어서 구조를 바꿨다.
 
@@ -198,3 +201,29 @@ Pop-Up by IENBA -- https://freesound.org/s/545477/ -- License: Attribution 4.0
   애니메이션의 깡충 이륙 지점(보폭 18%)마다 1회).
   Mixkit 음원은 Mixkit Sound Effects Free License로 표기 의무가 없다.
 - 2026-11-20 사운드 믹서(`tools/sound-mixer`)로 33개 cue 볼륨을 조정했다. 값은 `CombatSfxSetup.Cues`가 기준이다.
+- 2026-11-21 사운드 교체: 사운드 믹서의 "새 후보 비교"로 들어 보고 사용자가 고른 값(볼륨, 내려치기 겹 타이밍)을 반영했다.
+  파일은 모두 무수정이고, 출처는 `Resources/Credits.json`에 있다.
+  - 교체: 고학년 충돌 `SFX_Skill_Upper_Impact_Thud.mp3`(Pixabay #515257), 저학년 발사 `SFX_Skill_Lower_Shot_Heavy.wav`
+    (OpenGameArt 150 Combat Sound Effects의 HeavyShot_01, CC0), 저학년 폭발 `SFX_Skill_Lower_Burst_8Bit.mp3`(Pixabay #340462),
+    적 틱 `SFX_Enemy_Tick_Hitmarker.mp3`(Freesound 322640 aruscio28, CC0), 스펠·짱셈 스펠·교주의 권능은 각자 다른 음원
+    `SFX_Spell_Impact.wav`·`SFX_Jjangsem_Spell_Impact.wav`·`SFX_Power_Impact.wav`(같은 팩의 Healing Spell Impact 15·14·4,
+    CC0), 새마음금고 황금 기둥 `SFX_Vault_Pillar_Earth.wav`(같은 팩 Earth Spell Impact 2, CC0).
+  - 고학년 돌진: 왼발·오른발 0.17초 반복을 없애고 `SkillUpperRun`(`SFX_Skill_Upper_Run.mp3`, Pixabay #359909)을 돌진 동안
+    루프 voice로 재생하다(원본 발소리가 돌진 속도보다 느려 `PlayerCombatAudio.DashRunPitch` 1.55배속, 믹서도 같은 배속으로
+    재생하고 배속 칸에서 조절) 돌진이 끝나면(충돌·시간 초과·취소 모두) 0.1초 페이드로 끊는다. `SkillUpperStepLeft`·`Right`는
+    씬이 큐를 번호로 저장하므로 enum에 남기고 `CombatSfxSetup.RetiredCues`로 표에서 뺐다.
+  - 새 큐: 상점 구매 `ShopPurchase`(Pixabay #567194, 오퍼 구매와 투자가 성공할 때), 시스트의 가짜 날개 비행 날갯짓
+    `PlayerWingFlap`(Pixabay #80054, 날아서 움직이는 동안 걷기 주기마다 1회 = 0.5초), 크레용사 쫄병 소환 `BossCrayonSummon`
+    (効果音ラボ 剣を抜く, 이 보스의 소환에서는 일반 적 등장음 대신 울림), 검 차징 `BossCrayonCharge`(Pixabay #102051, 맵 베기
+    예고부터 voice로 재생하고 내려칠 때 끊음), 변신 `BossCrayonTransform`(効果音ラボ オーラ1, 페이즈 전환에서 3초 재생·마지막 1.5초
+    페이드).
+  - 크레용사 기모아 내려치기는 3겹이다: `BossSwordSlam` ① 휘두름(Pixabay #185432) 즉시, `BossSwordSlamMagic` ② 마법 충격
+    +0.27초, `BossSwordSlamClash` ③ 칼 부딪힘(効果音ラボ 剣で打ち合う3) +0.39초. 지연은
+    `CrayonHeroBossPatternRuntime.SlamMagicDelay`·`SlamClashDelay`, 재생은 `CombatSfx.PlayAfter`가 맡는다.
+  - **② 마법 충격(Freesound 749799 RescopicSound)은 CC BY-NC 4.0이다.** 크레딧 표기가 필수이고 상업적 이용이 금지된다.
+    `Credits.json` 표기 의무 절에 넣었고 `CreditsScreenVerification.RequiredAttribution`이 검사한다. 게임을 유료로 배포하면
+    이 음원을 교체해야 한다.
+  - 効果音ラボ 음원은 상업적 이용 가능·표기 불필요지만 음원 파일 자체의 재배포는 금지된다(게임에 포함해 재생하는 것은 허용).
+  - 더 이상 쓰지 않는 예전 파일(`SFX_Skill_Upper_Impact.wav`, `SFX_Skill_Upper_Step_*.wav`, `SFX_Skill_Lower_Shot.wav`,
+    `SFX_Skill_Lower_Burst.wav`, `SFX_Enemy_Tick.wav`, `SFX_Power_Spell_Impact.mp3`, `SFX_Boss_Sword_Slam.mp3`,
+    `SFX_Vault_Pillar_Emerge.mp3`)은 이전 교체 때처럼 지우지 않고 남겨 두었다. 크레딧에서는 뺐다.

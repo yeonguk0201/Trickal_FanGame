@@ -58,6 +58,9 @@
   textarea { width: 100%; min-height: 120px; font: 12px ui-monospace, Consolas, monospace; border-radius: 8px;
              border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 8px; }
   .note { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+  .scene { border-top: 1px solid var(--line); padding: 10px 0 4px; }
+  .timing { display: grid; gap: 4px; margin: 8px 0 0 4px; max-width: 640px; }
+  .timing label { display: grid; grid-template-columns: minmax(110px, 180px) 1fr 64px 16px; gap: 8px; align-items: center; }
   @media (max-width: 760px) {
     header, main { padding-left: 16px; padding-right: 16px; }
     th.hide-sm, td.hide-sm { display: none; }
@@ -79,6 +82,25 @@
     <h2>BGM</h2>
     <div id="bgm"></div>
     <p class="note">BGM은 반복 재생된다. "믹스 게인"은 설정 슬라이더와 별개로 BGM 자체를 줄이는 값이다(게임 기본 1.0). 바꾸면 내보내기에 함께 나온다.</p>
+  </section>
+
+  <section class="card" id="candCard">
+    <h2 id="candTitle">새 후보 비교</h2>
+    <div id="candOnly">
+    <p class="note" style="margin:0 0 8px">아직 게임에 들어가지 않은 소리. "현재"는 지금 게임에 들어 있는 소리를 현재 볼륨으로 들려준다.
+      시작(초)은 앞부분 무음·불필요한 부분을 건너뛰고, 길이(초)는 그 시간 뒤에 끊는다(0 = 끝까지).
+      페이드(초)는 끝나기 전 그 시간 동안 소리를 0까지 줄인다.</p>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr>
+        <th>후보</th><th class="hide-sm">파일</th><th>볼륨</th><th>재생</th>
+        <th class="hide-sm">시작·길이·페이드(초)</th><th class="hide-sm">반복 간격(초)</th>
+      </tr></thead>
+      <tbody id="candRows"></tbody>
+    </table>
+    </div>
+    </div>
+    <div id="candScenes" style="margin-top:10px"></div>
   </section>
 
   <section class="card">
@@ -110,7 +132,9 @@
 const DATA = __SOUND_DATA__;
 const STORE = 'trickal-sound-mixer-v1';
 const settings = { master: 1, bgm: 1, sfx: 1 };
-const edits = { volume: {}, cadence: {}, bgmGain: {} };
+const edits = { volume: {}, cadence: {}, bgmGain: {}, cand: {}, sceneAt: {}, rate: {} };
+DATA.candidates = DATA.candidates || [];
+DATA.candidateScenes = DATA.candidateScenes || [];
 try {
   const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
   if (saved) {
@@ -122,17 +146,23 @@ try {
       if (saved.volume && c.cue in saved.volume && was[c.cue] === c.volume) edits.volume[c.cue] = saved.volume[c.cue];
     Object.assign(edits.cadence, saved.cadence || {});
     Object.assign(edits.bgmGain, saved.bgmGain || {});
+    Object.assign(edits.cand, saved.cand || {});
+    Object.assign(edits.sceneAt, saved.sceneAt || {});
+    for (const c of DATA.cues)
+      if (saved.rate && c.cue in saved.rate && (saved.rateDefaults || {})[c.cue] === c.rate) edits.rate[c.cue] = saved.rate[c.cue];
   }
 } catch (e) { /* storage blocked: start from the defaults */ }
 
 function save() {
   const defaults = Object.fromEntries(DATA.cues.map(c => [c.cue, c.volume]));
-  try { localStorage.setItem(STORE, JSON.stringify({ settings, ...edits, defaults })); } catch (e) { }
+  const rateDefaults = Object.fromEntries(DATA.cues.map(c => [c.cue, c.rate]));
+  try { localStorage.setItem(STORE, JSON.stringify({ settings, ...edits, defaults, rateDefaults })); } catch (e) { }
 }
 const round2 = v => Math.round(v * 100) / 100;
 const clamp01 = v => Math.min(1, Math.max(0, v));
 const volumeOf = c => edits.volume[c.cue] ?? c.volume;
 const cadenceOf = c => edits.cadence[c.cue] ?? c.cadence;
+const rateOf = c => edits.rate[c.cue] ?? c.rate ?? 1;
 const sfxLevel = () => settings.master * settings.sfx;
 
 // ---- playback ---------------------------------------------------------------------------------------------
@@ -142,6 +172,9 @@ const repeats = new Map();  // cue -> { timer, stop }
 function playOnce(c) {
   const audio = new Audio(c.src);
   audio.volume = clamp01(volumeOf(c) * sfxLevel());
+  // Unity's AudioSource.pitch speeds the clip up and raises it together, so the page does not keep the pitch.
+  audio.preservesPitch = false;
+  audio.playbackRate = rateOf(c);
   const set = active.get(c.cue) || new Set();
   set.add(audio);
   active.set(c.cue, set);
@@ -179,7 +212,234 @@ function stopRepeat(c) {
   if (button) { button.classList.remove('on'); button.textContent = '반복'; }
 }
 
+// ---- candidates -------------------------------------------------------------------------------------------
+const candById = Object.fromEntries(DATA.candidates.map(k => [k.id, k]));
+const cueByName = Object.fromEntries(DATA.cues.map(c => [c.cue, c]));
+const candActive = new Set();
+const candTimers = new Set();
+const candRepeats = new Map();
+const candBase = k => ({ volume: k.volume, start: 0, length: k.length || 0, fade: k.fade || 0, cadence: k.cadence });
+const candField = (k, f) => (edits.cand[k.id] || {})[f] ?? candBase(k)[f];
+const candVolume = k => clamp01(candField(k, 'volume') * sfxLevel());
+function later(fn, seconds) {
+  const t = setTimeout(() => { candTimers.delete(t); fn(); }, seconds * 1000);
+  candTimers.add(t);
+}
+
+// Plays a candidate from its start offset; `length` overrides its own cut (0 = to the end of the cut).
+function playCandidate(k, length) {
+  if (!k.src) return null;
+  const audio = new Audio(k.src);
+  audio.volume = candVolume(k);
+  audio._cand = k.id;
+  const start = candField(k, 'start');
+  const cut = length || candField(k, 'length');
+  candActive.add(audio);
+  audio.addEventListener('ended', () => candActive.delete(audio));
+  const go = () => {
+    audio.currentTime = start;
+    audio.play().catch(() => candActive.delete(audio));
+    const span = cut > 0 ? cut : Math.max(0, audio.duration - start);
+    const fade = Math.min(candField(k, 'fade'), span);
+    if (fade > 0) later(() => {
+      // Linear fade over the last `fade` seconds, from whatever the volume is at that moment.
+      const from = audio.volume, began = performance.now();
+      const step = () => {
+        if (!candActive.has(audio)) return;
+        const t = Math.min(1, (performance.now() - began) / (fade * 1000));
+        audio.volume = from * (1 - t);
+        if (t < 1) requestAnimationFrame(step);
+      };
+      audio._fading = true;
+      step();
+    }, span - fade);
+    if (cut > 0) later(() => { audio.pause(); candActive.delete(audio); }, cut);
+  };
+  if (audio.readyState >= 1) go(); else audio.addEventListener('loadedmetadata', go, { once: true });
+  return audio;
+}
+
+// (cue, start time[, play length]); a length cuts a long clip (the looping run) the way the game would.
+function playCompare(list) {
+  for (const [cue, at, length] of list) {
+    const c = cueByName[cue];
+    if (!c) continue;
+    later(() => {
+      const audio = playOnce(c);
+      if (length > 0) later(() => audio.pause(), length);
+    }, at);
+  }
+}
+
+function refreshCandVolume(k) {
+  for (const a of candActive) if (a._cand === k.id && !a._fading) a.volume = candVolume(k);
+}
+
+function startCandRepeat(k, button) {
+  stopCandRepeat(k);
+  let stopped = false;
+  const state = { stop: () => { stopped = true; clearTimeout(state.timer); } };
+  const tick = () => {
+    if (stopped) return;
+    const gap = candField(k, 'cadence');
+    const audio = playCandidate(k);
+    if (!audio) return;
+    if (gap > 0) state.timer = setTimeout(tick, gap * 1000);
+    else {
+      const cut = candField(k, 'length');
+      if (cut > 0) state.timer = setTimeout(tick, cut * 1000);
+      else audio.addEventListener('ended', tick, { once: true });
+    }
+  };
+  candRepeats.set(k.id, state);
+  button.classList.add('on'); button.textContent = '반복 중';
+  tick();
+}
+function stopCandRepeat(k) {
+  const s = candRepeats.get(k.id);
+  if (s) s.stop();
+  candRepeats.delete(k.id);
+  const b = document.querySelector(`[data-cand-repeat="${k.id}"]`);
+  if (b) { b.classList.remove('on'); b.textContent = '반복'; }
+}
+
+function setCand(k, field, value) {
+  const base = candBase(k)[field];
+  const e = edits.cand[k.id] || (edits.cand[k.id] = {});
+  if (value === base) delete e[field]; else e[field] = value;
+  if (!Object.keys(e).length) delete edits.cand[k.id];
+  renderExport(); save();
+}
+
+function buildCandidates() {
+  const card = document.getElementById('candCard');
+  if (!DATA.candidates.length && !DATA.candidateScenes.length) { card.style.display = 'none'; return; }
+  if (!DATA.candidates.length) {
+    document.getElementById('candOnly').style.display = 'none';
+    document.getElementById('candTitle').textContent = '게임 장면';
+  }
+  const body = document.getElementById('candRows');
+  let lastGroup = null;
+  for (const k of DATA.candidates) {
+    if (k.group !== lastGroup) {
+      lastGroup = k.group;
+      const g = document.createElement('tr');
+      g.className = 'group';
+      g.innerHTML = `<td colspan="6">${k.group}</td>`;
+      body.append(g);
+    }
+    const target = k.target ? cueByName[k.target] : null;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="name">${k.label}</div>
+          <div class="cue">${target ? `대체: ${target.label} (${target.volume.toFixed(2)})` : '새 효과음'}</div></td>
+      <td class="hide-sm"><span class="cue">${k.file || '— 파일 대기 —'}</span><div class="def dur"></div>
+          ${k.source ? `<div class="def src" style="white-space:normal">${k.source}</div>` : ''}</td>
+      <td><div class="vol"><input type="range" min="0" max="1" step="0.01"><input type="number" min="0" max="1" step="0.01"></div>
+          <div class="def">시작값 ${k.volume.toFixed(2)}</div></td>
+      <td><div class="actions"><button class="play">후보</button>
+          ${k.compare.length ? '<button class="cmp">현재</button>' : ''}
+          <button data-cand-repeat="${k.id}">반복</button><button class="reset" title="시작값으로">↺</button></div></td>
+      <td class="hide-sm"><div class="actions"><input type="number" class="start" min="0" max="30" step="0.01" title="시작(초)">
+          <input type="number" class="length" min="0" max="30" step="0.01" title="길이(초), 0 = 끝까지">
+          <input type="number" class="fade" min="0" max="30" step="0.1" title="끝 페이드아웃(초)"></div></td>
+      <td class="hide-sm"><input type="number" class="cadence" min="0" max="10" step="0.01"></td>`;
+    const [range, number] = tr.querySelectorAll('.vol input');
+    const start = tr.querySelector('.start'), length = tr.querySelector('.length'), cadence = tr.querySelector('.cadence');
+    const fade = tr.querySelector('.fade');
+    const sync = () => {
+      range.value = number.value = candField(k, 'volume');
+      start.value = candField(k, 'start'); length.value = candField(k, 'length'); cadence.value = candField(k, 'cadence');
+      fade.value = candField(k, 'fade');
+      tr.classList.toggle('changed', k.id in edits.cand);
+    };
+    const setVol = v => { setCand(k, 'volume', round2(clamp01(+v || 0))); sync(); refreshCandVolume(k); };
+    range.addEventListener('input', () => setVol(range.value));
+    number.addEventListener('change', () => setVol(number.value));
+    for (const [input, field] of [[start, 'start'], [length, 'length'], [fade, 'fade'], [cadence, 'cadence']])
+      input.addEventListener('change', () => { setCand(k, field, Math.max(0, round2(+input.value || 0))); sync(); });
+    if (!k.src) tr.querySelectorAll('.play, [data-cand-repeat], input').forEach(x => x.disabled = true);
+    else {
+      const probe = new Audio(k.src);
+      probe.preload = 'metadata';
+      probe.addEventListener('loadedmetadata', () => tr.querySelector('.dur').textContent = `원본 ${probe.duration.toFixed(2)}초`);
+    }
+    tr.querySelector('.play').addEventListener('click', () => playCandidate(k));
+    tr.querySelector('.cmp')?.addEventListener('click', () => playCompare(k.compare));
+    const rep = tr.querySelector('[data-cand-repeat]');
+    rep.addEventListener('click', () => candRepeats.has(k.id) ? stopCandRepeat(k) : startCandRepeat(k, rep));
+    tr.querySelector('.reset').addEventListener('click', () => { delete edits.cand[k.id]; sync(); refreshCandVolume(k); renderExport(); save(); });
+    sync();
+    body.append(tr);
+  }
+  const host = document.getElementById('candScenes');
+  for (const s of DATA.candidateScenes) {
+    const block = document.createElement('div');
+    block.className = 'scene';
+    const head = document.createElement('div');
+    head.className = 'actions';
+    head.style.flexWrap = 'wrap';
+    const label = document.createElement('span');
+    label.className = 'name';
+    label.textContent = s.label;
+    const play = document.createElement('button');
+    play.className = 'primary';
+    play.textContent = '후보로 재생';
+    if (!s.parts.length) play.style.display = 'none';
+    play.addEventListener('click', () => {
+      s.parts.forEach(([id, , len], i) => { if (candById[id]) later(() => playCandidate(candById[id], len), sceneAt(s, i)); });
+    });
+    head.append(label, play);
+    if (s.compare && s.compare.length) {
+      const cmp = document.createElement('button');
+      cmp.textContent = s.parts.length ? '현재 게임 버전' : '재생';
+      cmp.addEventListener('click', () => playCompare(s.compare));
+      head.append(cmp);
+    }
+    block.append(head);
+    if (s.editable) {
+      // One row per layer: when it starts, counted from the moment the scene is played.
+      const grid = document.createElement('div');
+      grid.className = 'timing';
+      const inputs = [];
+      s.parts.forEach(([id], i) => {
+        const k = candById[id];
+        const row = document.createElement('label');
+        row.innerHTML = `<span>${k ? k.label.replace(/^.*?([①-⑨].*)$/, '$1') : id}</span>
+          <input type="range" min="0" max="${s.maxAt || 2}" step="0.01"><input type="number" min="0" max="10" step="0.01"><span class="def">초</span>`;
+        const [range, number] = row.querySelectorAll('input');
+        const sync = () => { range.value = number.value = sceneAt(s, i); };
+        const set = v => { setSceneAt(s, i, Math.max(0, round2(+v || 0))); sync(); };
+        range.addEventListener('input', () => set(range.value));
+        number.addEventListener('change', () => set(number.value));
+        inputs.push(sync);
+        sync();
+        grid.append(row);
+      });
+      const reset = document.createElement('button');
+      reset.textContent = '↺ 타이밍 기본값';
+      reset.addEventListener('click', () => { delete edits.sceneAt[s.label]; inputs.forEach(f => f()); renderExport(); save(); });
+      head.append(reset);
+      block.append(grid);
+    }
+    host.append(block);
+  }
+}
+
+const sceneAt = (s, i) => (edits.sceneAt[s.label] || {})[i] ?? s.parts[i][1];
+function setSceneAt(s, i, v) {
+  const e = edits.sceneAt[s.label] || (edits.sceneAt[s.label] = {});
+  if (v === s.parts[i][1]) delete e[i]; else e[i] = v;
+  if (!Object.keys(e).length) delete edits.sceneAt[s.label];
+  renderExport(); save();
+}
+
 function stopAll() {
+  for (const k of DATA.candidates) stopCandRepeat(k);
+  for (const t of candTimers) clearTimeout(t);
+  candTimers.clear();
+  for (const a of candActive) a.pause();
+  candActive.clear();
   for (const c of DATA.cues) stopRepeat(c);
   for (const set of active.values()) for (const audio of set) audio.pause();
   active.clear();
@@ -226,7 +486,7 @@ function buildSettings() {
     slider('BGM', settings.bgm, v => { settings.bgm = v; liveAll(); }),
     slider('효과음', settings.sfx, v => { settings.sfx = v; liveAll(); }));
 }
-function liveAll() { refreshBgmVolumes(); DATA.cues.forEach(refreshLiveVolume); save(); }
+function liveAll() { refreshBgmVolumes(); DATA.cues.forEach(refreshLiveVolume); DATA.candidates.forEach(refreshCandVolume); save(); }
 
 function buildBgm() {
   const host = document.getElementById('bgm');
@@ -304,19 +564,22 @@ function buildRows() {
       <td><div class="name">${c.label}</div><div class="cue">${c.cue}</div></td>
       <td class="hide-sm"><span class="cue">${c.file}</span></td>
       <td><div class="vol"><input type="range" min="0" max="1" step="0.01"><input type="number" min="0" max="1" step="0.01"></div>
-          <div class="def">기본 ${c.volume.toFixed(2)} <span class="max"></span></div></td>
+          <div class="def">기본 ${c.volume.toFixed(2)} <span class="max"></span></div>
+          ${c.rate !== 1 ? `<div class="def">배속 <input type="number" class="rate" min="0.5" max="3" step="0.05" style="width:4.5em"> (기본 ${c.rate})</div>` : ''}</td>
       <td><div class="actions"><button class="play">재생</button><button data-repeat="${c.cue}">반복</button>
           <button class="reset" title="기본값으로">↺</button></div></td>
       <td class="hide-sm"><input type="number" class="cadence" min="0" max="10" step="0.01"></td>`;
     const [range, number] = tr.querySelectorAll('.vol input');
     const cadence = tr.querySelector('.cadence');
+    const rate = tr.querySelector('.rate');
     const maxNote = tr.querySelector('.max');
     const sync = () => {
       const v = volumeOf(c);
       range.value = number.value = v;
       cadence.value = cadenceOf(c);
+      if (rate) rate.value = rateOf(c);
       maxNote.textContent = v >= 1 ? '최대 — 더 키우려면 BGM을 낮출 것' : '';
-      tr.classList.toggle('changed', c.cue in edits.volume || c.cue in edits.cadence);
+      tr.classList.toggle('changed', c.cue in edits.volume || c.cue in edits.cadence || c.cue in edits.rate);
     };
     const setVolume = v => {
       v = round2(clamp01(+v || 0));
@@ -330,11 +593,16 @@ function buildRows() {
       if (v === c.cadence) delete edits.cadence[c.cue]; else edits.cadence[c.cue] = v;
       sync(); save();
     });
+    rate?.addEventListener('change', () => {
+      const v = Math.min(3, Math.max(0.5, round2(+rate.value || 1)));
+      if (v === c.rate) delete edits.rate[c.cue]; else edits.rate[c.cue] = v;
+      sync(); renderExport(); save();
+    });
     tr.querySelector('.play').addEventListener('click', () => playOnce(c));
     const repeat = tr.querySelector('[data-repeat]');
     repeat.addEventListener('click', () => repeats.has(c.cue) ? stopRepeat(c) : startRepeat(c, repeat));
     tr.querySelector('.reset').addEventListener('click', () => {
-      delete edits.volume[c.cue]; delete edits.cadence[c.cue];
+      delete edits.volume[c.cue]; delete edits.cadence[c.cue]; delete edits.rate[c.cue];
       sync(); refreshLiveVolume(c); renderExport(); save();
     });
     sync();
@@ -359,7 +627,19 @@ const fmt = v => `${Number(v.toFixed(2))}f`;
 function renderExport() {
   const lines = DATA.cues.filter(c => c.cue in edits.volume).map(c =>
     `(CombatSfxCue.${c.cue}, "${c.file}", ${fmt(edits.volume[c.cue])}, ${fmt(c.guard)}, ${fmt(c.cap)}),  // ${c.label}: ${c.volume} → ${edits.volume[c.cue]}`);
+  for (const c of DATA.cues) if (c.cue in edits.rate) lines.push(`// 배속 ${c.label} (${c.cue}): ${c.rate} → ${edits.rate[c.cue]}`);
   for (const b of DATA.bgm) if (b.key in edits.bgmGain) lines.push(`// BGM 믹스 게인 ${b.label} (${b.file}): 1 → ${edits.bgmGain[b.key]}`);
+  for (const k of DATA.candidates) {
+    if (!(k.id in edits.cand)) continue;
+    const len = candField(k, 'length');
+    lines.push(`// 후보 ${k.label} (${k.file}): 볼륨 ${candField(k, 'volume')}, 시작 ${candField(k, 'start')}초, ` +
+      `길이 ${len > 0 ? len + '초' : '끝까지'}, 페이드아웃 ${candField(k, 'fade')}초, 반복 간격 ${candField(k, 'cadence')}초`);
+  }
+  for (const s of DATA.candidateScenes) {
+    if (!(s.label in edits.sceneAt)) continue;
+    const parts = s.parts.map(([id], i) => `${candById[id] ? candById[id].label : id} ${sceneAt(s, i)}초`);
+    lines.push(`// 장면 ${s.label} 타이밍: ${parts.join(' / ')}`);
+  }
   document.getElementById('out').value = lines.length ? lines.join('\n') : '// 아직 바꾼 값이 없다.';
 }
 
@@ -367,7 +647,7 @@ document.getElementById('search').addEventListener('input', filterRows);
 document.getElementById('stopAll').addEventListener('click', stopAll);
 document.getElementById('resetAll').addEventListener('click', () => {
   if (!confirm('모든 효과음 볼륨·반복 간격·BGM 믹스 게인을 기본값으로 되돌릴까?')) return;
-  edits.volume = {}; edits.cadence = {}; edits.bgmGain = {};
+  edits.volume = {}; edits.cadence = {}; edits.bgmGain = {}; edits.cand = {}; edits.sceneAt = {}; edits.rate = {};
   save(); location.reload();
 });
 document.getElementById('copy').addEventListener('click', async () => {
@@ -379,6 +659,7 @@ document.getElementById('copy').addEventListener('click', async () => {
 
 buildSettings();
 buildBgm();
+buildCandidates();
 buildGroups();
 buildRows();
 renderExport();

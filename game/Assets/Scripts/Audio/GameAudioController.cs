@@ -43,7 +43,13 @@ namespace TrickalFanGame.Audio
             public float Volume;
             public float FadeStartedAt = -1f;
             public float FadeSeconds;
+            // Sound pass 2026-11-21: a voice told to fade out on its own at this time (-1 = never).
+            public float StopAt = -1f;
+            public float StopFadeSeconds;
         }
+
+        // Sound pass 2026-11-21: cues asked for with a delay, the later layers of one moment.
+        private readonly List<(float At, CombatSfxCue Cue)> pendingCues = new();
 
         private const int MaximumVoices = 8;
         private readonly List<Voice> voices = new();
@@ -106,6 +112,7 @@ namespace TrickalFanGame.Audio
         private void Update()
         {
             TickVoices(Time.unscaledTime);
+            TickPendingCues(Time.unscaledTime);
             // Esc backs out of whatever is open (the pause menu, the shop, a
             // frontend page), so it always sounds as a cancel.
             if (Keyboard.current?.escapeKey.wasPressedThisFrame == true) PlayUiCancel();
@@ -211,7 +218,10 @@ namespace TrickalFanGame.Audio
         // Plays a cue on a voice of its own and returns a handle to stop it
         // with, or 0 when nothing played. The retrigger guard applies as it
         // does to a one-shot. With every voice busy the oldest is taken over.
-        public int PlayCombatVoice(CombatSfxCue cue)
+        // A looping voice (the dash run) keeps going until it is stopped.
+        // `pitch` plays the clip faster (and higher) as Unity's AudioSource
+        // pitch does; 1 is the clip as recorded.
+        public int PlayCombatVoice(CombatSfxCue cue, bool loop = false, float pitch = 1f)
         {
             if (!TryGetCombatEntry(cue, out CombatSfxEntry entry) || entry.clip == null) return 0;
             float now = Time.unscaledTime;
@@ -241,7 +251,10 @@ namespace TrickalFanGame.Audio
             voice.Handle = ++nextVoiceHandle;
             voice.Volume = entry.volume > 0f ? Mathf.Clamp01(entry.volume) : 1f;
             voice.FadeStartedAt = -1f;
+            voice.StopAt = -1f;
             voice.Source.Stop();
+            voice.Source.loop = loop;
+            voice.Source.pitch = pitch > 0f ? pitch : 1f;
             voice.Source.clip = entry.clip;
             voice.Source.volume = voice.Volume * SfxLevel;
             voice.Source.Play();
@@ -266,6 +279,46 @@ namespace TrickalFanGame.Audio
             }
         }
 
+        // Sound pass 2026-11-21: lets a voice play for `delay` seconds and then fade out over
+        // `fadeSeconds`, without the caller having to come back for it.
+        public void StopCombatVoiceAfter(int handle, float delay, float fadeSeconds)
+        {
+            if (handle <= 0) return;
+            foreach (Voice voice in voices)
+            {
+                if (voice.Handle != handle || voice.Source == null || !voice.Source.isPlaying) continue;
+                voice.StopAt = Time.unscaledTime + Mathf.Max(0f, delay);
+                voice.StopFadeSeconds = Mathf.Max(0f, fadeSeconds);
+                return;
+            }
+        }
+
+        // Sound pass 2026-11-21: plays a cue `delay` seconds from now (unscaled, like the
+        // guards), so one moment can be layered from several clips.
+        public void PlayCombatCueAfter(CombatSfxCue cue, float delay)
+        {
+            if (delay <= 0f)
+            {
+                PlayCombatCue(cue);
+                return;
+            }
+
+            pendingCues.Add((Time.unscaledTime + delay, cue));
+        }
+
+        public int PendingCueCount => pendingCues.Count;
+
+        private void TickPendingCues(float now)
+        {
+            for (int i = pendingCues.Count - 1; i >= 0; i--)
+            {
+                if (now < pendingCues[i].At) continue;
+                CombatSfxCue cue = pendingCues[i].Cue;
+                pendingCues.RemoveAt(i);
+                PlayCombatCue(cue);
+            }
+        }
+
         private static float SfxLevel => LocalSettings.MasterVolume * LocalSettings.SfxVolume;
 
         private void TickVoices(float now)
@@ -273,6 +326,19 @@ namespace TrickalFanGame.Audio
             foreach (Voice voice in voices)
             {
                 if (voice.Source == null || !voice.Source.isPlaying) continue;
+                if (voice.StopAt >= 0f && now >= voice.StopAt && voice.FadeStartedAt < 0f)
+                {
+                    voice.StopAt = -1f;
+                    if (voice.StopFadeSeconds <= 0f)
+                    {
+                        voice.Source.Stop();
+                        continue;
+                    }
+
+                    voice.FadeStartedAt = now;
+                    voice.FadeSeconds = voice.StopFadeSeconds;
+                }
+
                 float fade = 1f;
                 if (voice.FadeStartedAt >= 0f)
                 {

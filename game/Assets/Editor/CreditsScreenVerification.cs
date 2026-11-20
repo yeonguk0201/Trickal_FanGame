@@ -19,18 +19,23 @@ namespace TrickalFanGame.Editor
         // Mirrors the confirmed credit block in docs/audio-sources.md ("크레딧 표기 의무"). Kept in the verifier
         // rather than in the data, so deleting an entry from Credits.json fails instead of passing quietly.
         // Modified: whether the game plays an edited version, which CC BY 4.0 requires the credit to say.
-        private static readonly (string Source, string Author, bool Modified)[] RequiredAttribution =
-        {
-            ("https://freesound.org/s/541478/", "EminYILDIRIM", true),
-            ("https://freesound.org/s/396500/", "alonsotm", true),
-            // Sound-2: the cancel sound, played as downloaded.
-            ("https://freesound.org/s/545477/", "IENBA", false),
-            // Sound-3: the player's footstep, amplified (+30 dB) because the original is very quiet.
-            ("https://freesound.org/s/535222/", "spycrah", true),
-        };
+        private const string ByLicenseName = "Attribution 4.0";
+        private const string ByLicenseUrl = "https://creativecommons.org/licenses/by/4.0/";
+        private const string ByNcLicenseName = "Attribution-NonCommercial 4.0";
+        private const string ByNcLicenseUrl = "https://creativecommons.org/licenses/by-nc/4.0/";
 
-        private const string RequiredLicenseName = "Attribution 4.0";
-        private const string RequiredLicenseUrl = "https://creativecommons.org/licenses/by/4.0/";
+        private static readonly (string Source, string Author, bool Modified, string LicenseName, string LicenseUrl)[]
+            RequiredAttribution =
+        {
+            ("https://freesound.org/s/541478/", "EminYILDIRIM", true, ByLicenseName, ByLicenseUrl),
+            ("https://freesound.org/s/396500/", "alonsotm", true, ByLicenseName, ByLicenseUrl),
+            // Sound-2: the cancel sound, played as downloaded.
+            ("https://freesound.org/s/545477/", "IENBA", false, ByLicenseName, ByLicenseUrl),
+            // Sound-3: the player's footstep, amplified (+30 dB) because the original is very quiet.
+            ("https://freesound.org/s/535222/", "spycrah", true, ByLicenseName, ByLicenseUrl),
+            // Sound pass 2026-11-21: the 크레용사 slam's magic layer, played as downloaded. NonCommercial: the game must stay free.
+            ("https://freesound.org/s/749799/", "RescopicSound", false, ByNcLicenseName, ByNcLicenseUrl),
+        };
 
         // CC BY 4.0 forbids wording that suggests the author endorses or sponsors this game.
         private static readonly string[] ForbiddenEndorsementWords = { "후원", "보증", "제공받", "endors", "sponsor" };
@@ -45,7 +50,7 @@ namespace TrickalFanGame.Editor
             FrontendCreditsView view = VerifyScene(scene);
             VerifyRenderedRows(view, sections);
             VerifyRoundTrip();
-            Debug.Log($"Credits-0 verification passed: {RequiredAttribution.Length} CC BY 4.0 credits complete on " +
+            Debug.Log($"Credits-0 verification passed: {RequiredAttribution.Length} attribution credits complete on " +
                       $"screen, {CreditsCatalog.AllEntries(sections).Count()} entries from Resources/Credits.json, " +
                       "the home route in and the way back.");
         }
@@ -93,21 +98,22 @@ namespace TrickalFanGame.Editor
             foreach (CreditsCatalog.Entry entry in entries.Where(entry => entry.attributionRequired))
                 VerifyAttributionComplete(entry);
 
-            foreach ((string source, string author, bool modified) in RequiredAttribution)
+            foreach ((string source, string author, bool modified, string licenseName, string licenseUrl)
+                     in RequiredAttribution)
             {
                 CreditsCatalog.Entry[] matches = entries
                     .Where(entry => string.Equals(entry.source?.Trim(), source, StringComparison.Ordinal)).ToArray();
                 Assert(matches.Length == 1,
-                    $"The credits data must hold exactly one entry for the CC BY 4.0 source {source}; found {matches.Length}.");
+                    $"The credits data must hold exactly one entry for the attribution source {source}; found {matches.Length}.");
                 CreditsCatalog.Entry entry = matches[0];
                 Assert(entry.attributionRequired,
-                    $"{source} is CC BY 4.0, so its entry must be marked attributionRequired.");
+                    $"{source} requires attribution, so its entry must be marked attributionRequired.");
                 Assert(string.Equals(entry.author?.Trim(), author, StringComparison.Ordinal),
                     $"{source} must credit {author}; found \"{entry.author}\".");
-                Assert(entry.licenseName != null && entry.licenseName.Contains(RequiredLicenseName, StringComparison.Ordinal),
-                    $"{source} must name the licence \"{RequiredLicenseName}\"; found \"{entry.licenseName}\".");
-                Assert(string.Equals(entry.licenseUrl?.Trim(), RequiredLicenseUrl, StringComparison.Ordinal),
-                    $"{source} must link the licence at {RequiredLicenseUrl}; found \"{entry.licenseUrl}\".");
+                Assert(entry.licenseName != null && entry.licenseName.Contains(licenseName, StringComparison.Ordinal),
+                    $"{source} must name the licence \"{licenseName}\"; found \"{entry.licenseName}\".");
+                Assert(string.Equals(entry.licenseUrl?.Trim(), licenseUrl, StringComparison.Ordinal),
+                    $"{source} must link the licence at {licenseUrl}; found \"{entry.licenseUrl}\".");
                 Assert(entry.modified == modified, modified
                     ? $"{source} was resampled, trimmed, levelled and layered, so its entry must carry the modification notice."
                     : $"{source} plays as downloaded, so its entry must not claim a modification.");
@@ -233,7 +239,8 @@ namespace TrickalFanGame.Editor
                 copy.Build(sections);
                 Assert(copy.Entries.Count == expected.Length, "Rebuilding the credits screen duplicated rows.");
 
-                foreach ((string source, string author, bool modified) in RequiredAttribution)
+                foreach ((string source, string author, bool modified, string licenseName, string licenseUrl)
+                         in RequiredAttribution)
                 {
                     FrontendCreditsEntryView[] rows = copy.Entries
                         .Where(row => row.Entry != null &&
@@ -248,9 +255,9 @@ namespace TrickalFanGame.Editor
                         $"{source}: the author is missing from the row on screen.");
                     Assert(license.Contains(source, StringComparison.Ordinal),
                         $"{source}: the original link is missing from the row on screen.");
-                    Assert(license.Contains(RequiredLicenseName, StringComparison.Ordinal),
+                    Assert(license.Contains(licenseName, StringComparison.Ordinal),
                         $"{source}: the licence name is missing from the row on screen.");
-                    Assert(license.Contains(RequiredLicenseUrl, StringComparison.Ordinal),
+                    Assert(license.Contains(licenseUrl, StringComparison.Ordinal),
                         $"{source}: the licence link is missing from the row on screen.");
                     Assert(license.Contains(CreditsCatalog.ModifiedNotice, StringComparison.Ordinal) == modified,
                         modified

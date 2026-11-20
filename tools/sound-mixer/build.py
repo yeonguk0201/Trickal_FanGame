@@ -2,15 +2,18 @@
 
 Reads CombatSfxSetup.Cues (cue, file, volume, guard, length cap) and the two BGM paths, then writes
 tmp/sound-mixer.html. The page plays the real files in game/Assets/Audio by relative path, so it must stay in tmp/
-(or be rebuilt) and needs no server or internet connection.
+(or be rebuilt) and needs no server or internet connection. Candidate sounds not yet imported go in
+tmp/sound-candidates/ and are listed in CANDIDATES below.
 """
 from pathlib import Path
 import json
 import re
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parents[2]
 SETUP = ROOT / 'game/Assets/Editor/CombatSfxSetup.cs'
 AUDIO_SETUP = ROOT / 'game/Assets/Editor/Week13Setting1ASetup.cs'
+PLAYER_AUDIO = ROOT / 'game/Assets/Scripts/Audio/PlayerCombatAudio.cs'
 OUT = ROOT / 'tmp/sound-mixer.html'
 
 # Korean names and groups for the cue list. A cue missing here still shows, under its English name.
@@ -24,8 +27,9 @@ LABELS = {
     'SkillLowerShot': ('스킬', '저학년 유도탄 발사'),
     'SkillLowerBurst': ('스킬', '저학년 유도탄 폭발'),
     'SkillUpperDash': ('스킬', '고학년 돌진 출발'),
-    'SkillUpperStepLeft': ('스킬', '고학년 돌진 왼발'),
-    'SkillUpperStepRight': ('스킬', '고학년 돌진 오른발'),
+    'SkillUpperRun': ('스킬', '고학년 돌진 달리기 (돌진 동안 반복)'),
+    'PlayerWingFlap': ('플레이어', '시스트 날개 비행 날갯짓'),
+    'ShopPurchase': ('월드', '상점 구매'),
     'SkillUpperImpact': ('스킬', '고학년 돌진 충돌'),
     'SpellCast': ('스킬', '스펠 사용'),
     'JjangsemSpellCast': ('스킬', '짱셈 스펠 사용'),
@@ -53,7 +57,12 @@ LABELS = {
     'UiFocusMove': ('UI', '포커스 이동 (상점·보상)'),
     'BossIntroVs': ('보스', '보스 등장 VS'),
     'BossSwordSwing': ('보스', '크레용사 칼 휘두르기'),
-    'BossSwordSlam': ('보스', '크레용사 내려찍기'),
+    'BossSwordSlam': ('보스', '크레용사 내려치기 ① 휘두름'),
+    'BossSwordSlamMagic': ('보스', '크레용사 내려치기 ② 마법 충격 (+0.27초)'),
+    'BossSwordSlamClash': ('보스', '크레용사 내려치기 ③ 칼 부딪힘 (+0.39초)'),
+    'BossCrayonCharge': ('보스', '크레용사 검 차징 (내려치기에서 끊김)'),
+    'BossCrayonSummon': ('보스', '크레용사 쫄병 소환'),
+    'BossCrayonTransform': ('보스', '크레용사 변신 (3초, 마지막 1.5초 페이드)'),
     'BossObstacleLanding': ('보스', '부스러기 장애물 착지'),
     'VaultPillarEmerge': ('보스', '새마음금고 황금 기둥'),
     'VaultJumpWhistle': ('보스', '새마음금고 점프 휘파람'),
@@ -68,8 +77,7 @@ LABELS = {
 # How often the game repeats a cue, so the repeat button plays it at the real cadence. 0 = back to back.
 CADENCE = {
     'PlayerStep': 0.25,
-    'SkillUpperStepLeft': 0.34,
-    'SkillUpperStepRight': 0.34,
+    'PlayerWingFlap': 0.5,
     'SkillLowerShot': 0.08,
     'VaultSlimeThrow': 0.08,
     'VaultMove': 0.75,
@@ -77,7 +85,57 @@ CADENCE = {
     'EnemyTickDamage': 0.5,
 }
 
+
+
+def read_rates():
+    """Cues the game plays sped up (AudioSource.pitch), so the page plays them at the same speed."""
+    text = PLAYER_AUDIO.read_text(encoding='utf-8')
+    m = re.search(r'DashRunPitch\s*=\s*([\d.]+)f', text)
+    assert m, 'PlayerCombatAudio.DashRunPitch not found.'
+    return {'SkillUpperRun': float(m.group(1))}
+
+
 GROUP_ORDER = ['플레이어', '스킬', '적', '월드', 'UI', '보스', '기타']
+
+# Sounds being auditioned before they are imported. Files live in tmp/sound-candidates/ (next to the built page);
+# a missing file still shows as a placeholder row so the to-do stays visible. `target` is the cue the candidate
+# would replace (played side by side for comparison); None means a new cue. `volume` is only a starting point.
+CANDIDATE_DIR = ROOT / 'tmp/sound-candidates'
+_PACK150 = 'OpenGameArt 150 Combat Sound Effects (untamedpixels, CC0)'
+# The 2026-11-21 sound pass imported every candidate auditioned here; add new ones the same way:
+# dict(id=, group=, label=, target=<cue or None>, file=, volume=, cadence=, length=, fade=, source=).
+CANDIDATES = []
+# Moments made of several cues, played at the game's timing so they can be balanced together.
+# parts: (candidate id, start time, play length or 0 for its own length) — candidates only.
+# compare: (cue, start time[, play length]) — cues already in the game.
+# editable: the page shows a start-time slider per part (0..maxAt seconds) and exports the changed timing.
+CANDIDATE_SCENES = [
+    dict(label='고학년 돌진: 출발 → 달리기 1.6초 → 충돌', parts=[],
+         compare=[('SkillUpperDash', 0.0), ('SkillUpperRun', 0.0, 1.7), ('SkillUpperImpact', 1.6)]),
+    dict(label='저학년 전체: 시전 → 발사 ×4 → 폭발 ×4', parts=[],
+         compare=[('SkillLowerCast', 0.0)] + [('SkillLowerShot', i * 0.08) for i in range(4)]
+                 + [('SkillLowerBurst', 0.45 + i * 0.08) for i in range(4)]),
+    dict(label='크레용사 차징 → 내려치기 3겹', parts=[],
+         compare=[('BossCrayonCharge', 0.0, 1.2), ('BossSwordSlam', 1.2), ('BossSwordSlamMagic', 1.47),
+                  ('BossSwordSlamClash', 1.59)]),
+]
+CANDIDATE_COMPARE = {}
+
+
+def read_candidates():
+    out = []
+    for c in CANDIDATES:
+        c = dict(c)
+        has = bool(c['file']) and (CANDIDATE_DIR / c['file']).exists()
+        if c['file'] and not has:
+            print(f'warning: candidate file missing: {CANDIDATE_DIR / c["file"]}')
+        c['src'] = f'sound-candidates/{quote(c["file"])}' if has else None
+        c.setdefault('length', 0)
+        c.setdefault('fade', 0)
+        c.setdefault('source', '')
+        c['compare'] = CANDIDATE_COMPARE.get(c['id']) or ([(c['target'], 0.0)] if c['target'] else [])
+        out.append(c)
+    return out
 
 
 def read_cues():
@@ -85,12 +143,13 @@ def read_cues():
     pattern = re.compile(
         r'\(CombatSfxCue\.(\w+),\s*"([^"]+)",\s*([\d.]+)f,\s*([\d.]+)f,\s*([\d.]+)f\)')
     cues = []
+    rates = read_rates()
     for name, file, volume, guard, cap in pattern.findall(text):
         group, label = LABELS.get(name, ('기타', name))
         path = ROOT / 'game/Assets/Audio/SFX' / file
         assert path.exists(), f'{name}: missing {path}'
         cues.append(dict(cue=name, file=file, volume=float(volume), guard=float(guard), cap=float(cap),
-                         group=group, label=label, cadence=CADENCE.get(name, 0),
+                         group=group, label=label, cadence=CADENCE.get(name, 0), rate=rates.get(name, 1.0),
                          src=f'../game/Assets/Audio/SFX/{file}'))
     assert cues, 'No cues were read from CombatSfxSetup.Cues.'
     cues.sort(key=lambda c: GROUP_ORDER.index(c['group']) if c['group'] in GROUP_ORDER else len(GROUP_ORDER))
@@ -111,6 +170,7 @@ def read_bgm():
 
 def main():
     payload = json.dumps({'cues': read_cues(), 'bgm': read_bgm(),
+                          'candidates': read_candidates(), 'candidateScenes': CANDIDATE_SCENES,
                           'uiClick': '../game/Assets/Audio/SFX/SFX_UI_Click.wav'},
                          ensure_ascii=False).replace('<', '\\u003c')
     template = (Path(__file__).parent / 'mixer.html').read_text(encoding='utf-8')

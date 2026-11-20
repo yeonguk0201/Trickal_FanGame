@@ -156,6 +156,22 @@ namespace TrickalFanGame.Enemy
         private float chargeImpactAt;
         private bool chargingSlash;
 
+        // Sound pass 2026-11-21: the slam is one swing with two layers landing after it, at the offsets set by ear in
+        // tools/sound-mixer; the charge hums on a voice cut by the slam; the transformation plays its first
+        // seconds and fades.
+        public const float SlamMagicDelay = 0.27f;
+        public const float SlamClashDelay = 0.39f;
+        public const float TransformSoundSeconds = 3f;
+        public const float TransformFadeSeconds = 1.5f;
+        private int chargeVoice;
+        public bool IsChargeSoundActive => chargeVoice != 0;
+
+        private void StopChargeSound(float fadeSeconds = 0.08f)
+        {
+            CombatSfx.StopVoice(chargeVoice, fadeSeconds);
+            chargeVoice = 0;
+        }
+
         // Pose groups: swing 0..3, dash 4..7, slam 8..11, stronger charge stages 12..13.
         public int AttackPoseIndex => attackPoseIndex;
         public float ChargeImpactAt => chargeImpactAt;
@@ -246,6 +262,7 @@ namespace TrickalFanGame.Enemy
             StopMovement();
             ClearTelegraph();
             ClearRecognitionDebug();
+            StopChargeSound(0f);
             if (health != null) health.SetInvulnerable(false);
         }
 
@@ -355,6 +372,8 @@ namespace TrickalFanGame.Enemy
             ResolveComponents();
             if (state == BossActionState.PhaseTransition)
             {
+                StopChargeSound();
+                CombatSfx.PlayVoiceFor(CombatSfxCue.BossCrayonTransform, TransformSoundSeconds, TransformFadeSeconds);
                 ResetAttackArtwork();
                 StopMovement();
                 ClearTelegraph();
@@ -378,6 +397,8 @@ namespace TrickalFanGame.Enemy
                     chargeStartedAt = lastTickTime;
                     chargeImpactAt = stateEndsAt + slashLockedDelay;
                     attackPoseIndex = 8;
+                    StopChargeSound(0f);
+                    chargeVoice = CombatSfx.PlayVoice(CombatSfxCue.BossCrayonCharge);
                     StopMovement();
                     UpdateAimDirection();
                     ShowMapSlashTelegraph();
@@ -403,6 +424,7 @@ namespace TrickalFanGame.Enemy
 
             if (state == BossActionState.Recovery)
             {
+                StopChargeSound();
                 chargingSlash = false;
                 summonPoseIndex = execution == BossPatternExecution.CrayonHeroSummonMinions ? 3 : -1;
                 attackPoseIndex = execution == BossPatternExecution.CrayonHeroMapSlash ? 11 : -1;
@@ -429,6 +451,7 @@ namespace TrickalFanGame.Enemy
 
             if (state == BossActionState.Defeated)
             {
+                StopChargeSound();
                 ResetAttackArtwork();
                 StopMovement();
                 ClearTelegraph();
@@ -436,6 +459,7 @@ namespace TrickalFanGame.Enemy
             else if (state == BossActionState.Idle)
             {
                 // A stun (Jjangsem-2) or a cancelled fight drops the pattern under way; it restarts from its telegraph.
+                StopChargeSound();
                 ResetAttackArtwork();
                 StopMovement();
                 ClearTelegraph();
@@ -595,8 +619,12 @@ namespace TrickalFanGame.Enemy
                 float lightHeight = Mathf.Clamp(ResolveEffectBodyWidth() * 1.6f, 5f, 9f);
                 SlamLightEffect.PlayPath(warning, lightHeight, transform, visual, arenaBounds);
             }
-            // Golden phase slams three directions at once; one sound covers them.
+            // Golden phase slams three directions at once; one sound covers them. The charge stops as the swing
+            // lands, and the magic burst and the clash follow it.
+            StopChargeSound(0.05f);
             CombatSfx.Play(CombatSfxCue.BossSwordSlam);
+            CombatSfx.PlayAfter(CombatSfxCue.BossSwordSlamMagic, SlamMagicDelay);
+            CombatSfx.PlayAfter(CombatSfxCue.BossSwordSlamClash, SlamClashDelay);
             slashResolved = true;
             slashPending = false;
             chargingSlash = false;
@@ -826,7 +854,8 @@ namespace TrickalFanGame.Enemy
                 livingMinions.Add(minion);
                 boss?.RegisterOwnedObject(minion);
             }
-            if (count > 0) CombatSfx.Play(CombatSfxCue.EnemyAppear);
+            // Sound pass 2026-11-21: the drawn sword is this boss's own summon sound, in place of the generic appear pop.
+            if (count > 0) CombatSfx.Play(CombatSfxCue.BossCrayonSummon);
         }
 
         private void UpdateAimDirection()

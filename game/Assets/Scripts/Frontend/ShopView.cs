@@ -706,6 +706,7 @@ namespace TrickalFanGame.Frontend
             if (!IsInvesting || session == null || InvestFocusedIndex >= ShopUpgrades.Catalog.Length)
                 return ShopUpgradeStatus.Unavailable;
             ShopUpgradeStatus result = session.TryPurchaseUpgrade(ShopUpgrades.Catalog[InvestFocusedIndex].UpgradeId);
+            if (result == ShopUpgradeStatus.Purchased) CombatSfx.Play(CombatSfxCue.ShopPurchase);
             SetFeedback(GetUpgradeMessage(result));
             Refresh();
             return result;
@@ -826,6 +827,8 @@ namespace TrickalFanGame.Frontend
         {
             if (!IsVisible || IsInvesting || session == null) return ShopPurchaseResult.Unavailable;
             ShopPurchaseResult result = session.TryPurchase(FocusedIndex);
+            // Sound pass 2026-11-21: the register rings only when the purchase went through.
+            if (result == ShopPurchaseResult.Purchased) CombatSfx.Play(CombatSfxCue.ShopPurchase);
             SetFeedback(result switch
             {
                 ShopPurchaseResult.Purchased => PurchasedMessage,

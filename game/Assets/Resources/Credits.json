@@ -1,8 +1,8 @@
 {
   "sections": [
     {
-      "heading": "효과음 - 표기 의무 (CC BY 4.0)",
-      "note": "라이선스가 표기를 요구하는 항목이다. 기본 공격 두 음원은 수정해서 사용했고, Pop-Up은 원본 그대로 쓴다.",
+      "heading": "효과음 - 표기 의무 (CC BY 4.0 · CC BY-NC 4.0)",
+      "note": "라이선스가 표기를 요구하는 항목이다. 기본 공격 두 음원은 수정해서 사용했고, Pop-Up은 원본 그대로 쓴다. Elemental Magic Spell Impact Incoming은 비상업(NonCommercial) 라이선스라 이 게임을 유료로 배포하면 교체해야 한다.",
       "entries": [
         {
           "title": "Magic Fire Spell Impact & Punch",
@@ -42,6 +42,16 @@
           "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
           "modified": true,
           "usage": "플레이어 발소리 (음량 증폭)",
+          "attributionRequired": true
+        },
+        {
+          "title": "Elemental Magic Spell Impact Incoming",
+          "author": "RescopicSound",
+          "source": "https://freesound.org/s/749799/",
+          "licenseName": "Attribution-NonCommercial 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-nc/4.0/",
+          "modified": false,
+          "usage": "크레용사 기모아 내려치기",
           "attributionRequired": true
         }
       ]
@@ -149,6 +159,26 @@
           "modified": false,
           "usage": "적 등장 (웨이브·소환), 상점·보상 선택 포커스 이동",
           "attributionRequired": false
+        },
+        {
+          "title": "Hitmarker Sound Effect",
+          "author": "aruscio28",
+          "source": "https://freesound.org/s/322640/",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": false,
+          "usage": "적 지속 피해 틱",
+          "attributionRequired": false
+        },
+        {
+          "title": "150 Combat Sound Effects (HeavyShot 01, Healing Spell Impact 4·14·15, Earth Spell Impact 2)",
+          "author": "untamedpixels 정리 · 원작 CoMiGo, lentikula",
+          "source": "https://opengameart.org/content/150-combat-sound-effects",
+          "licenseName": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "modified": false,
+          "usage": "저학년 유도탄 발사, 스펠·짱셈 스펠·교주의 권능 사용, 새마음금고 황금 기둥",
+          "attributionRequired": false
         }
       ]
     },
@@ -253,17 +283,7 @@
           "licenseName": "Pixabay Content License",
           "licenseUrl": "https://pixabay.com/service/license-summary/",
           "modified": false,
-          "usage": "크레용사 칼 휘두르기·돌진",
-          "attributionRequired": false
-        },
-        {
-          "title": "Sword Slash with Metallic Impact",
-          "author": "daviddumaisaudio",
-          "source": "Pixabay #185435",
-          "licenseName": "Pixabay Content License",
-          "licenseUrl": "https://pixabay.com/service/license-summary/",
-          "modified": false,
-          "usage": "크레용사 내려찍기",
+          "usage": "크레용사 칼 휘두르기·돌진, 기모아 내려치기",
           "attributionRequired": false
         },
         {
@@ -297,16 +317,6 @@
           "attributionRequired": false
         },
         {
-          "title": "Epic Spell Impact",
-          "author": "dragon-studio",
-          "source": "Pixabay #478364",
-          "licenseName": "Pixabay Content License",
-          "licenseUrl": "https://pixabay.com/service/license-summary/",
-          "modified": false,
-          "usage": "스펠·짱셈 스펠·교주의 권능 사용",
-          "attributionRequired": false
-        },
-        {
           "title": "Biodynamic Impact Braam Tonal Dark",
           "author": "bryansantosbreton",
           "source": "Pixabay #176441",
@@ -314,16 +324,6 @@
           "licenseUrl": "https://pixabay.com/service/license-summary/",
           "modified": false,
           "usage": "보스 등장 VS 연출",
-          "attributionRequired": false
-        },
-        {
-          "title": "Earth Spell",
-          "author": "dragon-studio",
-          "source": "Pixabay #393923",
-          "licenseName": "Pixabay Content License",
-          "licenseUrl": "https://pixabay.com/service/license-summary/",
-          "modified": false,
-          "usage": "새마음금고 황금 기둥 소환",
           "attributionRequired": false
         },
         {
@@ -415,6 +415,66 @@
           "modified": false,
           "usage": "치명타",
           "attributionRequired": false
+        },
+        {
+          "title": "Running on the Floor",
+          "author": "thumblegray",
+          "source": "Pixabay #359909",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "고학년 돌진 달리기",
+          "attributionRequired": false
+        },
+        {
+          "title": "Heavy Boulder Thud",
+          "author": "dragon-studio",
+          "source": "Pixabay #515257",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "고학년 돌진 충돌",
+          "attributionRequired": false
+        },
+        {
+          "title": "8-bit Explosion 10",
+          "author": "u_b32baquv5u",
+          "source": "Pixabay #340462",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "저학년 유도탄 폭발",
+          "attributionRequired": false
+        },
+        {
+          "title": "Fabric Flap",
+          "author": "freesound_community",
+          "source": "Pixabay #80054",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "시스트의 가짜 날개 비행",
+          "attributionRequired": false
+        },
+        {
+          "title": "Cash Register Open",
+          "author": "universfield",
+          "source": "Pixabay #567194",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "상점 구매",
+          "attributionRequired": false
+        },
+        {
+          "title": "Magic Chargeup",
+          "author": "freesound_community",
+          "source": "Pixabay #102051",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "크레용사 검 차징",
+          "attributionRequired": false
         }
       ]
     },
@@ -445,6 +505,42 @@
       ]
     },
     {
+      "heading": "효과음 - 効果音ラボ",
+      "note": "표기 의무는 없다(効果音ラボ 이용 약관). 음원 파일 자체의 재배포는 금지된다.",
+      "entries": [
+        {
+          "title": "剣を抜く",
+          "author": "効果音ラボ",
+          "source": "https://soundeffect-lab.info/sound/battle/",
+          "licenseName": "効果音ラボ 利用規約",
+          "licenseUrl": "https://soundeffect-lab.info/agreement/",
+          "modified": false,
+          "usage": "크레용사 쫄병 소환",
+          "attributionRequired": false
+        },
+        {
+          "title": "剣で打ち合う3",
+          "author": "効果音ラボ",
+          "source": "https://soundeffect-lab.info/sound/battle/",
+          "licenseName": "効果音ラボ 利用規約",
+          "licenseUrl": "https://soundeffect-lab.info/agreement/",
+          "modified": false,
+          "usage": "크레용사 기모아 내려치기",
+          "attributionRequired": false
+        },
+        {
+          "title": "オーラ1",
+          "author": "効果音ラボ",
+          "source": "https://soundeffect-lab.info/sound/battle/",
+          "licenseName": "効果音ラボ 利用規約",
+          "licenseUrl": "https://soundeffect-lab.info/agreement/",
+          "modified": false,
+          "usage": "크레용사 변신",
+          "attributionRequired": false
+        }
+      ]
+    },
+    {
       "heading": "효과음 - 자체 제작",
       "note": "외부 음원을 쓰지 않고 파라미터로 합성한다.",
       "entries": [
@@ -455,7 +551,7 @@
           "licenseName": "자체 보유",
           "licenseUrl": "",
           "modified": false,
-          "usage": "틱 데미지, 피격, 유도탄, 돌진 발소리 등",
+          "usage": "플레이어 피격, 고학년 돌진 출발",
           "attributionRequired": false
         }
       ]

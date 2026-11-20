@@ -16,21 +16,19 @@ namespace TrickalFanGame.Audio
     {
         private static readonly int CueCount = Enum.GetValues(typeof(CombatSfxCue)).Length;
 
-        // Seconds between two footfalls while the dash runs. A sprint, not a
-        // walk; the two step clips alternate at this cadence.
-        [SerializeField, Min(0.02f)] private float dashStepInterval = 0.17f;
+        // Sound pass 2026-11-21: how quickly the running fades when the dash ends.
+        public const float DashRunFadeSeconds = 0.1f;
+        // The recorded run's footfalls are slower than Erpin's dash reads on
+        // screen, so the loop plays sped up (tools/sound-mixer reads this value).
+        public const float DashRunPitch = 1.55f;
 
         private readonly int[] requestCounts = new int[CueCount];
         private readonly List<HomingSkillProjectile> trackedShots = new();
-        private float nextDashStepTime;
-        private bool nextDashStepIsLeft;
+        // The looping run voice while the dash lasts; 0 when silent.
+        private int dashRunVoice;
 
-        public float DashStepInterval => dashStepInterval;
-
-        public void ConfigureDashSteps(float interval)
-        {
-            dashStepInterval = Mathf.Max(0.02f, interval);
-        }
+        public bool IsDashRunActive => dashRunVoice != 0 || dashRunRequested;
+        private bool dashRunRequested;
 
         private Health health;
         private PlayerCombatEvents combatEvents;
@@ -114,7 +112,7 @@ namespace TrickalFanGame.Audio
             foreach (HomingSkillProjectile shot in trackedShots)
                 if (shot != null) shot.Exploded -= OnShotExploded;
             trackedShots.Clear();
-            nextDashStepTime = 0f;
+            StopDashRun(0f);
         }
 
         private void CacheComponents()
@@ -223,48 +221,41 @@ namespace TrickalFanGame.Audio
         private void OnDashStarted()
         {
             Play(CombatSfxCue.SkillUpperDash);
-            BeginDashSteps(Time.unscaledTime);
+            StartDashRun();
         }
 
-        // The first footfall comes one cadence after the launch, so the
-        // whoosh and a step do not land on the same frame.
-        public void BeginDashSteps(float currentTime)
+        // Sound pass 2026-11-21: the dash has no fixed length — it runs until it hits
+        // something, up to ten seconds — so the running loops on a voice of
+        // its own and is cut when the dash ends.
+        public void StartDashRun()
         {
-            nextDashStepTime = currentTime + dashStepInterval;
-            nextDashStepIsLeft = true;
+            StopDashRun(0f);
+            requestCounts[(int)CombatSfxCue.SkillUpperRun]++;
+            dashRunRequested = true;
+            dashRunVoice = GameAudioController.Instance != null
+                ? GameAudioController.Instance.PlayCombatVoice(CombatSfxCue.SkillUpperRun, true, DashRunPitch)
+                : 0;
         }
 
-        // The dash has no fixed length — it runs until it hits something, up
-        // to ten seconds — so the run is kept going here rather than baked
-        // into a clip of its own.
-        public void TickDashSteps(float currentTime)
+        public void StopDashRun(float fadeSeconds = DashRunFadeSeconds)
         {
-            if (highGradeSkill == null || !highGradeSkill.IsDashing) return;
-            PumpDashSteps(currentTime);
+            if (dashRunVoice > 0) GameAudioController.Instance?.StopCombatVoice(dashRunVoice, fadeSeconds);
+            dashRunVoice = 0;
+            dashRunRequested = false;
         }
 
-        // Plays every footfall due by now. Kept apart from the dash check
-        // above so the cadence can be verified without a dashing player.
-        public void PumpDashSteps(float currentTime)
+        // A dash that ends without its event (the player removed mid-dash)
+        // must not leave the run looping.
+        private void Update()
         {
-            // Never started, or the game stalled for a while: resync rather
-            // than firing off every footfall that was missed.
-            if (nextDashStepTime <= 0f || currentTime - nextDashStepTime > 1f)
-                nextDashStepTime = currentTime;
-            while (currentTime >= nextDashStepTime)
-            {
-                Play(nextDashStepIsLeft ? CombatSfxCue.SkillUpperStepLeft : CombatSfxCue.SkillUpperStepRight);
-                nextDashStepIsLeft = !nextDashStepIsLeft;
-                nextDashStepTime += dashStepInterval;
-            }
+            if (dashRunRequested && highGradeSkill != null && !highGradeSkill.IsDashing) StopDashRun();
         }
-
-        private void Update() => TickDashSteps(Time.unscaledTime);
 
         // Only a dash that lands on an enemy makes the impact sound; running
         // out of time or cancelling it does not.
         private void OnDashEnded(UltimateEndReason reason)
         {
+            StopDashRun();
             if (reason != UltimateEndReason.Impact) return;
             Play(CombatSfxCue.SkillUpperImpact);
         }

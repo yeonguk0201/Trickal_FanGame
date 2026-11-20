@@ -28,9 +28,8 @@ namespace TrickalFanGame.Audio
         // itself is the two step cues below.
         SkillUpperDash,
 
-        // Q: one footfall while the dash runs. The dash lasts until it hits
-        // something, up to ten seconds, so no single clip can cover it; the
-        // two feet alternate at a fixed cadence for as long as it lasts.
+        // Retired in the 2026-11-21 sound pass (replaced by SkillUpperRun); kept for numbering.
+        // Q: one footfall while the dash ran, alternating feet.
         SkillUpperStepLeft,
         SkillUpperStepRight,
 
@@ -148,5 +147,26 @@ namespace TrickalFanGame.Audio
         VaultEat,
         VaultSlimeThrow,
         VaultMove,
+
+        // Sound pass 2026-11-21: Q's running, one looping voice from the launch until the
+        // dash ends. It replaces the two footfall cues above, which are kept
+        // only so the numbers after them do not move (CombatSfxSetup.RetiredCues).
+        SkillUpperRun,
+
+        // Sound pass 2026-11-21: a gold or elif purchase (or an investment) going through in the shop.
+        ShopPurchase,
+
+        // Sound pass 2026-11-21: one wingbeat per walk cycle while flying on 시스트의 가짜 날개.
+        PlayerWingFlap,
+
+        // Sound pass 2026-11-21: the 크레용사 drawing its sword to call its minions; the
+        // sword charging before the map slash (cut at the slash); the two
+        // layers that land after BossSwordSlam's swing; and its phase-two
+        // transformation, faded out early.
+        BossCrayonSummon,
+        BossCrayonCharge,
+        BossSwordSlamMagic,
+        BossSwordSlamClash,
+        BossCrayonTransform,
     }
 }

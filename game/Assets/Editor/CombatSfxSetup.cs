@@ -17,8 +17,15 @@ namespace TrickalFanGame.Editor
     {
         public const string ClipRoot = "Assets/Audio/SFX";
 
-        // Seconds between two footfalls while the upper-grade dash runs.
-        public const float DashStepInterval = 0.17f;
+        // Sound pass 2026-11-21: cues that stay in the enum only so the numbers after them
+        // do not move. They carry no clip and nothing plays them.
+        public static readonly CombatSfxCue[] RetiredCues =
+        {
+            CombatSfxCue.SkillUpperStepLeft,
+            CombatSfxCue.SkillUpperStepRight,
+        };
+
+        public static bool IsRetired(CombatSfxCue cue) => Array.IndexOf(RetiredCues, cue) >= 0;
 
         // cue, clip file, volume, minimum interval between two plays, and the
         // longest the clip may be. The length cap is per cue because it comes
@@ -31,30 +38,30 @@ namespace TrickalFanGame.Editor
             (CombatSfxCue.HitCritical, "SFX_Hit_Critical_Slap.mp3", 0.37f, 0.05f, 1.2f),
             // A poisoned pack ticks on the same frame, so this guard is the
             // longest of the set: one sound per tick wave, not one per enemy.
-            (CombatSfxCue.EnemyTickDamage, "SFX_Enemy_Tick.wav", 0.82f, 0.12f, 1f),
+            (CombatSfxCue.EnemyTickDamage, "SFX_Enemy_Tick_Hitmarker.mp3", 0.49f, 0.12f, 1f),
             (CombatSfxCue.PlayerHurt, "SFX_Player_Hurt.wav", 0.65f, 0.1f, 1.5f),
             // The lower-grade skill read as too quiet next to the rest, so
             // its three cues sit well above the basic attack now.
             (CombatSfxCue.SkillLowerCast, "SFX_Skill_Lower_Cast.wav", 0.61f, 0.05f, 3f),
             // The four shots are 0.08s apart and the explosions land close
             // together, so these guards only drop same-frame repeats.
-            (CombatSfxCue.SkillLowerShot, "SFX_Skill_Lower_Shot.wav", 0.71f, 0.02f, 0.5f),
-            (CombatSfxCue.SkillLowerBurst, "SFX_Skill_Lower_Burst.wav", 0.79f, 0.03f, 1f),
+            (CombatSfxCue.SkillLowerShot, "SFX_Skill_Lower_Shot_Heavy.wav", 0.71f, 0.02f, 1f),
+            (CombatSfxCue.SkillLowerBurst, "SFX_Skill_Lower_Burst_8Bit.mp3", 0.79f, 0.03f, 1f),
             (CombatSfxCue.SkillUpperDash, "SFX_Skill_Upper_Dash.wav", 0.49f, 0.1f, 1.5f),
-            // One footfall each, alternating every PlayerCombatAudio
-            // cadence (0.17s), so each foot repeats every 0.34s.
-            (CombatSfxCue.SkillUpperStepLeft, "SFX_Skill_Upper_Step_Left.wav", 0.7f, 0.1f, 0.5f),
-            (CombatSfxCue.SkillUpperStepRight, "SFX_Skill_Upper_Step_Right.wav", 0.7f, 0.1f, 0.5f),
-            (CombatSfxCue.SkillUpperImpact, "SFX_Skill_Upper_Impact.wav", 0.77f, 0.1f, 1.5f),
+            // Sound pass 2026-11-21: the running loops on a voice while the dash lasts (up
+            // to ten seconds), so its length cap is only a sanity bound.
+            (CombatSfxCue.SkillUpperRun, "SFX_Skill_Upper_Run.mp3", 0.7f, 0.1f, 6f),
+            (CombatSfxCue.SkillUpperImpact, "SFX_Skill_Upper_Impact_Thud.mp3", 0.47f, 0.1f, 2.5f),
             // World events. Each happens once at a time, so they carry the
             // loosest guards and may run longer.
             (CombatSfxCue.BossPortal, "SFX_Boss_Portal.wav", 0.56f, 0.15f, 3f),
             (CombatSfxCue.BombExplosion, "SFX_Bomb_Explosion.wav", 0.79f, 0.06f, 3f),
             (CombatSfxCue.MuffinExplosion, "SFX_Muffin_Explosion.wav", 0.49f, 0.06f, 2f),
-            // Sound-1: spells and the 권능 share one epic impact.
-            (CombatSfxCue.SpellCast, "SFX_Power_Spell_Impact.mp3", 0.34f, 0.15f, 3f),
-            (CombatSfxCue.JjangsemSpellCast, "SFX_Power_Spell_Impact.mp3", 0.43f, 0.15f, 3f),
-            (CombatSfxCue.PowerCast, "SFX_Power_Spell_Impact.mp3", 0.44f, 0.15f, 3f),
+            // Sound pass 2026-11-21: spells, 짱셈 spells and the 권능 each have an impact of
+            // their own from one family (lentikula's healing spell impacts).
+            (CombatSfxCue.SpellCast, "SFX_Spell_Impact.wav", 0.83f, 0.15f, 3f),
+            (CombatSfxCue.JjangsemSpellCast, "SFX_Jjangsem_Spell_Impact.wav", 0.61f, 0.15f, 3f),
+            (CombatSfxCue.PowerCast, "SFX_Power_Impact.wav", 0.74f, 0.15f, 3f),
             (CombatSfxCue.SpGain, "SFX_SP_Gain.wav", 0.46f, 0.12f, 2f),
             (CombatSfxCue.Heal, "SFX_Heal.wav", 0.59f, 0.15f, 2f),
             (CombatSfxCue.DoorOpen, "SFX_Door_Open.wav", 0.7f, 0.15f, 2f),
@@ -62,7 +69,17 @@ namespace TrickalFanGame.Editor
             // Sound-1: the 크레용사's sword. Swings and dashes come at least a
             // retarget apart, so the guard only drops same-frame repeats.
             (CombatSfxCue.BossSwordSwing, "SFX_Boss_Sword_Swing.mp3", 0.47f, 0.08f, 2f),
-            (CombatSfxCue.BossSwordSlam, "SFX_Boss_Sword_Slam.mp3", 0.9f, 0.1f, 2f),
+            // Sound pass 2026-11-21: the charged map slash is three layers: this swing, then
+            // the magic burst and the clash at CrayonHeroBossPatternRuntime's
+            // SlamMagicDelay and SlamClashDelay.
+            (CombatSfxCue.BossSwordSlam, "SFX_Boss_Sword_Slam_Swing.mp3", 0.8f, 0.1f, 2f),
+            (CombatSfxCue.BossSwordSlamMagic, "SFX_Boss_Sword_Slam_Magic.mp3", 0.6f, 0.1f, 3.5f),
+            (CombatSfxCue.BossSwordSlamClash, "SFX_Boss_Sword_Slam_Clash.mp3", 0.6f, 0.1f, 2.5f),
+            // The charge plays on a voice cut by the slam; the transformation
+            // plays its first three seconds and fades over the last 1.5.
+            (CombatSfxCue.BossCrayonCharge, "SFX_Boss_Crayon_Charge.mp3", 0.6f, 0.1f, 7.5f),
+            (CombatSfxCue.BossCrayonTransform, "SFX_Boss_Crayon_Transform.mp3", 0.6f, 0.15f, 10f),
+            (CombatSfxCue.BossCrayonSummon, "SFX_Boss_Crayon_Summon.mp3", 0.7f, 0.15f, 2.5f),
             (CombatSfxCue.ObstacleHit, "SFX_Obstacle_Hit.mp3", 1f, 0.05f, 1.2f),
             // A room full of enemies attacks often; keep it under the hits
             // the player lands, and fold a volley into one sound.
@@ -73,7 +90,7 @@ namespace TrickalFanGame.Editor
             (CombatSfxCue.BossIntroVs, "SFX_Boss_Intro_VS.mp3", 0.69f, 0.15f, 9f),
             // Sound-2: the 새마음금고. Pillars emerge 0.1s or more apart and
             // each is meant to be heard, so the guard stays short.
-            (CombatSfxCue.VaultPillarEmerge, "SFX_Vault_Pillar_Emerge.mp3", 0.77f, 0.05f, 3f),
+            (CombatSfxCue.VaultPillarEmerge, "SFX_Vault_Pillar_Earth.wav", 0.77f, 0.05f, 3f),
             // The whistle and the meteor wind play on voices that are cut at
             // the impact, so their length is only an upper bound.
             (CombatSfxCue.VaultJumpWhistle, "SFX_Vault_Jump_Whistle.mp3", 0.5f, 0.1f, 2.5f),
@@ -100,6 +117,10 @@ namespace TrickalFanGame.Editor
             // Two footfalls every 0.5s of walking: quiet, and the guard sits
             // under the 0.25s step so none is dropped.
             (CombatSfxCue.PlayerStep, "SFX_Player_Step.wav", 0.07f, 0.1f, 1f),
+            // Sound pass 2026-11-21: flying beats the wings once per 0.5s walk cycle instead.
+            (CombatSfxCue.PlayerWingFlap, "SFX_Player_Wing_Flap.mp3", 0.57f, 0.1f, 1f),
+            // Sound pass 2026-11-21: a purchase or investment that went through in the shop.
+            (CombatSfxCue.ShopPurchase, "SFX_Shop_Purchase.mp3", 0.57f, 0.1f, 2.5f),
             // The chewing plays on a voice cut when the heal ends, so its
             // length is only an upper bound.
             (CombatSfxCue.VaultEat, "SFX_Vault_Eat.mp3", 0.75f, 0.15f, 11f),
@@ -177,7 +198,6 @@ namespace TrickalFanGame.Editor
                 // Re-running must not stack a second router on the player.
                 PlayerCombatAudio router = player.GetComponent<PlayerCombatAudio>();
                 if (router == null) router = Undo.AddComponent<PlayerCombatAudio>(player.gameObject);
-                router.ConfigureDashSteps(DashStepInterval);
                 EditorUtility.SetDirty(router);
                 EditorUtility.SetDirty(player.gameObject);
             }

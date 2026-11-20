@@ -2629,3 +2629,7 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 3. 전투 BGM을 재생한 상태에서 효과음의 `재생`(겹쳐 재생 가능)과 `반복`(게임 주기 간격)을 눌러 듣고 슬라이더로 조절한다.
 4. `변경값 복사`로 나온 `CombatSfxSetup.Cues` 줄을 반영하고 `TrickalFanGame.Editor.CombatSfxVerification.SetupAndVerifyBatch`를
    실행한다. BGM 믹스 게인은 현재 게임에 대응 값이 없어 주석으로만 나오며, 반영하려면 코드 변경이 필요하다.
+5. 새 음원을 들어 볼 때는 파일을 `tmp/sound-candidates/`에 넣고 `tools/sound-mixer/build.py`의 `CANDIDATES`에 한 줄을
+   추가한 뒤 다시 빌드한다. "새 후보 비교"에서 `후보`·`현재`를 번갈아 듣고, 고른 값은 `// 후보 …` 줄로 내보내진다.
+   겹쳐 울리는 소리는 `CANDIDATE_SCENES`에 장면으로 적고 `editable=True`면 겹마다 시작 시점을 조절할 수 있다.
+

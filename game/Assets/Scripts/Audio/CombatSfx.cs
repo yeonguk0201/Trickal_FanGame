@@ -31,11 +31,30 @@ namespace TrickalFanGame.Audio
 
         // Sound-2: a cue that must stop when its moment ends. Keep the handle
         // and pass it to StopVoice; 0 means nothing played.
-        public static int PlayVoice(CombatSfxCue cue)
+        public static int PlayVoice(CombatSfxCue cue, bool loop = false)
         {
             RequestCounts[(int)cue]++;
             GameAudioController controller = GameAudioController.Instance;
-            return controller != null ? controller.PlayCombatVoice(cue) : 0;
+            return controller != null ? controller.PlayCombatVoice(cue, loop) : 0;
+        }
+
+        // Sound pass 2026-11-21: a later layer of the same moment, `delay` seconds from now.
+        // Counted when asked for, so routing checks do not have to wait.
+        public static void PlayAfter(CombatSfxCue cue, float delay)
+        {
+            RequestCounts[(int)cue]++;
+            GameAudioController.Instance?.PlayCombatCueAfter(cue, delay);
+        }
+
+        // Sound pass 2026-11-21: plays a voice for `seconds` in all, its last `fadeSeconds`
+        // fading out; for a long clip of which only the start is wanted.
+        public static int PlayVoiceFor(CombatSfxCue cue, float seconds, float fadeSeconds)
+        {
+            int handle = PlayVoice(cue);
+            if (handle > 0)
+                GameAudioController.Instance?.StopCombatVoiceAfter(handle, Mathf.Max(0f, seconds - fadeSeconds),
+                    fadeSeconds);
+            return handle;
         }
 
         public static void StopVoice(int handle, float fadeSeconds = 0.08f)
