@@ -371,6 +371,23 @@ namespace TrickalFanGame.Editor
                 other.GetComponent<EnemyChampionUndying>().Tick(other.GetComponent<EnemyChampionUndying>().EndTime);
                 Assert(otherHealth.IsDead && kills.Count == 1,
                     "Running out after an environment blow must not credit the player.");
+
+                // The downing blow's source is gone by the time the life runs out (a bomb, a blown-up enemy): the
+                // death must still go out, or the room never clears and a grey, unhittable body stays behind.
+                GameObject doomed = Champion(chaser, root.transform, Vector2.right * 12f);
+                Health doomedHealth = doomed.GetComponent<Health>();
+                bool doomedDied = false;
+                doomedHealth.Died += () => doomedDied = true;
+                GameObject vanishingSource = new("Variant-2 Vanishing Source");
+                vanishingSource.transform.SetParent(root.transform);
+                doomedHealth.TakeDamage(new DamageContext(vanishingSource, DamageSourceType.Environment,
+                    doomedHealth.MaxHealth + 1f));
+                EnemyChampionUndying doomedUndying = doomed.GetComponent<EnemyChampionUndying>();
+                Assert(doomedUndying.IsActive, "A blow from any source must start undying.");
+                Object.DestroyImmediate(vanishingSource);
+                doomedUndying.Tick(doomedUndying.EndTime);
+                Assert(doomedHealth.IsDead && doomedDied && !doomedUndying.IsActive && kills.Count == 1,
+                    "Running out after the downing blow's source was destroyed must still raise Died.");
             }
             finally
             {
