@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사운드 믹서</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --panel: #ffffff; --ink: #24211c; --muted: #6f685d; --line: #e2ddd3;
+    --accent: #7a4fb3; --accent-ink: #ffffff; --changed: #fff4d6; --changed-line: #e8c56a;
+    --play: #2f7d5b; --stop: #b0433a; --chip: #efeae1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17161a; --panel: #212026; --ink: #ece8f2; --muted: #a39dac; --line: #34323b;
+      --accent: #a98be0; --accent-ink: #17161a; --changed: #3a3220; --changed-line: #8c7333;
+      --play: #5fbf92; --stop: #e07a70; --chip: #2c2a31;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 14px/1.45 "Pretendard", "Malgun Gothic", system-ui, sans-serif; }
+  header { padding: 20px 24px 8px; }
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  .sub { color: var(--muted); margin: 0; }
+  main { padding: 8px 24px 40px; max-width: 1180px; }
+  section.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+                 padding: 14px 16px; margin: 12px 0; }
+  section.card h2 { font-size: 15px; margin: 0 0 10px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px 18px; }
+  label.slider { display: grid; grid-template-columns: 70px 1fr 52px; align-items: center; gap: 8px; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  input[type=number] { width: 64px; padding: 3px 5px; border: 1px solid var(--line); border-radius: 6px;
+                       background: var(--bg); color: var(--ink); font: inherit; }
+  button { font: inherit; border: 1px solid var(--line); background: var(--chip); color: var(--ink);
+           border-radius: 8px; padding: 5px 10px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button.on { background: var(--play); color: #fff; border-color: var(--play); }
+  button.danger { color: var(--stop); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .toolbar input[type=search] { flex: 1 1 200px; min-width: 160px; padding: 6px 10px; border-radius: 8px;
+                                border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips button.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  tr.group td { background: var(--bg); font-weight: 700; color: var(--muted); padding-top: 14px; }
+  tr.changed td { background: var(--changed); }
+  tr.changed td:first-child { box-shadow: inset 3px 0 0 var(--changed-line); }
+  .name { font-weight: 600; }
+  .cue { font: 12px ui-monospace, Consolas, monospace; color: var(--muted); }
+  .vol { display: grid; grid-template-columns: minmax(120px, 1fr) 64px; gap: 8px; align-items: center; }
+  .def { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .actions { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+  .max { color: var(--stop); font-size: 12px; }
+  textarea { width: 100%; min-height: 120px; font: 12px ui-monospace, Consolas, monospace; border-radius: 8px;
+             border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 8px; }
+  .note { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+  @media (max-width: 760px) {
+    header, main { padding-left: 16px; padding-right: 16px; }
+    th.hide-sm, td.hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>사운드 믹서</h1>
+  <p class="sub">게임 기본 설정(마스터·BGM·효과음 100%)에서 효과음이 실제로 들리는 크기로 재생한다. Unity와 같은 선형 볼륨(0–1)이고, 최종 크기 = 효과음 볼륨 × 마스터 × 효과음 설정.</p>
+</header>
+<main>
+  <section class="card">
+    <h2>플레이어 설정 (게임 기본값 100%)</h2>
+    <div class="grid3" id="settings"></div>
+  </section>
+
+  <section class="card">
+    <h2>BGM</h2>
+    <div id="bgm"></div>
+    <p class="note">BGM은 반복 재생된다. "믹스 게인"은 설정 슬라이더와 별개로 BGM 자체를 줄이는 값이다(게임 기본 1.0). 바꾸면 내보내기에 함께 나온다.</p>
+  </section>
+
+  <section class="card">
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="이름·큐·파일 검색">
+      <button id="stopAll" class="danger">모두 정지</button>
+      <button id="resetAll">전체 기본값</button>
+      <button id="copy" class="primary">변경값 복사</button>
+    </div>
+    <div class="chips" id="groups" style="margin-top:10px"></div>
+  </section>
+
+  <section class="card" style="padding:4px 8px">
+    <table>
+      <thead><tr>
+        <th>효과음</th><th class="hide-sm">파일</th><th>볼륨</th><th>재생</th><th class="hide-sm">반복 간격(초)</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>내보내기</h2>
+    <textarea id="out" readonly></textarea>
+    <p class="note">바뀐 행만 <code>CombatSfxSetup.Cues</code> 형식으로 나온다. 이 텍스트를 그대로 전달하면 게임에 반영한다. 조절값은 이 브라우저에 자동 저장된다.</p>
+  </section>
+</main>
+<script>
+const DATA = __SOUND_DATA__;
+const STORE = 'trickal-sound-mixer-v1';
+const settings = { master: 1, bgm: 1, sfx: 1 };
+const edits = { volume: {}, cadence: {}, bgmGain: {} };
+try {
+  const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
+  if (saved) {
+    Object.assign(settings, saved.settings || {});
+    // Keep a volume edit only while the game's default is still what it was when edited; once the edit is applied to
+    // CombatSfxSetup (or the file changes level) the old value would be misleading.
+    const was = saved.defaults || {};
+    for (const c of DATA.cues)
+      if (saved.volume && c.cue in saved.volume && was[c.cue] === c.volume) edits.volume[c.cue] = saved.volume[c.cue];
+    Object.assign(edits.cadence, saved.cadence || {});
+    Object.assign(edits.bgmGain, saved.bgmGain || {});
+  }
+} catch (e) { /* storage blocked: start from the defaults */ }
+
+function save() {
+  const defaults = Object.fromEntries(DATA.cues.map(c => [c.cue, c.volume]));
+  try { localStorage.setItem(STORE, JSON.stringify({ settings, ...edits, defaults })); } catch (e) { }
+}
+const round2 = v => Math.round(v * 100) / 100;
+const clamp01 = v => Math.min(1, Math.max(0, v));
+const volumeOf = c => edits.volume[c.cue] ?? c.volume;
+const cadenceOf = c => edits.cadence[c.cue] ?? c.cadence;
+const sfxLevel = () => settings.master * settings.sfx;
+
+// ---- playback ---------------------------------------------------------------------------------------------
+const active = new Map();   // cue -> Set<HTMLAudioElement>
+const repeats = new Map();  // cue -> { timer, stop }
+
+function playOnce(c) {
+  const audio = new Audio(c.src);
+  audio.volume = clamp01(volumeOf(c) * sfxLevel());
+  const set = active.get(c.cue) || new Set();
+  set.add(audio);
+  active.set(c.cue, set);
+  audio.addEventListener('ended', () => set.delete(audio));
+  audio.play().catch(() => set.delete(audio));
+  return audio;
+}
+
+function refreshLiveVolume(c) {
+  for (const audio of active.get(c.cue) || []) audio.volume = clamp01(volumeOf(c) * sfxLevel());
+}
+
+function startRepeat(c, button) {
+  stopRepeat(c);
+  let stopped = false;
+  const state = { timer: null, stop: () => { stopped = true; clearTimeout(state.timer); } };
+  const tick = () => {
+    if (stopped) return;
+    const gap = cadenceOf(c);
+    const audio = playOnce(c);
+    if (gap > 0) state.timer = setTimeout(tick, gap * 1000);
+    else audio.addEventListener('ended', tick, { once: true });
+  };
+  repeats.set(c.cue, state);
+  button.classList.add('on');
+  button.textContent = '반복 중';
+  tick();
+}
+
+function stopRepeat(c) {
+  const state = repeats.get(c.cue);
+  if (state) state.stop();
+  repeats.delete(c.cue);
+  const button = document.querySelector(`[data-repeat="${c.cue}"]`);
+  if (button) { button.classList.remove('on'); button.textContent = '반복'; }
+}
+
+function stopAll() {
+  for (const c of DATA.cues) stopRepeat(c);
+  for (const set of active.values()) for (const audio of set) audio.pause();
+  active.clear();
+  for (const b of DATA.bgm) stopBgm(b);
+}
+
+// ---- BGM --------------------------------------------------------------------------------------------------
+const bgmPlayers = new Map();
+const bgmGainOf = b => edits.bgmGain[b.key] ?? 1;
+function bgmVolume(b) { return clamp01(bgmGainOf(b) * settings.master * settings.bgm); }
+function startBgm(b) {
+  let audio = bgmPlayers.get(b.key);
+  if (!audio) { audio = new Audio(b.src); audio.loop = true; bgmPlayers.set(b.key, audio); }
+  audio.volume = bgmVolume(b);
+  audio.play().catch(() => {});
+}
+function stopBgm(b) {
+  const audio = bgmPlayers.get(b.key);
+  if (audio) { audio.pause(); audio.currentTime = 0; }
+  const button = document.querySelector(`[data-bgm="${b.key}"]`);
+  if (button) { button.classList.remove('on'); button.textContent = '재생'; }
+}
+function refreshBgmVolumes() {
+  for (const b of DATA.bgm) { const a = bgmPlayers.get(b.key); if (a) a.volume = bgmVolume(b); }
+}
+
+// ---- UI ---------------------------------------------------------------------------------------------------
+function slider(labelText, value, onInput, step = 0.01) {
+  const label = document.createElement('label');
+  label.className = 'slider';
+  label.innerHTML = `<span>${labelText}</span><input type="range" min="0" max="1" step="${step}"><input type="number" min="0" max="1" step="${step}">`;
+  const [range, number] = label.querySelectorAll('input');
+  range.value = number.value = value;
+  const apply = v => { v = round2(clamp01(+v || 0)); range.value = number.value = v; onInput(v); };
+  range.addEventListener('input', () => apply(range.value));
+  number.addEventListener('change', () => apply(number.value));
+  return label;
+}
+
+function buildSettings() {
+  const host = document.getElementById('settings');
+  host.append(
+    slider('마스터', settings.master, v => { settings.master = v; liveAll(); }),
+    slider('BGM', settings.bgm, v => { settings.bgm = v; liveAll(); }),
+    slider('효과음', settings.sfx, v => { settings.sfx = v; liveAll(); }));
+}
+function liveAll() { refreshBgmVolumes(); DATA.cues.forEach(refreshLiveVolume); save(); }
+
+function buildBgm() {
+  const host = document.getElementById('bgm');
+  for (const b of DATA.bgm) {
+    const row = document.createElement('div');
+    row.className = 'grid3';
+    row.style.alignItems = 'center';
+    row.style.marginBottom = '8px';
+    const title = document.createElement('div');
+    title.innerHTML = `<div class="name">${b.label}</div><div class="cue">${b.file}</div>`;
+    const button = document.createElement('button');
+    button.textContent = '재생';
+    button.dataset.bgm = b.key;
+    button.addEventListener('click', () => {
+      if (button.classList.contains('on')) { stopBgm(b); return; }
+      for (const other of DATA.bgm) if (other !== b) stopBgm(other);
+      startBgm(b); button.classList.add('on'); button.textContent = '정지';
+    });
+    const gain = slider('믹스 게인', bgmGainOf(b), v => {
+      if (v === 1) delete edits.bgmGain[b.key]; else edits.bgmGain[b.key] = v;
+      refreshBgmVolumes(); renderExport(); save();
+    });
+    const controls = document.createElement('div');
+    controls.className = 'actions';
+    controls.append(button);
+    row.append(title, gain, controls);
+    host.append(row);
+  }
+  const click = document.createElement('div');
+  click.className = 'actions';
+  click.innerHTML = '<span class="note" style="margin:0">UI 클릭(버튼)은 음량 1.0 고정으로 재생된다.</span>';
+  const clickButton = document.createElement('button');
+  clickButton.textContent = 'UI 클릭 재생';
+  clickButton.addEventListener('click', () => {
+    const a = new Audio(DATA.uiClick); a.volume = clamp01(sfxLevel()); a.play().catch(() => {});
+  });
+  click.prepend(clickButton);
+  host.append(click);
+}
+
+let groupFilter = '전체';
+function buildGroups() {
+  const host = document.getElementById('groups');
+  const groups = ['전체', ...new Set(DATA.cues.map(c => c.group))];
+  for (const g of groups) {
+    const b = document.createElement('button');
+    b.textContent = g;
+    b.className = g === groupFilter ? 'active' : '';
+    b.addEventListener('click', () => {
+      groupFilter = g;
+      host.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+      filterRows();
+    });
+    host.append(b);
+  }
+}
+
+function buildRows() {
+  const body = document.getElementById('rows');
+  let lastGroup = null;
+  for (const c of DATA.cues) {
+    if (c.group !== lastGroup) {
+      lastGroup = c.group;
+      const g = document.createElement('tr');
+      g.className = 'group';
+      g.dataset.group = c.group;
+      g.innerHTML = `<td colspan="5">${c.group}</td>`;
+      body.append(g);
+    }
+    const tr = document.createElement('tr');
+    tr.dataset.cue = c.cue;
+    tr.dataset.group = c.group;
+    tr.dataset.search = `${c.label} ${c.cue} ${c.file}`.toLowerCase();
+    tr.innerHTML = `
+      <td><div class="name">${c.label}</div><div class="cue">${c.cue}</div></td>
+      <td class="hide-sm"><span class="cue">${c.file}</span></td>
+      <td><div class="vol"><input type="range" min="0" max="1" step="0.01"><input type="number" min="0" max="1" step="0.01"></div>
+          <div class="def">기본 ${c.volume.toFixed(2)} <span class="max"></span></div></td>
+      <td><div class="actions"><button class="play">재생</button><button data-repeat="${c.cue}">반복</button>
+          <button class="reset" title="기본값으로">↺</button></div></td>
+      <td class="hide-sm"><input type="number" class="cadence" min="0" max="10" step="0.01"></td>`;
+    const [range, number] = tr.querySelectorAll('.vol input');
+    const cadence = tr.querySelector('.cadence');
+    const maxNote = tr.querySelector('.max');
+    const sync = () => {
+      const v = volumeOf(c);
+      range.value = number.value = v;
+      cadence.value = cadenceOf(c);
+      maxNote.textContent = v >= 1 ? '최대 — 더 키우려면 BGM을 낮출 것' : '';
+      tr.classList.toggle('changed', c.cue in edits.volume || c.cue in edits.cadence);
+    };
+    const setVolume = v => {
+      v = round2(clamp01(+v || 0));
+      if (v === c.volume) delete edits.volume[c.cue]; else edits.volume[c.cue] = v;
+      sync(); refreshLiveVolume(c); renderExport(); save();
+    };
+    range.addEventListener('input', () => setVolume(range.value));
+    number.addEventListener('change', () => setVolume(number.value));
+    cadence.addEventListener('change', () => {
+      const v = Math.max(0, round2(+cadence.value || 0));
+      if (v === c.cadence) delete edits.cadence[c.cue]; else edits.cadence[c.cue] = v;
+      sync(); save();
+    });
+    tr.querySelector('.play').addEventListener('click', () => playOnce(c));
+    const repeat = tr.querySelector('[data-repeat]');
+    repeat.addEventListener('click', () => repeats.has(c.cue) ? stopRepeat(c) : startRepeat(c, repeat));
+    tr.querySelector('.reset').addEventListener('click', () => {
+      delete edits.volume[c.cue]; delete edits.cadence[c.cue];
+      sync(); refreshLiveVolume(c); renderExport(); save();
+    });
+    sync();
+    body.append(tr);
+  }
+}
+
+function filterRows() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const visibleGroups = new Set();
+  document.querySelectorAll('#rows tr[data-cue]').forEach(tr => {
+    const show = (groupFilter === '전체' || tr.dataset.group === groupFilter) && (!q || tr.dataset.search.includes(q));
+    tr.style.display = show ? '' : 'none';
+    if (show) visibleGroups.add(tr.dataset.group);
+  });
+  document.querySelectorAll('#rows tr.group').forEach(tr => {
+    tr.style.display = visibleGroups.has(tr.dataset.group) ? '' : 'none';
+  });
+}
+
+const fmt = v => `${Number(v.toFixed(2))}f`;
+function renderExport() {
+  const lines = DATA.cues.filter(c => c.cue in edits.volume).map(c =>
+    `(CombatSfxCue.${c.cue}, "${c.file}", ${fmt(edits.volume[c.cue])}, ${fmt(c.guard)}, ${fmt(c.cap)}),  // ${c.label}: ${c.volume} → ${edits.volume[c.cue]}`);
+  for (const b of DATA.bgm) if (b.key in edits.bgmGain) lines.push(`// BGM 믹스 게인 ${b.label} (${b.file}): 1 → ${edits.bgmGain[b.key]}`);
+  document.getElementById('out').value = lines.length ? lines.join('\n') : '// 아직 바꾼 값이 없다.';
+}
+
+document.getElementById('search').addEventListener('input', filterRows);
+document.getElementById('stopAll').addEventListener('click', stopAll);
+document.getElementById('resetAll').addEventListener('click', () => {
+  if (!confirm('모든 효과음 볼륨·반복 간격·BGM 믹스 게인을 기본값으로 되돌릴까?')) return;
+  edits.volume = {}; edits.cadence = {}; edits.bgmGain = {};
+  save(); location.reload();
+});
+document.getElementById('copy').addEventListener('click', async () => {
+  const text = document.getElementById('out').value;
+  try { await navigator.clipboard.writeText(text); }
+  catch (e) { const t = document.getElementById('out'); t.select(); document.execCommand('copy'); }
+  const b = document.getElementById('copy'); b.textContent = '복사됨'; setTimeout(() => b.textContent = '변경값 복사', 1200);
+});
+
+buildSettings();
+buildBgm();
+buildGroups();
+buildRows();
+renderExport();
+</script>
+</body>
+</html>

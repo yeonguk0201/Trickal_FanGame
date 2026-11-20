@@ -1,3 +1,4 @@
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Debugging;
 using TrickalFanGame.Player;
@@ -137,6 +138,12 @@ namespace TrickalFanGame.Enemy
         private float activeEndsAt;
         private int jumpCount;
         private int currentJump;
+        // Sound-2: the jump whose whistle is sounding, and the voice to cut at
+        // its landing.
+        private int whistledJump = -1;
+        private int jumpWhistleVoice;
+        // Sound-3: the chewing while the heal runs.
+        private int eatVoice;
         private int resolvedJumpCount;
         private float jumpSequenceStartTime;
         private Vector2 jumpStart;
@@ -357,6 +364,7 @@ namespace TrickalFanGame.Enemy
         public void OnPatternStateChanged(BossActionState state, BossPatternExecution execution, float stateEndsAt)
         {
             activeEndsAt = stateEndsAt;
+            if (state != BossActionState.Active || execution != BossPatternExecution.SaemaeumTreasureHeal) StopEating();
             healPoseIndex = -1;
             if (execution == BossPatternExecution.SaemaeumTreasureHeal && boss != null && boss.CurrentPhase == 1)
             {
@@ -422,6 +430,8 @@ namespace TrickalFanGame.Enemy
                     if (!HealIsAvailable) return true;
                     healUses++;
                     appliedHealPulses = 0;
+                    StopEating();
+                    eatVoice = CombatSfx.PlayVoice(CombatSfxCue.VaultEat);
                     return true;
                 default:
                     return false;
@@ -717,6 +727,7 @@ namespace TrickalFanGame.Enemy
             jumpCount = minimum + NextRandom(maximum - minimum + 1);
             currentJump = 0;
             resolvedJumpCount = 0;
+            whistledJump = -1;
             jumpSequenceStartTime = lastTickTime;
             activeEndsAt = jumpSequenceStartTime + JumpSequenceDuration;
             boss?.SynchronizeActiveEndTime(activeEndsAt);
@@ -755,6 +766,13 @@ namespace TrickalFanGame.Enemy
                 jumpProgress < 0.36f ? 2 : jumpProgress < 0.58f ? 3 : jumpProgress < contact ? 4 :
                 jumpProgress < 0.90f ? 5 : jumpProgress < 0.96f ? 6 : 7;
             float flight = Mathf.Clamp01((jumpProgress - takeoff) / (contact - takeoff));
+            // The whistle starts as the vault leaves the floor and runs until it lands.
+            if (jumpProgress >= takeoff && jumpProgress < contact && whistledJump < currentJump)
+            {
+                whistledJump = currentJump;
+                CombatSfx.StopVoice(jumpWhistleVoice);
+                jumpWhistleVoice = CombatSfx.PlayVoice(CombatSfxCue.VaultJumpWhistle);
+            }
             Vector2 position = Vector2.Lerp(jumpStart, jumpDestination, JumpTravelFraction(flight));
             if (body != null) body.position = position;
             else transform.position = position;
@@ -837,6 +855,9 @@ namespace TrickalFanGame.Enemy
 
         private void ResolveLanding(Vector2 impactPosition, int landingIndex)
         {
+            CombatSfx.StopVoice(jumpWhistleVoice, 0.05f);
+            jumpWhistleVoice = 0;
+            CombatSfx.Play(CombatSfxCue.VaultJumpLanding);
             GetComponent<BossMovementAnimator>()?.NotifyLanding();
             BossSummonedObstacle.BreakInCircle(impactPosition, landingRadius);
             FireLandingBurst(impactPosition, landingIndex);
@@ -1059,6 +1080,9 @@ namespace TrickalFanGame.Enemy
 
         private void EndJump()
         {
+            // A jump cut short (the boss dying, the pattern ending) takes its whistle with it.
+            CombatSfx.StopVoice(jumpWhistleVoice);
+            jumpWhistleVoice = 0;
             jumpPoseIndex = -1;
             jumpCycleFrameIndex = -1;
             if (jumping)
@@ -1072,8 +1096,15 @@ namespace TrickalFanGame.Enemy
             SetVisualHeight(0f);
         }
 
+        private void StopEating()
+        {
+            CombatSfx.StopVoice(eatVoice);
+            eatVoice = 0;
+        }
+
         private void OnDisable()
         {
+            StopEating();
             healPoseIndex = -1;
             EndJump();
             ClearLandingTelegraph();

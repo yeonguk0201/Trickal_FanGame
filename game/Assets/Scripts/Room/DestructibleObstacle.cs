@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Item;
 using TrickalFanGame.Player;
@@ -293,6 +294,7 @@ namespace TrickalFanGame.Room
         {
             if (isBroken || !isActiveAndEnabled || BreakRule != ObstacleBreakRule.Hits) return false;
             hitsTaken++;
+            CombatSfx.Play(CombatSfxCue.ObstacleHit);
             // Holding a burn artifact is enough; its burn chance is not rolled. The hit that breaks the obstacle
             // does not light it.
             if (!isBurning && burnHits > 0 && hitsTaken >= burnHits && hitsTaken < RequiredHits &&
@@ -467,6 +469,7 @@ namespace TrickalFanGame.Room
                 enemy.name = $"Obstacle Enemy {index + 1} - {obstacleId}";
                 lastEnemies.Add(enemy);
             }
+            if (lastEnemies.Count > 0) CombatSfx.Play(CombatSfxCue.EnemyAppear);
         }
 
         private void SpawnExplosion(bool byExplosion)

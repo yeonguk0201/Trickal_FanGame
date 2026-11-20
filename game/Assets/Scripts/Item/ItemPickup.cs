@@ -44,6 +44,7 @@ namespace TrickalFanGame.Item
                 return;
             }
 
+            TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.ItemPickup);
             Destroy(gameObject);
         }
     }

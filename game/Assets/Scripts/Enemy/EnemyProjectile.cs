@@ -1,3 +1,4 @@
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
 using TrickalFanGame.Room;
@@ -62,7 +63,17 @@ namespace TrickalFanGame.Enemy
 
             EnemyProjectile projectile = projectileObject.AddComponent<EnemyProjectile>();
             projectile.Launch(direction, source, damageTier, speed, lifetime);
+            PlayAttackSound(source);
             return projectile;
+        }
+
+        // Sound-1: an ordinary enemy attacking. A four-way volley spawns its
+        // shots on one frame, and the cue's retrigger guard folds them into a
+        // single sound. Bosses voice their own patterns and stay out of it.
+        public static void PlayAttackSound(GameObject source)
+        {
+            if (source != null && source.GetComponentInParent<BossController>() != null) return;
+            CombatSfx.Play(CombatSfxCue.EnemyAttack);
         }
 
         public static float LaunchRadiusOf(GameObject source, bool authoredArtwork)

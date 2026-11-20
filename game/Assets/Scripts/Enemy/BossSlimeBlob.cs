@@ -25,6 +25,8 @@ namespace TrickalFanGame.Enemy
 
         public Vector2 Destination => destination;
         public bool HasLanded => hasLanded;
+        public bool HasLaunched => hasLaunched;
+        private bool hasLaunched;
         public GameObject Mark => mark;
 
         public static BossSlimeBlob Launch(Vector2 from, Vector2 to, float now, float duration, float height,
@@ -73,6 +75,12 @@ namespace TrickalFanGame.Enemy
             if (hasLanded) return;
             // A staggered lump waits hidden inside the boss until its own launch time.
             if (lump != null) lump.enabled = now >= launchTime;
+            // Sound-3: one throw sound per lump, as each one actually leaves the boss.
+            if (!hasLaunched && now >= launchTime)
+            {
+                hasLaunched = true;
+                TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.VaultSlimeThrow);
+            }
             float flight = Mathf.Clamp01((now - launchTime) / flightDuration);
             // A lob: straight along the ground with a parabola above it.
             transform.position = Vector2.Lerp(start, destination, flight);

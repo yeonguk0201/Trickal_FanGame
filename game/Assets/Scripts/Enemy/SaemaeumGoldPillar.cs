@@ -1,3 +1,4 @@
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Frontend;
 using TrickalFanGame.Room;
@@ -106,6 +107,8 @@ namespace TrickalFanGame.Enemy
         private void Emerge()
         {
             HasEmerged = true;
+            // Sound-2: each pillar is heard on its own as it bursts out.
+            CombatSfx.Play(CombatSfxCue.VaultPillarEmerge);
             if (mark != null)
             {
                 if (Application.isPlaying) Destroy(mark.gameObject);

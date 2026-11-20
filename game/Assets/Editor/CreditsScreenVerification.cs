@@ -18,10 +18,15 @@ namespace TrickalFanGame.Editor
     {
         // Mirrors the confirmed credit block in docs/audio-sources.md ("크레딧 표기 의무"). Kept in the verifier
         // rather than in the data, so deleting an entry from Credits.json fails instead of passing quietly.
-        private static readonly (string Source, string Author)[] RequiredAttribution =
+        // Modified: whether the game plays an edited version, which CC BY 4.0 requires the credit to say.
+        private static readonly (string Source, string Author, bool Modified)[] RequiredAttribution =
         {
-            ("https://freesound.org/s/541478/", "EminYILDIRIM"),
-            ("https://freesound.org/s/396500/", "alonsotm"),
+            ("https://freesound.org/s/541478/", "EminYILDIRIM", true),
+            ("https://freesound.org/s/396500/", "alonsotm", true),
+            // Sound-2: the cancel sound, played as downloaded.
+            ("https://freesound.org/s/545477/", "IENBA", false),
+            // Sound-3: the player's footstep, amplified (+30 dB) because the original is very quiet.
+            ("https://freesound.org/s/535222/", "spycrah", true),
         };
 
         private const string RequiredLicenseName = "Attribution 4.0";
@@ -88,7 +93,7 @@ namespace TrickalFanGame.Editor
             foreach (CreditsCatalog.Entry entry in entries.Where(entry => entry.attributionRequired))
                 VerifyAttributionComplete(entry);
 
-            foreach ((string source, string author) in RequiredAttribution)
+            foreach ((string source, string author, bool modified) in RequiredAttribution)
             {
                 CreditsCatalog.Entry[] matches = entries
                     .Where(entry => string.Equals(entry.source?.Trim(), source, StringComparison.Ordinal)).ToArray();
@@ -103,8 +108,9 @@ namespace TrickalFanGame.Editor
                     $"{source} must name the licence \"{RequiredLicenseName}\"; found \"{entry.licenseName}\".");
                 Assert(string.Equals(entry.licenseUrl?.Trim(), RequiredLicenseUrl, StringComparison.Ordinal),
                     $"{source} must link the licence at {RequiredLicenseUrl}; found \"{entry.licenseUrl}\".");
-                Assert(entry.modified,
-                    $"{source} was resampled, trimmed, levelled and layered, so its entry must carry the modification notice.");
+                Assert(entry.modified == modified, modified
+                    ? $"{source} was resampled, trimmed, levelled and layered, so its entry must carry the modification notice."
+                    : $"{source} plays as downloaded, so its entry must not claim a modification.");
             }
 
             foreach (CreditsCatalog.Section section in sections)
@@ -227,7 +233,7 @@ namespace TrickalFanGame.Editor
                 copy.Build(sections);
                 Assert(copy.Entries.Count == expected.Length, "Rebuilding the credits screen duplicated rows.");
 
-                foreach ((string source, string author) in RequiredAttribution)
+                foreach ((string source, string author, bool modified) in RequiredAttribution)
                 {
                     FrontendCreditsEntryView[] rows = copy.Entries
                         .Where(row => row.Entry != null &&
@@ -246,8 +252,10 @@ namespace TrickalFanGame.Editor
                         $"{source}: the licence name is missing from the row on screen.");
                     Assert(license.Contains(RequiredLicenseUrl, StringComparison.Ordinal),
                         $"{source}: the licence link is missing from the row on screen.");
-                    Assert(license.Contains(CreditsCatalog.ModifiedNotice, StringComparison.Ordinal),
-                        $"{source}: the modification notice is missing from the row on screen.");
+                    Assert(license.Contains(CreditsCatalog.ModifiedNotice, StringComparison.Ordinal) == modified,
+                        modified
+                            ? $"{source}: the modification notice is missing from the row on screen."
+                            : $"{source}: the row on screen claims a modification that was not made.");
                     AssertFits(row.PrimaryText, source + " author line");
                     AssertFits(row.LicenseText, source + " licence line");
                 }

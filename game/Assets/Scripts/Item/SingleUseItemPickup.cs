@@ -72,9 +72,11 @@ namespace TrickalFanGame.Item
             if (string.IsNullOrWhiteSpace(instanceId)) instanceId = configuredInstanceId;
         }
 
+        // Called only by the slot taking this pickup, so it is the moment the player picks it up.
         public void MarkCollected()
         {
             isCollected = true;
+            TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.ItemPickup);
             if (Application.isPlaying) Destroy(gameObject);
             else DestroyImmediate(gameObject);
         }

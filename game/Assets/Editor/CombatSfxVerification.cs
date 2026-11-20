@@ -3,6 +3,8 @@ using System.Linq;
 using System.Reflection;
 using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
+using TrickalFanGame.Enemy;
+using TrickalFanGame.Item;
 using TrickalFanGame.Player;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -25,6 +27,8 @@ namespace TrickalFanGame.Editor
             VerifyScene(Week13FrontendSetup.GameScenePath, true);
             VerifyRetriggerGuard();
             VerifyRouting();
+            VerifyWorldRouting();
+            VerifyCancelButtonNames();
             Debug.Log("Combat SFX verification passed.");
         }
 
@@ -109,10 +113,10 @@ namespace TrickalFanGame.Editor
                    VolumeOf(CombatSfxCue.SkillLowerBurst) > VolumeOf(CombatSfxCue.BasicAttack),
                 "The lower-grade cast and burst must stay louder than the basic attack.");
 
-            // A tick is background damage; it must not compete with the hit
-            // the player actually aimed, and its guard is the longest.
-            Assert(VolumeOf(CombatSfxCue.EnemyTickDamage) < VolumeOf(CombatSfxCue.HitEnemy),
-                "The tick cue must stay quieter than the basic attack blast.");
+            // A tick is background damage, so a whole pack ticking at once
+            // must collapse into one sound. Its loudness against the hit is
+            // tuned by ear in tools/sound-mixer (the files differ in level,
+            // so the table numbers alone cannot order them).
             Assert(GuardOf(CombatSfxCue.EnemyTickDamage) > GuardOf(CombatSfxCue.HitEnemy),
                 "The tick cue needs a longer guard than the blast: a whole pack ticks at once.");
         }
@@ -277,6 +281,29 @@ namespace TrickalFanGame.Editor
                     Assert(router.GetRequestCount(CombatSfxCue.SkillUpperImpact) == 1,
                         "A dash that lands on an enemy must play the impact.");
 
+                    Raise(router, "OnSpellUsed", new object[] { null });
+                    Assert(router.GetRequestCount(CombatSfxCue.SpellCast) == 1 &&
+                           router.GetRequestCount(CombatSfxCue.SpellTeleport) == 0,
+                        "An ordinary spell must play the spell cue, not the teleport.");
+                    ItemDefinition teleport = ScriptableObject.CreateInstance<ItemDefinition>();
+                    try
+                    {
+                        teleport.ConfigureContract("sfx-teleport-probe", "probe", ItemKind.SingleUseSpell,
+                            ItemRarity.Common, true, 1, new ItemEffectEntry(ItemEffectType.TeleportToBossRoom));
+                        Raise(router, "OnSpellUsed", teleport);
+                        Assert(router.GetRequestCount(CombatSfxCue.SpellTeleport) == 1 &&
+                               router.GetRequestCount(CombatSfxCue.SpellCast) == 1,
+                            "A teleport spell must play the teleport instead of the spell cue.");
+                    }
+                    finally
+                    {
+                        UnityEngine.Object.DestroyImmediate(teleport);
+                    }
+
+                    Raise(router, "OnPowerUsed", new object[] { null });
+                    Assert(router.GetRequestCount(CombatSfxCue.PowerCast) == 1,
+                        "Using the 권능 must ask for the power cue.");
+
                     VerifyDashSteps(router);
                 }
                 finally
@@ -291,6 +318,80 @@ namespace TrickalFanGame.Editor
                 Invoke(player.GetComponent<PlayerCombatAudio>(), "OnDisable");
                 UnityEngine.Object.DestroyImmediate(player);
             }
+        }
+
+        // Sound-1: the world cues that are not the player's own. An enemy
+        // dying asks for the defeat cue and the player dying does not; an
+        // ordinary enemy's attack asks for the attack cue and a boss's
+        // does not, because the boss voices its own patterns.
+        private static void VerifyWorldRouting()
+        {
+            GameObject enemy = new("Combat SFX defeat fixture");
+            GameObject player = new("Combat SFX player death fixture");
+            GameObject minion = new("Combat SFX minion fixture");
+            GameObject boss = new("Combat SFX boss fixture");
+            try
+            {
+                Health enemyHealth = enemy.AddComponent<Health>();
+                Invoke(enemyHealth, "Awake");
+                int defeats = CombatSfx.GetRequestCount(CombatSfxCue.EnemyDefeated);
+                enemyHealth.TakeDamage(new DamageContext(player, DamageSourceType.Environment, 10000f));
+                Assert(enemyHealth.IsDead, "The defeat fixture must die to a lethal hit.");
+                Assert(CombatSfx.GetRequestCount(CombatSfxCue.EnemyDefeated) == defeats + 1,
+                    "An enemy dying must ask for the defeat cue once.");
+
+                Health playerHealth = player.AddComponent<Health>();
+                Invoke(playerHealth, "Awake");
+                player.AddComponent<PlayerCombatEvents>();
+                playerHealth.TakeDamage(new DamageContext(enemy, DamageSourceType.Environment, 10000f));
+                Assert(playerHealth.IsDead, "The player fixture must die to a lethal hit.");
+                Assert(CombatSfx.GetRequestCount(CombatSfxCue.EnemyDefeated) == defeats + 1,
+                    "The player dying must not play the enemy defeat cue.");
+
+                int attacks = CombatSfx.GetRequestCount(CombatSfxCue.EnemyAttack);
+                EnemyProjectile.PlayAttackSound(minion);
+                Assert(CombatSfx.GetRequestCount(CombatSfxCue.EnemyAttack) == attacks + 1,
+                    "An ordinary enemy attacking must ask for the attack cue.");
+                boss.AddComponent<BossController>();
+                EnemyProjectile.PlayAttackSound(boss);
+                Assert(CombatSfx.GetRequestCount(CombatSfxCue.EnemyAttack) == attacks + 1,
+                    "A boss attacking must not play the ordinary enemy attack cue.");
+
+                // Sound-3: a 자폭형 (or crumb minion) death blast sounds like a bomb, once per blast.
+                int blasts = CombatSfx.GetRequestCount(CombatSfxCue.BombExplosion);
+                EnemyDeathBlast blast = EnemyDeathBlast.Spawn(Vector3.one * 5000f, minion.transform, minion, null,
+                    0f, 1f, 2, 0f);
+                Assert(blast.Explode() && !blast.Explode() &&
+                       CombatSfx.GetRequestCount(CombatSfxCue.BombExplosion) == blasts + 1,
+                    "An enemy death blast must ask for the bomb explosion cue once when it goes off.");
+
+                // Sound-3: a spell or 권능 taken off the floor asks for the item pickup cue once.
+                int pickups = CombatSfx.GetRequestCount(CombatSfxCue.ItemPickup);
+                new GameObject("Combat SFX spell pickup fixture", typeof(BoxCollider2D))
+                    .AddComponent<SingleUseItemPickup>().MarkCollected();
+                new GameObject("Combat SFX power pickup fixture", typeof(BoxCollider2D))
+                    .AddComponent<ActivePowerPickup>().MarkCollected();
+                Assert(CombatSfx.GetRequestCount(CombatSfxCue.ItemPickup) == pickups + 2,
+                    "Collecting a spell or a power pickup must ask for the item pickup cue once each.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(boss);
+                UnityEngine.Object.DestroyImmediate(minion);
+                UnityEngine.Object.DestroyImmediate(player);
+                UnityEngine.Object.DestroyImmediate(enemy);
+            }
+        }
+
+        // Sound-2: the cancel sound goes to the buttons that back out of a
+        // screen, by name, and every other button keeps the click.
+        private static void VerifyCancelButtonNames()
+        {
+            foreach (string name in new[] { "BackButton", "SettingsBackButton", "CreditsBackButton", "Cancel",
+                         "Cancel Button", "Cancel Selection", "Close", "Resume Button" })
+                Assert(GameAudioController.IsCancelButtonName(name), $"{name} must sound as a cancel.");
+            foreach (string name in new[] { "Background", "HomeQuitButton", "StartButton", "Buy Button", "" })
+                Assert(!GameAudioController.IsCancelButtonName(name), $"{name} must keep the click.");
         }
 
         // The run has to last as long as the dash does, and the two feet have

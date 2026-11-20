@@ -112,6 +112,10 @@ namespace TrickalFanGame.Resource
             }
 
             isCollected = true;
+            // Sound-3: gold clinks as coins; every other resource is an item pickup.
+            TrickalFanGame.Audio.CombatSfx.Play(resourceType == RunResourceType.Gold
+                ? TrickalFanGame.Audio.CombatSfxCue.GoldPickup
+                : TrickalFanGame.Audio.CombatSfxCue.ItemPickup);
             DestroyPickup();
             return true;
         }

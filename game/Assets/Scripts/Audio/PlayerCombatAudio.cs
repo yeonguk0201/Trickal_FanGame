@@ -39,6 +39,7 @@ namespace TrickalFanGame.Audio
         private PlayerUltimate highGradeSkill;
         private PlayerSP sp;
         private PlayerSpellSlot spellSlot;
+        private PlayerPowerSlot powerSlot;
         private bool cached;
         // Set while resolving a hit that rolled a critical. Health raises
         // AnyDamageResolved — which carries the critical flag — just before
@@ -76,6 +77,7 @@ namespace TrickalFanGame.Audio
             if (health != null) health.Healed += OnHealed;
             if (sp != null) sp.Restored += OnSpRestored;
             if (spellSlot != null) spellSlot.ItemUsed += OnSpellUsed;
+            if (powerSlot != null) powerSlot.PowerUsed += OnPowerUsed;
         }
 
         private void OnDisable() => Unsubscribe();
@@ -107,6 +109,7 @@ namespace TrickalFanGame.Audio
             if (health != null) health.Healed -= OnHealed;
             if (sp != null) sp.Restored -= OnSpRestored;
             if (spellSlot != null) spellSlot.ItemUsed -= OnSpellUsed;
+            if (powerSlot != null) powerSlot.PowerUsed -= OnPowerUsed;
 
             foreach (HomingSkillProjectile shot in trackedShots)
                 if (shot != null) shot.Exploded -= OnShotExploded;
@@ -125,6 +128,7 @@ namespace TrickalFanGame.Audio
             highGradeSkill = GetComponent<PlayerUltimate>();
             sp = GetComponent<PlayerSP>();
             spellSlot = GetComponent<PlayerSpellSlot>();
+            powerSlot = GetComponent<PlayerPowerSlot>();
         }
 
         private void OnBasicAttackFired() => Play(CombatSfxCue.BasicAttack);
@@ -147,10 +151,30 @@ namespace TrickalFanGame.Audio
         // One slot holds both kinds of spell, so the kind picks the sound.
         private void OnSpellUsed(ItemDefinition definition)
         {
+            if (IsTeleportSpell(definition))
+            {
+                Play(CombatSfxCue.SpellTeleport);
+                return;
+            }
+
             Play(definition != null && definition.Kind == ItemKind.JjangsemSpell
                 ? CombatSfxCue.JjangsemSpellCast
                 : CombatSfxCue.SpellCast);
         }
+
+        // Sound-2: a spell that moves the player to another room sounds as a teleport.
+        public static bool IsTeleportSpell(ItemDefinition definition)
+        {
+            if (definition == null) return false;
+            foreach (ItemEffectEntry effect in definition.Effects)
+                if (effect != null && effect.EffectType is ItemEffectType.TeleportToBossRoom
+                        or ItemEffectType.TeleportToGoldiShop)
+                    return true;
+            return definition.EffectType is ItemEffectType.TeleportToBossRoom or ItemEffectType.TeleportToGoldiShop;
+        }
+
+        // Sound-1: the 교주의 권능 going off.
+        private void OnPowerUsed(ItemDefinition definition) => Play(CombatSfxCue.PowerCast);
 
         // Damage over time on an enemy: poison, burn, the damage aura, a
         // spell's pulse. They all arrive as Periodic delivery, which is what

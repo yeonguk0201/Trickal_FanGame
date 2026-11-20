@@ -76,5 +76,77 @@ namespace TrickalFanGame.Audio
         // New members go after this one: the scenes store a cue as its
         // number, so inserting above would repoint every later cue.
         JjangsemSpellCast,
+
+        // Sound-1: the 크레용사 boss's sword. One slash-and-swing covers an
+        // approach swing landing and every dash of the dash chain starting;
+        // the map slash comes down as a slam with a metallic impact.
+        BossSwordSwing,
+        BossSwordSlam,
+
+        // A player attack hitting a destructible obstacle, once per hit.
+        ObstacleHit,
+
+        // An ordinary enemy attacking: a melee strike starting, or a shot or
+        // lob leaving it. Bosses carry their own cues and are left out.
+        EnemyAttack,
+
+        // An enemy dying, whatever killed it.
+        EnemyDefeated,
+
+        // Using the 교주의 권능.
+        PowerCast,
+
+        // The VS artwork slamming down in the boss intro.
+        BossIntroVs,
+
+        // Sound-2: the 새마음금고 boss. A gold pillar bursting out of the
+        // floor, one sound per pillar; the whistle while the vault is in the
+        // air, cut by its landing thud; a meteor's wind while it falls, cut
+        // by its explosion.
+        VaultPillarEmerge,
+        VaultJumpWhistle,
+        VaultJumpLanding,
+        VaultMeteorFall,
+        VaultMeteorImpact,
+
+        // The 부스러기 boss's thrown obstacles touching down together.
+        BossObstacleLanding,
+
+        // The floor portal opening after the boss.
+        PortalAppear,
+
+        // The character levelling up on the run result screen.
+        LevelUp,
+
+        // A spell that moves the player to another room. It replaces the
+        // ordinary spell sound for that spell.
+        SpellTeleport,
+
+        // Backing out of a screen: a back, cancel, close or resume button, or Esc.
+        UiCancel,
+
+        // Enemies appearing: a new wave, a boss summon, an obstacle's ambush.
+        EnemyAppear,
+
+        // Sound-3: the shop's focus moving to another offer, invest row,
+        // action button or popup choice, by keyboard or mouse.
+        UiFocusMove,
+
+        // Picking up a dropped item other than gold: an artifact, a spell, a
+        // 권능, a key, a bomb or elif. Gold, SP and hearts keep their own cues.
+        ItemPickup,
+
+        // Sound-3: picking up gold; a door taking the player to the next
+        // room; a chest opening; one of the player's footfalls while walking.
+        GoldPickup,
+        RoomTransition,
+        ChestOpen,
+        PlayerStep,
+
+        // Sound-3: the 새마음금고 chewing while it heals (cut when the heal
+        // ends), throwing its slime, and each hop of its walk.
+        VaultEat,
+        VaultSlimeThrow,
+        VaultMove,
     }
 }

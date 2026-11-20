@@ -1,4 +1,5 @@
 using TMPro;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Character;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Player;
@@ -64,6 +65,7 @@ namespace TrickalFanGame.Frontend
         private bool restPositionsCaptured;
         private float previousTimeScale = 1f;
         private float elapsed;
+        private bool vsSoundPlayed;
 
         public RoomGraphController RoomGraph => roomGraph;
         public GameBossHudView BossHud => bossHud;
@@ -166,6 +168,7 @@ namespace TrickalFanGame.Frontend
                 : FindFirstObjectByType<PlayerMovement>()?.GetComponentInChildren<SpriteRenderer>()?.sprite);
 
             elapsed = 0f;
+            vsSoundPlayed = false;
             Stage = BossIntroStage.Panels;
             Apply();
         }
@@ -222,6 +225,14 @@ namespace TrickalFanGame.Frontend
             }
 
             float sinceImpact = elapsed - VsImpactAt;
+            // Sound-1: the braam lands with the VS slam. A skip past the
+            // panels jumps to the fill above and never reaches here.
+            if (sinceImpact >= 0f && !vsSoundPlayed)
+            {
+                vsSoundPlayed = true;
+                CombatSfx.Play(CombatSfxCue.BossIntroVs);
+            }
+
             if (flash != null)
             {
                 float flashAlpha = sinceImpact >= 0f ? 0.7f * (1f - Mathf.Clamp01(sinceImpact / FlashSeconds)) : 0f;

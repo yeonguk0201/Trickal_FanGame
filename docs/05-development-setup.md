@@ -2578,3 +2578,13 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
   Shift 0.05)로 바꾸면 멈추는 자리가 바로 바뀐다. 폭과 높이가 같으면 원, 다르면 캡슐이다. 발 좌우 위치(그림을
   뒤집지 않았을 때 기준, 뒤집으면 함께 뒤집힘)와 발 내림(음수는 위로)은 슬라이더나 캔버스의 초록 발 끌기로 바꾼다. 값은 브라우저에 자동 저장되고 "공유할 값"을 복사해 전달한다.
 - 확인 근거: 2026-11-19 Unity 6000.3.22f1 배치 종료 코드 0, 3개 보스 렌더, 헤드리스 Edge로 첫 화면 렌더 확인.
+
+## 사운드 믹서
+
+효과음이 BGM에 묻히는지 게임 기본 볼륨에서 듣고 조절하는 오프라인 페이지다.
+
+1. 저장소 루트에서 `python tools/sound-mixer/build.py`를 실행한다. 큐를 추가·변경한 뒤에도 다시 실행한다.
+2. 생성된 `tmp/sound-mixer.html`을 Edge 또는 Chrome으로 연다. 파일을 다른 폴더로 옮기면 음원 상대 경로가 깨진다.
+3. 전투 BGM을 재생한 상태에서 효과음의 `재생`(겹쳐 재생 가능)과 `반복`(게임 주기 간격)을 눌러 듣고 슬라이더로 조절한다.
+4. `변경값 복사`로 나온 `CombatSfxSetup.Cues` 줄을 반영하고 `TrickalFanGame.Editor.CombatSfxVerification.SetupAndVerifyBatch`를
+   실행한다. BGM 믹스 게인은 현재 게임에 대응 값이 없어 주석으로만 나오며, 반영하려면 코드 변경이 필요하다.

@@ -1,4 +1,5 @@
 using System;
+using TrickalFanGame.Audio;
 using UnityEngine;
 
 namespace TrickalFanGame.Combat
@@ -199,6 +200,9 @@ namespace TrickalFanGame.Combat
             KillingBlow = killingBlow;
             IsDead = true;
             ResolvePlayerCombatEvents(killingBlow.Source)?.TryReportEnemyKilled(this, killingBlow);
+            // Sound-1: every enemy death, whatever dealt the blow. The player
+            // is the one Health that carries PlayerCombatEvents.
+            if (GetComponent<PlayerCombatEvents>() == null) CombatSfx.Play(CombatSfxCue.EnemyDefeated);
             Died?.Invoke();
         }
 

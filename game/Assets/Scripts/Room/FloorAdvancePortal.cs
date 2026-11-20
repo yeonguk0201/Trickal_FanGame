@@ -238,6 +238,8 @@ namespace TrickalFanGame.Room
         private void SetUnlocked(bool unlocked)
         {
             if (unlocked != IsUnlocked) visibleTime = 0f;
+            // Sound-2: the portal opening once the boss is down and its reward taken.
+            if (unlocked && !IsUnlocked) CombatSfx.Play(CombatSfxCue.PortalAppear);
             IsUnlocked = unlocked;
             EnsureTrigger();
             // Edit-mode integration verifiers exercise transitions without a game clock.

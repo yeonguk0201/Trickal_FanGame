@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Player;
 using TrickalFanGame.Room;
@@ -558,6 +559,8 @@ namespace TrickalFanGame.Enemy
                 float lightHeight = Mathf.Clamp(ResolveEffectBodyWidth() * 1.6f, 5f, 9f);
                 SlamLightEffect.PlayPath(warning, lightHeight, transform, visual, arenaBounds);
             }
+            // Golden phase slams three directions at once; one sound covers them.
+            CombatSfx.Play(CombatSfxCue.BossSwordSlam);
             slashResolved = true;
             slashPending = false;
             chargingSlash = false;
@@ -607,6 +610,7 @@ namespace TrickalFanGame.Enemy
                 lockedDirection * (SwingStartOffset + swingRange * 0.5f),
                 swingRange * 2f, Mathf.Max(swingWidth * 2f, ResolveEffectBodyWidth() * 1.2f), 0.35f, transform, visual,
                 angle: Mathf.Atan2(lockedDirection.y, lockedDirection.x) * Mathf.Rad2Deg);
+            CombatSfx.Play(CombatSfxCue.BossSwordSwing);
             completedSwings++;
             attackPoseIndex = 2;
             attackFollowThroughStartedAt = now;
@@ -654,6 +658,8 @@ namespace TrickalFanGame.Enemy
             dashInMotion = true;
             attackPoseIndex = completedDashes % 2 == 0 ? 5 : 7;
             dashStateEndsAt = now + dashDuration;
+            // Every dash of the chain swings the sword as it launches.
+            CombatSfx.Play(CombatSfxCue.BossSwordSwing);
             ShowDashTelegraph();
             SetAllTelegraphColors(new Color(1f, 0.12f, 0.05f, 0.9f),
                 new Color(1f, 0.45f, 0.05f, 0.95f));
@@ -784,6 +790,7 @@ namespace TrickalFanGame.Enemy
                 livingMinions.Add(minion);
                 boss?.RegisterOwnedObject(minion);
             }
+            if (count > 0) CombatSfx.Play(CombatSfxCue.EnemyAppear);
         }
 
         private void UpdateAimDirection()

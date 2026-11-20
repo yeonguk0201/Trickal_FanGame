@@ -164,6 +164,7 @@ namespace TrickalFanGame.Enemy
                     {
                         stateEndsAt = currentTime + activeDuration;
                         SetState(MeleeEnemyAttackState.Active);
+                        EnemyProjectile.PlayAttackSound(gameObject);
                         BeginLunge();
                         if (TryResolveActiveHit())
                         {

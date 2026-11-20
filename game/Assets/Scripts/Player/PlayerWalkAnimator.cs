@@ -159,6 +159,9 @@ namespace TrickalFanGame.Player
             {
                 elapsed -= frameDuration;
                 frameIndex = (frameIndex + 1) % FrameCount;
+                // Sound-3: frames 1 and 3 are the feet touching down, two steps per walk cycle.
+                if (frameIndex % 2 == 1)
+                    TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.PlayerStep);
             }
 
             spriteRenderer.sprite = SelectFrames(movement.FacingDirection)[frameIndex];

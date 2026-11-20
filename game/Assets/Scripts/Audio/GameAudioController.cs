@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TrickalFanGame.Data;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -32,7 +33,24 @@ namespace TrickalFanGame.Audio
         [SerializeField] private AudioSource sfxSource;
         [SerializeField] private CombatSfxEntry[] combatSfx = Array.Empty<CombatSfxEntry>();
 
+        // Sound-2: a cue that has to stop when its moment ends (a falling
+        // whistle cut by the landing, the wind of a meteor cut by its impact)
+        // cannot ride the shared one-shot source, so it gets a voice of its own.
+        private sealed class Voice
+        {
+            public AudioSource Source;
+            public int Handle;
+            public float Volume;
+            public float FadeStartedAt = -1f;
+            public float FadeSeconds;
+        }
+
+        private const int MaximumVoices = 8;
+        private readonly List<Voice> voices = new();
+        private int nextVoiceHandle;
+
         private readonly HashSet<Button> boundButtons = new();
+        private readonly HashSet<Button> cancelButtons = new();
         private readonly Dictionary<CombatSfxCue, float> nextCueTime = new();
         private readonly Dictionary<CombatSfxCue, int> cuePlayCounts = new();
         private float nextButtonScanTime;
@@ -45,6 +63,7 @@ namespace TrickalFanGame.Audio
         public AudioSource SfxSource => sfxSource;
         public AudioClip CurrentBgm => bgmSource != null ? bgmSource.clip : null;
         public int UiClickPlayCount { get; private set; }
+        public int UiCancelPlayCount { get; private set; }
         public IReadOnlyList<CombatSfxEntry> CombatSfx => combatSfx;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -86,6 +105,10 @@ namespace TrickalFanGame.Audio
 
         private void Update()
         {
+            TickVoices(Time.unscaledTime);
+            // Esc backs out of whatever is open (the pause menu, the shop, a
+            // frontend page), so it always sounds as a cancel.
+            if (Keyboard.current?.escapeKey.wasPressedThisFrame == true) PlayUiCancel();
             if (Time.unscaledTime < nextButtonScanTime) return;
             nextButtonScanTime = Time.unscaledTime + 0.5f;
             RefreshButtonBindings();
@@ -133,6 +156,25 @@ namespace TrickalFanGame.Audio
             if (sfxSource != null && uiClick != null) sfxSource.PlayOneShot(uiClick);
         }
 
+        // Sound-2: backing out with a back, cancel, close or resume button, or Esc.
+        public void PlayUiCancel()
+        {
+            UiCancelPlayCount++;
+            PlayCombatCue(CombatSfxCue.UiCancel);
+        }
+
+        // Buttons are named by what they do, and the ones that back out of a
+        // screen carry Back, Cancel, Close or Resume in their names.
+        public static bool IsCancelButtonName(string objectName)
+        {
+            if (string.IsNullOrEmpty(objectName)) return false;
+            return objectName.EndsWith("BackButton", StringComparison.Ordinal) ||
+                   objectName.Equals("Back", StringComparison.OrdinalIgnoreCase) ||
+                   objectName.IndexOf("Cancel", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   objectName.IndexOf("Close", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   objectName.IndexOf("Resume", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
         public void ConfigureCombatSfx(CombatSfxEntry[] entries)
         {
             combatSfx = entries ?? Array.Empty<CombatSfxEntry>();
@@ -166,6 +208,86 @@ namespace TrickalFanGame.Audio
             return true;
         }
 
+        // Plays a cue on a voice of its own and returns a handle to stop it
+        // with, or 0 when nothing played. The retrigger guard applies as it
+        // does to a one-shot. With every voice busy the oldest is taken over.
+        public int PlayCombatVoice(CombatSfxCue cue)
+        {
+            if (!TryGetCombatEntry(cue, out CombatSfxEntry entry) || entry.clip == null) return 0;
+            float now = Time.unscaledTime;
+            if (nextCueTime.TryGetValue(cue, out float readyAt) && now < readyAt) return 0;
+            nextCueTime[cue] = now + Mathf.Max(0f, entry.minimumInterval);
+            cuePlayCounts[cue] = GetCombatCuePlayCount(cue) + 1;
+
+            Voice voice = voices.Find(candidate => candidate.Source != null && !candidate.Source.isPlaying);
+            if (voice == null && voices.Count < MaximumVoices)
+            {
+                AudioSource source = gameObject.AddComponent<AudioSource>();
+                source.playOnAwake = false;
+                source.loop = false;
+                source.spatialBlend = 0f;
+                source.ignoreListenerPause = true;
+                voice = new Voice { Source = source };
+                voices.Add(voice);
+            }
+
+            if (voice == null)
+            {
+                voice = voices[0];
+                foreach (Voice candidate in voices)
+                    if (candidate.Handle < voice.Handle) voice = candidate;
+            }
+
+            voice.Handle = ++nextVoiceHandle;
+            voice.Volume = entry.volume > 0f ? Mathf.Clamp01(entry.volume) : 1f;
+            voice.FadeStartedAt = -1f;
+            voice.Source.Stop();
+            voice.Source.clip = entry.clip;
+            voice.Source.volume = voice.Volume * SfxLevel;
+            voice.Source.Play();
+            return voice.Handle;
+        }
+
+        // Fades a voice out. A handle that has been taken over or has finished
+        // is ignored, so a late stop never cuts another sound short.
+        public void StopCombatVoice(int handle, float fadeSeconds = 0.08f)
+        {
+            if (handle <= 0) return;
+            foreach (Voice voice in voices)
+            {
+                if (voice.Handle != handle || voice.Source == null || !voice.Source.isPlaying) continue;
+                if (fadeSeconds <= 0f) voice.Source.Stop();
+                else if (voice.FadeStartedAt < 0f)
+                {
+                    voice.FadeStartedAt = Time.unscaledTime;
+                    voice.FadeSeconds = fadeSeconds;
+                }
+                return;
+            }
+        }
+
+        private static float SfxLevel => LocalSettings.MasterVolume * LocalSettings.SfxVolume;
+
+        private void TickVoices(float now)
+        {
+            foreach (Voice voice in voices)
+            {
+                if (voice.Source == null || !voice.Source.isPlaying) continue;
+                float fade = 1f;
+                if (voice.FadeStartedAt >= 0f)
+                {
+                    fade = 1f - Mathf.Clamp01((now - voice.FadeStartedAt) / Mathf.Max(0.001f, voice.FadeSeconds));
+                    if (fade <= 0f)
+                    {
+                        voice.Source.Stop();
+                        continue;
+                    }
+                }
+
+                voice.Source.volume = voice.Volume * SfxLevel * fade;
+            }
+        }
+
         private bool TryGetCombatEntry(CombatSfxCue cue, out CombatSfxEntry entry)
         {
             for (int i = 0; i < combatSfx.Length; i++)
@@ -184,21 +306,36 @@ namespace TrickalFanGame.Audio
             return button != null && boundButtons.Contains(button);
         }
 
+        public bool IsCancelButtonBound(Button button)
+        {
+            return button != null && cancelButtons.Contains(button);
+        }
+
         public void RefreshButtonBindings()
         {
             Button[] buttons = FindObjectsByType<Button>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (Button button in buttons)
             {
                 if (button == null || !boundButtons.Add(button)) continue;
-                button.onClick.AddListener(PlayUiClick);
+                if (IsCancelButtonName(button.gameObject.name))
+                {
+                    cancelButtons.Add(button);
+                    button.onClick.AddListener(PlayUiCancel);
+                }
+                else button.onClick.AddListener(PlayUiClick);
             }
         }
 
         private void UnbindButtons()
         {
             foreach (Button button in boundButtons)
-                if (button != null) button.onClick.RemoveListener(PlayUiClick);
+            {
+                if (button == null) continue;
+                button.onClick.RemoveListener(PlayUiClick);
+                button.onClick.RemoveListener(PlayUiCancel);
+            }
             boundButtons.Clear();
+            cancelButtons.Clear();
         }
 
         private void MergeClips(AudioClip configuredHomeBgm, AudioClip configuredCombatBgm,

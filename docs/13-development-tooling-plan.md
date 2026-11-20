@@ -803,3 +803,13 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
   자리를 비교한다. 게임 규칙(`EnemyFeet.StandingRootArea`)과 같은 식으로 위치를 계산한다.
 - 상태: 완료(2026-11-19). 사용자가 도구로 정한 값을 `BossPattern0Setup.BossFeet`에 반영하고 Play로 확인했다.
 - 실행 방법은 `docs/05-development-setup.md`의 같은 이름 항목.
+
+### 사운드 믹서 (2026-11-20, Sound-3)
+
+- [x] `tools/sound-mixer/build.py`: `CombatSfxSetup.Cues`(큐·파일·볼륨·재생 간격·길이 상한)와 BGM 경로를 읽어
+  `tmp/sound-mixer.html`을 만든다. 실제 `game/Assets/Audio` 파일을 상대 경로로 재생하므로 서버·인터넷이 필요 없다.
+- [x] 게임 기본 설정(마스터·BGM·효과음 100%)에서 각 효과음을 Unity와 같은 선형 볼륨으로 재생, 여러 소리 동시 재생,
+  게임 주기에 맞춘 반복 재생(간격 편집 가능), BGM 반복 재생과 믹스 게인, 그룹·검색 필터, 브라우저 자동 저장.
+- [x] 바뀐 값만 `CombatSfxSetup.Cues` 형식으로 내보낸다. 게임 파일에는 자동으로 쓰지 않는다.
+- [x] 헤드리스 Edge에서 48개 큐·6개 그룹·BGM 2곡 렌더 확인. 실제 청취 판단은 사용자 확인 항목이다.
+- 실행법은 [개발 환경](./05-development-setup.md)의 “사운드 믹서”.

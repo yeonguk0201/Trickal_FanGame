@@ -59,7 +59,11 @@ Freesound가 제공하는 문구에 수정 고지를 덧붙인 형태다. 두 �
 ```
 Magic Fire Spell Impact & Punch by EminYILDIRIM -- https://freesound.org/s/541478/ -- License: Attribution 4.0 (modified)
 FireSpell3.wav by alonsotm -- https://freesound.org/s/396500/ -- License: Attribution 4.0 (modified)
+Pop-Up by IENBA -- https://freesound.org/s/545477/ -- License: Attribution 4.0
 ```
+
+- 2026-11-19 Sound-2: 뒤로가기·취소음(`SFX_UI_Cancel.wav`)으로 Pop-Up(IENBA, CC BY 4.0)이 들어와 표기 의무 음원이
+  **3개**가 됐다. 원본 그대로 쓰므로 수정 고지는 붙이지 않는다. `CreditsScreenVerification`이 세 줄을 모두 검사한다.
 
 - 수정 내용을 자세히 적을 필요는 없다. "modified" 또는 "수정됨" 표시로 충족된다.
 - 제작자가 이 게임을 후원하거나 보증한다는 뜻으로 읽힐 표현은 쓰지 않는다(CC BY 4.0이 금지한다).
@@ -172,3 +176,25 @@ FireSpell3.wav by alonsotm -- https://freesound.org/s/396500/ -- License: Attrib
 - 경로나 용도를 바꿀 때는 이 문서와 `Week13Setting1ASetup`의 경로를 함께 갱신한 뒤 Setup·검증을 다시 실행한다.
 - 전투 효과음 8종의 경로는 위 "전투 효과음" 절에 있고, 담당 Setup은 `CombatSfxSetup`이다. BGM·UI 클릭과 전투 효과음은
   서로 다른 필드를 쓰므로 두 Setup은 서로를 덮어쓰지 않는다.
+- 2026-11-19 Sound-1·Sound-2: 크레용사 칼, 장애물·적 공격·처치, 권능·스펠, 보스 VS, 새마음금고(기둥·점프·메테오), 부스러기 장애물
+  착지, 포탈 등장, 레벨업, 순간이동 스펠, 뒤로가기·취소, 적 등장 효과음이 추가됐다. 기본 타격·치명타·아이템 드롭은 새 음원으로
+  교체됐고(`SFX_Hit_Punch.mp3`, `SFX_Hit_Critical_Slap.mp3`, `SFX_Item_Drop_Cork.mp3`), UI 클릭은 같은 경로
+  `SFX_UI_Click.wav`에 POP SFX Neutral(ethernel0, CC0)을 덮어썼다. 적 등장음 `SFX_Enemy_Appear.wav`는 OpenGameArt Pop Sounds의 pop8(EZduzziteh, CC0)이다. 큐와 파일 경로의 기준은 `CombatSfxSetup.Cues`,
+  출처는 `Resources/Credits.json`이다.
+- 2026-11-20 Sound-3: 상점 포커스 이동음 `SFX_UI_Focus_Move.wav`(큐 `UiFocusMove`)는 같은 Pop Sounds 팩의 pop2(EZduzziteh,
+  CC0, 무수정)다. 상점은 오퍼 칸·투자 행·투자/닫기 버튼·구매 팝업 선택이, 보상 선택 창은 카드·확인·취소 사이 선택이 실제로
+  바뀔 때만 울린다(창이 열리며 첫 카드를 잡을 때와 카드 클릭으로 확인 버튼에 넘어갈 때는 울리지 않는다). 자폭형과 부스러기 쫄따구의 사망
+  폭발(`EnemyDeathBlast`)은 새 음원 없이 폭탄 큐 `BombExplosion`을 재사용한다.
+- 2026-11-20 Sound-3: 아이템 줍기음 `SFX_Item_Pickup.mp3`(큐 `ItemPickup`)는 Pixabay #145251 Coin Collect Retro 8-bit
+  Sound Effect(lesiakower, Pixabay Content License, 무수정)다. 아티팩트·스펠·권능·열쇠·폭탄·엘리프를 주울 때 울린다. 골드는
+  별도 동전 소리를 넣을 예정이라 제외했고, SP·하트는 기존 `SpGain`·`Heal`을 그대로 쓴다.
+- 2026-11-20 Sound-3 추가분(발소리 외 무수정): 골드 줍기 `SFX_Gold_Pickup.wav`(Mixkit #1939 Coins handling), 문으로 방 이동
+  `SFX_Room_Transition.wav`(Mixkit #192 Cabinet door closing, 구덩이·순간이동 스펠은 제외), 상자 열기 `SFX_Chest_Open.mp3`
+  (Freesound 771164 steprock, CC0), 플레이어 발소리 `SFX_Player_Step.wav`(Freesound 535222 spycrah, **CC BY 4.0 — 크레딧
+  표기 필수**, 원본이 다른 효과음보다 약 30dB 작아 피크 -3dBFS로 +29.8dB 증폭(그 외 무가공), 크레딧 수정 표기, 걷기 프레임
+  1·3에서 0.25초 간격), 새마음금고 먹기 `SFX_Vault_Eat.mp3`(Freesound 244370 philip1789, CC0, 회복
+  패턴 동안 voice로 재생하고 패턴이 끝나면 끊음), 젤리 던지기 `SFX_Vault_Slime_Throw.wav`(Freesound 346373 denao270, CC0,
+  젤리 덩어리가 실제로 날아갈 때마다 1회, 0.08초 간격), 이동 `SFX_Vault_Move.wav`(Freesound 353250 Zuzek06, CC0, 걷기
+  애니메이션의 깡충 이륙 지점(보폭 18%)마다 1회).
+  Mixkit 음원은 Mixkit Sound Effects Free License로 표기 의무가 없다.
+- 2026-11-20 사운드 믹서(`tools/sound-mixer`)로 33개 cue 볼륨을 조정했다. 값은 `CombatSfxSetup.Cues`가 기준이다.

@@ -153,6 +153,10 @@ namespace TrickalFanGame.Enemy
             moving = !suppressed && distance > 0.0001f && distance < 0.7f;
             float previousCycle = cycle;
             cycle = moving ? Mathf.Repeat(cycle + distance / strideLength, 1f) : 0f;
+            // Sound-3: the ordinary vault hop leaves the ground at 18% of its stride (the drawn takeoff pose).
+            if (style == BossMovementStyle.VaultHop && moving &&
+                ((previousCycle < 0.18f && cycle >= 0.18f) || (cycle < previousCycle && cycle >= 0.18f)))
+                TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.VaultMove);
             // The ordinary vault hop lands at 86% of its stride. Its ground treasures react only on impact.
             if (style == BossMovementStyle.VaultHop && moving &&
                 ((previousCycle < 0.86f && cycle >= 0.86f) || (cycle < previousCycle && previousCycle < 0.86f)))

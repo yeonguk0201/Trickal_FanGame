@@ -1,3 +1,4 @@
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Frontend;
 using TrickalFanGame.Run;
@@ -28,6 +29,9 @@ namespace TrickalFanGame.Enemy
         private Transform target;
         private SpriteRenderer mark;
         private SpriteRenderer lump;
+        // Sound-2: the wind of the fall, started with the warning and cut by the impact.
+        private int fallVoice;
+        private bool fallSounded;
 
         public bool HasLanded { get; private set; }
         public bool TargetsPlayer { get; private set; }
@@ -79,6 +83,11 @@ namespace TrickalFanGame.Enemy
         public void Tick(float now)
         {
             if (HasLanded) return;
+            if (!fallSounded && Application.isPlaying)
+            {
+                fallSounded = true;
+                fallVoice = CombatSfx.PlayVoice(CombatSfxCue.VaultMeteorFall);
+            }
             float warning = Mathf.Max(0.01f, impactAt - shownAt);
             float progress = Mathf.Clamp01((now - shownAt) / warning);
             if (mark != null)
@@ -110,6 +119,9 @@ namespace TrickalFanGame.Enemy
         private void Land()
         {
             HasLanded = true;
+            CombatSfx.StopVoice(fallVoice, 0.04f);
+            fallVoice = 0;
+            CombatSfx.Play(CombatSfxCue.VaultMeteorImpact);
             LastBrokenObstacles = BossSummonedObstacle.BreakInCircle(transform.position, radius);
             HurtPlayerOnMark();
             if (lump != null && lump.sprite != null)
@@ -117,6 +129,9 @@ namespace TrickalFanGame.Enemy
             if (Application.isPlaying) Destroy(gameObject);
             else DestroyImmediate(gameObject);
         }
+
+        // A meteor cleared with its room before landing stops its wind.
+        private void OnDestroy() => CombatSfx.StopVoice(fallVoice);
 
         private void HurtPlayerOnMark()
         {
