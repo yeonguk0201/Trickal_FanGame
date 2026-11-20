@@ -484,7 +484,7 @@ namespace TrickalFanGame.Combat
             if (obstacle != null)
             {
                 // Same burst as an enemy hit, but only when the hit counted (not on bomb-only obstacles).
-                if (DestructibleObstacle.TryHitCollider(collider))
+                if (DestructibleObstacle.TryHitCollider(collider, null, transform.position))
                 {
                     HitSpark.Play(transform.position, flightVelocity, obstacle);
                 }

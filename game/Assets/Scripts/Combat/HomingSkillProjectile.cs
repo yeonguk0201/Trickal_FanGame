@@ -119,7 +119,7 @@ namespace TrickalFanGame.Combat
                 return;
             }
 
-            DestructibleObstacle.TryHitCollider(other, hitObstacles);
+            DestructibleObstacle.TryHitCollider(other, hitObstacles, transform.position);
             bool isPortalDoor = other.GetComponentInParent<DoorController>() != null;
             bool isSolidBoundary = !other.isTrigger;
             if (!hasAssignedTarget && (isPortalDoor || isSolidBoundary))

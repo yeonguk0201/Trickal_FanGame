@@ -69,6 +69,8 @@ namespace TrickalFanGame.Room
         private int hitsTaken;
         private bool isBroken;
         private bool isBurning;
+        private Vector2 lastHitPoint;
+        private bool hasLastHitPoint;
 
         public string ObstacleId => obstacleId;
         public string VariantId => variantId;
@@ -82,6 +84,10 @@ namespace TrickalFanGame.Room
         public bool IsBurning => isBurning;
         // Whether the obstacle was burning when it broke.
         public bool BrokeWhileBurning => isBroken && isBurning;
+        // Where the last counted hit or the breaking explosion came from, when the caller knew it. A tree falls away
+        // from it (TreeFallEffect).
+        public bool HasLastHitPoint => hasLastHitPoint;
+        public Vector2 LastHitPoint => lastHitPoint;
         public ResourceDropTable DropTable => dropTable;
         public int DropSeed => dropSeed;
         public ObstacleBreakRule BreakRule => variant != null ? variant.BreakRule : ObstacleBreakRule.Hits;
@@ -94,6 +100,8 @@ namespace TrickalFanGame.Room
         // The enemies the last break released instead of dropping.
         public IReadOnlyList<GameObject> LastEnemies => lastEnemies;
         public event Action<DestructibleObstacle> Broken;
+        // A counted hit that leaves the obstacle standing; the breaking hit raises Broken instead.
+        public event Action<DestructibleObstacle> Hit;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // Development panel only: the next obstacle broken on a floor with a secret room leaves a secret pit.
         public static bool DevelopmentForceNextSecretPit { get; set; }
@@ -290,9 +298,13 @@ namespace TrickalFanGame.Room
         }
 
         // One player attack or skill hit. Returns true when the hit counted.
-        public bool RegisterPlayerHit()
+        public bool RegisterPlayerHit() => RegisterPlayerHit(null);
+
+        // hitPoint: the attack center or the shot's position, so a tree can fall away from the hit.
+        public bool RegisterPlayerHit(Vector2? hitPoint)
         {
             if (isBroken || !isActiveAndEnabled || BreakRule != ObstacleBreakRule.Hits) return false;
+            RememberHitPoint(hitPoint);
             hitsTaken++;
             CombatSfx.Play(CombatSfxCue.ObstacleHit);
             // Holding a burn artifact is enough; its burn chance is not rolled. The hit that breaks the obstacle
@@ -311,6 +323,7 @@ namespace TrickalFanGame.Room
             }
 
             if (hitsTaken >= RequiredHits) Break(false);
+            else Hit?.Invoke(this);
             return true;
         }
 
@@ -320,7 +333,7 @@ namespace TrickalFanGame.Room
             int hits = 0;
             foreach (Collider2D collider in Physics2D.OverlapCircleAll(center, radius, ObstacleMask))
             {
-                if (TryHitCollider(collider, alreadyHit)) hits++;
+                if (TryHitCollider(collider, alreadyHit, center)) hits++;
             }
 
             return hits;
@@ -337,7 +350,7 @@ namespace TrickalFanGame.Room
                     : null;
                 if (obstacle == null ||
                     (alreadyDestroyed != null && !alreadyDestroyed.Add(obstacle)) ||
-                    !obstacle.TryDestroyByBomb())
+                    !obstacle.TryDestroyByBomb(center))
                 {
                     continue;
                 }
@@ -348,9 +361,12 @@ namespace TrickalFanGame.Room
             return destroyed;
         }
 
-        public bool TryDestroyByBomb()
+        public bool TryDestroyByBomb() => TryDestroyByBomb(null);
+
+        public bool TryDestroyByBomb(Vector2? explosionCenter)
         {
             if (isBroken || !isActiveAndEnabled) return false;
+            RememberHitPoint(explosionCenter);
             hitsTaken = RequiredHits;
             if (visual != null) visual.color = crackedColor;
             Break(true);
@@ -383,11 +399,19 @@ namespace TrickalFanGame.Room
             if (collision.collider.GetComponentInParent<PlayerMovement>() != null) TryOpenWithKey();
         }
 
-        public static bool TryHitCollider(Collider2D collider, ISet<DestructibleObstacle> alreadyHit = null)
+        public static bool TryHitCollider(Collider2D collider, ISet<DestructibleObstacle> alreadyHit = null,
+            Vector2? hitPoint = null)
         {
             DestructibleObstacle obstacle = collider != null ? collider.GetComponentInParent<DestructibleObstacle>() : null;
             if (obstacle == null || (alreadyHit != null && !alreadyHit.Add(obstacle))) return false;
-            return obstacle.RegisterPlayerHit();
+            return obstacle.RegisterPlayerHit(hitPoint);
+        }
+
+        private void RememberHitPoint(Vector2? hitPoint)
+        {
+            if (!hitPoint.HasValue) return;
+            lastHitPoint = hitPoint.Value;
+            hasLastHitPoint = true;
         }
 
         // Stable across runs and platforms (FNV-1a over the stable obstacle ID), unlike string.GetHashCode.

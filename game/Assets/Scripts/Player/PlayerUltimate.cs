@@ -115,7 +115,7 @@ namespace TrickalFanGame.Player
         {
             if (IsDashing)
             {
-                DestructibleObstacle.TryHitCollider(collision.collider, impactedObstacles);
+                DestructibleObstacle.TryHitCollider(collision.collider, impactedObstacles, transform.position);
             }
 
             TryImpact(collision.collider.GetComponentInParent<Health>(), Time.time);

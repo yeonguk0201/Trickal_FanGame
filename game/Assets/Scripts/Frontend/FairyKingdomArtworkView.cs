@@ -29,6 +29,9 @@ namespace TrickalFanGame.Frontend
         // the lower hedge foreground (20) still covers it. The trunk cell keeps the obstacle order under the player.
         public const int TreeCanopySortingOrder = 15;
         private bool referencesCached;
+        // TreeHitEffect: the shake started by the last counted hit, and whether it is mirrored.
+        private float treeShakeStartedAt = float.NegativeInfinity;
+        private bool treeShakeMirrored;
         public string ArtworkId => artworkId;
         public FairyKingdomArtworkMode Mode => mode;
         public SpriteRenderer Visual => visual;
@@ -46,10 +49,38 @@ namespace TrickalFanGame.Frontend
         {
             Cache();
             if (health != null && mode == FairyKingdomArtworkMode.Crumb) health.Died += OnDied;
+            if (obstacle != null && mode == FairyKingdomArtworkMode.Obstacle)
+            {
+                obstacle.Broken += OnObstacleBroken;
+                obstacle.Hit += OnObstacleHit;
+            }
         }
         private void OnDisable()
         {
             if (health != null) health.Died -= OnDied;
+            if (obstacle != null)
+            {
+                obstacle.Broken -= OnObstacleBroken;
+                obstacle.Hit -= OnObstacleHit;
+            }
+            treeShakeStartedAt = float.NegativeInfinity;
+        }
+
+        // A standing tree shakes and drops leaves on each counted hit. A burning tree keeps its flame animation.
+        private void OnObstacleHit(DestructibleObstacle hit)
+        {
+            if (!Application.isPlaying || hit.VariantId != DestructibleObstacle.TreeVariantId || hit.IsBurning) return;
+            treeShakeStartedAt = Time.time;
+            treeShakeMirrored = TreeFallEffect.FallsLeftFrom(hit);
+            TreeHitEffect.CreateLeaves(hit, visual);
+        }
+
+        // A broken tree used to vanish at once; it now falls over away from the hit and fades (TreeFallEffect).
+        // A tree restored as already broken on a revisit never raises Broken, so it does not fall again.
+        private void OnObstacleBroken(DestructibleObstacle broken)
+        {
+            if (Application.isPlaying && broken.VariantId == DestructibleObstacle.TreeVariantId)
+                TreeFallEffect.Create(broken, visual);
         }
         private void Cache()
         {
@@ -119,6 +150,14 @@ namespace TrickalFanGame.Frontend
                     Time.time - periodic.BurstTime, localWidth);
                 if (burst != null) visual.sprite = burst;
             }
+            // TreeHitEffect: the shake frames stand in for the intact drawing; a burning tree never shakes.
+            bool shaking = id == "obstacle-tree" && !authoredHazard &&
+                           Time.time - treeShakeStartedAt < TreeHitEffect.ShakeDuration;
+            Sprite shakeFrame = shaking
+                ? TreeHitEffect.ShakeFrame(TreeHitEffect.ShakeFrameAt(Time.time - treeShakeStartedAt), fitted)
+                : null;
+            if (shakeFrame != null) visual.sprite = shakeFrame;
+            if (id == "obstacle-tree") visual.flipX = shakeFrame != null && treeShakeMirrored;
             if (id == "obstacle-tree" && visual.transform != transform)
             {
                 // The root marks the lower grid cell. Only the drawing reaches into the cell above it.
@@ -138,7 +177,8 @@ namespace TrickalFanGame.Frontend
             // Legacy placeholder palettes must not recolor authored art. Hit feedback owns fixed enemy colors.
             if (mode == FairyKingdomArtworkMode.Obstacle)
             {
-                float shade = !rockDamage && !authoredHazard && obstacle != null ? Mathf.Lerp(1f, 0.7f,
+                // A tree shows its hits by shaking (TreeHitEffect), not by darkening.
+                float shade = !rockDamage && !authoredHazard && id != "obstacle-tree" && obstacle != null ? Mathf.Lerp(1f, 0.7f,
                     obstacle.HitsTaken / (float)obstacle.RequiredHits) : 1f;
                 visual.color = new Color(shade, shade, shade, 1f);
             }
