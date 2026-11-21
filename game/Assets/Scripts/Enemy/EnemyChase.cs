@@ -11,7 +11,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0f)] private float detectionRange = 6f;
         [SerializeField, Min(0f)] private float stopDistance = 0.8f;
         [SerializeField] private Transform target;
-        [Tooltip("비행하는 적입니다. 길찾기 없이 대상에게 곧장 날아갑니다(EnemyFlight와 함께 사용).")]
+        [Tooltip("비행하는 적입니다. 구덩이와 낮은 장애물 위로 날고, 벽과 나무는 돌아갑니다(EnemyFlight와 함께 사용).")]
         [SerializeField] private bool flies;
 
         private Rigidbody2D body;
@@ -93,11 +93,10 @@ namespace TrickalFanGame.Enemy
                 return;
             }
 
-            // A flying body crosses pits and low obstacles, so it needs no path: it heads straight for the target
-            // and physics stops it at walls and trees.
-            Vector2 direction = flies
-                ? offset / distance
-                : navigator.GetMoveDirection(transform.position, target.position, terrain, Time.time);
+            // A flying body crosses pits and low obstacles but not walls and trees, so it plans with the flight rule
+            // and goes around a tree instead of pressing into it.
+            Vector2 direction = navigator.GetMoveDirection(transform.position, target.position, terrain, Time.time,
+                flies);
             // Shock (Passive-0 §4.8) slows ordinary movement only.
             body.linearVelocity = direction * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this));
         }
