@@ -1457,7 +1457,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   좌우 0.7칸 쥬비 2마리, 3초 주기, 8마리 상한에서 건너뜀과 1마리 보충, 대왕쥬비 사망 뒤 쥬비 유지와 방 클리어. 2026-10-28 모두
   통과했고 2026-10-28 사용자 Play 확인을 마쳤다. 수동 확인: Game Scene Play → `F1` 개발 패널 `— Room —`의 `Spawn Jyubi king (summons Jyubi)`로 플레이어 위 4칸에
   소환한다. (1) 큰 쥬비가 한자리에 떠 있지 않고 이리저리 꺾이며 날아다니는지, 플레이어가 다가가면 물러나고 멀어지면 따라오는지
-  본다. (2) 3초마다 금색으로 깜빡인 뒤 좌우에 쥬비 2마리가 나오는지, 같은 섹션의 `Jyubi kings N, their Jyubi M, summoning K`
+  본다. (2) 3초마다 금색으로 깜빡인 뒤 쥬비 3마리(2026-11-22부터, `Make nearest enemy elite`로 엘리트로 바꾸면 4마리)가
+  나오는지, 같은 섹션의 `Jyubi kings N, their Jyubi M, summoning K`
   표시에서 쥬비 수가 8에서 멈추는지 본다. (3) 대왕쥬비를 먼저 잡아도 쥬비가 남아 방이 끝나지 않고, 쥬비까지 잡아야 끝나는지
   본다. 실제 방에서 보려면 `— Seed —`의 `Find Jyubi king F3`로 3층에 nest가 있는 seed를 찾아 `Restart Run with this seed` 뒤
   3층으로 간다.

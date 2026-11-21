@@ -80,10 +80,11 @@ namespace TrickalFanGame.Editor
             ValidateRuntimeBinding(assembler, prefab, runtimeSeed);
             ValidateMovement(prefab);
             ValidateSummonsInRoom(prefab, jyubi);
+            ValidateEliteSummonCount(prefab);
             Debug.Log($"Enemy-11 verification passed: {Week27Enemy11Setup.DisplayName} is the Jyubi drawing at twice " +
                       "its size with 50 health, light contact damage and the Jyubi bounce. It flies at 3, backs off " +
                       "inside 3 and closes in beyond 5 of the player while circling and wobbling, waits out its spawn " +
-                      "delay, then 1.5 s later and every 3 s glows 0.6 s and releases two Jyubi that join the room; " +
+                      "delay, then 1.5 s later and every 3 s glows 0.6 s and releases three Jyubi (four as an elite) that join the room; " +
                       "it stops at eight of its own, tops up one when one dies, and the Jyubi stay and hold the room " +
                       "after it dies. Threat 6, floor 3 only, jyubi-nest 14~17 in every profile; " +
                       $"{GeneratedSeedCount} seeds place it reproducibly ({counts}), and runtime seed {runtimeSeed} " +
@@ -169,10 +170,10 @@ namespace TrickalFanGame.Editor
                    Mathf.Approximately(controller.FirstSummonDelay, 1.5f) &&
                    Mathf.Approximately(controller.SummonInterval, 3f) &&
                    Mathf.Approximately(controller.SummonTelegraph, 0.6f) &&
-                   controller.SummonCount == 2 && controller.MaxSummons == 8 &&
+                   controller.SummonCount == 3 && controller.EliteSummonCount == 4 && controller.MaxSummons == 8 &&
                    Mathf.Approximately(controller.SummonSideOffset, 0.7f),
-                "The Jyubi king must fly at 3 about 4 from the player and release two Jyubi every 3 s after a " +
-                "0.6 s glow, at most eight of its own.");
+                "The Jyubi king must fly at 3 about 4 from the player and release three Jyubi (four as an elite) " +
+                "every 3 s after a 0.6 s glow, at most eight of its own.");
 
             FairyKingdomArtworkView view = prefab.GetComponent<FairyKingdomArtworkView>();
             FairyKingdomArtworkView jyubiView = jyubi.GetComponent<FairyKingdomArtworkView>();
@@ -434,9 +435,9 @@ namespace TrickalFanGame.Editor
                     "Half way through the 0.6 s glow the Jyubi king must glow and hold its Jyubi back.");
                 controller.Tick(now + 2.11f);
                 Health[] firstPair = controller.LastSummons.ToArray();
-                Assert(!controller.IsSummoning && controller.Visual.color == Color.white && firstPair.Length == 2 &&
-                       controller.AliveSummonCount == 2 && room.AliveEnemyCount == 3,
-                    "After the glow the Jyubi king must release two Jyubi into its room, got summoning " +
+                Assert(!controller.IsSummoning && controller.Visual.color == Color.white && firstPair.Length == 3 &&
+                       controller.AliveSummonCount == 3 && room.AliveEnemyCount == 4,
+                    "After the glow the Jyubi king must release three Jyubi into its room, got summoning " +
                     $"{controller.IsSummoning}, color {controller.Visual.color}, released {firstPair.Length}, alive " +
                     $"{controller.AliveSummonCount}, room {room.AliveEnemyCount}.");
                 Vector3 kingPosition = controller.transform.position;
@@ -447,11 +448,15 @@ namespace TrickalFanGame.Editor
                        firstPair.Any(summon => Vector2.Distance(summon.transform.position,
                            kingPosition + Vector3.left * 0.7f) < 0.001f) &&
                        firstPair.Any(summon => Vector2.Distance(summon.transform.position,
+                           kingPosition) < 0.001f) &&
+                       firstPair.Any(summon => Vector2.Distance(summon.transform.position,
                            kingPosition + Vector3.right * 0.7f) < 0.001f),
-                    "The two Jyubi must be alerted Jyubi of the room, 0.7 to the king's left and right.");
+                    "The three Jyubi must be alerted Jyubi of the room, 0.7 to the king's left, under it and 0.7 " +
+                    "to its right.");
 
-                // Every 3 s after the first: 4, 6, 8 alive. The fourth summon comes due at the cap and is skipped.
-                for (int cycle = 1; cycle <= 3; cycle++)
+                // Every 3 s after the first: 6, then 8 alive (only two fit under the cap). The fourth summon comes due
+                // at the cap and is skipped.
+                for (int cycle = 1; cycle <= 2; cycle++)
                 {
                     // Each summon is timed from when the previous one started (1.5 s + 0.01 margin, then 3 s each).
                     float due = now + 1.5f + cycle * 3f + cycle * 0.01f;
@@ -459,11 +464,12 @@ namespace TrickalFanGame.Editor
                     Assert(!controller.IsSummoning, $"Summon {cycle + 1} must wait for its 3 s interval.");
                     controller.Tick(due + 0.01f);
                     controller.Tick(due + 0.62f);
-                    Assert(controller.AliveSummonCount == 2 + cycle * 2 && room.AliveEnemyCount == 3 + cycle * 2,
-                        $"Summon {cycle + 1} must bring the Jyubi to {2 + cycle * 2}.");
+                    int expected = Mathf.Min(3 + cycle * 3, 8);
+                    Assert(controller.AliveSummonCount == expected && room.AliveEnemyCount == expected + 1,
+                        $"Summon {cycle + 1} must bring the Jyubi to {expected}.");
                 }
 
-                float capped = now + 1.5f + 4 * 3f + 0.05f;
+                float capped = now + 1.5f + 3 * 3f + 0.05f;
                 controller.Tick(capped);
                 Assert(!controller.IsSummoning && controller.AliveSummonCount == 8 &&
                        Mathf.Abs(controller.NextSummonAt - (capped + 3f)) < TimeTolerance,
@@ -489,6 +495,39 @@ namespace TrickalFanGame.Editor
                     summon.TakeDamage(new DamageContext(null, DamageSourceType.PlayerAttack, 999f));
                 Assert(room.State == RoomState.Cleared && room.AliveEnemyCount == 0,
                     "The room must clear once the king's Jyubi are gone too.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Physics2D.SyncTransforms();
+            }
+        }
+
+        // An elite 대왕쥬비 (the 1.5x 거대 variant) releases four per summon; any other releases three.
+        private static void ValidateEliteSummonCount(GameObject prefab)
+        {
+            GameObject root = new("Enemy-11 Elite Summon Verification");
+            try
+            {
+                Health normal = Spawn(prefab, root.transform, Origin);
+                Health elite = Spawn(prefab, root.transform, Origin + Vector2.right * 10f);
+                Health champion = Spawn(prefab, root.transform, Origin + Vector2.right * 20f);
+                Assert(EnemyVariant.Apply(elite.gameObject, EnemyVariantKind.Elite) &&
+                       EnemyVariant.Apply(champion.gameObject, EnemyVariantKind.ChampionShots),
+                    "The Jyubi king must accept the elite and champion variants.");
+                JyubiKingController normalKing = normal.GetComponent<JyubiKingController>();
+                JyubiKingController eliteKing = elite.GetComponent<JyubiKingController>();
+                JyubiKingController championKing = champion.GetComponent<JyubiKingController>();
+                Assert(normalKing.CurrentSummonCount == 3 && championKing.CurrentSummonCount == 3 &&
+                       eliteKing.CurrentSummonCount == 4,
+                    "A Jyubi king must release three per summon and an elite one four, got normal " +
+                    $"{normalKing.CurrentSummonCount}, champion {championKing.CurrentSummonCount}, elite " +
+                    $"{eliteKing.CurrentSummonCount}.");
+
+                typeof(JyubiKingController).GetMethod("ReleaseSummons", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .Invoke(eliteKing, null);
+                Assert(eliteKing.LastSummons.Count == 4 && eliteKing.AliveSummonCount == 4,
+                    $"An elite Jyubi king's summon must release four Jyubi, got {eliteKing.LastSummons.Count}.");
             }
             finally
             {
