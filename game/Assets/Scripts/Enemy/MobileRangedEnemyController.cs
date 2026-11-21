@@ -353,7 +353,7 @@ namespace TrickalFanGame.Enemy
             EnemyProjectile projectile = EnemyProjectile.Create(origin, direction, gameObject,
                 projectileDamageTier, projectileSpeed, projectileLifetime,
                 drawnProjectile != null ? drawnProjectile : spriteRenderer != null ? spriteRenderer.sprite : null,
-                drawnProjectile != null);
+                drawnProjectile != null, ProjectileSizing.PollenShotScale);
             presentation?.SetPhase(EnemyAttackPhase.Active);
             presentationEndsAt = currentTime + Mathf.Min(0.08f, shotInterval);
             ProjectileFired?.Invoke(projectile);

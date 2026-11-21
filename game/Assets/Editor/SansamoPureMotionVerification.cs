@@ -71,7 +71,8 @@ namespace TrickalFanGame.Editor
                 Require(motion.ProjectileSprite != null &&
                         AssetDatabase.GetAssetPath(motion.ProjectileSprite) == SansamoPureMotionSetup.ProjectilePath &&
                         shot.sprite == motion.ProjectileSprite && shot.color == Color.white &&
-                        Mathf.Approximately(projectile.transform.localScale.x, ProjectileSizing.DrawnEnemyScale),
+                        Mathf.Approximately(projectile.transform.localScale.x, ProjectileSizing.PollenShotScale) &&
+                        Mathf.Approximately(motion.ProjectileSprite.pixelsPerUnit, SansamoPureMotionSetup.ProjectilePixelsPerUnit),
                     "Pure Sansamo must fire its drawn pollen shot untinted at the drawn-shot size.");
                 Require(root.GetComponent<Rigidbody2D>().linearVelocity.sqrMagnitude > 0.01f,
                     "First shot must retain orbit movement.");

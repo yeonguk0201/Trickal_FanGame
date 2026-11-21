@@ -59,6 +59,9 @@ namespace TrickalFanGame.Combat
         public const float RangedEnemyScale = 0.3f;
         // Drawn enemy shots (onion, crayon arrow/magic) are enlarged for readability; the hitbox follows the artwork.
         public const float DrawnEnemyScale = 0.4f;
+        // 산사모-순수's round pollen ball reads far bulkier than the long onion/arrow shots at the same scale, so it
+        // keeps the plain ranged hitbox and its drawing follows that size.
+        public const float PollenShotScale = RangedEnemyScale;
         public const float BossScale = 0.35f;
         // Passive-0 §4.1: a grown basic attack shot must still pass a one-tile corridor.
         public const float MaximumPlayerBasicRadius = 0.45f;

@@ -11,8 +11,9 @@ namespace TrickalFanGame.Editor
         public const string AtlasPath = "Assets/Art/Enemies/FairyKingdom/Walking/SansamoPure_Walk.png";
         public const string PrefabPath = "Assets/Prefabs/QuickRangedFairy.prefab";
         public const string ProjectilePath = "Assets/Art/Enemies/FairyKingdom/Attacking/SansamoPure_Projectile.png";
-        // The pollen ball body (about 300 of 512 px) is about one local unit, the shot's hitbox diameter.
-        public const float ProjectilePixelsPerUnit = 300f;
+        // The pollen ball body (about 340 of 512 px) is one local unit, the shot's hitbox diameter, so the whole
+        // drawing is about 1.5x the hitbox (0.45 world units at ProjectileSizing.PollenShotScale).
+        public const float ProjectilePixelsPerUnit = 340f;
 
         [MenuItem("Trickal Fan Game/Artwork/Setup Sansamo Pure Motion")]
         public static void Setup()
