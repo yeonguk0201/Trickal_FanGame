@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "origin": "top-left",
+    "anchor": "top-left",
+    "rotation": "clockwise-degrees"
+  },
+  "layers": [
+    {
+      "id": "portrait",
+      "name": "원형 캐릭터 초상",
+      "kind": "portrait",
+      "portraitZoom": 121,
+      "x": 630,
+      "y": 65,
+      "w": 660,
+      "h": 660,
+      "z": 1,
+      "rotation": 0,
+      "visible": true,
+      "portraitX": -14,
+      "portraitY": 60
+    },
+    {
+      "id": "bubble",
+      "name": "말풍선",
+      "kind": "bubble",
+      "x": 380.5760885268493,
+      "y": 134.77382645803704,
+      "w": 345.83924642158604,
+      "h": 171.7637857841394,
+      "z": 4,
+      "rotation": 0,
+      "visible": true,
+      "text": "간식 더 없어?\n더 꺼내 봐!",
+      "font": 35,
+      "color": "#555751"
+    },
+    {
+      "id": "strap",
+      "name": "수식어 띠",
+      "kind": "strap",
+      "x": 750,
+      "y": 740,
+      "w": 420,
+      "h": 32,
+      "z": 2,
+      "rotation": 0,
+      "visible": true
+    },
+    {
+      "id": "epithet",
+      "name": "수식어",
+      "kind": "outlined",
+      "x": 715,
+      "y": 725,
+      "w": 490,
+      "h": 53,
+      "z": 3,
+      "rotation": 0,
+      "visible": true,
+      "text": "요정여왕",
+      "font": 35,
+      "color": "#343735"
+    },
+    {
+      "id": "name",
+      "name": "캐릭터 이름표",
+      "kind": "nameplate",
+      "x": 585,
+      "y": 799,
+      "w": 750,
+      "h": 118,
+      "z": 2,
+      "rotation": 0,
+      "visible": true,
+      "text": "에르핀",
+      "font": 48,
+      "color": "#30332e"
+    },
+    {
+      "id": "bar",
+      "name": "로딩 바",
+      "kind": "track",
+      "x": 100,
+      "y": 1041,
+      "w": 1720,
+      "h": 18,
+      "z": 2,
+      "rotation": 0,
+      "visible": true
+    },
+    {
+      "id": "percent",
+      "name": "로딩 퍼센트",
+      "kind": "outlined",
+      "x": 835,
+      "y": 999,
+      "w": 250,
+      "h": 55,
+      "z": 3,
+      "rotation": 0,
+      "visible": true,
+      "text": "72%",
+      "font": 35,
+      "color": "#343735"
+    }
+  ]
+}

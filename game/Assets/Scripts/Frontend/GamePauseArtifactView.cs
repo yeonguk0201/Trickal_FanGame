@@ -189,6 +189,7 @@ namespace TrickalFanGame.Frontend
 
         private void Update()
         {
+            if (RunSceneLoader.IsLoading) return;
             if (Keyboard.current?.escapeKey.wasPressedThisFrame != true) return;
             if (IsSettingsOpen) CloseSettings();
             else if (pendingRunAction != PendingRunAction.None) CancelRunActionConfirmation();
@@ -198,6 +199,7 @@ namespace TrickalFanGame.Frontend
 
         private void LateUpdate()
         {
+            if (RunSceneLoader.IsLoading) return;
             bool confirmingAction = pendingRunAction != PendingRunAction.None;
             if (confirmingAction) FitConfirmationBackdrop();
             Transform activeScope = confirmingAction ? confirmationFocusScope : focusScope;

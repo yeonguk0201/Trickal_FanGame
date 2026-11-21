@@ -205,6 +205,7 @@ namespace TrickalFanGame.Editor
                 return;
             }
             if (Time.frameCount < 8) return;
+            if (RunSceneLoader.IsLoading) return;
 
             try
             {

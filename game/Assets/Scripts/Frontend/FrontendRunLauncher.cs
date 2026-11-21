@@ -41,7 +41,7 @@ namespace TrickalFanGame.Frontend
 
         private void LaunchRun(string characterId)
         {
-            if (!sceneLoadingEnabled || isLaunching) return;
+            if (!sceneLoadingEnabled || isLaunching || RunSceneLoader.IsLoading) return;
             if (!LocalProfile.IsRegistered)
             {
                 Debug.LogError("[FrontendRunLauncher] A registered local profile is required.", this);
@@ -64,7 +64,7 @@ namespace TrickalFanGame.Frontend
             isLaunching = true;
             try
             {
-                SceneManager.LoadScene(buildIndex, LoadSceneMode.Single);
+                if (!RunSceneLoader.TryLoad(buildIndex, onFailure: CancelLaunch)) CancelLaunch();
             }
             catch
             {
@@ -72,6 +72,12 @@ namespace TrickalFanGame.Frontend
                 RunLaunchContext.Clear();
                 throw;
             }
+        }
+
+        private void CancelLaunch()
+        {
+            isLaunching = false;
+            RunLaunchContext.Clear();
         }
     }
 }

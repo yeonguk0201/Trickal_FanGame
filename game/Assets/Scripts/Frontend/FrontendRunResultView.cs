@@ -116,7 +116,7 @@ namespace TrickalFanGame.Frontend
 
         private void Update()
         {
-            if (!IsShowing || sequence == null) return;
+            if (RunSceneLoader.IsLoading || !IsShowing || sequence == null) return;
             bool confirm = Keyboard.current?.enterKey.wasPressedThisFrame == true ||
                            Keyboard.current?.spaceKey.wasPressedThisFrame == true ||
                            Mouse.current?.leftButton.wasPressedThisFrame == true;
@@ -125,7 +125,7 @@ namespace TrickalFanGame.Frontend
 
         private void LateUpdate()
         {
-            if (!IsSummaryVisible || EventSystem.current == null) return;
+            if (RunSceneLoader.IsLoading || !IsSummaryVisible || EventSystem.current == null) return;
             GameObject selected = EventSystem.current.currentSelectedGameObject;
             if (selected != null && selected.transform.IsChildOf(actionRoot.transform)) return;
             Focus(retryRunButton);
@@ -139,7 +139,7 @@ namespace TrickalFanGame.Frontend
 
         public void RequestAdvance()
         {
-            if (sequence == null) return;
+            if (RunSceneLoader.IsLoading || sequence == null) return;
             if (stageAnimating && !hasUsedFastForward)
             {
                 hasUsedFastForward = true;
@@ -331,6 +331,8 @@ namespace TrickalFanGame.Frontend
 
         private IEnumerator PlaySequence()
         {
+            // Do not spend the result reveal/XP animation behind the scene loading overlay.
+            while (RunSceneLoader.IsLoading) yield return null;
             skipToSummary = false;
             finishCurrentStage = false;
             hasUsedFastForward = false;

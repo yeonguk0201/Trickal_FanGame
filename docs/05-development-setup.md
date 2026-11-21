@@ -2644,3 +2644,14 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 기본 말풍선 후속 확인: 위 Setup을 실행한 다음 Verify를 실행한다. 짧은 대사·긴 대사·여러 줄 대사에서 최대 폭 유지, 내용에 따른 높이 확장과 텍스트 잘림 여부를 검사한다. NPC 접근 시 작은 기본 말풍선과 `[E]상점열기`가 보이고 `E` 입력으로 상점이 열리는지 Play에서 확인한다. 배치 참고 렌더는 그래픽을 켠 `InGameUiPolishVerification.CaptureNpcBatch`로 `output/menu-review/npc-simple-bubble-{short,long}.png`에 저장한다. 이번 후속 수정은 열린 Editor의 프로젝트 잠금으로 자동 검증·렌더 미실행이다.
 
 - 기본 인사 `뭐 하나 사시려구요?`는 한 줄에 들어가도록 최대 텍스트 폭을 2.0 월드 단위로 조정했다. 더 긴 대사는 계속 줄바꿈과 높이 확장을 사용한다.
+
+
+### 인게임 진입·종료 로딩 화면 (Loading-0, 2026-11-21)
+
+- 사용자 승인 배치는 `Assets/Resources/RunLoadingScreen/Layout.json`이다. 초상 121%, 내부 이동 X -14 / Y 60, 말풍선 `간식 더 없어? / 더 꺼내 봐!`, 수식어 `요정여왕`, 이름 `에르핀`을 사용한다. `Style.asset`은 기존 에르핀 원화와 `Week13FrontendSetup.FontPath`의 ONE Mobile POP TMP 글꼴을 참조한다. 별도 Scene Setup 없이 적용된다.
+- `RunSceneLoader`가 게임 시작(캐릭터 선택 확정), ESC 메뉴의 인게임 재시작·홈 복귀, 게임 종료 후 결과창 진입을 `LoadSceneAsync`로 처리한다. 결과창은 Frontend Scene에 있으므로 결과창 → 홈/캐릭터 선택은 기존 패널 전환을 유지하며, 선택 확정 후 인게임에 다시 들어갈 때 로딩을 표시한다. 방·층 이동의 `RoomTransitionWipe`와는 별개다.
+- 화면은 씬 사이에 유지된다. 클릭·키보드/패드 Submit은 EventSystem을 잠시 비활성화해 막고, 결과 연출도 로딩이 닫힐 때까지 기다린다. 새 씬의 Start 실행 후 100%를 0.15초 표시하고 게임/홈은 시간 1, 결과는 시간 0으로 복원한다. 씬 활성화 전 최소 표시 시간은 0.6초다. 네트워크 프로필 조회·결과 저장은 로딩 완료를 막지 않는다.
+- Edit Mode 단독 검증: `Trickal Fan Game > Loading Screen > Verify` (`TrickalFanGame.Editor.RunLoadingScreenVerification.Verify`). 승인 배치·글꼴·초상 참조·원형 마스크·중복 생성 방지·진행률·오류 로그를 검사한다. Scene을 열거나 저장하지 않는다.
+- 전환 전용 Play 배치: `TrickalFanGame.Editor.RunLoadingScreenPlayVerification.RunBatch`. `-batchmode -nographics`와 `-executeMethod`로 실행하며 **`-quit`는 사용하지 않는다**. 테스트가 Play를 켜고 종료 코드를 반환한다. 시작→재시작→홈 복귀→재진입→결과 복귀, 중복 전환 차단, 100% 표시·입력/시간 복원·결과 제출 한 번·결과 연출 대기를 검사한다. 테스트용 프로필/성장 캐시 키는 종료 시 복원한다.
+- 실행 근거: 초기 Edit 배치에서 UI CanvasRenderer 누락 로그를 발견해 커스텀 Graphic의 RequireComponent로 수정했다. 수정본의 런타임·Editor Roslyn 컴파일과 승인 JSON/UTF-8/meta 검사 통과(`output/run-loading-compile/`). 다른 Unity 빌드 종료 후 `RunLoadingScreenPlayVerification.RunBatch`가 호출한 Edit Verify와 전환 Play 검증 모두 통과했다(`output/run-loading-screen-play-final.log`, 종료 0). 시작·재시작·홈 복귀·재진입·결과 복귀, 100% 표시, 입력/시간 복원, 단일 결과 제출과 결과 연출 대기를 확인했다. 실제 화면의 미술 검수는 별도다. 말풍선의 `꺼` 글자는 같은 기존 TMP 글꼴의 동적 아틀라스에 추가됐으며 GUID는 유지한다.
+- 수동 Play 확인(1920×1080, 1280×720): Frontend Scene의 게임 시작 → 에르핀 선택·확정 / 인게임 ESC → 다시 시작·확인 / ESC → 홈으로·확인 / 사망 뒤 GAME OVER 확인 또는 최종 보스 클리어 → 결과. 모든 씬 전환에서 연두 체크·원형 초상·말풍선·이름표·하단 바가 보이고 새 화면에 입력이 새지 않아야 한다. 로딩 뒤 이동·ESC가 정상 동작하고 결과 경험치 연출의 첫 장면이 가려지지 않아야 한다. 결과에서 다시 하기는 캐릭터 선택으로, 홈은 홈 패널로 이동한다.

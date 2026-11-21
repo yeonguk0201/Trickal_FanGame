@@ -90,6 +90,7 @@ namespace TrickalFanGame.Frontend
 
         private void Update()
         {
+            if (RunSceneLoader.IsLoading) return;
             if (Keyboard.current?.tabKey.wasPressedThisFrame == true) FocusStart();
         }
 

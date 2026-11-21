@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System;
+using TrickalFanGame.Frontend;
 using TrickalFanGame.Item;
 using TrickalFanGame.Network;
 using UnityEngine;
@@ -20,83 +22,58 @@ namespace TrickalFanGame.Run
 
         public bool TryTransition(CreateRunRequest request, CharacterProgressDto startingProgress,
             IGameApiClient apiClient, IReadOnlyDictionary<string, ItemRarity> itemRarities = null,
-            string deathDescription = null)
+            string deathDescription = null, Action onLoadFailed = null)
         {
             int buildIndex = SceneUtility.GetBuildIndexByScenePath(frontendScenePath);
-            if (buildIndex < 0 || !RunResultContext.TryPrepare(request, startingProgress, apiClient, itemRarities, deathDescription))
+            if (!RunSceneLoader.CanLoad(buildIndex) ||
+                !RunResultContext.TryPrepare(request, startingProgress, apiClient, itemRarities, deathDescription))
                 return false;
 
-            float previousTimeScale = Time.timeScale;
-            Time.timeScale = 0f;
-            try
-            {
-                SceneManager.LoadScene(buildIndex, LoadSceneMode.Single);
-                return true;
-            }
-            catch
+            if (RunSceneLoader.TryLoad(buildIndex, 0f, () =>
             {
                 RunResultContext.Clear();
-                Time.timeScale = previousTimeScale > 0f ? previousTimeScale : 1f;
-                throw;
-            }
+                onLoadFailed?.Invoke();
+            })) return true;
+            RunResultContext.Clear();
+            return false;
         }
 
         public bool CanLoadFrontend()
         {
-            return SceneUtility.GetBuildIndexByScenePath(frontendScenePath) >= 0;
+            return RunSceneLoader.CanLoad(SceneUtility.GetBuildIndexByScenePath(frontendScenePath));
         }
 
         public bool TryReturnHomeWithoutResult()
         {
             int buildIndex = SceneUtility.GetBuildIndexByScenePath(frontendScenePath);
-            if (buildIndex < 0) return false;
+            if (!RunSceneLoader.CanLoad(buildIndex)) return false;
 
             RunLaunchContext.Clear();
             RunResultContext.Clear();
             FrontendEntryContext.Clear();
             FrontendEntryContext.TryRequestHome();
-            float previousTimeScale = Time.timeScale;
-            Time.timeScale = 1f;
-            try
-            {
-                SceneManager.LoadScene(buildIndex, LoadSceneMode.Single);
-                return true;
-            }
-            catch
-            {
-                FrontendEntryContext.Clear();
-                Time.timeScale = previousTimeScale;
-                throw;
-            }
+            if (RunSceneLoader.TryLoad(buildIndex, onFailure: FrontendEntryContext.Clear)) return true;
+            FrontendEntryContext.Clear();
+            return false;
         }
 
         public bool CanReloadGame()
         {
-            return SceneManager.GetActiveScene().buildIndex >= 0;
+            return RunSceneLoader.CanLoad(SceneManager.GetActiveScene().buildIndex);
         }
 
         public bool TryRestartRun(string userId, string nickname, string characterId,
             IGameApiClient apiClient)
         {
             int buildIndex = SceneManager.GetActiveScene().buildIndex;
-            if (buildIndex < 0 || !RunLaunchContext.TryPrepare(userId, nickname, characterId, apiClient))
+            if (!RunSceneLoader.CanLoad(buildIndex) || !RunLaunchContext.TryPrepare(userId, nickname, characterId, apiClient))
                 return false;
 
             RunResultContext.Clear();
             FrontendEntryContext.Clear();
-            float previousTimeScale = Time.timeScale;
-            Time.timeScale = 1f;
-            try
-            {
-                SceneManager.LoadScene(buildIndex, LoadSceneMode.Single);
-                return true;
-            }
-            catch
-            {
-                RunLaunchContext.Clear();
-                Time.timeScale = previousTimeScale;
-                throw;
-            }
+            if (RunSceneLoader.TryLoad(buildIndex, onFailure: RunLaunchContext.Clear)) return true;
+            RunLaunchContext.Clear();
+            return false;
         }
     }
 }
