@@ -42,6 +42,7 @@ namespace TrickalFanGame.Editor
             ValidateOneHitKill(prefab);
             ValidateFlight(prefab);
             ValidateDirectChase(prefab);
+            ValidateTreeDetour(prefab);
             ValidateRoomSpawn(prefab);
             ValidateProjectileHitsOneOverlappingEnemy(prefab);
             ValidateContactRecoil(prefab);
@@ -50,7 +51,7 @@ namespace TrickalFanGame.Editor
                       "health that any player hit kills on every floor, its touch takes exactly half a heart on " +
                       "floors 1 and 3 while other enemy damage keeps the one-heart minimum, it is faster than the " +
                       "player's base speed, it ignores pits and low obstacles but not trees or the player, it heads " +
-                      "straight for its target past an obstacle, and a room registers it as an extra enemy that " +
+                      "straight for its target past an obstacle but goes around a tree in its way, and a room registers it as an extra enemy that " +
                       "counts as a kill without changing the room state, and a player shot without pierce " +
                       "hits only one of several overlapping enemies while each pierce adds exactly one more, it " +
                       "bounces away from the player it touches or sits inside and pauses before chasing again, and " +
@@ -219,6 +220,35 @@ namespace TrickalFanGame.Editor
                 Vector2 velocity = jyubi.GetComponent<Rigidbody2D>().linearVelocity;
                 Assert(Vector2.Distance(velocity, Vector2.right * Week23Enemy6Setup.MoveSpeed) < 0.01f,
                     $"Jyubi must head straight for its target over an obstacle, but moved {velocity}.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Physics2D.SyncTransforms();
+            }
+        }
+
+        // A tree blocks flight, so 쥬비 steers around it instead of pressing into it on the straight line.
+        private static void ValidateTreeDetour(GameObject prefab)
+        {
+            GameObject root = new("Enemy-6 Tree Detour Verification");
+            try
+            {
+                Health player = CreatePlayer(root.transform);
+                player.transform.position = Origin + Vector2.right * 4f;
+                Solid(root.transform, "Tree", Origin + Vector2.right * 2f, true);
+                GameObject jyubi = (GameObject)PrefabUtility.InstantiatePrefab(prefab, root.transform);
+                jyubi.transform.position = Origin;
+                InvokeAwake(jyubi.GetComponent<Health>());
+                Physics2D.SyncTransforms();
+
+                EnemyChase chase = jyubi.GetComponent<EnemyChase>();
+                chase.SetTarget(player.transform);
+                chase.TickChase();
+                Vector2 velocity = jyubi.GetComponent<Rigidbody2D>().linearVelocity;
+                Assert(Mathf.Abs(velocity.magnitude - Week23Enemy6Setup.MoveSpeed) < 0.01f &&
+                       Mathf.Abs(velocity.normalized.y) > 0.2f,
+                    $"Jyubi must steer around a tree between it and its target, but moved {velocity}.");
             }
             finally
             {

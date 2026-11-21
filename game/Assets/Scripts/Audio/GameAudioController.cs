@@ -28,6 +28,7 @@ namespace TrickalFanGame.Audio
 
         [SerializeField] private AudioClip homeBgm;
         [SerializeField] private AudioClip combatBgm;
+        [SerializeField] private AudioClip bossBgm;
         [SerializeField] private AudioClip uiClick;
         [SerializeField] private AudioSource bgmSource;
         [SerializeField] private AudioSource sfxSource;
@@ -46,12 +47,16 @@ namespace TrickalFanGame.Audio
             // Sound pass 2026-11-21: a voice told to fade out on its own at this time (-1 = never).
             public float StopAt = -1f;
             public float StopFadeSeconds;
+            // Sound pass 2026-11-22: a multiplier the caller changes while the voice plays (a loop heard by distance).
+            public float Gain = 1f;
         }
 
         // Sound pass 2026-11-21: cues asked for with a delay, the later layers of one moment.
         private readonly List<(float At, CombatSfxCue Cue)> pendingCues = new();
 
-        private const int MaximumVoices = 8;
+        // Sound pass 2026-11-22: the ambience (CombatAmbienceAudio) can hold up to eleven loops at once: one per
+        // hazard kind and one each for up to four 쥬비 and four 잠복형.
+        private const int MaximumVoices = 20;
         private readonly List<Voice> voices = new();
         private int nextVoiceHandle;
 
@@ -64,6 +69,7 @@ namespace TrickalFanGame.Audio
         public static GameAudioController Instance { get; private set; }
         public AudioClip HomeBgm => homeBgm;
         public AudioClip CombatBgm => combatBgm;
+        public AudioClip BossBgm => bossBgm;
         public AudioClip UiClick => uiClick;
         public AudioSource BgmSource => bgmSource;
         public AudioSource SfxSource => sfxSource;
@@ -79,10 +85,12 @@ namespace TrickalFanGame.Audio
         }
 
         public void Configure(AudioClip configuredHomeBgm, AudioClip configuredCombatBgm,
-            AudioClip configuredUiClick, AudioSource configuredBgmSource, AudioSource configuredSfxSource)
+            AudioClip configuredUiClick, AudioSource configuredBgmSource, AudioSource configuredSfxSource,
+            AudioClip configuredBossBgm = null)
         {
             homeBgm = configuredHomeBgm;
             combatBgm = configuredCombatBgm;
+            bossBgm = configuredBossBgm;
             uiClick = configuredUiClick;
             bgmSource = configuredBgmSource;
             sfxSource = configuredSfxSource;
@@ -93,7 +101,7 @@ namespace TrickalFanGame.Audio
         {
             if (Instance != null && Instance != this)
             {
-                Instance.MergeClips(homeBgm, combatBgm, uiClick, combatSfx);
+                Instance.MergeClips(homeBgm, combatBgm, bossBgm, uiClick, combatSfx);
                 Instance.ApplySceneAudio(SceneManager.GetActiveScene().name);
                 Destroy(gameObject);
                 return;
@@ -101,6 +109,10 @@ namespace TrickalFanGame.Audio
 
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            // Sound pass 2026-11-22: the movement and hazard loops follow whatever room is showing, so they live
+            // on the one controller that survives scene loads.
+            if (Application.isPlaying && GetComponent<CombatAmbienceAudio>() == null)
+                gameObject.AddComponent<CombatAmbienceAudio>();
             ConfigureSources();
             LocalSettings.AudioVolumeChanged += ApplyVolumes;
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -112,6 +124,7 @@ namespace TrickalFanGame.Audio
         private void Update()
         {
             TickVoices(Time.unscaledTime);
+            TickBgm(Time.unscaledTime);
             TickPendingCues(Time.unscaledTime);
             // Esc backs out of whatever is open (the pause menu, the shop, a
             // frontend page), so it always sounds as a cancel.
@@ -139,11 +152,135 @@ namespace TrickalFanGame.Audio
 
         public void ApplySceneAudio(string sceneName)
         {
+            // A scene change ends any boss music, pending start or fade the last scene left behind.
+            ClearBgmSchedule();
+            IsBossMusic = false;
+            ApplyVolumes();
             AudioClip next = ResolveBgmForScene(sceneName);
             if (bgmSource == null || next == null || bgmSource.clip == next && bgmSource.isPlaying) return;
             bgmSource.Stop();
             bgmSource.clip = next;
             bgmSource.Play();
+        }
+
+        // Boss-Music: the boss room has a track of its own. Entering it cuts the floor music so the VS cue
+        // plays alone, and the boss track starts once that cue is over. The portal out fades the boss track
+        // under the screen wipe and brings the floor music back as the screen opens. All timing is unscaled,
+        // because the intro and the wipe both run with game time stopped.
+        public const float BossEntryFadeSeconds = 0.25f;
+        public const float BossMusicFadeInSeconds = 0.6f;
+        public const float FloorMusicFadeInSeconds = 0.8f;
+
+        private float bgmFade = 1f;
+        private float bgmFadeFrom = 1f;
+        private float bgmFadeTo = 1f;
+        private float bgmFadeStartedAt = -1f;
+        private float bgmFadeSeconds;
+        private bool stopBgmWhenFaded;
+        private AudioClip pendingBgm;
+        private float pendingBgmAt = -1f;
+        private float pendingBgmFadeIn;
+
+        public bool IsBossMusic { get; private set; }
+        public bool IsBgmStartPending => pendingBgm != null && pendingBgmAt >= 0f;
+        public AudioClip PendingBgm => pendingBgm;
+        public float BgmFade => bgmFade;
+
+        // A boss intro has begun: silence whatever plays quickly (the floor music, or the last boss's track when
+        // the development panel jumps between boss rooms). The boss track waits for StartBossMusic.
+        public void EnterBossMusic()
+        {
+            IsBossMusic = true;
+            ClearBgmSchedule();
+            FadeBgmTo(0f, BossEntryFadeSeconds, true);
+        }
+
+        // Starts the boss track `delay` seconds from now. A second call while the start is pending or the
+        // track is already playing does nothing, so the VS cue and the end of the intro can both ask for it.
+        // A scene not yet given the boss track falls back to its own music rather than staying silent.
+        public void StartBossMusic(float delay)
+        {
+            AudioClip track = bossBgm != null ? bossBgm : ResolveBgmForScene(SceneManager.GetActiveScene().name);
+            if (bgmSource == null || track == null) return;
+            if (!IsBossMusic) EnterBossMusic();
+            if (pendingBgm == track && IsBgmStartPending ||
+                bgmSource.clip == track && bgmSource.isPlaying && !stopBgmWhenFaded) return;
+            pendingBgm = track;
+            pendingBgmAt = Time.unscaledTime + Mathf.Max(0f, delay);
+            pendingBgmFadeIn = BossMusicFadeInSeconds;
+        }
+
+        // Leaving through the portal: fade the boss track out over `fadeOutSeconds` and start the floor music
+        // again `resumeAfter` seconds from now. Without boss music this leaves the floor music alone.
+        public void LeaveBossMusic(float fadeOutSeconds, float resumeAfter)
+        {
+            if (!IsBossMusic) return;
+            IsBossMusic = false;
+            pendingBgm = null;
+            pendingBgmAt = -1f;
+            FadeBgmTo(0f, fadeOutSeconds, true);
+            AudioClip floorMusic = ResolveBgmForScene(SceneManager.GetActiveScene().name);
+            if (floorMusic == null || bgmSource == null) return;
+            pendingBgm = floorMusic;
+            pendingBgmAt = Time.unscaledTime + Mathf.Max(0f, resumeAfter);
+            pendingBgmFadeIn = FloorMusicFadeInSeconds;
+        }
+
+        private void FadeBgmTo(float target, float seconds, bool stopWhenSilent)
+        {
+            stopBgmWhenFaded = stopWhenSilent && target <= 0f;
+            if (seconds <= 0f || bgmSource == null || !bgmSource.isPlaying)
+            {
+                bgmFadeStartedAt = -1f;
+                bgmFade = target;
+                if (stopBgmWhenFaded && bgmSource != null) bgmSource.Stop();
+                stopBgmWhenFaded = false;
+                ApplyVolumes();
+                return;
+            }
+
+            bgmFadeFrom = bgmFade;
+            bgmFadeTo = target;
+            bgmFadeSeconds = seconds;
+            bgmFadeStartedAt = Time.unscaledTime;
+        }
+
+        private void ClearBgmSchedule()
+        {
+            pendingBgm = null;
+            pendingBgmAt = -1f;
+            bgmFadeStartedAt = -1f;
+            stopBgmWhenFaded = false;
+            bgmFade = 1f;
+        }
+
+        private void TickBgm(float now)
+        {
+            if (bgmFadeStartedAt >= 0f)
+            {
+                float t = Mathf.Clamp01((now - bgmFadeStartedAt) / Mathf.Max(0.001f, bgmFadeSeconds));
+                bgmFade = Mathf.Lerp(bgmFadeFrom, bgmFadeTo, t);
+                if (t >= 1f)
+                {
+                    bgmFadeStartedAt = -1f;
+                    if (stopBgmWhenFaded && bgmSource != null) bgmSource.Stop();
+                    stopBgmWhenFaded = false;
+                }
+
+                ApplyVolumes();
+            }
+
+            if (!IsBgmStartPending || now < pendingBgmAt || bgmSource == null) return;
+            AudioClip next = pendingBgm;
+            float fadeIn = pendingBgmFadeIn;
+            pendingBgm = null;
+            pendingBgmAt = -1f;
+            bgmSource.Stop();
+            bgmSource.clip = next;
+            bgmFade = 0f;
+            bgmSource.Play();
+            FadeBgmTo(1f, fadeIn, false);
+            ApplyVolumes();
         }
 
         public AudioClip ResolveBgmForScene(string sceneName)
@@ -153,7 +290,7 @@ namespace TrickalFanGame.Audio
 
         public void ApplyVolumes()
         {
-            if (bgmSource != null) bgmSource.volume = LocalSettings.MasterVolume * LocalSettings.BgmVolume;
+            if (bgmSource != null) bgmSource.volume = LocalSettings.MasterVolume * LocalSettings.BgmVolume * bgmFade;
             if (sfxSource != null) sfxSource.volume = LocalSettings.MasterVolume * LocalSettings.SfxVolume;
         }
 
@@ -221,7 +358,9 @@ namespace TrickalFanGame.Audio
         // A looping voice (the dash run) keeps going until it is stopped.
         // `pitch` plays the clip faster (and higher) as Unity's AudioSource
         // pitch does; 1 is the clip as recorded.
-        public int PlayCombatVoice(CombatSfxCue cue, bool loop = false, float pitch = 1f)
+        // `startAt` begins that many seconds into the clip (wrapped), so several copies of one loop do not play in step.
+        public int PlayCombatVoice(CombatSfxCue cue, bool loop = false, float pitch = 1f, float gain = 1f,
+            float startAt = 0f)
         {
             if (!TryGetCombatEntry(cue, out CombatSfxEntry entry) || entry.clip == null) return 0;
             float now = Time.unscaledTime;
@@ -252,13 +391,36 @@ namespace TrickalFanGame.Audio
             voice.Volume = entry.volume > 0f ? Mathf.Clamp01(entry.volume) : 1f;
             voice.FadeStartedAt = -1f;
             voice.StopAt = -1f;
+            voice.Gain = Mathf.Clamp01(gain);
             voice.Source.Stop();
             voice.Source.loop = loop;
             voice.Source.pitch = pitch > 0f ? pitch : 1f;
             voice.Source.clip = entry.clip;
-            voice.Source.volume = voice.Volume * SfxLevel;
+            voice.Source.volume = voice.Volume * SfxLevel * voice.Gain;
+            voice.Source.time = startAt > 0f ? Mathf.Repeat(startAt, Mathf.Max(0.01f, entry.clip.length - 0.01f)) : 0f;
             voice.Source.Play();
             return voice.Handle;
+        }
+
+        // Sound pass 2026-11-22: whether a voice handle still plays its own sound (not finished, not taken over).
+        public bool IsCombatVoicePlaying(int handle)
+        {
+            if (handle <= 0) return false;
+            foreach (Voice voice in voices)
+                if (voice.Handle == handle) return voice.Source != null && voice.Source.isPlaying;
+            return false;
+        }
+
+        // Sound pass 2026-11-22: scales a playing voice's volume (0-1) from the next frame on.
+        public void SetCombatVoiceGain(int handle, float gain)
+        {
+            if (handle <= 0) return;
+            foreach (Voice voice in voices)
+            {
+                if (voice.Handle != handle) continue;
+                voice.Gain = Mathf.Clamp01(gain);
+                return;
+            }
         }
 
         // Fades a voice out. A handle that has been taken over or has finished
@@ -350,7 +512,7 @@ namespace TrickalFanGame.Audio
                     }
                 }
 
-                voice.Source.volume = voice.Volume * SfxLevel * fade;
+                voice.Source.volume = voice.Volume * SfxLevel * fade * voice.Gain;
             }
         }
 
@@ -404,11 +566,12 @@ namespace TrickalFanGame.Audio
             cancelButtons.Clear();
         }
 
-        private void MergeClips(AudioClip configuredHomeBgm, AudioClip configuredCombatBgm,
+        private void MergeClips(AudioClip configuredHomeBgm, AudioClip configuredCombatBgm, AudioClip configuredBossBgm,
             AudioClip configuredUiClick, CombatSfxEntry[] configuredCombatSfx)
         {
             if (configuredHomeBgm != null) homeBgm = configuredHomeBgm;
             if (configuredCombatBgm != null) combatBgm = configuredCombatBgm;
+            if (configuredBossBgm != null) bossBgm = configuredBossBgm;
             if (configuredUiClick != null) uiClick = configuredUiClick;
             // The surviving controller keeps whichever table has cues, so the
             // scene that carries the combat sounds can load in either order.

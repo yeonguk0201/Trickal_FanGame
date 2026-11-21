@@ -11,7 +11,9 @@ namespace TrickalFanGame.Enemy
     // reached on foot (a flying player over a pit or obstacle, or a sealed-off target), the enemy walks to the reachable
     // cell nearest the goal and holds there instead of pushing into the edge. Hitbox-2: a normal enemy walks on
     // its feet circle, so terrain queries take a TerrainFootprint and run from the feet center, and the grid cells
-    // sit on the world 0.5 lattice so the middle of every one-cell lane is a cell center.
+    // sit on the world 0.5 lattice so the middle of every one-cell lane is a cell center. Flight: a flying body
+    // (쥬비) plans with the flight rule instead, where pits and low obstacles are open and only walls, doors, chests
+    // and trees block, so it goes around a tree instead of pressing into it.
     public sealed class EnemyObstacleNavigator
     {
         // The circle that meets terrain: the feet of a normal enemy (Hitbox-2), otherwise the body. Offset is from
@@ -67,6 +69,11 @@ namespace TrickalFanGame.Enemy
         public static int ObstacleMask => RoomPit.MovementBlockMask;
         // What stops a projectile.
         public static int LineOfFireMask => LayerMask.GetMask("Environment");
+        // What can stop a flying body; low obstacles on this layer are filtered out per collider.
+        public static int FlightObstacleMask => RoomMovementClass.EnvironmentMask;
+
+        private static readonly List<Collider2D> FlightOverlapHits = new();
+        private static readonly List<RaycastHit2D> FlightCastHits = new();
 
         public static float ResolveBodyRadius(GameObject owner)
         {
@@ -102,15 +109,22 @@ namespace TrickalFanGame.Enemy
         }
 
         // Root positions in, a unit direction out; the plan runs between the feet centers.
-        public Vector2 GetMoveDirection(Vector2 from, Vector2 goal, TerrainFootprint terrain, float currentTime)
+        public Vector2 GetMoveDirection(Vector2 from, Vector2 goal, TerrainFootprint terrain, float currentTime,
+            bool flies = false)
         {
-            return GetMoveDirection(terrain.Center(from), terrain.Center(goal), terrain.Radius, currentTime);
+            return GetMoveDirection(terrain.Center(from), terrain.Center(goal), terrain.Radius, currentTime, flies);
         }
 
         // True when a body of the given radius can travel straight from one point to the other.
         public static bool HasClearPath(Vector2 from, Vector2 to, float bodyRadius)
         {
-            return IsCastClear(from, to, bodyRadius * CastRadiusScale, ObstacleMask);
+            return HasClearPath(from, to, bodyRadius, false);
+        }
+
+        public static bool HasClearPath(Vector2 from, Vector2 to, float bodyRadius, bool flies)
+        {
+            float radius = bodyRadius * CastRadiusScale;
+            return flies ? IsFlightCastClear(from, to, radius) : IsCastClear(from, to, radius, ObstacleMask);
         }
 
         // True when an enemy projectile fired from one point would reach the other without hitting an obstacle.
@@ -126,6 +140,33 @@ namespace TrickalFanGame.Enemy
             if (distance <= 0.0001f) return true;
             return Physics2D.CircleCast(from, Mathf.Max(0.01f, radius), offset / distance, distance, mask)
                 .collider == null;
+        }
+
+        private static ContactFilter2D FlightFilter => new()
+        {
+            useLayerMask = true,
+            layerMask = FlightObstacleMask,
+            useTriggers = false,
+        };
+
+        private static bool IsFlightCastClear(Vector2 from, Vector2 to, float radius)
+        {
+            Vector2 offset = to - from;
+            float distance = offset.magnitude;
+            if (distance <= 0.0001f) return true;
+            Physics2D.CircleCast(from, Mathf.Max(0.01f, radius), offset / distance, FlightFilter, FlightCastHits,
+                distance);
+            foreach (RaycastHit2D hit in FlightCastHits)
+                if (!RoomMovementClass.IsLowObstacle(hit.collider)) return false;
+            return true;
+        }
+
+        private static bool IsFlightBlocked(Vector2 point, float radius)
+        {
+            Physics2D.OverlapCircle(point, Mathf.Max(0.01f, radius), FlightFilter, FlightOverlapHits);
+            foreach (Collider2D hit in FlightOverlapHits)
+                if (!RoomMovementClass.IsLowObstacle(hit)) return true;
+            return false;
         }
 
         // Obstacle-3: backing away takes the straight line or a 45-degree turn from it, whichever is clear for a short
@@ -166,11 +207,12 @@ namespace TrickalFanGame.Enemy
         }
 
         // Unit direction to move this tick, or zero when already at the goal.
-        public Vector2 GetMoveDirection(Vector2 from, Vector2 goal, float bodyRadius, float currentTime)
+        public Vector2 GetMoveDirection(Vector2 from, Vector2 goal, float bodyRadius, float currentTime,
+            bool flies = false)
         {
             Vector2 direct = goal - from;
             if (direct.sqrMagnitude <= 0.0001f) return Vector2.zero;
-            if (HasClearPath(from, goal, bodyRadius))
+            if (HasClearPath(from, goal, bodyRadius, flies))
             {
                 Reset();
                 return direct.normalized;
@@ -183,7 +225,7 @@ namespace TrickalFanGame.Enemy
                 plannedGoal = goal;
                 pathIndex = 0;
                 if (hasNearestPoint && (goal - nearestPointGoal).sqrMagnitude <= CellSize * CellSize &&
-                    FindPathOrNearest(from, nearestPoint, bodyRadius, path))
+                    FindPathOrNearest(from, nearestPoint, bodyRadius, path, flies))
                 {
                     // Two sides of a pit can be almost equally near, so choosing again on every repath would flip
                     // between them. The chosen point stays until the player moves on.
@@ -191,7 +233,7 @@ namespace TrickalFanGame.Enemy
                 }
                 else
                 {
-                    plannedGoalReachable = FindPathOrNearest(from, goal, bodyRadius, path);
+                    plannedGoalReachable = FindPathOrNearest(from, goal, bodyRadius, path, flies);
                     hasNearestPoint = !plannedGoalReachable;
                     nearestPoint = path.Count > 0 ? path[path.Count - 1] : from;
                     nearestPointGoal = goal;
@@ -205,7 +247,7 @@ namespace TrickalFanGame.Enemy
                 pathIndex++;
             }
 
-            while (pathIndex + 1 < path.Count && HasClearPath(from, path[pathIndex + 1], bodyRadius))
+            while (pathIndex + 1 < path.Count && HasClearPath(from, path[pathIndex + 1], bodyRadius, flies))
             {
                 pathIndex++;
             }
@@ -231,7 +273,8 @@ namespace TrickalFanGame.Enemy
 
         // Returns whether the goal is reachable. When it is not, the result leads to the reachable cell nearest the
         // goal (empty when the enemy already stands there).
-        public static bool FindPathOrNearest(Vector2 from, Vector2 goal, float bodyRadius, List<Vector2> result)
+        public static bool FindPathOrNearest(Vector2 from, Vector2 goal, float bodyRadius, List<Vector2> result,
+            bool flies = false)
         {
             result.Clear();
             Vector2 min = Vector2.Min(from, goal) - Vector2.one * SearchMargin;
@@ -251,7 +294,10 @@ namespace TrickalFanGame.Enemy
             for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
             {
-                blocked[y * width + x] = Physics2D.OverlapCircle(CellCenter(x, y, origin), clearance, mask) != null;
+                Vector2 center = CellCenter(x, y, origin);
+                blocked[y * width + x] = flies
+                    ? IsFlightBlocked(center, clearance)
+                    : Physics2D.OverlapCircle(center, clearance, mask) != null;
             }
 
             // The enemy may stand beside an obstacle and the player may hug one; both end cells stay usable.

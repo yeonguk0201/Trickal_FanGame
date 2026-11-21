@@ -33,9 +33,10 @@ namespace TrickalFanGame.Enemy
             float speed,
             float lifetime,
             Sprite sprite,
-            bool authoredArtwork = false)
+            bool authoredArtwork = false,
+            float drawnScale = ProjectileSizing.DrawnEnemyScale)
         {
-            position = LaunchOrigin(source, position, authoredArtwork);
+            position = LaunchOrigin(source, position, authoredArtwork, drawnScale);
             GameObject projectileObject = new("Enemy Projectile");
             if (source != null && source.transform.parent != null)
             {
@@ -58,7 +59,7 @@ namespace TrickalFanGame.Enemy
             collider.isTrigger = true;
             // Variant-0: an elite's shots are 1.5x, drawing and hitbox together.
             ProjectileSizing.Apply(projectileObject.transform, collider,
-                (authoredArtwork ? ProjectileSizing.DrawnEnemyScale : ProjectileSizing.RangedEnemyScale) *
+                (authoredArtwork ? drawnScale : ProjectileSizing.RangedEnemyScale) *
                 EnemyVariant.ProjectileScaleOf(source));
 
             EnemyProjectile projectile = projectileObject.AddComponent<EnemyProjectile>();
@@ -76,16 +77,18 @@ namespace TrickalFanGame.Enemy
             CombatSfx.Play(CombatSfxCue.EnemyAttack);
         }
 
-        public static float LaunchRadiusOf(GameObject source, bool authoredArtwork)
+        public static float LaunchRadiusOf(GameObject source, bool authoredArtwork,
+            float drawnScale = ProjectileSizing.DrawnEnemyScale)
         {
-            float scale = (authoredArtwork ? ProjectileSizing.DrawnEnemyScale : ProjectileSizing.RangedEnemyScale) *
+            float scale = (authoredArtwork ? drawnScale : ProjectileSizing.RangedEnemyScale) *
                           EnemyVariant.ProjectileScaleOf(source);
             return ProjectileSizing.WorldCollisionRadius(scale);
         }
 
-        public static Vector2 LaunchOrigin(GameObject shooter, Vector2 desired, bool authoredArtwork)
+        public static Vector2 LaunchOrigin(GameObject shooter, Vector2 desired, bool authoredArtwork,
+            float drawnScale = ProjectileSizing.DrawnEnemyScale)
         {
-            return ClearLaunchPosition(shooter, desired, LaunchRadiusOf(shooter, authoredArtwork));
+            return ClearLaunchPosition(shooter, desired, LaunchRadiusOf(shooter, authoredArtwork, drawnScale));
         }
 
         // Hitbox-2: only the feet meet walls, so the root of an enemy pressed against a wall can sit on or inside

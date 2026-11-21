@@ -466,7 +466,7 @@ namespace TrickalFanGame.Run
             statusMessage = IsCleared ? "Run cleared. Saving result..." : "Run ended. Saving result...";
             if (resultTransition != null && resultTransition.TryTransition(
                     pendingRequest, playerProgressClient != null ? playerProgressClient.AppliedProgress : null,
-                    GetValidApiClient(), ResultItemRarities(), deathDescription))
+                    GetValidApiClient(), ResultItemRarities(), deathDescription, SubmitPendingRun))
             {
                 return;
             }

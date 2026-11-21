@@ -1,15 +1,31 @@
 using TrickalFanGame.Player;
 using TrickalFanGame.Audio;
+using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TrickalFanGame.Item;
 using TrickalFanGame.Resource;
 using System.Collections.Generic;
 
 namespace TrickalFanGame.Room
 {
+    // The way to the next floor once the boss is down and its reward taken. Portal-E (2026-11-22): the player walks
+    // up to it and presses E, like the reward altar, instead of being taken on touch. It has no solid collider; the
+    // trigger is only the zone where "[E] 이동" shows. It is drawn standing up, so feet behind its base put the
+    // player behind it.
     [RequireComponent(typeof(Collider2D))]
     public sealed class FloorAdvancePortal : MonoBehaviour
     {
+        public const string EnterPrompt = "[E] 이동";
+        // Where E works: about the reward altar's zone, centered a little under the portal's middle so it covers the
+        // ground in front of it.
+        public static readonly Vector2 InteractionZoneSize = new(2.6f, 2.6f);
+        public static readonly Vector2 InteractionZoneOffset = new(0f, -0.6f);
+        // The bottom of the drawn ring, as a share of one frame's height under the portal's center (PortalAurora's
+        // ring center -0.015 and half height 0.405). Feet above it stand behind the portal.
+        public const float BaseHeightFraction = -0.42f;
+        public const float PromptHeight = 1.5f;
+        private const float PlayerSearchInterval = 0.5f;
         public static readonly Color LockedColor = new(0.12f, 0.4f, 0.46f, 0.55f);
         public static readonly Color UnlockedColor = new(0.25f, 0.9f, 1f, 0.9f);
 
@@ -32,11 +48,24 @@ namespace TrickalFanGame.Room
         private int destinationFloor;
         private Collider2D portalTrigger;
         private SpriteRenderer indicator;
+        private TextMeshPro prompt;
+        private PlayerMovement playerInside;
+        private PlayerMovement player;
+        private PlayerFlight playerFlight;
+        private float nextPlayerSearch;
 
         public int DestinationFloor => destinationFloor;
         public bool IsUnlocked { get; private set; }
         public SpriteRenderer Indicator => indicator;
         public string RequiredRewardId => requiredRewardId;
+        public TextMeshPro Prompt => prompt;
+        public bool IsPlayerInRange => playerInside != null;
+        public bool CanInteract => IsUnlocked && IsRevealed && playerInside != null &&
+                                   assembler?.Progress?.IsRewardSelectionPending != true && !RoomTransitionWipe.IsBusy;
+        // The ground line of the drawn ring, in world space.
+        public float BaseY => transform.position.y + (indicator != null && indicator.sprite != null
+            ? indicator.sprite.rect.height / indicator.sprite.pixelsPerUnit * transform.lossyScale.y * BaseHeightFraction
+            : 0f);
 
         public void Configure(
             RoomGraphAssembler configuredAssembler,
@@ -130,9 +159,18 @@ namespace TrickalFanGame.Room
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            PlayerMovement player = other.GetComponentInParent<PlayerMovement>();
-            if (player != null) TryEnter(player);
+            PlayerMovement entering = other.GetComponentInParent<PlayerMovement>();
+            if (entering != null) playerInside = entering;
         }
+
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            PlayerMovement leaving = other.GetComponentInParent<PlayerMovement>();
+            if (leaving != null && leaving == playerInside) playerInside = null;
+        }
+
+        // Verification stands the player in the zone without physics.
+        public void SetPlayerInRangeForVerification(PlayerMovement configuredPlayer) => playerInside = configuredPlayer;
 
         public bool TryEnter(PlayerMovement player)
         {
@@ -140,10 +178,32 @@ namespace TrickalFanGame.Room
                 assembler.Progress?.IsRewardSelectionPending == true ||
                 player.GetComponent<PlayerActionState>()?.CanTransition == false) return false;
 
+            // Floor-Wipe: in play the screen closes first, the floor loads in the dark and the screen opens on it.
+            // The boss music fades out under the closing screen and the floor music returns as it opens.
+            // Edit-mode verifiers have no game clock, so they keep the immediate load below.
+            if (Application.isPlaying)
+            {
+                if (RoomTransitionWipe.IsBusy) return false;
+                PlayerMovement traveller = player;
+                if (!RoomTransitionWipe.Play(() => LoadDestination(traveller))) return false;
+                CombatSfx.Play(CombatSfxCue.BossPortal);
+                GameAudioController.Instance?.LeaveBossMusic(RoomTransitionWipe.DarkUntil,
+                    RoomTransitionWipe.DarkUntil);
+                return true;
+            }
+
+            return LoadDestination(player, playPortalSound: true);
+        }
+
+        private bool LoadDestination(PlayerMovement player) => LoadDestination(player, playPortalSound: false);
+
+        private bool LoadDestination(PlayerMovement player, bool playPortalSound)
+        {
+            if (assembler == null || player == null) return false;
             if (assembler.TryLoadFloor(destinationFloor, player, out string error))
             {
                 // Sound-0: only a portal that actually took the player.
-                CombatSfx.Play(CombatSfxCue.BossPortal);
+                if (playPortalSound) CombatSfx.Play(CombatSfxCue.BossPortal);
                 Debug.Log($"[FloorAdvancePortal] Entered floor {destinationFloor}.", this);
                 return true;
             }
@@ -162,6 +222,12 @@ namespace TrickalFanGame.Room
             if (portalTrigger != null)
             {
                 portalTrigger.isTrigger = true;
+            }
+
+            if (portalTrigger is BoxCollider2D zone)
+            {
+                zone.size = InteractionZoneSize;
+                zone.offset = InteractionZoneOffset;
             }
         }
 
@@ -204,9 +270,63 @@ namespace TrickalFanGame.Room
 
         private void Update()
         {
-            if (!IsUnlocked) return;
+            if (!IsUnlocked)
+            {
+                if (prompt != null) prompt.gameObject.SetActive(false);
+                return;
+            }
+
             visibleTime += Time.deltaTime;
             ApplyVisual();
+            if (!Application.isPlaying) return;
+            EnsurePrompt();
+            bool canInteract = CanInteract && Time.timeScale > 0f;
+            if (prompt != null) prompt.gameObject.SetActive(canInteract);
+            if (canInteract && Keyboard.current?.eKey.wasPressedThisFrame == true) TryEnter(playerInside);
+        }
+
+        private void LateUpdate()
+        {
+            if (indicator == null || !Application.isPlaying) return;
+            if (player == null && Time.unscaledTime >= nextPlayerSearch)
+            {
+                nextPlayerSearch = Time.unscaledTime + PlayerSearchInterval;
+                player = FindFirstObjectByType<PlayerMovement>();
+                playerFlight = null;
+            }
+
+            // PlayerFlight is added only when the wings are taken, after the player was found.
+            if (playerFlight == null && player != null) playerFlight = player.GetComponent<PlayerFlight>();
+            bool behind = player != null && player.gameObject.activeInHierarchy && player.FeetPosition.y > BaseY;
+            bool flying = playerFlight != null && playerFlight.IsFlying;
+            indicator.sortingOrder = SortingOrderFor(behind, flying);
+            if (aurora != null && aurora.Glow != null) aurora.Glow.sortingOrder = indicator.sortingOrder - 1;
+        }
+
+        // In front the portal sits low (1, its aurora under it at 0); behind, the ring and its aurora both go over
+        // the player's body, a flying body included.
+        public static int SortingOrderFor(bool playerBehind, bool playerFlying)
+        {
+            if (!playerBehind) return 1;
+            return PlayerMovement.BodySortingOrder + 2 + (playerFlying ? PlayerFlight.FlyingSortingOrderBoost : 0);
+        }
+
+        // The same world-space label as the reward altar's "[E] 보상 선택", over the portal's top.
+        private void EnsurePrompt()
+        {
+            if (prompt != null) return;
+            GameObject label = new("Interaction Prompt", typeof(RectTransform), typeof(TextMeshPro));
+            label.transform.SetParent(transform, false);
+            prompt = label.GetComponent<TextMeshPro>();
+            prompt.text = EnterPrompt;
+            prompt.fontSize = 3.5f;
+            prompt.alignment = TextAlignmentOptions.Center;
+            prompt.color = new Color(0.9f, 0.98f, 1f, 1f);
+            prompt.sortingOrder = PlayerMovement.AboveBodySortingOrder + PlayerFlight.FlyingSortingOrderBoost + 1;
+            RectTransform rect = (RectTransform)label.transform;
+            rect.localPosition = new Vector3(0f, PromptHeight, 0f);
+            rect.sizeDelta = new Vector2(5f, 1f);
+            label.SetActive(false);
         }
 
         private void FixedUpdate()

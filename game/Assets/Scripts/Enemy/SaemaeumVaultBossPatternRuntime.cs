@@ -630,6 +630,9 @@ namespace TrickalFanGame.Enemy
                 BossProjectile.Create(BossProjectile.FrontLaunchPoint(gameObject, shot),
                     shot * approachProjectileSpeed, gameObject, boss.ProjectileDamageTier, sprite, artwork);
             }
+
+            // Sound pass 2026-11-22: one ordinary enemy attack sound per fan of rubies.
+            CombatSfx.Play(CombatSfxCue.EnemyAttack);
         }
 
         // Random spots anywhere in the arena with no cap on how many stand, so an unlucky throw can wall the player

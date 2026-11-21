@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using TrickalFanGame.Item;
+using TrickalFanGame.Player;
 using TrickalFanGame.Room;
 using UnityEditor;
 using UnityEngine;
@@ -59,6 +61,21 @@ namespace TrickalFanGame.Editor
                     "Aurora must fade in with the portal.");
                 Require(portal.GetComponentsInChildren<MeshRenderer>().Length == 1,
                     "Reconfiguration must not duplicate aurora layers.");
+                // Portal-E: no solid body, a trigger zone for the E prompt, and drawn over a player behind its base.
+                Require(trigger.isTrigger && trigger.size == FloorAdvancePortal.InteractionZoneSize &&
+                        trigger.offset == FloorAdvancePortal.InteractionZoneOffset &&
+                        portal.GetComponents<Collider2D>().All(shape => shape.isTrigger),
+                    "Portal must only carry its E interaction trigger, with no solid collider.");
+                Require(FloorAdvancePortal.EnterPrompt == "[E] 이동", "Portal prompt must read [E] 이동.");
+                Require(portal.BaseY < portal.transform.position.y && portal.BaseY > visual.bounds.min.y,
+                    "Portal base must sit inside the bottom half of the drawn frame.");
+                Require(FloorAdvancePortal.SortingOrderFor(false, false) < PlayerMovement.BodySortingOrder &&
+                        FloorAdvancePortal.SortingOrderFor(true, false) > PlayerMovement.BodySortingOrder &&
+                        FloorAdvancePortal.SortingOrderFor(true, true) >
+                        PlayerMovement.BodySortingOrder + PlayerFlight.FlyingSortingOrderBoost,
+                    "Portal must draw under a player in front and over a walking or flying player behind.");
+                Require(!portal.IsPlayerInRange && !portal.CanInteract,
+                    "Portal must not offer entry before the player stands in its zone.");
                 GameObject drop = new("Overlapping drop");
                 drop.transform.SetParent(root.transform, false);
                 var dropCollider = drop.AddComponent<CircleCollider2D>();

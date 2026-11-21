@@ -12,6 +12,8 @@ namespace TrickalFanGame.Editor
     {
         public const string HomeBgmPath = "Assets/Audio/BGM/BGM_Home.ogg";
         public const string CombatBgmPath = "Assets/Audio/BGM/BGM_Combat.ogg";
+        // Boss-Music: the boss room track, started after the VS cue.
+        public const string BossBgmPath = "Assets/Audio/BGM/BGM_Boss.mp3";
         public const string UiClickPath = "Assets/Audio/SFX/SFX_UI_Click.wav";
         public const string AudioRootName = "Game Audio";
 
@@ -24,18 +26,21 @@ namespace TrickalFanGame.Editor
 
             AudioClip homeBgm = RequireClip(HomeBgmPath);
             AudioClip combatBgm = RequireClip(CombatBgmPath);
+            AudioClip bossBgm = RequireClip(BossBgmPath);
             AudioClip uiClick = RequireClip(UiClickPath);
             ConfigureImporter(HomeBgmPath, AudioClipLoadType.Streaming);
             ConfigureImporter(CombatBgmPath, AudioClipLoadType.Streaming);
+            ConfigureImporter(BossBgmPath, AudioClipLoadType.Streaming);
             ConfigureImporter(UiClickPath, AudioClipLoadType.DecompressOnLoad);
 
-            ConfigureScene(Week13FrontendSetup.ScenePath, homeBgm, combatBgm, uiClick);
-            ConfigureScene(Week13FrontendSetup.GameScenePath, homeBgm, combatBgm, uiClick);
+            ConfigureScene(Week13FrontendSetup.ScenePath, homeBgm, combatBgm, bossBgm, uiClick);
+            ConfigureScene(Week13FrontendSetup.GameScenePath, homeBgm, combatBgm, bossBgm, uiClick);
             AssetDatabase.SaveAssets();
             Debug.Log("Setting-1A audio setup completed for Frontend and Game scenes.");
         }
 
-        private static void ConfigureScene(string scenePath, AudioClip homeBgm, AudioClip combatBgm, AudioClip uiClick)
+        private static void ConfigureScene(string scenePath, AudioClip homeBgm, AudioClip combatBgm, AudioClip bossBgm,
+            AudioClip uiClick)
         {
             if (!File.Exists(scenePath)) throw new InvalidOperationException($"Scene is missing: {scenePath}");
             Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
@@ -58,7 +63,7 @@ namespace TrickalFanGame.Editor
                 sources = root.GetComponents<AudioSource>();
             }
 
-            controller.Configure(homeBgm, combatBgm, uiClick, sources[0], sources[1]);
+            controller.Configure(homeBgm, combatBgm, uiClick, sources[0], sources[1], bossBgm);
             EditorUtility.SetDirty(controller);
             EditorUtility.SetDirty(sources[0]);
             EditorUtility.SetDirty(sources[1]);

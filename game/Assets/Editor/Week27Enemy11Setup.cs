@@ -39,7 +39,9 @@ namespace TrickalFanGame.Editor
         // User decisions (2026-10-28).
         public const float SummonInterval = 3f;
         public const float SummonTelegraph = 0.6f;
-        public const int SummonCount = 2;
+        // User decision (2026-11-22): three, and four for an elite.
+        public const int SummonCount = JyubiKingController.DefaultSummonCount;
+        public const int EliteSummonCount = JyubiKingController.DefaultEliteSummonCount;
         public const int MaxSummons = 8;
 
         public const int Threat = 6;
@@ -104,7 +106,7 @@ namespace TrickalFanGame.Editor
             AssetDatabase.SaveAssets();
             Debug.Log($"Enemy-11 ready: {DisplayName} ({PrefabName}) has {MaxHealth} health, flies at {MoveSpeed} " +
                       $"about {PreferredDistance} from the player while buzzing around, and every {SummonInterval} s " +
-                      $"glows {SummonTelegraph} s and releases {SummonCount} Jyubi (at most {MaxSummons} of its own " +
+                      $"glows {SummonTelegraph} s and releases {SummonCount} Jyubi ({EliteSummonCount} as an elite, at most {MaxSummons} of its own " +
                       $"alive). Threat {Threat}, floor " +
                       $"{EncounterEnemyFloorPool.IntroductionFloor(EncounterEnemyRole.JyubiKing)}+, {Pattern} " +
                       $"Encounters {MinimumThreat}~{MaximumThreat}, Encounter content version " +
@@ -153,6 +155,7 @@ namespace TrickalFanGame.Editor
                     JyubiKingController.DefaultDistanceBand);
                 controller.ConfigureSummon(jyubi, JyubiKingController.DefaultFirstSummonDelay, SummonInterval,
                     SummonTelegraph, SummonCount, MaxSummons, JyubiKingController.DefaultSummonSideOffset);
+                controller.ConfigureEliteSummonCount(EliteSummonCount);
 
                 FairyKingdomArtworkCatalog catalog = FairyKingdomArtworkSetup.RefreshCatalog();
                 FairyKingdomArtworkSetup.BindPrefabContents(contents, catalog);

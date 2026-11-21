@@ -22,6 +22,9 @@ namespace TrickalFanGame.Audio
         // without audio hardware.
         public static int GetRequestCount(CombatSfxCue cue) => RequestCounts[(int)cue];
 
+        // Sound pass 2026-11-22: counts a cue a caller started on the controller itself (an ambience loop).
+        public static void CountRequest(CombatSfxCue cue) => RequestCounts[(int)cue]++;
+
         public static bool Play(CombatSfxCue cue)
         {
             RequestCounts[(int)cue]++;

@@ -493,7 +493,8 @@ Web에 `DATABASE_URL`, Supabase database password, service role key를 넣지 �
 - HUD-7C Play Mode: Unity `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud7CPlayVerification.RunBatch -logFile <로그 경로>`. `-quit`는 넣지 않는다. 확인 취소 시 같은 Run·일시정지·API 요청 0회를 유지하고, 확정 시 결과 저장·보상 없이 Run 상태를 정리해 Frontend 홈의 시간과 첫 포커스를 복원하는지 검사한 뒤 Editor를 종료한다.
 - HUD-7D 자동 구성·회귀: Unity `-batchmode -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud7DVerification.SetupAndVerifyBatch -logFile <로그 경로>`. 같은 캐릭터 재시작 버튼과 공용 확인 UI, Setup 두 번, Game Scene GUID와 HUD-7C 회귀를 검사한다.
 - HUD-7D Play Mode: Unity `-batchmode -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Hud7DPlayVerification.RunBatch -logFile <로그 경로>`. `-quit`는 넣지 않는다. 취소 시 기존 Run ID·seed·진행을 유지하고, 확정 시 결과 저장 없이 같은 캐릭터와 새 Run ID·seed, 1층 1번 방·처치 0·빈 인벤토리로 시작하는지 검사한 뒤 Editor를 종료한다.
-- Setting-1A 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup Setting-1A Audio`. `Assets/Audio`의 홈·전투 BGM과 UI 클릭음을 임포트 규칙에 맞추고 Frontend·Game Scene의 영속 오디오 컨트롤러에 연결한다. 같은 경로의 음원 교체 후에도 이 메뉴를 다시 실행한다.
+- Setting-1A 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup Setting-1A Audio`. `Assets/Audio`의 홈·전투·보스방 BGM(`BGM_Boss.mp3`)과 UI 클릭음을 임포트 규칙에 맞추고 Frontend·Game Scene의 영속 오디오 컨트롤러에 연결한다. 같은 경로의 음원 교체 후에도 이 메뉴를 다시 실행한다.
+- 보스방 BGM·층 이동 암전: 보스 등장 연출이 시작되면 층 BGM이 0.25초에 멎고, VS 효과음이 울리고 0.5초 뒤 보스방 BGM이 0.6초에 걸쳐 들어온다(곡 도입이 길어 VS 꼬리와 겹쳐 시작한다. 연출을 VS 전에 건너뛰면 연출 끝에 바로 시작). 보스를 쓰러뜨리면 보스방 BGM이 2.5초에 걸쳐 사라지고 층 BGM이 다시 시작된다. 보스가 살아 있는 동안 보스방을 벗어나면(개발 패널 이동 등) 0.6초에 걸쳐 바뀐다. 보스방 포탈을 타면 대각선 띠가 왼쪽부터 차례로 화면을 덮고(`RoomTransitionWipe`, 게임 시간 정지), 암전 중 다음 층을 불러온 뒤 띠가 오른쪽으로 빠지며 열린다. Edit Mode 검증기의 `FloorAdvancePortal.TryEnter`는 암전 없이 즉시 층을 불러온다.
 - Setting-1A 자동 구성·회귀: Unity `-batchmode -nographics -quit -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Setting1AVerification.SetupAndVerifyBatch -logFile <로그 경로>`. Setup 두 번, 음원 임포트 설정, Scene별 단일 컨트롤러·두 Source, Scene GUID, BGM 라우팅과 저장 음량 계산을 검사한다.
 - Setting-1A Play Mode: Unity `-batchmode -nographics -projectPath <game 경로> -executeMethod TrickalFanGame.Editor.Week13Setting1APlayVerification.RunBatch -logFile <로그 경로>`. `-quit`는 넣지 않는다. 실제 버튼 클릭음, 즉시 음량 적용, `Frontend → Game → Frontend` BGM 전환과 저장값 재로드를 검사한 뒤 Editor를 종료한다.
 - Setting-1B 구성: Unity 메뉴 `Trickal Fan Game > Week 13 > Setup Setting-1B Display`. Frontend·Game 카메라와 두 UI 기준 프레임에 중앙 16:9 비율 제어를 중복 없이 구성하고 기본 빌드 화면을 1920×1080 테두리 없는 전체 화면, 크기 조절 불가 창으로 설정한다.
@@ -1456,7 +1457,8 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   좌우 0.7칸 쥬비 2마리, 3초 주기, 8마리 상한에서 건너뜀과 1마리 보충, 대왕쥬비 사망 뒤 쥬비 유지와 방 클리어. 2026-10-28 모두
   통과했고 2026-10-28 사용자 Play 확인을 마쳤다. 수동 확인: Game Scene Play → `F1` 개발 패널 `— Room —`의 `Spawn Jyubi king (summons Jyubi)`로 플레이어 위 4칸에
   소환한다. (1) 큰 쥬비가 한자리에 떠 있지 않고 이리저리 꺾이며 날아다니는지, 플레이어가 다가가면 물러나고 멀어지면 따라오는지
-  본다. (2) 3초마다 금색으로 깜빡인 뒤 좌우에 쥬비 2마리가 나오는지, 같은 섹션의 `Jyubi kings N, their Jyubi M, summoning K`
+  본다. (2) 3초마다 금색으로 깜빡인 뒤 쥬비 3마리(2026-11-22부터, `Make nearest enemy elite`로 엘리트로 바꾸면 4마리)가
+  나오는지, 같은 섹션의 `Jyubi kings N, their Jyubi M, summoning K`
   표시에서 쥬비 수가 8에서 멈추는지 본다. (3) 대왕쥬비를 먼저 잡아도 쥬비가 남아 방이 끝나지 않고, 쥬비까지 잡아야 끝나는지
   본다. 실제 방에서 보려면 `— Seed —`의 `Find Jyubi king F3`로 3층에 nest가 있는 seed를 찾아 `Restart Run with this seed` 뒤
   3층으로 간다.
@@ -2644,3 +2646,14 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 기본 말풍선 후속 확인: 위 Setup을 실행한 다음 Verify를 실행한다. 짧은 대사·긴 대사·여러 줄 대사에서 최대 폭 유지, 내용에 따른 높이 확장과 텍스트 잘림 여부를 검사한다. NPC 접근 시 작은 기본 말풍선과 `[E]상점열기`가 보이고 `E` 입력으로 상점이 열리는지 Play에서 확인한다. 배치 참고 렌더는 그래픽을 켠 `InGameUiPolishVerification.CaptureNpcBatch`로 `output/menu-review/npc-simple-bubble-{short,long}.png`에 저장한다. 이번 후속 수정은 열린 Editor의 프로젝트 잠금으로 자동 검증·렌더 미실행이다.
 
 - 기본 인사 `뭐 하나 사시려구요?`는 한 줄에 들어가도록 최대 텍스트 폭을 2.0 월드 단위로 조정했다. 더 긴 대사는 계속 줄바꿈과 높이 확장을 사용한다.
+
+
+### 인게임 진입·종료 로딩 화면 (Loading-0, 2026-11-21)
+
+- 사용자 승인 배치는 `Assets/Resources/RunLoadingScreen/Layout.json`이다. 초상 121%, 내부 이동 X -14 / Y 60, 말풍선 `간식 더 없어? / 더 꺼내 봐!`, 수식어 `요정여왕`, 이름 `에르핀`을 사용한다. `Style.asset`은 기존 에르핀 원화와 `Week13FrontendSetup.FontPath`의 ONE Mobile POP TMP 글꼴을 참조한다. 별도 Scene Setup 없이 적용된다.
+- `RunSceneLoader`가 게임 시작(캐릭터 선택 확정), ESC 메뉴의 인게임 재시작·홈 복귀, 게임 종료 후 결과창 진입을 `LoadSceneAsync`로 처리한다. 결과창은 Frontend Scene에 있으므로 결과창 → 홈/캐릭터 선택은 기존 패널 전환을 유지하며, 선택 확정 후 인게임에 다시 들어갈 때 로딩을 표시한다. 방·층 이동의 `RoomTransitionWipe`와는 별개다.
+- 화면은 씬 사이에 유지된다. 클릭·키보드/패드 Submit은 EventSystem을 잠시 비활성화해 막고, 결과 연출도 로딩이 닫힐 때까지 기다린다. 새 씬의 Start 실행 후 100%를 0.15초 표시하고 게임/홈은 시간 1, 결과는 시간 0으로 복원한다. 씬 활성화 전 최소 표시 시간은 0.6초다. 네트워크 프로필 조회·결과 저장은 로딩 완료를 막지 않는다.
+- Edit Mode 단독 검증: `Trickal Fan Game > Loading Screen > Verify` (`TrickalFanGame.Editor.RunLoadingScreenVerification.Verify`). 승인 배치·글꼴·초상 참조·원형 마스크·중복 생성 방지·진행률·오류 로그를 검사한다. Scene을 열거나 저장하지 않는다.
+- 전환 전용 Play 배치: `TrickalFanGame.Editor.RunLoadingScreenPlayVerification.RunBatch`. `-batchmode -nographics`와 `-executeMethod`로 실행하며 **`-quit`는 사용하지 않는다**. 테스트가 Play를 켜고 종료 코드를 반환한다. 시작→재시작→홈 복귀→재진입→결과 복귀, 중복 전환 차단, 100% 표시·입력/시간 복원·결과 제출 한 번·결과 연출 대기를 검사한다. 테스트용 프로필/성장 캐시 키는 종료 시 복원한다.
+- 실행 근거: 초기 Edit 배치에서 UI CanvasRenderer 누락 로그를 발견해 커스텀 Graphic의 RequireComponent로 수정했다. 수정본의 런타임·Editor Roslyn 컴파일과 승인 JSON/UTF-8/meta 검사 통과(`output/run-loading-compile/`). 다른 Unity 빌드 종료 후 `RunLoadingScreenPlayVerification.RunBatch`가 호출한 Edit Verify와 전환 Play 검증 모두 통과했다(`output/run-loading-screen-play-final.log`, 종료 0). 시작·재시작·홈 복귀·재진입·결과 복귀, 100% 표시, 입력/시간 복원, 단일 결과 제출과 결과 연출 대기를 확인했다. 실제 화면의 미술 검수는 별도다. 말풍선의 `꺼` 글자는 같은 기존 TMP 글꼴의 동적 아틀라스에 추가됐으며 GUID는 유지한다.
+- 수동 Play 확인(1920×1080, 1280×720): Frontend Scene의 게임 시작 → 에르핀 선택·확정 / 인게임 ESC → 다시 시작·확인 / ESC → 홈으로·확인 / 사망 뒤 GAME OVER 확인 또는 최종 보스 클리어 → 결과. 모든 씬 전환에서 연두 체크·원형 초상·말풍선·이름표·하단 바가 보이고 새 화면에 입력이 새지 않아야 한다. 로딩 뒤 이동·ESC가 정상 동작하고 결과 경험치 연출의 첫 장면이 가려지지 않아야 한다. 결과에서 다시 하기는 캐릭터 선택으로, 홈은 홈 패널로 이동한다.

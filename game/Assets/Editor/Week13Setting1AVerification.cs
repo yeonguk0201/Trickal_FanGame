@@ -18,12 +18,15 @@ namespace TrickalFanGame.Editor
             AudioClip home = RequireClip(Week13Setting1ASetup.HomeBgmPath);
             AudioClip combat = RequireClip(Week13Setting1ASetup.CombatBgmPath);
             AudioClip click = RequireClip(Week13Setting1ASetup.UiClickPath);
+            AudioClip boss = RequireClip(Week13Setting1ASetup.BossBgmPath);
             ValidateImporter(Week13Setting1ASetup.HomeBgmPath, AudioClipLoadType.Streaming);
             ValidateImporter(Week13Setting1ASetup.CombatBgmPath, AudioClipLoadType.Streaming);
+            ValidateImporter(Week13Setting1ASetup.BossBgmPath, AudioClipLoadType.Streaming);
             ValidateImporter(Week13Setting1ASetup.UiClickPath, AudioClipLoadType.DecompressOnLoad);
-            ValidateScene(Week13FrontendSetup.ScenePath, home, combat, click);
-            ValidateScene(Week13FrontendSetup.GameScenePath, home, combat, click);
+            ValidateScene(Week13FrontendSetup.ScenePath, home, combat, boss, click);
+            ValidateScene(Week13FrontendSetup.GameScenePath, home, combat, boss, click);
             ValidateVolumeApplication(home, combat, click);
+            ValidateBossMusicRouting(home, combat, boss, click);
             Debug.Log("Setting-1A verification passed: clips, scene persistence, BGM routing, and volume application.");
         }
 
@@ -42,7 +45,8 @@ namespace TrickalFanGame.Editor
             Debug.Log("Setting-1A batch verification passed: setup twice without duplicates and stable Scene GUIDs.");
         }
 
-        private static void ValidateScene(string scenePath, AudioClip home, AudioClip combat, AudioClip click)
+        private static void ValidateScene(string scenePath, AudioClip home, AudioClip combat, AudioClip boss,
+            AudioClip click)
         {
             Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
             GameAudioController[] controllers = scene.GetRootGameObjects()
@@ -51,7 +55,8 @@ namespace TrickalFanGame.Editor
             GameAudioController controller = controllers[0];
             Assert(controller.gameObject.name == Week13Setting1ASetup.AudioRootName,
                 $"{scenePath} audio controller must use the stable root name.");
-            Assert(controller.HomeBgm == home && controller.CombatBgm == combat && controller.UiClick == click,
+            Assert(controller.HomeBgm == home && controller.CombatBgm == combat && controller.BossBgm == boss &&
+                   controller.UiClick == click,
                 $"{scenePath} audio clips are not assigned correctly.");
             Assert(controller.BgmSource != null && controller.SfxSource != null &&
                    controller.BgmSource != controller.SfxSource,
@@ -101,6 +106,42 @@ namespace TrickalFanGame.Editor
                 LocalSettings.MasterVolume = originalMaster;
                 LocalSettings.BgmVolume = originalBgm;
                 LocalSettings.SfxVolume = originalSfx;
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        // Boss-Music: entering a boss stops the floor music and queues nothing until asked; the boss track is
+        // queued once; leaving queues the floor music back and a scene change clears the boss state.
+        private static void ValidateBossMusicRouting(AudioClip home, AudioClip combat, AudioClip boss, AudioClip click)
+        {
+            Scene scene = EditorSceneManager.OpenScene(Week13FrontendSetup.GameScenePath, OpenSceneMode.Single);
+            GameObject root = new("Boss-Music Verification");
+            try
+            {
+                AudioSource bgm = root.AddComponent<AudioSource>();
+                AudioSource sfx = root.AddComponent<AudioSource>();
+                GameAudioController controller = root.AddComponent<GameAudioController>();
+                controller.Configure(home, combat, click, bgm, sfx, boss);
+                controller.EnterBossMusic();
+                Assert(controller.IsBossMusic && !controller.IsBgmStartPending,
+                    "Entering a boss must stop the floor music without starting the boss track yet.");
+                controller.StartBossMusic(2f);
+                Assert(controller.IsBgmStartPending && controller.PendingBgm == boss,
+                    "The boss track must be queued after the VS cue.");
+                controller.StartBossMusic(0f);
+                Assert(controller.PendingBgm == boss, "A second boss-track request must keep the first one.");
+                controller.LeaveBossMusic(0.8f, 0.8f);
+                Assert(!controller.IsBossMusic && controller.IsBgmStartPending &&
+                       controller.PendingBgm == controller.ResolveBgmForScene(scene.name) && controller.PendingBgm == combat,
+                    "Leaving the boss room must queue the floor music back.");
+                controller.EnterBossMusic();
+                controller.ApplySceneAudio(GameAudioController.GameSceneName);
+                Assert(!controller.IsBossMusic && !controller.IsBgmStartPending &&
+                       Mathf.Approximately(controller.BgmFade, 1f),
+                    "A scene change must clear the boss music state.");
+            }
+            finally
+            {
                 UnityEngine.Object.DestroyImmediate(root);
             }
         }

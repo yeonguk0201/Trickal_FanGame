@@ -200,6 +200,10 @@ namespace TrickalFanGame.Enemy
             if (style == BossMovementStyle.VaultHop && moving &&
                 ((previousCycle < 0.18f && cycle >= 0.18f) || (cycle < previousCycle && cycle >= 0.18f)))
                 TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.VaultMove);
+            // Sound pass 2026-11-22: the 부스러기 boss's squish as each hop lands (86% of the stride, as below).
+            if (style == BossMovementStyle.BuseureogiHop && moving &&
+                ((previousCycle < 0.86f && cycle >= 0.86f) || (cycle < previousCycle && previousCycle < 0.86f)))
+                TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.BossCrumbMove);
             // The ordinary vault hop lands at 86% of its stride. Its ground treasures react only on impact.
             if (style == BossMovementStyle.VaultHop && moving &&
                 ((previousCycle < 0.86f && cycle >= 0.86f) || (cycle < previousCycle && previousCycle < 0.86f)))

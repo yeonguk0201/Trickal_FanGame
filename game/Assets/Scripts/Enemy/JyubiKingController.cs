@@ -30,7 +30,9 @@ namespace TrickalFanGame.Enemy
         public const float DefaultFirstSummonDelay = 1.5f;
         public const float DefaultSummonInterval = 3f;
         public const float DefaultSummonTelegraph = 0.6f;
-        public const int DefaultSummonCount = 2;
+        // Three at a time; an elite (the 1.5x 거대 variant) releases four (user decision, 2026-11-22; two before).
+        public const int DefaultSummonCount = 3;
+        public const int DefaultEliteSummonCount = 4;
         public const int DefaultMaxSummons = 8;
         public const float DefaultSummonSideOffset = 0.7f;
 
@@ -52,6 +54,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.1f)] private float summonInterval = DefaultSummonInterval;
         [SerializeField, Min(0f)] private float summonTelegraph = DefaultSummonTelegraph;
         [SerializeField, Min(1)] private int summonCount = DefaultSummonCount;
+        [SerializeField, Min(1)] private int eliteSummonCount = DefaultEliteSummonCount;
         [SerializeField, Min(1)] private int maxSummons = DefaultMaxSummons;
         [SerializeField, Min(0f)] private float summonSideOffset = DefaultSummonSideOffset;
 
@@ -73,6 +76,9 @@ namespace TrickalFanGame.Enemy
         public float SummonInterval => summonInterval;
         public float SummonTelegraph => summonTelegraph;
         public int SummonCount => summonCount;
+        public int EliteSummonCount => eliteSummonCount;
+        // How many one summon releases for this body: more for an elite.
+        public int CurrentSummonCount => EnemyVariant.IsEliteEnemy(gameObject) ? eliteSummonCount : summonCount;
         public int MaxSummons => maxSummons;
         public float SummonSideOffset => summonSideOffset;
         public bool IsSummoning => !float.IsNaN(telegraphStartedAt);
@@ -110,6 +116,8 @@ namespace TrickalFanGame.Enemy
             maxSummons = Mathf.Max(1, configuredMax);
             summonSideOffset = Mathf.Max(0f, configuredSideOffset);
         }
+
+        public void ConfigureEliteSummonCount(int configuredCount) => eliteSummonCount = Mathf.Max(1, configuredCount);
 
         private void Awake()
         {
@@ -230,7 +238,7 @@ namespace TrickalFanGame.Enemy
 
         private void ReleaseSummons()
         {
-            int count = Mathf.Min(summonCount, maxSummons - AliveSummonCount);
+            int count = Mathf.Min(CurrentSummonCount, maxSummons - AliveSummonCount);
             List<Health> released = new(Mathf.Max(0, count));
             if (summonPrefab != null && count > 0)
             {

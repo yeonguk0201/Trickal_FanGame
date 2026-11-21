@@ -128,6 +128,27 @@ namespace TrickalFanGame.Editor
             (CombatSfxCue.VaultSlimeThrow, "SFX_Vault_Slime_Throw.wav", 0.8f, 0.03f, 1f),
             // One per drawn hop takeoff of the walk.
             (CombatSfxCue.VaultMove, "SFX_Vault_Move.wav", 0.73f, 0.15f, 1f),
+            // Sound pass 2026-11-22 (tools/sound-mixer). The loops play on voices CombatAmbienceAudio starts and
+            // stops, so their length caps are only sanity bounds. The fire and rumble loops are short seamless cuts of
+            // 40-second recordings (AudioLoopCutter).
+            (CombatSfxCue.JyubiMoveLoop, "SFX_Jubi_Move_Loop.mp3", 0.4f, 0.1f, 8f),
+            (CombatSfxCue.AmbushMoveLoop, "SFX_Ambush_Move_Loop.wav", 0.6f, 0.1f, 7f),
+            // Each walking or hopping enemy steps every CombatAmbienceAudio.EnemyStepInterval (0.35s) on its own
+            // offset; the guard only folds steps landing on the same frame.
+            (CombatSfxCue.EnemyStep, "SFX_Enemy_Step.mp3", 0.4f, 0.03f, 1f),
+            (CombatSfxCue.AmbushEmerge, "SFX_Ambush_Emerge.mp3", 0.2f, 0.1f, 3.5f),
+            // The two share one file and are kept as two cues so each can be mixed on its own.
+            (CombatSfxCue.NunuringSplit, "SFX_Slime_Splatter.mp3", 0.6f, 0.1f, 1f),
+            (CombatSfxCue.BossCrumbSummon, "SFX_Slime_Splatter.mp3", 0.6f, 0.15f, 1f),
+            (CombatSfxCue.BossCrumbMove, "SFX_Boss_Crumb_Move.mp3", 0.89f, 0.15f, 1f),
+            // The recording opens on 0.5s of silence, cut off (AudioLoopCutter) so the crumble lands with the last hit.
+            (CombatSfxCue.ObstacleBreak, "SFX_Obstacle_Break.wav", 0.4f, 0.05f, 5.5f),
+            (CombatSfxCue.SpikeRaise, "SFX_Spike_Raise.mp3", 0.5f, 0.1f, 1.5f),
+            (CombatSfxCue.SpikeLower, "SFX_Spike_Lower.mp3", 0.4f, 0.1f, 1f),
+            // Volume here is the level at CombatAmbienceAudio's near distance; the far level is its ratio of this.
+            (CombatSfxCue.FireTrapLoop, "SFX_Trap_Fire_Loop.wav", 1f, 0.1f, 9f),
+            (CombatSfxCue.PoisonGasLoop, "SFX_Poison_Gas_Loop.mp3", 1f, 0.1f, 6f),
+            (CombatSfxCue.PoisonSwampLoop, "SFX_Poison_Swamp_Loop.mp3", 1f, 0.1f, 5f),
         };
 
         public static string PathFor(CombatSfxCue cue)

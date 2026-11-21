@@ -207,6 +207,16 @@
           "attributionRequired": false
         },
         {
+          "title": "Thriller Cinematic Background High Tension Score",
+          "author": "openmindaudio",
+          "source": "Pixabay #469144",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "보스방 BGM",
+          "attributionRequired": false
+        },
+        {
           "title": "Magical Spell Cast",
           "author": "daviddumaisaudio",
           "source": "Pixabay #190272",
@@ -464,6 +474,126 @@
           "licenseUrl": "https://pixabay.com/service/license-summary/",
           "modified": false,
           "usage": "상점 구매",
+          "attributionRequired": false
+        },
+        {
+          "title": "Bee Flying Loop",
+          "author": "freesound_community",
+          "source": "Pixabay #42287",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "쥬비 이동",
+          "attributionRequired": false
+        },
+        {
+          "title": "ST1 Footstep SFX",
+          "author": "yarzur_ofc",
+          "source": "Pixabay #323053",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "일반 적 이동 발소리",
+          "attributionRequired": false
+        },
+        {
+          "title": "Rock Destroy",
+          "author": "freesound_community",
+          "source": "Pixabay #6409",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "잠복형 튀어나옴",
+          "attributionRequired": false
+        },
+        {
+          "title": "Earth Rumble",
+          "author": "freesound_community",
+          "source": "Pixabay #6953",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "잠복형 땅속 이동 (6초 반복 구간으로 잘라 이음매 크로스페이드)",
+          "attributionRequired": false
+        },
+        {
+          "title": "Slime Splatter 1",
+          "author": "floraphonic",
+          "source": "Pixabay #220262",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "누누링 분열, 부스러기 보스 쫄따구 소환",
+          "attributionRequired": false
+        },
+        {
+          "title": "Slime Squish 5",
+          "author": "floraphonic",
+          "source": "Pixabay #218569",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "부스러기 보스 이동",
+          "attributionRequired": false
+        },
+        {
+          "title": "Debris Break",
+          "author": "lordsonny_two",
+          "source": "Pixabay #253779",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "장애물 부서짐 (앞 0.49초 무음 제거)",
+          "attributionRequired": false
+        },
+        {
+          "title": "Metal Blade Slice 30",
+          "author": "floraphonic",
+          "source": "Pixabay #195317",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "가시함정 올라옴",
+          "attributionRequired": false
+        },
+        {
+          "title": "Metal Blade Slice 51",
+          "author": "floraphonic",
+          "source": "Pixabay #200594",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "가시함정 내려감",
+          "attributionRequired": false
+        },
+        {
+          "title": "Fire Sound",
+          "author": "soundreality",
+          "source": "Pixabay #334130",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": true,
+          "usage": "불함정 (8초·6초 반복 구간으로 잘라 이음매 크로스페이드)",
+          "attributionRequired": false
+        },
+        {
+          "title": "066956 Natalie Godinez",
+          "author": "freesound_community",
+          "source": "Pixabay #38532",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "독가스",
+          "attributionRequired": false
+        },
+        {
+          "title": "Bubbles Popping SFX",
+          "author": "mrstokes302",
+          "source": "Pixabay #425024",
+          "licenseName": "Pixabay Content License",
+          "licenseUrl": "https://pixabay.com/service/license-summary/",
+          "modified": false,
+          "usage": "독늪",
           "attributionRequired": false
         },
         {
