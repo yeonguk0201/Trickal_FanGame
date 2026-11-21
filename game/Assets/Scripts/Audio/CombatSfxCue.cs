@@ -86,7 +86,9 @@ namespace TrickalFanGame.Audio
         ObstacleHit,
 
         // An ordinary enemy attacking: a melee strike starting, or a shot or
-        // lob leaving it. Bosses carry their own cues and are left out.
+        // lob leaving it. Bosses carry their own cues, except that the 부스러기 boss's
+        // cream shot and the 새마음금고's ruby fans use this one too (its landing ring is
+        // covered by the landing thud).
         EnemyAttack,
 
         // An enemy dying, whatever killed it.
@@ -168,5 +170,26 @@ namespace TrickalFanGame.Audio
         BossSwordSlamMagic,
         BossSwordSlamClash,
         BossCrayonTransform,
+
+        // Sound pass 2026-11-22: enemy movement. 쥬비 wings and the 잠복형 rumbling under the floor loop while any of
+        // them moves (CombatAmbienceAudio); ordinary walking enemies share one footfall every EnemyStepInterval; the
+        // 잠복형 bursting out; a 누누링 splitting; the 부스러기 boss landing each hop and calling its crumbs.
+        JyubiMoveLoop,
+        AmbushMoveLoop,
+        EnemyStep,
+        AmbushEmerge,
+        NunuringSplit,
+        BossCrumbMove,
+        BossCrumbSummon,
+
+        // Sound pass 2026-11-22: a destructible obstacle (room or boss-made) breaking; the periodic spikes coming up
+        // and going down; and three loops heard louder the closer the player is (CombatAmbienceAudio): a burning
+        // fire trap, a 독버섯's gas cloud and a damage puddle (독늪).
+        ObstacleBreak,
+        SpikeRaise,
+        SpikeLower,
+        FireTrapLoop,
+        PoisonGasLoop,
+        PoisonSwampLoop,
     }
 }

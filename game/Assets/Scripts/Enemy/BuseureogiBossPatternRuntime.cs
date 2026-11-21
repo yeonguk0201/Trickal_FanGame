@@ -279,7 +279,8 @@ namespace TrickalFanGame.Enemy
                 context?.BeginCombat(target);
                 spawned++;
             }
-            if (spawned > 0) CombatSfx.Play(CombatSfxCue.EnemyAppear);
+            // Sound pass 2026-11-22: its crumbs splat out with their own sound instead of the ordinary enemy arrival.
+            if (spawned > 0) CombatSfx.Play(CombatSfxCue.BossCrumbSummon);
             return spawned;
         }
 
@@ -384,6 +385,8 @@ namespace TrickalFanGame.Enemy
             BossProjectile.Create(BossProjectile.FrontLaunchPoint(gameObject, direction), direction * projectileSpeed,
                 gameObject, boss.ProjectileDamageTier, GetComponentInChildren<SpriteRenderer>()?.sprite,
                 projectileFrames, CreamProjectileArtworkWorldScale);
+            // Sound pass 2026-11-22: the ordinary enemies' attack sound as the cream leaves it.
+            CombatSfx.Play(CombatSfxCue.EnemyAttack);
         }
 
         private void StopMovement()

@@ -232,6 +232,7 @@ namespace TrickalFanGame.Enemy
             SetHidden(false);
             SetAnchored(true);
             SetState(AmbushState.Attacking, currentTime);
+            TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.AmbushEmerge);
             LastAttackTime = currentTime;
             LastHitCount = 0;
             DamageContext context = HealthUnits.CreateEnemyDamageContext(gameObject, DamageSourceType.EnemyMelee,

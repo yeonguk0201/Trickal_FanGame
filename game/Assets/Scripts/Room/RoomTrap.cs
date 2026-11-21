@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TrickalFanGame.Audio;
 using TrickalFanGame.Combat;
 using TrickalFanGame.Enemy;
 using TrickalFanGame.Frontend;
@@ -111,6 +112,10 @@ namespace TrickalFanGame.Room
         // The gas the last break of this 독버섯 left, until it ends.
         public PoisonGasCloud LastGas { get; private set; }
         public ExtinguishedFireArtwork FireRemnant { get; private set; }
+        // The obstacle a fire, spiked rock or 독버섯 breaks as (null for floor traps); the fire's sound follows its hits.
+        public DestructibleObstacle Obstacle => obstacle != null ? obstacle : obstacle = GetComponent<DestructibleObstacle>();
+        // Sound pass 2026-11-22: the periodic spikes' state last tick, so coming up and going down each sound once.
+        private PeriodicSpikeState? lastSpikeState;
         // 진흙케이크: burst (by a step or a bomb) and when, for the burst frames and the puddle.
         public bool HasBurst => !float.IsNaN(burstTime);
         public float BurstTime => burstTime;
@@ -249,6 +254,7 @@ namespace TrickalFanGame.Room
             if (kind == RoomTrapKind.DamagePuddle)
                 PoisonPuddleBubbles.Attach(transform, hitSize * 0.5f, PuddleBubbleCount, visual);
             RestartCycle(Time.time);
+            lastSpikeState = null;
             SubscribeFireBreak();
             RegisterMudCake();
         }
@@ -305,6 +311,10 @@ namespace TrickalFanGame.Room
 
             PeriodicSpikeState state = StateAt(currentTime);
             RefreshPeriodicArtwork(state);
+            // Entering the room only sets the state; a change while the player is here sounds.
+            if (kind == RoomTrapKind.PeriodicSpikes && lastSpikeState.HasValue && lastSpikeState.Value != state)
+                CombatSfx.Play(state == PeriodicSpikeState.Raised ? CombatSfxCue.SpikeRaise : CombatSfxCue.SpikeLower);
+            lastSpikeState = state;
             if (state != PeriodicSpikeState.Raised) return;
 
             Vector2 center = transform.position;

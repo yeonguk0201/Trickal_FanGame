@@ -230,3 +230,27 @@ Pop-Up by IENBA -- https://freesound.org/s/545477/ -- License: Attribution 4.0
   - 더 이상 쓰지 않는 예전 파일(`SFX_Skill_Upper_Impact.wav`, `SFX_Skill_Upper_Step_*.wav`, `SFX_Skill_Lower_Shot.wav`,
     `SFX_Skill_Lower_Burst.wav`, `SFX_Enemy_Tick.wav`, `SFX_Power_Spell_Impact.mp3`, `SFX_Boss_Sword_Slam.mp3`,
     `SFX_Vault_Pillar_Emerge.mp3`)은 이전 교체 때처럼 지우지 않고 남겨 두었다. 크레딧에서는 뺐다.
+- 2026-11-22 적·함정 사운드: 사운드 믹서 "새 후보 비교"에서 사용자가 정한 값을 반영했다. 파일은 모두 무수정 Pixabay 음원이고
+  출처는 `Resources/Credits.json`에 있다.
+  - 적: 쥬비 이동 `JyubiMoveLoop`(#42287, 0.4, 살아 있는 쥬비마다 반복), 일반 적 발소리 `EnemyStep`(#323053, 0.4, 걷거나
+    깡충 뛰는 적마다 0.35초 간격, 시작 시점은 적마다 다름), 잠복형 땅속 이동 `AmbushMoveLoop`(#6953, 0.6, 땅속 이동 중인
+    잠복형마다 반복)·튀어나옴
+    `AmbushEmerge`(#6409, 0.2), 누누링 분열 `NunuringSplit`(#220262, 0.6).
+  - 부스러기 보스: 이동 `BossCrumbMove`(#218569, 0.89, 깡충 착지 지점(보폭 86%)마다 1회), 쫄따구 소환 `BossCrumbSummon`
+    (누누링 분열과 같은 파일, 0.6, 일반 적 등장음 대신).
+  - 장애물 부서짐 `ObstacleBreak`(#253779, 0.4): 방 장애물과 부스러기 보스 장애물 공용. 마지막 타격의 `ObstacleHit`와 겹친다.
+    불함정은 부서짐 대신 불 소리가 꺼지며 줄어든다.
+  - 주기 가시: 올라옴 `SpikeRaise`(#195317, 0.5)·내려감 `SpikeLower`(#200594, 0.4). 방에 들어갈 때의 첫 상태는 울리지 않는다.
+  - 거리 반복음(`CombatAmbienceAudio`): 불함정 `FireTrapLoop`(#334130), 독가스 `PoisonGasLoop`(#38532), 독늪(피해 장판)
+    `PoisonSwampLoop`(#425024). 큐 볼륨 1.0은 발 기준 1유닛 이내의 크기이고, 6유닛 이상에서 불·독가스 0.1배, 독늪 0.24배,
+    그 사이는 선형이다. 함정은 종류마다 voice 하나를 쓰고 가장 크게 들리는 원천이 크기를 정한다. 불함정은 맞은 횟수 0·1·2대에
+    1.0·0.65·0.2배로 0.25초에 걸쳐 줄고, 3대째 꺼지면 0.8초에 걸쳐 사라진다. 일시정지 중에는 반복음이 모두 멈춘다.
+  - 쥬비·잠복형 반복음은 개체마다 voice를 하나씩 쓰되 종류마다 플레이어에게 가까운 4마리까지만 들린다
+    (`CombatAmbienceAudio.MaxEnemyLoops`). 같은 소리가 겹쳐 맞물리지 않게 개체마다 클립의 다른 지점에서 시작한다.
+  - 불(#334130, 44초)과 땅울림(#6953, 42초)은 `AudioLoopCutter`(메뉴 `Trickal Fan Game/Audio/Cut Ambience Loops`)로
+    4초 지점부터 8초·6초를 잘라 1초 크로스페이드로 이음매를 이은 WAV(`SFX_Trap_Fire_Loop.wav`, `SFX_Ambush_Move_Loop.wav`)를
+    쓴다. 원본은 `tmp/sound-candidates/`에 있어야 다시 자를 수 있다.
+  - 장애물 부서짐 원본은 앞 0.5초가 무음이라 마지막 타격보다 늦게 들렸다. 같은 도구로 앞 0.49초를 잘라(5ms 페이드 인)
+    `SFX_Obstacle_Break.wav`로 쓴다.
+  - 보스 투사체 발사에 일반 적 공격음 `EnemyAttack`을 쓴다: 부스러기 보스 크림 발사, 새마음금고 접근 루비 부채꼴(한 번에 1회).
+    점프 착지 루비 고리는 착지음만으로 충분해 넣지 않았다.

@@ -81,6 +81,8 @@ namespace TrickalFanGame.Enemy
             }
 
             LastSplits = splits;
+            // Sound pass 2026-11-22: 누누링's splatter as it comes apart.
+            if (splits.Count > 0) TrickalFanGame.Audio.CombatSfx.Play(TrickalFanGame.Audio.CombatSfxCue.NunuringSplit);
             SplitSpawned?.Invoke(LastSplits);
         }
 

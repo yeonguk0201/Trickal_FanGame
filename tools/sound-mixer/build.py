@@ -72,6 +72,19 @@ LABELS = {
     'VaultEat': ('보스', '새마음금고 먹기'),
     'VaultSlimeThrow': ('보스', '새마음금고 젤리 던지기'),
     'VaultMove': ('보스', '새마음금고 이동'),
+    'JyubiMoveLoop': ('적', '쥬비 이동 (날갯짓 반복)'),
+    'EnemyStep': ('적', '일반 적 이동 발소리'),
+    'AmbushEmerge': ('적', '잠복형 튀어나옴'),
+    'AmbushMoveLoop': ('적', '잠복형 땅속 이동 (반복)'),
+    'NunuringSplit': ('적', '누누링 분열'),
+    'BossCrumbMove': ('보스', '부스러기 보스 이동 (깡충 착지마다)'),
+    'BossCrumbSummon': ('보스', '부스러기 보스 쫄따구 소환'),
+    'ObstacleBreak': ('월드', '장애물 부서짐 (방·보스 장애물)'),
+    'SpikeRaise': ('함정', '가시함정 올라옴'),
+    'SpikeLower': ('함정', '가시함정 내려감'),
+    'FireTrapLoop': ('함정', '불함정 (가까이 볼륨, 반복)'),
+    'PoisonGasLoop': ('함정', '독가스 (가까이 볼륨, 반복)'),
+    'PoisonSwampLoop': ('함정', '독늪 보글거림 (가까이 볼륨, 반복)'),
 }
 
 # How often the game repeats a cue, so the repeat button plays it at the real cadence. 0 = back to back.
@@ -83,6 +96,12 @@ CADENCE = {
     'VaultMove': 0.75,
     'BasicAttack': 0.35,
     'EnemyTickDamage': 0.5,
+    'EnemyStep': 0.35,
+    'JyubiMoveLoop': 0,
+    'AmbushMoveLoop': 0,
+    'BossCrumbMove': 0.6,
+    'SpikeRaise': 4.0,
+    'SpikeLower': 4.0,
 }
 
 
@@ -95,7 +114,7 @@ def read_rates():
     return {'SkillUpperRun': float(m.group(1))}
 
 
-GROUP_ORDER = ['플레이어', '스킬', '적', '월드', 'UI', '보스', '기타']
+GROUP_ORDER = ['플레이어', '스킬', '적', '함정', '월드', 'UI', '보스', '기타']
 
 # Sounds being auditioned before they are imported. Files live in tmp/sound-candidates/ (next to the built page);
 # a missing file still shows as a placeholder row so the to-do stays visible. `target` is the cue the candidate
@@ -104,12 +123,42 @@ CANDIDATE_DIR = ROOT / 'tmp/sound-candidates'
 _PACK150 = 'OpenGameArt 150 Combat Sound Effects (untamedpixels, CC0)'
 # The 2026-11-21 sound pass imported every candidate auditioned here; add new ones the same way:
 # dict(id=, group=, label=, target=<cue or None>, file=, volume=, cadence=, length=, fade=, source=).
-CANDIDATES = []
+#
+# Optional keys for hazards heard by distance:
+#   spatial=dict(near=, far=, min=)  volume is `volume` at `near` units or closer, `min` at `far` or beyond, linear
+#                                    in between. The row then loops the clip and shows a listener-distance slider.
+#   stages=[(label, multiplier), ...] steps the loop drops through (fire trap: hit 0/1/2, then put out);
+#                                    `stage_fade` = seconds a step takes, the last step fades to 0 over `off_fade`.
+_PIXABAY = 'Pixabay'
+# The 2026-11-22 sound pass imported every candidate above into the game (see the cue table). The three distance
+# loops stay here with the values the game now uses (CombatAmbienceAudio), so distance and fire stages can still be
+# auditioned; changing them here does not change the game until the export is applied.
+CANDIDATES = [
+    dict(id='FireTrapLoop', group='함정', label='불함정 (게임 반영값, 거리·단계 미리듣기)', target=None,
+         file='SFX_Trap_Fire_Loop.wav', volume=1.0, cadence=0,
+         spatial=dict(near=1.0, far=6.0, min=0.1),
+         stages=[('큰불 (0대)', 1.0), ('중간불 (1대)', 0.65), ('작은불 (2대)', 0.2), ('꺼짐 (3대)', 0.0)],
+         stage_fade=0.25, off_fade=0.8,
+         source=f'{_PIXABAY} fire-sound-334130'),
+    dict(id='PoisonGasLoop', group='함정', label='독가스 (게임 반영값, 거리 미리듣기)', target=None,
+         file='freesound_community-066956_natalie-godinez-38532.mp3', volume=1.0, cadence=0,
+         spatial=dict(near=1.0, far=6.0, min=0.1),
+         source=f'{_PIXABAY} 066956-natalie-godinez-38532'),
+    dict(id='PoisonSwampLoop', group='함정', label='독늪 보글거림 (게임 반영값, 거리 미리듣기)', target=None,
+         file='mrstokes302-bubbles-popping-sfx-mrstokes302-425024.mp3', volume=1.0, cadence=0,
+         spatial=dict(near=1.0, far=6.0, min=0.24),
+         source=f'{_PIXABAY} bubbles-popping-sfx-mrstokes302-425024'),
+]
 # Moments made of several cues, played at the game's timing so they can be balanced together.
 # parts: (candidate id, start time, play length or 0 for its own length) — candidates only.
 # compare: (cue, start time[, play length]) — cues already in the game.
+# layered: (cue, start time[, play length]) cues already in the game, played together with the candidate parts.
 # editable: the page shows a start-time slider per part (0..maxAt seconds) and exports the changed timing.
 CANDIDATE_SCENES = [
+    dict(label='주기 가시함정: 올라옴 → 2초 유지 → 내려감', parts=[],
+         compare=[('SpikeRaise', 0.0), ('SpikeLower', 2.0)]),
+    dict(label='장애물 마지막 타격: 타격 + 부서짐', parts=[], compare=[('ObstacleHit', 0.0), ('ObstacleBreak', 0.0)]),
+    dict(label='잠복형: 땅속 이동 → 튀어나옴', parts=[], compare=[('AmbushMoveLoop', 0.0, 1.5), ('AmbushEmerge', 1.5)]),
     dict(label='고학년 돌진: 출발 → 달리기 1.6초 → 충돌', parts=[],
          compare=[('SkillUpperDash', 0.0), ('SkillUpperRun', 0.0, 1.7), ('SkillUpperImpact', 1.6)]),
     dict(label='저학년 전체: 시전 → 발사 ×4 → 폭발 ×4', parts=[],
@@ -133,6 +182,10 @@ def read_candidates():
         c.setdefault('length', 0)
         c.setdefault('fade', 0)
         c.setdefault('source', '')
+        c.setdefault('spatial', None)
+        c.setdefault('stages', [])
+        c.setdefault('stage_fade', 0)
+        c.setdefault('off_fade', 0)
         c['compare'] = CANDIDATE_COMPARE.get(c['id']) or ([(c['target'], 0.0)] if c['target'] else [])
         out.append(c)
     return out

@@ -60,6 +60,10 @@
   .note { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
   .scene { border-top: 1px solid var(--line); padding: 10px 0 4px; }
   .timing { display: grid; gap: 4px; margin: 8px 0 0 4px; max-width: 640px; }
+  tr.spatial td { border-bottom: 1px solid var(--line); padding-top: 0; }
+  .spatialBox { padding: 0 0 6px 12px; border-left: 3px solid var(--chip); }
+  .stages { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px; }
+  .stages label { display: flex; gap: 4px; align-items: center; }
   .timing label { display: grid; grid-template-columns: minmax(110px, 180px) 1fr 64px 16px; gap: 8px; align-items: center; }
   @media (max-width: 760px) {
     header, main { padding-left: 16px; padding-right: 16px; }
@@ -218,7 +222,13 @@ const cueByName = Object.fromEntries(DATA.cues.map(c => [c.cue, c]));
 const candActive = new Set();
 const candTimers = new Set();
 const candRepeats = new Map();
-const candBase = k => ({ volume: k.volume, start: 0, length: k.length || 0, fade: k.fade || 0, cadence: k.cadence });
+const candBase = k => {
+  const b = { volume: k.volume, start: 0, length: k.length || 0, fade: k.fade || 0, cadence: k.cadence };
+  if (k.spatial) Object.assign(b, { minVolume: k.spatial.min, near: k.spatial.near, far: k.spatial.far });
+  (k.stages || []).forEach(([, m], i) => { b['stage' + i] = m; });
+  if ((k.stages || []).length) Object.assign(b, { stageFade: k.stage_fade || 0, offFade: k.off_fade || 0 });
+  return b;
+};
 const candField = (k, f) => (edits.cand[k.id] || {})[f] ?? candBase(k)[f];
 const candVolume = k => clamp01(candField(k, 'volume') * sfxLevel());
 function later(fn, seconds) {
@@ -275,8 +285,140 @@ function refreshCandVolume(k) {
   for (const a of candActive) if (a._cand === k.id && !a._fading) a.volume = candVolume(k);
 }
 
+// ---- hazards heard by distance (fire, gas, swamp) ---------------------------------------------------------
+// The loop's volume is `volume` (가까이) at `near` units or closer and `minVolume` (멀리) at `far` or beyond, linear in
+// between, times the current stage multiplier. A stage change ramps over stageFade; the last stage over offFade.
+const spatialPlayers = new Map();       // id -> { audio, stageGain, from, to, began, span, raf }
+const listenDist = {}, listenStage = {};
+const lerp = (a, b, t) => a + (b - a) * t;
+function distanceGain(k) {
+  const near = candField(k, 'near'), far = candField(k, 'far');
+  const d = listenDist[k.id] ?? near;
+  const t = far > near ? clamp01((d - near) / (far - near)) : (d <= near ? 0 : 1);
+  return lerp(candField(k, 'volume'), candField(k, 'minVolume'), t);
+}
+const stageCount = k => (k.stages || []).length;
+const stageMult = (k, i) => stageCount(k) ? candField(k, 'stage' + i) : 1;
+
+function setStage(k, i) {
+  listenStage[k.id] = i;
+  const p = spatialPlayers.get(k.id);
+  if (p) {
+    const last = i === stageCount(k) - 1;
+    p.from = p.stageGain; p.to = stageMult(k, i); p.began = performance.now();
+    p.span = (last ? candField(k, 'offFade') : candField(k, 'stageFade')) * 1000;
+  }
+  document.querySelectorAll(`[data-stage-of="${k.id}"]`).forEach(b => b.classList.toggle('on', +b.dataset.stage === i));
+}
+
+function startSpatial(k) {
+  stopSpatial(k);
+  const audio = new Audio(k.src);
+  audio._cand = k.id;
+  const stage = listenStage[k.id] ?? 0;
+  const p = { audio, stageGain: stageMult(k, stage), from: 0, to: stageMult(k, stage), began: 0, span: 0 };
+  spatialPlayers.set(k.id, p);
+  const start = candField(k, 'start');
+  const go = () => { audio.currentTime = start; audio.play().catch(() => {}); };
+  const frame = () => {
+    if (spatialPlayers.get(k.id) !== p) return;
+    if (p.span > 0) {
+      const t = Math.min(1, (performance.now() - p.began) / p.span);
+      p.stageGain = lerp(p.from, p.to, t);
+      if (t >= 1) p.span = 0;
+    } else p.stageGain = p.to;
+    audio.volume = clamp01(distanceGain(k) * p.stageGain * sfxLevel());
+    const cut = candField(k, 'length');
+    if (audio.ended || (cut > 0 && audio.currentTime >= start + cut)) go();
+    p.raf = requestAnimationFrame(frame);
+  };
+  if (audio.readyState >= 1) go(); else audio.addEventListener('loadedmetadata', go, { once: true });
+  frame();
+}
+function stopSpatial(k) {
+  const p = spatialPlayers.get(k.id);
+  if (!p) return;
+  cancelAnimationFrame(p.raf);
+  p.audio.pause();
+  spatialPlayers.delete(k.id);
+}
+
+// Fire: steps 큰불 → 중간불 → 작은불 → 꺼짐, `gap` seconds apart, starting the loop if it is not playing.
+function playStageRun(k, gap) {
+  setStage(k, 0);
+  if (!spatialPlayers.has(k.id)) {
+    const b = document.querySelector(`[data-cand-repeat="${k.id}"]`);
+    startCandRepeat(k, b);
+  }
+  for (let i = 1; i < stageCount(k); i++) later(() => setStage(k, i), gap * i);
+}
+
+function buildSpatialRow(k) {
+  const tr = document.createElement('tr');
+  tr.className = 'spatial';
+  const stageInputs = (k.stages || []).map(([label], i) =>
+    `<label class="stage"><button data-stage-of="${k.id}" data-stage="${i}">${label}</button>
+       <input type="number" class="stageMult" data-i="${i}" min="0" max="1" step="0.05" title="이 단계 배율"></label>`).join('');
+  tr.innerHTML = `<td colspan="6"><div class="spatialBox">
+      <div class="timing">
+        <label><span>멀리 볼륨 (최소)</span><input type="range" class="minR" min="0" max="1" step="0.01"><input type="number" class="minN" min="0" max="1" step="0.01"><span></span></label>
+        <label><span>최대 볼륨 거리 (유닛)</span><input type="range" class="nearR" min="0" max="10" step="0.1"><input type="number" class="nearN" min="0" max="20" step="0.1"><span></span></label>
+        <label><span>최소 볼륨 거리 (유닛)</span><input type="range" class="farR" min="0" max="15" step="0.1"><input type="number" class="farN" min="0" max="30" step="0.1"><span></span></label>
+        <label><span><b>미리듣기: 플레이어 거리</b></span><input type="range" class="distR" min="0" max="15" step="0.1"><input type="number" class="distN" min="0" max="30" step="0.1"><span class="def gain"></span></label>
+      </div>
+      ${stageCount(k) ? `<div class="stages">${stageInputs}</div>
+        <div class="actions" style="margin-top:6px;flex-wrap:wrap">
+          <span class="def">단계 전환(초)</span><input type="number" class="stageFade" min="0" max="5" step="0.05">
+          <span class="def">꺼짐 페이드(초)</span><input type="number" class="offFade" min="0" max="5" step="0.05">
+          <button class="stageRun">불 끄기 순서 재생 (1.5초 간격)</button></div>` : ''}
+    </div></td>`;
+  const q = s => tr.querySelector(s);
+  const pairs = [['minVolume', q('.minR'), q('.minN'), 1], ['near', q('.nearR'), q('.nearN'), 30], ['far', q('.farR'), q('.farN'), 30]];
+  const dist = [q('.distR'), q('.distN')];
+  const gainNote = q('.gain');
+  const sync = () => {
+    for (const [f, r, n] of pairs) r.value = n.value = candField(k, f);
+    dist[0].value = dist[1].value = listenDist[k.id] ?? candField(k, 'near');
+    gainNote.textContent = `→ ${distanceGain(k).toFixed(2)}`;
+    tr.querySelectorAll('.stageMult').forEach(inp => { inp.value = candField(k, 'stage' + inp.dataset.i); });
+    if (q('.stageFade')) { q('.stageFade').value = candField(k, 'stageFade'); q('.offFade').value = candField(k, 'offFade'); }
+  };
+  for (const [f, r, n, max] of pairs) {
+    const set = v => { setCand(k, f, round2(Math.min(max, Math.max(0, +v || 0)))); syncAll(k); };
+    r.addEventListener('input', () => set(r.value));
+    n.addEventListener('change', () => set(n.value));
+  }
+  const setDist = v => { listenDist[k.id] = Math.max(0, +v || 0); sync(); };
+  dist[0].addEventListener('input', () => setDist(dist[0].value));
+  dist[1].addEventListener('change', () => setDist(dist[1].value));
+  tr.querySelectorAll('.stageMult').forEach(inp => inp.addEventListener('change', () => {
+    setCand(k, 'stage' + inp.dataset.i, round2(clamp01(+inp.value || 0)));
+    const i = +inp.dataset.i;
+    if ((listenStage[k.id] ?? 0) === i) setStage(k, i);
+    syncAll(k);
+  }));
+  for (const f of ['stageFade', 'offFade']) q('.' + f)?.addEventListener('change', e => {
+    setCand(k, f, Math.max(0, round2(+e.target.value || 0))); syncAll(k);
+  });
+  tr.querySelectorAll('[data-stage-of]').forEach(b => b.addEventListener('click', () => setStage(k, +b.dataset.stage)));
+  q('.stageRun')?.addEventListener('click', () => playStageRun(k, 1.5));
+  tr.querySelector(`[data-stage-of]`)?.classList.add('on');
+  if (!k.src) tr.querySelectorAll('input, button').forEach(x => x.disabled = true);
+  spatialSyncs[k.id] = sync;
+  sync();
+  return tr;
+}
+const spatialSyncs = {}, rowSyncs = {};
+const syncAll = k => { rowSyncs[k.id]?.(); spatialSyncs[k.id]?.(); };
+
 function startCandRepeat(k, button) {
   stopCandRepeat(k);
+  if (k.spatial) {
+    startSpatial(k);
+    candRepeats.set(k.id, { stop: () => stopSpatial(k) });
+    button.classList.add('on'); button.textContent = '반복 중';
+    return;
+  }
   let stopped = false;
   const state = { stop: () => { stopped = true; clearTimeout(state.timer); } };
   const tick = () => {
@@ -336,7 +478,7 @@ function buildCandidates() {
       <td class="hide-sm"><span class="cue">${k.file || '— 파일 대기 —'}</span><div class="def dur"></div>
           ${k.source ? `<div class="def src" style="white-space:normal">${k.source}</div>` : ''}</td>
       <td><div class="vol"><input type="range" min="0" max="1" step="0.01"><input type="number" min="0" max="1" step="0.01"></div>
-          <div class="def">시작값 ${k.volume.toFixed(2)}</div></td>
+          <div class="def">${k.spatial ? '가까이(최대) ' : ''}시작값 ${k.volume.toFixed(2)}</div></td>
       <td><div class="actions"><button class="play">후보</button>
           ${k.compare.length ? '<button class="cmp">현재</button>' : ''}
           <button data-cand-repeat="${k.id}">반복</button><button class="reset" title="시작값으로">↺</button></div></td>
@@ -353,7 +495,8 @@ function buildCandidates() {
       fade.value = candField(k, 'fade');
       tr.classList.toggle('changed', k.id in edits.cand);
     };
-    const setVol = v => { setCand(k, 'volume', round2(clamp01(+v || 0))); sync(); refreshCandVolume(k); };
+    rowSyncs[k.id] = sync;
+    const setVol = v => { setCand(k, 'volume', round2(clamp01(+v || 0))); syncAll(k); refreshCandVolume(k); };
     range.addEventListener('input', () => setVol(range.value));
     number.addEventListener('change', () => setVol(number.value));
     for (const [input, field] of [[start, 'start'], [length, 'length'], [fade, 'fade'], [cadence, 'cadence']])
@@ -368,9 +511,14 @@ function buildCandidates() {
     tr.querySelector('.cmp')?.addEventListener('click', () => playCompare(k.compare));
     const rep = tr.querySelector('[data-cand-repeat]');
     rep.addEventListener('click', () => candRepeats.has(k.id) ? stopCandRepeat(k) : startCandRepeat(k, rep));
-    tr.querySelector('.reset').addEventListener('click', () => { delete edits.cand[k.id]; sync(); refreshCandVolume(k); renderExport(); save(); });
+    tr.querySelector('.reset').addEventListener('click', () => {
+      delete edits.cand[k.id]; syncAll(k); refreshCandVolume(k);
+      if (stageCount(k)) setStage(k, listenStage[k.id] ?? 0);
+      renderExport(); save();
+    });
     sync();
     body.append(tr);
+    if (k.spatial) body.append(buildSpatialRow(k));
   }
   const host = document.getElementById('candScenes');
   for (const s of DATA.candidateScenes) {
@@ -388,6 +536,7 @@ function buildCandidates() {
     if (!s.parts.length) play.style.display = 'none';
     play.addEventListener('click', () => {
       s.parts.forEach(([id, , len], i) => { if (candById[id]) later(() => playCandidate(candById[id], len), sceneAt(s, i)); });
+      if (s.layered) playCompare(s.layered);
     });
     head.append(label, play);
     if (s.compare && s.compare.length) {
@@ -633,10 +782,13 @@ function renderExport() {
     if (!(k.id in edits.cand)) continue;
     const len = candField(k, 'length');
     lines.push(`// 후보 ${k.label} (${k.file}): 볼륨 ${candField(k, 'volume')}, 시작 ${candField(k, 'start')}초, ` +
-      `길이 ${len > 0 ? len + '초' : '끝까지'}, 페이드아웃 ${candField(k, 'fade')}초, 반복 간격 ${candField(k, 'cadence')}초`);
+      `길이 ${len > 0 ? len + '초' : '끝까지'}, 페이드아웃 ${candField(k, 'fade')}초, 반복 간격 ${candField(k, 'cadence')}초` +
+      (k.spatial ? `, 거리: ${candField(k, 'near')}유닛 이내 ${candField(k, 'volume')} → ${candField(k, 'far')}유닛 이상 ${candField(k, 'minVolume')}` : '') +
+      (stageCount(k) ? `, 단계: ${k.stages.map(([l], i) => `${l} ×${candField(k, 'stage' + i)}`).join(' / ')}` +
+        `, 단계 전환 ${candField(k, 'stageFade')}초, 꺼짐 페이드 ${candField(k, 'offFade')}초` : ''));
   }
   for (const s of DATA.candidateScenes) {
-    if (!(s.label in edits.sceneAt)) continue;
+    if (!(s.label in edits.sceneAt) || !s.parts.length || !Object.keys(edits.sceneAt[s.label]).length) continue;
     const parts = s.parts.map(([id], i) => `${candById[id] ? candById[id].label : id} ${sceneAt(s, i)}초`);
     lines.push(`// 장면 ${s.label} 타이밍: ${parts.join(' / ')}`);
   }

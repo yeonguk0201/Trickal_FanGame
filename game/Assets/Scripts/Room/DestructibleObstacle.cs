@@ -430,6 +430,10 @@ namespace TrickalFanGame.Room
         private void Break(bool byExplosion)
         {
             isBroken = true;
+            // Sound pass 2026-11-22: rocks, trees, boxes and the 부스러기 boss's obstacles crumble. A fire trap is put
+            // out instead; its loop dies away in CombatAmbienceAudio.
+            RoomTrap trap = GetComponent<RoomTrap>();
+            if (trap == null || trap.Kind != RoomTrapKind.Fire) CombatSfx.Play(CombatSfxCue.ObstacleBreak);
             bool firstBreak = runState == null || runState.TryMarkObstacleDestroyed(obstacleId);
             if (firstBreak && isBurning && runProgress != null) runProgress.RecordBurnedObstacle();
             if (firstBreak && TryRollDevelopmentPit(out ResourceDropEntry forcedPit)) SpawnDrop(forcedPit);
