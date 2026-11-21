@@ -26680,6 +26680,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Audio.GameAudioController
   homeBgm: {fileID: 8300000, guid: 2deed3d24963da0408d86f7191d86f47, type: 3}
   combatBgm: {fileID: 8300000, guid: f6ecc53ccba89c344acb793ea2337754, type: 3}
+  bossBgm: {fileID: 8300000, guid: 6cb9c9762cdd1654ea11129427f110be, type: 3}
   uiClick: {fileID: 8300000, guid: ab1ccdf5ccabb444f8c347b416af2346, type: 3}
   bgmSource: {fileID: 1711810916}
   sfxSource: {fileID: 1711810915}

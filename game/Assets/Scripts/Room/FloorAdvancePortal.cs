@@ -140,10 +140,32 @@ namespace TrickalFanGame.Room
                 assembler.Progress?.IsRewardSelectionPending == true ||
                 player.GetComponent<PlayerActionState>()?.CanTransition == false) return false;
 
+            // Floor-Wipe: in play the screen closes first, the floor loads in the dark and the screen opens on it.
+            // The boss music fades out under the closing screen and the floor music returns as it opens.
+            // Edit-mode verifiers have no game clock, so they keep the immediate load below.
+            if (Application.isPlaying)
+            {
+                if (RoomTransitionWipe.IsBusy) return false;
+                PlayerMovement traveller = player;
+                if (!RoomTransitionWipe.Play(() => LoadDestination(traveller))) return false;
+                CombatSfx.Play(CombatSfxCue.BossPortal);
+                GameAudioController.Instance?.LeaveBossMusic(RoomTransitionWipe.DarkUntil,
+                    RoomTransitionWipe.DarkUntil);
+                return true;
+            }
+
+            return LoadDestination(player, playPortalSound: true);
+        }
+
+        private bool LoadDestination(PlayerMovement player) => LoadDestination(player, playPortalSound: false);
+
+        private bool LoadDestination(PlayerMovement player, bool playPortalSound)
+        {
+            if (assembler == null || player == null) return false;
             if (assembler.TryLoadFloor(destinationFloor, player, out string error))
             {
                 // Sound-0: only a portal that actually took the player.
-                CombatSfx.Play(CombatSfxCue.BossPortal);
+                if (playPortalSound) CombatSfx.Play(CombatSfxCue.BossPortal);
                 Debug.Log($"[FloorAdvancePortal] Entered floor {destinationFloor}.", this);
                 return true;
             }

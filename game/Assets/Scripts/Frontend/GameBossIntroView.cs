@@ -60,6 +60,12 @@ namespace TrickalFanGame.Frontend
         [SerializeField] private Image flash;
 
         private BossController introducedBoss;
+        // Boss-Music: the room whose intro started the boss track. Walking out of it any way other than the
+        // portal (which fades the track under its own wipe) brings the floor music back.
+        private RoomNode bossMusicRoom;
+        public const float LeaveRoomMusicFadeSeconds = 0.6f;
+        public const float BossMusicAfterVsSeconds = 0.5f;
+        public const float BossDefeatedMusicFadeSeconds = 2.5f;
         private Vector2 bossRestPosition;
         private Vector2 playerRestPosition;
         private bool restPositionsCaptured;
@@ -125,6 +131,7 @@ namespace TrickalFanGame.Frontend
 
         private void Update()
         {
+            ReleaseBossMusicOutsideBossRoom();
             if (!IsPlaying)
             {
                 TryBegin();
@@ -155,6 +162,7 @@ namespace TrickalFanGame.Frontend
             if (boss == null || IsPlaying) return;
             CaptureRestPositions();
             introducedBoss = boss;
+            bossMusicRoom = roomGraph != null ? roomGraph.CurrentNode : null;
             previousTimeScale = Time.timeScale > 0f ? Time.timeScale : 1f;
             Time.timeScale = 0f;
 
@@ -169,8 +177,29 @@ namespace TrickalFanGame.Frontend
 
             elapsed = 0f;
             vsSoundPlayed = false;
+            // Boss-Music: the floor music stops so the VS cue plays alone.
+            GameAudioController.Instance?.EnterBossMusic();
             Stage = BossIntroStage.Panels;
             Apply();
+        }
+
+        public void ReleaseBossMusicOutsideBossRoom()
+        {
+            GameAudioController audio = GameAudioController.Instance;
+            if (audio == null || !audio.IsBossMusic || roomGraph == null || RoomTransitionWipe.IsBusy || IsPlaying)
+                return;
+            // The boss is down: its track fades slowly and the floor music comes back while the player is still
+            // in the room.
+            if (introducedBoss == null || introducedBoss.State == BossActionState.Defeated)
+            {
+                bossMusicRoom = null;
+                audio.LeaveBossMusic(BossDefeatedMusicFadeSeconds, BossDefeatedMusicFadeSeconds);
+                return;
+            }
+
+            if (bossMusicRoom != null && roomGraph.CurrentNode == bossMusicRoom) return;
+            bossMusicRoom = null;
+            audio.LeaveBossMusic(LeaveRoomMusicFadeSeconds, LeaveRoomMusicFadeSeconds);
         }
 
         // During the panels: jump to the bar fill. During the fill: finish now.
@@ -231,6 +260,9 @@ namespace TrickalFanGame.Frontend
             {
                 vsSoundPlayed = true;
                 CombatSfx.Play(CombatSfxCue.BossIntroVs);
+                // Boss-Music: the track opens slowly before its main theme, so it starts under the tail of the
+                // VS cue rather than after it.
+                GameAudioController.Instance?.StartBossMusic(BossMusicAfterVsSeconds);
             }
 
             if (flash != null)
@@ -254,6 +286,8 @@ namespace TrickalFanGame.Frontend
         {
             Stage = BossIntroStage.Idle;
             elapsed = 0f;
+            // A skip past the panels never plays the VS cue, so the boss track starts now instead.
+            if (!vsSoundPlayed) GameAudioController.Instance?.StartBossMusic(0f);
             SetOverlayVisible(false);
             if (bossHud != null) bossHud.ClearIntroPresentation();
             if (Time.timeScale == 0f) Time.timeScale = previousTimeScale;

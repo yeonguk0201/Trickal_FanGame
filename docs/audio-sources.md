@@ -36,6 +36,7 @@ Trickal Fan Game에 실제로 적용하기로 확정한 음원의 출처와 라�
 | `yodguard-locked-door-4-540180.mp3` | Pixabay #540180 | yodguard | Pixabay Content License | 불필요 |
 | `universfield-wine-cork-pop-352295.mp3` | Pixabay #352295 | universfield | Pixabay Content License | 불필요 |
 | `openmindaudio-cartoon-quirky-christmas-gift-unwrapping-620480.mp3` | Pixabay #620480 | openmindaudio | Pixabay Content License | 불필요 |
+| `openmindaudio-thriller-cinematic-background-high-tension-score-469144.mp3` | Pixabay #469144 | openmindaudio | Pixabay Content License | 불필요 |
 
 ### 크레딧 표기 의무 — 배포 전 필수
 
@@ -110,6 +111,7 @@ Pop-Up by IENBA -- https://freesound.org/s/545477/ -- License: Attribution 4.0
 | 잠긴 문 열림 | `DoorOpen` | `SFX/SFX_Door_Open.wav` | 외부: yodguard-locked-door-4 |
 | 아이템 바닥 드롭 | `ItemDrop` | `SFX/SFX_Item_Drop.wav` | 외부: wine-cork-pop |
 | 전투 BGM | — (`GameAudioController`) | `BGM/BGM_Combat.ogg` | 외부: cartoon-quirky-christmas-gift-unwrapping |
+| 보스방 BGM (VS 효과음 뒤 시작) | — (`GameAudioController.BossBgm`) | `BGM/BGM_Boss.mp3` | 외부: thriller-cinematic-background-high-tension-score |
 
 ### 외부 음원 반입 (2026-10-20)
 
@@ -173,6 +175,7 @@ Pop-Up by IENBA -- https://freesound.org/s/545477/ -- License: Attribution 4.0
 |---|---|
 | 홈 화면 BGM | `Assets/Audio/BGM/BGM_Home.ogg` |
 | 전투 BGM | `Assets/Audio/BGM/BGM_Combat.ogg` |
+| 보스방 BGM | `Assets/Audio/BGM/BGM_Boss.mp3` |
 | UI 클릭 효과음 | `Assets/Audio/SFX/SFX_UI_Click.wav` |
 
 - 음원만 교체할 때는 위 파일명을 유지하면 Scene 참조와 런타임 코드를 바꿀 필요가 없다.
