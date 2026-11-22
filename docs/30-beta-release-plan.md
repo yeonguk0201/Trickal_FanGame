@@ -39,7 +39,13 @@
 | Layout-0 | Layout 추가 | B3 | 텍스트 Layout과 가져오기 도구(T7)로 작성, seed 재현·문 사이 경로·스폰·상자 위치 검증 | 구현(2026-11-09, Unity `RoomLayoutImporterVerification.ImportAndVerifyBatch`·`VerifyWithRegressionsBatch`, `Week25Trap1Verification.Verify` 통과, 사용자 Play 확인 — 고칠 방 없음) |
 | Sound-1 | 전투 피드백 효과음(적·사망·권능) | Sound-0 | 26번 §3.6 그대로. Play-2 전에 넣는다 | 예정 |
 | Verify-0 | 현재 계약 기준 회귀와 Setup 보존 | 위 변경 | 유효 검증의 통과/실패 목록, Setup 재실행 시 콘텐츠·GUID 보존, 계약 차이 출력 | 구현(2026-11-10, 검증기 195개 통과, Setup 149개 중 유지 85·은퇴 62·내부 ID만 2·내용 변경 0, Unity↔Backend 계약 차이 0, Backend Jest 191 통과, §3.3). 완료(2026-11-10, 일시정지 화면 겹침·버튼 한 줄·스크롤 사용자 Play 확인) |
-| Balance-0 | 경제 측정 | Layout-0 | 26번 §7 "실제 플레이와 경제 측정" 그대로 | 예정 |
+| Density-0 | 방 크기별 적 수 | 없음 | 28번 §10.2. 웨이브당 상한 small 4·basic 5·wide/tall 8·large 15, 방당 상한·층별 위협 점수 범위·스폰 지점을 방 크기에 맞춤, Encounter 콘텐츠 버전 올림 | 예정 |
+| Density-1 | small 방 추적형(불효자손) 가중치 축소 | Density-0 | 28번 §10.1. 수치는 그대로, small 인카운터 가중치만 | 예정 |
+| Drop-2 | 일반 상자 스펠 10% | 없음 | 28번 §10.3 | 예정 |
+| Shop-2 | 상점 소모품 풀에 스펠 섞기 | 없음 | 28번 §10.3. 고정 칸 없음, 가격 후보 8~12골드 | 예정 |
+| Boss-Pattern-1 | 크레용사용 대쉬 재설계·일반 공격 시작 범위 | 검흔 에셋(사용자) | 28번 §10.4. 플레이어 위치 검흔 예고 → 검흔 앞까지 도약(밀어내기 없음) → 0.1초 뒤 검흔, 대쉬당 피해 1회. `swingRecognitionMultiplier` 1.15는 에셋 없이 먼저 가능 | 예정 |
+| Boss-Room-0 | 크레용사용 large 전용 보스방 | 없음 | 28번 §10.4 | 예정 |
+| Balance-0 | 경제 측정 | Layout-0, Density-0·1, Drop-2, Shop-2, Boss-Pattern-1, Boss-Room-0 | 26번 §7 "실제 플레이와 경제 측정" 그대로 | 예정 |
 | Play-2 | 여러 seed 실제 Run·저장·웹 확인 | Balance-0 | 무자원 필수 경로·3층 종료, 중복 보상·재추첨 없음, 아이템 전적 정상 | 예정 |
 | Build-0 | 실제 게임 빌드 | Play-2 | 정상 빌드에 개발 패널 미포함, 프로필 → Run → 저장 → 웹 확인, 저장 실패 재시도 | 예정 |
 | Beta-0 | 베타 공개 준비 | Build-0, B2, B4 | 빌드에 버전 표시, 피드백 경로 안내, 조작 안내(키 설명), 알려진 문제 목록, 크레딧(CC BY 음원 포함) 확인, 베타 전적 초기화 안내(§3.1 S5), 배포 채널 업로드 | 예정 |
@@ -321,8 +327,10 @@ Describe-0(2026-11-20 사용자 요청, 권능·아티팩트 설명 보기): HUD
 
 1. B3 결정, Auth-0 → Offline-0 → Offline-1, Deploy-0은 Auth-0 뒤 병렬(다른 작업과 겹치지 않고 일정 위험이 가장 크다)
 2. Layout-0 → Sound-1 → Number-0
-3. Verify-0 → Balance-0 → Play-2 → Build-0 → Beta-0
-4. 병렬: Sound-2·3·6·7, 연출 남은 것(Defeat-4 크레용 용사·누루링, Motion-0 누루링). Menu-0~2·Boss-Intro-0·Effect-0은 완료
+3. 베타 플레이 피드백 조정(28번 §10, 2026-11-23): Density-0 → Density-1, Drop-2·Shop-2·Boss-Room-0은 병렬, Boss-Pattern-1은 검흔 에셋 뒤
+   (일반 공격 시작 범위는 먼저). 권능 상향은 Sound-1 뒤 Play로 다시 판단한다.
+4. Verify-0 → Balance-0 → Play-2 → Build-0 → Beta-0
+5. 병렬: Sound-2·3·6·7, 연출 남은 것(Defeat-4 크레용 용사·누루링, Motion-0 누루링). Menu-0~2·Boss-Intro-0·Effect-0은 완료
 
 일정이 밀리면 (0) Sound-5·8·9와 Menu-3~5, (1) Sound-6·7 중 일부, (2) Motion-0 대상 수, (3) Boss-Intro-0 순으로 줄인다.
 §3 필수 조각과 Number-0은 줄이지 않는다.
@@ -338,6 +346,7 @@ Describe-0(2026-11-20 사용자 요청, 권능·아티팩트 설명 보기): HUD
 - [ ] 적·사망·권능 효과음을 사용자 Play로 확인했다. (Sound-1)
 - [x] 피해 숫자가 TextMeshPro로 바뀌고 치명타가 구분된다. (Number-0)
 - [x] 회귀 목록과 Setup 재실행 보존을 확인했다. (Verify-0)
+- [ ] 베타 플레이 피드백 조정(적 수·스펠 수급·크레용사용)을 사용자 Play로 확인했다. (Density-0·1, Drop-2, Shop-2, Boss-Pattern-1, Boss-Room-0)
 - [ ] 여러 seed 실제 Run에서 경제·시간을 기록하고 저장·웹 전적을 확인했다. (Balance-0, Play-2)
 - [ ] 실제 빌드에서 개발 패널 없이 전체 흐름이 된다. (Build-0)
 - [ ] 버전 표시·피드백 경로·조작 안내·크레딧을 넣고 배포 채널에 올렸다. (Beta-0)
