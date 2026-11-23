@@ -204,6 +204,20 @@ namespace TrickalFanGame.Enemy
             if (State == BossActionState.Active) stateEndsAt = endsAt;
         }
 
+        // For a pattern whose warning or recovery has its own per-phase length instead of the phase tempo. Call while
+        // that state is being entered (OnPatternStateChanged), when its end still holds the tempo-scaled length.
+        public void OverrideEnteringTelegraphDuration(float duration)
+        {
+            if (State == BossActionState.Telegraph && CurrentPattern != null)
+                stateEndsAt += Mathf.Max(0.01f, duration) - CurrentPattern.GetTelegraphDuration(CurrentTempoMultiplier);
+        }
+
+        public void OverrideEnteringRecoveryDuration(float duration)
+        {
+            if (State == BossActionState.Recovery && CurrentPattern != null)
+                stateEndsAt += Mathf.Max(0.01f, duration) - ScaleDuration(CurrentPattern.RecoveryDuration);
+        }
+
         public void CleanupOwnedObjects()
         {
             for (int index = ownedObjects.Count - 1; index >= 0; index--)

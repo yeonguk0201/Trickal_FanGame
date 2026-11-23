@@ -43,7 +43,7 @@
 | Density-1 | small 방 추적형(불효자손) 가중치 축소 | Density-0 | 28번 §10.1. 수치는 그대로, small 인카운터 가중치만 | 예정 |
 | Drop-2 | 일반 상자 스펠 10% | 없음 | 28번 §10.3 | 예정 |
 | Shop-2 | 상점 소모품 풀에 스펠 섞기 | 없음 | 28번 §10.3. 고정 칸 없음, 가격 후보 8~12골드 | 예정 |
-| Boss-Pattern-1 | 크레용사용 대쉬 재설계·일반 공격 시작 범위 | 검흔 에셋(사용자) | 28번 §10.4. 플레이어 위치 검흔 예고 → 검흔 앞까지 도약(밀어내기 없음) → 0.1초 뒤 검흔, 대쉬당 피해 1회. `swingRecognitionMultiplier` 1.15는 에셋 없이 먼저 가능 | 예정 |
+| Boss-Pattern-1 | 크레용사용 대쉬 재설계·일반 공격 시작 범위 | 검흔 에셋(사용자) | 28번 §10.4. 플레이어 위치 검흔 예고 → 검흔 앞까지 도약(밀어내기 없음) → 0.1초 뒤 검흔, 대쉬당 피해 1회. `swingRecognitionMultiplier` 1.15 | 구현(2026-11-23, Blender v2 검흔 연결, Unity `BossPattern1Verification.SetupAndVerifyBatch`·`VerifyWithRegressionsBatch` 통과. 28번 §10.4.1). 완료(2026-11-23, 사용자 Play 확인) |
 | Boss-Room-0 | 크레용사용 large 전용 보스방 | 없음 | 28번 §10.4 | 예정 |
 | Balance-0 | 경제 측정 | Layout-0, Density-0·1, Drop-2, Shop-2, Boss-Pattern-1, Boss-Room-0 | 26번 §7 "실제 플레이와 경제 측정" 그대로 | 예정 |
 | Play-2 | 여러 seed 실제 Run·저장·웹 확인 | Balance-0 | 무자원 필수 경로·3층 종료, 중복 보상·재추첨 없음, 아이템 전적 정상 | 예정 |
