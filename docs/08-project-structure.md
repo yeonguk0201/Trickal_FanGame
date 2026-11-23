@@ -1195,3 +1195,10 @@ PostgreSQL
               │ Statistics   │
               └──────────────┘
 프로젝트의 핵심은 단순히 Unity 게임을 완성하는 것이 아니라, 게임에서 발생한 데이터를 Backend를 통해 저장하고 이를 Web에서 실제 전적과 통계로 활용하는 End-to-End 시스템을 완성하는 것이다.
+
+## Blender 외부 이펙트 제작 도구 (2026-11-23)
+
+- `tools/blender/run.py`: Blender 탐색과 Python 배치 실행, 작업별 UTF-8 로그.
+- `tools/blender/smoke_preview.py`: 독립 레이어·키프레임·투명 PNG·편집 원본의 연결 확인 샘플.
+- `tools/blender/README.md`: 설치 정보, 실행법, 검증 근거와 Unity 연결 전 작업 규칙.
+- `tmp/blender/`: 로컬 포터블 실행 파일(Git 제외). `output/blender-smoke/`: 생성 원본·PNG·명세·로그(Git 제외).

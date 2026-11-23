@@ -2679,3 +2679,18 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 전환 전용 Play 배치: `TrickalFanGame.Editor.RunLoadingScreenPlayVerification.RunBatch`. `-batchmode -nographics`와 `-executeMethod`로 실행하며 **`-quit`는 사용하지 않는다**. 테스트가 Play를 켜고 종료 코드를 반환한다. 시작→재시작→홈 복귀→재진입→결과 복귀, 중복 전환 차단, 100% 표시·입력/시간 복원·결과 제출 한 번·결과 연출 대기를 검사한다. 테스트용 프로필/성장 캐시 키는 종료 시 복원한다.
 - 실행 근거: 초기 Edit 배치에서 UI CanvasRenderer 누락 로그를 발견해 커스텀 Graphic의 RequireComponent로 수정했다. 수정본의 런타임·Editor Roslyn 컴파일과 승인 JSON/UTF-8/meta 검사 통과(`output/run-loading-compile/`). 다른 Unity 빌드 종료 후 `RunLoadingScreenPlayVerification.RunBatch`가 호출한 Edit Verify와 전환 Play 검증 모두 통과했다(`output/run-loading-screen-play-final.log`, 종료 0). 시작·재시작·홈 복귀·재진입·결과 복귀, 100% 표시, 입력/시간 복원, 단일 결과 제출과 결과 연출 대기를 확인했다. 실제 화면의 미술 검수는 별도다. 말풍선의 `꺼` 글자는 같은 기존 TMP 글꼴의 동적 아틀라스에 추가됐으며 GUID는 유지한다.
 - 수동 Play 확인(1920×1080, 1280×720): Frontend Scene의 게임 시작 → 에르핀 선택·확정 / 인게임 ESC → 다시 시작·확인 / ESC → 홈으로·확인 / 사망 뒤 GAME OVER 확인 또는 최종 보스 클리어 → 결과. 모든 씬 전환에서 연두 체크·원형 초상·말풍선·이름표·하단 바가 보이고 새 화면에 입력이 새지 않아야 한다. 로딩 뒤 이동·ESC가 정상 동작하고 결과 경험치 연출의 첫 장면이 가려지지 않아야 한다. 결과에서 다시 하기는 캐릭터 선택으로, 홈은 홈 패널로 이동한다.
+
+### 크레용사용 검흔 미리보기 (2026-11-23)
+
+- Edit Mode 메뉴: `Trickal Fan Game > Effects > Preview Crayon Hero Rift` → `Open / reset Scene preview`.
+- 별도 임시 Scene에서 작은 반투명 빨간 예고, 가는 검은 절단흔, 시안의 은백색 검광 원화, 바늘형 섬광, 직선 빛 파편을 표시한다(v3). 중앙이 벌어지는 연출과 소용돌이는 제거했다. `Loop playback`, `Playback speed`, 시간 슬라이더 및 `Warning`/`Cut`/`Peak`/`Fade`로 재생·정지·되감기가 가능하다. 공격 그림의 길이·폭·방향과 별도로 예고 크기를 조절하고, 5개 레이어·게임 바닥·캐릭터 원화를 비교한다. 값은 임시이며 에셋에 저장하지 않는다.
+- 예고 0.35초 + 도약 0.17초 + 도착 후 0.1초 뒤 검흔이 발생한다. 캐릭터는 크기 참고용 정지 원화이며 도약 동작을 시뮬레이션하지 않는다. 실제 보스 공격·피해·판정·방 경계와는 아직 연결하지 않은 미술 검수용 시안이다.
+- 배치: `TrickalFanGame.Editor.CrayonRiftPreview.VerifyAndExportBatch`는 셰이더 오류·시간 전환·되감기·작은 예고·레이어 독립 표시를 검사하고 `output/crayon-slash-v3/frame-000.png`부터 85장을 50fps로 출력한다. `-riftOutput <절대 경로>`로 출력 폴더를 바꿀 수 있다. 렌더링하므로 `-nographics`를 사용하지 않는다. 원화는 `Assets/Editor/CrayonSlashConcept-v1.png`에서 검수 도구가 주입한다.
+
+### Blender Python 외부 이펙트 제작 (2026-11-23)
+
+- 저장소 루트에서 `python tools/blender/run.py` 실행. Blender 4.5.9 LTS가 별도 프로세스에서 기술 샘플을 생성한다. `output/blender-smoke/preview.png`, `connection-sample.blend`, `manifest.json`, `blender.log`를 확인한다.
+- 다른 작업: `python tools/blender/run.py --script <제작 스크립트.py> --output <출력 폴더>`. 스크립트는 Blender 안에서 실행되며 `--output` 인자를 받는다.
+- 로컬 포터블 위치는 `tmp/blender/blender-4.5.9-windows-x64/blender.exe`. 다른 설치본은 `--blender <실행 파일>` 또는 `BLENDER_EXE`로 지정한다. `tmp/` 삭제 시 재설치가 필요하다.
+- 편집은 Blender에서 `.blend` 파일을 열어 한다. 현재 연결은 Python 배치 방식이며 열린 UI의 실시간 제어 또는 MCP 등록은 하지 않았다. 유료 애드온이나 별도 AI API 호출은 필요하지 않다.
+- 기본 명령의 실제 렌더·파일 생성·PNG 알파 확인을 통과했다. 게임 에셋 자동 임포트와 Unity 변경은 없다. 세부 설치·체크섬·작업 규칙은 `tools/blender/README.md`.
