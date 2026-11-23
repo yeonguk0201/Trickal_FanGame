@@ -149,7 +149,7 @@ namespace TrickalFanGame.Shop
             }
 
             stock.TryMarkPurchased(slotIndex);
-            if (offer.Kind == ShopOfferKind.Consumable) LastDroppedPickup = DropPickup(offer, slotIndex);
+            if (offer.Kind != ShopOfferKind.Item) LastDroppedPickup = DropPickup(offer, slotIndex);
             Purchased?.Invoke(offer);
             return ShopPurchaseResult.Purchased;
         }
@@ -197,6 +197,16 @@ namespace TrickalFanGame.Shop
 
         private GameObject DropPickup(ShopOffer offer, int slotIndex)
         {
+            if (offer.Kind == ShopOfferKind.Spell)
+            {
+                SingleUseItemPickup spell = Instantiate(offer.SpellPickupPrefab, GetDropPosition(slotIndex),
+                    Quaternion.identity, dropParent != null ? dropParent : transform);
+                spell.name = $"Shop Spell {offer.Item.ItemId} - {stock.ShopId}";
+                // The player may stand on the drop point, so a full slot does not swap until they step off and back.
+                spell.Configure(offer.Item, $"{stock.ShopId}-slot-{slotIndex}-spell", true);
+                return spell.gameObject;
+            }
+
             GameObject pickup = Instantiate(offer.Consumable.PickupPrefab, GetDropPosition(slotIndex),
                 Quaternion.identity, dropParent != null ? dropParent : transform);
             pickup.name = $"Shop Drop {offer.Consumable.ConsumableId} - {stock.ShopId}";

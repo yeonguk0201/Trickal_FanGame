@@ -18,7 +18,7 @@ MonoBehaviour:
     weight: 75
     minimumCount: 1
     countWeights: 280000002800000014000000
-    spellChance: 0.05
+    spellChance: 0.1
     specialRewardChance: 0
     jjangsemShare: 0
   - kind: 1

@@ -508,8 +508,12 @@ namespace TrickalFanGame.Room
             // Elif-3: elif offers roll only in a seeded Run, like the Elif-2 gold conversion; Editor fixtures
             // without a Run seed keep gold-only shops.
             bool rollElifPrice = runProgress != null && runProgress.HasRunSeed;
+            // Shop-2: spells join the consumable slots under the same rule, from the chest table's spell list.
+            ChestContentTable spellSource = rollElifPrice ? ChestContentTable : null;
             ShopStockState Build() => ShopStockBuilder.Build(node.RoomId, node.ContentSeed, shopCatalog,
-                selectionRewardPool, inventory, kind, powerRewardPool, rollElifPrice);
+                selectionRewardPool, inventory, kind, powerRewardPool, rollElifPrice,
+                spellSource != null ? spellSource.Spells : null,
+                spellSource != null ? spellSource.SpellPickupPrefab : null);
             ShopStockState stock = runProgress != null
                 ? runProgress.GetOrCreateShopStock(ShopStockBuilder.BuildShopId(node.RoomId), Build)
                 : Build();

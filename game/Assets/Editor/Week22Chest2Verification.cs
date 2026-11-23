@@ -86,9 +86,9 @@ namespace TrickalFanGame.Editor
             Assert(Mathf.Approximately(diamond.SpellChance, 1f) && Mathf.Approximately(diamond.JjangsemShare, 0.25f) &&
                    Mathf.Approximately(diamond.SpecialRewardChance, 0f),
                 "A diamond chest must always hold one spell with a 25% jjangsem share and no special reward (D2).");
-            Assert(Mathf.Approximately(normal.SpellChance, 0.05f) && Mathf.Approximately(normal.JjangsemShare, 0f) &&
-                   Mathf.Approximately(normal.SpecialRewardChance, 0f),
-                "A normal chest must keep its 5% spell without a jjangsem spell or special reward.");
+            Assert(Mathf.Approximately(normal.SpellChance, Week22Chest1Setup.NormalSpellChance) &&
+                   Mathf.Approximately(normal.JjangsemShare, 0f) && Mathf.Approximately(normal.SpecialRewardChance, 0f),
+                "A normal chest must keep its 10% spell (Drop-2) without a jjangsem spell or special reward.");
 
             // Contract-0 §3: valid IDs of the allowed kind only, per acquisition path.
             Assert(table.GoldenExclusiveArtifacts.Count > 0 && table.ArtifactPickupPrefab != null &&

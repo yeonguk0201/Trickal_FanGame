@@ -962,6 +962,11 @@ namespace TrickalFanGame.Frontend
                     ? $"{ArtifactEffectDescription.Build(item)}\n\n{GamePowerHudView.BuildOfferLine(item)}{note}"
                     : $"{ArtifactEffectDescription.Build(item)}\n\n현재 스택 {stacks} / {maximum}{note}");
             }
+            else if (offer.Kind == ShopOfferKind.Spell)
+            {
+                SetText(detailKindText, ItemKindText.GetDisplayName(offer.Item.Kind));
+                SetText(detailEffectText, ArtifactEffectDescription.Build(offer.Item));
+            }
             else
             {
                 SetText(detailKindText, ConsumableKind);
