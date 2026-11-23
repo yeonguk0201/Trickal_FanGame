@@ -38,5 +38,12 @@ MonoBehaviour:
   - {x: -6, y: -3.5}
   - {x: 6, y: -3.5}
   - {x: -9, y: 3}
-  spawnPointRoles: 030000000300000006000000030000000300000003000000
+  - {x: 0, y: 2.5}
+  - {x: -3.5, y: 0}
+  - {x: 3.5, y: 0}
+  - {x: 9.5, y: 2}
+  - {x: -9.5, y: -2}
+  spawnPointRoles: 0300000003000000060000000300000003000000030000000300000003000000030000000300000003000000
   layoutDifficultyModifier: 0
+  selectionWeight: 100
+  authoredChests: []

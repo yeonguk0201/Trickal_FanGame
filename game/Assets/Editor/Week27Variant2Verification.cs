@@ -49,7 +49,7 @@ namespace TrickalFanGame.Editor
                 ?.GetComponent<FloorGenerator>();
             RoomGraphAssembler assembler = Object.FindFirstObjectByType<RoomGraphAssembler>();
             Assert(generator != null && assembler != null && assembler.EnemyRoster != null &&
-                   generator.EncounterContentVersion == Week27Variant2Setup.EncounterContentVersion,
+                   generator.EncounterContentVersion >= Week27Variant2Setup.EncounterContentVersion,
                 "Run Variant-2 setup before verification.");
 
             ValidateRules();

@@ -38,6 +38,69 @@ MonoBehaviour:
       candidates:
       - enemyRole: 5
         weight: 100
+    - enemyRole: 0
+      count: 3
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 0
+        weight: 70
+      - enemyRole: 4
+        weight: 30
+  - waveNumber: 2
+    startCondition: 1
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 2
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 2
+        weight: 100
+    - enemyRole: 5
+      count: 2
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 5
+        weight: 100
+    - enemyRole: 0
+      count: 3
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 0
+        weight: 70
+      - enemyRole: 4
+        weight: 30
+  - waveNumber: 3
+    startCondition: 1
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 2
+      count: 1
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 2
+        weight: 100
+    - enemyRole: 5
+      count: 2
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 5
+        weight: 100
+    - enemyRole: 0
+      count: 4
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 0
+        weight: 70
+      - enemyRole: 4
+        weight: 30
   clearCondition: 0
-  declaredMinimumThreat: 8
-  declaredMaximumThreat: 8
+  declaredMinimumThreat: 52
+  declaredMaximumThreat: 62

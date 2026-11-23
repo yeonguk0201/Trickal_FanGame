@@ -237,6 +237,7 @@ namespace TrickalFanGame.Editor
                 EncounterEnemyCandidate[] expected = pressure
                     ? Week27Enemy13Setup.PressureMeleeCandidates()
                     : Week27Enemy10Setup.SwarmMeleeCandidates();
+                expected = Density1Setup.ForDefinition(definition, expected);
                 foreach (EncounterSpawnRule rule in rules.Where(rule => rule.Candidates.Any(candidate =>
                              candidate.EnemyRole == EncounterEnemyRole.SelfDestruct)))
                 {
@@ -250,6 +251,8 @@ namespace TrickalFanGame.Editor
                 Assert(table.TryComputeThreatRange(definition, out int minimum, out int maximum, out error) &&
                        minimum == definition.DeclaredMinimumThreat && maximum == definition.DeclaredMaximumThreat,
                     $"'{definition.EncounterId}' must still compute its declared threat range. {error}");
+                // Density-0 lays out the bigger sizes (Density0Verification); small keeps the ranges below.
+                if (!Density0Setup.IsSmall(definition)) continue;
                 if (pressure)
                 {
                     Assert(definition.DeclaredMinimumThreat == Week19Difficulty1Setup.PressureMinimumThreat &&

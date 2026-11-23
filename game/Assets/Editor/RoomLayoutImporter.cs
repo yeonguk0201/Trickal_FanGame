@@ -35,7 +35,9 @@ namespace TrickalFanGame.Editor
         public const string TrapIdPrefix = "trap";
         public const string TrapContainerName = "Traps";
         // Part of each room's content hash. Raise it when the importer builds a different Prefab from the same text.
-        public const int BuildRevision = 3;
+        // 4: Density-0 appends generated SpawnPoints (RoomSpawnPointDensity), which the hash also covers through
+        // the profile's SpawnPoint target.
+        public const int BuildRevision = 4;
 
         private const string StagingId = "staging";
         private const SpawnPointPlacementRole MeleeRear =
@@ -224,13 +226,34 @@ namespace TrickalFanGame.Editor
 
         public static bool TryValidateGeometry(RoomLayoutDocument document, out string error)
         {
+            // Density-0: a broken Layout can leave no room for generated SpawnPoints, so its own reason is reported
+            // first by checking the authored points; the generation failure counts only when nothing else fails.
+            Vector2[] spawnPoints;
+            try
+            {
+                spawnPoints = ResolveSpawnPoints(document);
+            }
+            catch (InvalidOperationException exception)
+            {
+                if (!TryValidateGeometry(document, document.SpawnPoints, out error)) return false;
+                error = exception.Message;
+                return false;
+            }
+
+            return TryValidateGeometry(document, spawnPoints, out error);
+        }
+
+        private static bool TryValidateGeometry(RoomLayoutDocument document, Vector2[] spawnPoints,
+            out string error)
+        {
             RoomLayoutProfile profile = document.Profile;
             // The walkable floor is narrower than the profile's movement bounds, so reachability is judged on the
             // floor the player can actually stand on. The built template is validated against the profile again.
             Rect movementBounds = profile.Floor;
             Rect encounterBounds = Week14Room3Setup.EncounterBounds(profile.RoomSize);
             RoomTemplateDoor[] doors = Week14Room3Setup.BuildDoorContracts(profile.RoomSize);
-            Vector2[] spawnPoints = document.SpawnPoints;
+            BuildFootprints(document, out List<RoomObstacleFootprint> terrain,
+                out List<RoomObstacleFootprint> withChests, out List<RoomObstacleFootprint> floorTraps);
             for (int index = 0; index < spawnPoints.Length; index++)
             {
                 if (!encounterBounds.Contains(spawnPoints[index]))
@@ -247,27 +270,7 @@ namespace TrickalFanGame.Editor
                 }
             }
 
-            List<RoomObstacleFootprint> terrain = new();
-            foreach (RoomLayoutCell cell in document.Obstacles)
-            {
-                terrain.Add(new RoomObstacleFootprint(ObstacleId(cell), profile.CellRect(cell.Column, cell.Row),
-                    cell.Symbol.Kind != RoomLayoutCellKind.Tree));
-            }
-
-            foreach (RoomLayoutPit pit in document.Pits())
-                terrain.Add(new RoomObstacleFootprint(pit.PitId, pit.Bounds, false, true));
-
-            // A chest is a solid body the player can push, so the door and SpawnPoint checks also run with every
-            // chest standing on its cell.
-            List<RoomObstacleFootprint> withChests = new(terrain);
             List<RoomLayoutCell> chests = document.CellsOf(RoomLayoutCellKind.Chest).ToList();
-            Vector2 chestSize = Vector2.one * ChestPlacement.ChestWorldSize;
-            foreach (RoomLayoutCell chest in chests)
-            {
-                withChests.Add(new RoomObstacleFootprint(chest.Id(ChestIdPrefix),
-                    new Rect(chest.Center - chestSize * 0.5f, chestSize), false));
-            }
-
             if (!RoomObstacleLayout.TryValidate(document.Id, movementBounds, encounterBounds, doors, spawnPoints,
                     withChests, out error))
             {
@@ -275,9 +278,6 @@ namespace TrickalFanGame.Editor
             }
 
             // Trap-1: floor traps block nothing, so they are checked apart from the obstacles above.
-            List<RoomObstacleFootprint> floorTraps = document.CellsOf(RoomLayoutCellKind.FloorTrap)
-                .Select(cell => new RoomObstacleFootprint(cell.Id(TrapIdPrefix), profile.CellRect(cell.Column, cell.Row),
-                    false, requiresSafePathAvoidance: cell.Symbol.TrapKind == RoomTrapKind.FloorSpikes)).ToList();
             if (!RoomObstacleLayout.TryValidateFloorTraps(document.Id, movementBounds, doors, spawnPoints, withChests,
                     floorTraps, out error))
             {
@@ -305,6 +305,47 @@ namespace TrickalFanGame.Editor
 
             error = null;
             return true;
+        }
+
+        // The obstacles and pits (terrain), the same with every chest standing on its cell (a chest is a solid body
+        // the player can push, so the door and SpawnPoint checks also run with it), and the floor traps.
+        private static void BuildFootprints(RoomLayoutDocument document, out List<RoomObstacleFootprint> terrain,
+            out List<RoomObstacleFootprint> withChests, out List<RoomObstacleFootprint> floorTraps)
+        {
+            RoomLayoutProfile profile = document.Profile;
+            terrain = new List<RoomObstacleFootprint>();
+            foreach (RoomLayoutCell cell in document.Obstacles)
+            {
+                terrain.Add(new RoomObstacleFootprint(ObstacleId(cell), profile.CellRect(cell.Column, cell.Row),
+                    cell.Symbol.Kind != RoomLayoutCellKind.Tree));
+            }
+
+            foreach (RoomLayoutPit pit in document.Pits())
+                terrain.Add(new RoomObstacleFootprint(pit.PitId, pit.Bounds, false, true));
+
+            withChests = new List<RoomObstacleFootprint>(terrain);
+            Vector2 chestSize = Vector2.one * ChestPlacement.ChestWorldSize;
+            foreach (RoomLayoutCell chest in document.CellsOf(RoomLayoutCellKind.Chest))
+            {
+                withChests.Add(new RoomObstacleFootprint(chest.Id(ChestIdPrefix),
+                    new Rect(chest.Center - chestSize * 0.5f, chestSize), false));
+            }
+
+            floorTraps = document.CellsOf(RoomLayoutCellKind.FloorTrap)
+                .Select(cell => new RoomObstacleFootprint(cell.Id(TrapIdPrefix), profile.CellRect(cell.Column, cell.Row),
+                    false, requiresSafePathAvoidance: cell.Symbol.TrapKind == RoomTrapKind.FloorSpikes)).ToList();
+        }
+
+        // Density-0: the Layout's SpawnPoints followed by the generated ones up to the profile's target.
+        public static Vector2[] ResolveSpawnPoints(RoomLayoutDocument document)
+        {
+            RoomLayoutProfile profile = document.Profile;
+            BuildFootprints(document, out _, out List<RoomObstacleFootprint> withChests,
+                out List<RoomObstacleFootprint> floorTraps);
+            return RoomSpawnPointDensity.Extend(document.Id, profile.Floor,
+                Week14Room3Setup.EncounterBounds(profile.RoomSize),
+                Week14Room3Setup.BuildDoorContracts(profile.RoomSize), document.SpawnPoints, withChests, floorTraps,
+                Density0Setup.SpawnPointTarget(profile.ProfileId));
         }
 
         // Every Encounter of the room's profile must be placeable whatever doors a generated room opens; a room
@@ -362,7 +403,7 @@ namespace TrickalFanGame.Editor
             if (source == null)
                 throw new InvalidOperationException($"The importer is missing source Prefab {profile.SourcePrefabPath}.");
 
-            Vector2[] spawnPoints = document.SpawnPoints;
+            Vector2[] spawnPoints = ResolveSpawnPoints(document);
             Week14Room3Setup.ConfigureLayout(profile.ProfileId, document.Id, profile.ProfilePath, templatePath,
                 prefabPath, $"Room {document.Id}", profile.RoomSize, spawnPoints, source, null,
                 document.MinimumFloor, document.MaximumFloor, false);
@@ -642,7 +683,9 @@ namespace TrickalFanGame.Editor
         public static string ContentHash(RoomLayoutDocument document)
         {
             using SHA1 sha = SHA1.Create();
-            byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes($"{BuildRevision}\n{document.NormalizedText}"));
+            byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(
+                $"{BuildRevision}\n{RoomSpawnPointDensity.Revision}/{Density0Setup.SpawnPointTarget(document.Profile.ProfileId)}\n" +
+                document.NormalizedText));
             return string.Concat(bytes.Select(value => value.ToString("x2")));
         }
 

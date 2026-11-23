@@ -211,15 +211,19 @@ namespace TrickalFanGame.Editor
                     "follow that.");
                 if (!holds) continue;
                 found++;
+                EncounterEnemyCandidate[] weights = Density1Setup.ForDefinition(definition,
+                    expected);
                 foreach (EncounterSpawnRule rule in rules.Where(rule => rule.Candidates.Any(candidate =>
                              candidate.EnemyRole == EncounterEnemyRole.SplittingChaser)))
                 {
-                    Assert(rule.Candidates.Count == expected.Length &&
-                           expected.All(candidate => Weight(rule, candidate.EnemyRole) == candidate.Weight),
+                    Assert(rule.Candidates.Count == weights.Length &&
+                           weights.All(candidate => Weight(rule, candidate.EnemyRole) == candidate.Weight),
                         $"'{definition.EncounterId}' melee slots must weigh " +
-                        string.Join("/", expected.Select(candidate => candidate.Weight)) + ".");
+                        string.Join("/", weights.Select(candidate => candidate.Weight)) + ".");
                 }
 
+                // Density-0 lays out the bigger sizes (Density0Verification); small keeps 10~16.
+                if (!Density0Setup.IsSmall(definition)) continue;
                 Assert(table.TryComputeThreatRange(definition, out int minimum, out int maximum, out error) &&
                        minimum == 10 && maximum == 16 && definition.DeclaredMinimumThreat == 10 &&
                        definition.DeclaredMaximumThreat == 16 &&

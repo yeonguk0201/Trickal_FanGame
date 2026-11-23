@@ -123,7 +123,9 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateDeclaredThreats(FloorGenerator generator, RoomDifficultyTable table)
         {
-            foreach (Week19Spawn2Setup.ProfileSpec spec in Week19Spawn2Setup.Profiles)
+            // Density-0 lays out the bigger sizes and their threat (Density0Verification); small keeps these.
+            foreach (Week19Spawn2Setup.ProfileSpec spec in Week19Spawn2Setup.Profiles
+                         .Where(spec => Density0Setup.IsSmall(spec.ProfileId)))
             {
                 foreach ((string pattern, int minimum, int maximum) in new[]
                          {
@@ -258,21 +260,24 @@ namespace TrickalFanGame.Editor
                     if (rooms.Length == 0) continue;
                     int nearest = rooms.Min(node => distances[node.RoomId]);
                     int farthest = rooms.Max(node => distances[node.RoomId]);
-                    Assert(table.TryGetFloorRange(floor.FloorNumber, out FloorDifficultyRange range),
-                        $"Floor {floor.FloorNumber} has no difficulty range.");
                     foreach (GeneratedRoomNode room in rooms)
                     {
+                        // Density-0: each room size has its own floor range and tier bands.
+                        string profileId = room.Template.Profile.ProfileId;
+                        Assert(table.TryGetFloorRange(floor.FloorNumber, profileId, out FloorDifficultyRange range),
+                            $"Floor {floor.FloorNumber} has no difficulty range for '{profileId}'.");
                         Assert(room.HasDifficulty, $"Seed {seed} room '{room.RoomId}' has no stored difficulty.");
                         GeneratedRoomDifficulty difficulty = room.Difficulty;
                         Assert(table.TryScore(room.ResolvedEncounterWaves, room.Template.LayoutDifficultyModifier,
                                    out int score, out error) && score == difficulty.Score,
                             $"Seed {seed} room '{room.RoomId}' score must equal resolved threat plus Layout modifier.");
-                        Assert(difficulty.Tier == table.Classify(score) && range.Contains(score),
+                        Assert(difficulty.Tier == table.Classify(score, profileId) && range.Contains(score),
                             $"Seed {seed} room '{room.RoomId}' score {score} has a wrong tier or leaves floor range.");
                         Assert(difficulty.DistanceFromStart == distances[room.RoomId],
                             $"Seed {seed} room '{room.RoomId}' stored the wrong start distance.");
                         selectedEncounters.Add(room.EncounterId);
-                        floorMaximum[floor.FloorNumber] = Math.Max(floorMaximum[floor.FloorNumber], score);
+                        if (Density0Setup.IsSmall(profileId))
+                            floorMaximum[floor.FloorNumber] = Math.Max(floorMaximum[floor.FloorNumber], score);
 
                         int available = difficulty.AvailableTierMask;
                         Assert(difficulty.IsTierAvailable(difficulty.Tier),

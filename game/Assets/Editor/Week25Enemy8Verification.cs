@@ -217,6 +217,7 @@ namespace TrickalFanGame.Editor
                 EncounterEnemyCandidate[] expected = pressure
                     ? Week27Enemy13Setup.PressureMeleeCandidates()
                     : Week27Enemy10Setup.SwarmMeleeCandidates();
+                expected = Density1Setup.ForDefinition(definition, expected);
                 foreach (EncounterSpawnRule rule in rules.Where(rule => rule.Candidates.Any(candidate =>
                              candidate.EnemyRole == EncounterEnemyRole.FourWayShooter)))
                 {
@@ -226,6 +227,8 @@ namespace TrickalFanGame.Editor
                         string.Join("/", expected.Select(candidate => candidate.Weight)) + ".");
                 }
 
+                // Density-0 lays out the bigger sizes (Density0Verification); small keeps the ranges below.
+                if (!Density0Setup.IsSmall(definition)) continue;
                 Week19Encounter4Setup.SwarmSpec swarm = Week19Encounter4Setup.Swarms.FirstOrDefault(spec =>
                     Week19Spawn2Setup.EncounterId(spec.ProfileId, "swarm") == definition.EncounterId);
                 Assert(pressure

@@ -243,18 +243,21 @@ namespace TrickalFanGame.Editor
                 Week19Spawn2Setup.ProfileSpec spec = Week19Spawn2Setup.Profiles.First(entry =>
                     Week19Spawn2Setup.EncounterId(entry.ProfileId, "crossfire") == definition.EncounterId);
                 EncounterEnemyCandidate[] expected = Week27Enemy12Setup.CrossfireRearCandidates(spec);
-                Assert(rules.Length == 1 && rules[0].Count == 3 &&
+                // Density-0: small keeps one rule of three rear slots; bigger sizes spread more rear rules over
+                // their waves, every one with the same candidates.
+                bool small = Density0Setup.IsSmall(definition);
+                Assert((!small || (rules.Length == 1 && rules[0].Count == 3)) && rules.Length >= 1 &&
                        definition.Waves[0].SpawnRules.Any(rule => rule.Candidates.Any(candidate =>
                            candidate.EnemyRole == EncounterEnemyRole.Lobber)) &&
-                       rules[0].Candidates.Count == expected.Length &&
-                       expected.All(candidate => Weight(rules[0], candidate.EnemyRole) == candidate.Weight),
+                       rules.All(rule => rule.Candidates.Count == expected.Length &&
+                           expected.All(candidate => Weight(rule, candidate.EnemyRole) == candidate.Weight)),
                     $"'{definition.EncounterId}' rear slots must be three of " +
                     string.Join("/", expected.Select(candidate => candidate.Weight)) + " (산사모-순수/sniper/lobber).");
 
                 // Threat 4 equals the sniper's, so crossfire keeps 15~19, and floor 2 cannot draw the lobber.
                 Assert(table.TryComputeThreatRange(definition, out int minimum, out int maximum, out error) &&
-                       minimum == Week19Difficulty1Setup.CrossfireMinimumThreat &&
-                       maximum == Week19Difficulty1Setup.CrossfireMaximumThreat &&
+                       (!small || minimum == Week19Difficulty1Setup.CrossfireMinimumThreat) &&
+                       (!small || maximum == Week19Difficulty1Setup.CrossfireMaximumThreat) &&
                        definition.DeclaredMinimumThreat == minimum && definition.DeclaredMaximumThreat == maximum &&
                        definition.MinimumFloor == 2 && definition.MaximumFloor == 3,
                     $"'{definition.EncounterId}' must keep its 15~19 range on floors 2~3. {error}");

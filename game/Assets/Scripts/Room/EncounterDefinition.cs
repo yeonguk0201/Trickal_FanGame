@@ -550,7 +550,9 @@ namespace TrickalFanGame.Room
 
             int seed = FloorGenerator.DeriveSeed(node.ContentSeed, contentVersion, EncounterSalt);
             FloorDifficultyRange range = default;
-            if (table != null && !table.TryGetFloorRange(node.FloorNumber, out range))
+            // Density-0: the floor range and tier bands of the room's size.
+            string sizeId = node.Template.Profile.ProfileId;
+            if (table != null && !table.TryGetFloorRange(node.FloorNumber, sizeId, out range))
             { error = $"Room {node.RoomId} has no difficulty range for floor {node.FloorNumber}."; return false; }
             IEnumerable<EncounterDefinition> resolving = table != null
                 ? candidates
@@ -581,7 +583,7 @@ namespace TrickalFanGame.Room
                 if (!table.TryScore(resolvedWaves, node.Template.LayoutDifficultyModifier, out int score, out error))
                 { error = $"Room {node.RoomId} could not score Encounter '{candidate.EncounterId}'. {error}"; return false; }
                 if (range.Contains(score))
-                    scored.Add(new ScoredEncounter(candidate, resolvedWaves, score, table.Classify(score)));
+                    scored.Add(new ScoredEncounter(candidate, resolvedWaves, score, table.Classify(score, sizeId)));
             }
 
             if (scored.Count == 0)

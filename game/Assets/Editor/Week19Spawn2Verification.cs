@@ -194,8 +194,9 @@ namespace TrickalFanGame.Editor
                     Assert(definition.TryValidate(out string error), error);
                     Assert(definition.AllowedProfiles.Count == 1 &&
                            definition.AllowedProfiles[0].ProfileId == spec.ProfileId &&
-                           definition.Waves.Count == 2,
-                        $"Encounter '{id}' must be profile-specific and contain two waves.");
+                           // Density-0 gives bigger rooms more waves; small keeps two.
+                           (definition.Waves.Count == 2 || !Density0Setup.IsSmall(spec.ProfileId)),
+                        $"Encounter '{id}' must be profile-specific and contain two waves in a small room.");
                     EncounterSpawnRule rear = pattern == "pressure"
                         ? definition.Waves[0].SpawnRules[1]
                         : definition.Waves[0].SpawnRules[0];
@@ -267,8 +268,9 @@ namespace TrickalFanGame.Editor
                         $"Profile '{spec.ProfileId}' changed candidates for identical seed {seed}.");
                     Assert(first.All(spawn => template.SupportsEnemyRole(spawn.SpawnPointIndex, spawn.Role)),
                         $"Profile '{spec.ProfileId}' selected a role-incompatible SpawnPoint.");
-                    EncounterEnemyRole rearRole = first[1].Role;
-                    Assert(rearRole == EncounterEnemyRole.Ranged || rearRole == EncounterEnemyRole.Sniper,
+                    // The rear rule comes after the melee rule, whatever count Density-0 gives it.
+                    EncounterEnemyRole rearRole = first[first.Length - 1].Role;
+                    Assert(rearRole is EncounterEnemyRole.Ranged or EncounterEnemyRole.Sniper,
                         $"Profile '{spec.ProfileId}' rear slot selected '{rearRole}'.");
                     if (rearRole == EncounterEnemyRole.Sniper) sniperCount++;
                 }

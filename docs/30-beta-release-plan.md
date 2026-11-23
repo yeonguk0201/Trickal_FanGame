@@ -39,8 +39,8 @@
 | Layout-0 | Layout 추가 | B3 | 텍스트 Layout과 가져오기 도구(T7)로 작성, seed 재현·문 사이 경로·스폰·상자 위치 검증 | 구현(2026-11-09, Unity `RoomLayoutImporterVerification.ImportAndVerifyBatch`·`VerifyWithRegressionsBatch`, `Week25Trap1Verification.Verify` 통과, 사용자 Play 확인 — 고칠 방 없음) |
 | Sound-1 | 전투 피드백 효과음(적·사망·권능) | Sound-0 | 26번 §3.6 그대로. Play-2 전에 넣는다 | 예정 |
 | Verify-0 | 현재 계약 기준 회귀와 Setup 보존 | 위 변경 | 유효 검증의 통과/실패 목록, Setup 재실행 시 콘텐츠·GUID 보존, 계약 차이 출력 | 구현(2026-11-10, 검증기 195개 통과, Setup 149개 중 유지 85·은퇴 62·내부 ID만 2·내용 변경 0, Unity↔Backend 계약 차이 0, Backend Jest 191 통과, §3.3). 완료(2026-11-10, 일시정지 화면 겹침·버튼 한 줄·스크롤 사용자 Play 확인) |
-| Density-0 | 방 크기별 적 수 | 없음 | 28번 §10.2. 웨이브당 상한 small 4·basic 5·wide/tall 8·large 15, 방당 상한·층별 위협 점수 범위·스폰 지점을 방 크기에 맞춤, Encounter 콘텐츠 버전 올림 | 예정 |
-| Density-1 | small 방 추적형(불효자손) 가중치 축소 | Density-0 | 28번 §10.1. 수치는 그대로, small 인카운터 가중치만 | 예정 |
+| Density-0 | 방 크기별 적 수 | 없음 | 28번 §10.2. 웨이브당 상한 small 4·basic 5·wide/tall 6·large 8(Play 피드백으로 8·15에서 낮춤), 방당 상한·층별 위협 점수 범위·스폰 지점을 방 크기에 맞춤, Encounter 콘텐츠 버전 올림 | 구현(2026-11-23, Unity `Density0Verification.SetupAndVerifyBatch`·`VerifyWithRegressionsBatch`(19개) 통과, Setup 재실행 보존 확인. 28번 §10.2.1). 사용자 Play 확인 대기 |
+| Density-1 | small 방 추적형(불효자손) 가중치 축소 | Density-0 | 28번 §10.1. 수치는 그대로, small 인카운터 가중치만 | 구현(2026-11-23, 불효자손 가중치 절반, Encounter 콘텐츠 버전 25, Unity `Density1Verification.SetupAndVerifyBatch`·`VerifyWithRegressionsBatch`(19개) 통과. 28번 §10.2.2). 사용자 Play 확인 대기 |
 | Drop-2 | 일반 상자 스펠 10% | 없음 | 28번 §10.3 | 완료(2026-11-23, Unity `Shop2SpellSupplyVerification.VerifyWithRegressionsBatch` 통과, 사용자 Play 확인. 28번 §10.3.1) |
 | Shop-2 | 상점 소모품 풀에 스펠 섞기 | 없음 | 28번 §10.3. 고정 칸 없음, 칸당 25%·10골드, 돈 관련 스펠·아티팩트 제외 | 완료(2026-11-23, 상점당 평균 0.742개, Unity `Shop2SpellSupplyVerification` 통과, 사용자 Play 확인. 28번 §10.3.1) |
 | Boss-Pattern-1 | 크레용사용 대쉬 재설계·일반 공격 시작 범위 | 검흔 에셋(사용자) | 28번 §10.4. 플레이어 위치 검흔 예고 → 검흔 앞까지 도약(밀어내기 없음) → 0.1초 뒤 검흔, 대쉬당 피해 1회. `swingRecognitionMultiplier` 1.15 | 구현(2026-11-23, Blender v2 검흔 연결, Unity `BossPattern1Verification.SetupAndVerifyBatch`·`VerifyWithRegressionsBatch` 통과. 28번 §10.4.1). 완료(2026-11-23, 사용자 Play 확인) |

@@ -152,9 +152,9 @@ namespace TrickalFanGame.Editor
             EncounterEnemyCandidate[] melee = Week27Enemy13Setup.PressureMeleeCandidates();
             int[][] expectedWeights =
             {
-                new[] { 150, 75, 0, 0, 0, 0 },
-                new[] { 100, 50, 45, 0, 45, 0 },
-                new[] { 50, 25, 30, 30, 30, 45 },
+                new[] { 150, 75, 0, 0, 0, 0, 90, 0, 0 },
+                new[] { 100, 50, 45, 0, 45, 0, 60, 60, 0 },
+                new[] { 50, 25, 30, 30, 30, 45, 30, 40, 30 },
             };
             for (int floor = 1; floor <= 3; floor++)
             {

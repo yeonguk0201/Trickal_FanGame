@@ -25,7 +25,7 @@ MonoBehaviour:
     completionCondition: 0
     spawnRules:
     - enemyRole: 6
-      count: 4
+      count: 6
       spawnPointId: 
       spawnGroupId: all
       candidates:
@@ -36,12 +36,23 @@ MonoBehaviour:
     completionCondition: 0
     spawnRules:
     - enemyRole: 6
-      count: 3
+      count: 6
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 6
+        weight: 100
+  - waveNumber: 3
+    startCondition: 1
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 6
+      count: 6
       spawnPointId: 
       spawnGroupId: all
       candidates:
       - enemyRole: 6
         weight: 100
   clearCondition: 0
-  declaredMinimumThreat: 7
-  declaredMaximumThreat: 7
+  declaredMinimumThreat: 18
+  declaredMaximumThreat: 18

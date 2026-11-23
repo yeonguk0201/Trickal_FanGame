@@ -79,15 +79,9 @@ namespace TrickalFanGame.Editor
             RoomDifficultyTable table = ConfigureThreat(generator.DifficultyTable);
             EncounterEnemyRoster roster = ConfigureRoster(prefab);
 
-            // Spawn-2 owns pressure and crossfire and reads the Enemy-13 melee list. Threat 4 matches 누루링 in the
-            // same slots, so both declared ranges are restored unchanged.
+            // Spawn-2 owns pressure and crossfire and reads the Enemy-13 melee list; Density-0 lays out their waves
+            // by room size and declares the threat range they can produce.
             EncounterDefinition[] updated = Week19Spawn2Setup.ConfigureEncounters();
-            foreach (EncounterDefinition definition in updated.Where(Week25Enemy9Setup.IsPressure))
-                definition.ConfigureDeclaredThreat(Week19Difficulty1Setup.PressureMinimumThreat,
-                    Week19Difficulty1Setup.PressureMaximumThreat);
-            foreach (EncounterDefinition definition in updated.Where(Week27Enemy12Setup.IsCrossfire))
-                definition.ConfigureDeclaredThreat(Week19Difficulty1Setup.CrossfireMinimumThreat,
-                    Week19Difficulty1Setup.CrossfireMaximumThreat);
             HashSet<string> updatedIds = new(updated.Select(definition => definition.EncounterId),
                 StringComparer.Ordinal);
             EncounterDefinition[] definitions = generator.EncounterDefinitions

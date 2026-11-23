@@ -1539,6 +1539,22 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   개발 패널(`F1`): `— Room —`의 `Make nearest champion` 줄 `Undying`이 가장 가까운 일반 적을 불사 챔피언으로 바꾸고, 아래 줄
   `undying now N (생명/최대 남은초)`에 불사 중인 적을 보인다. 불사 챔피언이 있는 seed는 `Find champion F2`로 찾는다(성질은 무작위).
 
+- Density-0 방 크기별 적 수(Unity): 메뉴 `Trickal Fan Game > Beta > Setup Density-0 Enemies by Room Size`가 Encounter 콘텐츠 버전
+  24를 멱등 구성한다. 사양은 [28번 §10.2](./28-difficulty-enemies-drops-plan.md). `Density0Setup`이 6종 Encounter의 크기별 웨이브
+  (`Layout`)와 선언 위협을 맡고(Spawn-2·Enemy-13 재실행도 이 값을 쓴다), 난이도 표에 크기별 방·웨이브·후열 상한, 층 범위, 난이도
+  구간(`RoomSizeDifficulty`)을 넣는다. 크기별 값은 small을 평균 적 수 비율로 늘린 것이다. 임포터 이전 템플릿 16개에 SpawnPoint를
+  생성하고 Layout 방을 다시 가져온다(거부된 방이 있으면 예외). 배치는
+  `-executeMethod TrickalFanGame.Editor.Density0Verification.SetupAndVerifyBatch`(Setup 2회 GUID·SpawnPoint·웨이브 불변 포함),
+  단독 `Verify`, 회귀 `VerifyWithRegressionsBatch`(Layout 임포터, Variant-0~2, Enemy-7~13, Curve-1, Spawn-1·2, Difficulty-1,
+  Encounter-4, Room-8, Floor-1, 개발 패널, 19개). 검사: 크기별 표 값·small이 전역 값과 같음, 30개 Encounter의 웨이브·후보·선언 위협,
+  small 값 유지·large 3웨이브 20마리 이하, 웨이브 상한·후열·방 범위 초과 거부, 모든 전투 템플릿의 SpawnPoint 수·생성 위치(간격·문 거리)·모든 문
+  조합 배치, 256 seed 생성의 크기별 상한·층 범위·난이도 분류·결정성, large 방 런타임 결합. 개발 패널 변경은 없다.
+
+- Density-1 small 방 추적형 가중치(Unity): 메뉴 `Trickal Fan Game > Beta > Setup Density-1 Small Room Chaser Weight`가 Encounter
+  콘텐츠 버전 25를 멱등 구성한다. 사양은 [28번 §10.2.2](./28-difficulty-enemies-drops-plan.md). small Encounter의 불효자손 가중치만
+  절반으로 낮춘다. 배치는 `-executeMethod TrickalFanGame.Editor.Density1Verification.SetupAndVerifyBatch`(Setup 2회 GUID·웨이브 불변
+  포함), 단독 `Verify`, 회귀 `VerifyWithRegressionsBatch`(Density-0 회귀 19개 포함, 10분 넘게 걸릴 수 있다).
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,
@@ -1719,6 +1735,12 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
     가중치가 보인다. 끝나면 `Clear forced layout and restart`를 누른다. 확인할 것: 격자대로 놓인 장애물·구덩이·나무,
     종류 고정 장애물의 색과 드롭, 처음부터 놓여 있는 상자(일반은 닿으면, 황금은 열쇠, 다이아몬드는 폭탄·폭발 상자로
     열림), 방을 나갔다 돌아와도 상자가 한 번만 있는지, 적이 끼이지 않고 방이 클리어되는지.
+  - **Density-0 생성 SpawnPoint**(2026-11-23): 임포터는 파일의 `1`~`N` SpawnPoint 뒤에 방 크기별 목표 수(small 4·basic 7·
+    wide/tall 9·large 11, `Density0Setup.Sizes`)까지 SpawnPoint를 자동으로 덧붙인다(`RoomSpawnPointDensity`). 벽에서
+    0.75, 장애물·구덩이·상자에서 0.75, 바닥 함정에서 0.5, 모든 문의 진입점에서 2.0·문 위치에서 2.5 떨어지고 도달할 수
+    있으며 방을 충분히 보는 0.5 격자 칸 중에서, 이미 있는 점과 가장 먼 칸을 차례로 고른다(seed 없음, 서로 1.5 이상).
+    역할은 근접·후열이다. 생성 규칙을 바꾸면 `RoomSpawnPointDensity.Revision`을 올려 모든 방을 다시 만든다. 손으로 찍은
+    점이 목표 수 이상이면 생성하지 않는다. 자리가 모자라면 "has room for only N SpawnPoints"로 거부된다.
 
 - 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
 - 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.

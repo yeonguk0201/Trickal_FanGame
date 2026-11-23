@@ -30,7 +30,7 @@ MonoBehaviour:
       spawnGroupId: all
       candidates:
       - enemyRole: 0
-        weight: 60
+        weight: 30
       - enemyRole: 4
         weight: 25
       - enemyRole: 7
@@ -47,7 +47,7 @@ MonoBehaviour:
       spawnGroupId: all
       candidates:
       - enemyRole: 0
-        weight: 60
+        weight: 30
       - enemyRole: 4
         weight: 25
       - enemyRole: 7

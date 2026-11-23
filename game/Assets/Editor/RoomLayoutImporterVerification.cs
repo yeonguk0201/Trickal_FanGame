@@ -434,11 +434,14 @@ namespace TrickalFanGame.Editor
                        template.LayoutDifficultyModifier == document.Difficulty &&
                        template.MinimumFloor == document.MinimumFloor && template.MaximumFloor == document.MaximumFloor,
                     $"{label} does not match its header.");
-                Assert(template.SpawnPoints.Count == document.SpawnPoints.Length &&
-                       template.SpawnPoints.Select((point, index) => point == document.SpawnPoints[index])
-                           .All(same => same) &&
+                // Density-0: the grid's SpawnPoints come first, then the generated ones up to the size's target.
+                Vector2[] spawnPoints = RoomLayoutImporter.ResolveSpawnPoints(document);
+                Assert(template.SpawnPoints.Count == spawnPoints.Length &&
+                       spawnPoints.Length == Density0Setup.SpawnPointTarget(document.Profile.ProfileId) &&
+                       template.SpawnPoints.Take(document.SpawnPoints.Length).SequenceEqual(document.SpawnPoints) &&
+                       template.SpawnPoints.SequenceEqual(spawnPoints) &&
                        template.SpawnPointRoles.SequenceEqual(
-                           RoomLayoutImporter.BuildSpawnPointRoles(document.Profile, document.SpawnPoints)),
+                           RoomLayoutImporter.BuildSpawnPointRoles(document.Profile, spawnPoints)),
                     $"{label} SpawnPoints or roles do not match its grid.");
 
                 RoomLayoutCell[] chestCells = document.CellsOf(RoomLayoutCellKind.Chest).ToArray();

@@ -185,73 +185,9 @@ namespace TrickalFanGame.Editor
             return roster;
         }
 
-        internal static EncounterDefinition[] ConfigureEncounters()
-        {
-            List<EncounterDefinition> definitions = new();
-            foreach (ProfileSpec spec in Profiles)
-            {
-                RoomProfile profile = AssetDatabase.LoadAssetAtPath<RoomProfile>(spec.ProfilePath);
-                if (profile == null || profile.ProfileId != spec.ProfileId)
-                {
-                    throw new InvalidOperationException($"Spawn-2 is missing Room Profile '{spec.ProfileId}'.");
-                }
-
-                EncounterSpawnRule melee = CandidateRule(
-                    new EncounterEnemyCandidate(EncounterEnemyRole.Chaser, 70),
-                    new EncounterEnemyCandidate(EncounterEnemyRole.FastChaser, 30));
-                // Enemy-8/9/10/13: the pressure melee slots also draw 저혈당 요정-활발, 누루링-요정전사, 자폭형 and
-                // 잠복형; crossfire keeps its two chasers.
-                EncounterSpawnRule pressureMelee = CandidateRule(Week27Enemy13Setup.PressureMeleeCandidates());
-                EncounterSpawnRule rear = CandidateRule(
-                    new EncounterEnemyCandidate(EncounterEnemyRole.Ranged, spec.QuickRangedWeight),
-                    new EncounterEnemyCandidate(EncounterEnemyRole.Sniper, spec.SniperWeight));
-                EncounterSpawnRule charge = CandidateRule(
-                    new EncounterEnemyCandidate(EncounterEnemyRole.Charging, 100));
-
-                definitions.Add(CreateOrUpdate(spec.ProfileId, "pressure", profile,
-                    Wave(1, pressureMelee, rear),
-                    Wave(2, pressureMelee, rear)));
-                // Enemy-12: crossfire's three rear slots also draw 곡사형 (floor 3 only through the floor pool).
-                definitions.Add(CreateOrUpdate(spec.ProfileId, "crossfire", profile,
-                    Wave(1, CandidateRule(3, Week27Enemy12Setup.CrossfireRearCandidates(spec))),
-                    Wave(2, melee, charge)));
-            }
-
-            return definitions.OrderBy(definition => definition.EncounterId, StringComparer.Ordinal).ToArray();
-        }
-
-        private static EncounterDefinition CreateOrUpdate(string profileId, string pattern,
-            RoomProfile profile, params EncounterWaveDefinition[] waves)
-        {
-            string path = EncounterPath(profileId, pattern);
-            EncounterDefinition definition = AssetDatabase.LoadAssetAtPath<EncounterDefinition>(path);
-            if (definition == null)
-            {
-                definition = ScriptableObject.CreateInstance<EncounterDefinition>();
-                AssetDatabase.CreateAsset(definition, path);
-            }
-
-            definition.Configure(EncounterId(profileId, pattern), new[] { profile },
-                Week27Curve1Setup.MinimumFloor(pattern), Week27Curve1Setup.MaximumFloor,
-                Week14Encounter1Setup.MinimumPlayerDistance,
-                Week14Encounter1Setup.MinimumDoorDistance,
-                waves,
-                EncounterClearCondition.AllWavesCleared);
-            EditorUtility.SetDirty(definition);
-            return definition;
-        }
-
-        private static EncounterWaveDefinition Wave(int number, params EncounterSpawnRule[] rules) =>
-            new(number,
-                number == 1 ? EncounterWaveStartCondition.RoomEntered :
-                    EncounterWaveStartCondition.PreviousWaveCleared,
-                EncounterWaveCompletionCondition.AllRequiredEnemiesDefeated,
-                rules);
-
-        private static EncounterSpawnRule CandidateRule(params EncounterEnemyCandidate[] candidates) =>
-            CandidateRule(1, candidates);
-
-        private static EncounterSpawnRule CandidateRule(int count, params EncounterEnemyCandidate[] candidates) =>
-            new(candidates, count, null, "all");
+        // Density-0 owns the waves of pressure and crossfire for every room size (and their declared threat), so
+        // re-running Spawn-2 keeps them.
+        internal static EncounterDefinition[] ConfigureEncounters() =>
+            Density0Setup.ConfigureEncounters(new[] { "pressure", "crossfire" }, Density0Setup.LoadTable());
     }
 }
