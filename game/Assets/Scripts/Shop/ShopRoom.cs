@@ -41,6 +41,7 @@ namespace TrickalFanGame.Shop
         public const float DropSpacing = 1.2f;
 
         [SerializeField] private ShopKeeper keeper;
+        [SerializeField] private ShopDecorDefinition decor;
 
         private RunProgress runProgress;
         private ShopStockState stock;
@@ -58,6 +59,17 @@ namespace TrickalFanGame.Shop
         public void ConfigureKeeper(ShopKeeper configuredKeeper)
         {
             keeper = configuredKeeper;
+        }
+
+        public ShopDecorDefinition Decor => decor;
+        public ShopRoomDecor BuiltDecor { get; private set; }
+
+        public void ConfigureDecor(ShopDecorDefinition configuredDecor) => decor = configuredDecor;
+
+        // Runs after Configure, because the decoration follows this shop's kind.
+        public void BuildDecor(RoomPrefab room, RoomRunState state, int contentSeed)
+        {
+            if (BuiltDecor == null) BuiltDecor = ShopRoomDecor.Build(this, decor, room, state, contentSeed, runProgress);
         }
 
         public void Configure(RunProgress configuredProgress, ShopStockState configuredStock,

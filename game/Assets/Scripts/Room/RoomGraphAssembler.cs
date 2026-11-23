@@ -522,6 +522,7 @@ namespace TrickalFanGame.Room
             shop.name = $"Shop - {node.RoomId}";
             shop.transform.localPosition = Vector3.zero;
             shop.Configure(runProgress, stock, content, shopSession);
+            shop.BuildDecor(instance, runProgress?.GetRoomState(node.RoomId), node.ContentSeed);
             error = null;
             return true;
         }

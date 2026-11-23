@@ -1198,6 +1198,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Shop.ShopRoom
   keeper: {fileID: 6028743633880014176}
+  decor: {fileID: 11400000, guid: 8069629e2a6d48e49b0e4403e3d89dea, type: 2}
 --- !u!1 &8758292912678211800
 GameObject:
   m_ObjectHideFlags: 0

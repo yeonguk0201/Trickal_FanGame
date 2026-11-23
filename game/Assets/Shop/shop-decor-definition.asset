@@ -1,0 +1,894 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14cb75186ce10754e99a088133a49608, type: 3}
+  m_Name: shop-decor-definition
+  m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Shop.ShopDecorDefinition
+  themes:
+  - kind: 0
+    map: {fileID: 21300000, guid: e1e8b14137bce934aac4edb57fbd3899, type: 3}
+    doors:
+    - direction: 2
+      art:
+        sprite: {fileID: 21300000, guid: 87f748b54f8f61147b7127766fb30261, type: 3}
+        position: {x: 0, y: 3.821883}
+    - direction: 3
+      art:
+        sprite: {fileID: 21300000, guid: 48e8207fb5ef68448891f0950911c84d, type: 3}
+        position: {x: 0, y: -3.6743002}
+    - direction: 0
+      art:
+        sprite: {fileID: 21300000, guid: 8f2c75d3e5ed5f14482f7247cf0eaea6, type: 3}
+        position: {x: -6.9262085, y: 0.08142494}
+    - direction: 1
+      art:
+        sprite: {fileID: 21300000, guid: 91ca09f4ba5ade3468aad62757a031f2, type: 3}
+        position: {x: 6.9262085, y: 0.08142494}
+    foregroundLeft:
+      sprite: {fileID: 21300000, guid: 121b9fea25d380248a907caeba36517c, type: 3}
+      position: {x: -4.9465647, y: -3.8676844}
+    foregroundCenter:
+      sprite: {fileID: 21300000, guid: a9b2dc5a1df0aaa4b80ee0c0044205ce, type: 3}
+      position: {x: 0, y: -3.8676844}
+    foregroundRight:
+      sprite: {fileID: 21300000, guid: 318499d9badeb4d40b9f27c5f5665930, type: 3}
+      position: {x: 4.941476, y: -3.8676844}
+    keeperPosition: {x: -0.025, y: -0.25}
+    pieces:
+    - pieceId: shop-decor-sist-01
+      stages:
+      - {fileID: 21300000, guid: 92bd629015f70fa4fbac03054602b5a8, type: 3}
+      - {fileID: 21300000, guid: ec1f7d2f6a95278478c1437cee66cd0b, type: 3}
+      - {fileID: 21300000, guid: 34a401a8e031e0347bc183cfb004a70a, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.044843048
+        y: 0.022617124
+        width: 0.94618833
+        height: 0.9741519
+      solidArea:
+        serializedVersion: 2
+        x: -1.3122
+        y: -0.82000005
+        width: 2.3344
+        height: 0.945
+      dropTable: {fileID: 11400000, guid: f06bff1cbc2996446a3c66b0f2182ab9, type: 2}
+      center: {x: -0.145, y: 0.53}
+      size: {x: 2.918, y: 2.7}
+      flipX: 0
+    - pieceId: shop-decor-sist-02
+      stages:
+      - {fileID: 21300000, guid: 6592d0f9d7e876941a44592a7285bf5e, type: 3}
+      - {fileID: 21300000, guid: 1e51d5e7eb3ad994eb5a21e044a05cf6, type: 3}
+      - {fileID: 21300000, guid: 345897b4b52d43947bff41882e2f355d, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0016611295
+        y: 0.0014749262
+        width: 0.9983389
+        height: 0.99705017
+      solidArea:
+        serializedVersion: 2
+        x: -2.1097999
+        y: -0.89
+        width: 1.3496
+        height: 0.66499996
+      dropTable: {fileID: 11400000, guid: 5f97828bdb8a3e647914d4846bfe920d, type: 2}
+      center: {x: -1.435, y: 0.06}
+      size: {x: 1.687, y: 1.9}
+      flipX: 0
+    - pieceId: shop-decor-sist-03
+      stages:
+      - {fileID: 21300000, guid: 852e7dfb85f9fd94faf843ca0601f8b0, type: 3}
+      - {fileID: 21300000, guid: 329d350091e47c646b33671ec6e1e7e7, type: 3}
+      - {fileID: 21300000, guid: f6bbff6cec4b7c14db7f0b834b683fa8, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.06740028
+        y: 0.0015527951
+        width: 0.8940853
+        height: 0.99689436
+      solidArea:
+        serializedVersion: 2
+        x: 5.0698
+        y: 2.385
+        width: 1.4904003
+        height: 0.5775001
+      dropTable: {fileID: 11400000, guid: 9870c406b1de9514abe17268df9858d6, type: 2}
+      center: {x: 5.815, y: 3.21}
+      size: {x: 1.863, y: 1.65}
+      flipX: 0
+    - pieceId: shop-decor-sist-04
+      stages:
+      - {fileID: 21300000, guid: 852e7dfb85f9fd94faf843ca0601f8b0, type: 3}
+      - {fileID: 21300000, guid: 329d350091e47c646b33671ec6e1e7e7, type: 3}
+      - {fileID: 21300000, guid: f6bbff6cec4b7c14db7f0b834b683fa8, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.06740028
+        y: 0.0015527951
+        width: 0.8940853
+        height: 0.99689436
+      solidArea:
+        serializedVersion: 2
+        x: -6.5702
+        y: 2.315
+        width: 1.4904003
+        height: 0.5775001
+      dropTable: {fileID: 11400000, guid: 9870c406b1de9514abe17268df9858d6, type: 2}
+      center: {x: -5.825, y: 3.14}
+      size: {x: 1.863, y: 1.65}
+      flipX: 1
+    - pieceId: shop-decor-sist-05
+      stages:
+      - {fileID: 21300000, guid: 852e7dfb85f9fd94faf843ca0601f8b0, type: 3}
+      - {fileID: 21300000, guid: 329d350091e47c646b33671ec6e1e7e7, type: 3}
+      - {fileID: 21300000, guid: f6bbff6cec4b7c14db7f0b834b683fa8, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.06740028
+        y: 0.0015527951
+        width: 0.8940853
+        height: 0.99689436
+      solidArea:
+        serializedVersion: 2
+        x: -2.1102
+        y: 0.08500004
+        width: 1.4904
+        height: 0.5775
+      dropTable: {fileID: 11400000, guid: 9870c406b1de9514abe17268df9858d6, type: 2}
+      center: {x: -1.365, y: 0.91}
+      size: {x: 1.863, y: 1.65}
+      flipX: 1
+    - pieceId: shop-decor-sist-06
+      stages:
+      - {fileID: 21300000, guid: 852e7dfb85f9fd94faf843ca0601f8b0, type: 3}
+      - {fileID: 21300000, guid: 329d350091e47c646b33671ec6e1e7e7, type: 3}
+      - {fileID: 21300000, guid: f6bbff6cec4b7c14db7f0b834b683fa8, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.06740028
+        y: 0.0015527951
+        width: 0.8940853
+        height: 0.99689436
+      solidArea:
+        serializedVersion: 2
+        x: 0.3298
+        y: 0.035000026
+        width: 1.4904001
+        height: 0.5775
+      dropTable: {fileID: 11400000, guid: 9870c406b1de9514abe17268df9858d6, type: 2}
+      center: {x: 1.075, y: 0.86}
+      size: {x: 1.863, y: 1.65}
+      flipX: 0
+    - pieceId: shop-decor-sist-07
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: 0.6354
+        y: -0.9205
+        width: 0.9392
+        height: 0.37135
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: 1.105, y: -0.39}
+      size: {x: 1.174, y: 1.061}
+      flipX: 0
+    - pieceId: shop-decor-sist-08
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: -2.1446
+        y: 2.9295
+        width: 0.9391999
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: -1.675, y: 3.46}
+      size: {x: 1.174, y: 1.061}
+      flipX: 0
+    - pieceId: shop-decor-sist-09
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: 1.2454
+        y: 2.8195
+        width: 0.93920016
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: 1.715, y: 3.35}
+      size: {x: 1.174, y: 1.061}
+      flipX: 0
+    - pieceId: shop-decor-sist-10
+      stages:
+      - {fileID: 21300000, guid: 852e7dfb85f9fd94faf843ca0601f8b0, type: 3}
+      - {fileID: 21300000, guid: 329d350091e47c646b33671ec6e1e7e7, type: 3}
+      - {fileID: 21300000, guid: f6bbff6cec4b7c14db7f0b834b683fa8, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.06740028
+        y: 0.0015527951
+        width: 0.8940853
+        height: 0.99689436
+      solidArea:
+        serializedVersion: 2
+        x: -6.5902
+        y: 1.5550001
+        width: 1.4904003
+        height: 0.5775001
+      dropTable: {fileID: 11400000, guid: 9870c406b1de9514abe17268df9858d6, type: 2}
+      center: {x: -5.845, y: 2.38}
+      size: {x: 1.863, y: 1.65}
+      flipX: 1
+    - pieceId: shop-decor-sist-11
+      stages:
+      - {fileID: 21300000, guid: 852e7dfb85f9fd94faf843ca0601f8b0, type: 3}
+      - {fileID: 21300000, guid: 329d350091e47c646b33671ec6e1e7e7, type: 3}
+      - {fileID: 21300000, guid: f6bbff6cec4b7c14db7f0b834b683fa8, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.06740028
+        y: 0.0015527951
+        width: 0.8940853
+        height: 0.99689436
+      solidArea:
+        serializedVersion: 2
+        x: 5.0898
+        y: 1.595
+        width: 1.4904003
+        height: 0.5775001
+      dropTable: {fileID: 11400000, guid: 9870c406b1de9514abe17268df9858d6, type: 2}
+      center: {x: 5.835, y: 2.42}
+      size: {x: 1.863, y: 1.65}
+      flipX: 0
+    - pieceId: shop-decor-sist-12
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: 4.6854
+        y: -3.6104999
+        width: 0.9392004
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: 5.155, y: -3.08}
+      size: {x: 1.174, y: 1.061}
+      flipX: 0
+    - pieceId: shop-decor-sist-13
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: 5.7054
+        y: -2.8005
+        width: 0.9392004
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: 6.175, y: -2.27}
+      size: {x: 1.174, y: 1.061}
+      flipX: 0
+    - pieceId: shop-decor-sist-14
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: 5.7054
+        y: -3.6304998
+        width: 0.9392004
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: 6.175, y: -3.1}
+      size: {x: 1.174, y: 1.061}
+      flipX: 0
+    - pieceId: shop-decor-sist-15
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: -6.7246003
+        y: -3.7005
+        width: 0.9392004
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: -6.255, y: -3.17}
+      size: {x: 1.174, y: 1.061}
+      flipX: 1
+    - pieceId: shop-decor-sist-16
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: -5.8046002
+        y: -3.7405
+        width: 0.9392004
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: -5.335, y: -3.21}
+      size: {x: 1.174, y: 1.061}
+      flipX: 1
+    - pieceId: shop-decor-sist-17
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: -6.7246003
+        y: -2.8005
+        width: 0.9392004
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: -6.255, y: -2.27}
+      size: {x: 1.174, y: 1.061}
+      flipX: 1
+    - pieceId: shop-decor-sist-18
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: -2.2546
+        y: -3.7605
+        width: 0.93920016
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: -1.785, y: -3.23}
+      size: {x: 1.174, y: 1.061}
+      flipX: 0
+    - pieceId: shop-decor-sist-19
+      stages:
+      - {fileID: 21300000, guid: 0062b99dd4de78c41991cbfec702a4f3, type: 3}
+      - {fileID: 21300000, guid: 1d75d986e8918fb48aaff650e666bf2e, type: 3}
+      - {fileID: 21300000, guid: 77eb38fda13819c469ed1bcc9ba7d09f, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0014641288
+        y: 0
+        width: 0.9677892
+        height: 0.99837923
+      solidArea:
+        serializedVersion: 2
+        x: 1.2953999
+        y: -3.5805
+        width: 0.93920016
+        height: 0.3713498
+      dropTable: {fileID: 11400000, guid: 6beadb57ddafd5c47a118d460dec542f, type: 2}
+      center: {x: 1.765, y: -3.05}
+      size: {x: 1.174, y: 1.061}
+      flipX: 0
+  - kind: 1
+    map: {fileID: 21300000, guid: f3bc4ceecedf0574291a6f9c27cec1ff, type: 3}
+    doors:
+    - direction: 2
+      art:
+        sprite: {fileID: 21300000, guid: 09b746fe04a2f39438a8c1d7d1d16b86, type: 3}
+        position: {x: 0, y: 3.821883}
+    - direction: 3
+      art:
+        sprite: {fileID: 21300000, guid: 3cb8a2e65e89f8c46b9453a109eedd40, type: 3}
+        position: {x: 0, y: -3.6743002}
+    - direction: 0
+      art:
+        sprite: {fileID: 21300000, guid: 5d44e301e05b2cb4b9247cb3622ea17a, type: 3}
+        position: {x: -6.9262085, y: 0.08142494}
+    - direction: 1
+      art:
+        sprite: {fileID: 21300000, guid: b508fec76d7b88b40bee9e6c9667ee1a, type: 3}
+        position: {x: 6.9262085, y: 0.08142494}
+    foregroundLeft:
+      sprite: {fileID: 21300000, guid: 5b9fd2a5b7002ea4fa16cf7350ad5d0c, type: 3}
+      position: {x: -4.9465647, y: -3.8676844}
+    foregroundCenter:
+      sprite: {fileID: 21300000, guid: fa6ebb28a79426b42bfa6d26577bb134, type: 3}
+      position: {x: 0, y: -3.8676844}
+    foregroundRight:
+      sprite: {fileID: 21300000, guid: 6dbd4e8f75040854ea13374eb71bb537, type: 3}
+      position: {x: 4.941476, y: -3.8676844}
+    keeperPosition: {x: -0.065, y: -0.23}
+    pieces:
+    - pieceId: shop-decor-goldi-01
+      stages:
+      - {fileID: 21300000, guid: 6d1bc3b1a6c721748b2cbadb788307dc, type: 3}
+      - {fileID: 21300000, guid: 53dba6612f5b5234f8c8928e46a548f6, type: 3}
+      - {fileID: 21300000, guid: 02ba1a5a528fd304da02a7554b2f7f09, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.020895522
+        y: 0.019145804
+        width: 0.93880594
+        height: 0.9808542
+      solidArea:
+        serializedVersion: 2
+        x: -1.029
+        y: -0.78999996
+        width: 2.068
+        height: 0.91699994
+      dropTable: {fileID: 11400000, guid: 1395d65b1fc616141840921295a50fc5, type: 2}
+      center: {x: 0.005, y: 0.52}
+      size: {x: 2.585, y: 2.62}
+      flipX: 0
+    - pieceId: shop-decor-goldi-02
+      stages:
+      - {fileID: 21300000, guid: 0ec40e471be79f14dbf816686ed27976, type: 3}
+      - {fileID: 21300000, guid: 5c3c258c862f7e84ebbf09fc07b0bea0, type: 3}
+      - {fileID: 21300000, guid: 890acd06eb2e0b84db39ddad23bf9705, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0015174507
+        y: 0.00155521
+        width: 0.99696505
+        height: 0.9984448
+      solidArea:
+        serializedVersion: 2
+        x: 1.3118
+        y: -0.804
+        width: 1.0064001
+        height: 0.4298
+      dropTable: {fileID: 11400000, guid: f4e8cf5e66db65f4294bce6a2e4e5cd6, type: 2}
+      center: {x: 1.815, y: -0.19}
+      size: {x: 1.258, y: 1.228}
+      flipX: 0
+    - pieceId: shop-decor-goldi-03
+      stages:
+      - {fileID: 21300000, guid: 79baff3893fbc2c4ea81aba98940c594, type: 3}
+      - {fileID: 21300000, guid: a60c1b445ca02b346b408d4e4d598e17, type: 3}
+      - {fileID: 21300000, guid: db62fdca07adec541993d7e39606b327, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0331384
+        y: 0.012251149
+        width: 0.91228074
+        height: 0.98774886
+      solidArea:
+        serializedVersion: 2
+        x: -1.9658
+        y: -0.8225
+        width: 0.6816001
+        height: 0.37974998
+      dropTable: {fileID: 11400000, guid: 2ce3f65ed9bed674a8573692fc3cdcaa, type: 2}
+      center: {x: -1.625, y: -0.28}
+      size: {x: 0.852, y: 1.085}
+      flipX: 0
+    - pieceId: shop-decor-goldi-04
+      stages:
+      - {fileID: 21300000, guid: e0b97e7b462fd0049ae019f0ea1a4005, type: 3}
+      - {fileID: 21300000, guid: c264d764c6db16147ab5631d1ab7c63a, type: 3}
+      - {fileID: 21300000, guid: 19b0f1efa95b82d4093bcc15957c68db, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.017331023
+        y: 0.025948104
+        width: 0.8682842
+        height: 0.9720559
+      solidArea:
+        serializedVersion: 2
+        x: -5.4098
+        y: 2.49
+        width: 0.82960033
+        height: 1.1099999
+      dropTable: {fileID: 11400000, guid: d8393f214b5e204419e4b55aa7f7b66f, type: 2}
+      center: {x: -4.995, y: 2.94}
+      size: {x: 1.037, y: 0.9}
+      flipX: 0
+    - pieceId: shop-decor-goldi-05
+      stages:
+      - {fileID: 21300000, guid: e0b97e7b462fd0049ae019f0ea1a4005, type: 3}
+      - {fileID: 21300000, guid: c264d764c6db16147ab5631d1ab7c63a, type: 3}
+      - {fileID: 21300000, guid: 19b0f1efa95b82d4093bcc15957c68db, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.017331023
+        y: 0.025948104
+        width: 0.8682842
+        height: 0.9720559
+      solidArea:
+        serializedVersion: 2
+        x: -6.6
+        y: 2.5175
+        width: 0.92420006
+        height: 1.0825
+      dropTable: {fileID: 11400000, guid: d8393f214b5e204419e4b55aa7f7b66f, type: 2}
+      center: {x: -6.065, y: 2.94}
+      size: {x: 0.973, y: 0.845}
+      flipX: 0
+    - pieceId: shop-decor-goldi-06
+      stages:
+      - {fileID: 21300000, guid: e0b97e7b462fd0049ae019f0ea1a4005, type: 3}
+      - {fileID: 21300000, guid: c264d764c6db16147ab5631d1ab7c63a, type: 3}
+      - {fileID: 21300000, guid: 19b0f1efa95b82d4093bcc15957c68db, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.017331023
+        y: 0.025948104
+        width: 0.8682842
+        height: 0.9720559
+      solidArea:
+        serializedVersion: 2
+        x: -6.6498003
+        y: -3.6
+        width: 0.82960033
+        height: 1.1599998
+      dropTable: {fileID: 11400000, guid: d8393f214b5e204419e4b55aa7f7b66f, type: 2}
+      center: {x: -6.235, y: -2.89}
+      size: {x: 1.037, y: 0.9}
+      flipX: 0
+    - pieceId: shop-decor-goldi-07
+      stages:
+      - {fileID: 21300000, guid: e0b97e7b462fd0049ae019f0ea1a4005, type: 3}
+      - {fileID: 21300000, guid: c264d764c6db16147ab5631d1ab7c63a, type: 3}
+      - {fileID: 21300000, guid: 19b0f1efa95b82d4093bcc15957c68db, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.017331023
+        y: 0.025948104
+        width: 0.8682842
+        height: 0.9720559
+      solidArea:
+        serializedVersion: 2
+        x: -5.6798
+        y: -3.6
+        width: 0.82960033
+        height: 0.605
+      dropTable: {fileID: 11400000, guid: d8393f214b5e204419e4b55aa7f7b66f, type: 2}
+      center: {x: -5.265, y: -2.86}
+      size: {x: 1.037, y: 0.9}
+      flipX: 0
+    - pieceId: shop-decor-goldi-08
+      stages:
+      - {fileID: 21300000, guid: e0b97e7b462fd0049ae019f0ea1a4005, type: 3}
+      - {fileID: 21300000, guid: c264d764c6db16147ab5631d1ab7c63a, type: 3}
+      - {fileID: 21300000, guid: 19b0f1efa95b82d4093bcc15957c68db, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.017331023
+        y: 0.025948104
+        width: 0.8682842
+        height: 0.9720559
+      solidArea:
+        serializedVersion: 2
+        x: -6.6
+        y: 1.52
+        width: 1.0297999
+        height: 0.9000001
+      dropTable: {fileID: 11400000, guid: d8393f214b5e204419e4b55aa7f7b66f, type: 2}
+      center: {x: -5.985, y: 1.97}
+      size: {x: 1.037, y: 0.9}
+      flipX: 0
+    - pieceId: shop-decor-goldi-09
+      stages:
+      - {fileID: 21300000, guid: e0b97e7b462fd0049ae019f0ea1a4005, type: 3}
+      - {fileID: 21300000, guid: c264d764c6db16147ab5631d1ab7c63a, type: 3}
+      - {fileID: 21300000, guid: 19b0f1efa95b82d4093bcc15957c68db, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.017331023
+        y: 0.025948104
+        width: 0.8682842
+        height: 0.9720559
+      solidArea:
+        serializedVersion: 2
+        x: -6.6
+        y: -2.41
+        width: 0.8298001
+        height: 0.9000001
+      dropTable: {fileID: 11400000, guid: d8393f214b5e204419e4b55aa7f7b66f, type: 2}
+      center: {x: -6.185, y: -1.96}
+      size: {x: 1.037, y: 0.9}
+      flipX: 0
+    - pieceId: shop-decor-goldi-10
+      stages:
+      - {fileID: 21300000, guid: 0ec40e471be79f14dbf816686ed27976, type: 3}
+      - {fileID: 21300000, guid: 5c3c258c862f7e84ebbf09fc07b0bea0, type: 3}
+      - {fileID: 21300000, guid: 890acd06eb2e0b84db39ddad23bf9705, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0015174507
+        y: 0.00155521
+        width: 0.99696505
+        height: 0.9984448
+      solidArea:
+        serializedVersion: 2
+        x: 1.2818
+        y: -0.15400001
+        width: 1.0063999
+        height: 0.4298
+      dropTable: {fileID: 11400000, guid: f4e8cf5e66db65f4294bce6a2e4e5cd6, type: 2}
+      center: {x: 1.785, y: 0.46}
+      size: {x: 1.258, y: 1.228}
+      flipX: 0
+    - pieceId: shop-decor-goldi-11
+      stages:
+      - {fileID: 21300000, guid: 0160b0b8300e73c4286ff92c60ad61aa, type: 3}
+      - {fileID: 21300000, guid: 5f9faf2be11167649af97403a4e24de4, type: 3}
+      - {fileID: 21300000, guid: 3fb60afaa46544e4db1d035d14400316, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.053968254
+        y: 0
+        width: 0.86507934
+        height: 0.9890311
+      solidArea:
+        serializedVersion: 2
+        x: 5.7409997
+        y: -3.6
+        width: 0.8590002
+        height: 1.0839999
+      dropTable: {fileID: 11400000, guid: 1e95f193f3bb3c04eae9e7c2f3d8fd55, type: 2}
+      center: {x: 6.153, y: -2.963}
+      size: {x: 1.03, y: 0.894}
+      flipX: 0
+    - pieceId: shop-decor-goldi-12
+      stages:
+      - {fileID: 21300000, guid: 0160b0b8300e73c4286ff92c60ad61aa, type: 3}
+      - {fileID: 21300000, guid: 5f9faf2be11167649af97403a4e24de4, type: 3}
+      - {fileID: 21300000, guid: 3fb60afaa46544e4db1d035d14400316, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.053968254
+        y: 0
+        width: 0.86507934
+        height: 0.9890311
+      solidArea:
+        serializedVersion: 2
+        x: 4.7818003
+        y: -3.6
+        width: 0.8263998
+        height: 0.49544978
+      dropTable: {fileID: 11400000, guid: 1e95f193f3bb3c04eae9e7c2f3d8fd55, type: 2}
+      center: {x: 5.195, y: -2.97}
+      size: {x: 1.033, y: 0.897}
+      flipX: 0
+    - pieceId: shop-decor-goldi-13
+      stages:
+      - {fileID: 21300000, guid: 0160b0b8300e73c4286ff92c60ad61aa, type: 3}
+      - {fileID: 21300000, guid: 5f9faf2be11167649af97403a4e24de4, type: 3}
+      - {fileID: 21300000, guid: 3fb60afaa46544e4db1d035d14400316, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.053968254
+        y: 0
+        width: 0.86507934
+        height: 0.9890311
+      solidArea:
+        serializedVersion: 2
+        x: 5.6518
+        y: -2.3785
+        width: 0.94819975
+        height: 0.8970001
+      dropTable: {fileID: 11400000, guid: 1e95f193f3bb3c04eae9e7c2f3d8fd55, type: 2}
+      center: {x: 6.065, y: -1.93}
+      size: {x: 1.033, y: 0.897}
+      flipX: 0
+    - pieceId: shop-decor-goldi-14
+      stages:
+      - {fileID: 21300000, guid: 0160b0b8300e73c4286ff92c60ad61aa, type: 3}
+      - {fileID: 21300000, guid: 5f9faf2be11167649af97403a4e24de4, type: 3}
+      - {fileID: 21300000, guid: 3fb60afaa46544e4db1d035d14400316, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.053968254
+        y: 0
+        width: 0.86507934
+        height: 0.9890311
+      solidArea:
+        serializedVersion: 2
+        x: 5.7718
+        y: 1.5715
+        width: 0.82819986
+        height: 0.89699996
+      dropTable: {fileID: 11400000, guid: 1e95f193f3bb3c04eae9e7c2f3d8fd55, type: 2}
+      center: {x: 6.185, y: 2.02}
+      size: {x: 1.033, y: 0.897}
+      flipX: 0
+    - pieceId: shop-decor-goldi-15
+      stages:
+      - {fileID: 21300000, guid: 0160b0b8300e73c4286ff92c60ad61aa, type: 3}
+      - {fileID: 21300000, guid: 5f9faf2be11167649af97403a4e24de4, type: 3}
+      - {fileID: 21300000, guid: 3fb60afaa46544e4db1d035d14400316, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.053968254
+        y: 0
+        width: 0.86507934
+        height: 0.9890311
+      solidArea:
+        serializedVersion: 2
+        x: 4.8518
+        y: 2.5415
+        width: 0.8263998
+        height: 1.0584998
+      dropTable: {fileID: 11400000, guid: 1e95f193f3bb3c04eae9e7c2f3d8fd55, type: 2}
+      center: {x: 5.265, y: 2.99}
+      size: {x: 1.033, y: 0.897}
+      flipX: 0
+    - pieceId: shop-decor-goldi-16
+      stages:
+      - {fileID: 21300000, guid: 0160b0b8300e73c4286ff92c60ad61aa, type: 3}
+      - {fileID: 21300000, guid: 5f9faf2be11167649af97403a4e24de4, type: 3}
+      - {fileID: 21300000, guid: 3fb60afaa46544e4db1d035d14400316, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.053968254
+        y: 0
+        width: 0.86507934
+        height: 0.9890311
+      solidArea:
+        serializedVersion: 2
+        x: 5.8118
+        y: 2.5615
+        width: 0.8263998
+        height: 1.0384998
+      dropTable: {fileID: 11400000, guid: 1e95f193f3bb3c04eae9e7c2f3d8fd55, type: 2}
+      center: {x: 6.225, y: 3.01}
+      size: {x: 1.033, y: 0.897}
+      flipX: 0
+    - pieceId: shop-decor-goldi-17
+      stages:
+      - {fileID: 21300000, guid: 0ec40e471be79f14dbf816686ed27976, type: 3}
+      - {fileID: 21300000, guid: 5c3c258c862f7e84ebbf09fc07b0bea0, type: 3}
+      - {fileID: 21300000, guid: 890acd06eb2e0b84db39ddad23bf9705, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0015174507
+        y: 0.00155521
+        width: 0.99696505
+        height: 0.9984448
+      solidArea:
+        serializedVersion: 2
+        x: 1.3018
+        y: -3.734
+        width: 1.0063999
+        height: 0.42980003
+      dropTable: {fileID: 11400000, guid: f4e8cf5e66db65f4294bce6a2e4e5cd6, type: 2}
+      center: {x: 1.805, y: -3.12}
+      size: {x: 1.258, y: 1.228}
+      flipX: 0
+    - pieceId: shop-decor-goldi-18
+      stages:
+      - {fileID: 21300000, guid: 0ec40e471be79f14dbf816686ed27976, type: 3}
+      - {fileID: 21300000, guid: 5c3c258c862f7e84ebbf09fc07b0bea0, type: 3}
+      - {fileID: 21300000, guid: 890acd06eb2e0b84db39ddad23bf9705, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0015174507
+        y: 0.00155521
+        width: 0.99696505
+        height: 0.9984448
+      solidArea:
+        serializedVersion: 2
+        x: -2.3582
+        y: -3.734
+        width: 1.0064001
+        height: 0.42980003
+      dropTable: {fileID: 11400000, guid: f4e8cf5e66db65f4294bce6a2e4e5cd6, type: 2}
+      center: {x: -1.855, y: -3.12}
+      size: {x: 1.258, y: 1.228}
+      flipX: 0
+    - pieceId: shop-decor-goldi-19
+      stages:
+      - {fileID: 21300000, guid: 0ec40e471be79f14dbf816686ed27976, type: 3}
+      - {fileID: 21300000, guid: 5c3c258c862f7e84ebbf09fc07b0bea0, type: 3}
+      - {fileID: 21300000, guid: 890acd06eb2e0b84db39ddad23bf9705, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0015174507
+        y: 0.00155521
+        width: 0.99696505
+        height: 0.9984448
+      solidArea:
+        serializedVersion: 2
+        x: 1.3018
+        y: 2.406
+        width: 1.0063999
+        height: 1.194
+      dropTable: {fileID: 11400000, guid: f4e8cf5e66db65f4294bce6a2e4e5cd6, type: 2}
+      center: {x: 1.805, y: 3.02}
+      size: {x: 1.258, y: 1.228}
+      flipX: 0
+    - pieceId: shop-decor-goldi-20
+      stages:
+      - {fileID: 21300000, guid: 0ec40e471be79f14dbf816686ed27976, type: 3}
+      - {fileID: 21300000, guid: 5c3c258c862f7e84ebbf09fc07b0bea0, type: 3}
+      - {fileID: 21300000, guid: 890acd06eb2e0b84db39ddad23bf9705, type: 3}
+      hitArea:
+        serializedVersion: 2
+        x: 0.0015174507
+        y: 0.00155521
+        width: 0.99696505
+        height: 0.9984448
+      solidArea:
+        serializedVersion: 2
+        x: -2.3282
+        y: 2.4959998
+        width: 1.0064001
+        height: 1.1040001
+      dropTable: {fileID: 11400000, guid: f4e8cf5e66db65f4294bce6a2e4e5cd6, type: 2}
+      center: {x: -1.825, y: 3.11}
+      size: {x: 1.258, y: 1.228}
+      flipX: 0
