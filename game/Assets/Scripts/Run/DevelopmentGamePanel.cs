@@ -159,6 +159,12 @@ namespace TrickalFanGame.Run
             FindEnemySeedButton(assembler, EncounterEnemyRole.Lobber, "lobber", "Lobber room");
             // Enemy-13: 잠복형 only comes in pressure's melee slots from floor 3.
             FindEnemySeedButton(assembler, EncounterEnemyRole.Ambusher, "ambusher", "Ambusher room");
+            // Attribute-0: the new 불효자손·산사모.
+            FindEnemySeedButton(assembler, EncounterEnemyRole.RibbonLasher, "ribbon", "Ribbon room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.Leaper, "leaper", "Leaper room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.FanShooter, "fan shooter", "Fan shooter room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.BoomerangThrower, "boomerang", "Boomerang room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.BurrowHealer, "healer", "Healer room");
             // Variant-0: elites start on floor 3 (20% of combat rooms).
             if (GUILayout.Button("Find elite F3"))
                 FindSeed(assembler, node => EnemyVariantRules.CountElites(node.ResolvedEncounterWaves) > 0,
@@ -212,6 +218,18 @@ namespace TrickalFanGame.Run
             {
                 numbers.SpawnSamples(assembler.Graph.Player.transform.position + Vector3.up * 0.6f);
                 status = "Normal 12, critical 48, tick 3, blocked 0.";
+            }
+
+            // Replays the player's heal and SP effects without needing lost health or an SP pickup.
+            CombatVisualFeedback recovery = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<CombatVisualFeedback>()
+                : null;
+            if (recovery != null)
+            {
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("Play heal FX")) recovery.PlayHealEffect();
+                if (GUILayout.Button("Play SP FX")) recovery.PlaySPEffect();
+                GUILayout.EndHorizontal();
             }
 
             // Hitbox-1: the look follows the size, the hurtbox stops at its limit and the feet never change.
@@ -923,6 +941,22 @@ namespace TrickalFanGame.Run
                     "Assets/Prefabs/QuickRangedFairy.prefab");
                 status = controller.SpawnExtraEnemy(sansamo, player.transform.position + Vector3.right * 3f) != null
                     ? "Spawned pure Sansamo to the right of the player." : "Pure Sansamo spawn failed.";
+            }
+            // Attribute-0 (2026-11-23): the five new 불효자손·산사모, one button each.
+            foreach ((string label, string prefabName) in new[]
+                     {
+                         ("Spawn 불효자손-순수 (ribbon)", "BulhyojasonPure"),
+                         ("Spawn 불효자손-활발 (leaps)", "BulhyojasonLively"),
+                         ("Spawn 불효자손-우울 (3-way fan)", "BulhyojasonGloomy"),
+                         ("Spawn 산사모-냉정 (boomerang)", "SansamoCold"),
+                         ("Spawn 산사모-우울 (burrow heal)", "SansamoGloomy"),
+                     })
+            {
+                if (!AssistedButton(label) || controller == null || player == null) continue;
+                GameObject attributeEnemy = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/" + prefabName + ".prefab");
+                status = controller.SpawnExtraEnemy(attributeEnemy, player.transform.position + Vector3.right * 4f) != null
+                    ? $"Spawned {prefabName} to the right of the player." : $"{prefabName} spawn failed.";
             }
             if (AssistedButton("Spawn crumb minion (explodes on death)") && controller != null && player != null)
             {

@@ -1,0 +1,481 @@
+fileFormatVersion: 2
+guid: 57a7e0dee98e9d8428deeac5c3996669
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7412555584566252091
+    second: SansamoGloomy_Death_Sheet_0
+  - first:
+      213: 2408862357231630314
+    second: SansamoGloomy_Death_Sheet_1
+  - first:
+      213: -8172512201397102099
+    second: SansamoGloomy_Death_Sheet_2
+  - first:
+      213: -6903107852666520125
+    second: SansamoGloomy_Death_Sheet_3
+  - first:
+      213: -5771531572578358465
+    second: SansamoGloomy_Death_Sheet_4
+  - first:
+      213: 8614471350084600257
+    second: SansamoGloomy_Death_Sheet_5
+  - first:
+      213: -6915272003326848315
+    second: SansamoGloomy_Death_Sheet_6
+  - first:
+      213: 2488578280973315731
+    second: SansamoGloomy_Death_Sheet_7
+  - first:
+      213: -3725811167466443784
+    second: SansamoGloomy_Death_Sheet_8
+  - first:
+      213: -6325391064513478563
+    second: SansamoGloomy_Death_Sheet_9
+  - first:
+      213: -4841615185452071115
+    second: SansamoGloomy_Death_Sheet_10
+  - first:
+      213: -3461404861932459413
+    second: SansamoGloomy_Death_Sheet_11
+  - first:
+      213: 5720350516607334889
+    second: SansamoGloomy_Death_Sheet_12
+  - first:
+      213: 7949710267904532347
+    second: SansamoGloomy_Death_Sheet_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 89
+        width: 401
+        height: 334
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cd271028ff412990800000000000000
+      internalID: -7412555584566252091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 478
+        y: 89
+        width: 422
+        height: 334
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae7f99b1d8ffd6120800000000000000
+      internalID: 2408862357231630314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 956
+        y: 95
+        width: 393
+        height: 319
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de91e21e377659e80800000000000000
+      internalID: -8172512201397102099
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 1414
+        y: 260
+        width: 142
+        height: 155
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3cd3a937bfb3330a0800000000000000
+      internalID: -6903107852666520125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 295
+        width: 106
+        height: 109
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3be3861d9667efa0800000000000000
+      internalID: -5771531572578358465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 1782
+        y: 394
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c1829d2d00cc8770800000000000000
+      internalID: 8614471350084600257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 1788
+        y: 391
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c2df7c60c40800a0800000000000000
+      internalID: -6915272003326848315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 1890
+        y: 297
+        width: 45
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39eaa21f2c4398220800000000000000
+      internalID: 2488578280973315731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 1774
+        y: 333
+        width: 91
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fbaafebb724b4cc0800000000000000
+      internalID: -3725811167466443784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 1845
+        y: 316
+        width: 28
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d508e361752b738a0800000000000000
+      internalID: -6325391064513478563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 1501
+        y: 89
+        width: 531
+        height: 206
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5370efb04a02fccb0800000000000000
+      internalID: -4841615185452071115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 1709
+        y: 261
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6aa4bc0e9e96ffc0800000000000000
+      internalID: -3461404861932459413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 1995
+        y: 254
+        width: 37
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e93a15bc74c26f40800000000000000
+      internalID: 5720350516607334889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Death_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 132
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7f99b98e5b035e60800000000000000
+      internalID: 7949710267904532347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SansamoGloomy_Death_Sheet_0: -7412555584566252091
+      SansamoGloomy_Death_Sheet_1: 2408862357231630314
+      SansamoGloomy_Death_Sheet_10: -4841615185452071115
+      SansamoGloomy_Death_Sheet_11: -3461404861932459413
+      SansamoGloomy_Death_Sheet_12: 5720350516607334889
+      SansamoGloomy_Death_Sheet_13: 7949710267904532347
+      SansamoGloomy_Death_Sheet_2: -8172512201397102099
+      SansamoGloomy_Death_Sheet_3: -6903107852666520125
+      SansamoGloomy_Death_Sheet_4: -5771531572578358465
+      SansamoGloomy_Death_Sheet_5: 8614471350084600257
+      SansamoGloomy_Death_Sheet_6: -6915272003326848315
+      SansamoGloomy_Death_Sheet_7: 2488578280973315731
+      SansamoGloomy_Death_Sheet_8: -3725811167466443784
+      SansamoGloomy_Death_Sheet_9: -6325391064513478563
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

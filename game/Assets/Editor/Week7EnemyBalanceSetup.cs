@@ -26,7 +26,7 @@ namespace TrickalFanGame.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log(
-                "Phase E-4 enemy balance ready: Chaser HP 60 / contact 2 / melee 3 / speed 2.25, " +
+                "Phase E-4 enemy balance ready: Chaser HP 45 / contact 2 / melee 3 / speed 2.25, " +
                 "Ranged HP 30 / damage 2 / speed 1.5, Charging HP 70 / damage 3 / dash speed 8.");
         }
 

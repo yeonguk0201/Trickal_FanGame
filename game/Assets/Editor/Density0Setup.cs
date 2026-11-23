@@ -188,7 +188,7 @@ namespace TrickalFanGame.Editor
 
         // Attribute-0 adds the new 불효자손·산사모 to the slots they fit.
         public static EncounterEnemyCandidate[] BaseCandidates(SlotKind kind, Week19Spawn2Setup.ProfileSpec spec) =>
-            AuthoredCandidates(kind, spec);
+            EnemyAttribute0Setup.Extend(kind, AuthoredCandidates(kind, spec));
 
         private static EncounterEnemyCandidate[] AuthoredCandidates(SlotKind kind,
             Week19Spawn2Setup.ProfileSpec spec) =>

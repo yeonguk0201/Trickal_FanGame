@@ -262,7 +262,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
-  maxHealth: 60
+  maxHealth: 45
   currentShield: 0
   useHealthUnits: 0
 --- !u!114 &5840264429905698585
@@ -432,6 +432,7 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   profileId: TestEnemy
   useSharedProfile: 1
+  surface: {fileID: 0}
 --- !u!114 &6272522787524356244
 MonoBehaviour:
   m_ObjectHideFlags: 0

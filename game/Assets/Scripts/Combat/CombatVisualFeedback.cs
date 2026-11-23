@@ -59,13 +59,18 @@ namespace TrickalFanGame.Combat
         {
             if (sp == null || source == null || Time.time < nextHealAt) return;
             nextHealAt = Time.time + 0.35f;
-            Vector3 feet = new Vector3(source.bounds.center.x, source.bounds.min.y, transform.position.z);
-            float width = Mathf.Clamp(source.bounds.size.x * 1.6f, 1.2f, 2.4f);
-            CombatSpriteEffect.Play("hp-heal", feet, width, width, 0.8f, transform, source,
-                true, pivot: new Vector2(0.5f, 0.12f));
+            PlayHealEffect();
         }
 
-        private void HandleSP() => SPAbsorptionEffect.Play(transform, source);
+        public void PlayHealEffect()
+        {
+            if (sp == null || source == null) return;
+            PlayerRecoveryEffect.Play(PlayerRecoveryKind.Heal, transform, source);
+        }
+
+        private void HandleSP() => PlaySPEffect();
+
+        public void PlaySPEffect() => PlayerRecoveryEffect.Play(PlayerRecoveryKind.SP, transform, source);
 
         private void HandleDamage(DamageContext context, float damage, float remaining)
         {

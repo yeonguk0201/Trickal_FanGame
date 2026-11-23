@@ -20,9 +20,9 @@ namespace TrickalFanGame.Editor
             EnemyProfile ranged = ReadRanged();
             EnemyProfile charging = ReadCharging();
 
-            Assert(chaser.Health == 60 && chaser.Damage == EnemyDamageTier.Heavy &&
+            Assert(Mathf.Approximately(chaser.Health, EnemyAttribute0Setup.MadnessBulhyojasonHealth) && chaser.Damage == EnemyDamageTier.Heavy &&
                    Mathf.Approximately(chaser.Speed, 2.25f),
-                "Enemy-2 chaser must use HP 60, heavy contact damage, and move speed 2.25.");
+                "Enemy-2 chaser must use the Attribute-0 HP, heavy contact damage, and move speed 2.25.");
             Assert(Require<MeleeEnemyAttack>(LoadPrefab(ChaserPrefabPath), ChaserPrefabPath).DamageTier ==
                    EnemyDamageTier.Critical,
                 "Enemy-2 chaser must use critical melee damage.");

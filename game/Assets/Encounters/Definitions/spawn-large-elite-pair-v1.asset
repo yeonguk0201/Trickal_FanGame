@@ -47,6 +47,10 @@ MonoBehaviour:
         weight: 70
       - enemyRole: 4
         weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
   - waveNumber: 2
     startCondition: 1
     completionCondition: 0
@@ -74,6 +78,10 @@ MonoBehaviour:
         weight: 70
       - enemyRole: 4
         weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
   - waveNumber: 3
     startCondition: 1
     completionCondition: 0
@@ -101,6 +109,10 @@ MonoBehaviour:
         weight: 70
       - enemyRole: 4
         weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
   clearCondition: 0
   declaredMinimumThreat: 52
   declaredMaximumThreat: 62

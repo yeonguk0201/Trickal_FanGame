@@ -242,7 +242,8 @@ namespace TrickalFanGame.Editor
 
                 Week19Spawn2Setup.ProfileSpec spec = Week19Spawn2Setup.Profiles.First(entry =>
                     Week19Spawn2Setup.EncounterId(entry.ProfileId, "crossfire") == definition.EncounterId);
-                EncounterEnemyCandidate[] expected = Week27Enemy12Setup.CrossfireRearCandidates(spec);
+                EncounterEnemyCandidate[] expected = EnemyAttribute0Setup.Extend(
+                    Density0Setup.SlotKind.CrossfireRear, Week27Enemy12Setup.CrossfireRearCandidates(spec));
                 // Density-0: small keeps one rule of three rear slots; bigger sizes spread more rear rules over
                 // their waves, every one with the same candidates.
                 bool small = Density0Setup.IsSmall(definition);

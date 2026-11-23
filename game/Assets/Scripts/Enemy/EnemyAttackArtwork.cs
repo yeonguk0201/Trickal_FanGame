@@ -20,7 +20,14 @@ namespace TrickalFanGame.Enemy
         private MeleeEnemyAttack melee;
         private Health health;
         private KnockbackReceiver knockback;
+        // Attribute enemies (2026-11-23): a pose the controller holds outside the four attack phases (leap, burrow),
+        // and the side a locked attack faces while the target walks past it.
+        private Sprite heldPose;
+        private Vector2 heldFacing;
 
+        public Sprite HeldPose => heldPose;
+        public void HoldPose(Sprite pose) => heldPose = pose;
+        public void HoldFacing(Vector2 facing) => heldFacing = facing;
         public int FrameCount => frames.Length;
         public Sprite ReferenceSprite => referenceSprite;
         public Sprite GetFrame(int index) => frames[index];
@@ -53,10 +60,18 @@ namespace TrickalFanGame.Enemy
         // Movement owns the renderer and calls this before rendering a stride or hop.
         public bool TryRender()
         {
+            if (heldPose != null && isActiveAndEnabled && MatchesArtwork && (health == null || !health.IsDead))
+            {
+                if (Mathf.Abs(heldFacing.x) > 0.001f) source.flipX = heldFacing.x > 0f;
+                source.sprite = heldPose;
+                return true;
+            }
+
             if (!isActiveAndEnabled || !MatchesArtwork || frames.Length != 4 || presentation == null ||
                 presentation.Phase == EnemyAttackPhase.Idle || (health != null && health.IsDead) ||
                 (knockback != null && knockback.IsActive)) return false;
-            Vector2 direction = charger != null ? charger.LockedDirection :
+            Vector2 direction = heldFacing != Vector2.zero ? heldFacing :
+                charger != null ? charger.LockedDirection :
                 sniper != null ? sniper.LockedDirection :
                 melee != null && melee.LockedDirection != Vector2.zero ? melee.LockedDirection :
                 behavior != null && behavior.Target != null ?

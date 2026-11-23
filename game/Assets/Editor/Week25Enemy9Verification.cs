@@ -212,7 +212,7 @@ namespace TrickalFanGame.Editor
                 if (!holds) continue;
                 found++;
                 EncounterEnemyCandidate[] weights = Density1Setup.ForDefinition(definition,
-                    expected);
+                    EnemyAttribute0Setup.Extend(Density0Setup.SlotKind.PressureMelee, expected));
                 foreach (EncounterSpawnRule rule in rules.Where(rule => rule.Candidates.Any(candidate =>
                              candidate.EnemyRole == EncounterEnemyRole.SplittingChaser)))
                 {

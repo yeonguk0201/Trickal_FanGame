@@ -30,6 +30,16 @@ namespace TrickalFanGame.Room
         // Enemy-13: 잠복형, which moves under the floor out of reach and bursts out near the player. Pressure melee
         // slots only.
         Ambusher,
+        // Attribute-0 (2026-11-23): 불효자손-순수, a ribbon whip aimed at the player.
+        RibbonLasher,
+        // Attribute-0: 불효자손-활발, which leaps around and hurts on landing.
+        Leaper,
+        // Attribute-0: 불효자손-우울, which throws three shots in a fan.
+        FanShooter,
+        // Attribute-0: 산사모-냉정, whose shot flies out and back along a long teardrop.
+        BoomerangThrower,
+        // Attribute-0: 산사모-우울, which follows allies, digs in and heals them.
+        BurrowHealer,
     }
     public enum EncounterWaveStartCondition { RoomEntered, PreviousWaveCleared }
     public enum EncounterWaveCompletionCondition { AllRequiredEnemiesDefeated }
@@ -383,7 +393,10 @@ namespace TrickalFanGame.Room
                                              selectedRole == EncounterEnemyRole.FourWayShooter ||
                                              selectedRole == EncounterEnemyRole.SplittingChaser ||
                                              selectedRole == EncounterEnemyRole.SelfDestruct ||
-                                             selectedRole == EncounterEnemyRole.Ambusher;
+                                             selectedRole == EncounterEnemyRole.Ambusher ||
+                                             selectedRole == EncounterEnemyRole.RibbonLasher ||
+                                             selectedRole == EncounterEnemyRole.Leaper ||
+                                             selectedRole == EncounterEnemyRole.BurrowHealer;
                     int selectedIndex = prefersCloseSpawn
                         ? available.OrderBy(index => template.SpawnPoints[index].sqrMagnitude)
                             .ThenBy(index => index).First()

@@ -18,7 +18,7 @@ namespace TrickalFanGame.Editor
             ConfigurePrefab(
                 BulhyojasonPrefabPath,
                 "BulhyojasonEnemy",
-                maxHealth: 60f,
+                maxHealth: EnemyAttribute0Setup.MadnessBulhyojasonHealth,
                 moveSpeed: 2.25f,
                 contactDamageTier: EnemyDamageTier.Heavy,
                 meleeDamageTier: EnemyDamageTier.Critical,

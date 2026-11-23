@@ -16,6 +16,8 @@ namespace TrickalFanGame.Frontend
         Periodic = 2,
         // A hit stopped by invulnerability: "무적" over a 0.
         Blocked = 3,
+        // An enemy being healed: a green "+amount".
+        Healed = 4,
     }
 
     public sealed class WorldCombatNumberPool : MonoBehaviour
@@ -23,6 +25,9 @@ namespace TrickalFanGame.Frontend
         public const string BlockedLabel = "무적";
         private const float CriticalPopDuration = 0.12f;
         private const float BlockedRepeatInterval = 0.35f;
+        private static readonly Color HealFaceColor = new(0.8f, 1f, 0.74f, 1f);
+        private static readonly Color HealOutlineColor = new(0.05f, 0.5f, 0.2f, 1f);
+        private static readonly Color HealShadowColor = new(0.02f, 0.24f, 0.08f, 0.5f);
 
         private sealed class Entry
         {
@@ -34,6 +39,7 @@ namespace TrickalFanGame.Frontend
             public Vector3 StartPosition;
             public Color TextColor;
             public Color BurstColor;
+            public Color ShadowColor;
             public float Scale;
             public float BurstSpin;
             public float Elapsed;
@@ -72,6 +78,9 @@ namespace TrickalFanGame.Frontend
         private readonly Queue<Entry> available = new();
         private readonly Dictionary<Health, float> lastBlockedAt = new();
         private int spawnSequence;
+        // Runtime copies of the saved outlined materials, so the build keeps their shader variant.
+        private Material healNumberMaterial;
+        private Material healShadowMaterial;
         private float clock;
 
         public TMP_Text Template => template;
@@ -125,12 +134,28 @@ namespace TrickalFanGame.Frontend
             Health.AnyDamageResolved += OnAnyDamageResolved;
             Health.AnyDamageBlocked -= OnAnyDamageBlocked;
             Health.AnyDamageBlocked += OnAnyDamageBlocked;
+            Health.AnyHealed -= OnAnyHealed;
+            Health.AnyHealed += OnAnyHealed;
         }
 
         private void OnDisable()
         {
             Health.AnyDamageResolved -= OnAnyDamageResolved;
             Health.AnyDamageBlocked -= OnAnyDamageBlocked;
+            Health.AnyHealed -= OnAnyHealed;
+        }
+
+        private void OnDestroy()
+        {
+            ReleaseMaterial(healNumberMaterial);
+            ReleaseMaterial(healShadowMaterial);
+        }
+
+        private static void ReleaseMaterial(Material material)
+        {
+            if (material == null) return;
+            if (Application.isPlaying) Destroy(material);
+            else DestroyImmediate(material);
         }
 
         private void Update()
@@ -153,6 +178,13 @@ namespace TrickalFanGame.Frontend
                     : WorldCombatNumberKind.Normal;
             Spawn(target.transform.position, FormatAmount(result.FinalDamage), kind);
             if (regularEnemy != null && boss == null) EnsureHealthBar(target);
+        }
+
+        private void OnAnyHealed(Health target, float amount)
+        {
+            if (target == null || amount <= 0f || target.GetComponent<PlayerMovement>() != null) return;
+            if (target.GetComponent<TestEnemy>() == null && target.GetComponent<BossController>() == null) return;
+            Spawn(target.transform.position, "+" + FormatAmount(amount), WorldCombatNumberKind.Healed);
         }
 
         // Only direct hits show "무적": ticks on an invulnerable target would only repeat it. The same target shows
@@ -198,7 +230,7 @@ namespace TrickalFanGame.Frontend
                     entry.Burst.transform.Rotate(0f, 0f, entry.BurstSpin * safeDelta, Space.Self);
                 }
 
-                entry.Shadow.color = WithAlpha(shadowColor, shadowColor.a * alpha);
+                entry.Shadow.color = WithAlpha(entry.ShadowColor, entry.ShadowColor.a * alpha);
                 if (entry.Kind == WorldCombatNumberKind.Blocked)
                     entry.Label.color = WithAlpha(blockedLabelFaceColor, alpha);
                 if (entry.Elapsed >= lifetime) ReleaseAt(i);
@@ -231,10 +263,13 @@ namespace TrickalFanGame.Frontend
             entry.Scale = kind switch
             {
                 WorldCombatNumberKind.Critical => criticalScale,
-                WorldCombatNumberKind.Periodic => periodicScale,
+                WorldCombatNumberKind.Periodic or WorldCombatNumberKind.Healed => periodicScale,
                 _ => 1f,
             };
-            entry.TextColor = numberColor;
+            bool healed = kind == WorldCombatNumberKind.Healed;
+            entry.TextColor = healed ? HealFaceColor : numberColor;
+            entry.ShadowColor = healed ? HealShadowColor : shadowColor;
+            ApplyNumberMaterials(entry, healed);
             entry.Text.transform.position = entry.StartPosition;
             entry.Text.transform.localScale = Vector3.one * entry.Scale;
             entry.Text.text = value;
@@ -283,7 +318,26 @@ namespace TrickalFanGame.Frontend
             // Local units are scaled by the number, so the offset is divided back to stay the same on screen.
             entry.Shadow.transform.localPosition = (Vector3)(shadowOffset / Mathf.Max(0.01f, entry.Scale));
             entry.Shadow.text = entry.Text.text;
-            entry.Shadow.color = shadowColor;
+            entry.Shadow.color = entry.ShadowColor;
+        }
+
+        private void ApplyNumberMaterials(Entry entry, bool healed)
+        {
+            if (healed && numberMaterial != null && healNumberMaterial == null)
+                healNumberMaterial = GreenCopy(numberMaterial, HealOutlineColor);
+            if (healed && shadowMaterial != null && healShadowMaterial == null)
+                healShadowMaterial = GreenCopy(shadowMaterial, HealShadowColor);
+            Material number = healed ? healNumberMaterial : numberMaterial;
+            Material shadow = healed ? healShadowMaterial : shadowMaterial;
+            if (number != null && entry.Text.fontSharedMaterial != number) entry.Text.fontSharedMaterial = number;
+            if (shadow != null && entry.Shadow.fontSharedMaterial != shadow) entry.Shadow.fontSharedMaterial = shadow;
+        }
+
+        private static Material GreenCopy(Material source, Color outline)
+        {
+            Material copy = new(source) { name = source.name + " (Heal)", hideFlags = HideFlags.DontSave };
+            copy.SetColor(ShaderUtilities.ID_OutlineColor, new Color(outline.r, outline.g, outline.b, 1f));
+            return copy;
         }
 
         private void ConfigureLabel(Entry entry, bool show)

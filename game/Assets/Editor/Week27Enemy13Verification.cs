@@ -237,7 +237,7 @@ namespace TrickalFanGame.Editor
                 found++;
                 // One melee rule per wave, however many waves Density-0 gives the room size.
                 EncounterEnemyCandidate[] weights = Density1Setup.ForDefinition(definition,
-                    expected);
+                    EnemyAttribute0Setup.Extend(Density0Setup.SlotKind.PressureMelee, expected));
                 Assert(rules.Length == definition.Waves.Count && rules.All(rule => rule.Candidates.Count == weights.Length &&
                            weights.All(candidate => Weight(rule, candidate.EnemyRole) == candidate.Weight)),
                     $"'{definition.EncounterId}' melee slots in both waves must weigh " +

@@ -237,7 +237,9 @@ namespace TrickalFanGame.Editor
                        first[1].Count == 2 && first[1].Candidates.All(candidate =>
                            candidate.EnemyRole == EncounterEnemyRole.Jyubi),
                     $"'{definition.EncounterId}' must open with one Jyubi king and two Jyubi.");
-                Assert(second.Length == 1 && second[0].Count == 3 && second[0].Candidates.Count == 2 &&
+                Assert(second.Length == 1 && second[0].Count == 3 && second[0].Candidates.Count == 4 &&
+                       Weight(second[0], EncounterEnemyRole.RibbonLasher) == 30 &&
+                       Weight(second[0], EncounterEnemyRole.Leaper) == 20 &&
                        Weight(second[0], EncounterEnemyRole.Chaser) == Density1Setup.SmallChaserWeight(70) &&
                        Weight(second[0], EncounterEnemyRole.FastChaser) == 30,
                     $"'{definition.EncounterId}' must follow with three chasers weighed 35/30 (Density-1).");
@@ -290,7 +292,9 @@ namespace TrickalFanGame.Editor
                            room.ResolvedEncounterWaves[0].Count(spawn => spawn.Role == EncounterEnemyRole.Jyubi) == 2 &&
                            room.ResolvedEncounterWaves[1].Length == 3 &&
                            room.ResolvedEncounterWaves[1].All(spawn => spawn.Role == EncounterEnemyRole.Chaser ||
-                                                                      spawn.Role == EncounterEnemyRole.FastChaser),
+                                                                      spawn.Role == EncounterEnemyRole.FastChaser ||
+                                                                      spawn.Role == EncounterEnemyRole.RibbonLasher ||
+                                                                      spawn.Role == EncounterEnemyRole.Leaper),
                         $"Seed {seed} room '{room.RoomId}' resolved a wrong Jyubi nest.");
                     ResolvedEncounterSpawn king = kings[0];
                     Assert(room.Template.SupportsEnemyRole(king.SpawnPointIndex, king.Role) &&

@@ -14,7 +14,7 @@ namespace TrickalFanGame.Editor
         [MenuItem("Trickal Fan Game/Effects/Verify Reviewed Combat Effects")]
         public static void Verify()
         {
-            foreach (string name in new[] { "hp-heal", "circular-explosion", "sword-slash", "sword-slam", "slam-light", "slam-ground" })
+            foreach (string name in new[] { "circular-explosion", "sword-slash", "sword-slam", "slam-light", "slam-ground" })
             {
                 Sprite[] frames = CombatEffectArtwork.Frames(name, 4, 2);
                 Assert(frames.Length == 8, name + " must contain eight reviewed frames.");
@@ -27,9 +27,10 @@ namespace TrickalFanGame.Editor
                        importer.textureCompression == TextureImporterCompression.Uncompressed,
                     name + " must preserve its alpha, NPOT size and frame boundaries.");
             }
-            foreach (string name in new[] { "sp-mote", "warning-chevron", "landing-shadow" })
+            foreach (string name in new[] { "warning-chevron", "landing-shadow" })
                 Assert(CombatEffectArtwork.Frames(name).Length == 1, name + " is missing.");
-            foreach (string name in new[] { "EnemyHitOverlay", "ChargeWarning", "MeleeWarning", "GroundSlam", "SlamLight", "LayeredSlam", LayeredSlamEffect.FlashShader })
+            foreach (string name in new[] { "EnemyHitOverlay", "ChargeWarning", "MeleeWarning", "GroundSlam", "SlamLight", "LayeredSlam", LayeredSlamEffect.FlashShader,
+                         PlayerRecoveryEffect.HealShaderName, PlayerRecoveryEffect.SpShaderName })
             {
                 Material material = CombatEffectArtwork.Material(name);
                 string detail = material == null ? "(not loaded from Resources)" : string.Join(" | ", Array.ConvertAll(
@@ -48,7 +49,7 @@ namespace TrickalFanGame.Editor
             ValidateSlamLightTiming();
             ValidateLayeredSlam();
             Debug.Log("Reviewed combat effects verification passed: legacy alpha sheets and five layered slam textures, " +
-                      "eight shaders, falling slam flash, bounded slam layout, independent light with sustained peak, actual HP/SP recovery events, and no recovery VFX for resets, overheal or spending.");
+                      "ten shaders, falling slam flash, bounded slam layout, independent light with sustained peak, actual HP/SP recovery events, and no recovery VFX for resets, overheal or spending.");
         }
 
         private static void ValidateSlamLightTiming()

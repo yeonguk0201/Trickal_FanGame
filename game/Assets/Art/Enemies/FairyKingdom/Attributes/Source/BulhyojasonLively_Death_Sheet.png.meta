@@ -1,0 +1,1495 @@
+fileFormatVersion: 2
+guid: 5ff19c3f51f19914baf44c2f87f7e881
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1093644742766783549
+    second: BulhyojasonLively_Death_Sheet_0
+  - first:
+      213: -8130971885425910271
+    second: BulhyojasonLively_Death_Sheet_1
+  - first:
+      213: 9176385802213406109
+    second: BulhyojasonLively_Death_Sheet_2
+  - first:
+      213: 4460419320133595533
+    second: BulhyojasonLively_Death_Sheet_3
+  - first:
+      213: 8506615529943560486
+    second: BulhyojasonLively_Death_Sheet_4
+  - first:
+      213: -158876337426746405
+    second: BulhyojasonLively_Death_Sheet_5
+  - first:
+      213: -969388236102563885
+    second: BulhyojasonLively_Death_Sheet_6
+  - first:
+      213: 3402877393806919043
+    second: BulhyojasonLively_Death_Sheet_7
+  - first:
+      213: -3971138717372840969
+    second: BulhyojasonLively_Death_Sheet_8
+  - first:
+      213: -2314903296065433082
+    second: BulhyojasonLively_Death_Sheet_9
+  - first:
+      213: 2213204843071252798
+    second: BulhyojasonLively_Death_Sheet_10
+  - first:
+      213: 3396956709310673456
+    second: BulhyojasonLively_Death_Sheet_11
+  - first:
+      213: 6546182131915437844
+    second: BulhyojasonLively_Death_Sheet_12
+  - first:
+      213: 5197820910089422095
+    second: BulhyojasonLively_Death_Sheet_13
+  - first:
+      213: 3905382133473347511
+    second: BulhyojasonLively_Death_Sheet_14
+  - first:
+      213: 1345461792101367056
+    second: BulhyojasonLively_Death_Sheet_15
+  - first:
+      213: -6646447074713094799
+    second: BulhyojasonLively_Death_Sheet_16
+  - first:
+      213: 2457480898509800957
+    second: BulhyojasonLively_Death_Sheet_17
+  - first:
+      213: 3115339958297508769
+    second: BulhyojasonLively_Death_Sheet_18
+  - first:
+      213: 6766724329924093223
+    second: BulhyojasonLively_Death_Sheet_19
+  - first:
+      213: 5777807207451117804
+    second: BulhyojasonLively_Death_Sheet_20
+  - first:
+      213: 7440927041075887927
+    second: BulhyojasonLively_Death_Sheet_21
+  - first:
+      213: 4477127845702285957
+    second: BulhyojasonLively_Death_Sheet_22
+  - first:
+      213: 3597570203686920103
+    second: BulhyojasonLively_Death_Sheet_23
+  - first:
+      213: -5008669651685871869
+    second: BulhyojasonLively_Death_Sheet_24
+  - first:
+      213: -6410808371101523337
+    second: BulhyojasonLively_Death_Sheet_25
+  - first:
+      213: 1540750884599302457
+    second: BulhyojasonLively_Death_Sheet_26
+  - first:
+      213: 7530411528537733818
+    second: BulhyojasonLively_Death_Sheet_27
+  - first:
+      213: -4969663711191205069
+    second: BulhyojasonLively_Death_Sheet_28
+  - first:
+      213: 9117822931046119754
+    second: BulhyojasonLively_Death_Sheet_29
+  - first:
+      213: -7280154456587472986
+    second: BulhyojasonLively_Death_Sheet_30
+  - first:
+      213: -4127893317986416096
+    second: BulhyojasonLively_Death_Sheet_31
+  - first:
+      213: 3942682293254215895
+    second: BulhyojasonLively_Death_Sheet_32
+  - first:
+      213: 5985600003531685421
+    second: BulhyojasonLively_Death_Sheet_33
+  - first:
+      213: 587035123796653893
+    second: BulhyojasonLively_Death_Sheet_34
+  - first:
+      213: 8120921959814104770
+    second: BulhyojasonLively_Death_Sheet_35
+  - first:
+      213: -2300268536783186136
+    second: BulhyojasonLively_Death_Sheet_36
+  - first:
+      213: 122777096880014647
+    second: BulhyojasonLively_Death_Sheet_37
+  - first:
+      213: -2008103644227413950
+    second: BulhyojasonLively_Death_Sheet_38
+  - first:
+      213: -7742259447101876270
+    second: BulhyojasonLively_Death_Sheet_39
+  - first:
+      213: 1237222346052018990
+    second: BulhyojasonLively_Death_Sheet_40
+  - first:
+      213: -6926134204766455464
+    second: BulhyojasonLively_Death_Sheet_41
+  - first:
+      213: -8132952546292451522
+    second: BulhyojasonLively_Death_Sheet_42
+  - first:
+      213: 9037778051292591856
+    second: BulhyojasonLively_Death_Sheet_43
+  - first:
+      213: -5528085140495033441
+    second: BulhyojasonLively_Death_Sheet_44
+  - first:
+      213: 5581032460452492694
+    second: BulhyojasonLively_Death_Sheet_45
+  - first:
+      213: 6361544000885875286
+    second: BulhyojasonLively_Death_Sheet_46
+  - first:
+      213: -148254906543400583
+    second: BulhyojasonLively_Death_Sheet_47
+  - first:
+      213: 3831218333484463593
+    second: BulhyojasonLively_Death_Sheet_48
+  - first:
+      213: -3650427576389221540
+    second: BulhyojasonLively_Death_Sheet_49
+  - first:
+      213: 6661816013368247060
+    second: BulhyojasonLively_Death_Sheet_50
+  - first:
+      213: -181747796411390117
+    second: BulhyojasonLively_Death_Sheet_51
+  - first:
+      213: 8172918197497939340
+    second: BulhyojasonLively_Death_Sheet_52
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 201
+        y: 22
+        width: 794
+        height: 502
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3c661369186d2f00800000000000000
+      internalID: 1093644742766783549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 1075
+        y: 27
+        width: 914
+        height: 499
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10e1082662cf82f80800000000000000
+      internalID: -8130971885425910271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 2077
+        y: 125
+        width: 574
+        height: 398
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d953edeb442195f70800000000000000
+      internalID: 9176385802213406109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 2667
+        y: 505
+        width: 78
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d813ad54db796ed30800000000000000
+      internalID: 4460419320133595533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 3187
+        y: 509
+        width: 64
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6217b1721c19d0670800000000000000
+      internalID: 8506615529943560486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 3311
+        y: 505
+        width: 146
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd3b67810de8bcdf0800000000000000
+      internalID: -158876337426746405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 3455
+        y: 513
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d70aa9098a0c82f0800000000000000
+      internalID: -969388236102563885
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 3471
+        y: 515
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3858110e5f2793f20800000000000000
+      internalID: 3402877393806919043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 3477
+        y: 509
+        width: 54
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f30135606ea3e8c0800000000000000
+      internalID: -3971138717372840969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 3529
+        y: 509
+        width: 116
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60293a497bfcfdfd0800000000000000
+      internalID: -2314903296065433082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 3851
+        y: 509
+        width: 50
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e39af662412e6be10800000000000000
+      internalID: 2213204843071252798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 3883
+        y: 349
+        width: 196
+        height: 174
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 032b7d7112a642f20800000000000000
+      internalID: 3396956709310673456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 3899
+        y: 513
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41734df37f5b8da50800000000000000
+      internalID: 6546182131915437844
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 269
+        width: 68
+        height: 244
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f054af7149e522840800000000000000
+      internalID: 5197820910089422095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 2129
+        y: 449
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b706d9db54b23630800000000000000
+      internalID: 3905382133473347511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 2731
+        y: 393
+        width: 34
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01dff011f5a0ca210800000000000000
+      internalID: 1345461792101367056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 2769
+        y: 431
+        width: 88
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 175ba45999313c3a0800000000000000
+      internalID: -6646447074713094799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 2993
+        y: 26
+        width: 1204
+        height: 319
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df50cfd5bd9ba1220800000000000000
+      internalID: 2457480898509800957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 3025
+        y: 453
+        width: 22
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ab37e0bf29eb3b20800000000000000
+      internalID: 3115339958297508769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 3041
+        y: 471
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7256e1a2deb38ed50800000000000000
+      internalID: 6766724329924093223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 3041
+        y: 465
+        width: 10
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce8c0d40b05ee2050800000000000000
+      internalID: 5777807207451117804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 3109
+        y: 349
+        width: 110
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73f3dea58bb734760800000000000000
+      internalID: 7440927041075887927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 3275
+        y: 345
+        width: 84
+        height: 164
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58a38190e04f12e30800000000000000
+      internalID: 4477127845702285957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 3299
+        y: 471
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7afd94d1a032de130800000000000000
+      internalID: 3597570203686920103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 3347
+        y: 349
+        width: 12
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30febf52d71ad7ab0800000000000000
+      internalID: -5008669651685871869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 3411
+        y: 363
+        width: 16
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 772a46d90cb3807a0800000000000000
+      internalID: -6410808371101523337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 3427
+        y: 353
+        width: 66
+        height: 80
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93909eb24c8d16510800000000000000
+      internalID: 1540750884599302457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 3585
+        y: 337
+        width: 52
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aba7ffa2365618860800000000000000
+      internalID: 7530411528537733818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 3637
+        y: 349
+        width: 84
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33b7c416f25380bb0800000000000000
+      internalID: -4969663711191205069
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 3689
+        y: 355
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a493ae1c5a3098e70800000000000000
+      internalID: 9117822931046119754
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 3761
+        y: 353
+        width: 18
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6af6029f712b7fa90800000000000000
+      internalID: -7280154456587472986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 3761
+        y: 347
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02a06b6d5e6c6b6c0800000000000000
+      internalID: -4127893317986416096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_32
+      rect:
+        serializedVersion: 2
+        x: 3625
+        y: 325
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d8d3af08a837b630800000000000000
+      internalID: 3942682293254215895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_33
+      rect:
+        serializedVersion: 2
+        x: 3637
+        y: 325
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2e351a7d7f111350800000000000000
+      internalID: 5985600003531685421
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_34
+      rect:
+        serializedVersion: 2
+        x: 3799
+        y: 289
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 547b398b551952800800000000000000
+      internalID: 587035123796653893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_35
+      rect:
+        serializedVersion: 2
+        x: 3809
+        y: 313
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c68367fe7f43b070800000000000000
+      internalID: 8120921959814104770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_36
+      rect:
+        serializedVersion: 2
+        x: 3815
+        y: 297
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 827d70104fdc310e0800000000000000
+      internalID: -2300268536783186136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_37
+      rect:
+        serializedVersion: 2
+        x: 3777
+        y: 297
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 735461e7e1134b100800000000000000
+      internalID: 122777096880014647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_38
+      rect:
+        serializedVersion: 2
+        x: 3785
+        y: 303
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24858adff58c124e0800000000000000
+      internalID: -2008103644227413950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_39
+      rect:
+        serializedVersion: 2
+        x: 3793
+        y: 297
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d794989d08fd8490800000000000000
+      internalID: -7742259447101876270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_40
+      rect:
+        serializedVersion: 2
+        x: 2419
+        y: 26
+        width: 482
+        height: 267
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e232b9c2b2f7b2110800000000000000
+      internalID: 1237222346052018990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_41
+      rect:
+        serializedVersion: 2
+        x: 3813
+        y: 289
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 859763213ad61ef90800000000000000
+      internalID: -6926134204766455464
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_42
+      rect:
+        serializedVersion: 2
+        x: 3991
+        y: 261
+        width: 36
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e373127dfb2f12f80800000000000000
+      internalID: -8132952546292451522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_43
+      rect:
+        serializedVersion: 2
+        x: 1095
+        y: 269
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f6fd12e043ac6d70800000000000000
+      internalID: 9037778051292591856
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_44
+      rect:
+        serializedVersion: 2
+        x: 1111
+        y: 257
+        width: 26
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9b9da09adb4843b0800000000000000
+      internalID: -5528085140495033441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_45
+      rect:
+        serializedVersion: 2
+        x: 4023
+        y: 261
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 695f135047fc37d40800000000000000
+      internalID: 5581032460452492694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_46
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 163
+        width: 98
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 652e1db509eb84850800000000000000
+      internalID: 6361544000885875286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_47
+      rect:
+        serializedVersion: 2
+        x: 205
+        y: 119
+        width: 86
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 979954fa2fa41fdf0800000000000000
+      internalID: -148254906543400583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_48
+      rect:
+        serializedVersion: 2
+        x: 4151
+        y: 191
+        width: 26
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e53e4096c83b2530800000000000000
+      internalID: 3831218333484463593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_49
+      rect:
+        serializedVersion: 2
+        x: 4179
+        y: 201
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c53c707c573175dc0800000000000000
+      internalID: -3650427576389221540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_50
+      rect:
+        serializedVersion: 2
+        x: 4261
+        y: 185
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 413c2db4e56837c50800000000000000
+      internalID: 6661816013368247060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_51
+      rect:
+        serializedVersion: 2
+        x: 247
+        y: 161
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b576034975d4a7df0800000000000000
+      internalID: -181747796411390117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Death_Sheet_52
+      rect:
+        serializedVersion: 2
+        x: 4217
+        y: 155
+        width: 52
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c85c0347cc90c6170800000000000000
+      internalID: 8172918197497939340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      BulhyojasonLively_Death_Sheet_0: 1093644742766783549
+      BulhyojasonLively_Death_Sheet_1: -8130971885425910271
+      BulhyojasonLively_Death_Sheet_10: 2213204843071252798
+      BulhyojasonLively_Death_Sheet_11: 3396956709310673456
+      BulhyojasonLively_Death_Sheet_12: 6546182131915437844
+      BulhyojasonLively_Death_Sheet_13: 5197820910089422095
+      BulhyojasonLively_Death_Sheet_14: 3905382133473347511
+      BulhyojasonLively_Death_Sheet_15: 1345461792101367056
+      BulhyojasonLively_Death_Sheet_16: -6646447074713094799
+      BulhyojasonLively_Death_Sheet_17: 2457480898509800957
+      BulhyojasonLively_Death_Sheet_18: 3115339958297508769
+      BulhyojasonLively_Death_Sheet_19: 6766724329924093223
+      BulhyojasonLively_Death_Sheet_2: 9176385802213406109
+      BulhyojasonLively_Death_Sheet_20: 5777807207451117804
+      BulhyojasonLively_Death_Sheet_21: 7440927041075887927
+      BulhyojasonLively_Death_Sheet_22: 4477127845702285957
+      BulhyojasonLively_Death_Sheet_23: 3597570203686920103
+      BulhyojasonLively_Death_Sheet_24: -5008669651685871869
+      BulhyojasonLively_Death_Sheet_25: -6410808371101523337
+      BulhyojasonLively_Death_Sheet_26: 1540750884599302457
+      BulhyojasonLively_Death_Sheet_27: 7530411528537733818
+      BulhyojasonLively_Death_Sheet_28: -4969663711191205069
+      BulhyojasonLively_Death_Sheet_29: 9117822931046119754
+      BulhyojasonLively_Death_Sheet_3: 4460419320133595533
+      BulhyojasonLively_Death_Sheet_30: -7280154456587472986
+      BulhyojasonLively_Death_Sheet_31: -4127893317986416096
+      BulhyojasonLively_Death_Sheet_32: 3942682293254215895
+      BulhyojasonLively_Death_Sheet_33: 5985600003531685421
+      BulhyojasonLively_Death_Sheet_34: 587035123796653893
+      BulhyojasonLively_Death_Sheet_35: 8120921959814104770
+      BulhyojasonLively_Death_Sheet_36: -2300268536783186136
+      BulhyojasonLively_Death_Sheet_37: 122777096880014647
+      BulhyojasonLively_Death_Sheet_38: -2008103644227413950
+      BulhyojasonLively_Death_Sheet_39: -7742259447101876270
+      BulhyojasonLively_Death_Sheet_4: 8506615529943560486
+      BulhyojasonLively_Death_Sheet_40: 1237222346052018990
+      BulhyojasonLively_Death_Sheet_41: -6926134204766455464
+      BulhyojasonLively_Death_Sheet_42: -8132952546292451522
+      BulhyojasonLively_Death_Sheet_43: 9037778051292591856
+      BulhyojasonLively_Death_Sheet_44: -5528085140495033441
+      BulhyojasonLively_Death_Sheet_45: 5581032460452492694
+      BulhyojasonLively_Death_Sheet_46: 6361544000885875286
+      BulhyojasonLively_Death_Sheet_47: -148254906543400583
+      BulhyojasonLively_Death_Sheet_48: 3831218333484463593
+      BulhyojasonLively_Death_Sheet_49: -3650427576389221540
+      BulhyojasonLively_Death_Sheet_5: -158876337426746405
+      BulhyojasonLively_Death_Sheet_50: 6661816013368247060
+      BulhyojasonLively_Death_Sheet_51: -181747796411390117
+      BulhyojasonLively_Death_Sheet_52: 8172918197497939340
+      BulhyojasonLively_Death_Sheet_6: -969388236102563885
+      BulhyojasonLively_Death_Sheet_7: 3402877393806919043
+      BulhyojasonLively_Death_Sheet_8: -3971138717372840969
+      BulhyojasonLively_Death_Sheet_9: -2314903296065433082
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

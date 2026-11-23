@@ -29,6 +29,7 @@ namespace TrickalFanGame.Editor
             "LivelyLowBloodSugarFairy", "ChargingEnemy", "NururingFairyWarrior", "CrayonArcherMinion",
             "CrayonAxeMinion", "CrayonMageMinion", "CrayonShieldMinion", "BuseureogiCrumbMinion",
             "SelfDestructFairy", "LobbingFairy", "AmbushFairy",
+            "BulhyojasonPure", "BulhyojasonLively", "BulhyojasonGloomy", "SansamoCold", "SansamoGloomy",
         };
 
         // Bosses walk on the same feet since Boss-Pattern-0 (2026-11-19); their bodies keep their own sizes.

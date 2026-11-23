@@ -17,7 +17,7 @@ namespace TrickalFanGame.Room
 
         public static int IntroductionFloor(EncounterEnemyRole role) => role switch
         {
-            EncounterEnemyRole.Chaser => 1,          // 불효자손
+            EncounterEnemyRole.Chaser => 1,          // 불효자손-광기
             EncounterEnemyRole.FastChaser => 1,      // 산사모-활발
             EncounterEnemyRole.Sniper => 1,          // 고혈당 요정(저격)
             EncounterEnemyRole.Jyubi => 1,           // 쥬비
@@ -29,6 +29,11 @@ namespace TrickalFanGame.Room
             EncounterEnemyRole.JyubiKing => 3,       // 대왕쥬비 (Enemy-11)
             EncounterEnemyRole.Lobber => 3,          // 곡사형 (Enemy-12)
             EncounterEnemyRole.Ambusher => 3,        // 잠복형 (Enemy-13)
+            EncounterEnemyRole.RibbonLasher => 1,    // 불효자손-순수 (Attribute-0)
+            EncounterEnemyRole.Leaper => 2,          // 불효자손-활발
+            EncounterEnemyRole.FanShooter => 2,      // 불효자손-우울
+            EncounterEnemyRole.BoomerangThrower => 3, // 산사모-냉정
+            EncounterEnemyRole.BurrowHealer => 3,    // 산사모-우울
             EncounterEnemyRole.Boss => 1,
             _ => throw new ArgumentOutOfRangeException(nameof(role), role,
                 "Every Encounter enemy role needs an introduction floor."),

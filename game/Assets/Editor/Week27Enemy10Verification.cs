@@ -235,7 +235,7 @@ namespace TrickalFanGame.Editor
                 else swarmFound++;
 
                 EncounterEnemyCandidate[] expected = pressure
-                    ? Week27Enemy13Setup.PressureMeleeCandidates()
+                    ? EnemyAttribute0Setup.Extend(Density0Setup.SlotKind.PressureMelee, Week27Enemy13Setup.PressureMeleeCandidates())
                     : Week27Enemy10Setup.SwarmMeleeCandidates();
                 expected = Density1Setup.ForDefinition(definition, expected);
                 foreach (EncounterSpawnRule rule in rules.Where(rule => rule.Candidates.Any(candidate =>

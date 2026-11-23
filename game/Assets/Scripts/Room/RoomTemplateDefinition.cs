@@ -133,6 +133,12 @@ namespace TrickalFanGame.Room
                 EncounterEnemyRole.SelfDestruct => SpawnPointPlacementRole.MeleePressure,
                 // Enemy-13: 잠복형 closes in under the floor, so it starts on a melee point.
                 EncounterEnemyRole.Ambusher => SpawnPointPlacementRole.MeleePressure,
+                // Attribute-0: the ribbon, the leaper and the healer close in; the two throwers stay at the back.
+                EncounterEnemyRole.RibbonLasher => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.Leaper => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.BurrowHealer => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.FanShooter => SpawnPointPlacementRole.RearFiring,
+                EncounterEnemyRole.BoomerangThrower => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Ranged => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Sniper => SpawnPointPlacementRole.RearFiring,
                 // Enemy-11: 대왕쥬비 keeps its distance, so it starts on a far rear point like the shooters.

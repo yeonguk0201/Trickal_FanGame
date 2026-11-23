@@ -1,0 +1,1729 @@
+fileFormatVersion: 2
+guid: 9ca5f4df98dd7074ea367fc47fc0eaa1
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1753401713137048337
+    second: BulhyojasonGloomy_Death_Sheet_0
+  - first:
+      213: 3455670773723413005
+    second: BulhyojasonGloomy_Death_Sheet_1
+  - first:
+      213: 5933223856629729599
+    second: BulhyojasonGloomy_Death_Sheet_2
+  - first:
+      213: -1707853426842076571
+    second: BulhyojasonGloomy_Death_Sheet_3
+  - first:
+      213: -7322412143922967224
+    second: BulhyojasonGloomy_Death_Sheet_4
+  - first:
+      213: -4930420029849348881
+    second: BulhyojasonGloomy_Death_Sheet_5
+  - first:
+      213: -1781809214327698279
+    second: BulhyojasonGloomy_Death_Sheet_6
+  - first:
+      213: -8001260485577422031
+    second: BulhyojasonGloomy_Death_Sheet_7
+  - first:
+      213: -3672765620770652182
+    second: BulhyojasonGloomy_Death_Sheet_8
+  - first:
+      213: -8897078265534530813
+    second: BulhyojasonGloomy_Death_Sheet_9
+  - first:
+      213: -7165047787070976992
+    second: BulhyojasonGloomy_Death_Sheet_10
+  - first:
+      213: -4067912303877050020
+    second: BulhyojasonGloomy_Death_Sheet_11
+  - first:
+      213: -7464305283049205260
+    second: BulhyojasonGloomy_Death_Sheet_12
+  - first:
+      213: -220365484666299863
+    second: BulhyojasonGloomy_Death_Sheet_13
+  - first:
+      213: -4900980264653884928
+    second: BulhyojasonGloomy_Death_Sheet_14
+  - first:
+      213: 9205548035074520563
+    second: BulhyojasonGloomy_Death_Sheet_15
+  - first:
+      213: -6839209506273769456
+    second: BulhyojasonGloomy_Death_Sheet_16
+  - first:
+      213: 7928734647241179090
+    second: BulhyojasonGloomy_Death_Sheet_17
+  - first:
+      213: -7250189081536624482
+    second: BulhyojasonGloomy_Death_Sheet_18
+  - first:
+      213: 6934030169178858401
+    second: BulhyojasonGloomy_Death_Sheet_19
+  - first:
+      213: 353479129014203034
+    second: BulhyojasonGloomy_Death_Sheet_20
+  - first:
+      213: 8145326140320276708
+    second: BulhyojasonGloomy_Death_Sheet_21
+  - first:
+      213: 1342127582513818330
+    second: BulhyojasonGloomy_Death_Sheet_22
+  - first:
+      213: -1963772420019951505
+    second: BulhyojasonGloomy_Death_Sheet_23
+  - first:
+      213: -2717687927350378299
+    second: BulhyojasonGloomy_Death_Sheet_24
+  - first:
+      213: 1016668552346125894
+    second: BulhyojasonGloomy_Death_Sheet_25
+  - first:
+      213: -4883894848870115022
+    second: BulhyojasonGloomy_Death_Sheet_26
+  - first:
+      213: 8879295897307596315
+    second: BulhyojasonGloomy_Death_Sheet_27
+  - first:
+      213: 6869971853387277738
+    second: BulhyojasonGloomy_Death_Sheet_28
+  - first:
+      213: 5707691243013410587
+    second: BulhyojasonGloomy_Death_Sheet_29
+  - first:
+      213: 1989014977253421327
+    second: BulhyojasonGloomy_Death_Sheet_30
+  - first:
+      213: -1678345390660734359
+    second: BulhyojasonGloomy_Death_Sheet_31
+  - first:
+      213: 4965469343645854711
+    second: BulhyojasonGloomy_Death_Sheet_32
+  - first:
+      213: 3596423637838214600
+    second: BulhyojasonGloomy_Death_Sheet_33
+  - first:
+      213: -1830804073109541403
+    second: BulhyojasonGloomy_Death_Sheet_34
+  - first:
+      213: -5655728139049974010
+    second: BulhyojasonGloomy_Death_Sheet_35
+  - first:
+      213: -3785191930738086802
+    second: BulhyojasonGloomy_Death_Sheet_36
+  - first:
+      213: -4976337325839980347
+    second: BulhyojasonGloomy_Death_Sheet_37
+  - first:
+      213: 7016407633884930631
+    second: BulhyojasonGloomy_Death_Sheet_38
+  - first:
+      213: -1753915426226264183
+    second: BulhyojasonGloomy_Death_Sheet_39
+  - first:
+      213: 2401039211893049950
+    second: BulhyojasonGloomy_Death_Sheet_40
+  - first:
+      213: 7915377205415896514
+    second: BulhyojasonGloomy_Death_Sheet_41
+  - first:
+      213: -5265151012414539539
+    second: BulhyojasonGloomy_Death_Sheet_42
+  - first:
+      213: -3563918356343642566
+    second: BulhyojasonGloomy_Death_Sheet_43
+  - first:
+      213: -2860054045177252839
+    second: BulhyojasonGloomy_Death_Sheet_44
+  - first:
+      213: -8265431946403215007
+    second: BulhyojasonGloomy_Death_Sheet_45
+  - first:
+      213: 7365099782399029780
+    second: BulhyojasonGloomy_Death_Sheet_46
+  - first:
+      213: 6529720925186168323
+    second: BulhyojasonGloomy_Death_Sheet_47
+  - first:
+      213: -7701521271656938843
+    second: BulhyojasonGloomy_Death_Sheet_48
+  - first:
+      213: -2749848137843385713
+    second: BulhyojasonGloomy_Death_Sheet_49
+  - first:
+      213: -744422878933664158
+    second: BulhyojasonGloomy_Death_Sheet_50
+  - first:
+      213: -8516897872347752104
+    second: BulhyojasonGloomy_Death_Sheet_51
+  - first:
+      213: -1836246315767097223
+    second: BulhyojasonGloomy_Death_Sheet_52
+  - first:
+      213: -1219959955415355194
+    second: BulhyojasonGloomy_Death_Sheet_53
+  - first:
+      213: -5847408906152274840
+    second: BulhyojasonGloomy_Death_Sheet_54
+  - first:
+      213: 7299178290692070353
+    second: BulhyojasonGloomy_Death_Sheet_55
+  - first:
+      213: -3467042117410186997
+    second: BulhyojasonGloomy_Death_Sheet_56
+  - first:
+      213: -9037469494441351316
+    second: BulhyojasonGloomy_Death_Sheet_57
+  - first:
+      213: 2879043096383075863
+    second: BulhyojasonGloomy_Death_Sheet_58
+  - first:
+      213: -8289891321434644498
+    second: BulhyojasonGloomy_Death_Sheet_59
+  - first:
+      213: 4665684146511422887
+    second: BulhyojasonGloomy_Death_Sheet_60
+  - first:
+      213: -3251566381637697477
+    second: BulhyojasonGloomy_Death_Sheet_61
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 41
+        y: 22
+        width: 862
+        height: 489
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe4a7eb8e6aaaa7e0800000000000000
+      internalID: -1753401713137048337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 1063
+        y: 27
+        width: 238
+        height: 442
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0abb70824205ff20800000000000000
+      internalID: 3455670773723413005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 1283
+        y: 23
+        width: 762
+        height: 489
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f39c94b79ab075250800000000000000
+      internalID: 5933223856629729599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 2145
+        y: 26
+        width: 884
+        height: 460
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56af4ac5b5c7c48e0800000000000000
+      internalID: -1707853426842076571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 2993
+        y: 441
+        width: 60
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84d077e63f0916a90800000000000000
+      internalID: -7322412143922967224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 3053
+        y: 441
+        width: 24
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe4db57fa11a39bb0800000000000000
+      internalID: -4930420029849348881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 3061
+        y: 445
+        width: 26
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99cca72c5fdb547e0800000000000000
+      internalID: -1781809214327698279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 3995
+        y: 279
+        width: 116
+        height: 210
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13bc9c91bffc5f090800000000000000
+      internalID: -8001260485577422031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 1995
+        y: 359
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aefb2b68027b70dc0800000000000000
+      internalID: -3672765620770652182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 2001
+        y: 345
+        width: 28
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30b37fbc47a378480800000000000000
+      internalID: -8897078265534530813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 2045
+        y: 323
+        width: 48
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02c8feceff2a09c90800000000000000
+      internalID: -7165047787070976992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 2929
+        y: 319
+        width: 32
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c51b7f5ff4fdb87c0800000000000000
+      internalID: -4067912303877050020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 2989
+        y: 335
+        width: 52
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f1d7c484e5796890800000000000000
+      internalID: -7464305283049205260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 3005
+        y: 389
+        width: 36
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 92a55bd52ca11fcf0800000000000000
+      internalID: -220365484666299863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 3069
+        y: 409
+        width: 22
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 002fa127a683cfbb0800000000000000
+      internalID: -4900980264653884928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 3107
+        y: 263
+        width: 124
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f579613a2da0cf70800000000000000
+      internalID: 9205548035074520563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 3157
+        y: 377
+        width: 66
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 018c312903f3611a0800000000000000
+      internalID: -6839209506273769456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 3217
+        y: 361
+        width: 6
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2df74274726880e60800000000000000
+      internalID: 7928734647241179090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 3223
+        y: 351
+        width: 24
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9808988177226b90800000000000000
+      internalID: -7250189081536624482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 3235
+        y: 361
+        width: 16
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a36fb763bf9a3060800000000000000
+      internalID: 6934030169178858401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 3255
+        y: 327
+        width: 136
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a92f760256fc7e400800000000000000
+      internalID: 353479129014203034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 3459
+        y: 373
+        width: 54
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e06e7508f20a0170800000000000000
+      internalID: 8145326140320276708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 3589
+        y: 361
+        width: 16
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ada6df6ece130a210800000000000000
+      internalID: 1342127582513818330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 3605
+        y: 355
+        width: 84
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f68600573674fb4e0800000000000000
+      internalID: -1963772420019951505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 3765
+        y: 361
+        width: 122
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c0c9ef9a35d84ad0800000000000000
+      internalID: -2717687927350378299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 4079
+        y: 347
+        width: 40
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 646c6ec69aeeb1e00800000000000000
+      internalID: 1016668552346125894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 4103
+        y: 361
+        width: 130
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2399cbcc28be83cb0800000000000000
+      internalID: -4883894848870115022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 1995
+        y: 345
+        width: 6
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b164a96f298993b70800000000000000
+      internalID: 8879295897307596315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 2011
+        y: 339
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa5a412800b075f50800000000000000
+      internalID: 6869971853387277738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 3765
+        y: 335
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1f0c63e1fac53f40800000000000000
+      internalID: 5707691243013410587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 3793
+        y: 339
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f013f1465966a9b10800000000000000
+      internalID: 1989014977253421327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 2077
+        y: 319
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 962b04b62c155b8e0800000000000000
+      internalID: -1678345390660734359
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_32
+      rect:
+        serializedVersion: 2
+        x: 3017
+        y: 295
+        width: 28
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7fb6a135f04e8e440800000000000000
+      internalID: 4965469343645854711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_33
+      rect:
+        serializedVersion: 2
+        x: 3729
+        y: 319
+        width: 36
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c53a237e3019e130800000000000000
+      internalID: 3596423637838214600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_34
+      rect:
+        serializedVersion: 2
+        x: 3761
+        y: 311
+        width: 10
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5eda7f0456da796e0800000000000000
+      internalID: -1830804073109541403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_35
+      rect:
+        serializedVersion: 2
+        x: 3765
+        y: 329
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 607cebd0931d281b0800000000000000
+      internalID: -5655728139049974010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_36
+      rect:
+        serializedVersion: 2
+        x: 3833
+        y: 259
+        width: 18
+        height: 74
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6c6ea96efb487bc0800000000000000
+      internalID: -3785191930738086802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_37
+      rect:
+        serializedVersion: 2
+        x: 3851
+        y: 295
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c86ac2619f70fab0800000000000000
+      internalID: -4976337325839980347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_38
+      rect:
+        serializedVersion: 2
+        x: 3887
+        y: 259
+        width: 72
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 742ec0981994f5160800000000000000
+      internalID: 7016407633884930631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_39
+      rect:
+        serializedVersion: 2
+        x: 1987
+        y: 319
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 987a4b56637d8a7e0800000000000000
+      internalID: -1753915426226264183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_40
+      rect:
+        serializedVersion: 2
+        x: 3829
+        y: 311
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5a4ba42174325120800000000000000
+      internalID: 2401039211893049950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_41
+      rect:
+        serializedVersion: 2
+        x: 3835
+        y: 315
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c5e90081a119dd60800000000000000
+      internalID: 7915377205415896514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_42
+      rect:
+        serializedVersion: 2
+        x: 3105
+        y: 295
+        width: 6
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de83e38dc0d6ee6b0800000000000000
+      internalID: -5265151012414539539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_43
+      rect:
+        serializedVersion: 2
+        x: 3111
+        y: 295
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a36a4a9232b6a8ec0800000000000000
+      internalID: -3563918356343642566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_44
+      rect:
+        serializedVersion: 2
+        x: 3661
+        y: 283
+        width: 44
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9147ac6cffb0f48d0800000000000000
+      internalID: -2860054045177252839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_45
+      rect:
+        serializedVersion: 2
+        x: 3717
+        y: 267
+        width: 48
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1698877df694b4d80800000000000000
+      internalID: -8265431946403215007
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_46
+      rect:
+        serializedVersion: 2
+        x: 3781
+        y: 307
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4127339ea37163660800000000000000
+      internalID: 7365099782399029780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_47
+      rect:
+        serializedVersion: 2
+        x: 3833
+        y: 303
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3061824e59a3e9a50800000000000000
+      internalID: 6529720925186168323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_48
+      rect:
+        serializedVersion: 2
+        x: 4075
+        y: 295
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a206c43533be1590800000000000000
+      internalID: -7701521271656938843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_49
+      rect:
+        serializedVersion: 2
+        x: 3085
+        y: 295
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8a539d10b396d9d0800000000000000
+      internalID: -2749848137843385713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_50
+      rect:
+        serializedVersion: 2
+        x: 4007
+        y: 283
+        width: 14
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26e3c72f5574ba5f0800000000000000
+      internalID: -744422878933664158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_51
+      rect:
+        serializedVersion: 2
+        x: 4023
+        y: 279
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8599e627286edc980800000000000000
+      internalID: -8516897872347752104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_52
+      rect:
+        serializedVersion: 2
+        x: 4091
+        y: 185
+        width: 154
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 978159464b75486e0800000000000000
+      internalID: -1836246315767097223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_53
+      rect:
+        serializedVersion: 2
+        x: 4099
+        y: 279
+        width: 8
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c0344952e4d11fe0800000000000000
+      internalID: -1219959955415355194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_54
+      rect:
+        serializedVersion: 2
+        x: 2961
+        y: 255
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 864965ca494d9dea0800000000000000
+      internalID: -5847408906152274840
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_55
+      rect:
+        serializedVersion: 2
+        x: 3155
+        y: 22
+        width: 874
+        height: 241
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1db91f09bf3eb4560800000000000000
+      internalID: 7299178290692070353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_56
+      rect:
+        serializedVersion: 2
+        x: 3101
+        y: 211
+        width: 22
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b09927a309792efc0800000000000000
+      internalID: -3467042117410186997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_57
+      rect:
+        serializedVersion: 2
+        x: 3101
+        y: 229
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c67e46b9065749280800000000000000
+      internalID: -9037469494441351316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_58
+      rect:
+        serializedVersion: 2
+        x: 3101
+        y: 175
+        width: 30
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71634fc317a64f720800000000000000
+      internalID: 2879043096383075863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_59
+      rect:
+        serializedVersion: 2
+        x: 893
+        y: 83
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eef5b4fc3c364fc80800000000000000
+      internalID: -8289891321434644498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_60
+      rect:
+        serializedVersion: 2
+        x: 3073
+        y: 59
+        width: 14
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a52cfae207dfb040800000000000000
+      internalID: 4665684146511422887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonGloomy_Death_Sheet_61
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 31
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3002ea7a9d10e2d0800000000000000
+      internalID: -3251566381637697477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      BulhyojasonGloomy_Death_Sheet_0: -1753401713137048337
+      BulhyojasonGloomy_Death_Sheet_1: 3455670773723413005
+      BulhyojasonGloomy_Death_Sheet_10: -7165047787070976992
+      BulhyojasonGloomy_Death_Sheet_11: -4067912303877050020
+      BulhyojasonGloomy_Death_Sheet_12: -7464305283049205260
+      BulhyojasonGloomy_Death_Sheet_13: -220365484666299863
+      BulhyojasonGloomy_Death_Sheet_14: -4900980264653884928
+      BulhyojasonGloomy_Death_Sheet_15: 9205548035074520563
+      BulhyojasonGloomy_Death_Sheet_16: -6839209506273769456
+      BulhyojasonGloomy_Death_Sheet_17: 7928734647241179090
+      BulhyojasonGloomy_Death_Sheet_18: -7250189081536624482
+      BulhyojasonGloomy_Death_Sheet_19: 6934030169178858401
+      BulhyojasonGloomy_Death_Sheet_2: 5933223856629729599
+      BulhyojasonGloomy_Death_Sheet_20: 353479129014203034
+      BulhyojasonGloomy_Death_Sheet_21: 8145326140320276708
+      BulhyojasonGloomy_Death_Sheet_22: 1342127582513818330
+      BulhyojasonGloomy_Death_Sheet_23: -1963772420019951505
+      BulhyojasonGloomy_Death_Sheet_24: -2717687927350378299
+      BulhyojasonGloomy_Death_Sheet_25: 1016668552346125894
+      BulhyojasonGloomy_Death_Sheet_26: -4883894848870115022
+      BulhyojasonGloomy_Death_Sheet_27: 8879295897307596315
+      BulhyojasonGloomy_Death_Sheet_28: 6869971853387277738
+      BulhyojasonGloomy_Death_Sheet_29: 5707691243013410587
+      BulhyojasonGloomy_Death_Sheet_3: -1707853426842076571
+      BulhyojasonGloomy_Death_Sheet_30: 1989014977253421327
+      BulhyojasonGloomy_Death_Sheet_31: -1678345390660734359
+      BulhyojasonGloomy_Death_Sheet_32: 4965469343645854711
+      BulhyojasonGloomy_Death_Sheet_33: 3596423637838214600
+      BulhyojasonGloomy_Death_Sheet_34: -1830804073109541403
+      BulhyojasonGloomy_Death_Sheet_35: -5655728139049974010
+      BulhyojasonGloomy_Death_Sheet_36: -3785191930738086802
+      BulhyojasonGloomy_Death_Sheet_37: -4976337325839980347
+      BulhyojasonGloomy_Death_Sheet_38: 7016407633884930631
+      BulhyojasonGloomy_Death_Sheet_39: -1753915426226264183
+      BulhyojasonGloomy_Death_Sheet_4: -7322412143922967224
+      BulhyojasonGloomy_Death_Sheet_40: 2401039211893049950
+      BulhyojasonGloomy_Death_Sheet_41: 7915377205415896514
+      BulhyojasonGloomy_Death_Sheet_42: -5265151012414539539
+      BulhyojasonGloomy_Death_Sheet_43: -3563918356343642566
+      BulhyojasonGloomy_Death_Sheet_44: -2860054045177252839
+      BulhyojasonGloomy_Death_Sheet_45: -8265431946403215007
+      BulhyojasonGloomy_Death_Sheet_46: 7365099782399029780
+      BulhyojasonGloomy_Death_Sheet_47: 6529720925186168323
+      BulhyojasonGloomy_Death_Sheet_48: -7701521271656938843
+      BulhyojasonGloomy_Death_Sheet_49: -2749848137843385713
+      BulhyojasonGloomy_Death_Sheet_5: -4930420029849348881
+      BulhyojasonGloomy_Death_Sheet_50: -744422878933664158
+      BulhyojasonGloomy_Death_Sheet_51: -8516897872347752104
+      BulhyojasonGloomy_Death_Sheet_52: -1836246315767097223
+      BulhyojasonGloomy_Death_Sheet_53: -1219959955415355194
+      BulhyojasonGloomy_Death_Sheet_54: -5847408906152274840
+      BulhyojasonGloomy_Death_Sheet_55: 7299178290692070353
+      BulhyojasonGloomy_Death_Sheet_56: -3467042117410186997
+      BulhyojasonGloomy_Death_Sheet_57: -9037469494441351316
+      BulhyojasonGloomy_Death_Sheet_58: 2879043096383075863
+      BulhyojasonGloomy_Death_Sheet_59: -8289891321434644498
+      BulhyojasonGloomy_Death_Sheet_6: -1781809214327698279
+      BulhyojasonGloomy_Death_Sheet_60: 4665684146511422887
+      BulhyojasonGloomy_Death_Sheet_61: -3251566381637697477
+      BulhyojasonGloomy_Death_Sheet_7: -8001260485577422031
+      BulhyojasonGloomy_Death_Sheet_8: -3672765620770652182
+      BulhyojasonGloomy_Death_Sheet_9: -8897078265534530813
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

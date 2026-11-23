@@ -19,7 +19,12 @@ namespace TrickalFanGame.Enemy
                 if (suffix >= 0) name = name.Substring(0, suffix).TrimEnd();
                 string displayName = name switch
                 {
-                    "TestEnemy" => "불효자손",
+                    "TestEnemy" => "불효자손-광기",
+                    "BulhyojasonPure" => "불효자손-순수",
+                    "BulhyojasonLively" => "불효자손-활발",
+                    "BulhyojasonGloomy" => "불효자손-우울",
+                    "SansamoCold" => "산사모-냉정",
+                    "SansamoGloomy" => "산사모-우울",
                     "SansamoEnemy" => "산사모-활발",
                     "ChargingEnemy" => "저혈당 요정-순수",
                     "RangedEnemy" => "원거리 요정",

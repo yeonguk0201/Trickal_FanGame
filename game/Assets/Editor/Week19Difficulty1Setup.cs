@@ -43,6 +43,12 @@ namespace TrickalFanGame.Editor
             // Enemy-13: 잠복형. Out of reach under the floor most of the time, like 누루링 it is a 4-point melee slot,
             // so pressure keeps 10~16.
             new(EncounterEnemyRole.Ambusher, 4),
+            // Attribute-0: inside the scores of the slots they join, so every Encounter keeps its threat range.
+            new(EncounterEnemyRole.RibbonLasher, 2),
+            new(EncounterEnemyRole.Leaper, 3),
+            new(EncounterEnemyRole.FanShooter, 3),
+            new(EncounterEnemyRole.BoomerangThrower, 3),
+            new(EncounterEnemyRole.BurrowHealer, 3),
         };
 
         public static readonly RoomDifficultyTierBand[] TierBands =

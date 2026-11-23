@@ -34,6 +34,12 @@ namespace TrickalFanGame.Editor
             (EncounterEnemyRole.Lobber, 3),
             // Enemy-13.
             (EncounterEnemyRole.Ambusher, 3),
+            // Attribute-0.
+            (EncounterEnemyRole.RibbonLasher, 1),
+            (EncounterEnemyRole.Leaper, 2),
+            (EncounterEnemyRole.FanShooter, 2),
+            (EncounterEnemyRole.BoomerangThrower, 3),
+            (EncounterEnemyRole.BurrowHealer, 3),
         };
 
         [MenuItem("Trickal Fan Game/Week 27/Setup and Verify Curve-1 Floor Enemy Pool")]
@@ -149,7 +155,7 @@ namespace TrickalFanGame.Editor
 
             // The pressure melee slot: floor 1 keeps only the two chasers, floor 2 leans to 저혈당-활발 and 자폭형
             // (Enemy-10), and floor 3 leans to 누루링 and 잠복형 (Enemy-13) while the floor-1 chasers halve.
-            EncounterEnemyCandidate[] melee = Week27Enemy13Setup.PressureMeleeCandidates();
+            EncounterEnemyCandidate[] melee = EnemyAttribute0Setup.Extend(Density0Setup.SlotKind.PressureMelee, Week27Enemy13Setup.PressureMeleeCandidates());
             int[][] expectedWeights =
             {
                 new[] { 150, 75, 0, 0, 0, 0, 90, 0, 0 },

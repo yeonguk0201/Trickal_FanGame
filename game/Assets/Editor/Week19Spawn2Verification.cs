@@ -270,7 +270,8 @@ namespace TrickalFanGame.Editor
                         $"Profile '{spec.ProfileId}' selected a role-incompatible SpawnPoint.");
                     // The rear rule comes after the melee rule, whatever count Density-0 gives it.
                     EncounterEnemyRole rearRole = first[first.Length - 1].Role;
-                    Assert(rearRole is EncounterEnemyRole.Ranged or EncounterEnemyRole.Sniper,
+                    Assert(rearRole is EncounterEnemyRole.Ranged or EncounterEnemyRole.Sniper or
+                            EncounterEnemyRole.FanShooter or EncounterEnemyRole.BoomerangThrower,
                         $"Profile '{spec.ProfileId}' rear slot selected '{rearRole}'.");
                     if (rearRole == EncounterEnemyRole.Sniper) sniperCount++;
                 }
@@ -280,7 +281,11 @@ namespace TrickalFanGame.Editor
                     new EncounterEnemyCandidate(EncounterEnemyRole.Sniper, spec.SniperWeight), floor);
                 int quickWeight = EncounterEnemyFloorPool.EffectiveWeight(
                     new EncounterEnemyCandidate(EncounterEnemyRole.Ranged, spec.QuickRangedWeight), floor);
-                float expected = sniperWeight / (float)(sniperWeight + quickWeight);
+                // Attribute-0's two throwers share the rear slot from their own floors.
+                int throwerWeight = EnemyAttribute0Setup.Extend(Density0Setup.SlotKind.PressureRear,
+                        Array.Empty<EncounterEnemyCandidate>())
+                    .Sum(candidate => EncounterEnemyFloorPool.EffectiveWeight(candidate, floor));
+                float expected = sniperWeight / (float)(sniperWeight + quickWeight + throwerWeight);
                 Assert(sniperCount > 0 && sniperCount < DistributionSeedCount &&
                        Mathf.Abs(observed - expected) <= 0.025f,
                     $"Profile '{spec.ProfileId}' expected {expected:P0} snipers but observed {observed:P1}.");

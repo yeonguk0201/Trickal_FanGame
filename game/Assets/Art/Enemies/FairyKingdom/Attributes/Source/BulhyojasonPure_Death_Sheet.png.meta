@@ -1,0 +1,1339 @@
+fileFormatVersion: 2
+guid: 6ad0a86e3868ab34da657de8d5bedb16
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8655714466081242317
+    second: BulhyojasonPure_Death_Sheet_0
+  - first:
+      213: -3671129479978489625
+    second: BulhyojasonPure_Death_Sheet_1
+  - first:
+      213: -8442786365233254722
+    second: BulhyojasonPure_Death_Sheet_2
+  - first:
+      213: -1063675670432792005
+    second: BulhyojasonPure_Death_Sheet_3
+  - first:
+      213: -5757132123911920878
+    second: BulhyojasonPure_Death_Sheet_4
+  - first:
+      213: 836559221732913452
+    second: BulhyojasonPure_Death_Sheet_5
+  - first:
+      213: -7536565154944959215
+    second: BulhyojasonPure_Death_Sheet_6
+  - first:
+      213: 3921525484697239693
+    second: BulhyojasonPure_Death_Sheet_7
+  - first:
+      213: -3762176807845376570
+    second: BulhyojasonPure_Death_Sheet_8
+  - first:
+      213: -2336905014388446657
+    second: BulhyojasonPure_Death_Sheet_9
+  - first:
+      213: -1304876814273023486
+    second: BulhyojasonPure_Death_Sheet_10
+  - first:
+      213: -1859815351028823481
+    second: BulhyojasonPure_Death_Sheet_11
+  - first:
+      213: 4060356207271860847
+    second: BulhyojasonPure_Death_Sheet_12
+  - first:
+      213: -2553582377739350536
+    second: BulhyojasonPure_Death_Sheet_13
+  - first:
+      213: 258976709526716720
+    second: BulhyojasonPure_Death_Sheet_14
+  - first:
+      213: 3707719604149888325
+    second: BulhyojasonPure_Death_Sheet_15
+  - first:
+      213: 8091841598023973064
+    second: BulhyojasonPure_Death_Sheet_16
+  - first:
+      213: -5045581917258802944
+    second: BulhyojasonPure_Death_Sheet_17
+  - first:
+      213: -6659727734090309948
+    second: BulhyojasonPure_Death_Sheet_18
+  - first:
+      213: -3477055378304937042
+    second: BulhyojasonPure_Death_Sheet_19
+  - first:
+      213: -2103774926401690023
+    second: BulhyojasonPure_Death_Sheet_20
+  - first:
+      213: -6604715603614429185
+    second: BulhyojasonPure_Death_Sheet_21
+  - first:
+      213: 529197551147895669
+    second: BulhyojasonPure_Death_Sheet_22
+  - first:
+      213: 4991538552610486910
+    second: BulhyojasonPure_Death_Sheet_23
+  - first:
+      213: 3801779453220477612
+    second: BulhyojasonPure_Death_Sheet_24
+  - first:
+      213: -8796151081107815039
+    second: BulhyojasonPure_Death_Sheet_25
+  - first:
+      213: 7473634873160163325
+    second: BulhyojasonPure_Death_Sheet_26
+  - first:
+      213: 7725330630508320384
+    second: BulhyojasonPure_Death_Sheet_27
+  - first:
+      213: -2663579474839551781
+    second: BulhyojasonPure_Death_Sheet_28
+  - first:
+      213: 4895080410336916320
+    second: BulhyojasonPure_Death_Sheet_29
+  - first:
+      213: -8155080150319917763
+    second: BulhyojasonPure_Death_Sheet_30
+  - first:
+      213: 4049956396563329480
+    second: BulhyojasonPure_Death_Sheet_31
+  - first:
+      213: 1534920196929670674
+    second: BulhyojasonPure_Death_Sheet_32
+  - first:
+      213: -7255851752560621391
+    second: BulhyojasonPure_Death_Sheet_33
+  - first:
+      213: 5753482928429488754
+    second: BulhyojasonPure_Death_Sheet_34
+  - first:
+      213: 6038565901935193468
+    second: BulhyojasonPure_Death_Sheet_35
+  - first:
+      213: -8878135333900709874
+    second: BulhyojasonPure_Death_Sheet_36
+  - first:
+      213: 5290571437005311119
+    second: BulhyojasonPure_Death_Sheet_37
+  - first:
+      213: 4113857959403079778
+    second: BulhyojasonPure_Death_Sheet_38
+  - first:
+      213: 8984519793849833060
+    second: BulhyojasonPure_Death_Sheet_39
+  - first:
+      213: -4949206295661858738
+    second: BulhyojasonPure_Death_Sheet_40
+  - first:
+      213: -8249141039486031085
+    second: BulhyojasonPure_Death_Sheet_41
+  - first:
+      213: 426439708885107827
+    second: BulhyojasonPure_Death_Sheet_42
+  - first:
+      213: -3653696138336254374
+    second: BulhyojasonPure_Death_Sheet_43
+  - first:
+      213: -7467579932636695167
+    second: BulhyojasonPure_Death_Sheet_44
+  - first:
+      213: 208337421544830667
+    second: BulhyojasonPure_Death_Sheet_45
+  - first:
+      213: 194911420134738024
+    second: BulhyojasonPure_Death_Sheet_46
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 26
+        width: 628
+        height: 479
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33384049d89b0e780800000000000000
+      internalID: -8655714466081242317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 705
+        y: 491
+        width: 102
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e8ea6d30378d0dc0800000000000000
+      internalID: -3671129479978489625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 1119
+        y: 26
+        width: 926
+        height: 484
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebea2c9588235da80800000000000000
+      internalID: -8442786365233254722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 2153
+        y: 31
+        width: 492
+        height: 479
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b32c0a30d901d31f0800000000000000
+      internalID: -1063675670432792005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 2552
+        y: 504
+        width: 26
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2136d3df5de8a10b0800000000000000
+      internalID: -5757132123911920878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 2651
+        y: 449
+        width: 110
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c21b7fc0e2e0c9b00800000000000000
+      internalID: 836559221732913452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 3315
+        y: 494
+        width: 68
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11d3be80cedb86790800000000000000
+      internalID: -7536565154944959215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 3499
+        y: 499
+        width: 12
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d804505b6ae0c6630800000000000000
+      internalID: 3921525484697239693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 3537
+        y: 495
+        width: 84
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6cdc92a40201acbc0800000000000000
+      internalID: -3762176807845376570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 3709
+        y: 479
+        width: 24
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3a2c875545a19fd0800000000000000
+      internalID: -2336905014388446657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 3801
+        y: 497
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 202fc91737524ede0800000000000000
+      internalID: -1304876814273023486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 3811
+        y: 491
+        width: 52
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74acb1ebacb9036e0800000000000000
+      internalID: -1859815351028823481
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 3863
+        y: 499
+        width: 48
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6addf33578495830800000000000000
+      internalID: 4060356207271860847
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 269
+        width: 236
+        height: 234
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fd062e5b5adf8cd0800000000000000
+      internalID: -2553582377739350536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 2101
+        y: 483
+        width: 52
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0318078f1f1189300800000000000000
+      internalID: 258976709526716720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 3089
+        y: 22
+        width: 1026
+        height: 383
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5452b1ce557747330800000000000000
+      internalID: 3707719604149888325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 3657
+        y: 377
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c8b2fc9f0ffb4070800000000000000
+      internalID: 8091841598023973064
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 3315
+        y: 341
+        width: 28
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00997a89afd7af9b0800000000000000
+      internalID: -5045581917258802944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 3795
+        y: 337
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cedabc19e4e393a0800000000000000
+      internalID: -6659727734090309948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 3809
+        y: 333
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea3d5cf3e840fbfc0800000000000000
+      internalID: -3477055378304937042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 4195
+        y: 161
+        width: 118
+        height: 196
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9562478c9d3edc2e0800000000000000
+      internalID: -2103774926401690023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 3737
+        y: 319
+        width: 8
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fff051cd6265754a0800000000000000
+      internalID: -6604715603614429185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 3745
+        y: 317
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57b4d247e56185700800000000000000
+      internalID: 529197551147895669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 3761
+        y: 305
+        width: 30
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7af3070ed1854540800000000000000
+      internalID: 4991538552610486910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 257
+        width: 88
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: caad59f1542a2c430800000000000000
+      internalID: 3801779453220477612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 2399
+        y: 26
+        width: 618
+        height: 265
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18586eb123bcde580800000000000000
+      internalID: -8796151081107815039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 2631
+        y: 257
+        width: 142
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dffdea3f15fa7b760800000000000000
+      internalID: 7473634873160163325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 2829
+        y: 237
+        width: 36
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08694e32743e53b60800000000000000
+      internalID: 7725330630508320384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 4039
+        y: 289
+        width: 12
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd0ca237490190bd0800000000000000
+      internalID: -2663579474839551781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 4071
+        y: 273
+        width: 48
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 063fa1da2b1dee340800000000000000
+      internalID: 4895080410336916320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 2813
+        y: 239
+        width: 16
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d35975d8fc553de80800000000000000
+      internalID: -8155080150319917763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 3065
+        y: 257
+        width: 30
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c17af492e5543830800000000000000
+      internalID: 4049956396563329480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_32
+      rect:
+        serializedVersion: 2
+        x: 3101
+        y: 255
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21ec09869c12d4510800000000000000
+      internalID: 1534920196929670674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_33
+      rect:
+        serializedVersion: 2
+        x: 3105
+        y: 257
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b88ab136490e4b90800000000000000
+      internalID: -7255851752560621391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_34
+      rect:
+        serializedVersion: 2
+        x: 4147
+        y: 223
+        width: 38
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27a505a7d3a78df40800000000000000
+      internalID: 5753482928429488754
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_35
+      rect:
+        serializedVersion: 2
+        x: 2927
+        y: 239
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7d22a1b1bb4dc350800000000000000
+      internalID: 6038565901935193468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_36
+      rect:
+        serializedVersion: 2
+        x: 3089
+        y: 241
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e001103c3f68ac480800000000000000
+      internalID: -8878135333900709874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_37
+      rect:
+        serializedVersion: 2
+        x: 4075
+        y: 229
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8c8789f0b2eb6940800000000000000
+      internalID: 5290571437005311119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_38
+      rect:
+        serializedVersion: 2
+        x: 2345
+        y: 87
+        width: 74
+        height: 98
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26842a6940c571930800000000000000
+      internalID: 4113857959403079778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_39
+      rect:
+        serializedVersion: 2
+        x: 4067
+        y: 177
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46692e5862d6fac70800000000000000
+      internalID: 8984519793849833060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_40
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 95
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e40b2fa9813e05bb0800000000000000
+      internalID: -4949206295661858738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_41
+      rect:
+        serializedVersion: 2
+        x: 177
+        y: 107
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31ba65f2ee9258d80800000000000000
+      internalID: -8249141039486031085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_42
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 95
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 374c736e7a40be500800000000000000
+      internalID: 426439708885107827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_43
+      rect:
+        serializedVersion: 2
+        x: 3123
+        y: 85
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a56404568b67b4dc0800000000000000
+      internalID: -3653696138336254374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_44
+      rect:
+        serializedVersion: 2
+        x: 2341
+        y: 87
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 185ba5fbd93dd5890800000000000000
+      internalID: -7467579932636695167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_45
+      rect:
+        serializedVersion: 2
+        x: 2325
+        y: 55
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc6b994f7c924e200800000000000000
+      internalID: 208337421544830667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonPure_Death_Sheet_46
+      rect:
+        serializedVersion: 2
+        x: 2329
+        y: 47
+        width: 14
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8684cc767e674b200800000000000000
+      internalID: 194911420134738024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      BulhyojasonPure_Death_Sheet_0: -8655714466081242317
+      BulhyojasonPure_Death_Sheet_1: -3671129479978489625
+      BulhyojasonPure_Death_Sheet_10: -1304876814273023486
+      BulhyojasonPure_Death_Sheet_11: -1859815351028823481
+      BulhyojasonPure_Death_Sheet_12: 4060356207271860847
+      BulhyojasonPure_Death_Sheet_13: -2553582377739350536
+      BulhyojasonPure_Death_Sheet_14: 258976709526716720
+      BulhyojasonPure_Death_Sheet_15: 3707719604149888325
+      BulhyojasonPure_Death_Sheet_16: 8091841598023973064
+      BulhyojasonPure_Death_Sheet_17: -5045581917258802944
+      BulhyojasonPure_Death_Sheet_18: -6659727734090309948
+      BulhyojasonPure_Death_Sheet_19: -3477055378304937042
+      BulhyojasonPure_Death_Sheet_2: -8442786365233254722
+      BulhyojasonPure_Death_Sheet_20: -2103774926401690023
+      BulhyojasonPure_Death_Sheet_21: -6604715603614429185
+      BulhyojasonPure_Death_Sheet_22: 529197551147895669
+      BulhyojasonPure_Death_Sheet_23: 4991538552610486910
+      BulhyojasonPure_Death_Sheet_24: 3801779453220477612
+      BulhyojasonPure_Death_Sheet_25: -8796151081107815039
+      BulhyojasonPure_Death_Sheet_26: 7473634873160163325
+      BulhyojasonPure_Death_Sheet_27: 7725330630508320384
+      BulhyojasonPure_Death_Sheet_28: -2663579474839551781
+      BulhyojasonPure_Death_Sheet_29: 4895080410336916320
+      BulhyojasonPure_Death_Sheet_3: -1063675670432792005
+      BulhyojasonPure_Death_Sheet_30: -8155080150319917763
+      BulhyojasonPure_Death_Sheet_31: 4049956396563329480
+      BulhyojasonPure_Death_Sheet_32: 1534920196929670674
+      BulhyojasonPure_Death_Sheet_33: -7255851752560621391
+      BulhyojasonPure_Death_Sheet_34: 5753482928429488754
+      BulhyojasonPure_Death_Sheet_35: 6038565901935193468
+      BulhyojasonPure_Death_Sheet_36: -8878135333900709874
+      BulhyojasonPure_Death_Sheet_37: 5290571437005311119
+      BulhyojasonPure_Death_Sheet_38: 4113857959403079778
+      BulhyojasonPure_Death_Sheet_39: 8984519793849833060
+      BulhyojasonPure_Death_Sheet_4: -5757132123911920878
+      BulhyojasonPure_Death_Sheet_40: -4949206295661858738
+      BulhyojasonPure_Death_Sheet_41: -8249141039486031085
+      BulhyojasonPure_Death_Sheet_42: 426439708885107827
+      BulhyojasonPure_Death_Sheet_43: -3653696138336254374
+      BulhyojasonPure_Death_Sheet_44: -7467579932636695167
+      BulhyojasonPure_Death_Sheet_45: 208337421544830667
+      BulhyojasonPure_Death_Sheet_46: 194911420134738024
+      BulhyojasonPure_Death_Sheet_5: 836559221732913452
+      BulhyojasonPure_Death_Sheet_6: -7536565154944959215
+      BulhyojasonPure_Death_Sheet_7: 3921525484697239693
+      BulhyojasonPure_Death_Sheet_8: -3762176807845376570
+      BulhyojasonPure_Death_Sheet_9: -2336905014388446657
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

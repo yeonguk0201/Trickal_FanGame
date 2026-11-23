@@ -35,6 +35,10 @@ MonoBehaviour:
         weight: 50
       - enemyRole: 11
         weight: 20
+      - enemyRole: 15
+        weight: 25
+      - enemyRole: 16
+        weight: 20
     - enemyRole: 0
       count: 1
       spawnPointId: 
@@ -44,6 +48,10 @@ MonoBehaviour:
         weight: 70
       - enemyRole: 4
         weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
   - waveNumber: 2
     startCondition: 1
     completionCondition: 0
@@ -64,6 +72,10 @@ MonoBehaviour:
         weight: 70
       - enemyRole: 4
         weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
     - enemyRole: 1
       count: 2
       spawnPointId: 
@@ -74,6 +86,10 @@ MonoBehaviour:
       - enemyRole: 5
         weight: 50
       - enemyRole: 11
+        weight: 20
+      - enemyRole: 15
+        weight: 25
+      - enemyRole: 16
         weight: 20
   - waveNumber: 3
     startCondition: 1
@@ -90,6 +106,10 @@ MonoBehaviour:
         weight: 50
       - enemyRole: 11
         weight: 20
+      - enemyRole: 15
+        weight: 25
+      - enemyRole: 16
+        weight: 20
     - enemyRole: 0
       count: 2
       spawnPointId: 
@@ -99,6 +119,10 @@ MonoBehaviour:
         weight: 70
       - enemyRole: 4
         weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
   clearCondition: 0
   declaredMinimumThreat: 38
   declaredMaximumThreat: 51

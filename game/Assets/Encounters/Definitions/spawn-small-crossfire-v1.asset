@@ -35,6 +35,10 @@ MonoBehaviour:
         weight: 10
       - enemyRole: 11
         weight: 20
+      - enemyRole: 15
+        weight: 25
+      - enemyRole: 16
+        weight: 20
   - waveNumber: 2
     startCondition: 1
     completionCondition: 0
@@ -48,6 +52,10 @@ MonoBehaviour:
         weight: 35
       - enemyRole: 4
         weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
     - enemyRole: 2
       count: 1
       spawnPointId: 
