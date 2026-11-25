@@ -1,0 +1,130 @@
+{
+  "source": "Character_Erpin_parts.psd",
+  "canvas": [
+    1254,
+    1254
+  ],
+  "layers": [
+    {
+      "name": "Back hair L",
+      "file": "Erpin_Standing_BackHairL.png",
+      "order": 0,
+      "bbox": [
+        69,
+        217,
+        542,
+        1198
+      ]
+    },
+    {
+      "name": "Back hair R",
+      "file": "Erpin_Standing_BackHairR.png",
+      "order": 1,
+      "bbox": [
+        780,
+        71,
+        1200,
+        1052
+      ]
+    },
+    {
+      "name": "Wing",
+      "file": "Erpin_Standing_Wing.png",
+      "order": 2,
+      "bbox": [
+        1004,
+        451,
+        1225,
+        736
+      ]
+    },
+    {
+      "name": "Cape",
+      "file": "Erpin_Standing_Cape.png",
+      "order": 3,
+      "bbox": [
+        384,
+        613,
+        952,
+        1010
+      ]
+    },
+    {
+      "name": "Cloud-shaped cape trim",
+      "file": "Erpin_Standing_CloudShapedCapeTrim.png",
+      "order": 4,
+      "bbox": [
+        271,
+        936,
+        1018,
+        1134
+      ]
+    },
+    {
+      "name": "Body and dress",
+      "file": "Erpin_Standing_BodyAndDress.png",
+      "order": 5,
+      "bbox": [
+        427,
+        600,
+        823,
+        1208
+      ]
+    },
+    {
+      "name": "Staff arm and scepter",
+      "file": "Erpin_Standing_StaffArmAndScepter.png",
+      "order": 6,
+      "bbox": [
+        48,
+        33,
+        559,
+        1132
+      ]
+    },
+    {
+      "name": "Free arm",
+      "file": "Erpin_Standing_FreeArm.png",
+      "order": 7,
+      "bbox": [
+        675,
+        705,
+        849,
+        858
+      ]
+    },
+    {
+      "name": "Face",
+      "file": "Erpin_Standing_Face.png",
+      "order": 8,
+      "bbox": [
+        370,
+        264,
+        948,
+        692
+      ]
+    },
+    {
+      "name": "Fringe and side locks",
+      "file": "Erpin_Standing_FringeAndSideLocks.png",
+      "order": 9,
+      "bbox": [
+        283,
+        193,
+        1032,
+        768
+      ]
+    },
+    {
+      "name": "Crown",
+      "file": "Erpin_Standing_Crown.png",
+      "order": 10,
+      "bbox": [
+        447,
+        67,
+        914,
+        284
+      ]
+    }
+  ]
+}

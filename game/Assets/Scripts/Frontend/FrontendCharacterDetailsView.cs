@@ -50,6 +50,7 @@ namespace TrickalFanGame.Frontend
             Character = character;
             if (character == null) return;
             SetSprite(previewImage, character.Portrait);
+            StandingPortraitView.Apply(previewImage, character);
             SetSprite(faceImage, character.SlotPortrait);
             SetText(nameText, character.DisplayName);
             SetText(epithetText, character.Epithet);
