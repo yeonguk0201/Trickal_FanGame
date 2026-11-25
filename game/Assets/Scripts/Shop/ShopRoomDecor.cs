@@ -35,6 +35,9 @@ namespace TrickalFanGame.Shop
         private readonly List<DestructibleObstacle> pieces = new();
         private RoomDoorSlot downSlot;
         private SpriteRenderer foregroundCenter;
+        private SpriteRenderer downDoorFront;
+        // Per side door: the side wall strips beside the opening, and the strip across it while no door is open.
+        private readonly List<(RoomDoorSlot Slot, Collider2D Gap)> sideWallGaps = new();
         private readonly List<(DestructibleObstacle Piece, SpriteRenderer Visual, float Line)> sorted = new();
         private DestructibleObstacle stall;
         private float stallLine;
@@ -64,6 +67,8 @@ namespace TrickalFanGame.Shop
             ShopRoomDecor decor = rootObject.AddComponent<ShopRoomDecor>();
             decor.HideRoomArt(content);
             decor.BuildBackdrop(theme, room);
+            FitSideDoors(room, theme.sideInset);
+            decor.BuildSideWalls(room, content, theme.sideInset);
             foreach (ShopDecorDefinition.Piece piece in theme.pieces)
                 decor.pieces.Add(BuildPiece(piece, rootObject.transform, state, contentSeed,
                     progress, content, room.Node, room.Controller));
@@ -162,6 +167,59 @@ namespace TrickalFanGame.Shop
                 ForegroundSortingOrder);
             foregroundCenter = Draw("Shop Foreground Center", theme.foregroundCenter.sprite,
                 theme.foregroundCenter.position, ForegroundSortingOrder);
+            downDoorFront = Draw("Shop Door Down Front", theme.downDoorFront.sprite, theme.downDoorFront.position,
+                ForegroundSortingOrder);
+        }
+
+        // The village walls stop the player at the village floor's edge, which is inside this map's side walls. These
+        // strips move the side edges in by the map's inset; the strip across a side door opens while the door does.
+        private void BuildSideWalls(RoomPrefab room, Transform content, float inset)
+        {
+            if (inset <= 0f) return;
+            Rect floor = FairyVillageRoomGeometry.WalkableFloor(RoomLayout.RoomSize);
+            float gap = RoomLayout.DoorOpeningLength * 0.5f;
+            const float Overlap = 0.5f;
+            Transform wall = content.Find("Top Left Wall");
+            int layer = wall != null ? wall.gameObject.layer : LayerMask.NameToLayer("Environment");
+            foreach (RoomDoorDirection direction in new[] { RoomDoorDirection.Left, RoomDoorDirection.Right })
+            {
+                float sign = direction == RoomDoorDirection.Left ? -1f : 1f;
+                float outer = sign * (floor.xMax + Overlap), inner = sign * (floor.xMax - inset);
+                float xMin = Mathf.Min(outer, inner), xMax = Mathf.Max(outer, inner);
+                AddWall($"Shop Side Wall {direction} Upper", Rect.MinMaxRect(xMin, gap, xMax, floor.yMax + Overlap),
+                    layer);
+                AddWall($"Shop Side Wall {direction} Lower", Rect.MinMaxRect(xMin, floor.yMin - Overlap, xMax, -gap),
+                    layer);
+                Collider2D gapWall = AddWall($"Shop Side Wall {direction} Door", Rect.MinMaxRect(xMin, -gap, xMax, gap),
+                    layer);
+                sideWallGaps.Add((Array.Find(room.DoorSlots, slot => slot != null && slot.Direction == direction),
+                    gapWall));
+            }
+        }
+
+        private Collider2D AddWall(string objectName, Rect rect, int layer)
+        {
+            GameObject wall = new(objectName) { layer = layer };
+            wall.transform.SetParent(transform, false);
+            wall.transform.localPosition = rect.center;
+            BoxCollider2D collider = wall.AddComponent<BoxCollider2D>();
+            collider.size = rect.size;
+            return collider;
+        }
+
+        // The side doors pass the player once it is just behind the shop map's painted opening, as in a village room,
+        // and the arrival point keeps its distance from the transition. Positions are set, not offset, so building the
+        // decor again on the same room changes nothing.
+        public static void FitSideDoors(RoomPrefab room, float inset)
+        {
+            foreach (RoomDoorSlot slot in room.DoorSlots)
+            {
+                if (slot == null || !RoomLayout.IsSideDoor(slot.Direction)) continue;
+                Vector2 inward = -RoomLayout.Direction(slot.Direction);
+                if (slot.Doorway != null) slot.Doorway.transform.localPosition = inward * inset;
+                if (slot.EntryPoint != null)
+                    slot.EntryPoint.localPosition = inward * (RoomLayout.EntryInsetFromTransition + inset);
+            }
         }
 
         private SpriteRenderer Draw(string objectName, Sprite sprite, Vector2 position, int sortingOrder)
@@ -217,8 +275,12 @@ namespace TrickalFanGame.Shop
         public void Refresh()
         {
             foreach ((RoomDoorSlot slot, SpriteRenderer door) in doors) door.enabled = slot != null && slot.IsConnected;
-            // An open bottom door must not be covered by the solid wall strip.
-            if (foregroundCenter != null) foregroundCenter.enabled = downSlot == null || !downSlot.IsConnected;
+            // An open bottom door must not be covered by the solid wall strip; its own front covers the player instead.
+            bool downOpen = downSlot != null && downSlot.IsConnected;
+            if (foregroundCenter != null) foregroundCenter.enabled = !downOpen;
+            if (downDoorFront != null) downDoorFront.enabled = downOpen;
+            foreach ((RoomDoorSlot slot, Collider2D gap) in sideWallGaps)
+                if (gap != null) gap.enabled = slot == null || !slot.IsConnected;
         }
     }
 }

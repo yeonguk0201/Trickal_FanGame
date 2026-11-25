@@ -17,6 +17,7 @@ namespace TrickalFanGame.Editor
         private const float DoorDepth = 1.7f;
         private const float FloorHalfWidth = 6.5f;
         private const float FloorHalfHeight = 3.5f;
+        private const string RoomPrefabPath = "Assets/Rooms/Prefabs/room-grid-base.prefab";
 
         public static void SetupAndVerifyBatch()
         {
@@ -61,7 +62,49 @@ namespace TrickalFanGame.Editor
             ValidateDropAmounts(sist, goldi);
             // The sign never drops, so the break test leaves no pickup behind.
             ValidateThreeHitBreak(sist.pieces.First(piece => piece.stages[0].name == "sist-sign-1"));
+            ValidateSideDoors(sist, goldi);
             Debug.Log("Shop decor verification passed.");
+        }
+
+        // Shop-Door-1: each map's side walls and side transition move in by its own inset, the transition still
+        // outside the walkable floor, and fitting the room moves only the side doors' transition and arrival point.
+        // Shop-Door-2: the open bottom door's front covers the door rect, from the theme's own art.
+        private static void ValidateSideDoors(ShopDecorDefinition.Theme sist, ShopDecorDefinition.Theme goldi)
+        {
+            Assert(Mathf.Approximately(sist.sideInset, ShopDecorSetup.SistSideInset) &&
+                   Mathf.Approximately(goldi.sideInset, ShopDecorSetup.GoldiSideInset),
+                "Each shop map must keep its own side inset.");
+            foreach ((ShopDecorDefinition.Theme theme, string prefix) in new[] { (sist, "sist"), (goldi, "goldi") })
+            {
+                ShopDecorDefinition.DoorArt down = theme.doors.First(door => door.direction == RoomDoorDirection.Down);
+                Assert(theme.downDoorFront.sprite.name == $"{prefix}-door-down-front" &&
+                       Vector2.Distance(theme.downDoorFront.position, down.art.position) < 0.001f &&
+                       theme.downDoorFront.sprite.rect.size == down.art.sprite.rect.size,
+                    $"The {prefix} bottom door front must cover its own bottom door art.");
+            }
+            float transitionInner = RoomLayout.HorizontalTransitionCenter - RoomLayout.TransitionThickness * 0.5f;
+            foreach (ShopDecorDefinition.Theme theme in new[] { sist, goldi })
+                Assert(theme.sideInset > 0f && transitionInner - theme.sideInset > FloorHalfWidth,
+                    $"The {theme.kind} side transition must move in but stay outside the walkable floor.");
+
+            GameObject root = PrefabUtility.LoadPrefabContents(RoomPrefabPath);
+            try
+            {
+                RoomPrefab room = root.GetComponent<RoomPrefab>();
+                Assert(room != null, $"{RoomPrefabPath} has no RoomPrefab.");
+                for (int pass = 0; pass < 2; pass++) ShopRoomDecor.FitSideDoors(room, sist.sideInset);
+                foreach (RoomDoorSlot slot in room.DoorSlots)
+                {
+                    bool side = RoomLayout.IsSideDoor(slot.Direction);
+                    Vector2 inward = -RoomLayout.Direction(slot.Direction);
+                    float inset = side ? sist.sideInset : 0f;
+                    Assert(Vector2.Distance(slot.Doorway.transform.localPosition, inward * inset) < 0.001f &&
+                           Vector2.Distance(slot.EntryPoint.localPosition,
+                               inward * (RoomLayout.EntryInsetFromTransition + inset)) < 0.001f,
+                        $"Fitting the shop room moved the {slot.Direction} door wrongly or more than once.");
+                }
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
         }
 
         private static void ValidateDoorsStayClear(ShopDecorDefinition.Theme theme)

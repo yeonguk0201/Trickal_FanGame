@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -28,6 +28,23 @@ WALL_OUTLINE_LUMINANCE = 135
 # Corner pillar tops as ellipses: center x, base y, half width, height.
 PILLARS = {"sist": ((162, 795, 51, 27), (1509, 795, 51, 27)), "goldi": ((158, 796, 51, 24), (1513, 796, 51, 24))}
 CENTER_BLEND = 12
+# Shop-Door-2: the open bottom door's front, drawn over actors like the village door's foreground. Points are in the
+# down door rect: OUTLINE closes the frame's silhouette above the wall's top edge, OPENING is the passage left behind
+# actors.
+DOWN_DOOR_FRONT = {
+    "sist": {
+        "outline": [(40, 75), (45, 58), (70, 48), (105, 38), (110, 22), (136, 18), (162, 22), (168, 38), (200, 48),
+                    (225, 58), (232, 75), (232, 219), (40, 219)],
+        "opening": [(95, 219), (95, 100), (105, 93), (120, 89), (135, 88), (150, 89), (165, 93), (176, 100),
+                    (176, 219)],
+    },
+    "goldi": {
+        "outline": [(0, 75), (10, 62), (45, 55), (85, 45), (98, 28), (135, 25), (170, 30), (185, 48), (225, 55),
+                    (262, 62), (272, 75), (272, 219), (0, 219)],
+        "opening": [(100, 100), (112, 88), (125, 80), (150, 78), (165, 84), (172, 100), (192, 122), (198, 135),
+                    (192, 160), (190, 219), (88, 219), (85, 160), (88, 130), (95, 110)],
+    },
+}
 # The fill fades back into the untouched floor over this many pixels on the door's room side.
 FLOOR_FADE = 18
 
@@ -91,6 +108,26 @@ def foreground_alpha(theme, image):
     return np.clip(rows + 1 - tops[None, :], 0, 1)
 
 
+def polygon_mask(size, points, blur=0.0):
+    mask = Image.new("L", size, 0)
+    ImageDraw.Draw(mask).polygon(points, fill=255)
+    if blur > 0:
+        mask = mask.filter(ImageFilter.GaussianBlur(blur))
+    return np.asarray(mask, dtype=float) / 255
+
+
+def down_door_front(theme, original):
+    """The open bottom door as it covers actors: the front wall and the door frame, without the passage."""
+    x0, y0, x1, y1 = DOORS["down"]
+    patch = original[y0:y1, x0:x1].copy()
+    size = (x1 - x0, y1 - y0)
+    shape = DOWN_DOOR_FRONT[theme]
+    wall = foreground_alpha(theme, original)[y0:y1, x0:x1]
+    cover = np.maximum(wall, polygon_mask(size, shape["outline"])) * (1 - polygon_mask(size, shape["opening"], 1.0))
+    patch[..., 3] = np.rint(patch[..., 3] * cover).astype(np.uint8)
+    return patch
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     for theme, source in THEMES.items():
@@ -112,6 +149,8 @@ def main():
                  "right": front[FOREGROUND_TOP:, right:]}
         for name, part in parts.items():
             Image.fromarray(part, "RGBA").save(OUTPUT / f"{theme}-foreground-{name}.png", optimize=True)
+        Image.fromarray(down_door_front(theme, original), "RGBA").save(
+            OUTPUT / f"{theme}-door-down-front.png", optimize=True)
         print(theme, "size", original.shape[1], original.shape[0])
     copied = 0
     for frame in sorted((HERE / "frames").glob("*.png")):

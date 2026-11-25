@@ -41,7 +41,11 @@ MonoBehaviour:
     foregroundRight:
       sprite: {fileID: 21300000, guid: 318499d9badeb4d40b9f27c5f5665930, type: 3}
       position: {x: 4.941476, y: -3.8676844}
+    downDoorFront:
+      sprite: {fileID: 21300000, guid: ddf53edc700ec2640bf115bfa65de5fd, type: 3}
+      position: {x: 0, y: -3.6743002}
     keeperPosition: {x: -0.025, y: -0.25}
+    sideInset: 0.45
     pieces:
     - pieceId: shop-decor-sist-01
       stages:
@@ -470,7 +474,11 @@ MonoBehaviour:
     foregroundRight:
       sprite: {fileID: 21300000, guid: 6dbd4e8f75040854ea13374eb71bb537, type: 3}
       position: {x: 4.941476, y: -3.8676844}
+    downDoorFront:
+      sprite: {fileID: 21300000, guid: 2e723a9384c3bd34d8b5f7746acbb22e, type: 3}
+      position: {x: 0, y: -3.6743002}
     keeperPosition: {x: -0.065, y: -0.23}
+    sideInset: 0.3
     pieces:
     - pieceId: shop-decor-goldi-01
       stages:

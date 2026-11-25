@@ -72,6 +72,12 @@ namespace TrickalFanGame.Editor
 
         public static readonly Vector2 SistKeeperPosition = new(-0.025f, -0.25f);
         public static readonly Vector2 GoldiKeeperPosition = new(-0.065f, -0.23f);
+        // Shop-Door-1 (2026-11-25): the village room's side floor starts at source x≈180 and its side door passes the
+        // player just behind the painted opening (≈118). The 시스트 floor starts at ≈222 (opening back ≈173) and the
+        // 골디 one at ≈210 (≈143), so their side walls and side door transitions move this far toward the room. Up
+        // and down already match.
+        public const float SistSideInset = 0.45f;
+        public const float GoldiSideInset = 0.3f;
 
         private static readonly Placement[] SistPieces =
         {
@@ -220,14 +226,15 @@ namespace TrickalFanGame.Editor
             Undo.RecordObject(definition, "Configure shop decor");
             definition.Configure(new[]
             {
-                BuildTheme(ShopKind.General, "sist", SistKeeperPosition, SistPieces, false, tables),
-                BuildTheme(ShopKind.Goldi, "goldi", GoldiKeeperPosition, GoldiPieces, true, tables),
+                BuildTheme(ShopKind.General, "sist", SistKeeperPosition, SistSideInset, SistPieces, false, tables),
+                BuildTheme(ShopKind.Goldi, "goldi", GoldiKeeperPosition, GoldiSideInset, GoldiPieces, true, tables),
             });
             EditorUtility.SetDirty(definition);
             return definition;
         }
 
         private static ShopDecorDefinition.Theme BuildTheme(ShopKind kind, string prefix, Vector2 keeper,
+            float sideInset,
             IReadOnlyList<Placement> placements, bool attachToWalls,
             IReadOnlyDictionary<string, ResourceDropTable> tables)
         {
@@ -267,7 +274,10 @@ namespace TrickalFanGame.Editor
                     ForegroundDoorRight - ForegroundDoorLeft, height - ForegroundTop)),
                 foregroundRight = Placed($"{prefix}-foreground-right", new RectInt(ForegroundDoorRight, ForegroundTop,
                     width - ForegroundDoorRight, height - ForegroundTop)),
+                downDoorFront = Placed($"{prefix}-door-down-front",
+                    Doors.First(door => door.Direction == RoomDoorDirection.Down).Rect),
                 keeperPosition = keeper,
+                sideInset = sideInset,
                 pieces = pieces,
             };
         }

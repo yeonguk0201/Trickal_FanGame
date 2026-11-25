@@ -57,7 +57,13 @@ namespace TrickalFanGame.Shop
             public PlacedSprite foregroundLeft;
             public PlacedSprite foregroundCenter;
             public PlacedSprite foregroundRight;
+            // Shop-Door-2: drawn over actors instead of foregroundCenter while the bottom door is open, so the door
+            // frame and the wall beside it cover the player and pieces as the village door's foreground does.
+            public PlacedSprite downDoorFront;
             public Vector2 keeperPosition;
+            // Shop-Door-1: this map paints its side walls and door openings further in than the village room, so the
+            // side walls, the side doors' transition and their arrival point move this far toward the room.
+            public float sideInset;
             public Piece[] pieces;
         }
 
@@ -81,7 +87,7 @@ namespace TrickalFanGame.Shop
                 Theme theme = Find(kind);
                 if (theme == null || theme.map == null || theme.doors == null || theme.pieces == null ||
                     theme.foregroundLeft?.sprite == null || theme.foregroundCenter?.sprite == null ||
-                    theme.foregroundRight?.sprite == null)
+                    theme.foregroundRight?.sprite == null || theme.downDoorFront?.sprite == null)
                 {
                     error = $"Shop decor theme {kind} is incomplete.";
                     return false;
