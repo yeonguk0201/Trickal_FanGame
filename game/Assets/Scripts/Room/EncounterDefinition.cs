@@ -30,6 +30,16 @@ namespace TrickalFanGame.Room
         // Enemy-13: 잠복형, which moves under the floor out of reach and bursts out near the player. Pressure melee
         // slots only.
         Ambusher,
+        // Attribute-0 (2026-11-23): 불효자손-순수, a ribbon whip aimed at the player.
+        RibbonLasher,
+        // Attribute-0: 불효자손-활발, which leaps around and hurts on landing.
+        Leaper,
+        // Attribute-0: 불효자손-우울, which throws three shots in a fan.
+        FanShooter,
+        // Attribute-0: 산사모-냉정, whose shot flies out and back along a long teardrop.
+        BoomerangThrower,
+        // Attribute-0: 산사모-우울, which follows allies, digs in and heals them.
+        BurrowHealer,
     }
     public enum EncounterWaveStartCondition { RoomEntered, PreviousWaveCleared }
     public enum EncounterWaveCompletionCondition { AllRequiredEnemiesDefeated }
@@ -332,25 +342,62 @@ namespace TrickalFanGame.Room
             if (waveIndex < 0 || waveIndex >= waves.Length)
             { error = $"Encounter '{encounterId}' has no wave index {waveIndex}."; return false; }
 
+            EncounterWaveDefinition wave = waves[waveIndex];
+            return TryResolveRules($"Encounter '{encounterId}'", wave.WaveNumber, wave.SpawnRules, template,
+                floorNumber, connections, waveIndex, selectionSeed, minimumPlayerDistance, minimumDoorDistance, null,
+                out resolved, out error);
+        }
+
+        // One wave's spawn rules placed on a room: shared by Encounter waves and the fixed waves of a room Layout
+        // (Layout-Wave). The seed and the wave index pick the same roles and points on every rebuild.
+        // Layout-Wave-2: ruleSpawnPoints (optional, per rule) limits a rule to those 0-based SpawnPoints.
+        public static bool TryResolveRules(string owner, int waveNumber, IReadOnlyList<EncounterSpawnRule> rules,
+            RoomTemplateDefinition template, int floorNumber, IReadOnlyList<GeneratedRoomConnection> connections,
+            int waveIndex, int selectionSeed, float minimumPlayerDistance, float minimumDoorDistance,
+            IReadOnlyList<IReadOnlyList<int>> ruleSpawnPoints,
+            out ResolvedEncounterSpawn[] resolved, out string error)
+        {
+            resolved = Array.Empty<ResolvedEncounterSpawn>();
             List<RoomTemplateDoor> activeDoors = ResolveActiveDoors(template, connections);
             HashSet<int> occupied = new();
             List<ResolvedEncounterSpawn> result = new();
-            EncounterWaveDefinition wave = waves[waveIndex];
-            for (int ruleIndex = 0; ruleIndex < wave.SpawnRules.Count; ruleIndex++)
+            bool IsSafe(Vector2 point, IReadOnlyList<RoomTemplateDoor> doors)
             {
-                EncounterSpawnRule rule = wave.SpawnRules[ruleIndex];
+                foreach (RoomTemplateDoor door in doors)
+                    if (Vector2.Distance(point, door.SafeEntryPosition) < minimumPlayerDistance ||
+                        Vector2.Distance(point, door.SlotPosition) < minimumDoorDistance)
+                        return false;
+                return true;
+            }
+
+            for (int ruleIndex = 0; ruleIndex < rules.Count; ruleIndex++)
+            {
+                EncounterSpawnRule rule = rules[ruleIndex];
                 int[] candidates;
-                if (!string.IsNullOrWhiteSpace(rule.SpawnPointId))
+                IReadOnlyList<int> pinned = ruleSpawnPoints != null && ruleIndex < ruleSpawnPoints.Count
+                    ? ruleSpawnPoints[ruleIndex]
+                    : null;
+                if (pinned != null && pinned.Count > 0)
+                {
+                    if (pinned.Any(index => index < 0 || index >= template.SpawnPoints.Count))
+                    {
+                        error = $"{owner} wave {waveNumber} rule {ruleIndex + 1} pins a SpawnPoint the room lacks.";
+                        return false;
+                    }
+
+                    candidates = pinned.Distinct().ToArray();
+                }
+                else if (!string.IsNullOrWhiteSpace(rule.SpawnPointId))
                 {
                     if (!template.TryResolveSpawnReference(rule.SpawnPointId, null, rule.Count,
                             out candidates, out error))
-                    { error = $"Encounter '{encounterId}' wave {wave.WaveNumber} cannot resolve a spawn reference. {error}"; return false; }
+                    { error = $"{owner} wave {waveNumber} cannot resolve a spawn reference. {error}"; return false; }
                 }
                 else
                 {
                     if (!template.TryResolveSpawnReference(null, rule.SpawnGroupId,
                             template.SpawnPoints.Count, out candidates, out error))
-                    { error = $"Encounter '{encounterId}' wave {wave.WaveNumber} cannot resolve a spawn group. {error}"; return false; }
+                    { error = $"{owner} wave {waveNumber} cannot resolve a spawn group. {error}"; return false; }
                 }
 
                 for (int instanceIndex = 0; instanceIndex < rule.Count; instanceIndex++)
@@ -365,7 +412,7 @@ namespace TrickalFanGame.Room
                     {
                         string required = string.Join(", ", rule.Candidates.Select(candidate =>
                             $"{candidate.EnemyRole} requires {RoomTemplateDefinition.RequiredPlacementRole(candidate.EnemyRole)}"));
-                        error = $"Encounter '{encounterId}' wave {wave.WaveNumber} cannot place candidate " +
+                        error = $"{owner} wave {waveNumber} cannot place candidate " +
                                 $"{instanceIndex + 1} of rule {ruleIndex + 1} on a role-compatible, safe, unused " +
                                 $"SpawnPoint ({required}).";
                         return false;
@@ -383,7 +430,10 @@ namespace TrickalFanGame.Room
                                              selectedRole == EncounterEnemyRole.FourWayShooter ||
                                              selectedRole == EncounterEnemyRole.SplittingChaser ||
                                              selectedRole == EncounterEnemyRole.SelfDestruct ||
-                                             selectedRole == EncounterEnemyRole.Ambusher;
+                                             selectedRole == EncounterEnemyRole.Ambusher ||
+                                             selectedRole == EncounterEnemyRole.RibbonLasher ||
+                                             selectedRole == EncounterEnemyRole.Leaper ||
+                                             selectedRole == EncounterEnemyRole.BurrowHealer;
                     int selectedIndex = prefersCloseSpawn
                         ? available.OrderBy(index => template.SpawnPoints[index].sqrMagnitude)
                             .ThenBy(index => index).First()
@@ -415,15 +465,6 @@ namespace TrickalFanGame.Room
             }
 
             throw new InvalidOperationException("A positive weighted enemy candidate list must select a role.");
-        }
-
-        private bool IsSafe(Vector2 point, IReadOnlyList<RoomTemplateDoor> doors)
-        {
-            foreach (RoomTemplateDoor door in doors)
-                if (Vector2.Distance(point, door.SafeEntryPosition) < minimumPlayerDistance ||
-                    Vector2.Distance(point, door.SlotPosition) < minimumDoorDistance)
-                    return false;
-            return true;
         }
 
         private static List<RoomTemplateDoor> ResolveActiveDoors(RoomTemplateDefinition template,
@@ -550,7 +591,9 @@ namespace TrickalFanGame.Room
 
             int seed = FloorGenerator.DeriveSeed(node.ContentSeed, contentVersion, EncounterSalt);
             FloorDifficultyRange range = default;
-            if (table != null && !table.TryGetFloorRange(node.FloorNumber, out range))
+            // Density-0: the floor range and tier bands of the room's size.
+            string sizeId = node.Template.Profile.ProfileId;
+            if (table != null && !table.TryGetFloorRange(node.FloorNumber, sizeId, out range))
             { error = $"Room {node.RoomId} has no difficulty range for floor {node.FloorNumber}."; return false; }
             IEnumerable<EncounterDefinition> resolving = table != null
                 ? candidates
@@ -572,8 +615,13 @@ namespace TrickalFanGame.Room
 
                 if (table == null)
                 {
-                    node.AssignEncounter(candidate, EnemyVariantRules.AssignVariants(resolvedWaves, node.FloorNumber,
-                        node.ContentSeed, contentVersion));
+                    if (!node.Template.TryApplyLayoutWaves(candidate, resolvedWaves, node.FloorNumber,
+                            node.DirectionalConnections, seed, out ResolvedEncounterSpawn[][] planned,
+                            out RoomLayoutVariant[][] plannedVariants, out error))
+                    { error = $"Room {node.RoomId} could not place its Layout waves. {error}"; return false; }
+                    node.AssignEncounter(candidate, EnemyVariantRules.ApplyLayoutVariants(
+                        EnemyVariantRules.AssignVariants(planned, node.FloorNumber, node.ContentSeed, contentVersion),
+                        plannedVariants, node.ContentSeed, contentVersion));
                     error = null;
                     return true;
                 }
@@ -581,7 +629,7 @@ namespace TrickalFanGame.Room
                 if (!table.TryScore(resolvedWaves, node.Template.LayoutDifficultyModifier, out int score, out error))
                 { error = $"Room {node.RoomId} could not score Encounter '{candidate.EncounterId}'. {error}"; return false; }
                 if (range.Contains(score))
-                    scored.Add(new ScoredEncounter(candidate, resolvedWaves, score, table.Classify(score)));
+                    scored.Add(new ScoredEncounter(candidate, resolvedWaves, score, table.Classify(score, sizeId)));
             }
 
             if (scored.Count == 0)
@@ -598,11 +646,29 @@ namespace TrickalFanGame.Room
                 .Where(entry => Math.Abs((int)entry.Tier - (int)target) == closestGap).ToArray();
             ScoredEncounter selected = pool[(int)(unchecked((uint)seed) % (uint)pool.Length)];
             int availableTierMask = scored.Aggregate(0, (mask, entry) => mask | 1 << (int)entry.Tier);
+            // Layout-Wave: a room Layout's own waves replace or extend the chosen Encounter's, so the stored score
+            // and tier are those of the waves the room really fights.
+            int finalScore = selected.Score;
+            RoomDifficultyTier finalTier = selected.Tier;
+            ResolvedEncounterSpawn[][] finalWaves = selected.Waves;
+            RoomLayoutVariant[][] layoutVariants = null;
+            if (node.Template.HasLayoutWaves)
+            {
+                if (!node.Template.TryApplyLayoutWaves(selected.Definition, selected.Waves, node.FloorNumber,
+                        node.DirectionalConnections, seed, out finalWaves, out layoutVariants, out error))
+                { error = $"Room {node.RoomId} could not place its Layout waves. {error}"; return false; }
+                if (!table.TryScore(finalWaves, node.Template.LayoutDifficultyModifier, out finalScore, out error))
+                { error = $"Room {node.RoomId} could not score its Layout waves. {error}"; return false; }
+                finalTier = table.Classify(finalScore, sizeId);
+            }
+
             // Variant-0: the stored score stays the Encounter's own score (selection and floor range); the elite's
             // extra threat is read separately with RoomDifficultyTable.TryScoreVariants. Variant-1 champions too.
-            node.AssignEncounter(selected.Definition, EnemyVariantRules.AssignVariants(selected.Waves, node.FloorNumber,
-                    node.ContentSeed, contentVersion),
-                new GeneratedRoomDifficulty(distance, selected.Score, selected.Tier, target, availableTierMask));
+            // Layout-Wave-2: a Layout entry's fixed variant replaces the roll on its enemies.
+            node.AssignEncounter(selected.Definition, EnemyVariantRules.ApplyLayoutVariants(
+                    EnemyVariantRules.AssignVariants(finalWaves, node.FloorNumber, node.ContentSeed, contentVersion),
+                    layoutVariants, node.ContentSeed, contentVersion),
+                new GeneratedRoomDifficulty(distance, finalScore, finalTier, target, availableTierMask));
             error = null;
             return true;
         }

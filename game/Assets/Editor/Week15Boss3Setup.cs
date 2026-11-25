@@ -93,7 +93,7 @@ namespace TrickalFanGame.Editor
                     new BossPatternDefinition("crayon-approach-sword-swing",
                         BossPatternExecution.CrayonHeroApproachSwing, 0.05f, 2.2f, 0.2f, 0.2f),
                     new BossPatternDefinition("crayon-short-dash-chain",
-                        BossPatternExecution.CrayonHeroDashChain, 0.2f, 0.75f, 0.3f, 0.45f),
+                        BossPatternExecution.CrayonHeroDashChain, 0.35f, 0.75f, 0.8f, 0.45f),
                 });
 
                 CrayonHeroBossPatternRuntime runtime = contents.GetComponent<CrayonHeroBossPatternRuntime>();
@@ -107,9 +107,10 @@ namespace TrickalFanGame.Editor
                     Load<GameObject>(ShieldPrefabPath),
                 }, 4, 2.5f, 0.15f);
                 runtime.ConfigureSwing(3.2f, 1.35f, 2.4f, 3f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Medium);
-                runtime.ConfigureSwingRecognition(1.4f);
+                runtime.ConfigureSwingRecognition(1.15f);
                 runtime.ConfigureSwingMoveSpeed(0.6f);
-                runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, EnemyDamageTier.Light);
+                runtime.ConfigureDash(0.05f, 0.7f, 1.2f, EnemyDamageTier.Light);
+                runtime.ConfigureDashRift(0.35f, 0.3f, 0.1f, 0.8f, 4.2f, 0.9f, 1.2f);
                 runtime.ConfigureSelection(3, 9f, 7.5f, 45, 30, 10, 15);
                 runtime.ConfigureAwakening(new[] { 0.3f, 0.7f, 1f, 0.25f }, 0.65f, 0.02f);
 

@@ -154,10 +154,12 @@ namespace TrickalFanGame.Editor
                     $"Pit Layout '{spec.TemplateId}' must be a Normal room on every floor of its profile.");
                 Assert(template.LayoutDifficultyModifier == Week19Difficulty1Setup.ObstacleLayoutModifier,
                     $"Pit Layout '{spec.TemplateId}' must keep the +1 Layout difficulty modifier.");
-                Assert(template.SpawnPoints.Count == spawnCounts[spec.ProfileId] &&
+                // Density-0 tops every room up to its size's SpawnPoint target, after the authored points.
+                Assert(template.SpawnPoints.Count == Density0Setup.SpawnPointTarget(spec.ProfileId) &&
+                       template.SpawnPoints.Count >= spawnCounts[spec.ProfileId] &&
                        template.SpawnPoints.Take(Week19Encounter4Setup.BaseSpawnPointCount)
                            .SequenceEqual(spec.SpawnPoints),
-                    $"Pit Layout '{spec.TemplateId}' must keep its authored SpawnPoints plus Encounter-4's.");
+                    $"Pit Layout '{spec.TemplateId}' must keep its authored SpawnPoints and reach its size's target.");
 
                 GameObject prefab = template.RoomPrefabAsset;
                 RoomPit[] pits = prefab.GetComponentsInChildren<RoomPit>(true);

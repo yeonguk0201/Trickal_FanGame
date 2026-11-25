@@ -86,6 +86,41 @@ namespace TrickalFanGame.Room
         public int FarWeight => farWeight;
     }
 
+    // Density-0 (docs/28 §10.2): a room size (Room Profile) with its own enemy counts, floor ranges and tier bands,
+    // because a large room holds far more enemies than a small one and would otherwise always score Hard.
+    [Serializable]
+    public struct RoomSizeDifficulty
+    {
+        [SerializeField] private string profileId;
+        [SerializeField, Min(0)] private int minimumRoomEnemies;
+        [SerializeField, Min(0)] private int maximumRoomEnemies;
+        [SerializeField, Min(0)] private int maximumWaveEnemies;
+        [SerializeField, Min(0)] private int maximumWaveRearFiring;
+        [SerializeField] private RoomDifficultyTierBand[] tierBands;
+        [SerializeField] private FloorDifficultyRange[] floorRanges;
+
+        public RoomSizeDifficulty(string configuredProfileId, int configuredMinimumRoomEnemies,
+            int configuredMaximumRoomEnemies, int configuredMaximumWaveEnemies, int configuredMaximumWaveRearFiring,
+            RoomDifficultyTierBand[] configuredTierBands, FloorDifficultyRange[] configuredFloorRanges)
+        {
+            profileId = configuredProfileId;
+            minimumRoomEnemies = configuredMinimumRoomEnemies;
+            maximumRoomEnemies = configuredMaximumRoomEnemies;
+            maximumWaveEnemies = configuredMaximumWaveEnemies;
+            maximumWaveRearFiring = configuredMaximumWaveRearFiring;
+            tierBands = configuredTierBands ?? Array.Empty<RoomDifficultyTierBand>();
+            floorRanges = configuredFloorRanges ?? Array.Empty<FloorDifficultyRange>();
+        }
+
+        public string ProfileId => profileId;
+        public int MinimumRoomEnemies => minimumRoomEnemies;
+        public int MaximumRoomEnemies => maximumRoomEnemies;
+        public int MaximumWaveEnemies => maximumWaveEnemies;
+        public int MaximumWaveRearFiring => maximumWaveRearFiring;
+        public IReadOnlyList<RoomDifficultyTierBand> TierBands => tierBands ?? Array.Empty<RoomDifficultyTierBand>();
+        public IReadOnlyList<FloorDifficultyRange> FloorRanges => floorRanges ?? Array.Empty<FloorDifficultyRange>();
+    }
+
     // Stored on a generated combat room so revisits and tools read the same difficulty without re-rolling.
     public readonly struct GeneratedRoomDifficulty
     {
@@ -124,11 +159,17 @@ namespace TrickalFanGame.Room
         [SerializeField, Min(0)] private int maximumWaveEnemies;
         [SerializeField, Min(0)] private int maximumWaveRearFiring;
 
+        // Density-0: per room size overrides. A size without an entry uses the table-wide values.
+        [SerializeField] private RoomSizeDifficulty[] sizeDifficulties = Array.Empty<RoomSizeDifficulty>();
+
+        // The table-wide limits; a room size with a RoomSizeDifficulty entry uses its own (SizeLimits).
         public int MinimumRoomEnemies => minimumRoomEnemies;
         public int MaximumRoomEnemies => maximumRoomEnemies;
         public int MaximumWaveEnemies => maximumWaveEnemies;
         public int MaximumWaveRearFiring => maximumWaveRearFiring;
         public bool HasEncounterLimits => maximumRoomEnemies > 0;
+        public IReadOnlyList<RoomSizeDifficulty> SizeDifficulties =>
+            sizeDifficulties ?? Array.Empty<RoomSizeDifficulty>();
 
         public void ConfigureEncounterLimits(int minimumRoom, int maximumRoom, int maximumWave, int maximumWaveRear)
         {
@@ -138,18 +179,80 @@ namespace TrickalFanGame.Room
             maximumWaveRearFiring = maximumWaveRear;
         }
 
-        public bool TryValidateEncounterSize(EncounterDefinition definition, out string error)
+        public void ConfigureSizeDifficulties(RoomSizeDifficulty[] configured)
         {
-            if (!HasEncounterLimits)
+            sizeDifficulties = configured ?? Array.Empty<RoomSizeDifficulty>();
+        }
+
+        public bool TryGetSizeDifficulty(string profileId, out RoomSizeDifficulty size)
+        {
+            foreach (RoomSizeDifficulty candidate in SizeDifficulties)
             {
-                error = null;
+                if (!string.Equals(candidate.ProfileId, profileId, StringComparison.Ordinal)) continue;
+                size = candidate;
                 return true;
             }
 
+            size = default;
+            return false;
+        }
+
+        // The enemy count limits a room of the profile uses. False when neither the size nor the table sets any.
+        public bool TryGetEncounterLimits(string profileId, out int minimumRoom, out int maximumRoom,
+            out int maximumWave, out int maximumWaveRear)
+        {
+            if (TryGetSizeDifficulty(profileId, out RoomSizeDifficulty size))
+            {
+                minimumRoom = size.MinimumRoomEnemies;
+                maximumRoom = size.MaximumRoomEnemies;
+                maximumWave = size.MaximumWaveEnemies;
+                maximumWaveRear = size.MaximumWaveRearFiring;
+                return true;
+            }
+
+            minimumRoom = minimumRoomEnemies;
+            maximumRoom = maximumRoomEnemies;
+            maximumWave = maximumWaveEnemies;
+            maximumWaveRear = maximumWaveRearFiring;
+            return HasEncounterLimits;
+        }
+
+        // Every profile the Encounter allows must accept its size.
+        public bool TryValidateEncounterSize(EncounterDefinition definition, out string error)
+        {
             if (definition == null)
             {
                 error = "Encounter size validation requires an Encounter.";
                 return false;
+            }
+
+            if (definition.AllowedProfiles == null || definition.AllowedProfiles.Count == 0)
+                return TryValidateEncounterSize(definition, minimumRoomEnemies, maximumRoomEnemies,
+                    maximumWaveEnemies, maximumWaveRearFiring, HasEncounterLimits, out error);
+
+            foreach (RoomProfile profile in definition.AllowedProfiles)
+            {
+                bool limited = TryGetEncounterLimits(profile != null ? profile.ProfileId : null, out int minimumRoom,
+                    out int maximumRoom, out int maximumWave, out int maximumWaveRear);
+                if (!TryValidateEncounterSize(definition, minimumRoom, maximumRoom, maximumWave, maximumWaveRear,
+                        limited, out error))
+                {
+                    if (profile != null) error += $" (room size '{profile.ProfileId}')";
+                    return false;
+                }
+            }
+
+            error = null;
+            return true;
+        }
+
+        private static bool TryValidateEncounterSize(EncounterDefinition definition, int minimumRoom,
+            int maximumRoom, int maximumWave, int maximumWaveRear, bool limited, out string error)
+        {
+            if (!limited)
+            {
+                error = null;
+                return true;
             }
 
             int total = 0;
@@ -167,21 +270,21 @@ namespace TrickalFanGame.Room
                         rearCount += rule.Count;
                 }
 
-                if (waveCount > maximumWaveEnemies || rearCount > maximumWaveRearFiring)
+                if (waveCount > maximumWave || rearCount > maximumWaveRear)
                 {
                     error = $"Encounter '{definition.EncounterId}' wave {wave.WaveNumber} has {waveCount} enemies " +
-                            $"({rearCount} rear firing), above the {maximumWaveEnemies} per wave " +
-                            $"({maximumWaveRearFiring} rear firing) limit.";
+                            $"({rearCount} rear firing), above the {maximumWave} per wave " +
+                            $"({maximumWaveRear} rear firing) limit.";
                     return false;
                 }
 
                 total += waveCount;
             }
 
-            if (total < minimumRoomEnemies || total > maximumRoomEnemies)
+            if (total < minimumRoom || total > maximumRoom)
             {
                 error = $"Encounter '{definition.EncounterId}' has {total} enemies, outside the room range " +
-                        $"{minimumRoomEnemies}~{maximumRoomEnemies}.";
+                        $"{minimumRoom}~{maximumRoom}.";
                 return false;
             }
 
@@ -226,36 +329,27 @@ namespace TrickalFanGame.Room
             }
 
             RoomDifficultyTier[] tiers = (RoomDifficultyTier[])Enum.GetValues(typeof(RoomDifficultyTier));
-            if (tierBands == null || tierBands.Length != tiers.Length)
-            {
-                error = "Room difficulty table needs exactly one band per difficulty tier.";
+            if (!TryValidateBands(tierBands, "Room difficulty table", out error) ||
+                !TryValidateFloorRanges(floorRanges, "Room difficulty table", out error))
                 return false;
-            }
 
-            for (int index = 0; index < tierBands.Length; index++)
+            HashSet<string> sizeIds = new(StringComparer.Ordinal);
+            foreach (RoomSizeDifficulty size in SizeDifficulties)
             {
-                if (tierBands[index].Tier != tiers[index] ||
-                    (index == 0 ? tierBands[index].MinimumScore != 0
-                        : tierBands[index].MinimumScore <= tierBands[index - 1].MinimumScore))
+                string owner = $"Room difficulty table size '{size.ProfileId}'";
+                if (string.IsNullOrWhiteSpace(size.ProfileId) || !sizeIds.Add(size.ProfileId))
                 {
-                    error = "Room difficulty tier bands must follow tier order, start at 0, and strictly increase.";
+                    error = $"{owner} has no profile ID or is duplicated.";
                     return false;
                 }
-            }
 
-            if (floorRanges == null || floorRanges.Length == 0)
-            {
-                error = "Room difficulty table needs at least one floor range.";
-                return false;
-            }
-
-            HashSet<int> floors = new();
-            foreach (FloorDifficultyRange range in floorRanges)
-            {
-                if (range.FloorNumber < 1 || range.MinimumScore < 0 || range.MaximumScore < range.MinimumScore ||
-                    !floors.Add(range.FloorNumber))
+                if (!TryValidateBands(size.TierBands, owner, out error) ||
+                    !TryValidateFloorRanges(size.FloorRanges, owner, out error))
+                    return false;
+                if (!AreLimitsConsistent(size.MinimumRoomEnemies, size.MaximumRoomEnemies, size.MaximumWaveEnemies,
+                        size.MaximumWaveRearFiring))
                 {
-                    error = $"Room difficulty table has an invalid or duplicated range for floor {range.FloorNumber}.";
+                    error = $"{owner} has inconsistent Encounter size limits.";
                     return false;
                 }
             }
@@ -276,10 +370,8 @@ namespace TrickalFanGame.Room
                 }
             }
 
-            if (HasEncounterLimits &&
-                (minimumRoomEnemies < 1 || maximumRoomEnemies < minimumRoomEnemies || maximumWaveEnemies < 1 ||
-                 maximumWaveEnemies > maximumRoomEnemies || maximumWaveRearFiring < 1 ||
-                 maximumWaveRearFiring > maximumWaveEnemies))
+            if (HasEncounterLimits && !AreLimitsConsistent(minimumRoomEnemies, maximumRoomEnemies,
+                    maximumWaveEnemies, maximumWaveRearFiring))
             {
                 error = "Room difficulty table has inconsistent Encounter size limits.";
                 return false;
@@ -290,6 +382,60 @@ namespace TrickalFanGame.Room
             {
                 error = "Room difficulty distance weights need a positive total at both ends of the curve.";
                 return false;
+            }
+
+            error = null;
+            return true;
+        }
+
+        private static bool AreLimitsConsistent(int minimumRoom, int maximumRoom, int maximumWave,
+            int maximumWaveRear) =>
+            minimumRoom >= 1 && maximumRoom >= minimumRoom && maximumWave >= 1 && maximumWave <= maximumRoom &&
+            maximumWaveRear >= 1 && maximumWaveRear <= maximumWave;
+
+        private static bool TryValidateBands(IReadOnlyList<RoomDifficultyTierBand> bands, string owner,
+            out string error)
+        {
+            RoomDifficultyTier[] tiers = (RoomDifficultyTier[])Enum.GetValues(typeof(RoomDifficultyTier));
+            if (bands == null || bands.Count != tiers.Length)
+            {
+                error = $"{owner} needs exactly one band per difficulty tier.";
+                return false;
+            }
+
+            for (int index = 0; index < bands.Count; index++)
+            {
+                if (bands[index].Tier != tiers[index] ||
+                    (index == 0 ? bands[index].MinimumScore != 0
+                        : bands[index].MinimumScore <= bands[index - 1].MinimumScore))
+                {
+                    error = $"{owner} tier bands must follow tier order, start at 0, and strictly increase.";
+                    return false;
+                }
+            }
+
+            error = null;
+            return true;
+        }
+
+        private static bool TryValidateFloorRanges(IReadOnlyList<FloorDifficultyRange> ranges, string owner,
+            out string error)
+        {
+            if (ranges == null || ranges.Count == 0)
+            {
+                error = $"{owner} needs at least one floor range.";
+                return false;
+            }
+
+            HashSet<int> floors = new();
+            foreach (FloorDifficultyRange range in ranges)
+            {
+                if (range.FloorNumber < 1 || range.MinimumScore < 0 || range.MaximumScore < range.MinimumScore ||
+                    !floors.Add(range.FloorNumber))
+                {
+                    error = $"{owner} has an invalid or duplicated range for floor {range.FloorNumber}.";
+                    return false;
+                }
             }
 
             error = null;
@@ -309,10 +455,18 @@ namespace TrickalFanGame.Room
             return false;
         }
 
-        public RoomDifficultyTier Classify(int score)
+        // The table-wide bands. Generated rooms are classified with their size's bands (the profile overload).
+        public RoomDifficultyTier Classify(int score) => Classify(score, tierBands);
+
+        public RoomDifficultyTier Classify(int score, string profileId) =>
+            TryGetSizeDifficulty(profileId, out RoomSizeDifficulty size)
+                ? Classify(score, size.TierBands)
+                : Classify(score, tierBands);
+
+        private static RoomDifficultyTier Classify(int score, IReadOnlyList<RoomDifficultyTierBand> bands)
         {
-            RoomDifficultyTier result = tierBands[0].Tier;
-            foreach (RoomDifficultyTierBand band in tierBands)
+            RoomDifficultyTier result = bands[0].Tier;
+            foreach (RoomDifficultyTierBand band in bands)
             {
                 if (score >= band.MinimumScore) result = band.Tier;
             }
@@ -320,9 +474,18 @@ namespace TrickalFanGame.Room
             return result;
         }
 
-        public bool TryGetFloorRange(int floorNumber, out FloorDifficultyRange range)
+        public bool TryGetFloorRange(int floorNumber, out FloorDifficultyRange range) =>
+            TryGetFloorRange(floorNumber, floorRanges, out range);
+
+        public bool TryGetFloorRange(int floorNumber, string profileId, out FloorDifficultyRange range) =>
+            TryGetSizeDifficulty(profileId, out RoomSizeDifficulty size)
+                ? TryGetFloorRange(floorNumber, size.FloorRanges, out range)
+                : TryGetFloorRange(floorNumber, floorRanges, out range);
+
+        private static bool TryGetFloorRange(int floorNumber, IReadOnlyList<FloorDifficultyRange> ranges,
+            out FloorDifficultyRange range)
         {
-            foreach (FloorDifficultyRange candidate in floorRanges ?? Array.Empty<FloorDifficultyRange>())
+            foreach (FloorDifficultyRange candidate in ranges ?? Array.Empty<FloorDifficultyRange>())
             {
                 if (candidate.FloorNumber != floorNumber) continue;
                 range = candidate;

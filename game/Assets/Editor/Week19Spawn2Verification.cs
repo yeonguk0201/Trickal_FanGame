@@ -194,8 +194,9 @@ namespace TrickalFanGame.Editor
                     Assert(definition.TryValidate(out string error), error);
                     Assert(definition.AllowedProfiles.Count == 1 &&
                            definition.AllowedProfiles[0].ProfileId == spec.ProfileId &&
-                           definition.Waves.Count == 2,
-                        $"Encounter '{id}' must be profile-specific and contain two waves.");
+                           // Density-0 gives bigger rooms more waves; small keeps two.
+                           (definition.Waves.Count == 2 || !Density0Setup.IsSmall(spec.ProfileId)),
+                        $"Encounter '{id}' must be profile-specific and contain two waves in a small room.");
                     EncounterSpawnRule rear = pattern == "pressure"
                         ? definition.Waves[0].SpawnRules[1]
                         : definition.Waves[0].SpawnRules[0];
@@ -267,8 +268,10 @@ namespace TrickalFanGame.Editor
                         $"Profile '{spec.ProfileId}' changed candidates for identical seed {seed}.");
                     Assert(first.All(spawn => template.SupportsEnemyRole(spawn.SpawnPointIndex, spawn.Role)),
                         $"Profile '{spec.ProfileId}' selected a role-incompatible SpawnPoint.");
-                    EncounterEnemyRole rearRole = first[1].Role;
-                    Assert(rearRole == EncounterEnemyRole.Ranged || rearRole == EncounterEnemyRole.Sniper,
+                    // The rear rule comes after the melee rule, whatever count Density-0 gives it.
+                    EncounterEnemyRole rearRole = first[first.Length - 1].Role;
+                    Assert(rearRole is EncounterEnemyRole.Ranged or EncounterEnemyRole.Sniper or
+                            EncounterEnemyRole.FanShooter or EncounterEnemyRole.BoomerangThrower,
                         $"Profile '{spec.ProfileId}' rear slot selected '{rearRole}'.");
                     if (rearRole == EncounterEnemyRole.Sniper) sniperCount++;
                 }
@@ -278,7 +281,11 @@ namespace TrickalFanGame.Editor
                     new EncounterEnemyCandidate(EncounterEnemyRole.Sniper, spec.SniperWeight), floor);
                 int quickWeight = EncounterEnemyFloorPool.EffectiveWeight(
                     new EncounterEnemyCandidate(EncounterEnemyRole.Ranged, spec.QuickRangedWeight), floor);
-                float expected = sniperWeight / (float)(sniperWeight + quickWeight);
+                // Attribute-0's two throwers share the rear slot from their own floors.
+                int throwerWeight = EnemyAttribute0Setup.Extend(Density0Setup.SlotKind.PressureRear,
+                        Array.Empty<EncounterEnemyCandidate>())
+                    .Sum(candidate => EncounterEnemyFloorPool.EffectiveWeight(candidate, floor));
+                float expected = sniperWeight / (float)(sniperWeight + quickWeight + throwerWeight);
                 Assert(sniperCount > 0 && sniperCount < DistributionSeedCount &&
                        Mathf.Abs(observed - expected) <= 0.025f,
                     $"Profile '{spec.ProfileId}' expected {expected:P0} snipers but observed {observed:P1}.");
@@ -305,7 +312,10 @@ namespace TrickalFanGame.Editor
                            WaveSignature(room.ResolvedEncounterWaves) ==
                            WaveSignature(repeated.ResolvedEncounterWaves),
                         $"Seed {seed} room '{room.RoomId}' did not persist the same candidate selection.");
-                    Assert(room.ResolvedEncounterWaves.Count == room.Encounter.Waves.Count,
+                    // Layout-Wave: a room Layout with its own waves stores that many instead.
+                    Assert(room.ResolvedEncounterWaves.Count == (room.Template.HasLayoutWaves
+                               ? room.Template.LayoutWaves.Count
+                               : room.Encounter.Waves.Count),
                         $"Seed {seed} room '{room.RoomId}' did not store every resolved wave.");
                     foreach (ResolvedEncounterSpawn spawn in room.ResolvedEncounterWaves.SelectMany(wave => wave))
                     {

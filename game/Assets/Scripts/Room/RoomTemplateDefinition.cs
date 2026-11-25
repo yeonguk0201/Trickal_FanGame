@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -57,6 +58,73 @@ namespace TrickalFanGame.Room
         public Vector2 LocalPosition => localPosition;
     }
 
+    // Layout-Wave-2 (2026-11-25): what a fixed wave entry makes of its enemies. Random keeps the floor's elite and
+    // champion rolls; the others override them (Normal blocks both). Append only: stored in room templates.
+    public enum RoomLayoutVariant
+    {
+        Random = 0,
+        Normal = 1,
+        Elite = 2,
+        // A champion whose death property is picked from the slot's seed, as a rolled champion's is.
+        Champion = 3,
+        ChampionPuddle = 4,
+        ChampionShots = 5,
+        ChampionBlast = 6,
+        ChampionUndying = 7,
+    }
+
+    // One entry of a fixed Layout wave: its enemies, the SpawnPoints they may use (0-based; empty means any
+    // role-compatible point) and the variant they take.
+    [Serializable]
+    public struct RoomLayoutWaveEntry
+    {
+        [SerializeField] private EncounterSpawnRule rule;
+        [SerializeField] private int[] spawnPoints;
+        [SerializeField] private RoomLayoutVariant variant;
+
+        public RoomLayoutWaveEntry(EncounterSpawnRule configuredRule, int[] configuredSpawnPoints = null,
+            RoomLayoutVariant configuredVariant = RoomLayoutVariant.Random)
+        {
+            rule = configuredRule;
+            spawnPoints = configuredSpawnPoints != null ? (int[])configuredSpawnPoints.Clone() : Array.Empty<int>();
+            variant = configuredVariant;
+        }
+
+        public EncounterSpawnRule Rule => rule;
+        public IReadOnlyList<int> SpawnPoints => spawnPoints ?? Array.Empty<int>();
+        public bool IsPinned => SpawnPoints.Count > 0;
+        public RoomLayoutVariant Variant => variant;
+    }
+
+    // Layout-Wave (2026-11-24): one wave a room Layout fixes. An auto wave takes the wave of the Encounter the room
+    // rolls (the old rule); a fixed wave places its own entries. A room without layout waves keeps the old rule
+    // entirely.
+    [Serializable]
+    public struct RoomLayoutWave
+    {
+        [SerializeField] private bool auto;
+        [SerializeField] private RoomLayoutWaveEntry[] entries;
+
+        public RoomLayoutWave(bool configuredAuto, EncounterSpawnRule[] configuredSpawnRules)
+            : this(configuredAuto, configuredSpawnRules?.Select(rule => new RoomLayoutWaveEntry(rule)).ToArray())
+        {
+        }
+
+        public RoomLayoutWave(bool configuredAuto, RoomLayoutWaveEntry[] configuredEntries)
+        {
+            auto = configuredAuto;
+            entries = configuredAuto
+                ? Array.Empty<RoomLayoutWaveEntry>()
+                : configuredEntries ?? Array.Empty<RoomLayoutWaveEntry>();
+        }
+
+        public static RoomLayoutWave Auto => new(true, (RoomLayoutWaveEntry[])null);
+        public bool IsAuto => auto;
+        public IReadOnlyList<RoomLayoutWaveEntry> Entries => entries ?? Array.Empty<RoomLayoutWaveEntry>();
+        public IReadOnlyList<EncounterSpawnRule> SpawnRules => Entries.Select(entry => entry.Rule).ToArray();
+        public int FixedEnemyCount => auto ? 0 : Entries.Sum(entry => entry.Rule.Count);
+    }
+
     [CreateAssetMenu(fileName = "RoomTemplate", menuName = "Trickal Fan Game/Room Template")]
     public sealed class RoomTemplateDefinition : ScriptableObject
     {
@@ -76,8 +144,10 @@ namespace TrickalFanGame.Room
         // (authored chests, many resource obstacles) use a lower weight.
         [SerializeField, Min(1)] private int selectionWeight = DefaultSelectionWeight;
         [SerializeField] private RoomTemplateChest[] authoredChests = Array.Empty<RoomTemplateChest>();
+        [SerializeField] private RoomLayoutWave[] layoutWaves = Array.Empty<RoomLayoutWave>();
 
         public const int DefaultSelectionWeight = 100;
+        public const int MaximumLayoutWaves = 6;
 
         public string TemplateId => templateId;
         public RoomProfile Profile => profile;
@@ -91,6 +161,8 @@ namespace TrickalFanGame.Room
         public int LayoutDifficultyModifier => layoutDifficultyModifier;
         public int SelectionWeight => Mathf.Max(1, selectionWeight);
         public IReadOnlyList<RoomTemplateChest> AuthoredChests => authoredChests ?? Array.Empty<RoomTemplateChest>();
+        public IReadOnlyList<RoomLayoutWave> LayoutWaves => layoutWaves ?? Array.Empty<RoomLayoutWave>();
+        public bool HasLayoutWaves => LayoutWaves.Count > 0;
 
         public void ConfigureLayoutDifficultyModifier(int modifier)
         {
@@ -107,6 +179,88 @@ namespace TrickalFanGame.Room
             authoredChests = chests != null ? (RoomTemplateChest[])chests.Clone() : Array.Empty<RoomTemplateChest>();
         }
 
+        public void ConfigureLayoutWaves(RoomLayoutWave[] waves)
+        {
+            layoutWaves = waves != null ? (RoomLayoutWave[])waves.Clone() : Array.Empty<RoomLayoutWave>();
+        }
+
+        // Layout-Wave: the room's waves once the Encounter is chosen. Auto waves reuse the Encounter's resolved
+        // waves (cycling when the Layout asks for more waves than it has); fixed waves are placed with the
+        // Encounter's safety distances and the same SpawnPoint, door and floor rules as any Encounter wave.
+        public bool TryApplyLayoutWaves(EncounterDefinition encounter, IReadOnlyList<ResolvedEncounterSpawn[]> encounterWaves,
+            int floorNumber, IReadOnlyList<GeneratedRoomConnection> connections, int selectionSeed,
+            out ResolvedEncounterSpawn[][] waves, out string error) =>
+            TryApplyLayoutWaves(encounter, encounterWaves, floorNumber, connections, selectionSeed, out waves, out _,
+                out error);
+
+        // Layout-Wave-2: variants holds, per placed enemy, the variant its entry fixes (Random for auto waves).
+        public bool TryApplyLayoutWaves(EncounterDefinition encounter, IReadOnlyList<ResolvedEncounterSpawn[]> encounterWaves,
+            int floorNumber, IReadOnlyList<GeneratedRoomConnection> connections, int selectionSeed,
+            out ResolvedEncounterSpawn[][] waves, out RoomLayoutVariant[][] variants, out string error)
+        {
+            if (!HasLayoutWaves)
+            {
+                waves = encounterWaves?.ToArray() ?? Array.Empty<ResolvedEncounterSpawn[]>();
+                variants = null;
+                error = null;
+                return true;
+            }
+
+            waves = new ResolvedEncounterSpawn[LayoutWaves.Count][];
+            variants = new RoomLayoutVariant[LayoutWaves.Count][];
+            for (int index = 0; index < waves.Length; index++)
+            {
+                RoomLayoutWave wave = LayoutWaves[index];
+                if (wave.IsAuto)
+                {
+                    if (encounterWaves == null || encounterWaves.Count == 0)
+                    {
+                        error = $"Room template '{templateId}' wave {index + 1} is auto but no Encounter wave exists.";
+                        return false;
+                    }
+
+                    waves[index] = (ResolvedEncounterSpawn[])encounterWaves[index % encounterWaves.Count].Clone();
+                    variants[index] = new RoomLayoutVariant[waves[index].Length];
+                    continue;
+                }
+
+                float playerDistance = encounter != null ? encounter.MinimumPlayerDistance : 1.5f;
+                float doorDistance = encounter != null ? encounter.MinimumDoorDistance : 2f;
+                if (!TryResolveLayoutWave(index, floorNumber, connections, selectionSeed, playerDistance, doorDistance,
+                        out waves[index], out variants[index], out error))
+                    return false;
+            }
+
+            error = null;
+            return true;
+        }
+
+        // One fixed Layout wave placed on the room. Entries with SpawnPoints go first so the free entries never take
+        // a point an entry is pinned to; the order is fixed, so the same seed places the same enemies.
+        public bool TryResolveLayoutWave(int waveIndex, int floorNumber,
+            IReadOnlyList<GeneratedRoomConnection> connections, int selectionSeed, float minimumPlayerDistance,
+            float minimumDoorDistance, out ResolvedEncounterSpawn[] spawns, out RoomLayoutVariant[] variants,
+            out string error)
+        {
+            spawns = Array.Empty<ResolvedEncounterSpawn>();
+            variants = Array.Empty<RoomLayoutVariant>();
+            if (waveIndex < 0 || waveIndex >= LayoutWaves.Count || LayoutWaves[waveIndex].IsAuto)
+            {
+                error = $"Room template '{templateId}' has no fixed layout wave {waveIndex + 1}.";
+                return false;
+            }
+
+            RoomLayoutWaveEntry[] ordered = LayoutWaves[waveIndex].Entries
+                .OrderBy(entry => entry.IsPinned ? 0 : 1).ToArray();
+            if (!EncounterDefinition.TryResolveRules($"layout {templateId}", waveIndex + 1,
+                    ordered.Select(entry => entry.Rule).ToArray(), this, floorNumber, connections, waveIndex,
+                    selectionSeed, minimumPlayerDistance, minimumDoorDistance,
+                    ordered.Select(entry => entry.SpawnPoints).ToArray(), out spawns, out error))
+                return false;
+            variants = ordered.SelectMany(entry => Enumerable.Repeat(entry.Variant, entry.Rule.Count)).ToArray();
+            return true;
+        }
+
         public static string SpawnPointId(int index) => $"spawn-{index + 1:00}";
 
         public bool SupportsEnemyRole(int spawnPointIndex, EncounterEnemyRole enemyRole)
@@ -121,6 +275,73 @@ namespace TrickalFanGame.Room
                    (spawnPointRoles[spawnPointIndex] & required) == required;
         }
 
+        private bool TryValidateLayoutWaves(out string error)
+        {
+            if (LayoutWaves.Count > MaximumLayoutWaves)
+            {
+                error = $"Room template '{templateId}' has {LayoutWaves.Count} layout waves; at most {MaximumLayoutWaves}.";
+                return false;
+            }
+
+            for (int index = 0; index < LayoutWaves.Count; index++)
+            {
+                RoomLayoutWave wave = LayoutWaves[index];
+                if (wave.IsAuto) continue;
+                if (wave.SpawnRules.Count == 0)
+                {
+                    error = $"Room template '{templateId}' layout wave {index + 1} fixes no enemy.";
+                    return false;
+                }
+
+                foreach (RoomLayoutWaveEntry entry in wave.Entries)
+                {
+                    EncounterSpawnRule rule = entry.Rule;
+                    HashSet<EncounterEnemyRole> roles = new();
+                    if (rule.Count < 1 || !string.Equals(rule.SpawnGroupId, "all", StringComparison.Ordinal) ||
+                        rule.Candidates.Any(candidate => candidate.Weight < 1 ||
+                                                         candidate.EnemyRole == EncounterEnemyRole.Boss ||
+                                                         !Enum.IsDefined(typeof(EncounterEnemyRole), candidate.EnemyRole) ||
+                                                         !roles.Add(candidate.EnemyRole)))
+                    {
+                        error = $"Room template '{templateId}' layout wave {index + 1} has an invalid enemy entry.";
+                        return false;
+                    }
+
+                    // Layout-Wave-2: pinned SpawnPoints exist, repeat no point and hold the entry's enemies.
+                    if (entry.IsPinned &&
+                        (entry.SpawnPoints.Any(point => point < 0 || point >= SpawnPoints.Count) ||
+                         entry.SpawnPoints.Distinct().Count() != entry.SpawnPoints.Count ||
+                         entry.SpawnPoints.Count < rule.Count))
+                    {
+                        error = $"Room template '{templateId}' layout wave {index + 1} pins {rule.Count} enemies to " +
+                                $"SpawnPoints [{string.Join(", ", entry.SpawnPoints.Select(point => point + 1))}] " +
+                                $"of {SpawnPoints.Count}.";
+                        return false;
+                    }
+
+                    if (!Enum.IsDefined(typeof(RoomLayoutVariant), entry.Variant) ||
+                        !rule.Candidates.All(candidate => LayoutVariantAllows(entry.Variant, candidate.EnemyRole)))
+                    {
+                        error = $"Room template '{templateId}' layout wave {index + 1} gives {entry.Variant} to an " +
+                                "enemy that cannot take it.";
+                        return false;
+                    }
+                }
+            }
+
+            error = null;
+            return true;
+        }
+
+        // Layout-Wave-2: 쥬비 never becomes an elite or champion, and 자폭형 never takes the death blast.
+        public static bool LayoutVariantAllows(RoomLayoutVariant variant, EncounterEnemyRole role) => variant switch
+        {
+            RoomLayoutVariant.Random or RoomLayoutVariant.Normal => true,
+            RoomLayoutVariant.ChampionBlast => EnemyVariantRules.IsEligible(role) &&
+                                               role != EncounterEnemyRole.SelfDestruct,
+            _ => EnemyVariantRules.IsEligible(role),
+        };
+
         public static SpawnPointPlacementRole RequiredPlacementRole(EncounterEnemyRole enemyRole)
         {
             return enemyRole switch
@@ -133,6 +354,12 @@ namespace TrickalFanGame.Room
                 EncounterEnemyRole.SelfDestruct => SpawnPointPlacementRole.MeleePressure,
                 // Enemy-13: 잠복형 closes in under the floor, so it starts on a melee point.
                 EncounterEnemyRole.Ambusher => SpawnPointPlacementRole.MeleePressure,
+                // Attribute-0: the ribbon, the leaper and the healer close in; the two throwers stay at the back.
+                EncounterEnemyRole.RibbonLasher => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.Leaper => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.BurrowHealer => SpawnPointPlacementRole.MeleePressure,
+                EncounterEnemyRole.FanShooter => SpawnPointPlacementRole.RearFiring,
+                EncounterEnemyRole.BoomerangThrower => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Ranged => SpawnPointPlacementRole.RearFiring,
                 EncounterEnemyRole.Sniper => SpawnPointPlacementRole.RearFiring,
                 // Enemy-11: 대왕쥬비 keeps its distance, so it starts on a far rear point like the shooters.
@@ -287,6 +514,8 @@ namespace TrickalFanGame.Room
             {
                 return false;
             }
+
+            if (!TryValidateLayoutWaves(out error)) return false;
 
             if (profile == null)
             {

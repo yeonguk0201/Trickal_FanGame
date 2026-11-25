@@ -1,0 +1,377 @@
+fileFormatVersion: 2
+guid: 48b1563a51f87f84aa6a2276434e97eb
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7535512757151977421
+    second: SansamoCold_Death_Sheet_0
+  - first:
+      213: -5052210039755598936
+    second: SansamoCold_Death_Sheet_1
+  - first:
+      213: -5535137178824353238
+    second: SansamoCold_Death_Sheet_2
+  - first:
+      213: -2977909482611389785
+    second: SansamoCold_Death_Sheet_3
+  - first:
+      213: 9016653609775310574
+    second: SansamoCold_Death_Sheet_4
+  - first:
+      213: 2553893041022111300
+    second: SansamoCold_Death_Sheet_5
+  - first:
+      213: -4588296237006745311
+    second: SansamoCold_Death_Sheet_6
+  - first:
+      213: 675242474889165805
+    second: SansamoCold_Death_Sheet_7
+  - first:
+      213: -1370645891745369287
+    second: SansamoCold_Death_Sheet_8
+  - first:
+      213: 6722744446554332010
+    second: SansamoCold_Death_Sheet_9
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 90
+        width: 408
+        height: 342
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcfc7728de4839860800000000000000
+      internalID: 7535512757151977421
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 474
+        y: 91
+        width: 431
+        height: 341
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a394b19cb1f2e9b0800000000000000
+      internalID: -5052210039755598936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 369
+        width: 28
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2add11ff0e3f23b0800000000000000
+      internalID: -5535137178824353238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 1013
+        y: 80
+        width: 346
+        height: 320
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7aa4eab6a175ca6d0800000000000000
+      internalID: -2977909482611389785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 1380
+        y: 80
+        width: 650
+        height: 346
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee6a6619fa6912d70800000000000000
+      internalID: 9016653609775310574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 1754
+        y: 317
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44e07709030417320800000000000000
+      internalID: 2553893041022111300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 1782
+        y: 315
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12193fcd1e81350c0800000000000000
+      internalID: -4588296237006745311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 1754
+        y: 304
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: deb360d0471fe5900800000000000000
+      internalID: 675242474889165805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 1780
+        y: 285
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9333badc2dc7afce0800000000000000
+      internalID: -1370645891745369287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoCold_Death_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 155
+        width: 9
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6bd99c947cfb4d50800000000000000
+      internalID: 6722744446554332010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SansamoCold_Death_Sheet_0: 7535512757151977421
+      SansamoCold_Death_Sheet_1: -5052210039755598936
+      SansamoCold_Death_Sheet_2: -5535137178824353238
+      SansamoCold_Death_Sheet_3: -2977909482611389785
+      SansamoCold_Death_Sheet_4: 9016653609775310574
+      SansamoCold_Death_Sheet_5: 2553893041022111300
+      SansamoCold_Death_Sheet_6: -4588296237006745311
+      SansamoCold_Death_Sheet_7: 675242474889165805
+      SansamoCold_Death_Sheet_8: -1370645891745369287
+      SansamoCold_Death_Sheet_9: 6722744446554332010
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

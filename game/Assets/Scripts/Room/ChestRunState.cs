@@ -21,6 +21,8 @@ namespace TrickalFanGame.Room
         // clear chest whose seed comes from the room.
         public bool HasContentSeed { get; internal set; }
         public int ContentSeed { get; internal set; }
+        // Balance-1: the item pity placed this chest, so it holds an artifact or a spell on every rebuild.
+        public bool ForcesItem { get; internal set; }
         public bool IsClosed => !IsOpened && !IsDiscarded;
     }
 }

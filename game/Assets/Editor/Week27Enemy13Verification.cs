@@ -235,13 +235,18 @@ namespace TrickalFanGame.Editor
                     "follow that.");
                 if (!pressure) continue;
                 found++;
-                Assert(rules.Length == 2 && rules.All(rule => rule.Candidates.Count == expected.Length &&
-                           expected.All(candidate => Weight(rule, candidate.EnemyRole) == candidate.Weight)),
+                // One melee rule per wave, however many waves Density-0 gives the room size.
+                EncounterEnemyCandidate[] weights = Density1Setup.ForDefinition(definition,
+                    EnemyAttribute0Setup.Extend(Density0Setup.SlotKind.PressureMelee, expected));
+                Assert(rules.Length == definition.Waves.Count && rules.All(rule => rule.Candidates.Count == weights.Length &&
+                           weights.All(candidate => Weight(rule, candidate.EnemyRole) == candidate.Weight)),
                     $"'{definition.EncounterId}' melee slots in both waves must weigh " +
-                    string.Join("/", expected.Select(candidate => candidate.Weight)) + ".");
+                    string.Join("/", weights.Select(candidate => candidate.Weight)) + ".");
+                // Density-0: only the small room keeps 10~16; every size declares what its candidates produce.
+                bool small = Density0Setup.IsSmall(definition);
                 Assert(table.TryComputeThreatRange(definition, out int minimum, out int maximum, out error) &&
-                       minimum == Week19Difficulty1Setup.PressureMinimumThreat &&
-                       maximum == Week19Difficulty1Setup.PressureMaximumThreat &&
+                       (!small || minimum == Week19Difficulty1Setup.PressureMinimumThreat) &&
+                       (!small || maximum == Week19Difficulty1Setup.PressureMaximumThreat) &&
                        definition.DeclaredMinimumThreat == minimum && definition.DeclaredMaximumThreat == maximum,
                     $"'{definition.EncounterId}' must keep its 10~16 range. {error}");
             }

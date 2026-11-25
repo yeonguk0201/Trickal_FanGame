@@ -33,3 +33,5 @@ MonoBehaviour:
     displayName: "\uC18C\uB2E4\uB9DB \uCEA1\uC290"
     pickupPrefab: {fileID: 2738873779375130701, guid: f489f72f9eabdf54283b6dabf115cc48, type: 3}
     price: 3
+  spellPrice: 10
+  spellSlotPercent: 25

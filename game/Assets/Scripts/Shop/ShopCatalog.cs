@@ -47,8 +47,13 @@ namespace TrickalFanGame.Shop
         [SerializeField, Min(1)] private int rarePrice = 20;
         [SerializeField, Min(1)] private int epicPrice = 25;
         [SerializeField] private ShopConsumable[] consumables = Array.Empty<ShopConsumable>();
+        // Shop-2 (docs/28 §10.3): each consumable slot of a seeded Run's shop sells a spell at this chance and price.
+        [SerializeField, Min(1)] private int spellPrice = 10;
+        [SerializeField, Range(0, 100)] private int spellSlotPercent = 25;
 
         public IReadOnlyList<ShopConsumable> Consumables => consumables;
+        public int SpellPrice => spellPrice;
+        public int SpellSlotPercent => spellSlotPercent;
 
         public int GetItemPrice(ItemRarity rarity) => rarity switch
         {
@@ -74,6 +79,12 @@ namespace TrickalFanGame.Shop
             if (commonPrice <= 0 || uncommonPrice <= 0 || rarePrice <= 0 || epicPrice <= 0)
             {
                 error = $"{name} needs a positive price for every Item rarity.";
+                return false;
+            }
+
+            if (spellPrice <= 0 || spellSlotPercent < 0 || spellSlotPercent > 100)
+            {
+                error = $"{name} needs a positive spell price and a spell slot chance within 0..100.";
                 return false;
             }
 

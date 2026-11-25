@@ -52,6 +52,12 @@ namespace TrickalFanGame.Editor
             new("CrayonAxeMinion", "CrayonAxe"),
             new("CrayonArcherMinion", "CrayonArcher"),
             new("CrayonShieldMinion", "CrayonShield"),
+            // Attribute-0 (2026-11-23).
+            new("BulhyojasonPure", "BulhyojasonPure"),
+            new("BulhyojasonLively", "BulhyojasonLively"),
+            new("BulhyojasonGloomy", "BulhyojasonGloomy"),
+            new("SansamoCold", "SansamoCold"),
+            new("SansamoGloomy", "SansamoGloomy"),
             new("TestBoss", "Buseureogi", BossFrameRoot, BossKnockScale),
             new("SaemaeumVaultBoss", "Vault", BossFrameRoot, BossKnockScale),
             // 잠복형 (2026-11-06) dies above ground, so its size comes from the full burst drawing.

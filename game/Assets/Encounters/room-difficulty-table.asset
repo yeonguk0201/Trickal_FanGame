@@ -37,6 +37,16 @@ MonoBehaviour:
     score: 4
   - role: 12
     score: 4
+  - role: 13
+    score: 2
+  - role: 14
+    score: 3
+  - role: 15
+    score: 3
+  - role: 16
+    score: 3
+  - role: 17
+    score: 3
   tierBands:
   - tier: 0
     minimumScore: 0
@@ -68,3 +78,114 @@ MonoBehaviour:
   maximumRoomEnemies: 7
   maximumWaveEnemies: 4
   maximumWaveRearFiring: 3
+  sizeDifficulties:
+  - profileId: small
+    minimumRoomEnemies: 2
+    maximumRoomEnemies: 7
+    maximumWaveEnemies: 4
+    maximumWaveRearFiring: 3
+    tierBands:
+    - tier: 0
+      minimumScore: 0
+    - tier: 1
+      minimumScore: 12
+    - tier: 2
+      minimumScore: 16
+    floorRanges:
+    - floorNumber: 1
+      minimumScore: 0
+      maximumScore: 18
+    - floorNumber: 2
+      minimumScore: 0
+      maximumScore: 20
+    - floorNumber: 3
+      minimumScore: 0
+      maximumScore: 22
+  - profileId: basic
+    minimumRoomEnemies: 2
+    maximumRoomEnemies: 8
+    maximumWaveEnemies: 5
+    maximumWaveRearFiring: 3
+    tierBands:
+    - tier: 0
+      minimumScore: 0
+    - tier: 1
+      minimumScore: 16
+    - tier: 2
+      minimumScore: 21
+    floorRanges:
+    - floorNumber: 1
+      minimumScore: 0
+      maximumScore: 24
+    - floorNumber: 2
+      minimumScore: 0
+      maximumScore: 27
+    - floorNumber: 3
+      minimumScore: 0
+      maximumScore: 29
+  - profileId: wide
+    minimumRoomEnemies: 2
+    maximumRoomEnemies: 14
+    maximumWaveEnemies: 6
+    maximumWaveRearFiring: 4
+    tierBands:
+    - tier: 0
+      minimumScore: 0
+    - tier: 1
+      minimumScore: 30
+    - tier: 2
+      minimumScore: 40
+    floorRanges:
+    - floorNumber: 1
+      minimumScore: 0
+      maximumScore: 45
+    - floorNumber: 2
+      minimumScore: 0
+      maximumScore: 50
+    - floorNumber: 3
+      minimumScore: 0
+      maximumScore: 55
+  - profileId: tall
+    minimumRoomEnemies: 2
+    maximumRoomEnemies: 14
+    maximumWaveEnemies: 6
+    maximumWaveRearFiring: 4
+    tierBands:
+    - tier: 0
+      minimumScore: 0
+    - tier: 1
+      minimumScore: 30
+    - tier: 2
+      minimumScore: 40
+    floorRanges:
+    - floorNumber: 1
+      minimumScore: 0
+      maximumScore: 45
+    - floorNumber: 2
+      minimumScore: 0
+      maximumScore: 50
+    - floorNumber: 3
+      minimumScore: 0
+      maximumScore: 55
+  - profileId: large
+    minimumRoomEnemies: 2
+    maximumRoomEnemies: 14
+    maximumWaveEnemies: 8
+    maximumWaveRearFiring: 5
+    tierBands:
+    - tier: 0
+      minimumScore: 0
+    - tier: 1
+      minimumScore: 33
+    - tier: 2
+      minimumScore: 44
+    floorRanges:
+    - floorNumber: 1
+      minimumScore: 0
+      maximumScore: 50
+    - floorNumber: 2
+      minimumScore: 0
+      maximumScore: 55
+    - floorNumber: 3
+      minimumScore: 0
+      maximumScore: 61

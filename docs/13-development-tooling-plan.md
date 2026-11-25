@@ -783,6 +783,30 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 - Unity `RoomLayoutImporterVerification.VerifyWithRegressionsBatch` 통과: 기존 52개 방, 신규 장벽 허용/거부, Trap-1 및 Encounter·지형·상자·장애물 회귀. 로그 `tmp/room-layout-traversal-verification.log`: `Room Layout regression verification passed.`, 종료 코드 0. 실제 Play 검수는 미실시.
 
 
+### 방 웨이브·몬스터 지정 (Layout-Wave, 2026-11-24)
+
+- 사용자 요청: 방마다 웨이브 수와 웨이브별 몬스터를 지정하고, 지정하지 않으면 이전 규칙(방 크기별 Encounter)을 그대로 쓴다.
+- 형식: 방 파일 머리말 `wave1`~`wave6`. `auto`는 방이 뽑은 Encounter의 같은 순번 웨이브(부족하면 반복), 직접 지정은
+  `chaser*3, sniper|ranged*2`. 31번 §2.3.
+- 런타임: `RoomTemplateDefinition.layoutWaves`, `TryApplyLayoutWaves`. 고정 웨이브는 `EncounterDefinition.TryResolveRules`로
+  Encounter와 같은 SpawnPoint 역할·문 안전 거리·층별 등장 규칙을 따른다. 방 점수와 등급은 실제 웨이브로 다시 계산한다.
+- 임포터: 방의 모든 층·문 조합에서 고정 웨이브가 놓이는지, 층보다 늦게 나오는 몬스터만 남는 항목이 없는지 검사한다.
+- 편집기: 오른쪽 **웨이브 · 몬스터**. 자동/직접 지정, 몬스터 후보(또는)·마리 수, 순서 이동·삭제, 이전 규칙으로 되돌리기,
+  스폰 자리·돌진 자리·등장 층 사전 검사. 내보내기·가져오기·JSON·자동 저장 왕복.
+- 검증: Unity `RoomLayoutWaveVerification.Verify`(형식·편집기 몬스터 ID와 등장 층 대조·Template 적용·실제 층 생성),
+  `RoomLayoutImporterVerification.VerifyWithRegressionsBatch`, `Week19Spawn2Verification` 통과. 브라우저 `test.cjs` 통과.
+  Play 확인 대기.
+- Layout-Wave-2 (2026-11-25, 사용자 요청 "1,2,3 해보자"):
+  - 변형 지정 `!elite` 등: `RoomLayoutWaveEntry.Variant`, `EnemyVariantRules.ApplyLayoutVariants`(굴린 변형을 덮어씀, 지정
+    엘리트가 있으면 굴린 엘리트 제거).
+  - 자리 지정 `@5/6`: `RoomLayoutWaveEntry.SpawnPoints`, `RoomTemplateDefinition.TryResolveLayoutWave`(자리 지정 항목 먼저),
+    `EncounterDefinition.TryResolveRules`의 `ruleSpawnPoints`.
+  - 편집기: 항목마다 변형 선택·자리 입력, 마우스를 올리면 격자에 지정 자리 표시, 없는 자리·역할 불일치·자리 부족 검사.
+  - F1 개발 패널 `— Room —`: `Wave n/m alive k (Layout waves)`, 다음 웨이브 구성(역할·변형·자리), **Skip to last wave**.
+  - 검증: `RoomLayoutWaveVerification.Verify`(변형·자리 파싱 왕복·거부, 자리 고정 배치, 변형 덮어쓰기, 생성 방의 챔피언
+    지정) 통과, 브라우저 `test.cjs` 통과. Play 확인 대기.
+
+
 ### 클로버 보상 UI 적용·검토 메뉴 (2026-11-17)
 
 - 목적: 기존 보상 로직을 유지하며 개별 원화와 Menu 공용 컴포넌트를 재실행 가능한 Editor 구성으로 연결한다.
@@ -857,3 +881,19 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 - 목적: 인게임 진입·종료 로딩에서 승인된 배치와 비동기 전환의 입력/시간·Run 결과 보존을 함께 확인한다.
 - 산출물: `RunLoadingScreenVerification.Verify`(Scene 변경 없는 UI·자산 검사), `RunLoadingScreenPlayVerification.RunBatch`(시작·재시작·홈 복귀·결과 복귀의 실제 Play 검사).
 - 상태: 구현, 런타임·Editor 컴파일, 수정 후 전용 Edit 및 Play 배치 통과(`output/run-loading-screen-play-final.log`, 종료 0). 시작·재시작·홈 복귀·재진입·결과 복귀를 검사했다. 두 해상도의 시각 검수는 별도다. 실행법과 수동 경로는 [개발 환경 설정 가이드](./05-development-setup.md)의 Loading-0 절을 따른다.
+
+### 크레용사용 검흔 미리보기 (2026-11-23)
+
+- 목적: 28번 §10.4의 검흔을 Unity 독립 미리보기로 검수한 뒤 게임 연결 여부를 결정한다. v3는 사용자가 방향을 수용한 8프레임 이미지 시안의 검광 질감에 메시·셰이더를 합성한다.
+- 구현: `CrayonRiftVisual`과 `CrayonRift.shader`의 같은 시계·레이어를 `CrayonRiftPreview`의 격리된 Scene 뷰와 배치 렌더에서 사용한다. 시간·속도·길이·폭·대각선 방향·레이어 표시를 조절한다. 원본 Scene/Prefab을 저장하거나 게임 공격을 실행하지 않는다.
+- 상태: 미술 시안 구현. 사용자 미술 검수와 실제 보스 공격 연결은 대기. 실행법은 05번 문서의 “크레용사용 검흔 미리보기”.
+- v1 배치: `CrayonRiftPreview.VerifyAndExportBatch` 통과(`output/crayon-rift-unity-final.log`, Unity 종료 코드 0). 사용자 외형 검수에서는 거절됐다. v2는 예고를 작게 독립 조절하고 검은 열린 공간·보랏빛 흐름·순간 섬광·파편으로 다시 구성했다. 이전 42프레임 통과 기록은 v2 검증 근거로 사용하지 않는다. Scene 뷰 직접 조작·창 수명주기·사용자 미술 검수는 별도 미확인 항목이다.
+- v2 배치: 중간본은 원본 프로젝트에서 통과(`output/crayon-rift-v2-main.log`, 종료 0). 외곽 흐름 최종 조정은 원본 프로젝트의 병행 배치 잠금 때문에 같은 코드·셰이더와 참고 원화만 복사한 임시 Unity 프로젝트에서 검증·렌더했다(`output/crayon-rift-v2-isolated-final.log`, 종료 0, 85프레임). 작은 예고·레이어 토글·시간 전환·되감기 검사 통과. 셰이더 SHA-256 일치 확인. 사용자 미술 검수 대기이며 게임 공격 연결은 하지 않았다. 세부 기록은 `docs/art-prompts/crayon-rift-prototype.md`.
+- v3 배치: 독립 Unity 프로젝트에서 `CrayonRiftPreview.VerifyAndExportBatch` 통과(`output/crayon-slash-v3-reviewed.log`, 종료 0). 소용돌이·중앙 벌어짐을 제거하고 시안 원화의 은백색 검광을 끝에서 끝으로 드러낸다. 작은 반투명 빨간 예고·레이어 분리·시간 전환·되감기와 85프레임 렌더를 확인했다. 소스·원화·meta 5개 파일의 SHA-256 일치 확인. 미술 검수 대기, 게임 공격에는 미연결이다.
+
+### Blender Python 이펙트 제작 연결 (2026-11-23)
+
+- 목적: AI가 무료 외부 제작 도구를 통해 이펙트 형태·레이어·애니메이션을 반복 제작하고 Unity 연결 전 렌더를 확인한다.
+- 구현: `tools/blender/run.py`, `tools/blender/smoke_preview.py`. 공식 Blender 4.5.9 LTS 포터블은 Git 제외 경로 `tmp/blender/`에 설치하고 공식 SHA256과 대조했다. MCP 및 유료 애드온 없이 Python 배치로 실행한다.
+- 상태: 연결 검증 완료. 기본 명령 종료 0, `BLENDER_CONNECTION_OK`, 레이어·키프레임이 있는 `.blend`와 512×512 투명 RGBA PNG 생성 및 알파 범위 0~255 확인. 로그는 `output/blender-smoke/blender.log`.
+- 한계: 샘플은 기술 연결 확인용 도형이다. 전체 애니메이션 시퀀스, 최종 미술 승인, Unity 임포트·게임 이벤트 연결은 미수행. 실행법은 05번 문서와 `tools/blender/README.md`.

@@ -205,20 +205,25 @@ namespace TrickalFanGame.Editor
                 runtime.BeginCombat(target.transform, 42, 0f);
                 runtime.TryExecute(BossPatternExecution.CrayonHeroDashChain);
                 Set(runtime, "dashCountTarget", 3);
-                Require(runtime.AttackPoseIndex == 5, "First dash must cut down diagonally.");
                 float now = 0f;
-                for (int completed = 1; completed < 3; completed++)
+                for (int dash = 0; dash < 3; dash++)
                 {
+                    int launch = dash % 2 == 0 ? 5 : 6, landing = dash % 2 == 0 ? 6 : 7;
+                    animator.RenderPose(0.5f, true);
+                    Require(runtime.AttackPoseIndex == launch && animator.Artwork.sprite == (phase >= 2
+                        ? animator.GetGoldenAttackFrame(launch) : animator.GetCrayonAttackFrame(launch)),
+                        "Each leap must show its dash artwork instead of walking.");
                     now += runtime.DashDuration + 0.001f;
                     runtime.TickPattern(BossActionState.Active, BossPatternExecution.CrayonHeroDashChain, now);
-                    Require(runtime.AttackPoseIndex == (completed % 2 == 0 ? 4 : 6), "Retarget must prepare the opposite diagonal.");
-                    now += runtime.DashRetargetDuration + 0.001f;
+                    Require(runtime.AttackPoseIndex == landing, "Arrival must hold the end of the dash motion.");
+                    if (dash == 2) break;
+                    now += runtime.DashStrikeDelay + 0.001f;
                     runtime.TickPattern(BossActionState.Active, BossPatternExecution.CrayonHeroDashChain, now);
-                    int pose = completed % 2 == 0 ? 5 : 7;
-                    animator.RenderPose(0.5f, true);
-                    Require(runtime.AttackPoseIndex == pose && animator.Artwork.sprite == (phase >= 2
-                        ? animator.GetGoldenAttackFrame(pose) : animator.GetCrayonAttackFrame(pose)),
-                        "Each real dash must alternate diagonal artwork instead of walking.");
+                    now += runtime.DashRestDuration + 0.001f;
+                    runtime.TickPattern(BossActionState.Active, BossPatternExecution.CrayonHeroDashChain, now);
+                    Require(runtime.AttackPoseIndex == 4, "Each warning must show the ready pose.");
+                    now += runtime.CurrentDashWarningDuration + 0.001f;
+                    runtime.TickPattern(BossActionState.Active, BossPatternExecution.CrayonHeroDashChain, now);
                 }
                 runtime.OnPatternStateChanged(BossActionState.Defeated, BossPatternExecution.CrayonHeroDashChain, now);
                 Require(runtime.AttackPoseIndex == -1, "Defeat must clear attack artwork.");

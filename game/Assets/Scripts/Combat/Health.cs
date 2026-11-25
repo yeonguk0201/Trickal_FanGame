@@ -59,6 +59,7 @@ namespace TrickalFanGame.Combat
         public event Action<float> Healed;
         public static event Action<Health, DamageContext, DamageResult> AnyDamageResolved;
         public static event Action<Health, DamageContext> AnyDamageBlocked;
+        public static event Action<Health, float> AnyHealed;
 
         private void Awake()
         {
@@ -433,6 +434,7 @@ namespace TrickalFanGame.Combat
             {
                 Changed?.Invoke(CurrentHealth, MaxHealth);
                 Healed?.Invoke(healedAmount);
+                AnyHealed?.Invoke(this, healedAmount);
             }
 
             return healedAmount;

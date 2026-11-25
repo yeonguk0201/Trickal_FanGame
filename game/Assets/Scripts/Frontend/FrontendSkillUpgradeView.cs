@@ -136,6 +136,7 @@ namespace TrickalFanGame.Frontend
             if (characterNameText != null) characterNameText.text = character != null ? character.DisplayName : string.Empty;
             if (epithetText != null) epithetText.text = character != null ? character.Epithet : string.Empty;
             if (portraitImage != null && character != null && character.Portrait != null) portraitImage.sprite = character.Portrait;
+            StandingPortraitView.Apply(portraitImage, character);
             if (lowGradeNameText != null && !string.IsNullOrWhiteSpace(character?.LowGradeSkillName))
                 lowGradeNameText.text = character.LowGradeSkillName;
             if (highGradeNameText != null && !string.IsNullOrWhiteSpace(character?.HighGradeSkillName))

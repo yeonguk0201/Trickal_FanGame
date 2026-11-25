@@ -26,7 +26,10 @@ namespace TrickalFanGame.Character
         [SerializeField] private Sprite basicSkillIcon;
         [SerializeField] private string lowGradeSkillName;
         [SerializeField] private string highGradeSkillName;
+        [Tooltip("Optional 2D Animation rig drawn instead of Portrait on the character select and skill upgrade screens.")]
+        [SerializeField] private GameObject standingRig;
 
+        public GameObject StandingRig => standingRig;
         public string CharacterId => characterId;
         public string DisplayName => displayName;
         public string Description => description;

@@ -28,6 +28,11 @@ namespace TrickalFanGame.Frontend
             $"충전 {power.ActiveChargeRooms}방";
         public static readonly Color FilledCellColor = new(0.45f, 0.82f, 1f, 1f);
         public static readonly Color EmptyCellColor = new(0.34f, 0.38f, 0.47f, 0.95f);
+        // Balance-1: a full gauge turns gold and glows, so a ready 권능 reads at a glance. The cells drop the
+        // sky-blue artwork for plain gold, then the cells and the track pulse toward FullGlowColor.
+        public static readonly Color FullCellColor = new(1f, 0.78f, 0.22f, 1f);
+        public static readonly Color FullGlowColor = new(1f, 0.95f, 0.6f, 1f);
+        public const float FullGlowPeriod = 1.1f;
 
         private static readonly Color EmptyIconColor = new(0.2f, 0.22f, 0.27f, 0.9f);
 
@@ -49,6 +54,9 @@ namespace TrickalFanGame.Frontend
         private ItemDefinition renderedDefinition;
         private int renderedCharge;
         private PowerSlotUseResult renderedState;
+        private Image gaugeTrack;
+        private Color gaugeTrackColor;
+        private bool gaugeTrackCached;
 
         public PlayerPowerSlot Slot => slot;
         public Image Icon => icon;
@@ -60,6 +68,7 @@ namespace TrickalFanGame.Frontend
         public Sprite FilledCellSprite => filledCellSprite;
         public Image KeyBacking => keyBacking;
         public bool IsShowingUsable => renderedState == PowerSlotUseResult.Used;
+        public bool IsShowingFull { get; private set; }
         // The colour a charged cell draws with: white over the cell artwork, the plain sky blue without it.
         public Color FilledColor => filledCellSprite != null ? Color.white : FilledCellColor;
         // The mouse resting on the 권능 icon shows its description (PickupDescriptionView).
@@ -76,6 +85,7 @@ namespace TrickalFanGame.Frontend
             gaugeText = configuredGaugeText;
             keyText = configuredKeyText;
             gaugeCells = configuredGaugeCells ?? System.Array.Empty<Image>();
+            gaugeTrackCached = false;
             hasRendered = false;
             if (isActiveAndEnabled) Subscribe();
             RefreshNow();
@@ -111,7 +121,42 @@ namespace TrickalFanGame.Frontend
         }
 
         // Usability follows pause, death and room conditions that raise no event, so it is polled.
-        private void Update() => RefreshNow();
+        private void Update()
+        {
+            RefreshNow();
+            if (IsShowingFull) ApplyFullGlow(Time.unscaledTime);
+        }
+
+        // 0 at the pulse's dimmest, 1 at its brightest.
+        public static float FullGlowAmount(float time) =>
+            0.5f - 0.5f * Mathf.Cos(time * (Mathf.PI * 2f / FullGlowPeriod));
+
+        private void ApplyFullGlow(float time)
+        {
+            float glow = FullGlowAmount(time);
+            int required = renderedDefinition != null ? renderedDefinition.ActiveChargeRooms : 0;
+            for (int index = 0; index < gaugeCells.Length && index < required; index++)
+                if (gaugeCells[index] != null)
+                    gaugeCells[index].color = Color.Lerp(FullCellColor, FullGlowColor, glow * 0.6f);
+            Image track = GaugeTrack;
+            if (track != null) track.color = Color.Lerp(FullCellColor, FullGlowColor, glow);
+        }
+
+        // The pill outline around the cells (the cells' grandparent), recoloured only while full.
+        private Image GaugeTrack
+        {
+            get
+            {
+                if (gaugeTrackCached) return gaugeTrack;
+                gaugeTrackCached = true;
+                Transform bar = gaugeCells.Length > 0 && gaugeCells[0] != null ? gaugeCells[0].transform.parent : null;
+                gaugeTrack = bar != null && bar.parent != null && bar.parent != transform
+                    ? bar.parent.GetComponent<Image>()
+                    : null;
+                if (gaugeTrack != null) gaugeTrackColor = gaugeTrack.color;
+                return gaugeTrack;
+            }
+        }
 
         // The gauge is one pill-shaped bar: a thin outline (GaugeOutline wide) around an inner bar that masks the
         // cells to its round ends. The inner bar's colour shows through the thin GaugeCellGap lines between cells.
@@ -168,15 +213,18 @@ namespace TrickalFanGame.Frontend
             Transform bar = gaugeCells.Length > 0 && gaugeCells[0] != null ? gaugeCells[0].transform.parent : null;
             if (bar != null && bar.parent != null && bar.parent != transform)
                 bar.parent.gameObject.SetActive(required > 0);
+            IsShowingFull = required > 0 && charge >= required;
             for (int index = 0; index < gaugeCells.Length; index++)
             {
                 Image cell = gaugeCells[index];
                 if (cell == null) continue;
                 cell.gameObject.SetActive(index < required);
                 bool filled = index < charge;
-                cell.sprite = filled ? filledCellSprite : null;
-                cell.color = filled ? FilledColor : EmptyCellColor;
+                cell.sprite = filled && !IsShowingFull ? filledCellSprite : null;
+                cell.color = IsShowingFull ? FullCellColor : filled ? FilledColor : EmptyCellColor;
             }
+            Image track = GaugeTrack;
+            if (track != null) track.color = IsShowingFull ? FullCellColor : gaugeTrackColor;
             if (keyText != null)
             {
                 keyText.gameObject.SetActive(held != null);

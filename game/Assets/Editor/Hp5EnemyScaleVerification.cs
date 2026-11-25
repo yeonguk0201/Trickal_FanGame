@@ -20,7 +20,7 @@ namespace TrickalFanGame.Editor
         // 2026-11-18: they count two hits instead of having HP (Week15Boss1Verification checks them).
         private static readonly (string Prefab, float Health)[] EnemyHealth =
         {
-            ("TestEnemy", 60f), ("SansamoEnemy", 40f), ("RangedEnemy", 30f), ("HighBloodSugarFairy", 30f),
+            ("TestEnemy", EnemyAttribute0Setup.MadnessBulhyojasonHealth), ("SansamoEnemy", 40f), ("RangedEnemy", 30f), ("HighBloodSugarFairy", 30f),
             ("ChargingEnemy", 70f), ("BuseureogiCrumbMinion", 30f),
             ("CrayonAxeMinion", 40f), ("CrayonShieldMinion", 40f),
             ("CrayonArcherMinion", 30f), ("CrayonMageMinion", 30f), ("TestBoss", 250f),

@@ -36,7 +36,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.05f)] private float swingInterval = 0.7f;
         [SerializeField, Min(0.01f)] private float swingDirectionLockDuration = 0.12f;
         [SerializeField] private EnemyDamageTier swingDamageTier = EnemyDamageTier.Medium;
-        [SerializeField, Min(1f)] private float swingRecognitionMultiplier = 1.4f;
+        [SerializeField, Min(1f)] private float swingRecognitionMultiplier = 1.15f;
         // While a sword swing winds up, strikes and follows through, the hero keeps walking at this share of its
         // speed (2026-11-20 user: 40% slower). Walking up to the player before a swing stays at full speed.
         [SerializeField, Range(0f, 1f)] private float swingMoveSpeedMultiplier = 0.6f;
@@ -48,11 +48,22 @@ namespace TrickalFanGame.Enemy
         private float SwingMoveMultiplier => IsSwingAttacking ? swingMoveSpeedMultiplier : 1f;
 
         [Header("Dash chain")]
-        [SerializeField, Min(0.1f)] private float dashSpeed = 15f;
-        [SerializeField, Min(0.01f)] private float dashDuration = 0.17f;
-        [SerializeField, Min(0.01f)] private float dashRetargetDuration = 0.1f;
-        [SerializeField, Min(0.1f)] private float dashWidth = 1.8f;
+        // One step: every leap takes this long however far it goes (2026-11-23 user).
+        [SerializeField, Min(0.01f)] private float dashDuration = 0.05f;
+        [SerializeField, Min(0.01f)] private float dashRestDuration = 0.7f;
+        [SerializeField, Min(0.1f)] private float dashWidth = 1.2f;
         [SerializeField] private EnemyDamageTier dashDamageTier = EnemyDamageTier.Light;
+        // Boss-Pattern-1 (28번 §10.4): warning at the player's spot, leap to just before it, strike after a beat.
+        [SerializeField, Min(0.05f)] private float dashWarningDuration = 0.35f;
+        [SerializeField, Min(0.05f)] private float goldenDashWarningDuration = 0.3f;
+        [SerializeField, Min(0f)] private float dashStrikeDelay = 0.1f;
+        [SerializeField, Min(0.01f)] private float dashChainRecovery = 0.8f;
+        // Smaller than the drawn slash (7.4 x about 1.5) on purpose.
+        [SerializeField, Min(0.1f)] private float riftHitLength = 4.2f;
+        [SerializeField, Min(0.1f)] private float riftHitWidth = 0.9f;
+        // The boss swings from in front of the cut, so its drawn body (about 1.1 to each side) stays this far off the
+        // rift's line. It also keeps a player who stayed on the warning out of the leap's path hit.
+        [SerializeField, Min(0f)] private float riftBodyClearance = 1.2f;
 
         [Header("Pattern selection")]
         [SerializeField, Min(1)] private int pressureActionsBeforeSlash = 3;
@@ -98,15 +109,21 @@ namespace TrickalFanGame.Enemy
         public Sprite AwakenedSprite => awakenedSprite;
         public void ConfigureAwakenedArtwork(Sprite sprite) => awakenedSprite = sprite;
 
-        private const float DashPushSkin = 0.02f;
+        private const float LeapTerrainSkin = 0.02f;
+        private const int LeapSlideSteps = 4;
+        // sin 30: a dash crosses its rift at 30 degrees or more.
+        private const float MinRiftCrossingSine = 0.5f;
         // The swing and the map slash hit real boxes, so their corners are only softened.
         private const float WarningCornerRadius = 0.18f;
         // The hitbox lines sort two above the boss sprite; the drawn areas go one below it.
         private const int WarningOrderOffset = -3;
 
-        private static readonly List<RaycastHit2D> DashHits = new List<RaycastHit2D>();
         private static readonly List<RaycastHit2D> FeetHits = new List<RaycastHit2D>();
 
+        private enum DashStage { None, Warning, Leap, StrikeDelay, Rest }
+
+        private readonly List<(Collider2D own, Collider2D player)> dashIgnoredPairs =
+            new List<(Collider2D own, Collider2D player)>();
         private readonly List<GameObject> livingMinions = new List<GameObject>();
         private readonly List<LineRenderer> supplementalTelegraphLines = new List<LineRenderer>();
         private BossController boss;
@@ -138,10 +155,18 @@ namespace TrickalFanGame.Enemy
         private int swingCountTarget;
         private int completedSwings;
         private bool dashInMotion;
-        private bool dashChainHitApplied;
+        private bool dashHitApplied;
         private float dashStateEndsAt;
         private int dashCountTarget;
         private int completedDashes;
+        private DashStage dashStage;
+        private bool riftPlaced;
+        private Vector2 riftCenter;
+        private float riftAngle;
+        private Vector2 leapStart, leapEnd;
+        private float leapStartedAt, leapDuration;
+        private bool leapAdvances;
+        private CrayonDashRiftEffect riftEffect;
         private GameObject telegraphObject;
         private LineRenderer telegraphLine;
         private MeleeWarningVisual swingWarning;
@@ -222,13 +247,23 @@ namespace TrickalFanGame.Enemy
         public int SwingCountTarget => swingCountTarget;
         public int CompletedSwings => completedSwings;
         public bool IsSwingPreparing => swingPreparing;
-        public float DashSpeed => dashSpeed;
         public float DashDuration => dashDuration;
-        public float DashRetargetDuration => dashRetargetDuration;
+        public float DashRestDuration => dashRestDuration;
+        public float DashStrikeDelay => dashStrikeDelay;
+        public float DashChainRecovery => dashChainRecovery;
+        public float CurrentDashWarningDuration =>
+            boss != null && boss.CurrentPhase >= 2 ? goldenDashWarningDuration : dashWarningDuration;
+        public float RiftHitLength => riftHitLength;
+        public float RiftHitWidth => riftHitWidth;
+        public bool HasPlacedRift => riftPlaced;
+        public Vector2 RiftCenter => riftCenter;
+        public float RiftAngle => riftAngle;
+        public Vector2 LeapEnd => leapEnd;
         public int DashCountTarget => dashCountTarget;
         public int CompletedDashes => completedDashes;
         public bool IsDashInMotion => dashInMotion;
-        public bool DashChainHitApplied => dashChainHitApplied;
+        public bool DashHitApplied => dashHitApplied;
+        public bool IsPassingThroughPlayer => dashIgnoredPairs.Count > 0;
         public bool AttackHitboxVisible => telegraphLine != null && telegraphLine.enabled;
         public bool RecognitionRadiusVisible => recognitionDebugLine != null && recognitionDebugLine.enabled;
         public int LivingMinionCount
@@ -263,6 +298,8 @@ namespace TrickalFanGame.Enemy
             ClearTelegraph();
             ClearRecognitionDebug();
             StopChargeSound(0f);
+            ResetDashState();
+            RestorePlayerCollision(true);
             if (health != null) health.SetInvulnerable(false);
         }
 
@@ -297,14 +334,24 @@ namespace TrickalFanGame.Enemy
             swingDamageTier = damageTier;
         }
 
-        public void ConfigureDash(float speed, float duration, float retargetDuration, float width,
-            EnemyDamageTier damageTier)
+        public void ConfigureDash(float duration, float restDuration, float width, EnemyDamageTier damageTier)
         {
-            dashSpeed = Mathf.Max(0.1f, speed);
             dashDuration = Mathf.Max(0.01f, duration);
-            dashRetargetDuration = Mathf.Max(0.01f, retargetDuration);
+            dashRestDuration = Mathf.Max(0.01f, restDuration);
             dashWidth = Mathf.Max(0.1f, width);
             dashDamageTier = damageTier;
+        }
+
+        public void ConfigureDashRift(float warning, float goldenWarning, float strikeDelay, float chainRecovery,
+            float hitLength, float hitWidth, float bodyClearance)
+        {
+            dashWarningDuration = Mathf.Max(0.05f, warning);
+            goldenDashWarningDuration = Mathf.Max(0.05f, goldenWarning);
+            dashStrikeDelay = Mathf.Max(0f, strikeDelay);
+            dashChainRecovery = Mathf.Max(0.01f, chainRecovery);
+            riftHitLength = Mathf.Max(0.1f, hitLength);
+            riftHitWidth = Mathf.Max(0.1f, hitWidth);
+            riftBodyClearance = Mathf.Max(0f, bodyClearance);
         }
 
         // How far beyond its real reach the boss starts a swing (1 = only when the player is already inside).
@@ -414,10 +461,10 @@ namespace TrickalFanGame.Enemy
                 }
                 else if (execution == BossPatternExecution.CrayonHeroDashChain)
                 {
-                    attackPoseIndex = 4;
                     StopMovement();
-                    UpdateAimDirection();
-                    ShowDashTelegraph();
+                    boss?.OverrideEnteringTelegraphDuration(CurrentDashWarningDuration);
+                    completedDashes = 0;
+                    PlaceDashWarning();
                 }
                 return;
             }
@@ -442,6 +489,8 @@ namespace TrickalFanGame.Enemy
                          execution == BossPatternExecution.CrayonHeroDashChain)
                 {
                     StopMovement();
+                    if (execution == BossPatternExecution.CrayonHeroDashChain)
+                        boss?.OverrideEnteringRecoveryDuration(dashChainRecovery);
                 }
                 ResetSwingState();
                 ResetDashState();
@@ -455,6 +504,8 @@ namespace TrickalFanGame.Enemy
                 ResetAttackArtwork();
                 StopMovement();
                 ClearTelegraph();
+                ResetDashState();
+                RestorePlayerCollision(true);
             }
             else if (state == BossActionState.Idle)
             {
@@ -500,10 +551,10 @@ namespace TrickalFanGame.Enemy
                 case BossPatternExecution.CrayonHeroDashChain:
                     dashCountTarget = ResolveDashCountForRoll(NextRandom(100), boss != null && boss.CurrentPhase >= 2);
                     completedDashes = 0;
-                    dashChainHitApplied = false;
-                    BeginDash(lastTickTime);
-                    boss?.SynchronizeActiveEndTime(lastTickTime + dashCountTarget * dashDuration +
-                                                   (dashCountTarget - 1) * dashRetargetDuration + 0.02f);
+                    if (!riftPlaced) PlaceDashWarning();
+                    BeginLeap(lastTickTime);
+                    // Leap length depends on the distance, so the chain itself ends the Active state.
+                    boss?.SynchronizeActiveEndTime(float.PositiveInfinity);
                     return true;
                 default:
                     return false;
@@ -514,6 +565,7 @@ namespace TrickalFanGame.Enemy
         {
             float deltaTime = Mathf.Clamp(now - lastTickTime, 0f, 0.1f);
             lastTickTime = now;
+            RestorePlayerCollision(false);
             if (state == BossActionState.Telegraph)
             {
                 UpdateChargeArtwork();
@@ -523,11 +575,6 @@ namespace TrickalFanGame.Enemy
                 {
                     UpdateAimDirection();
                     ShowMapSlashTelegraph();
-                }
-                else if (execution == BossPatternExecution.CrayonHeroDashChain)
-                {
-                    UpdateAimDirection();
-                    ShowDashTelegraph();
                 }
                 else if (execution == BossPatternExecution.CrayonHeroApproachSwing)
                 {
@@ -547,7 +594,7 @@ namespace TrickalFanGame.Enemy
                         TickApproachSwing(now, deltaTime);
                         break;
                     case BossPatternExecution.CrayonHeroDashChain:
-                        TickDashChain(now, deltaTime);
+                        TickDashChain(now);
                         break;
                 }
                 return;
@@ -591,16 +638,42 @@ namespace TrickalFanGame.Enemy
 
         public static int ResolveDashCountForRoll(int roll, bool golden)
         {
-            int normalized = Mathf.Clamp(roll, 0, 99);
-            if (golden)
-            {
-                if (normalized < 25) return 1;
-                if (normalized < 55) return 2;
-                return 3;
-            }
-            if (normalized < 25) return 1;
-            if (normalized < 75) return 2;
-            return 3;
+            // 28번 §10.4: two or three dashes, always three when golden. The old 2:1 ratio of two to three is kept.
+            if (golden) return 3;
+            return Mathf.Clamp(roll, 0, 99) < 67 ? 2 : 3;
+        }
+
+        // The side of a slash's line that is drawn first follows the dash direction and alternates each dash.
+        public static float ResolveRiftAngle(Vector2 dashDirection, int dashIndex)
+        {
+            const float UpperLeftToLowerRight = -36f, UpperRightToLowerLeft = 216f;
+            bool startsUpperLeft = dashDirection.x >= 0f;
+            if (dashIndex % 2 != 0) startsUpperLeft = !startsUpperLeft;
+            float angle = startsUpperLeft ? UpperLeftToLowerRight : UpperRightToLowerLeft;
+            // A cut lying along the dash would put the boss on its own line, so that dash uses the other diagonal.
+            if (RiftCrossingSine(dashDirection, angle) < MinRiftCrossingSine)
+                angle = startsUpperLeft ? UpperRightToLowerLeft : UpperLeftToLowerRight;
+            return angle;
+        }
+
+        // How far before the rift's center, along the dash, the boss's body clears the rift's line.
+        public static float ResolveRiftStopDistance(Vector2 dashDirection, float riftAngle, float bodyClearance) =>
+            bodyClearance / Mathf.Max(MinRiftCrossingSine, RiftCrossingSine(dashDirection, riftAngle));
+
+        private static float RiftCrossingSine(Vector2 direction, float riftAngle)
+        {
+            float radians = riftAngle * Mathf.Deg2Rad;
+            Vector2 unit = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
+            return Mathf.Abs(unit.x * Mathf.Sin(radians) - unit.y * Mathf.Cos(radians));
+        }
+
+        public static bool IsInsideRift(Vector2 point, Vector2 center, float angle, float length, float width)
+        {
+            float radians = angle * Mathf.Deg2Rad;
+            Vector2 along = new Vector2(Mathf.Cos(radians), Mathf.Sin(radians));
+            Vector2 offset = point - center;
+            return Mathf.Abs(Vector2.Dot(offset, along)) <= length * 0.5f &&
+                   Mathf.Abs(Vector2.Dot(offset, new Vector2(-along.y, along.x))) <= width * 0.5f;
         }
 
         private void TickMapSlash(float now)
@@ -684,97 +757,219 @@ namespace TrickalFanGame.Enemy
             ClearTelegraph();
         }
 
-        private void TickDashChain(float now, float deltaTime)
+        private void TickDashChain(float now)
         {
-            if (target == null || completedDashes >= dashCountTarget) return;
-            if (dashInMotion)
+            if (target == null || dashStage == DashStage.None || completedDashes >= dashCountTarget)
             {
-                float travel = dashSpeed * deltaTime;
-                if (!dashChainHitApplied && ResolveDirectionalHit(0f, ResolveBodyRadius() + travel, dashWidth,
-                        dashDamageTier, DamageSourceType.EnemyContact, lockedDirection))
-                    dashChainHitApplied = true;
-                QueueMove(ClampToArena(CurrentMovePosition +
-                    lockedDirection * LimitDashTravelByPinnedTarget(travel)));
-                if (now < dashStateEndsAt) return;
-                completedDashes++;
-                dashInMotion = false;
-                if (completedDashes >= dashCountTarget)
-                {
-                    ClearTelegraph();
-                    return;
-                }
-                dashStateEndsAt = now + dashRetargetDuration;
-                attackPoseIndex = completedDashes % 2 == 0 ? 4 : 6;
-                UpdateAimDirection();
-                ShowDashTelegraph();
+                boss?.SynchronizeActiveEndTime(now);
                 return;
             }
-
-            StopMovement();
-            UpdateAimDirection();
-            ShowDashTelegraph();
-            if (now >= dashStateEndsAt) BeginDash(now);
+            switch (dashStage)
+            {
+                case DashStage.Leap:
+                    TickLeap(now);
+                    break;
+                case DashStage.StrikeDelay:
+                    if (now >= dashStateEndsAt) ResolveRiftStrike(now);
+                    break;
+                case DashStage.Rest:
+                    if (now < dashStateEndsAt) break;
+                    PlaceDashWarning();
+                    dashStage = DashStage.Warning;
+                    dashStateEndsAt = now + CurrentDashWarningDuration;
+                    break;
+                case DashStage.Warning:
+                    if (now >= dashStateEndsAt) BeginLeap(now);
+                    break;
+            }
         }
 
-        private void BeginDash(float now)
+        // Fixed where the player stands now; it does not follow them afterwards.
+        private void PlaceDashWarning()
         {
+            ClearRiftWarning();
+            attackPoseIndex = 4;
+            if (target == null) return;
             UpdateAimDirection();
-            dashInMotion = true;
-            attackPoseIndex = completedDashes % 2 == 0 ? 5 : 7;
-            dashStateEndsAt = now + dashDuration;
-            // Every dash of the chain swings the sword as it launches.
-            CombatSfx.Play(CombatSfxCue.BossSwordSwing);
-            ShowDashTelegraph();
-            SetAllTelegraphColors(new Color(1f, 0.12f, 0.05f, 0.9f),
-                new Color(1f, 0.45f, 0.05f, 0.95f));
+            riftCenter = target.position;
+            riftAngle = ResolveRiftAngle(lockedDirection, completedDashes);
+            riftPlaced = true;
+            riftEffect = CrayonDashRiftEffect.Show(riftCenter, riftAngle, visual, WarningOrderOffset);
+            if (riftEffect != null) boss?.RegisterOwnedObject(riftEffect.gameObject);
         }
 
-        // A Kinematic body is not stopped by the player it shoves, so a dash that pins the player against terrain
-        // would squeeze the feet through the wall and out of the room. The dash stops short of that instead.
-        private float LimitDashTravelByPinnedTarget(float travel)
+        private void BeginLeap(float now)
+        {
+            dashStage = DashStage.Leap;
+            dashInMotion = true;
+            dashHitApplied = false;
+            attackPoseIndex = completedDashes % 2 == 0 ? 5 : 6;
+            leapStart = CurrentMovePosition;
+            Vector2 toRift = riftCenter - leapStart;
+            if (toRift.sqrMagnitude > 0.0001f) lockedDirection = toRift.normalized;
+            // Negative when the player is too close: the boss hops back so the cut is still in front of it.
+            float distance = toRift.magnitude - ResolveRiftStopDistance(lockedDirection, riftAngle, riftBodyClearance);
+            leapAdvances = distance > 0f;
+            leapEnd = ClampToArena(ResolveLeapEnd(leapStart, lockedDirection * distance));
+            leapStartedAt = now;
+            leapDuration = dashDuration;
+            dashStateEndsAt = now + leapDuration;
+            SetPlayerCollisionIgnored();
+            BossMovementAnimator animator = GetComponent<BossMovementAnimator>();
+            DashAfterimageEffect.Play(animator != null && animator.Artwork != null ? animator.Artwork : visual,
+                leapEnd - leapStart);
+            CombatSfx.Play(CombatSfxCue.BossSwordSwing);
+        }
+
+        private void TickLeap(float now)
+        {
+            Vector2 from = CurrentMovePosition;
+            Vector2 next = Vector2.Lerp(leapStart, leapEnd, (now - leapStartedAt) / Mathf.Max(0.001f, leapDuration));
+            if (!dashHitApplied && leapAdvances && IsTargetNearSegment(from, next, dashWidth * 0.5f))
+            {
+                ApplyTargetDamage(dashDamageTier, DamageSourceType.EnemyContact);
+                dashHitApplied = true;
+            }
+            QueueMove(next);
+            if (now < dashStateEndsAt) return;
+            dashInMotion = false;
+            attackPoseIndex = completedDashes % 2 == 0 ? 6 : 7;
+            dashStage = DashStage.StrikeDelay;
+            dashStateEndsAt += dashStrikeDelay;
+            if (now >= dashStateEndsAt) ResolveRiftStrike(now);
+        }
+
+        private void ResolveRiftStrike(float now)
+        {
+            if (!dashHitApplied && IsDamageableTarget() &&
+                IsInsideRift(target.position, riftCenter, riftAngle, riftHitLength, riftHitWidth))
+            {
+                ApplyTargetDamage(dashDamageTier, DamageSourceType.EnemyMelee);
+                dashHitApplied = true;
+            }
+            if (riftEffect != null) riftEffect.Strike();
+            riftEffect = null;
+            riftPlaced = false;
+            CombatSfx.Play(CombatSfxCue.BossSwordSlamClash);
+            completedDashes++;
+            if (completedDashes >= dashCountTarget)
+            {
+                dashStage = DashStage.None;
+                boss?.SynchronizeActiveEndTime(now);
+                return;
+            }
+            attackPoseIndex = -1;
+            dashStage = DashStage.Rest;
+            dashStateEndsAt = now + dashRestDuration;
+        }
+
+        private bool IsDamageableTarget()
+        {
+            if (target == null) return false;
+            Health targetHealth = target.GetComponentInParent<Health>();
+            return targetHealth != null && !targetHealth.IsDead && target.GetComponentInParent<PlayerMovement>() != null;
+        }
+
+        private bool IsTargetNearSegment(Vector2 start, Vector2 end, float radius)
+        {
+            if (!IsDamageableTarget()) return false;
+            Vector2 point = target.position;
+            Vector2 segment = end - start;
+            float t = segment.sqrMagnitude > 0.000001f
+                ? Mathf.Clamp01(Vector2.Dot(point - start, segment) / segment.sqrMagnitude) : 0f;
+            return (point - (start + segment * t)).sqrMagnitude <= radius * radius;
+        }
+
+        // The leap crosses the player but not walls, obstacles or pits, so it cannot land the feet inside them.
+        private Vector2 ResolveLeapEnd(Vector2 start, Vector2 move)
+        {
+            EnemyFeet feet = GetComponentInChildren<EnemyFeet>();
+            if (feet == null || move.sqrMagnitude <= 0.0001f) return start + move;
+            Collider2D feetCollider = feet.Capsule != null && feet.Capsule.enabled ? feet.Capsule : feet.Collider;
+            if (feetCollider == null) return start + move;
+            Bounds shape = feetCollider.bounds;
+            Vector2 feetOffset = (Vector2)shape.center - (Vector2)transform.position;
+            var filter = new ContactFilter2D { useTriggers = false };
+            filter.SetLayerMask(EnemyFeet.TerrainMask);
+
+            // A wall takes away only the part of the move going into it; the rest continues along the wall.
+            Vector2 position = start, remaining = move;
+            for (int bounce = 0; bounce < LeapSlideSteps && remaining.sqrMagnitude > 0.0001f; bounce++)
+            {
+                float length = remaining.magnitude, travel = length;
+                Vector2 direction = remaining / length, blockNormal = Vector2.zero;
+                FeetHits.Clear();
+                Physics2D.CapsuleCast(position + feetOffset, shape.size, CapsuleDirection2D.Horizontal, 0f, direction,
+                    filter, FeetHits, length + LeapTerrainSkin);
+                foreach (RaycastHit2D hit in FeetHits)
+                {
+                    if (hit.collider == null || Physics2D.GetIgnoreCollision(feetCollider, hit.collider)) continue;
+                    Vector2 normal = hit.normal;
+                    // A cast that starts in contact has no useful normal, so ask which way the wall really is.
+                    if (bounce == 0 && hit.distance <= LeapTerrainSkin)
+                    {
+                        ColliderDistance2D contact = feetCollider.Distance(hit.collider);
+                        if (contact.isValid) normal = -contact.normal;
+                    }
+                    if (Vector2.Dot(normal, direction) >= -0.001f) continue;
+                    float free = Mathf.Max(0f, hit.distance - LeapTerrainSkin);
+                    if (free >= travel) continue;
+                    travel = free;
+                    blockNormal = normal;
+                }
+                position += direction * travel;
+                remaining -= direction * travel;
+                if (blockNormal == Vector2.zero) break;
+                remaining -= blockNormal * Vector2.Dot(remaining, blockNormal);
+            }
+            return position;
+        }
+
+        // A Kinematic body shoves whatever it meets, so the boss and the player stop colliding for the leap. That also
+        // keeps ContactDamage from adding a second hit to the dash.
+        private void SetPlayerCollisionIgnored()
         {
             PlayerMovement player = target != null ? target.GetComponentInParent<PlayerMovement>() : null;
-            PlayerFeet feet = player != null ? player.Feet : null;
-            Rigidbody2D targetBody = player != null ? player.GetComponent<Rigidbody2D>() : null;
-            // A player passing through enemy bodies (post-hit recovery) is not pushed at all.
-            if (feet == null || targetBody == null || travel <= 0f ||
-                (targetBody.excludeLayers.value & (1 << gameObject.layer)) != 0) return travel;
-
-            DashHits.Clear();
-            body.Cast(lockedDirection, DashHits, travel + DashPushSkin);
-            foreach (RaycastHit2D hit in DashHits)
+            if (player == null) return;
+            foreach (Collider2D own in GetComponentsInChildren<Collider2D>())
             {
-                if (hit.collider == null || hit.collider.isTrigger || hit.collider.attachedRigidbody != targetBody)
-                    continue;
-                Vector2 pushDirection = -hit.normal;
-                if (Vector2.Dot(pushDirection, lockedDirection) <= 0f) continue;
-                float contactDistance = Mathf.Max(0f, hit.distance - DashPushSkin);
-                float pushDistance = travel - contactDistance;
-                if (pushDistance <= 0f) continue;
-                travel = Mathf.Min(travel,
-                    contactDistance + ResolveFreeFeetDistance(feet, targetBody, pushDirection, pushDistance));
+                if (own.isTrigger) continue;
+                foreach (Collider2D other in player.GetComponentsInChildren<Collider2D>())
+                {
+                    if (other.isTrigger || Physics2D.GetIgnoreCollision(own, other)) continue;
+                    Physics2D.IgnoreCollision(own, other, true);
+                    dashIgnoredPairs.Add((own, other));
+                }
             }
-            return travel;
         }
 
-        // How far the player's feet can be pushed along the direction before solid terrain stops them.
-        private static float ResolveFreeFeetDistance(PlayerFeet feet, Rigidbody2D targetBody, Vector2 direction,
-            float distance)
+        // Collision returns after the strike, once the two no longer overlap, so the player is not popped aside.
+        private void RestorePlayerCollision(bool force)
         {
-            ContactFilter2D filter = new ContactFilter2D { useTriggers = false };
-            // Flight removes the Pit bit from the body, so a flying player is not treated as pinned by a pit.
-            filter.SetLayerMask(Physics2D.GetLayerCollisionMask(feet.gameObject.layer) &
-                                ~targetBody.excludeLayers.value);
-            FeetHits.Clear();
-            feet.Collider.Cast(direction, filter, FeetHits, distance + DashPushSkin);
-            float free = distance;
-            foreach (RaycastHit2D hit in FeetHits)
+            if (dashIgnoredPairs.Count == 0) return;
+            if (!force)
             {
-                if (hit.collider == null || Physics2D.GetIgnoreCollision(feet.Collider, hit.collider) ||
-                    Vector2.Dot(hit.normal, direction) >= 0f) continue;
-                free = Mathf.Min(free, Mathf.Max(0f, hit.distance - DashPushSkin));
+                if (dashStage == DashStage.Leap || dashStage == DashStage.StrikeDelay) return;
+                foreach ((Collider2D own, Collider2D player) in dashIgnoredPairs)
+                    if (own != null && player != null && own.enabled && player.enabled &&
+                        own.gameObject.activeInHierarchy && player.gameObject.activeInHierarchy &&
+                        own.Distance(player).isOverlapped)
+                        return;
             }
-            return free;
+            foreach ((Collider2D own, Collider2D player) in dashIgnoredPairs)
+                if (own != null && player != null) Physics2D.IgnoreCollision(own, player, false);
+            dashIgnoredPairs.Clear();
+        }
+
+        private void ClearRiftWarning()
+        {
+            if (riftEffect != null)
+            {
+                if (Application.isPlaying) Destroy(riftEffect.gameObject);
+                else DestroyImmediate(riftEffect.gameObject);
+            }
+            riftEffect = null;
+            riftPlaced = false;
         }
 
         private void MoveTowardTarget(float deltaTime, float speedMultiplier)
@@ -924,12 +1119,6 @@ namespace TrickalFanGame.Enemy
             Vector2 start = (Vector2)transform.position + lockedDirection * SwingStartOffset;
             telegraphLine.SetPosition(0, start);
             telegraphLine.SetPosition(1, start + lockedDirection * swingRange);
-        }
-
-        private void ShowDashTelegraph()
-        {
-            // The knight's short dash is readable from its attack pose; no floor path is displayed.
-            ClearTelegraph();
         }
 
         private void ShowSummonTelegraph()
@@ -1086,10 +1275,12 @@ namespace TrickalFanGame.Enemy
         private void ResetDashState()
         {
             dashInMotion = false;
-            dashChainHitApplied = false;
+            dashHitApplied = false;
             dashStateEndsAt = 0f;
             dashCountTarget = 0;
             completedDashes = 0;
+            dashStage = DashStage.None;
+            ClearRiftWarning();
         }
 
         private static bool IsPressureAttack(BossPatternExecution execution)

@@ -35,10 +35,10 @@ MonoBehaviour:
         weight: 50
       - enemyRole: 11
         weight: 20
-  - waveNumber: 2
-    startCondition: 1
-    completionCondition: 0
-    spawnRules:
+      - enemyRole: 15
+        weight: 25
+      - enemyRole: 16
+        weight: 20
     - enemyRole: 0
       count: 1
       spawnPointId: 
@@ -48,6 +48,14 @@ MonoBehaviour:
         weight: 70
       - enemyRole: 4
         weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
+  - waveNumber: 2
+    startCondition: 1
+    completionCondition: 0
+    spawnRules:
     - enemyRole: 2
       count: 1
       spawnPointId: 
@@ -55,6 +63,66 @@ MonoBehaviour:
       candidates:
       - enemyRole: 2
         weight: 100
+    - enemyRole: 0
+      count: 2
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 0
+        weight: 70
+      - enemyRole: 4
+        weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
+    - enemyRole: 1
+      count: 2
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 1
+        weight: 50
+      - enemyRole: 5
+        weight: 50
+      - enemyRole: 11
+        weight: 20
+      - enemyRole: 15
+        weight: 25
+      - enemyRole: 16
+        weight: 20
+  - waveNumber: 3
+    startCondition: 1
+    completionCondition: 0
+    spawnRules:
+    - enemyRole: 1
+      count: 3
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 1
+        weight: 50
+      - enemyRole: 5
+        weight: 50
+      - enemyRole: 11
+        weight: 20
+      - enemyRole: 15
+        weight: 25
+      - enemyRole: 16
+        weight: 20
+    - enemyRole: 0
+      count: 2
+      spawnPointId: 
+      spawnGroupId: all
+      candidates:
+      - enemyRole: 0
+        weight: 70
+      - enemyRole: 4
+        weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
   clearCondition: 0
-  declaredMinimumThreat: 15
-  declaredMaximumThreat: 19
+  declaredMinimumThreat: 38
+  declaredMaximumThreat: 51

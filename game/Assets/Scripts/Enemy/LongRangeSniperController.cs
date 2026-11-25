@@ -33,6 +33,8 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.01f)] private float projectileSpeed = 7f;
         [SerializeField] private EnemyDamageTier projectileDamageTier = EnemyDamageTier.Heavy;
         [SerializeField, Min(0.01f)] private float projectileLifetime = 5f;
+        // Drawn shot size (ProjectileSizing); 고혈당 요정 uses SniperShotScale, the crayon minions keep the default.
+        [SerializeField, Min(0.05f)] private float projectileScale = ProjectileSizing.DrawnEnemyScale;
         [SerializeField] private Transform target;
 
         private Rigidbody2D body;
@@ -61,6 +63,7 @@ namespace TrickalFanGame.Enemy
         public float AimDuration => aimDuration;
         public float RecoveryDuration => recoveryDuration;
         public float ProjectileSpeed => projectileSpeed;
+        public float ProjectileScale => projectileScale;
         public EnemyDamageTier ProjectileDamageTier => projectileDamageTier;
         public int StrafeDirection => strafeDirection;
         public bool IsActionSuppressed => behavior == null || behavior.IsActionSuppressed;
@@ -180,10 +183,10 @@ namespace TrickalFanGame.Enemy
                     behavior.SetControllerMovementSuppressed(true);
                     body.linearVelocity = Vector2.zero;
                     TrackTargetDuringAim();
-                    if (currentTime >= stateEndsAt &&
-                        !EnemyObstacleNavigator.HasLineOfFire(ShotOrigin, target.position))
+                    if (currentTime >= stateEndsAt && !AimReachesTarget())
                     {
-                        // Obstacle-0: never fire into an obstacle; go back to finding a clear line.
+                        // Obstacle-0, Balance-1: fire only when the aim line, as wide as the shot, reaches the
+                        // player; otherwise go back to finding a clear line within range.
                         EnterRelocating(currentTime);
                     }
                     else if (currentTime >= stateEndsAt)
@@ -241,7 +244,7 @@ namespace TrickalFanGame.Enemy
         {
             behavior.SetControllerMovementSuppressed(false);
             Vector2 shotOrigin = ShotOrigin;
-            bool hasSight = EnemyObstacleNavigator.HasLineOfFire(shotOrigin, target.position);
+            bool hasSight = HasShotLine(shotOrigin, target.position);
             if (stance.ShouldSeekSight(hasSight, currentTime))
             {
                 // Obstacle-0: hold the aim and walk around the obstacle until the line of fire opens.
@@ -283,7 +286,8 @@ namespace TrickalFanGame.Enemy
                 ? movement.normalized * (moveSpeed * EnemyStatusEffects.MoveSpeedMultiplierOf(this))
                 : Vector2.zero;
 
-            if (currentTime >= stateEndsAt)
+            // The aim starts only from a spot whose shot would reach the player; until then it keeps relocating.
+            if (currentTime >= stateEndsAt && AimReachesTarget())
             {
                 BeginAim(currentTime, direction);
             }
@@ -295,7 +299,26 @@ namespace TrickalFanGame.Enemy
             Vector2 step = movement.normalized * MobileRangedEnemyController.OrbitProbeDistance;
             Vector2 position = transform.position;
             return EnemyObstacleNavigator.HasClearPath(position, position + step, terrain) &&
-                   EnemyObstacleNavigator.HasLineOfFire(shotOrigin + step, target.position);
+                   HasShotLine(shotOrigin + step, target.position);
+        }
+
+        // Balance-1: true when a shot fired now would reach the player: within ShotReach and with no wall in the
+        // way of the shot's full width (the plain line-of-fire probe is thinner than the shot and lets corners
+        // through).
+        public bool AimReachesTarget()
+        {
+            if (target == null) return false;
+            Vector2 origin = ShotOrigin;
+            return Vector2.Distance(origin, target.position) <= ShotReach && HasShotLine(origin, target.position);
+        }
+
+        private bool HasShotLine(Vector2 from, Vector2 to)
+        {
+            Vector2 offset = to - from;
+            float distance = offset.magnitude;
+            if (distance <= 0.0001f) return true;
+            return Physics2D.CircleCast(from, ShotRadius, offset / distance, distance,
+                EnemyObstacleNavigator.LineOfFireMask).collider == null;
         }
 
         private void BeginAim(float currentTime, Vector2 direction)
@@ -308,7 +331,9 @@ namespace TrickalFanGame.Enemy
 
         // The shot leaves from here, slid off a wall the enemy is pressed against (Hitbox-2).
         private Vector2 ShotOrigin => EnemyProjectile.LaunchOrigin(gameObject, transform.position,
-            GetComponent<EnemyAttackArtwork>()?.ProjectileSprite != null);
+            HasDrawnProjectile, projectileScale);
+
+        public float ShotRadius => EnemyProjectile.LaunchRadiusOf(gameObject, HasDrawnProjectile, projectileScale);
 
         private void Fire(float currentTime)
         {
@@ -321,7 +346,7 @@ namespace TrickalFanGame.Enemy
                 projectileDamageTier,
                 projectileSpeed,
                 projectileLifetime,
-                projectileSprite, drawnProjectile != null);
+                projectileSprite, drawnProjectile != null, projectileScale);
             ProjectileFired?.Invoke(projectile);
             stateEndsAt = currentTime + firingDuration;
             SetState(LongRangeSniperState.Firing);
@@ -336,12 +361,27 @@ namespace TrickalFanGame.Enemy
             UpdateAimPath();
         }
 
+        // The shot's real reach: flight time × speed (Range-0).
+        public float ShotReach => projectileSpeed * projectileLifetime;
+
+        private bool HasDrawnProjectile => GetComponent<EnemyAttackArtwork>()?.ProjectileSprite != null;
+
+        // The aim line is the shot's own path: as wide as the shot's hitbox, from where the shot leaves to where it
+        // stops, at the end of its range or at the first wall it would meet.
         private void UpdateAimPath()
         {
             if (aimPath == null || State != LongRangeSniperState.Aiming ||
                 lockedDirection.sqrMagnitude <= 0.001f) return;
-            aimPath.SetPosition(0, transform.position);
-            aimPath.SetPosition(1, (Vector2)transform.position + lockedDirection * preferredDistance);
+            float radius = ShotRadius;
+            Vector2 origin = ShotOrigin;
+            float reach = ShotReach;
+            RaycastHit2D wall = Physics2D.CircleCast(origin, radius, lockedDirection, reach,
+                LayerMask.GetMask("Environment"));
+            if (wall.collider != null) reach = wall.distance;
+            aimPath.startWidth = radius * 2f;
+            aimPath.endWidth = radius * 2f;
+            aimPath.SetPosition(0, origin);
+            aimPath.SetPosition(1, origin + lockedDirection * reach);
         }
 
         private void CancelPattern(bool stopBody)
@@ -421,10 +461,10 @@ namespace TrickalFanGame.Enemy
             }
             aimPath.useWorldSpace = true;
             aimPath.positionCount = 2;
-            aimPath.startWidth = 0.06f;
-            aimPath.endWidth = 0.02f;
-            aimPath.startColor = new Color(1f, 0.35f, 0.85f, 0.9f);
-            aimPath.endColor = new Color(1f, 0.75f, 0.25f, 0.25f);
+            // Width is set per aim from the shot's hitbox; a full-width band is kept translucent.
+            aimPath.startColor = new Color(1f, 0.35f, 0.85f, 0.45f);
+            aimPath.endColor = new Color(1f, 0.75f, 0.25f, 0.2f);
+            aimPath.numCapVertices = 4;
             aimPath.sortingOrder = spriteRenderer != null ? spriteRenderer.sortingOrder - 1 : 0;
             if (spriteRenderer != null && spriteRenderer.sharedMaterial != null)
             {

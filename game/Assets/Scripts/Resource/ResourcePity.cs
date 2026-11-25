@@ -11,6 +11,16 @@ namespace TrickalFanGame.Resource
 
         public int KeyDroughtClears { get; private set; }
         public int BombDroughtClears { get; private set; }
+        // Balance-1: first combat clears in a row whose chest held no artifact or spell (none at all counts too).
+        public int ItemDroughtClears { get; private set; }
+
+        // At the threshold the next combat clear places a chest that holds an artifact or a spell.
+        public bool ShouldGuaranteeItem(int threshold) => threshold > 0 && ItemDroughtClears >= threshold;
+
+        public void RecordItemClear(bool chestHadItem)
+        {
+            ItemDroughtClears = chestHadItem ? 0 : ItemDroughtClears + 1;
+        }
 
         public static bool IsTracked(RunResourceType type) => type is RunResourceType.Key or RunResourceType.Bomb;
 
@@ -40,6 +50,7 @@ namespace TrickalFanGame.Resource
         {
             KeyDroughtClears = 0;
             BombDroughtClears = 0;
+            ItemDroughtClears = 0;
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -49,6 +60,8 @@ namespace TrickalFanGame.Resource
             if (type == RunResourceType.Key) KeyDroughtClears = clears < 0 ? 0 : clears;
             else if (type == RunResourceType.Bomb) BombDroughtClears = clears < 0 ? 0 : clears;
         }
+
+        public void SetItemDroughtForDevelopment(int clears) => ItemDroughtClears = clears < 0 ? 0 : clears;
 #endif
 
         private static bool Advance(int current, int threshold, out int next)

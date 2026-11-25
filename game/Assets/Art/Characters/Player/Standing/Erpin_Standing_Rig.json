@@ -1,0 +1,39 @@
+{
+  "note": "Hand-authored skeleton for the Erpin standing parts. Coordinates are PSD pixels (origin top-left, y down) on the 1254x1254 canvas. Bones are listed parent first.",
+  "pixelsPerUnit": 250,
+  "origin": [627, 1190],
+  "bones": [
+    { "name": "root", "parent": "", "start": [620, 1180], "end": [620, 1000] },
+    { "name": "spine", "parent": "root", "start": [620, 1000], "end": [620, 790] },
+    { "name": "chest", "parent": "spine", "start": [620, 790], "end": [620, 650] },
+    { "name": "head", "parent": "chest", "start": [630, 650], "end": [630, 260] },
+    { "name": "hairL1", "parent": "head", "start": [500, 330], "end": [390, 560] },
+    { "name": "hairL2", "parent": "hairL1", "start": [390, 560], "end": [300, 780] },
+    { "name": "hairL3", "parent": "hairL2", "start": [300, 780], "end": [230, 950] },
+    { "name": "hairR1", "parent": "head", "start": [760, 330], "end": [900, 560] },
+    { "name": "hairR2", "parent": "hairR1", "start": [900, 560], "end": [1010, 780] },
+    { "name": "hairR3", "parent": "hairR2", "start": [1010, 780], "end": [1130, 940] },
+    { "name": "sideLockL", "parent": "head", "start": [460, 470], "end": [430, 640] },
+    { "name": "sideLockR", "parent": "head", "start": [820, 470], "end": [760, 750] },
+    { "name": "wing", "parent": "chest", "start": [1020, 620], "end": [1200, 520] },
+    { "name": "capeL", "parent": "chest", "start": [560, 680], "end": [460, 890] },
+    { "name": "capeL2", "parent": "capeL", "start": [460, 890], "end": [380, 1040] },
+    { "name": "capeR", "parent": "chest", "start": [700, 680], "end": [830, 860] },
+    { "name": "capeR2", "parent": "capeR", "start": [830, 860], "end": [930, 1040] },
+    { "name": "armStaff", "parent": "chest", "start": [540, 690], "end": [350, 700] },
+    { "name": "armFree", "parent": "chest", "start": [720, 700], "end": [760, 820] }
+  ],
+  "layers": [
+    { "name": "Back hair L", "bones": ["head", "hairL1", "hairL2", "hairL3"] },
+    { "name": "Back hair R", "bones": ["head", "hairR1", "hairR2", "hairR3"] },
+    { "name": "Wing", "bones": ["wing"] },
+    { "name": "Cape", "bones": ["chest", "capeL", "capeL2", "capeR", "capeR2"] },
+    { "name": "Cloud-shaped cape trim", "bones": ["capeL2", "capeR2"] },
+    { "name": "Body and dress", "bones": ["root", "spine", "chest"] },
+    { "name": "Staff arm and scepter", "bones": ["armStaff"] },
+    { "name": "Free arm", "bones": ["armFree"] },
+    { "name": "Face", "bones": ["head"] },
+    { "name": "Fringe and side locks", "bones": ["head", "sideLockL", "sideLockR"] },
+    { "name": "Crown", "bones": ["head"] }
+  ]
+}

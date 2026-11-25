@@ -1,0 +1,689 @@
+fileFormatVersion: 2
+guid: 7e5b44d11c03bc5458b9891d4aaf1f1d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8673891982127674914
+    second: BulhyojasonLively_Attack_Sheet_0
+  - first:
+      213: -7821723501974534669
+    second: BulhyojasonLively_Attack_Sheet_1
+  - first:
+      213: -2208748422555941678
+    second: BulhyojasonLively_Attack_Sheet_2
+  - first:
+      213: -9074193589036599806
+    second: BulhyojasonLively_Attack_Sheet_3
+  - first:
+      213: -3353095964091220522
+    second: BulhyojasonLively_Attack_Sheet_4
+  - first:
+      213: -5830503892160235760
+    second: BulhyojasonLively_Attack_Sheet_5
+  - first:
+      213: 2113353371821223342
+    second: BulhyojasonLively_Attack_Sheet_6
+  - first:
+      213: -3906847127630606067
+    second: BulhyojasonLively_Attack_Sheet_7
+  - first:
+      213: 6398356500404256658
+    second: BulhyojasonLively_Attack_Sheet_8
+  - first:
+      213: -1281268542607147652
+    second: BulhyojasonLively_Attack_Sheet_9
+  - first:
+      213: -5586853322479709626
+    second: BulhyojasonLively_Attack_Sheet_10
+  - first:
+      213: 8075449874587234200
+    second: BulhyojasonLively_Attack_Sheet_11
+  - first:
+      213: 3632029037730647119
+    second: BulhyojasonLively_Attack_Sheet_12
+  - first:
+      213: 5682186750887525200
+    second: BulhyojasonLively_Attack_Sheet_13
+  - first:
+      213: -5204245390276425212
+    second: BulhyojasonLively_Attack_Sheet_14
+  - first:
+      213: -4099634725718585830
+    second: BulhyojasonLively_Attack_Sheet_15
+  - first:
+      213: -3801432831714967008
+    second: BulhyojasonLively_Attack_Sheet_16
+  - first:
+      213: -5777851293912901287
+    second: BulhyojasonLively_Attack_Sheet_17
+  - first:
+      213: -2512321536476048686
+    second: BulhyojasonLively_Attack_Sheet_18
+  - first:
+      213: -1701536274690985462
+    second: BulhyojasonLively_Attack_Sheet_19
+  - first:
+      213: 6776021304256450295
+    second: BulhyojasonLively_Attack_Sheet_20
+  - first:
+      213: 2159349980680456543
+    second: BulhyojasonLively_Attack_Sheet_21
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 15
+        width: 450
+        height: 639
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed9cb21d23520a780800000000000000
+      internalID: -8673891982127674914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 0
+        width: 651
+        height: 684
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f5cb7d8ae7a37390800000000000000
+      internalID: -7821723501974534669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 1046
+        y: 612
+        width: 63
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d4495b1303f851e0800000000000000
+      internalID: -2208748422555941678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 1102
+        y: 55
+        width: 792
+        height: 651
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 206b856020df11280800000000000000
+      internalID: -9074193589036599806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 422
+        y: 504
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ddfb827cf86771d0800000000000000
+      internalID: -3353095964091220522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 427
+        y: 502
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 017b146f993e51fa0800000000000000
+      internalID: -5830503892160235760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 442
+        y: 500
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ead2744d1b3245d10800000000000000
+      internalID: 2113353371821223342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 1981
+        y: 389
+        width: 96
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0192dd9c3718c9c0800000000000000
+      internalID: -3906847127630606067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 417
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29f38e056578bc850800000000000000
+      internalID: 6398356500404256658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 1721
+        y: 417
+        width: 24
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7db4088c05083ee0800000000000000
+      internalID: -1281268542607147652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 1625
+        y: 15
+        width: 534
+        height: 378
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 642d26de0828772b0800000000000000
+      internalID: -5586853322479709626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 2071
+        y: 391
+        width: 40
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89fae3810e2c11070800000000000000
+      internalID: 8075449874587234200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 379
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4cc6df9a2f876230800000000000000
+      internalID: 3632029037730647119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 1160
+        y: 208
+        width: 16
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05bf4129ebe2bde40800000000000000
+      internalID: 5682186750887525200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 1178
+        y: 222
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40a0c9c046ec6c7b0800000000000000
+      internalID: -5204245390276425212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 1190
+        y: 224
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1e00b010fb2b17c0800000000000000
+      internalID: -4099634725718585830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 1211
+        y: 213
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0224f1cfaf89e3bc0800000000000000
+      internalID: -3801432831714967008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 1172
+        y: 214
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9595a4d4cd2f0dfa0800000000000000
+      internalID: -5777851293912901287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 1180
+        y: 212
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d218c89fd0722dd0800000000000000
+      internalID: -2512321536476048686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 1492
+        y: 178
+        width: 21
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a023a96f5cde268e0800000000000000
+      internalID: -1701536274690985462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 1446
+        y: 128
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7fe4faea973490e50800000000000000
+      internalID: 6776021304256450295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulhyojasonLively_Attack_Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 23
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f598430ed5d87fd10800000000000000
+      internalID: 2159349980680456543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      BulhyojasonLively_Attack_Sheet_0: -8673891982127674914
+      BulhyojasonLively_Attack_Sheet_1: -7821723501974534669
+      BulhyojasonLively_Attack_Sheet_10: -5586853322479709626
+      BulhyojasonLively_Attack_Sheet_11: 8075449874587234200
+      BulhyojasonLively_Attack_Sheet_12: 3632029037730647119
+      BulhyojasonLively_Attack_Sheet_13: 5682186750887525200
+      BulhyojasonLively_Attack_Sheet_14: -5204245390276425212
+      BulhyojasonLively_Attack_Sheet_15: -4099634725718585830
+      BulhyojasonLively_Attack_Sheet_16: -3801432831714967008
+      BulhyojasonLively_Attack_Sheet_17: -5777851293912901287
+      BulhyojasonLively_Attack_Sheet_18: -2512321536476048686
+      BulhyojasonLively_Attack_Sheet_19: -1701536274690985462
+      BulhyojasonLively_Attack_Sheet_2: -2208748422555941678
+      BulhyojasonLively_Attack_Sheet_20: 6776021304256450295
+      BulhyojasonLively_Attack_Sheet_21: 2159349980680456543
+      BulhyojasonLively_Attack_Sheet_3: -9074193589036599806
+      BulhyojasonLively_Attack_Sheet_4: -3353095964091220522
+      BulhyojasonLively_Attack_Sheet_5: -5830503892160235760
+      BulhyojasonLively_Attack_Sheet_6: 2113353371821223342
+      BulhyojasonLively_Attack_Sheet_7: -3906847127630606067
+      BulhyojasonLively_Attack_Sheet_8: 6398356500404256658
+      BulhyojasonLively_Attack_Sheet_9: -1281268542607147652
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

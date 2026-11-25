@@ -16,7 +16,7 @@ namespace TrickalFanGame.Editor
 {
     // Chest-1: combat room clears roll a chest (33%, then normal/golden/diamond 75/20/5) instead of the old
     // single-pickup drop, never both. Opening drops the rolled contents once: normal 1~3 consumables (60/30/10) with a
-    // 5% spell, golden 2~4, diamond 4~6, consumables weighted like the old drop. Rolls replay per seed, a rebuilt room
+    // 10% spell (Drop-2), golden 2~4, diamond 4~6, consumables weighted like the old drop. Rolls replay per seed, a rebuilt room
     // restores its chest without dropping again, and the development panel can force each kind.
     public static class Week22Chest1Verification
     {
@@ -37,8 +37,8 @@ namespace TrickalFanGame.Editor
         };
         private const float ExpectedKeyCostPerClear = 0.1f;
         private const float ExpectedBombCostPerClear = 0.025f;
-        // Normal 5% plus the diamond chest's guaranteed spell (Chest-2).
-        private const float ExpectedSpellsPerClear = 0.04375f;
+        // Normal 10% (Drop-2) plus the diamond chest's guaranteed spell (Chest-2).
+        private const float ExpectedSpellsPerClear = 0.0625f;
 
         public static void SetupAndVerifyBatch()
         {
@@ -84,7 +84,7 @@ namespace TrickalFanGame.Editor
             ValidateClearChest(assembler, table);
             ValidateDevelopmentChests(assembler, table);
             Debug.Log($"Chest-1 verification passed: combat room clears roll a {Week22Chest1Setup.ChestChance:P0} chest (75/20/5) from the room seed " +
-                      "instead of the old drop, opening drops normal 1~3 (Drop-0 40/40/20, 5% spell), golden 2~4 and " +
+                      "instead of the old drop, opening drops normal 1~3 (Drop-0 40/40/20, Drop-2 10% spell), golden 2~4 and " +
                       "diamond 4~6 consumables once, revisits and rebuilds keep the chest without dropping again, " +
                       "and the development panel forces each kind.");
         }
@@ -95,7 +95,8 @@ namespace TrickalFanGame.Editor
             // Drop-0 (2026-11-06) raised the chest chance and the normal chest counts (was 33%, 60/30/10).
             Assert(Mathf.Approximately(table.ChestChance, Drop0DropRateSetup.ClearChestChance),
                 $"Chests must appear on {Drop0DropRateSetup.ClearChestChance:P0} of clears (Drop-0).");
-            AssertRule(table.FindRule(ChestKind.Normal), 75, 1, Drop0DropRateSetup.NormalChestCountWeights, 0.05f);
+            AssertRule(table.FindRule(ChestKind.Normal), 75, 1, Drop0DropRateSetup.NormalChestCountWeights,
+                Week22Chest1Setup.NormalSpellChance);
             AssertRule(table.FindRule(ChestKind.Golden), 20, 2, new[] { 1, 1, 1 }, 0f);
             AssertRule(table.FindRule(ChestKind.Diamond), 5, 4, new[] { 1, 1, 1 }, 1f);
 
@@ -332,8 +333,10 @@ namespace TrickalFanGame.Editor
                     "A floor rebuild must restore the closed chest where it was.");
 
                 // Opening drops the seeded contents once around the chest.
+                // Balance-1: a room chest rolls with the Run length's reward rates and its recorded item pity.
                 ChestContents expected = table.RollContents(RoomClearRewardSpawner.DeriveChestSeed(chestNode.ContentSeed),
-                    kind);
+                    kind, table.RatesFor(assembler.Generator.FloorCount),
+                    state.GetChest(RoomClearRewardSpawner.ClearChestId).ForcesItem);
                 // Chests open only in the room the player is in, whose content is shown.
                 Room(assembler, chestNode.RoomId).Node.SetVisible(true);
                 Open(restored, assembler.Progress, player);

@@ -32,7 +32,7 @@ MonoBehaviour:
       - enemyRole: 10
         weight: 100
     - enemyRole: 6
-      count: 2
+      count: 3
       spawnPointId: 
       spawnGroupId: all
       candidates:
@@ -43,7 +43,7 @@ MonoBehaviour:
     completionCondition: 0
     spawnRules:
     - enemyRole: 0
-      count: 3
+      count: 4
       spawnPointId: 
       spawnGroupId: all
       candidates:
@@ -51,6 +51,10 @@ MonoBehaviour:
         weight: 70
       - enemyRole: 4
         weight: 30
+      - enemyRole: 13
+        weight: 30
+      - enemyRole: 14
+        weight: 20
   clearCondition: 0
-  declaredMinimumThreat: 14
-  declaredMaximumThreat: 17
+  declaredMinimumThreat: 17
+  declaredMaximumThreat: 21

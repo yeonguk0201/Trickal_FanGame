@@ -25,7 +25,25 @@ for path in sorted((ROOT / 'game/RoomLayouts').glob('*.room.txt')):
     rows=[r.rstrip() for r in rows]
     w,h=SIZES[fields['profile']]
     assert len(rows)==h and all(len(r)==w for r in rows),path
-    rooms.append(dict(id=fields['id'],profile=fields['profile'],title=titles.get(fields['id'],fields['id']),note=fields.get('note',''),weight=int(fields.get('weight',100)),difficulty=int(fields.get('difficulty',1 if any(ch not in '.123456cgd' for ch in ''.join(rows)) else 0)),floors=fields.get('floors',''),grid=rows,source='현재 프로젝트'))
+    # Layout-Wave: wave1~wave6 as {auto} or {entries:[{roles,count,variant?,points?}]}, the editor's room shape.
+    waves=[]
+    for n in range(1,7):
+        text=fields.get(f'wave{n}')
+        if text is None: continue
+        assert n==len(waves)+1,(path,f'wave{n} after a gap')
+        if text.strip()=='auto': waves.append({'auto':True}); continue
+        entries=[]
+        for raw in text.split(','):
+            # Layout-Wave-2: ids[*n][!variant][@5/6]
+            body,_,points=raw.strip().partition('@')
+            body,_,variant=body.partition('!')
+            part,_,count=body.partition('*')
+            entry={'roles':[r.strip() for r in part.split('|')],'count':int(count) if count else 1}
+            if variant.strip(): entry['variant']=variant.strip()
+            if points.strip(): entry['points']=[int(n) for n in points.split('/')]
+            entries.append(entry)
+        waves.append({'entries':entries})
+    rooms.append(dict(id=fields['id'],profile=fields['profile'],title=titles.get(fields['id'],fields['id']),note=fields.get('note',''),weight=int(fields.get('weight',100)),difficulty=int(fields.get('difficulty',1 if any(ch not in '.123456cgd' for ch in ''.join(rows)) else 0)),floors=fields.get('floors',''),waves=waves,grid=rows,source='현재 프로젝트'))
 payload=json.dumps({'rooms':rooms,'masks':masks},ensure_ascii=False).replace('<','\\u003c')
 template=(Path(__file__).parent/'editor.html').read_text(encoding='utf-8')
 out=ROOT/'tmp/room-layout-editor.html'

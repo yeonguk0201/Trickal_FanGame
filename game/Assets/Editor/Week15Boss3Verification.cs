@@ -24,7 +24,7 @@ namespace TrickalFanGame.Editor
             ValidateGoldenTransitionAndTempo();
             ValidateFloorThreeRuntimeBinding();
             Debug.Log("Week 15 Boss-3 verification passed: Crayon Hero continuously pressures with weighted " +
-                      "chase swings, one-to-three aimed dashes, four-role damage-gated summons, a scarce slash, " +
+                      "chase swings, two-to-three rift dashes, four-role damage-gated summons, a scarce slash, " +
                       "and a faster golden phase with three independently stacking slash lines.");
         }
 
@@ -76,21 +76,20 @@ namespace TrickalFanGame.Editor
                    Mathf.Approximately(runtime.SwingRange, 2.4f) &&
                    Mathf.Approximately(runtime.SwingWidth, 3f) &&
                    runtime.SwingStartOffset > collider.bounds.extents.x &&
-                   Mathf.Approximately(runtime.SwingTriggerRange, runtime.SwingAttackReach * 1.4f) &&
+                   Mathf.Approximately(runtime.SwingTriggerRange, runtime.SwingAttackReach * 1.15f) &&
                    Mathf.Approximately(runtime.CurrentApproachSpeed, 3.2f) &&
                    Mathf.Approximately(runtime.SwingMoveSpeedMultiplier, 0.6f) &&
                    runtime.SwingDamageTier == EnemyDamageTier.Medium &&
                    runtime.DashDamageTier == EnemyDamageTier.Light &&
                    prefab.GetComponent<ContactDamage>()?.DamageTier == EnemyDamageTier.Light &&
-                   Mathf.Approximately(runtime.DashSpeed, 15f) &&
-                   Mathf.Approximately(runtime.DashDuration, 0.17f),
+                   Mathf.Approximately(runtime.DashDuration, 0.05f),
                 "Boss-3 pressure movement, summon gate, swing, or dash tuning drifted from verified values.");
             Assert(Mathf.Approximately(boss.Patterns[1].TelegraphDuration, 0.425f) &&
                    Mathf.Approximately(boss.Patterns[1].ActiveDuration, 0.1f) &&
                    Mathf.Approximately(boss.Patterns[1].RecoveryDuration, 0.4f),
                 "Boss-3 summon stop time must remain approximately half of its first implementation.");
-            Assert(Mathf.Approximately(boss.Patterns[3].RecoveryDuration, 0.3f),
-                "Boss-3 must stop for 0.3 seconds after the complete dash chain.");
+            Assert(Mathf.Approximately(boss.Patterns[3].RecoveryDuration, 0.8f),
+                "Boss-3 must stop for 0.8 seconds after the complete dash chain.");
             Assert(prefab.GetComponent<SpriteRenderer>() == null &&
                    prefab.GetComponentInChildren<SpriteRenderer>()?.sprite == sprite,
                 "Boss-3 must keep the authored sprite on a visual child.");
@@ -288,46 +287,25 @@ namespace TrickalFanGame.Editor
                     "Map slash must reset pressure progress and start a fresh absolute cooldown.");
 
                 Assert(Enumerable.Range(0, 100).Count(roll =>
-                           CrayonHeroBossPatternRuntime.ResolveDashCountForRoll(roll, false) == 1) == 25 &&
+                           CrayonHeroBossPatternRuntime.ResolveDashCountForRoll(roll, false) == 2) == 67 &&
                        Enumerable.Range(0, 100).Count(roll =>
-                           CrayonHeroBossPatternRuntime.ResolveDashCountForRoll(roll, false) == 2) == 50 &&
-                       Enumerable.Range(0, 100).Count(roll =>
-                           CrayonHeroBossPatternRuntime.ResolveDashCountForRoll(roll, false) == 3) == 25 &&
-                       Enumerable.Range(0, 100).Count(roll =>
-                           CrayonHeroBossPatternRuntime.ResolveDashCountForRoll(roll, true) == 1) == 25 &&
-                       Enumerable.Range(0, 100).Count(roll =>
-                           CrayonHeroBossPatternRuntime.ResolveDashCountForRoll(roll, true) == 2) == 30 &&
-                       Enumerable.Range(0, 100).Count(roll =>
-                           CrayonHeroBossPatternRuntime.ResolveDashCountForRoll(roll, true) == 3) == 45,
-                    "Dash count distribution must remain 25/50/25 normally and 25/30/45 when golden.");
+                           CrayonHeroBossPatternRuntime.ResolveDashCountForRoll(roll, false) == 3) == 33 &&
+                       Enumerable.Range(0, 100).All(roll =>
+                           CrayonHeroBossPatternRuntime.ResolveDashCountForRoll(roll, true) == 3),
+                    "Dash count must be two or three normally and three when golden.");
 
+                // The full warning, leap and strike rules live in BossPattern1Verification.
                 runtime.BeginCombat(target.transform, 4466, 0f);
                 target.transform.position = Vector2.right * 4f;
                 runtime.OnPatternStateChanged(BossActionState.Telegraph,
-                    BossPatternExecution.CrayonHeroDashChain, 0.2f);
+                    BossPatternExecution.CrayonHeroDashChain, 0.35f);
                 target.transform.position = Vector2.up * 4f;
                 runtime.TickPattern(BossActionState.Telegraph,
                     BossPatternExecution.CrayonHeroDashChain, 0.19f);
-                Assert(runtime.LockedDirection.y > 0.99f,
-                    "Initial dash telegraph must track the moving player for 0.2 seconds.");
+                Assert(runtime.LockedDirection.x > 0.99f && runtime.RiftCenter == Vector2.right * 4f,
+                    "The dash warning must stay where the player stood when it appeared.");
                 runtime.TryExecute(BossPatternExecution.CrayonHeroDashChain);
-                SetPrivateField(runtime, "dashCountTarget", 3);
-                Vector2 firstDirection = runtime.LockedDirection;
-                target.transform.position = Vector2.left * 4f;
-                runtime.TickPattern(BossActionState.Active,
-                    BossPatternExecution.CrayonHeroDashChain, 0.25f);
-                Assert(Vector2.Dot(firstDirection, runtime.LockedDirection) > 0.99f,
-                    "Dash direction must stay fixed after the dash begins.");
-                runtime.TickPattern(BossActionState.Active,
-                    BossPatternExecution.CrayonHeroDashChain, 0.37f);
-                runtime.TickPattern(BossActionState.Active,
-                    BossPatternExecution.CrayonHeroDashChain, 0.42f);
-                Assert(!runtime.IsDashInMotion && runtime.LockedDirection.x < -0.99f,
-                    "The 0.1-second gap between dashes must track the player before relocking.");
-                runtime.TickPattern(BossActionState.Active,
-                    BossPatternExecution.CrayonHeroDashChain, 0.48f);
-                Assert(runtime.IsDashInMotion && runtime.LockedDirection.x < -0.99f,
-                    "The next dash must lock the direction acquired during its retarget window.");
+                Assert(runtime.IsDashInMotion, "The dash must leap when its warning ends.");
 
                 Rigidbody2D bossBody = root.GetComponent<Rigidbody2D>();
                 bossBody.linearVelocity = new Vector2(3f, 2f);
@@ -446,7 +424,7 @@ namespace TrickalFanGame.Editor
             runtime.ConfigureSlash(18f, 1.15f, 0.2f, EnemyDamageTier.Critical);
             runtime.ConfigureSwing(3.2f, 1.35f, 2.4f, 3f, 0.15f, 0.3f, 0.7f, 0.12f, EnemyDamageTier.Medium);
             runtime.ConfigureSwingRecognition(1.4f);
-            runtime.ConfigureDash(15f, 0.17f, 0.1f, 1.8f, EnemyDamageTier.Light);
+            runtime.ConfigureDash(0.05f, 0.7f, 1.2f, EnemyDamageTier.Light);
             runtime.ConfigureSelection(3, 9f, 7.5f, 45, 30, 10, 15);
 
             target = new GameObject("Crayon Hero Player Target");

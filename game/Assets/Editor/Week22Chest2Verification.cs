@@ -79,16 +79,17 @@ namespace TrickalFanGame.Editor
             ChestKindRule normal = table.FindRule(ChestKind.Normal);
             ChestKindRule golden = table.FindRule(ChestKind.Golden);
             ChestKindRule diamond = table.FindRule(ChestKind.Diamond);
-            Assert(golden.SpecialRewardChance >= 0.2f && golden.SpecialRewardChance <= 0.3f &&
-                   Mathf.Approximately(golden.SpecialRewardChance, 0.25f) &&
+            // Balance-1 (2026-11-24): a golden chest always holds an artifact (was 25%).
+            Assert(Mathf.Approximately(golden.SpecialRewardChance, Week22Chest2Setup.GoldenSpecialRewardChance) &&
+                   Mathf.Approximately(golden.SpecialRewardChance, 1f) &&
                    Mathf.Approximately(golden.SpellChance, 0f) && Mathf.Approximately(golden.JjangsemShare, 0f),
-                "A golden chest must roll a 25% special reward (20~30%, §3.1) and no spell.");
+                "A golden chest must always hold its special reward (Balance-1) and no spell.");
             Assert(Mathf.Approximately(diamond.SpellChance, 1f) && Mathf.Approximately(diamond.JjangsemShare, 0.25f) &&
                    Mathf.Approximately(diamond.SpecialRewardChance, 0f),
                 "A diamond chest must always hold one spell with a 25% jjangsem share and no special reward (D2).");
-            Assert(Mathf.Approximately(normal.SpellChance, 0.05f) && Mathf.Approximately(normal.JjangsemShare, 0f) &&
-                   Mathf.Approximately(normal.SpecialRewardChance, 0f),
-                "A normal chest must keep its 5% spell without a jjangsem spell or special reward.");
+            Assert(Mathf.Approximately(normal.SpellChance, Week22Chest1Setup.NormalSpellChance) &&
+                   Mathf.Approximately(normal.JjangsemShare, 0f) && Mathf.Approximately(normal.SpecialRewardChance, 0f),
+                "A normal chest must keep its 10% spell (Drop-2) without a jjangsem spell or special reward.");
 
             // Contract-0 §3: valid IDs of the allowed kind only, per acquisition path.
             Assert(table.GoldenExclusiveArtifacts.Count > 0 && table.ArtifactPickupPrefab != null &&
@@ -196,8 +197,9 @@ namespace TrickalFanGame.Editor
                                     table.FindRule(ChestKind.Golden).SpecialRewardChance;
             float diamondSpellPerClear = table.KindChancePerRoll(ChestKind.Diamond) *
                                          table.FindRule(ChestKind.Diamond).SpellChance;
-            // Drop-0 (2026-11-06): 50% chests make both 0.025 per clear (was 0.0165 at 33%).
-            AssertNear(specialPerClear, 0.025f, 0.0001f, "golden special rewards per clear");
+            // Drop-0 (2026-11-06): 50% chests make both 0.025 per clear (was 0.0165 at 33%). Balance-1: the golden
+            // chest always holds its artifact, so its share is 0.5 × 0.2 = 0.1 per clear.
+            AssertNear(specialPerClear, 0.1f, 0.0001f, "golden special rewards per clear");
             AssertNear(diamondSpellPerClear, 0.025f, 0.0001f, "diamond spells per clear");
             Debug.Log($"Chest-2 expected per combat room clear: golden special reward {specialPerClear:F4}, " +
                       $"diamond spell {diamondSpellPerClear:F4}.");
@@ -325,14 +327,10 @@ namespace TrickalFanGame.Editor
                 RoomRunState state = assembler.Progress.GetRoomState(start.RoomId);
                 RoomChestSite site = new(room, start.Template, state, assembler.Progress, player.transform);
 
-                // A missed roll drops consumables only.
-                int missSeed = FindContentSeed(table, ChestKind.Golden, contents => !contents.HasSpecialReward);
-                TreasureChest miss = Spawn(table, site, "chest-reward-miss", ChestKind.Golden, missSeed);
-                Open(miss, assembler.Progress, player);
-                Assert(miss.IsOpened && Children(assembler, start.RoomId, ArtifactPrefix).Length == 0 &&
-                       ChestChildren(assembler, start.RoomId, DropPrefix, miss).Length ==
-                       table.RollContents(missSeed, ChestKind.Golden).Consumables.Count,
-                    "A golden chest whose roll misses must drop only its consumables.");
+                // Balance-1: no golden roll misses its artifact any more.
+                Assert(Enumerable.Range(0, 128).All(index =>
+                        table.RollContents(Seed(index), ChestKind.Golden).HasSpecialReward),
+                    "Every golden chest must hold its special reward.");
 
                 // A hit whose artifact is already at its stack limit drops no pickup the player cannot take.
                 int ownedSeed = FindContentSeed(table, ChestKind.Golden, contents =>
@@ -353,6 +351,13 @@ namespace TrickalFanGame.Editor
                     "The special reward must skip an artifact held at its stack limit.");
                 Assert(table.GoldenExclusiveArtifacts.Count > 1 || replacement == null,
                     "With every exclusive artifact at its stack limit there must be no special reward.");
+                // Balance-1: with the Run's artifact pool, a golden chest whose exclusive artifacts are spent gives a
+                // treasure pool artifact instead.
+                ItemDefinition fallback = table.ResolveArtifact(ownedContents, inventory, assembler.SelectionRewardPool,
+                    runSeed, "chest-reward-owned");
+                Assert(fallback != null && fallback != held && ArtifactRewardSelector.IsEligible(fallback, inventory) &&
+                       (replacement != null ? fallback == replacement : !table.IsGoldenExclusive(fallback)),
+                    "A golden chest must fall back to the treasure pool when no exclusive artifact is left.");
 
                 RoomChestSite ownerSite = new(room, start.Template, state, assembler.Progress, owner.transform);
                 TreasureChest owned = Spawn(table, ownerSite, "chest-reward-owned", ChestKind.Golden, ownedSeed);

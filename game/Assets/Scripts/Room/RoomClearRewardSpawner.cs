@@ -90,7 +90,7 @@ namespace TrickalFanGame.Room
                 bool isClearChest = existing.ChestId == ClearChestId;
                 if (existing.IsDiscarded || (!isClearChest && !existing.HasContentSeed)) continue;
                 TreasureChest restored = RoomChestSpawner.Spawn(chestTable, chestSite, existing.ChestId, existing.Kind,
-                    isClearChest ? chestSeed : existing.ContentSeed, out string error);
+                    isClearChest ? chestSeed : existing.ContentSeed, null, existing.ForcesItem, out string error);
                 if (restored == null)
                     Debug.LogError($"Room {runState.RoomId} could not rebuild chest {existing.ChestId}. {error}", this);
             }
@@ -130,15 +130,27 @@ namespace TrickalFanGame.Room
         private bool TrySpawnChest()
         {
             if (chestSite == null || runState == null || !runState.TryMarkClearRewardGranted()) return false;
+            // Balance-1: after itemPityClears combat clears without a chest item, this clear places a chest that
+            // holds an artifact or a spell, a normal one when the roll gave no chest.
+            ChestRewardRates rates = chestTable.RatesFor(chestSite.RunFloorCount);
+            bool forceItem = rates != null && runProgress != null &&
+                             runProgress.Pity.ShouldGuaranteeItem(rates.ItemPityClears);
             if (!chestTable.TryRollChest(chestSeed, out ChestKind kind))
             {
-                SpawnPityDrops(chestTable.Consumables);
-                return false;
-            }
+                if (!forceItem)
+                {
+                    RecordItemPity(false);
+                    SpawnPityDrops(chestTable.Consumables);
+                    return false;
+                }
 
+                kind = ChestKind.Normal;
+            }
             kind = ChestContentTable.ResolveKindForFloor(kind, chestSite.KeyFreeFloor);
-            TreasureChest chest = RoomChestSpawner.Spawn(chestTable, chestSite, ClearChestId, kind, chestSeed,
-                out string error);
+            TreasureChest chest = RoomChestSpawner.Spawn(chestTable, chestSite, ClearChestId, kind, chestSeed, null,
+                forceItem, out string error);
+            RecordItemPity(chest != null &&
+                           RoomChestSpawner.RollContents(chestTable, chestSite, ClearChestId, kind, chestSeed).HasItem);
             // After the chest, so the guaranteed pickups keep clear of it.
             SpawnPityDrops(chestTable.Consumables);
             if (chest == null)
@@ -152,6 +164,15 @@ namespace TrickalFanGame.Room
             RewardSpawned?.Invoke(chest.gameObject);
             return true;
         }
+        public bool LastClearForcedItem { get; private set; }
+
+        private void RecordItemPity(bool chestHadItem)
+        {
+            LastClearForcedItem = runState?.GetChest(ClearChestId)?.ForcesItem == true;
+            if (runProgress != null && chestTable?.RatesFor(chestSite?.RunFloorCount ?? 0) != null)
+                runProgress.Pity.RecordItemClear(chestHadItem);
+        }
+
         // Drop-0: counts this first clear for the pity counter and drops the key or bomb it guarantees. The pickup
         // Prefab is the source table's own key or bomb candidate. The room's clear reward is granted once, so a
         // revisit never counts or drops again.

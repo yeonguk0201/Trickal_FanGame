@@ -92,7 +92,7 @@ namespace TrickalFanGame.Run
             DrawSpellSlotSection(assembler);
             DrawPowerSection(assembler);
             DrawArtifactSection(assembler);
-            DrawResourceSection(progress);
+            DrawResourceSection(assembler, progress);
             DrawElifSection(assembler, progress);
             DrawChestSection(assembler);
             DrawObstacleSection(assembler);
@@ -159,6 +159,12 @@ namespace TrickalFanGame.Run
             FindEnemySeedButton(assembler, EncounterEnemyRole.Lobber, "lobber", "Lobber room");
             // Enemy-13: 잠복형 only comes in pressure's melee slots from floor 3.
             FindEnemySeedButton(assembler, EncounterEnemyRole.Ambusher, "ambusher", "Ambusher room");
+            // Attribute-0: the new 불효자손·산사모.
+            FindEnemySeedButton(assembler, EncounterEnemyRole.RibbonLasher, "ribbon", "Ribbon room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.Leaper, "leaper", "Leaper room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.FanShooter, "fan shooter", "Fan shooter room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.BoomerangThrower, "boomerang", "Boomerang room");
+            FindEnemySeedButton(assembler, EncounterEnemyRole.BurrowHealer, "healer", "Healer room");
             // Variant-0: elites start on floor 3 (20% of combat rooms).
             if (GUILayout.Button("Find elite F3"))
                 FindSeed(assembler, node => EnemyVariantRules.CountElites(node.ResolvedEncounterWaves) > 0,
@@ -212,6 +218,18 @@ namespace TrickalFanGame.Run
             {
                 numbers.SpawnSamples(assembler.Graph.Player.transform.position + Vector3.up * 0.6f);
                 status = "Normal 12, critical 48, tick 3, blocked 0.";
+            }
+
+            // Replays the player's heal and SP effects without needing lost health or an SP pickup.
+            CombatVisualFeedback recovery = assembler.Graph?.Player != null
+                ? assembler.Graph.Player.GetComponent<CombatVisualFeedback>()
+                : null;
+            if (recovery != null)
+            {
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("Play heal FX")) recovery.PlayHealEffect();
+                if (GUILayout.Button("Play SP FX")) recovery.PlaySPEffect();
+                GUILayout.EndHorizontal();
             }
 
             // Hitbox-1: the look follows the size, the hurtbox stops at its limit and the feet never change.
@@ -501,7 +519,7 @@ namespace TrickalFanGame.Run
                                     : string.Empty));
         }
 
-        private void DrawResourceSection(RunProgress progress)
+        private void DrawResourceSection(RoomGraphAssembler assembler, RunProgress progress)
         {
             GUILayout.Label($"— Resources — bomb {progress.GetResourceCount(RunResourceType.Bomb)}  " +
                             $"key {progress.GetResourceCount(RunResourceType.Key)}  " +
@@ -515,6 +533,16 @@ namespace TrickalFanGame.Run
             ResourcePity pity = progress.Pity;
             GUILayout.Label($"Pity key {pity.KeyDroughtClears}/{ResourcePity.KeyThreshold}  " +
                             $"bomb {pity.BombDroughtClears}/{ResourcePity.BombThreshold}  (next clear guarantees at the threshold)");
+            // Balance-1: the chest item pity and the reward rates of this Run's length.
+            ChestRewardRates chestRates = assembler.ChestContentTable != null
+                ? assembler.ChestContentTable.RatesFor(assembler.Generator != null ? assembler.Generator.FloorCount : 0)
+                : null;
+            GUILayout.Label(chestRates != null
+                ? $"Chest item pity {pity.ItemDroughtClears}/{chestRates.ItemPityClears}  normal chest artifact " +
+                  $"{chestRates.NormalArtifactChance:P0} spell {chestRates.NormalSpellChance:P0} ({chestRates.FloorCount}F rates)"
+                : "Chest item pity: no reward rates");
+            if (chestRates != null && AssistedButton("Chest item pity on next clear"))
+                pity.SetItemDroughtForDevelopment(chestRates.ItemPityClears);
             GUILayout.BeginHorizontal();
             if (AssistedButton("Key pity on next clear"))
                 pity.SetDroughtForDevelopment(RunResourceType.Key, ResourcePity.KeyThreshold);
@@ -635,8 +663,8 @@ namespace TrickalFanGame.Run
             RoomPrefab room = CurrentRoom(assembler);
             GeneratedRoomNode node = assembler.GeneratedGraph.FindFloor(room.Node.FloorNumber).Nodes
                 .First(candidate => candidate.RoomId == room.Node.RoomId);
-            RoomChestSite site = new(room, node.Template, assembler.Progress.GetRoomState(room.Node.RoomId),
-                assembler.Progress, player.transform);
+            RoomChestSite site = assembler.WithChestRewards(new RoomChestSite(room, node.Template,
+                assembler.Progress.GetRoomState(room.Node.RoomId), assembler.Progress, player.transform));
             TreasureChest chest = site.Parent.GetComponentsInChildren<TreasureChest>(false)
                 .Where(candidate => candidate.ChestId.StartsWith(RoomChestSpawner.DevelopmentChestPrefix,
                     System.StringComparison.Ordinal))
@@ -862,12 +890,51 @@ namespace TrickalFanGame.Run
             }
 
             TreasureChest chest = RoomChestSpawner.SpawnDevelopmentChest(assembler.ChestContentTable,
-                new RoomChestSite(room, node.Template, state, assembler.Progress,
-                    assembler.Graph.Player != null ? assembler.Graph.Player.transform : null), node.ContentSeed, kind,
+                assembler.WithChestRewards(new RoomChestSite(room, node.Template, state, assembler.Progress,
+                    assembler.Graph.Player != null ? assembler.Graph.Player.transform : null)), node.ContentSeed, kind,
                 out string error);
             message = chest != null ? $"Placed {kind} chest {chest.ChestId}." : error;
             return chest != null;
         }
+
+        // Layout-Wave-2 (2026-11-25): which wave is running, who comes next, and a skip to the last wave, to check a
+        // room's authored waves quickly (— Layout — Force <id>, then here).
+        private void DrawWaveStatus(RoomController controller, GeneratedRoomNode node)
+        {
+            if (controller == null || controller.WaveCount == 0) return;
+            string source = node?.Template != null && node.Template.HasLayoutWaves ? "  (Layout waves)" : string.Empty;
+            GUILayout.Label($"Wave {controller.CurrentWaveNumber}/{controller.WaveCount}  alive " +
+                            $"{controller.AliveEnemyCount}{source}");
+            var waves = node?.ResolvedEncounterWaves;
+            int next = controller.CurrentWaveNumber;
+            GUILayout.Label(waves != null && next < waves.Count
+                ? $"Next wave {next + 1}: {DescribeWave(waves[next])}"
+                : "Next wave: none (last wave)");
+            if (controller.CurrentWaveNumber >= 1 && controller.CurrentWaveNumber < controller.WaveCount &&
+                AssistedButton("Skip to last wave"))
+            {
+                int killed = 0;
+                for (int guard = 0; guard < 32 && controller.CurrentWaveNumber < controller.WaveCount; guard++)
+                {
+                    int killedNow = controller.KillAliveEnemiesForDevelopment();
+                    killed += killedNow;
+                    if (killedNow == 0) break;
+                }
+
+                status = $"Killed {killed} enemies; now wave {controller.CurrentWaveNumber}/{controller.WaveCount}.";
+            }
+        }
+
+        private static string DescribeWave(ResolvedEncounterSpawn[] wave) =>
+            wave == null || wave.Length == 0
+                ? "-"
+                : string.Join(", ", wave.GroupBy(spawn => (spawn.Role, spawn.Variant))
+                    .Select(group => $"{group.Key.Role}" +
+                                     (group.Key.Variant != TrickalFanGame.Enemy.EnemyVariantKind.None
+                                         ? $"({group.Key.Variant})"
+                                         : string.Empty) +
+                                     (group.Count() > 1 ? $"×{group.Count()}" : string.Empty) +
+                                     $"@{string.Join("/", group.Select(spawn => spawn.SpawnPointIndex + 1))}"));
 
         private void DrawRoomSection(RoomGraphAssembler assembler)
         {
@@ -902,6 +969,7 @@ namespace TrickalFanGame.Run
                                 ? $"  score {node.Difficulty.Score} {node.Difficulty.Tier}"
                                 : string.Empty) +
                             (eliteThreat > 0 ? $"  +variants {eliteThreat}" : string.Empty));
+            DrawWaveStatus(controller, node);
             DrawEliteControls(assembler, room, controller, node);
             DrawChampionControls(assembler, controller, node);
             GUILayout.Label("Death blasts pending " +
@@ -923,6 +991,22 @@ namespace TrickalFanGame.Run
                     "Assets/Prefabs/QuickRangedFairy.prefab");
                 status = controller.SpawnExtraEnemy(sansamo, player.transform.position + Vector3.right * 3f) != null
                     ? "Spawned pure Sansamo to the right of the player." : "Pure Sansamo spawn failed.";
+            }
+            // Attribute-0 (2026-11-23): the five new 불효자손·산사모, one button each.
+            foreach ((string label, string prefabName) in new[]
+                     {
+                         ("Spawn 불효자손-순수 (ribbon)", "BulhyojasonPure"),
+                         ("Spawn 불효자손-활발 (leaps)", "BulhyojasonLively"),
+                         ("Spawn 불효자손-우울 (3-way fan)", "BulhyojasonGloomy"),
+                         ("Spawn 산사모-냉정 (boomerang)", "SansamoCold"),
+                         ("Spawn 산사모-우울 (burrow heal)", "SansamoGloomy"),
+                     })
+            {
+                if (!AssistedButton(label) || controller == null || player == null) continue;
+                GameObject attributeEnemy = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Prefabs/" + prefabName + ".prefab");
+                status = controller.SpawnExtraEnemy(attributeEnemy, player.transform.position + Vector3.right * 4f) != null
+                    ? $"Spawned {prefabName} to the right of the player." : $"{prefabName} spawn failed.";
             }
             if (AssistedButton("Spawn crumb minion (explodes on death)") && controller != null && player != null)
             {
@@ -1380,6 +1464,13 @@ namespace TrickalFanGame.Run
 
         private static void RestartWithSeed(int seed)
         {
+            // Balance-1: after GAME OVER the result scene is held half-loaded, and Unity queues any other load
+            // behind it. Confirm GAME OVER and restart from the result screen instead.
+            if (TrickalFanGame.Frontend.RunSceneLoader.IsPreloading)
+            {
+                Debug.LogWarning("[DevelopmentGamePanel] Restart is unavailable while the result scene preloads.");
+                return;
+            }
             RunSession.DevelopmentSeedOverride = seed;
             RunSession session = FindFirstObjectByType<RunSession>();
             if (session != null && session.TryRestartRun()) return;

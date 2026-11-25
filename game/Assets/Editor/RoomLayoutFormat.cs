@@ -135,6 +135,8 @@ namespace TrickalFanGame.Editor
         public int MinimumFloor { get; internal set; } = 1;
         public int MaximumFloor { get; internal set; } = 99;
         public string Note { get; internal set; } = string.Empty;
+        // Layout-Wave: wave1..wave6 in order. Empty keeps the old rule (the rolled Encounter's waves).
+        public RoomLayoutWave[] Waves { get; internal set; } = Array.Empty<RoomLayoutWave>();
         // Rows top to bottom, each exactly Profile.Columns symbols.
         public string[] Rows { get; internal set; } = Array.Empty<string>();
         // Header and grid with line endings normalized; the importer hashes it to skip unchanged rooms.
@@ -214,6 +216,162 @@ namespace TrickalFanGame.Editor
             new(Week14Room6Setup.LargeProfileId, Week14Room6Setup.LargeProfilePath, Week14Room6Setup.LargeSize,
                 Week14Room6Setup.LargePrefabPath, 21, 11, 6),
         };
+
+        // Layout-Wave: the enemy names a wave line uses, kebab-case of EncounterEnemyRole (stable IDs; append only).
+        public const string AutoWave = "auto";
+        public static readonly IReadOnlyDictionary<string, EncounterEnemyRole> EnemyIds = BuildEnemyIds();
+
+        public static string EnemyId(EncounterEnemyRole role) =>
+            System.Text.RegularExpressions.Regex.Replace(role.ToString(), "(?<=[a-z])([A-Z])", "-$1").ToLowerInvariant();
+
+        private static Dictionary<string, EncounterEnemyRole> BuildEnemyIds()
+        {
+            Dictionary<string, EncounterEnemyRole> ids = new(StringComparer.Ordinal);
+            foreach (EncounterEnemyRole role in Enum.GetValues(typeof(EncounterEnemyRole)))
+                if (role != EncounterEnemyRole.Boss) ids.Add(EnemyId(role), role);
+            return ids;
+        }
+
+        public static string WaveKey(int waveNumber) => $"wave{waveNumber}";
+
+        // Layout-Wave-2: the variant names after '!' (stable; append only). No '!' keeps the floor's roll.
+        public static readonly IReadOnlyDictionary<string, RoomLayoutVariant> VariantIds =
+            new Dictionary<string, RoomLayoutVariant>(StringComparer.Ordinal)
+            {
+                ["normal"] = RoomLayoutVariant.Normal,
+                ["elite"] = RoomLayoutVariant.Elite,
+                ["champion"] = RoomLayoutVariant.Champion,
+                ["champion-puddle"] = RoomLayoutVariant.ChampionPuddle,
+                ["champion-shots"] = RoomLayoutVariant.ChampionShots,
+                ["champion-blast"] = RoomLayoutVariant.ChampionBlast,
+                ["champion-undying"] = RoomLayoutVariant.ChampionUndying,
+            };
+
+        public static string VariantId(RoomLayoutVariant variant) =>
+            VariantIds.FirstOrDefault(entry => entry.Value == variant).Key;
+
+        public const int MaximumWaveEntryCount = 12;
+
+        // "auto", or entries split by commas: "chaser*3, sniper|ranged*2" places three 불효자손-광기 and two enemies
+        // each picked from 저격·원거리. A missing "*n" means one. Layout-Wave-2: "!elite" fixes the entry's variant
+        // and "@5/6" limits it to SpawnPoints 5 and 6 (at least as many points as enemies):
+        // "sniper*2!champion@5/6".
+        public static bool TryParseWave(string value, out RoomLayoutWave wave, out string error)
+        {
+            wave = RoomLayoutWave.Auto;
+            string text = (value ?? string.Empty).Trim();
+            if (string.Equals(text, AutoWave, StringComparison.Ordinal))
+            {
+                error = null;
+                return true;
+            }
+
+            List<RoomLayoutWaveEntry> entries = new();
+            foreach (string rawEntry in text.Split(','))
+            {
+                string entry = rawEntry.Trim();
+                if (entry.Length == 0)
+                {
+                    error = $"Wave '{text}' has an empty entry. Use 'auto' or 'chaser*3, sniper'.";
+                    return false;
+                }
+
+                int[] points = Array.Empty<int>();
+                int at = entry.IndexOf('@');
+                if (at >= 0)
+                {
+                    string[] parts = entry.Substring(at + 1).Split('/');
+                    List<int> parsed = new();
+                    foreach (string part in parts)
+                    {
+                        if (!int.TryParse(part.Trim(), out int point) || point < 1 || parsed.Contains(point - 1))
+                        {
+                            error = $"Wave entry '{entry}' needs distinct SpawnPoint numbers after '@', like '@5/6'.";
+                            return false;
+                        }
+
+                        parsed.Add(point - 1);
+                    }
+
+                    points = parsed.ToArray();
+                    entry = entry.Substring(0, at).Trim();
+                }
+
+                RoomLayoutVariant variant = RoomLayoutVariant.Random;
+                int bang = entry.IndexOf('!');
+                if (bang >= 0)
+                {
+                    string variantId = entry.Substring(bang + 1).Trim();
+                    if (!VariantIds.TryGetValue(variantId, out variant))
+                    {
+                        error = $"Unknown variant '{variantId}'. Use one of: {string.Join(", ", VariantIds.Keys)}.";
+                        return false;
+                    }
+
+                    entry = entry.Substring(0, bang).Trim();
+                }
+
+                int count = 1;
+                int star = entry.IndexOf('*');
+                if (star >= 0)
+                {
+                    if (!int.TryParse(entry.Substring(star + 1).Trim(), out count) || count < 1 ||
+                        count > MaximumWaveEntryCount)
+                    {
+                        error = $"Wave entry '{entry}' needs a count from 1 to {MaximumWaveEntryCount} after '*'.";
+                        return false;
+                    }
+
+                    entry = entry.Substring(0, star).Trim();
+                }
+
+                if (points.Length > 0 && points.Length < count)
+                {
+                    error = $"Wave entry '{rawEntry.Trim()}' puts {count} enemies on {points.Length} SpawnPoints.";
+                    return false;
+                }
+
+                List<EncounterEnemyCandidate> candidates = new();
+                foreach (string rawId in entry.Split('|'))
+                {
+                    string id = rawId.Trim();
+                    if (!EnemyIds.TryGetValue(id, out EncounterEnemyRole role))
+                    {
+                        error = $"Unknown enemy '{id}'. Use one of: {string.Join(", ", EnemyIds.Keys)}.";
+                        return false;
+                    }
+
+                    if (candidates.Any(candidate => candidate.EnemyRole == role))
+                    {
+                        error = $"Wave entry '{rawEntry.Trim()}' lists '{id}' twice.";
+                        return false;
+                    }
+
+                    if (!RoomTemplateDefinition.LayoutVariantAllows(variant, role))
+                    {
+                        error = $"Wave entry '{rawEntry.Trim()}': '{id}' cannot be {VariantId(variant)}.";
+                        return false;
+                    }
+
+                    candidates.Add(new EncounterEnemyCandidate(role, 1));
+                }
+
+                entries.Add(new RoomLayoutWaveEntry(new EncounterSpawnRule(candidates.ToArray(), count, null, "all"),
+                    points, variant));
+            }
+
+            wave = new RoomLayoutWave(false, entries.ToArray());
+            error = null;
+            return true;
+        }
+
+        public static string FormatWave(RoomLayoutWave wave) => wave.IsAuto
+            ? AutoWave
+            : string.Join(", ", wave.Entries.Select(entry =>
+                string.Join("|", entry.Rule.Candidates.Select(candidate => EnemyId(candidate.EnemyRole))) +
+                (entry.Rule.Count > 1 ? $"*{entry.Rule.Count}" : string.Empty) +
+                (entry.Variant != RoomLayoutVariant.Random ? $"!{VariantId(entry.Variant)}" : string.Empty) +
+                (entry.IsPinned ? "@" + string.Join("/", entry.SpawnPoints.Select(point => point + 1)) : string.Empty)));
 
         public static RoomLayoutProfile FindProfile(string profileId) =>
             Profiles.FirstOrDefault(profile => string.Equals(profile.ProfileId, profileId, StringComparison.Ordinal));
@@ -303,7 +461,10 @@ namespace TrickalFanGame.Editor
             foreach (string key in header.Keys)
             {
                 if (key is "id" or "profile" or "weight" or "difficulty" or "floors" or "note") continue;
-                error = $"Unknown header key '{key}'. Use id, profile, weight, difficulty, floors or note.";
+                if (Enumerable.Range(1, RoomTemplateDefinition.MaximumLayoutWaves).Any(number => key == WaveKey(number)))
+                    continue;
+                error = $"Unknown header key '{key}'. Use id, profile, weight, difficulty, floors, note or " +
+                        $"wave1~wave{RoomTemplateDefinition.MaximumLayoutWaves}.";
                 return false;
             }
 
@@ -376,6 +537,36 @@ namespace TrickalFanGame.Editor
             }
 
             if (header.TryGetValue("note", out string note)) document.Note = note;
+
+            // Layout-Wave: wave1, wave2, ... with no gap; none keeps the old rule.
+            List<RoomLayoutWave> waves = new();
+            for (int number = 1; number <= RoomTemplateDefinition.MaximumLayoutWaves; number++)
+            {
+                if (!header.TryGetValue(WaveKey(number), out string waveText)) continue;
+                if (number != waves.Count + 1)
+                {
+                    error = $"'{WaveKey(number)}' needs '{WaveKey(waves.Count + 1)}' before it.";
+                    return false;
+                }
+
+                if (!TryParseWave(waveText, out RoomLayoutWave wave, out error))
+                {
+                    error = $"{WaveKey(number)}: {error}";
+                    return false;
+                }
+
+                int lastPoint = wave.Entries.SelectMany(entry => entry.SpawnPoints).DefaultIfEmpty(-1).Max();
+                if (lastPoint >= document.Profile.SpawnPointCount)
+                {
+                    error = $"{WaveKey(number)}: SpawnPoint {lastPoint + 1} does not exist; " +
+                            $"'{document.Profile.ProfileId}' has 1~{document.Profile.SpawnPointCount}.";
+                    return false;
+                }
+
+                waves.Add(wave);
+            }
+
+            document.Waves = waves.ToArray();
             error = null;
             return true;
         }

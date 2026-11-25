@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TrickalFanGame.Enemy;
 
 namespace TrickalFanGame.Room
@@ -128,6 +129,53 @@ namespace TrickalFanGame.Room
             int contentSeed, int contentVersion) =>
             AssignChampions(AssignElite(waves, floorNumber, contentSeed, contentVersion), floorNumber, contentSeed,
                 contentVersion);
+
+        // Layout-Wave-2 (2026-11-25): a room Layout entry may fix its enemies' variant. Random keeps the roll, Normal
+        // clears it, Champion picks the slot's death property as a rolled champion would. An authored elite takes the
+        // place of the room's rolled elite, so the roll never adds a second one beside it.
+        public static ResolvedEncounterSpawn[][] ApplyLayoutVariants(ResolvedEncounterSpawn[][] waves,
+            IReadOnlyList<RoomLayoutVariant[]> layoutVariants, int contentSeed, int contentVersion)
+        {
+            if (waves == null || layoutVariants == null ||
+                layoutVariants.All(wave => wave == null || wave.All(variant => variant == RoomLayoutVariant.Random)))
+                return waves;
+
+            bool authoredElite = layoutVariants.Any(wave => wave != null &&
+                                                            wave.Contains(RoomLayoutVariant.Elite));
+            ResolvedEncounterSpawn[][] result = CloneWaves(waves);
+            for (int waveIndex = 0; waveIndex < result.Length; waveIndex++)
+            {
+                ResolvedEncounterSpawn[] wave = result[waveIndex];
+                RoomLayoutVariant[] fixedVariants = waveIndex < layoutVariants.Count ? layoutVariants[waveIndex] : null;
+                if (wave == null) continue;
+                for (int index = 0; index < wave.Length; index++)
+                {
+                    ResolvedEncounterSpawn spawn = wave[index];
+                    RoomLayoutVariant layout = fixedVariants != null && index < fixedVariants.Length
+                        ? fixedVariants[index]
+                        : RoomLayoutVariant.Random;
+                    EnemyVariantKind variant = layout switch
+                    {
+                        RoomLayoutVariant.Random => authoredElite && spawn.Variant == EnemyVariantKind.Elite
+                            ? EnemyVariantKind.None
+                            : spawn.Variant,
+                        RoomLayoutVariant.Normal => EnemyVariantKind.None,
+                        RoomLayoutVariant.Elite => EnemyVariantKind.Elite,
+                        RoomLayoutVariant.Champion => PickChampionKind(spawn.Role, contentSeed, contentVersion,
+                            waveIndex, index),
+                        RoomLayoutVariant.ChampionPuddle => EnemyVariantKind.ChampionPuddle,
+                        RoomLayoutVariant.ChampionShots => EnemyVariantKind.ChampionShots,
+                        RoomLayoutVariant.ChampionBlast => EnemyVariantKind.ChampionBlast,
+                        RoomLayoutVariant.ChampionUndying => EnemyVariantKind.ChampionUndying,
+                        _ => spawn.Variant,
+                    };
+                    if (!IsEligible(spawn.Role)) variant = EnemyVariantKind.None;
+                    wave[index] = spawn.WithVariant(variant);
+                }
+            }
+
+            return result;
+        }
 
         public static int CountChampions(IReadOnlyList<ResolvedEncounterSpawn[]> waves)
         {

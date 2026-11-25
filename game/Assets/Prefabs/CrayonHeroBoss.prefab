@@ -413,10 +413,10 @@ MonoBehaviour:
     reuseCooldown: 0.2
   - patternId: crayon-short-dash-chain
     execution: 11
-    telegraphDuration: 0.2
+    telegraphDuration: 0.35
     additionalTelegraphDuration: 0
     activeDuration: 0.75
-    recoveryDuration: 0.3
+    recoveryDuration: 0.8
     reuseCooldown: 0.45
   encounterSeed: 1
   attackInterval: 1.2
@@ -479,13 +479,19 @@ MonoBehaviour:
   swingInterval: 0.7
   swingDirectionLockDuration: 0.12
   swingDamageTier: 1
-  swingRecognitionMultiplier: 1.4
+  swingRecognitionMultiplier: 1.15
   swingMoveSpeedMultiplier: 0.6
-  dashSpeed: 15
-  dashDuration: 0.17
-  dashRetargetDuration: 0.1
-  dashWidth: 1.8
+  dashDuration: 0.05
+  dashRestDuration: 0.7
+  dashWidth: 1.2
   dashDamageTier: 0
+  dashWarningDuration: 0.35
+  goldenDashWarningDuration: 0.3
+  dashStrikeDelay: 0.1
+  dashChainRecovery: 0.8
+  riftHitLength: 4.2
+  riftHitWidth: 0.9
+  riftBodyClearance: 1.2
   pressureActionsBeforeSlash: 3
   slashCooldownPhaseOne: 9
   slashCooldownGolden: 7.5

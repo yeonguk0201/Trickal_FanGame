@@ -215,8 +215,9 @@ namespace TrickalFanGame.Editor
                 // Enemy-9 added 누루링-요정전사 to the pressure melee slots (50/25/15/10), and Enemy-10 added 자폭형
                 // to both (pressure 50/25/15/10/15, swarm 60/25/15/15). Enemy-13 added 잠복형 to pressure (…/15).
                 EncounterEnemyCandidate[] expected = pressure
-                    ? Week27Enemy13Setup.PressureMeleeCandidates()
+                    ? EnemyAttribute0Setup.Extend(Density0Setup.SlotKind.PressureMelee, Week27Enemy13Setup.PressureMeleeCandidates())
                     : Week27Enemy10Setup.SwarmMeleeCandidates();
+                expected = Density1Setup.ForDefinition(definition, expected);
                 foreach (EncounterSpawnRule rule in rules.Where(rule => rule.Candidates.Any(candidate =>
                              candidate.EnemyRole == EncounterEnemyRole.FourWayShooter)))
                 {
@@ -226,6 +227,8 @@ namespace TrickalFanGame.Editor
                         string.Join("/", expected.Select(candidate => candidate.Weight)) + ".");
                 }
 
+                // Density-0 lays out the bigger sizes (Density0Verification); small keeps the ranges below.
+                if (!Density0Setup.IsSmall(definition)) continue;
                 Week19Encounter4Setup.SwarmSpec swarm = Week19Encounter4Setup.Swarms.FirstOrDefault(spec =>
                     Week19Spawn2Setup.EncounterId(spec.ProfileId, "swarm") == definition.EncounterId);
                 Assert(pressure

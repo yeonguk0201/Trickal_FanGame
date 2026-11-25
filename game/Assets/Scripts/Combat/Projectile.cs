@@ -56,9 +56,13 @@ namespace TrickalFanGame.Combat
         public const float BaseColliderRadius = 0.5f;
         public const float PlayerBasicScale = 0.4f;
         public const float PlayerSkillScale = 0.28f;
-        public const float RangedEnemyScale = 0.3f;
+        // Balance-1: every ordinary enemy shot is about 10% smaller (0.3 → 0.27, drawn 0.4 → 0.36), drawing and
+        // hitbox together. Boss shots keep their own sizes.
+        public const float RangedEnemyScale = 0.27f;
         // Drawn enemy shots (onion, crayon arrow/magic) are enlarged for readability; the hitbox follows the artwork.
-        public const float DrawnEnemyScale = 0.4f;
+        public const float DrawnEnemyScale = 0.36f;
+        // Balance-1: the sniper's onion is smaller again, since one shot costs two hearts.
+        public const float SniperShotScale = 0.31f;
         // 산사모-순수's round pollen ball reads far bulkier than the long onion/arrow shots at the same scale, so it
         // keeps the plain ranged hitbox and its drawing follows that size.
         public const float PollenShotScale = RangedEnemyScale;

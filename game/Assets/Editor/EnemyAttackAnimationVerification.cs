@@ -152,10 +152,10 @@ namespace TrickalFanGame.Editor
                     "Firing must use the actual onion sprite with original colors.");
                 Require(renderer.sprite.pixelsPerUnit == EnemyAttackAnimationSetup.ProjectilePixelsPerUnit &&
                     Mathf.Approximately(shot.GetComponent<CircleCollider2D>().bounds.extents.x,
-                        ProjectileSizing.WorldCollisionRadius(ProjectileSizing.DrawnEnemyScale)),
-                    "Onion artwork must use the drawn-shot world collision radius.");
+                        ProjectileSizing.WorldCollisionRadius(sniper.ProjectileScale)),
+                    "Onion artwork must use the sniper's drawn-shot world collision radius.");
                 VerifyReadableShot(renderer);
-                Require(shot.Velocity == Vector2.right * sniper.ProjectileSpeed && shot.transform.localScale == Vector3.one * ProjectileSizing.DrawnEnemyScale &&
+                Require(shot.Velocity == Vector2.right * sniper.ProjectileSpeed && shot.transform.localScale == Vector3.one * sniper.ProjectileScale &&
                     shot.GetComponent<CircleCollider2D>().radius == ProjectileSizing.BaseColliderRadius,
                     "Onion projectile must preserve speed and collision radius.");
                 Require(Mathf.Abs(Mathf.DeltaAngle(renderer.transform.eulerAngles.z, 180f)) < 0.01f,
@@ -170,10 +170,13 @@ namespace TrickalFanGame.Editor
             }
         }
 
-        // Drawn shots were once a third of a tile long; keep the 512px canvas at least one tile wide in the world.
+        // Drawn shots were once a third of a tile long; keep the 512px canvas nearly a tile wide in the world.
+        // Balance-1 shrank every enemy shot by about 10%, so the floor went from 1 to 0.9 tiles.
+        public const float MinimumReadableShotSize = 0.9f;
+
         private static void VerifyReadableShot(SpriteRenderer renderer)
         {
-            Require(Mathf.Max(renderer.bounds.size.x, renderer.bounds.size.y) >= 1f,
+            Require(Mathf.Max(renderer.bounds.size.x, renderer.bounds.size.y) >= MinimumReadableShotSize,
                 renderer.sprite.name + " must stay large enough to read in combat.");
         }
 

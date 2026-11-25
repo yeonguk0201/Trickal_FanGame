@@ -292,7 +292,7 @@ MonoBehaviour:
   attackCooldown: 0.2
   damageTier: 1
   lungeTriggerRange: 1.9
-  lungeDistance: 1.5
+  lungeDistance: 1.2
   aimLockLeadTime: 0.12
   lungeHitForwardOffset: 0.3
   lungeHitRadius: 0.75

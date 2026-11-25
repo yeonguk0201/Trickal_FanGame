@@ -38,6 +38,13 @@ namespace TrickalFanGame.Run
             return false;
         }
 
+        // Balance-1: loads the result scene in the background while GAME OVER or VICTORY plays, so the confirm
+        // button opens the result without the loading screen.
+        public bool PreloadResult()
+        {
+            return RunSceneLoader.Preload(SceneUtility.GetBuildIndexByScenePath(frontendScenePath));
+        }
+
         public bool CanLoadFrontend()
         {
             return RunSceneLoader.CanLoad(SceneUtility.GetBuildIndexByScenePath(frontendScenePath));

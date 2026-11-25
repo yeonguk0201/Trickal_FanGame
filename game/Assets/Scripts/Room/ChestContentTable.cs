@@ -60,20 +60,58 @@ namespace TrickalFanGame.Room
         }
     }
 
+    // Balance-1 (2026-11-24): how generous chests are for a Run of a given length. The 3-floor beta needs a build to
+    // come together by about the middle of floor 2, so its rates are high; longer Runs get their own row instead of
+    // retuning the short one. A normal chest holds an artifact or a spell at these chances, and a run of combat clears
+    // without a chest item guarantees one on the next clear (itemPityClears, ResourcePity).
+    [Serializable]
+    public sealed class ChestRewardRates
+    {
+        [SerializeField, Min(1)] private int floorCount = 3;
+        [SerializeField, Range(0f, 1f)] private float normalArtifactChance;
+        [SerializeField, Range(0f, 1f)] private float normalSpellChance;
+        [SerializeField, Min(1)] private int itemPityClears = 3;
+
+        public ChestRewardRates(int configuredFloorCount, float configuredNormalArtifactChance,
+            float configuredNormalSpellChance, int configuredItemPityClears)
+        {
+            floorCount = configuredFloorCount;
+            normalArtifactChance = configuredNormalArtifactChance;
+            normalSpellChance = configuredNormalSpellChance;
+            itemPityClears = configuredItemPityClears;
+        }
+
+        // The longest Run this row covers; a Run uses the first row at least as long as it.
+        public int FloorCount => floorCount;
+        public float NormalArtifactChance => normalArtifactChance;
+        public float NormalSpellChance => normalSpellChance;
+        public float NormalItemChance => normalArtifactChance + normalSpellChance;
+        public int ItemPityClears => itemPityClears;
+    }
+
     // What one chest holds: consumable drop candidates (one pickup each), an optional single-use item (a spell or a
     // jjangsem spell) and whether the golden special reward hit. The special reward's artifact is chosen when the chest
     // opens (ChestContentTable.ResolveSpecialReward), from the seeded SpecialRewardPick.
     public sealed class ChestContents
     {
         public ChestContents(ChestKind kind, IReadOnlyList<ResourceDropEntry> consumables, ItemDefinition spell,
-            bool hasSpecialReward = false, float specialRewardPick = 0f)
+            bool hasSpecialReward = false, float specialRewardPick = 0f, bool hasArtifact = false,
+            ItemDefinition fallbackSpell = null)
         {
             Kind = kind;
             Consumables = consumables ?? Array.Empty<ResourceDropEntry>();
             Spell = spell;
             HasSpecialReward = hasSpecialReward;
             SpecialRewardPick = specialRewardPick;
+            HasArtifact = hasArtifact;
+            FallbackSpell = fallbackSpell;
         }
+
+        // Balance-1: a normal chest's artifact, chosen from the treasure pool when the chest opens. FallbackSpell
+        // takes its place when the player can acquire no artifact.
+        public bool HasArtifact { get; }
+        public ItemDefinition FallbackSpell { get; }
+        public bool HasItem => Spell != null || HasSpecialReward || HasArtifact;
 
         public ChestKind Kind { get; }
         public IReadOnlyList<ResourceDropEntry> Consumables { get; }
@@ -104,8 +142,11 @@ namespace TrickalFanGame.Room
         [SerializeField] private ItemPickup artifactPickupPrefab;
         // Chest-2: implemented jjangsem spells a diamond chest may hold. Empty until Jjangsem-0; spells fill in.
         [SerializeField] private ItemDefinition[] jjangsemSpells = Array.Empty<ItemDefinition>();
+        // Balance-1: per Run length. Empty keeps the pre-Balance-1 rule chances and no item pity.
+        [SerializeField] private ChestRewardRates[] rewardRates = Array.Empty<ChestRewardRates>();
 
         public float ChestChance => chestChance;
+        public IReadOnlyList<ChestRewardRates> RewardRates => rewardRates ?? Array.Empty<ChestRewardRates>();
         public IReadOnlyList<ChestKindRule> Kinds => kinds;
         public IReadOnlyList<ResourceDropEntry> Consumables => consumables;
         public IReadOnlyList<ItemDefinition> Spells => spells;
@@ -138,6 +179,28 @@ namespace TrickalFanGame.Room
         public void ConfigureJjangsemSpells(ItemDefinition[] configuredJjangsemSpells)
         {
             jjangsemSpells = configuredJjangsemSpells ?? Array.Empty<ItemDefinition>();
+        }
+
+        public void ConfigureRewardRates(ChestRewardRates[] configuredRates)
+        {
+            rewardRates = configuredRates ?? Array.Empty<ChestRewardRates>();
+        }
+
+        // The row for a Run of this many floors: the shortest row that covers it, or else the longest row. Null
+        // without rows. A Run length of 0 (unknown) gets the shortest row.
+        public ChestRewardRates RatesFor(int runFloorCount)
+        {
+            ChestRewardRates chosen = null;
+            ChestRewardRates longest = null;
+            foreach (ChestRewardRates rates in RewardRates)
+            {
+                if (rates == null) continue;
+                if (longest == null || rates.FloorCount > longest.FloorCount) longest = rates;
+                if (rates.FloorCount >= runFloorCount && (chosen == null || rates.FloorCount < chosen.FloorCount))
+                    chosen = rates;
+            }
+
+            return chosen ?? longest;
         }
 
         public bool IsGoldenExclusive(ItemDefinition definition) =>
@@ -269,6 +332,25 @@ namespace TrickalFanGame.Room
                 }
             }
 
+            HashSet<int> rateLengths = new();
+            foreach (ChestRewardRates rates in RewardRates)
+            {
+                if (rates == null || rates.FloorCount < 1 || !rateLengths.Add(rates.FloorCount) ||
+                    rates.NormalArtifactChance < 0f || rates.NormalSpellChance < 0f || rates.NormalItemChance > 1f ||
+                    rates.ItemPityClears < 1)
+                {
+                    error = $"{name} reward rates need distinct Run lengths, chances within 0..1 and a positive " +
+                            "pity count.";
+                    return false;
+                }
+
+                if (rates.NormalSpellChance > 0f && spells.Length == 0)
+                {
+                    error = $"{name} reward rates give normal chest spells but there are no spells.";
+                    return false;
+                }
+            }
+
             if (chestPrefab == null)
             {
                 error = $"{name} needs the chest Prefab.";
@@ -339,7 +421,12 @@ namespace TrickalFanGame.Room
             return false;
         }
 
-        public ChestContents RollContents(int seed, ChestKind kind)
+        public ChestContents RollContents(int seed, ChestKind kind) => RollContents(seed, kind, null, false);
+
+        // Balance-1: with reward rates a normal chest's item comes from them instead of its rule's spell chance, and
+        // forceItem (the item pity) makes sure it holds one. The draws keep a fixed order, so the same seed, rates
+        // and forceItem always give the same chest.
+        public ChestContents RollContents(int seed, ChestKind kind, ChestRewardRates rates, bool forceItem)
         {
             if (!TryValidate(out string error)) throw new InvalidOperationException(error);
             ChestKindRule rule = FindRule(kind);
@@ -380,7 +467,25 @@ namespace TrickalFanGame.Room
 
             // Every draw below comes after the Chest-1 draws, so a chest keeps the consumables and spell hit it had.
             ItemDefinition spell = null;
-            if (rule.SpellChance > 0f && NextUnit(ref state) < rule.SpellChance)
+            bool hasArtifact = false;
+            ItemDefinition fallbackSpell = null;
+            if (kind == ChestKind.Normal && rates != null)
+            {
+                float roll = NextUnit(ref state);
+                if (forceItem || roll < rates.NormalItemChance)
+                {
+                    float artifactShare = rates.NormalItemChance > 0f
+                        ? rates.NormalArtifactChance / rates.NormalItemChance
+                        : 0.5f;
+                    hasArtifact = spells.Length == 0 || NextUnit(ref state) < artifactShare;
+                    ItemDefinition pickedSpell = spells.Length > 0
+                        ? spells[PickIndex(ref state, spells.Length)]
+                        : null;
+                    if (hasArtifact) fallbackSpell = pickedSpell;
+                    else spell = pickedSpell;
+                }
+            }
+            else if (rule.SpellChance > 0f && (forceItem || NextUnit(ref state) < rule.SpellChance))
             {
                 IReadOnlyList<ItemDefinition> jjangsemPool = JjangsemSpells;
                 bool isJjangsem = rule.JjangsemShare > 0f && jjangsemPool.Count > 0 &&
@@ -398,7 +503,32 @@ namespace TrickalFanGame.Room
                 specialRewardPick = NextUnit(ref state);
             }
 
-            return new ChestContents(kind, picked, spell, hasSpecialReward, specialRewardPick);
+            return new ChestContents(kind, picked, spell, hasSpecialReward, specialRewardPick, hasArtifact,
+                fallbackSpell);
+        }
+
+        // Balance-1: the artifact a chest gives when it opens. A golden chest's special reward takes a golden
+        // exclusive artifact first and otherwise one from the treasure pool; a normal chest's artifact always comes
+        // from the treasure pool. Null when the chest holds no artifact or the player can acquire none.
+        public ItemDefinition ResolveArtifact(ChestContents contents, PlayerInventory inventory,
+            IReadOnlyList<ItemDefinition> artifactPool, int runSeed, string rewardId)
+        {
+            if (contents == null || (!contents.HasSpecialReward && !contents.HasArtifact)) return null;
+            if (contents.HasSpecialReward)
+            {
+                ItemDefinition exclusive = ResolveSpecialReward(contents, inventory);
+                if (exclusive != null) return exclusive;
+            }
+
+            if (artifactPool == null) return null;
+            List<ItemDefinition> artifacts = new();
+            foreach (ItemDefinition candidate in artifactPool)
+                if (candidate != null && candidate.Kind == ItemKind.Artifact && !IsGoldenExclusive(candidate))
+                    artifacts.Add(candidate);
+            return ArtifactRewardSelector.TryChoose(artifacts, inventory, runSeed, rewardId, ItemPoolSource.Treasure,
+                out ItemDefinition chosen)
+                ? chosen
+                : null;
         }
 
         // The golden special reward for a chest that is opening: one exclusive artifact the player can still acquire,

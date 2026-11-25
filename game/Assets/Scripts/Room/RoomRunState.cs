@@ -75,6 +75,14 @@ namespace TrickalFanGame.Room
             return true;
         }
 
+        public bool TryRecordChestForcedItem(string chestId)
+        {
+            ChestRunState chest = GetChest(chestId);
+            if (chest == null || chest.ForcesItem) return false;
+            chest.ForcesItem = true;
+            return true;
+        }
+
         public bool TryOpenChest(string chestId)
         {
             ChestRunState chest = GetChest(chestId);

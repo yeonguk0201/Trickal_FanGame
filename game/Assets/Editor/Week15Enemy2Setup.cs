@@ -18,10 +18,11 @@ namespace TrickalFanGame.Editor
             ConfigurePrefab(
                 BulhyojasonPrefabPath,
                 "BulhyojasonEnemy",
-                maxHealth: 60f,
-                moveSpeed: 2.25f,
-                contactDamageTier: EnemyDamageTier.Heavy,
-                meleeDamageTier: EnemyDamageTier.Critical,
+                maxHealth: EnemyAttribute0Setup.MadnessBulhyojasonHealth,
+                // Balance-1: 2.25 → 2, contact 2 → 1 heart, swing 3 → 2 hearts.
+                moveSpeed: 2f,
+                contactDamageTier: EnemyDamageTier.Light,
+                meleeDamageTier: EnemyDamageTier.Heavy,
                 color: Week15EnemyRoleColorSetup.BulhyojasonColor);
 
             CreateVariantIfMissing(BulhyojasonPrefabPath, SansamoPrefabPath, "SansamoEnemy");

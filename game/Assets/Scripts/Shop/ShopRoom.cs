@@ -41,6 +41,7 @@ namespace TrickalFanGame.Shop
         public const float DropSpacing = 1.2f;
 
         [SerializeField] private ShopKeeper keeper;
+        [SerializeField] private ShopDecorDefinition decor;
 
         private RunProgress runProgress;
         private ShopStockState stock;
@@ -58,6 +59,17 @@ namespace TrickalFanGame.Shop
         public void ConfigureKeeper(ShopKeeper configuredKeeper)
         {
             keeper = configuredKeeper;
+        }
+
+        public ShopDecorDefinition Decor => decor;
+        public ShopRoomDecor BuiltDecor { get; private set; }
+
+        public void ConfigureDecor(ShopDecorDefinition configuredDecor) => decor = configuredDecor;
+
+        // Runs after Configure, because the decoration follows this shop's kind.
+        public void BuildDecor(RoomPrefab room, RoomRunState state, int contentSeed)
+        {
+            if (BuiltDecor == null) BuiltDecor = ShopRoomDecor.Build(this, decor, room, state, contentSeed, runProgress);
         }
 
         public void Configure(RunProgress configuredProgress, ShopStockState configuredStock,
@@ -149,7 +161,7 @@ namespace TrickalFanGame.Shop
             }
 
             stock.TryMarkPurchased(slotIndex);
-            if (offer.Kind == ShopOfferKind.Consumable) LastDroppedPickup = DropPickup(offer, slotIndex);
+            if (offer.Kind != ShopOfferKind.Item) LastDroppedPickup = DropPickup(offer, slotIndex);
             Purchased?.Invoke(offer);
             return ShopPurchaseResult.Purchased;
         }
@@ -197,6 +209,16 @@ namespace TrickalFanGame.Shop
 
         private GameObject DropPickup(ShopOffer offer, int slotIndex)
         {
+            if (offer.Kind == ShopOfferKind.Spell)
+            {
+                SingleUseItemPickup spell = Instantiate(offer.SpellPickupPrefab, GetDropPosition(slotIndex),
+                    Quaternion.identity, dropParent != null ? dropParent : transform);
+                spell.name = $"Shop Spell {offer.Item.ItemId} - {stock.ShopId}";
+                // The player may stand on the drop point, so a full slot does not swap until they step off and back.
+                spell.Configure(offer.Item, $"{stock.ShopId}-slot-{slotIndex}-spell", true);
+                return spell.gameObject;
+            }
+
             GameObject pickup = Instantiate(offer.Consumable.PickupPrefab, GetDropPosition(slotIndex),
                 Quaternion.identity, dropParent != null ? dropParent : transform);
             pickup.name = $"Shop Drop {offer.Consumable.ConsumableId} - {stock.ShopId}";

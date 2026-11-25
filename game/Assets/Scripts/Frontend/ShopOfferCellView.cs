@@ -174,16 +174,19 @@ namespace TrickalFanGame.Frontend
             {
                 icon.sprite = source != null ? source.sprite : null;
                 icon.preserveAspect = true;
+                // The cell is reused: an item shown here before left its card or outline material, which would draw
+                // a consumable's transparent pickup art on a black card with that item's rarity frame.
+                icon.material = null;
                 icon.color = source != null ? source.color
-                    : offer.Kind == ShopOfferKind.Item ? ArtifactHudSlotView.GetRarityColor(offer.Item.Rarity)
+                    : offer.Kind != ShopOfferKind.Consumable ? ArtifactHudSlotView.GetRarityColor(offer.Item.Rarity)
                     : Color.white;
             }
 
-            if (offer.Kind == ShopOfferKind.Item) UserArtwork.Apply(icon, offer.Item, iconText);
+            if (offer.Kind != ShopOfferKind.Consumable) UserArtwork.Apply(icon, offer.Item, iconText);
             else if (iconText != null) iconText.gameObject.SetActive(false);
 
             if (iconText != null)
-                iconText.text = offer.Kind == ShopOfferKind.Item
+                iconText.text = offer.Kind != ShopOfferKind.Consumable
                     ? ArtifactHudSlotView.GetShortStableId(offer.Item.ItemId)
                     : string.Empty;
         }

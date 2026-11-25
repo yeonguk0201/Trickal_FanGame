@@ -1,0 +1,1365 @@
+fileFormatVersion: 2
+guid: 7b10f09670b51f14ea816c5a9e69812d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2425151335606011621
+    second: SansamoGloomy_Emerge_Sheet_0
+  - first:
+      213: 4924991647997218927
+    second: SansamoGloomy_Emerge_Sheet_1
+  - first:
+      213: -7953297298888779283
+    second: SansamoGloomy_Emerge_Sheet_2
+  - first:
+      213: 7341838292859852747
+    second: SansamoGloomy_Emerge_Sheet_3
+  - first:
+      213: -5150811909046579716
+    second: SansamoGloomy_Emerge_Sheet_4
+  - first:
+      213: -6086061933164566658
+    second: SansamoGloomy_Emerge_Sheet_5
+  - first:
+      213: 6230657191011333737
+    second: SansamoGloomy_Emerge_Sheet_6
+  - first:
+      213: -3510759939070113727
+    second: SansamoGloomy_Emerge_Sheet_7
+  - first:
+      213: -260809372104544779
+    second: SansamoGloomy_Emerge_Sheet_8
+  - first:
+      213: -4276083494857882835
+    second: SansamoGloomy_Emerge_Sheet_9
+  - first:
+      213: 8253050569550052657
+    second: SansamoGloomy_Emerge_Sheet_10
+  - first:
+      213: -3966656074815305714
+    second: SansamoGloomy_Emerge_Sheet_11
+  - first:
+      213: 1526679311372575320
+    second: SansamoGloomy_Emerge_Sheet_12
+  - first:
+      213: -218781874047322767
+    second: SansamoGloomy_Emerge_Sheet_13
+  - first:
+      213: 8808455545320262090
+    second: SansamoGloomy_Emerge_Sheet_14
+  - first:
+      213: -6853553962049038837
+    second: SansamoGloomy_Emerge_Sheet_15
+  - first:
+      213: -1323825270199070151
+    second: SansamoGloomy_Emerge_Sheet_16
+  - first:
+      213: -2191411611709096849
+    second: SansamoGloomy_Emerge_Sheet_17
+  - first:
+      213: -3136376193522313720
+    second: SansamoGloomy_Emerge_Sheet_18
+  - first:
+      213: -2298774536604580115
+    second: SansamoGloomy_Emerge_Sheet_19
+  - first:
+      213: -7477710112010156985
+    second: SansamoGloomy_Emerge_Sheet_20
+  - first:
+      213: -3779280442362828611
+    second: SansamoGloomy_Emerge_Sheet_21
+  - first:
+      213: -1065809657063099025
+    second: SansamoGloomy_Emerge_Sheet_22
+  - first:
+      213: 6325777774607383320
+    second: SansamoGloomy_Emerge_Sheet_23
+  - first:
+      213: -3003959688996735843
+    second: SansamoGloomy_Emerge_Sheet_24
+  - first:
+      213: -4323017989865573801
+    second: SansamoGloomy_Emerge_Sheet_25
+  - first:
+      213: -8011937255798116304
+    second: SansamoGloomy_Emerge_Sheet_26
+  - first:
+      213: -8706148802894503163
+    second: SansamoGloomy_Emerge_Sheet_27
+  - first:
+      213: 4638891800266551516
+    second: SansamoGloomy_Emerge_Sheet_28
+  - first:
+      213: -4767798316015259789
+    second: SansamoGloomy_Emerge_Sheet_29
+  - first:
+      213: -8479627305358378959
+    second: SansamoGloomy_Emerge_Sheet_30
+  - first:
+      213: 4215623004388951124
+    second: SansamoGloomy_Emerge_Sheet_31
+  - first:
+      213: 4034241568803358398
+    second: SansamoGloomy_Emerge_Sheet_32
+  - first:
+      213: -2583927234495075167
+    second: SansamoGloomy_Emerge_Sheet_33
+  - first:
+      213: 5014505057288284092
+    second: SansamoGloomy_Emerge_Sheet_34
+  - first:
+      213: -4150776050251546069
+    second: SansamoGloomy_Emerge_Sheet_35
+  - first:
+      213: 7959490163481902958
+    second: SansamoGloomy_Emerge_Sheet_36
+  - first:
+      213: 8207023527730480663
+    second: SansamoGloomy_Emerge_Sheet_37
+  - first:
+      213: 4186207422584094970
+    second: SansamoGloomy_Emerge_Sheet_38
+  - first:
+      213: 3636033596510232488
+    second: SansamoGloomy_Emerge_Sheet_39
+  - first:
+      213: 9042936291675469666
+    second: SansamoGloomy_Emerge_Sheet_40
+  - first:
+      213: -287048419893209265
+    second: SansamoGloomy_Emerge_Sheet_41
+  - first:
+      213: -7665949586746780562
+    second: SansamoGloomy_Emerge_Sheet_42
+  - first:
+      213: 5684622396973997106
+    second: SansamoGloomy_Emerge_Sheet_43
+  - first:
+      213: -3128090181547809085
+    second: SansamoGloomy_Emerge_Sheet_44
+  - first:
+      213: -4522408467832537308
+    second: SansamoGloomy_Emerge_Sheet_45
+  - first:
+      213: 9152019697517580678
+    second: SansamoGloomy_Emerge_Sheet_46
+  - first:
+      213: -3959517783645456006
+    second: SansamoGloomy_Emerge_Sheet_47
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 465
+        width: 15
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b19b3a295b1285ed0800000000000000
+      internalID: -2425151335606011621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 449
+        width: 17
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f60d3a46fc5195440800000000000000
+      internalID: 4924991647997218927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 384
+        width: 111
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de919aabe3630a190800000000000000
+      internalID: -7953297298888779283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 469
+        width: 49
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc79544570373e560800000000000000
+      internalID: 7341838292859852747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 286
+        y: 465
+        width: 15
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfd4d60ebd3a488b0800000000000000
+      internalID: -5150811909046579716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 351
+        y: 0
+        width: 644
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e77e2b8cae6f98ba0800000000000000
+      internalID: -6086061933164566658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 994
+        y: 0
+        width: 522
+        height: 507
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 966b67b24bdb77650800000000000000
+      internalID: 6230657191011333737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 1515
+        y: 0
+        width: 457
+        height: 493
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 148cd0caf66474fc0800000000000000
+      internalID: -3510759939070113727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 421
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fdad95024b616cf0800000000000000
+      internalID: -260809372104544779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 409
+        width: 51
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d23c51397bc48a4c0800000000000000
+      internalID: -4276083494857882835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 369
+        y: 409
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13dbd5734c9b88270800000000000000
+      internalID: 8253050569550052657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 386
+        width: 8
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e080d72f05b93f8c0800000000000000
+      internalID: -3966656074815305714
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 380
+        width: 20
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 852ec48bebadf2510800000000000000
+      internalID: 1526679311372575320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 476
+        y: 380
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1757d127b0bb6fcf0800000000000000
+      internalID: -218781874047322767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 958
+        y: 394
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac942a636abed3a70800000000000000
+      internalID: 8808455545320262090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 978
+        y: 380
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b069813bbf843e0a0800000000000000
+      internalID: -6853553962049038837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 1478
+        y: 395
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93259114ee3d0ade0800000000000000
+      internalID: -1323825270199070151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 1973
+        y: 391
+        width: 58
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6cb96fefba8691e0800000000000000
+      internalID: -2191411611709096849
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 313
+        width: 56
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8065c1f187a5974d0800000000000000
+      internalID: -3136376193522313720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 0
+        width: 392
+        height: 386
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de688f60dbc1910e0800000000000000
+      internalID: -2298774536604580115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 367
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 744c9409546d93890800000000000000
+      internalID: -7477710112010156985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 357
+        width: 11
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db8e16e067c4d8bc0800000000000000
+      internalID: -3779280442362828611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 361
+        width: 6
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f65b29883cb7531f0800000000000000
+      internalID: -1065809657063099025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 535
+        y: 367
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81bb88fde5da9c750800000000000000
+      internalID: 6325777774607383320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 2000
+        y: 338
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d94b1c9149acf46d0800000000000000
+      internalID: -3003959688996735843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 290
+        width: 25
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7527074ea0e8104c0800000000000000
+      internalID: -4323017989865573801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 286
+        width: 14
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0307f61d381efc090800000000000000
+      internalID: -8011937255798116304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 1990
+        y: 306
+        width: 18
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 503e7c97acb8d2780800000000000000
+      internalID: -8706148802894503163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 509
+        y: 267
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd03c52b387a06040800000000000000
+      internalID: 4638891800266551516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 551
+        y: 235
+        width: 31
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37f643541b065ddb0800000000000000
+      internalID: -4767798316015259789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 572
+        y: 262
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 138396c84ef425a80800000000000000
+      internalID: -8479627305358378959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 954
+        y: 258
+        width: 17
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 454819389c6e08a30800000000000000
+      internalID: 4215623004388951124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_32
+      rect:
+        serializedVersion: 2
+        x: 549
+        y: 246
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb683ae15518cf730800000000000000
+      internalID: 4034241568803358398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_33
+      rect:
+        serializedVersion: 2
+        x: 511
+        y: 232
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1aca676dedb042cd0800000000000000
+      internalID: -2583927234495075167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_34
+      rect:
+        serializedVersion: 2
+        x: 499
+        y: 213
+        width: 12
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb7611818c9179540800000000000000
+      internalID: 5014505057288284092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_35
+      rect:
+        serializedVersion: 2
+        x: 549
+        y: 206
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b22ce8e8c2b7566c0800000000000000
+      internalID: -4150776050251546069
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_36
+      rect:
+        serializedVersion: 2
+        x: 1929
+        y: 208
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6ffd8be12ac57e60800000000000000
+      internalID: 7959490163481902958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_37
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 141
+        width: 46
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71606a17a6435e170800000000000000
+      internalID: 8207023527730480663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_38
+      rect:
+        serializedVersion: 2
+        x: 1423
+        y: 168
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af08a3ba875681a30800000000000000
+      internalID: 4186207422584094970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_39
+      rect:
+        serializedVersion: 2
+        x: 1957
+        y: 127
+        width: 60
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8afd06f9a49c57230800000000000000
+      internalID: 3636033596510232488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_40
+      rect:
+        serializedVersion: 2
+        x: 1982
+        y: 157
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 267fdcf45a6fe7d70800000000000000
+      internalID: 9042936291675469666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_41
+      rect:
+        serializedVersion: 2
+        x: 1021
+        y: 109
+        width: 57
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f479de2abf2340cf0800000000000000
+      internalID: -287048419893209265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_42
+      rect:
+        serializedVersion: 2
+        x: 1350
+        y: 89
+        width: 66
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e64d7ef77731d9590800000000000000
+      internalID: -7665949586746780562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_43
+      rect:
+        serializedVersion: 2
+        x: 1527
+        y: 141
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23c5ddd93f5d3ee40800000000000000
+      internalID: 5684622396973997106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_44
+      rect:
+        serializedVersion: 2
+        x: 1944
+        y: 130
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c6a47f9d8ac694d0800000000000000
+      internalID: -3128090181547809085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_45
+      rect:
+        serializedVersion: 2
+        x: 1952
+        y: 137
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42f7f91957d2d31c0800000000000000
+      internalID: -4522408467832537308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_46
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 102
+        width: 25
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 681d9e7ec61820f70800000000000000
+      internalID: 9152019697517580678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Emerge_Sheet_47
+      rect:
+        serializedVersion: 2
+        x: 1453
+        y: 21
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7978ffdd87fc09c0800000000000000
+      internalID: -3959517783645456006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SansamoGloomy_Emerge_Sheet_0: -2425151335606011621
+      SansamoGloomy_Emerge_Sheet_1: 4924991647997218927
+      SansamoGloomy_Emerge_Sheet_10: 8253050569550052657
+      SansamoGloomy_Emerge_Sheet_11: -3966656074815305714
+      SansamoGloomy_Emerge_Sheet_12: 1526679311372575320
+      SansamoGloomy_Emerge_Sheet_13: -218781874047322767
+      SansamoGloomy_Emerge_Sheet_14: 8808455545320262090
+      SansamoGloomy_Emerge_Sheet_15: -6853553962049038837
+      SansamoGloomy_Emerge_Sheet_16: -1323825270199070151
+      SansamoGloomy_Emerge_Sheet_17: -2191411611709096849
+      SansamoGloomy_Emerge_Sheet_18: -3136376193522313720
+      SansamoGloomy_Emerge_Sheet_19: -2298774536604580115
+      SansamoGloomy_Emerge_Sheet_2: -7953297298888779283
+      SansamoGloomy_Emerge_Sheet_20: -7477710112010156985
+      SansamoGloomy_Emerge_Sheet_21: -3779280442362828611
+      SansamoGloomy_Emerge_Sheet_22: -1065809657063099025
+      SansamoGloomy_Emerge_Sheet_23: 6325777774607383320
+      SansamoGloomy_Emerge_Sheet_24: -3003959688996735843
+      SansamoGloomy_Emerge_Sheet_25: -4323017989865573801
+      SansamoGloomy_Emerge_Sheet_26: -8011937255798116304
+      SansamoGloomy_Emerge_Sheet_27: -8706148802894503163
+      SansamoGloomy_Emerge_Sheet_28: 4638891800266551516
+      SansamoGloomy_Emerge_Sheet_29: -4767798316015259789
+      SansamoGloomy_Emerge_Sheet_3: 7341838292859852747
+      SansamoGloomy_Emerge_Sheet_30: -8479627305358378959
+      SansamoGloomy_Emerge_Sheet_31: 4215623004388951124
+      SansamoGloomy_Emerge_Sheet_32: 4034241568803358398
+      SansamoGloomy_Emerge_Sheet_33: -2583927234495075167
+      SansamoGloomy_Emerge_Sheet_34: 5014505057288284092
+      SansamoGloomy_Emerge_Sheet_35: -4150776050251546069
+      SansamoGloomy_Emerge_Sheet_36: 7959490163481902958
+      SansamoGloomy_Emerge_Sheet_37: 8207023527730480663
+      SansamoGloomy_Emerge_Sheet_38: 4186207422584094970
+      SansamoGloomy_Emerge_Sheet_39: 3636033596510232488
+      SansamoGloomy_Emerge_Sheet_4: -5150811909046579716
+      SansamoGloomy_Emerge_Sheet_40: 9042936291675469666
+      SansamoGloomy_Emerge_Sheet_41: -287048419893209265
+      SansamoGloomy_Emerge_Sheet_42: -7665949586746780562
+      SansamoGloomy_Emerge_Sheet_43: 5684622396973997106
+      SansamoGloomy_Emerge_Sheet_44: -3128090181547809085
+      SansamoGloomy_Emerge_Sheet_45: -4522408467832537308
+      SansamoGloomy_Emerge_Sheet_46: 9152019697517580678
+      SansamoGloomy_Emerge_Sheet_47: -3959517783645456006
+      SansamoGloomy_Emerge_Sheet_5: -6086061933164566658
+      SansamoGloomy_Emerge_Sheet_6: 6230657191011333737
+      SansamoGloomy_Emerge_Sheet_7: -3510759939070113727
+      SansamoGloomy_Emerge_Sheet_8: -260809372104544779
+      SansamoGloomy_Emerge_Sheet_9: -4276083494857882835
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

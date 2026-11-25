@@ -176,6 +176,19 @@ namespace TrickalFanGame.Editor
                 player.TakeDamage(1f);
                 Assert(pool.ActiveCount == beforeBlocked + 2, "Blocked hits on the player must not show numbers.");
 
+                player.SetInvulnerable(false);
+                int beforeHeal = pool.ActiveCount;
+                Assert(enemy.Heal(2f) > 0f && pool.ActiveCount == beforeHeal + 1, "Healing an enemy must show one number.");
+                Assert(pool.GetActiveKind(beforeHeal) == WorldCombatNumberKind.Healed &&
+                       pool.GetActiveText(beforeHeal) == "+2" &&
+                       pool.GetActiveTextColor(beforeHeal).g > pool.GetActiveTextColor(beforeHeal).r &&
+                       pool.GetActiveTextMaterial(beforeHeal) != pool.NumberMaterial,
+                    "A healed enemy must show a green +amount.");
+                player.TakeDamage(1f);
+                int beforePlayerHeal = pool.ActiveCount;
+                player.Heal(1f);
+                Assert(pool.ActiveCount == beforePlayerHeal, "Healing the player must not show a number.");
+
                 int created = pool.TotalInstanceCount;
                 pool.Tick(pool.Lifetime + 0.01f);
                 Assert(pool.ActiveCount == 0 && pool.PooledCount == created,

@@ -221,8 +221,15 @@ namespace TrickalFanGame.Editor
                 nests++;
 
                 Assert(definition.MinimumFloor == 3 && definition.MaximumFloor == 3 &&
-                       definition.AllowedProfiles.Count == 1 && definition.Waves.Count == 2,
-                    $"'{definition.EncounterId}' must be a two-wave floor-3 Encounter of one profile.");
+                       definition.AllowedProfiles.Count == 1,
+                    $"'{definition.EncounterId}' must be a floor-3 Encounter of one profile.");
+                Assert(definition.Waves[0].SpawnRules[0].Count == 1 &&
+                       definition.Waves[0].SpawnRules[0].Candidates.Count == 1 &&
+                       definition.Waves[0].SpawnRules[0].Candidates[0].EnemyRole == EncounterEnemyRole.JyubiKing,
+                    $"'{definition.EncounterId}' must open with one Jyubi king.");
+                // Density-0 lays out the bigger sizes (Density0Verification); small keeps the Enemy-11 nest.
+                if (!Density0Setup.IsSmall(definition)) continue;
+                Assert(definition.Waves.Count == 2, $"'{definition.EncounterId}' must have two waves.");
                 EncounterSpawnRule[] first = definition.Waves[0].SpawnRules.ToArray();
                 EncounterSpawnRule[] second = definition.Waves[1].SpawnRules.ToArray();
                 Assert(first.Length == 2 && first[0].Count == 1 && first[0].Candidates.Count == 1 &&
@@ -230,10 +237,12 @@ namespace TrickalFanGame.Editor
                        first[1].Count == 2 && first[1].Candidates.All(candidate =>
                            candidate.EnemyRole == EncounterEnemyRole.Jyubi),
                     $"'{definition.EncounterId}' must open with one Jyubi king and two Jyubi.");
-                Assert(second.Length == 1 && second[0].Count == 3 && second[0].Candidates.Count == 2 &&
-                       Weight(second[0], EncounterEnemyRole.Chaser) == 70 &&
+                Assert(second.Length == 1 && second[0].Count == 3 && second[0].Candidates.Count == 4 &&
+                       Weight(second[0], EncounterEnemyRole.RibbonLasher) == 30 &&
+                       Weight(second[0], EncounterEnemyRole.Leaper) == 20 &&
+                       Weight(second[0], EncounterEnemyRole.Chaser) == Density1Setup.SmallChaserWeight(70) &&
                        Weight(second[0], EncounterEnemyRole.FastChaser) == 30,
-                    $"'{definition.EncounterId}' must follow with three chasers weighed 70/30.");
+                    $"'{definition.EncounterId}' must follow with three chasers weighed 35/30 (Density-1).");
                 Assert(table.TryComputeThreatRange(definition, out int minimum, out int maximum, out error) &&
                        minimum == 14 && maximum == 17 && definition.DeclaredMinimumThreat == 14 &&
                        definition.DeclaredMaximumThreat == 17,
@@ -273,12 +282,19 @@ namespace TrickalFanGame.Editor
                     Assert(nest == kings.Length > 0,
                         $"Seed {seed} room '{room.RoomId}' placed a Jyubi king outside a nest, or a nest without one.");
                     if (!nest) continue;
-                    Assert(room.FloorNumber == 3 && kings.Length == 1 &&
-                           room.ResolvedEncounterWaves.Count == 2 &&
+                    // Density-0 gives bigger rooms more kings and waves (Density0Verification); small keeps one.
+                    string profileId = room.Template.Profile.ProfileId;
+                    Assert(room.FloorNumber == 3 && kings.Length ==
+                           Density0Setup.Layout(profileId, Week27Enemy11Setup.Pattern).Sum(wave => wave
+                               .Where(slot => slot.Kind == Density0Setup.SlotKind.JyubiKing).Sum(slot => slot.Count)),
+                        $"Seed {seed} room '{room.RoomId}' resolved the wrong number of Jyubi kings.");
+                    Assert(!Density0Setup.IsSmall(profileId) || room.ResolvedEncounterWaves.Count == 2 &&
                            room.ResolvedEncounterWaves[0].Count(spawn => spawn.Role == EncounterEnemyRole.Jyubi) == 2 &&
                            room.ResolvedEncounterWaves[1].Length == 3 &&
                            room.ResolvedEncounterWaves[1].All(spawn => spawn.Role == EncounterEnemyRole.Chaser ||
-                                                                      spawn.Role == EncounterEnemyRole.FastChaser),
+                                                                      spawn.Role == EncounterEnemyRole.FastChaser ||
+                                                                      spawn.Role == EncounterEnemyRole.RibbonLasher ||
+                                                                      spawn.Role == EncounterEnemyRole.Leaper),
                         $"Seed {seed} room '{room.RoomId}' resolved a wrong Jyubi nest.");
                     ResolvedEncounterSpawn king = kings[0];
                     Assert(room.Template.SupportsEnemyRole(king.SpawnPointIndex, king.Role) &&

@@ -92,14 +92,9 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateSpawnPoints(FloorGenerator generator)
         {
-            Dictionary<string, int> expectedCounts = new(StringComparer.Ordinal)
-            {
-                [Week14Room3Setup.SmallProfileId] = 4,
-                [Week14Room1Setup.BasicProfileId] = 5,
-                [Week14Room3Setup.WideProfileId] = 5,
-                [Week14Room6Setup.TallProfileId] = 5,
-                [Week14Room6Setup.LargeProfileId] = 6,
-            };
+            // Density-0 appends generated SpawnPoints after the Encounter-4 ones, up to its per-size target.
+            Dictionary<string, int> expectedCounts = Density0Setup.Sizes.ToDictionary(size => size.ProfileId,
+                size => size.SpawnPointTarget, StringComparer.Ordinal);
             // T7: a room from the Layout importer authors all of its SpawnPoints in its text file, so it has no
             // entry in the expansion table. Its count and roles are checked here and by the importer verification.
             RoomTemplateDefinition[] imported = generator.RoomTemplates
@@ -157,7 +152,9 @@ namespace TrickalFanGame.Editor
                 Assert(table.TryValidateEncounterSize(definition, out error), error);
             }
 
-            foreach (Week19Encounter4Setup.SwarmSpec spec in Week19Encounter4Setup.Swarms)
+            // Density-0 lays out the bigger sizes (Density0Verification); small keeps the Encounter-4 waves.
+            foreach (Week19Encounter4Setup.SwarmSpec spec in Week19Encounter4Setup.Swarms
+                         .Where(spec => Density0Setup.IsSmall(spec.ProfileId)))
             {
                 EncounterDefinition swarm = Find(generator, Week19Spawn2Setup.EncounterId(spec.ProfileId, "swarm"));
                 Assert(swarm.Waves.Count == 2 &&
@@ -187,8 +184,9 @@ namespace TrickalFanGame.Editor
 
         private static void ValidateInvalidSizes(FloorGenerator generator, RoomDifficultyTable table)
         {
+            // The cases below use the small size's limits (Density-0 gives the bigger sizes their own).
             RoomProfile profile = generator.RoomTemplates.First(template =>
-                template.SupportsRoomType(RoomType.Normal)).Profile;
+                template.SupportsRoomType(RoomType.Normal) && Density0Setup.IsSmall(template.Profile.ProfileId)).Profile;
             EncounterEnemyCandidate[] melee = { new(EncounterEnemyRole.Chaser, 1) };
             // Curve-1: the sniper is the rear-firing enemy present from floor 1.
             EncounterEnemyCandidate[] rear = { new(EncounterEnemyRole.Sniper, 1) };
@@ -263,6 +261,7 @@ namespace TrickalFanGame.Editor
             swarmSeed = 0;
             Dictionary<string, int> patternCounts = new(StringComparer.Ordinal);
             int[] enemyCountHistogram = new int[8];
+            int sizedRooms = 0;
             int smallRooms = 0, smallCrossfireCapable = 0;
             for (int seed = 1; seed <= GeneratedSeedCount; seed++)
             {
@@ -277,15 +276,21 @@ namespace TrickalFanGame.Editor
                 foreach (GeneratedRoomNode room in graph.Nodes.Where(node => node.Role == GeneratedRoomRole.Intermediate))
                 {
                     int total = room.ResolvedEncounterWaves.Sum(wave => wave.Length);
-                    Assert(total >= 2 && total <= 7 && room.ResolvedEncounterWaves.All(wave => wave.Length <= 4),
-                        $"Seed {seed} room '{room.RoomId}' resolved {total} enemies outside 2~7 or over 4 per wave.");
+                    string profileId = room.Template.Profile.ProfileId;
+                    Assert(table.TryGetEncounterLimits(profileId, out int minimumRoom, out int maximumRoom,
+                               out int maximumWave, out _) &&
+                           total >= minimumRoom && total <= maximumRoom &&
+                           room.ResolvedEncounterWaves.All(wave => wave.Length <= maximumWave),
+                        $"Seed {seed} room '{room.RoomId}' resolved {total} enemies outside its '{profileId}' limits.");
                     Assert(room.ResolvedEncounterWaves.All(wave =>
                             wave.Select(spawn => spawn.SpawnPointIndex).Distinct().Count() == wave.Length &&
                             wave.All(spawn => room.Template.SupportsEnemyRole(spawn.SpawnPointIndex, spawn.Role))),
                         $"Seed {seed} room '{room.RoomId}' reused or mismatched a SpawnPoint.");
-                    Assert(room.HasDifficulty && table.Classify(room.Difficulty.Score) == room.Difficulty.Tier,
+                    Assert(room.HasDifficulty &&
+                           table.Classify(room.Difficulty.Score, profileId) == room.Difficulty.Tier,
                         $"Seed {seed} room '{room.RoomId}' lost its room difficulty.");
-                    enemyCountHistogram[total]++;
+                    if (total < enemyCountHistogram.Length) enemyCountHistogram[total]++;
+                    else sizedRooms++;
                     string pattern = Pattern(room.EncounterId);
                     patternCounts[pattern] = patternCounts.TryGetValue(pattern, out int count) ? count + 1 : 1;
                     if (pattern == "swarm" && swarmSeed == 0 && room.FloorNumber == 1) swarmSeed = seed;
@@ -312,7 +317,7 @@ namespace TrickalFanGame.Editor
                       string.Join(", ", patternCounts.OrderBy(entry => entry.Key).Select(entry => $"{entry.Key} {entry.Value}")) +
                       "; room enemy counts " + string.Join(", ", Enumerable.Range(2, 6)
                           .Select(count => $"{count}:{enemyCountHistogram[count]}")) +
-                      $"; Small crossfire-capable rooms {smallCrossfireCapable}/{smallRooms}; runtime seed {swarmSeed} " +
+                      $"; {sizedRooms} Density-0 rooms over 7; Small crossfire-capable rooms {smallCrossfireCapable}/{smallRooms}; runtime seed {swarmSeed} " +
                       "binds stored waves; setup preserves GUIDs and SpawnPoint transforms.");
         }
 

@@ -23,8 +23,9 @@ namespace TrickalFanGame.Editor
         public const float RangedProjectileLifetime = 1.8f;
         // 6.5 speed × 1.4 s ≈ 9 units; it shoots while moving, so its range stays short.
         public const float QuickRangedProjectileLifetime = 1.4f;
-        // 11 speed × 1.3 s ≈ 14 units; the sniper covers most of the room width.
-        public const float SniperProjectileLifetime = 1.3f;
+        // Balance-1: capped at 12.5 units (was 11 × 1.3 s ≈ 14.3), the flight time follows the 11 shot speed.
+        public const float SniperRange = 12.5f;
+        public const float SniperProjectileLifetime = SniperRange / Week19Tune1Setup.SniperProjectileSpeed;
         // 7 speed × 1.7 s ≈ 12 units.
         public const float ArcherProjectileLifetime = 1.7f;
         // 7 speed × 1.4 s ≈ 10 units.

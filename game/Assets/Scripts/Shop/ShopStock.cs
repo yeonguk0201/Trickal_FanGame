@@ -9,6 +9,8 @@ namespace TrickalFanGame.Shop
     {
         Item,
         Consumable,
+        // Shop-2: a single-use spell in a consumable slot. Item holds the spell; buying it drops a floor pickup.
+        Spell,
     }
 
     // Shop-1: who runs the shop. 골디 sells better Items from a secret room; rules and prices are the same.
@@ -21,8 +23,9 @@ namespace TrickalFanGame.Shop
     public sealed class ShopOffer
     {
         private ShopOffer(int slotIndex, ShopOfferKind kind, ItemDefinition item, ShopConsumable consumable, int price,
-            int elifPrice)
+            int elifPrice, SingleUseItemPickup spellPickupPrefab = null)
         {
+            SpellPickupPrefab = spellPickupPrefab;
             SlotIndex = slotIndex;
             Kind = kind;
             Item = item;
@@ -40,11 +43,21 @@ namespace TrickalFanGame.Shop
         // Elif-3: above zero, the offer is sold for this much permanent elif only (never gold, never discounted).
         public int ElifPrice { get; }
         public bool IsElifPriced => ElifPrice > 0;
-        public string OfferId => Kind == ShopOfferKind.Item ? $"item:{Item.ItemId}" : $"consumable:{Consumable.ConsumableId}";
-        public string DisplayName => Kind == ShopOfferKind.Item ? Item.DisplayName : Consumable.DisplayName;
+        public SingleUseItemPickup SpellPickupPrefab { get; }
+        public string OfferId => Kind switch
+        {
+            ShopOfferKind.Item => $"item:{Item.ItemId}",
+            ShopOfferKind.Spell => $"spell:{Item.ItemId}",
+            _ => $"consumable:{Consumable.ConsumableId}",
+        };
+        public string DisplayName => Kind == ShopOfferKind.Consumable ? Consumable.DisplayName : Item.DisplayName;
 
         public static ShopOffer ForItem(int slotIndex, ItemDefinition item, int price) =>
             new(slotIndex, ShopOfferKind.Item, item, null, price, 0);
+
+        public static ShopOffer ForSpell(int slotIndex, ItemDefinition spell, int price,
+            SingleUseItemPickup pickupPrefab) =>
+            new(slotIndex, ShopOfferKind.Spell, spell, null, price, 0, pickupPrefab);
 
         public static ShopOffer ForConsumable(int slotIndex, ShopConsumable consumable) =>
             new(slotIndex, ShopOfferKind.Consumable, null, consumable, consumable.Price, 0);
@@ -161,6 +174,9 @@ namespace TrickalFanGame.Shop
         // so a seed lists the same Items with or without them.
         public const uint ElifOfferSalt = 0x454C4F46u;
         public const uint ExtraSlotSalt = 0x45585452u;
+        // Shop-2: spell rolls hash apart too, so the Items and the consumable draw order do not depend on them.
+        public const uint SpellSlotSalt = 0x5350454Cu;
+        private const int SpellPickSeedOffset = 16;
         // Shop-1: 골디 sells Items of this rarity or better.
         public const ItemRarity GoldiMinimumRarity = ItemRarity.Rare;
 
@@ -176,10 +192,14 @@ namespace TrickalFanGame.Shop
         // 교주의 권능 from powerPool at the Rare price instead.
         // Elif-3: with rollElifPrice, ShopUpgrades.ElifOfferPercent of shops sell one artifact offer for elif (never
         // the 권능 or a consumable). The stock also knows how to fill the extra slots 상품 칸 추가 opens.
+        // Shop-2: with a spellPool, each of the three consumable slots independently sells a distinct spell at
+        // ShopCatalog.SpellSlotPercent. Slots that only fill in for missing Items stay consumables.
         public static ShopStockState Build(string roomId, int roomContentSeed, ShopCatalog catalog,
             IReadOnlyList<ItemDefinition> itemPool, PlayerInventory inventory, ShopKind kind = ShopKind.General,
-            IReadOnlyList<ItemDefinition> powerPool = null, bool rollElifPrice = false)
+            IReadOnlyList<ItemDefinition> powerPool = null, bool rollElifPrice = false,
+            IReadOnlyList<ItemDefinition> spellPool = null, SingleUseItemPickup spellPickupPrefab = null)
         {
+            itemPool = WithoutMoneyItems(itemPool);
             string shopId = BuildShopId(roomId);
             int stockSeed = StockSeedOf(roomContentSeed);
             List<ShopOffer> offers = new(ShopCatalog.OfferCount);
@@ -207,8 +227,16 @@ namespace TrickalFanGame.Shop
             List<ShopConsumable> consumables = new(catalog.Consumables);
             consumables.Sort((left, right) => string.CompareOrdinal(left.ConsumableId, right.ConsumableId));
             uint state = unchecked((uint)FloorGenerator.DeriveSeed(stockSeed, 1, StockSalt));
-            while (offers.Count < ShopCatalog.OfferCount && consumables.Count > 0)
+            List<ItemDefinition> spells = SellableSpells(spellPool, spellPickupPrefab);
+            while (offers.Count < ShopCatalog.OfferCount)
             {
+                if (TryRollSpell(offers.Count, stockSeed, catalog, spells, out ItemDefinition spell))
+                {
+                    offers.Add(ShopOffer.ForSpell(offers.Count, spell, catalog.SpellPrice, spellPickupPrefab));
+                    continue;
+                }
+
+                if (consumables.Count == 0) break;
                 state = state == 0u ? 0x6D2B79F5u : state;
                 state ^= state << 13; state ^= state >> 17; state ^= state << 5;
                 int index = (int)(state % (uint)consumables.Count);
@@ -223,6 +251,59 @@ namespace TrickalFanGame.Shop
         }
 
         public static int StockSeedOf(int roomContentSeed) => FloorGenerator.DeriveSeed(roomContentSeed, 0, StockSalt);
+
+        // Shop-2 (user decision, 2026-11-23): a shop never sells anything that pays out money or waives its prices,
+        // whether spell or artifact. A new effect of that sort must join this list.
+        public static bool IsMoneyEffect(ItemEffectType type) => type is ItemEffectType.GainGold or
+            ItemEffectType.GainRandomGold or ItemEffectType.GainGoldOnAcquire or
+            ItemEffectType.GainPermanentElifRollOnAcquire or ItemEffectType.FreeCurrentShopOffers;
+
+        public static bool IsMoneyItem(ItemDefinition item)
+        {
+            if (item == null) return false;
+            if (item.Effects.Count == 0) return IsMoneyEffect(item.EffectType);
+            foreach (ItemEffectEntry effect in item.Effects)
+                if (IsMoneyEffect(effect.EffectType)) return true;
+            return false;
+        }
+
+        public static bool IsSellableSpell(ItemDefinition item) =>
+            item != null && item.IsValid && item.IsActive && item.Kind == ItemKind.SingleUseSpell && !IsMoneyItem(item);
+
+        private static List<ItemDefinition> WithoutMoneyItems(IReadOnlyList<ItemDefinition> pool)
+        {
+            if (pool == null) return null;
+            List<ItemDefinition> sellable = new(pool.Count);
+            foreach (ItemDefinition item in pool)
+                if (!IsMoneyItem(item)) sellable.Add(item);
+            return sellable;
+        }
+
+        // Sorted by stable ID, so reordering the source list never changes what a seed sells.
+        private static List<ItemDefinition> SellableSpells(IReadOnlyList<ItemDefinition> pool,
+            SingleUseItemPickup pickupPrefab)
+        {
+            List<ItemDefinition> spells = new();
+            if (pool == null || pickupPrefab == null) return spells;
+            foreach (ItemDefinition item in pool)
+                if (IsSellableSpell(item)) spells.Add(item);
+            spells.Sort((left, right) => string.CompareOrdinal(left.ItemId, right.ItemId));
+            return spells;
+        }
+
+        private static bool TryRollSpell(int slot, int stockSeed, ShopCatalog catalog, List<ItemDefinition> spells,
+            out ItemDefinition spell)
+        {
+            spell = null;
+            if (slot < ShopCatalog.ItemOfferCount || spells.Count == 0) return false;
+            uint roll = unchecked((uint)FloorGenerator.DeriveSeed(stockSeed, slot, SpellSlotSalt));
+            if (roll % 100u >= (uint)catalog.SpellSlotPercent) return false;
+            uint pick = unchecked((uint)FloorGenerator.DeriveSeed(stockSeed, slot + SpellPickSeedOffset, SpellSlotSalt));
+            int index = (int)(pick % (uint)spells.Count);
+            spell = spells[index];
+            spells.RemoveAt(index);
+            return true;
+        }
 
         // Elif-3: whether this shop sells an elif offer and which of its first artifactCount offers it is.
         public static bool RollElifOffer(int stockSeed, int artifactCount, out int index)

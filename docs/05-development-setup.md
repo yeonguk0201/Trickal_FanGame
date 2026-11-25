@@ -1539,6 +1539,22 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
   개발 패널(`F1`): `— Room —`의 `Make nearest champion` 줄 `Undying`이 가장 가까운 일반 적을 불사 챔피언으로 바꾸고, 아래 줄
   `undying now N (생명/최대 남은초)`에 불사 중인 적을 보인다. 불사 챔피언이 있는 seed는 `Find champion F2`로 찾는다(성질은 무작위).
 
+- Density-0 방 크기별 적 수(Unity): 메뉴 `Trickal Fan Game > Beta > Setup Density-0 Enemies by Room Size`가 Encounter 콘텐츠 버전
+  24를 멱등 구성한다. 사양은 [28번 §10.2](./28-difficulty-enemies-drops-plan.md). `Density0Setup`이 6종 Encounter의 크기별 웨이브
+  (`Layout`)와 선언 위협을 맡고(Spawn-2·Enemy-13 재실행도 이 값을 쓴다), 난이도 표에 크기별 방·웨이브·후열 상한, 층 범위, 난이도
+  구간(`RoomSizeDifficulty`)을 넣는다. 크기별 값은 small을 평균 적 수 비율로 늘린 것이다. 임포터 이전 템플릿 16개에 SpawnPoint를
+  생성하고 Layout 방을 다시 가져온다(거부된 방이 있으면 예외). 배치는
+  `-executeMethod TrickalFanGame.Editor.Density0Verification.SetupAndVerifyBatch`(Setup 2회 GUID·SpawnPoint·웨이브 불변 포함),
+  단독 `Verify`, 회귀 `VerifyWithRegressionsBatch`(Layout 임포터, Variant-0~2, Enemy-7~13, Curve-1, Spawn-1·2, Difficulty-1,
+  Encounter-4, Room-8, Floor-1, 개발 패널, 19개). 검사: 크기별 표 값·small이 전역 값과 같음, 30개 Encounter의 웨이브·후보·선언 위협,
+  small 값 유지·large 3웨이브 20마리 이하, 웨이브 상한·후열·방 범위 초과 거부, 모든 전투 템플릿의 SpawnPoint 수·생성 위치(간격·문 거리)·모든 문
+  조합 배치, 256 seed 생성의 크기별 상한·층 범위·난이도 분류·결정성, large 방 런타임 결합. 개발 패널 변경은 없다.
+
+- Density-1 small 방 추적형 가중치(Unity): 메뉴 `Trickal Fan Game > Beta > Setup Density-1 Small Room Chaser Weight`가 Encounter
+  콘텐츠 버전 25를 멱등 구성한다. 사양은 [28번 §10.2.2](./28-difficulty-enemies-drops-plan.md). small Encounter의 불효자손 가중치만
+  절반으로 낮춘다. 배치는 `-executeMethod TrickalFanGame.Editor.Density1Verification.SetupAndVerifyBatch`(Setup 2회 GUID·웨이브 불변
+  포함), 단독 `Verify`, 회귀 `VerifyWithRegressionsBatch`(Density-0 회귀 19개 포함, 10분 넘게 걸릴 수 있다).
+
 - Artifact-2 확정 아티팩트 14종: 메뉴 `Trickal Fan Game > Week 23 > Setup Artifact-2 Confirmed Artifacts`가 `Assets/Items/`에
   14종(`artifact-ner-eldr-flag`, `artifact-emergency-protection-belt`, `artifact-pork-cutlet-hairpin`, `artifact-rim-scythe`,
   `artifact-explosive-muffin`, `artifact-blazing-bow`, `artifact-attatta-gun`, `artifact-atta-sword`, `artifact-burning-branch`,
@@ -1719,6 +1735,12 @@ Unity 정의·DTO와 Web 소비자를 비교하며, `$unity-verification-runner`
     가중치가 보인다. 끝나면 `Clear forced layout and restart`를 누른다. 확인할 것: 격자대로 놓인 장애물·구덩이·나무,
     종류 고정 장애물의 색과 드롭, 처음부터 놓여 있는 상자(일반은 닿으면, 황금은 열쇠, 다이아몬드는 폭탄·폭발 상자로
     열림), 방을 나갔다 돌아와도 상자가 한 번만 있는지, 적이 끼이지 않고 방이 클리어되는지.
+  - **Density-0 생성 SpawnPoint**(2026-11-23): 임포터는 파일의 `1`~`N` SpawnPoint 뒤에 방 크기별 목표 수(small 4·basic 7·
+    wide/tall 9·large 11, `Density0Setup.Sizes`)까지 SpawnPoint를 자동으로 덧붙인다(`RoomSpawnPointDensity`). 벽에서
+    0.75, 장애물·구덩이·상자에서 0.75, 바닥 함정에서 0.5, 모든 문의 진입점에서 2.0·문 위치에서 2.5 떨어지고 도달할 수
+    있으며 방을 충분히 보는 0.5 격자 칸 중에서, 이미 있는 점과 가장 먼 칸을 차례로 고른다(seed 없음, 서로 1.5 이상).
+    역할은 근접·후열이다. 생성 규칙을 바꾸면 `RoomSpawnPointDensity.Revision`을 올려 모든 방을 다시 만든다. 손으로 찍은
+    점이 목표 수 이상이면 생성하지 않는다. 자리가 모자라면 "has room for only N SpawnPoints"로 거부된다.
 
 - 아직 구현되지 않은 도구의 명령과 경로는 이 문서에 확정된 사용법으로 기록하지 않는다.
 - 도구가 구현되고 검증되면 실행 위치, 명령 또는 Unity 메뉴, 입력, 기대 결과와 대표 오류 해결 방법을 이 섹션에 추가한다.
@@ -2532,6 +2554,8 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 6. Ctrl+Z / Ctrl+Shift+Z로 실행 취소/다시 실행. **이 방 초기화**는 포함된 원본으로 복원하며 새 방은 비운다. 초기화·삭제도 실행 취소할 수 있다.
 7. **방 내보내기**로 `<id>.room.txt`를 저장하거나 텍스트를 복사한다. **전체 JSON 저장**은 전체 보관함과 선택 방을 백업한다. **가져오기**에서 JSON/room.txt 붙여넣기 또는 여러 파일 선택을 지원한다. 같은 ID는 확인 후 교체하고 그 외 방은 보존한다.
 8. 자동 저장은 HTML 경로별 브라우저 저장소를 사용한다. 저장소/클립보드 접근이 제한되어도 편집·파일 저장·수동 텍스트 복사는 가능하다. HTML 파일 자체에는 변경이 기록되지 않으므로 다른 PC에는 JSON도 함께 전달한다. 다시 빌드해도 기존 브라우저 저장 내용이 우선이며, 프로젝트의 최신 방은 가져오기 또는 해당 방 초기화로 반영한다.
+8-1. (Layout-Wave) 오른쪽 **웨이브 · 몬스터**에서 **웨이브 지정 시작**을 누르면 웨이브별로 `자동`(방이 뽑은 Encounter의 웨이브) 또는 `직접 지정`(몬스터·마리 수, **또는**으로 후보 추가)을 고른다. 지정하지 않으면 이전 규칙 그대로다. 스폰 자리 초과·돌진 자리 초과·층보다 늦게 나오는 몬스터는 배치 검사에 표시된다. 형식은 31번 §2.3, Unity 검증은 `Trickal Fan Game > Tools > Verify Room Layout Waves`.
+   (Layout-Wave-2) 직접 지정 항목마다 **변형**(랜덤·일반·엘리트·챔피언 종류)과 **자리**(격자 스폰 번호, 예 `5/6`)를 정할 수 있다. 항목에 마우스를 올리면 격자에 지정 자리가 금색으로 표시된다. Play에서는 `F1` → `— Layout —` → `Force <id>`로 방에 들어간 뒤 `— Room —`의 `Wave n/m`·`Next wave` 줄로 구성을 보고 **Skip to last wave**로 넘긴다.
 9. 채택한 방 텍스트를 `game/RoomLayouts/`에 저장하고 `Trickal Fan Game > Tools > Validate Room Layouts` → `Import Room Layouts` 순서로 적용한다. Play → F1 → `— Layout —` → `Show layouts` → `Force <id>`로 확인한다.
 
 편집기 검사는 31번 문서의 문 금지 칸·스폰·인접 배치·상자 간격과 칸 단위 연결성 사전 검사다. 연결성은 파괴형 제거 후를 기준으로 하며, 문 사이 회피 대상은 상시 바닥 가시(`^`)뿐이다. 주기 가시·장판·거미줄·진흙케이크는 통과를 허용한다. 스폰 접근에는 바닥 함정을 장벽으로 세지 않는다. Unity의 파괴 후 시야, 전체 Encounter 및 실제 충돌 반지름 검증 통과를 보장하지 않는다. 불완전한 작업도 초안으로 내보낼 수 있다. 기존 방 ID는 안정 키이므로 이름만 바꾸고 싶으면 표시 이름을 수정한다.
@@ -2657,3 +2681,18 @@ Edit Mode에서 `Trickal Fan Game > Artwork > Setup Lively Fairy Motion`으로 �
 - 전환 전용 Play 배치: `TrickalFanGame.Editor.RunLoadingScreenPlayVerification.RunBatch`. `-batchmode -nographics`와 `-executeMethod`로 실행하며 **`-quit`는 사용하지 않는다**. 테스트가 Play를 켜고 종료 코드를 반환한다. 시작→재시작→홈 복귀→재진입→결과 복귀, 중복 전환 차단, 100% 표시·입력/시간 복원·결과 제출 한 번·결과 연출 대기를 검사한다. 테스트용 프로필/성장 캐시 키는 종료 시 복원한다.
 - 실행 근거: 초기 Edit 배치에서 UI CanvasRenderer 누락 로그를 발견해 커스텀 Graphic의 RequireComponent로 수정했다. 수정본의 런타임·Editor Roslyn 컴파일과 승인 JSON/UTF-8/meta 검사 통과(`output/run-loading-compile/`). 다른 Unity 빌드 종료 후 `RunLoadingScreenPlayVerification.RunBatch`가 호출한 Edit Verify와 전환 Play 검증 모두 통과했다(`output/run-loading-screen-play-final.log`, 종료 0). 시작·재시작·홈 복귀·재진입·결과 복귀, 100% 표시, 입력/시간 복원, 단일 결과 제출과 결과 연출 대기를 확인했다. 실제 화면의 미술 검수는 별도다. 말풍선의 `꺼` 글자는 같은 기존 TMP 글꼴의 동적 아틀라스에 추가됐으며 GUID는 유지한다.
 - 수동 Play 확인(1920×1080, 1280×720): Frontend Scene의 게임 시작 → 에르핀 선택·확정 / 인게임 ESC → 다시 시작·확인 / ESC → 홈으로·확인 / 사망 뒤 GAME OVER 확인 또는 최종 보스 클리어 → 결과. 모든 씬 전환에서 연두 체크·원형 초상·말풍선·이름표·하단 바가 보이고 새 화면에 입력이 새지 않아야 한다. 로딩 뒤 이동·ESC가 정상 동작하고 결과 경험치 연출의 첫 장면이 가려지지 않아야 한다. 결과에서 다시 하기는 캐릭터 선택으로, 홈은 홈 패널로 이동한다.
+
+### 크레용사용 검흔 미리보기 (2026-11-23)
+
+- Edit Mode 메뉴: `Trickal Fan Game > Effects > Preview Crayon Hero Rift` → `Open / reset Scene preview`.
+- 별도 임시 Scene에서 작은 반투명 빨간 예고, 가는 검은 절단흔, 시안의 은백색 검광 원화, 바늘형 섬광, 직선 빛 파편을 표시한다(v3). 중앙이 벌어지는 연출과 소용돌이는 제거했다. `Loop playback`, `Playback speed`, 시간 슬라이더 및 `Warning`/`Cut`/`Peak`/`Fade`로 재생·정지·되감기가 가능하다. 공격 그림의 길이·폭·방향과 별도로 예고 크기를 조절하고, 5개 레이어·게임 바닥·캐릭터 원화를 비교한다. 값은 임시이며 에셋에 저장하지 않는다.
+- 예고 0.35초 + 도약 0.17초 + 도착 후 0.1초 뒤 검흔이 발생한다. 캐릭터는 크기 참고용 정지 원화이며 도약 동작을 시뮬레이션하지 않는다. 실제 보스 공격·피해·판정·방 경계와는 아직 연결하지 않은 미술 검수용 시안이다.
+- 배치: `TrickalFanGame.Editor.CrayonRiftPreview.VerifyAndExportBatch`는 셰이더 오류·시간 전환·되감기·작은 예고·레이어 독립 표시를 검사하고 `output/crayon-slash-v3/frame-000.png`부터 85장을 50fps로 출력한다. `-riftOutput <절대 경로>`로 출력 폴더를 바꿀 수 있다. 렌더링하므로 `-nographics`를 사용하지 않는다. 원화는 `Assets/Editor/CrayonSlashConcept-v1.png`에서 검수 도구가 주입한다.
+
+### Blender Python 외부 이펙트 제작 (2026-11-23)
+
+- 저장소 루트에서 `python tools/blender/run.py` 실행. Blender 4.5.9 LTS가 별도 프로세스에서 기술 샘플을 생성한다. `output/blender-smoke/preview.png`, `connection-sample.blend`, `manifest.json`, `blender.log`를 확인한다.
+- 다른 작업: `python tools/blender/run.py --script <제작 스크립트.py> --output <출력 폴더>`. 스크립트는 Blender 안에서 실행되며 `--output` 인자를 받는다.
+- 로컬 포터블 위치는 `tmp/blender/blender-4.5.9-windows-x64/blender.exe`. 다른 설치본은 `--blender <실행 파일>` 또는 `BLENDER_EXE`로 지정한다. `tmp/` 삭제 시 재설치가 필요하다.
+- 편집은 Blender에서 `.blend` 파일을 열어 한다. 현재 연결은 Python 배치 방식이며 열린 UI의 실시간 제어 또는 MCP 등록은 하지 않았다. 유료 애드온이나 별도 AI API 호출은 필요하지 않다.
+- 기본 명령의 실제 렌더·파일 생성·PNG 알파 확인을 통과했다. 게임 에셋 자동 임포트와 Unity 변경은 없다. 세부 설치·체크섬·작업 규칙은 `tools/blender/README.md`.

@@ -474,10 +474,16 @@ namespace TrickalFanGame.Editor
                 Assert(Mathf.Abs(strip.sizeDelta.x - drawnWidth) < 0.01f &&
                        strip.sizeDelta.y == GamePowerHudView.KeyStripHeight,
                     "The R strip must span the drawn artwork's width.");
-                rig.Slot.AddCharge(3);
+                rig.Slot.AddCharge(2);
                 hud.RefreshNow();
-                Assert(hud.GaugeCells.Take(3).All(cell => cell.color == hud.FilledColor &&
+                Assert(!hud.IsShowingFull && hud.GaugeCells.Take(2).All(cell => cell.color == hud.FilledColor &&
                            cell.sprite == hud.FilledCellSprite) &&
+                       hud.GaugeCells[2].color == GamePowerHudView.EmptyCellColor,
+                    "A partly charged gauge must keep the sky-blue filled cells.");
+                rig.Slot.AddCharge(1);
+                hud.RefreshNow();
+                Assert(hud.IsShowingFull && hud.GaugeCells.Take(3).All(cell =>
+                           cell.color == GamePowerHudView.FullCellColor && cell.sprite == null) &&
                        hud.KeyText.gameObject.activeSelf && hud.KeyText.text == GamePowerHudView.KeyLabel &&
                        hud.IsShowingUsable && hud.Icon.color == Color.white,
                     "A full gauge must show filled cells and the un-greyed icon with the R strip.");

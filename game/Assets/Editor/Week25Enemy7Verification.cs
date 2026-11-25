@@ -169,6 +169,8 @@ namespace TrickalFanGame.Editor
             foreach (Week19Encounter4Setup.SwarmSpec spec in Week19Encounter4Setup.Swarms)
             {
                 EncounterDefinition swarm = Find(generator, spec.ProfileId);
+                // Density-0 lays out the bigger sizes (Density0Verification); small keeps 3+3.
+                if (!Density0Setup.IsSmall(spec.ProfileId)) continue;
                 bool small = spec.ProfileId == Week14Room3Setup.SmallProfileId ||
                              spec.ProfileId == Week14Room1Setup.BasicProfileId ||
                              spec.ProfileId == Week14Room3Setup.WideProfileId;
@@ -238,7 +240,11 @@ namespace TrickalFanGame.Editor
                     if (!isSwarm) continue;
                     swarmRooms++;
                     perFloor[room.FloorNumber]++;
-                    Assert(room.ResolvedEncounterWaves.Count == 2 && (spawns.Length == 6 || spawns.Length == 7) &&
+                    // Density-0: the swarm's size follows the room size.
+                    string profileId = room.Template.Profile.ProfileId;
+                    Assert(room.ResolvedEncounterWaves.Count ==
+                           Density0Setup.Layout(profileId, Week25Enemy7Setup.Pattern).Length &&
+                           spawns.Length == Density0Setup.EnemyCount(profileId, Week25Enemy7Setup.Pattern) &&
                            room.ResolvedEncounterWaves.All(wave =>
                                wave.Select(spawn => spawn.SpawnPointIndex).Distinct().Count() == wave.Length &&
                                wave.All(spawn => room.Template.SupportsEnemyRole(spawn.SpawnPointIndex, spawn.Role))),
@@ -246,7 +252,7 @@ namespace TrickalFanGame.Editor
                     Assert(room.HasDifficulty &&
                            room.Difficulty.Score == spawns.Length + room.Template.LayoutDifficultyModifier &&
                            room.Difficulty.Tier == RoomDifficultyTier.Easy &&
-                           table.Classify(room.Difficulty.Score) == RoomDifficultyTier.Easy,
+                           table.Classify(room.Difficulty.Score, profileId) == RoomDifficultyTier.Easy,
                         $"Seed {seed} room '{room.RoomId}' must score its Jyubi swarm as Easy.");
                     if (runtimeSeed == 0 && room.FloorNumber == 1) runtimeSeed = seed;
                 }

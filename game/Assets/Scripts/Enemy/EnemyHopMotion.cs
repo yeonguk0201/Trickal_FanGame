@@ -32,11 +32,15 @@ namespace TrickalFanGame.Enemy
         private bool moving;
         private float displayedLift;
         private bool hidSource;
+        // 불효자손-활발 (2026-11-24): a controller-driven jump height; negative leaves the stride hop in charge.
+        private float heldLift = -1f;
 
         public float StrideLength => strideLength;
         public float HopHeight => hopHeight;
         public bool IsHopping => moving;
         public SpriteRenderer Artwork => artwork;
+
+        public void HoldLift(float height) => heldLift = height;
 
         public void Configure(float stride, float height)
         {
@@ -95,6 +99,13 @@ namespace TrickalFanGame.Enemy
                 Restore();
                 return;
             }
+            if (heldLift >= 0f)
+            {
+                displayedLift = heldLift;
+                RenderLift(heldLift);
+                return;
+            }
+
             float target = moving ? LiftAt(phase, hopHeight) : 0f;
             // FixedUpdate moves in steps; ease the display between them and back to the floor.
             displayedLift = Mathf.Lerp(displayedLift, target, 1f - Mathf.Exp(-Time.deltaTime / 0.035f));
@@ -123,8 +134,9 @@ namespace TrickalFanGame.Enemy
             {
                 hidSource = !source.forceRenderingOff;
                 if (!hidSource) return; // something else already hides the body; leave it hidden
-                source.forceRenderingOff = true;
             }
+            // The movement animator restores the body each frame while it shows a held pose.
+            source.forceRenderingOff = true;
             artwork.enabled = source.enabled;
             artwork.sprite = source.sprite;
             artwork.color = source.color;
@@ -152,6 +164,7 @@ namespace TrickalFanGame.Enemy
             moving = false;
             phase = 0f;
             displayedLift = 0f;
+            heldLift = -1f;
             Restore();
         }
 

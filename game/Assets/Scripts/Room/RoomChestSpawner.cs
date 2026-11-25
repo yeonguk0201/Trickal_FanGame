@@ -21,6 +21,18 @@ namespace TrickalFanGame.Room
             Progress = progress != null ? progress : throw new ArgumentNullException(nameof(progress));
         }
 
+        // Balance-1: the artifacts a chest may give (the Run's selection pool) and the Run's floor count, which picks
+        // the chest reward rates. Without a pool a normal chest's artifact becomes its fallback spell.
+        public IReadOnlyList<ItemDefinition> ArtifactPool { get; private set; }
+        public int RunFloorCount { get; private set; }
+
+        public RoomChestSite WithRewards(IReadOnlyList<ItemDefinition> artifactPool, int runFloorCount)
+        {
+            ArtifactPool = artifactPool;
+            RunFloorCount = runFloorCount;
+            return this;
+        }
+
         public RoomPrefab Room { get; }
         public RoomTemplateDefinition Template { get; }
         public RoomRunState State { get; }
@@ -56,7 +68,12 @@ namespace TrickalFanGame.Room
         // placedLocal skips the placement search for a chest placed for the first time (Jjangsem-1 copies pick their
         // own spot); a chest with a recorded position always returns there.
         public static TreasureChest Spawn(ChestContentTable table, RoomChestSite site, string chestId, ChestKind kind,
-            int contentSeed, Vector2? placedLocal, out string error)
+            int contentSeed, Vector2? placedLocal, out string error) =>
+            Spawn(table, site, chestId, kind, contentSeed, placedLocal, false, out error);
+
+        // forceItem (Balance-1 item pity) is recorded with the chest, so a rebuilt room restores the same item.
+        public static TreasureChest Spawn(ChestContentTable table, RoomChestSite site, string chestId, ChestKind kind,
+            int contentSeed, Vector2? placedLocal, bool forceItem, out string error)
         {
             if (table == null)
             {
@@ -98,9 +115,10 @@ namespace TrickalFanGame.Room
                 bool isClosed = chest.Bind(site.State, site.Progress);
                 site.State.TryRecordChestPosition(chestId, local);
                 site.State.TryRecordChestContentSeed(chestId, contentSeed);
+                if (forceItem) site.State.TryRecordChestForcedItem(chestId);
                 if (isClosed)
                 {
-                    ChestContents contents = table.RollContents(contentSeed, kind);
+                    ChestContents contents = RollContents(table, site, chestId, kind, contentSeed);
                     chest.Opened += (opened, _) => SpawnContents(table, opened, contents, site);
                 }
             }
@@ -113,6 +131,14 @@ namespace TrickalFanGame.Room
 
             error = null;
             return chest;
+        }
+
+        // The contents of a chest of this room: the Run length's reward rates and the chest's recorded pity flag.
+        public static ChestContents RollContents(ChestContentTable table, RoomChestSite site, string chestId,
+            ChestKind kind, int contentSeed)
+        {
+            bool forced = site.State.GetChest(chestId)?.ForcesItem == true;
+            return table.RollContents(contentSeed, kind, table.RatesFor(site.RunFloorCount), forced);
         }
 
         // T7: the chests a Layout authors stand on their cell from the room's first build. Only a chest the Run has
@@ -181,9 +207,14 @@ namespace TrickalFanGame.Room
             List<GameObject> spawned = new();
             if (table == null || chest == null || contents == null || site == null) return spawned;
             // Chest-2: the special reward skips artifacts the opening player already holds at their stack limit.
-            ItemDefinition special = table.ResolveSpecialReward(contents,
-                site.Player != null ? site.Player.GetComponentInParent<PlayerInventory>() : null);
-            int total = contents.Consumables.Count + (contents.Spell != null ? 1 : 0) + (special != null ? 1 : 0);
+            // Balance-1: a golden chest falls back to the treasure pool, and a normal chest's artifact comes from it;
+            // a normal chest whose artifact finds no candidate gives its fallback spell instead.
+            ItemDefinition special = table.ResolveArtifact(contents,
+                site.Player != null ? site.Player.GetComponentInParent<PlayerInventory>() : null, site.ArtifactPool,
+                site.Progress.RunSeed, $"{site.State.RoomId}:{chest.ChestId}:chest");
+            ItemDefinition spellItem = contents.Spell ??
+                                       (contents.HasArtifact && special == null ? contents.FallbackSpell : null);
+            int total = contents.Consumables.Count + (spellItem != null ? 1 : 0) + (special != null ? 1 : 0);
             Transform room = site.Room.transform;
             RoomObstacleLayout.TryCollectFootprints(site.Room.gameObject, out List<RoomObstacleFootprint> footprints,
                 out _);
@@ -224,9 +255,9 @@ namespace TrickalFanGame.Room
 
                 SingleUseItemPickup spell = UnityEngine.Object.Instantiate(table.SpellPickupPrefab, position,
                     Quaternion.identity, site.Parent);
-                spell.name = $"Chest Spell {contents.Spell.ItemId} - {site.State.RoomId} {chest.ChestId}";
+                spell.name = $"Chest Spell {spellItem.ItemId} - {site.State.RoomId} {chest.ChestId}";
                 // The player is touching the chest, so a full slot does not swap until they step off and back on.
-                spell.Configure(contents.Spell, $"{site.State.RoomId}-{chest.ChestId}-spell", true);
+                spell.Configure(spellItem, $"{site.State.RoomId}-{chest.ChestId}-spell", true);
                 spawned.Add(spell.gameObject);
             }
 

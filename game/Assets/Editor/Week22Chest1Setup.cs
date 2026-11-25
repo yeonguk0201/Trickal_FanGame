@@ -21,7 +21,8 @@ namespace TrickalFanGame.Editor
         // diamond 4~6, consumable weights kept from the old clear drop. Drop-0 (2026-11-06) owns the chest chance,
         // the normal count weights and the consumable weights now.
         public const float ChestChance = Drop0DropRateSetup.ClearChestChance;
-        public const float NormalSpellChance = 0.05f;
+        // Drop-2 (docs/28 §10.3): 5% → 10%.
+        public const float NormalSpellChance = 0.1f;
 
         // New table, new stable IDs; the old table's "elif" candidate is the gold pickup.
         public static readonly (string Id, string OldId, int Weight)[] ConsumableWeights =

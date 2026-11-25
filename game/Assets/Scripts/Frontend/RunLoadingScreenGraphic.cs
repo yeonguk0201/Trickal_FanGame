@@ -11,6 +11,23 @@ namespace TrickalFanGame.Frontend
         public Shape Kind { get; set; }
         public float Radius { get; set; } = 16f;
 
+        private static readonly Vector2[] TreeOutline = {
+            new(-6,-39),new(-6,-19),new(-24,-21),new(-33,-14),new(-30,-3),
+            new(-38,5),new(-37,15),new(-26,22),new(-23,33),new(-10,34),
+            new(0,39),new(13,35),new(23,28),new(25,18),new(34,12),
+            new(36,1),new(29,-7),new(31,-17),new(22,-24),new(6,-20),new(6,-39)
+        };
+
+        private float patternOffset;
+        private const float Cell = 150f;
+
+        private void Update()
+        {
+            if (Kind != Shape.Pattern) return;
+            patternOffset = Mathf.Repeat(patternOffset + Time.unscaledDeltaTime * (2f * Cell / 8f), 2f * Cell);
+            SetVerticesDirty();
+        }
+
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();
@@ -79,31 +96,26 @@ namespace TrickalFanGame.Frontend
 
         private void Pattern(VertexHelper vh, Rect rect)
         {
-            const float cell = 150f;
             Color check = new(0.40f, 0.61f, 0.27f, 0.055f);
             Color tree = new(0.91f, 1f, 0.83f, 0.22f);
             Color star = new(0.51f, 0.74f, 0.40f, 0.23f);
-            int columns = Mathf.CeilToInt(rect.width / cell), rows = Mathf.CeilToInt(rect.height / cell);
-            for (int y = 0; y < rows; y++)
-            for (int x = 0; x < columns; x++)
+            int columns = Mathf.CeilToInt(rect.width / Cell);
+            int rows = Mathf.CeilToInt(rect.height / Cell);
+            Vector2 topLeft = new(rect.xMin - patternOffset, rect.yMax + patternOffset);
+            for (int y = 0; y < rows + 2; y++)
+            for (int x = 0; x < columns + 2; x++)
             {
-                Vector2 origin = new(rect.xMin + x * cell, rect.yMax - y * cell);
+                Vector2 origin = topLeft + new Vector2(x * Cell, -y * Cell);
+                if (origin.x + Cell <= rect.xMin || origin.x >= rect.xMax ||
+                    origin.y - Cell >= rect.yMax || origin.y <= rect.yMin) continue;
                 if ((x + y) % 2 == 0)
-                    Quad(vh, new Rect(origin.x, Mathf.Max(rect.yMin, origin.y - cell),
-                        Mathf.Min(cell, rect.xMax - origin.x), Mathf.Min(cell, origin.y - rect.yMin)), check);
-                Vector2 center = origin + new Vector2(75f, -75f);
-                if (center.x + 38f > rect.xMax || center.y - 40f < rect.yMin) continue;
+                    Quad(vh, new Rect(origin.x, origin.y - Cell, Cell, Cell), check);
+                Vector2 center = origin + new Vector2(Cell, -Cell) * 0.5f;
                 if ((x + y) % 2 == 0)
                 {
                     // Rounded tree outline with a trunk and three branches.
-                    Vector2[] outline = {
-                        new(-6,-39),new(-6,-19),new(-24,-21),new(-33,-14),new(-30,-3),
-                        new(-38,5),new(-37,15),new(-26,22),new(-23,33),new(-10,34),
-                        new(0,39),new(13,35),new(23,28),new(25,18),new(34,12),
-                        new(36,1),new(29,-7),new(31,-17),new(22,-24),new(6,-20),new(6,-39)
-                    };
-                    for (int i = 0; i < outline.Length; i++)
-                        Line(vh, center + outline[i], center + outline[(i + 1) % outline.Length], 4f, tree);
+                    for (int i = 0; i < TreeOutline.Length; i++)
+                        Line(vh, center + TreeOutline[i], center + TreeOutline[(i + 1) % TreeOutline.Length], 4f, tree);
                     Line(vh, center + new Vector2(0,-21), center + new Vector2(0,12), 4f, tree);
                     Line(vh, center, center + new Vector2(-12,10), 4f, tree);
                     Line(vh, center, center + new Vector2(13,11), 4f, tree);

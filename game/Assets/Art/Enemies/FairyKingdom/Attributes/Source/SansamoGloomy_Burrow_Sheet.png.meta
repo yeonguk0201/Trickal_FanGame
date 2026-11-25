@@ -1,0 +1,1053 @@
+fileFormatVersion: 2
+guid: 132f12d5d99738749a8d97b279038e2f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6807702519947376518
+    second: SansamoGloomy_Burrow_Sheet_0
+  - first:
+      213: 8253040465779000610
+    second: SansamoGloomy_Burrow_Sheet_1
+  - first:
+      213: -149018101420751320
+    second: SansamoGloomy_Burrow_Sheet_2
+  - first:
+      213: 8818331238757664635
+    second: SansamoGloomy_Burrow_Sheet_3
+  - first:
+      213: 4775307718047727978
+    second: SansamoGloomy_Burrow_Sheet_4
+  - first:
+      213: 2069586563317302759
+    second: SansamoGloomy_Burrow_Sheet_5
+  - first:
+      213: -2878804846242401930
+    second: SansamoGloomy_Burrow_Sheet_6
+  - first:
+      213: 967855064003627842
+    second: SansamoGloomy_Burrow_Sheet_7
+  - first:
+      213: -512087372648970246
+    second: SansamoGloomy_Burrow_Sheet_8
+  - first:
+      213: 8733898703694242382
+    second: SansamoGloomy_Burrow_Sheet_9
+  - first:
+      213: 7737515947583848266
+    second: SansamoGloomy_Burrow_Sheet_10
+  - first:
+      213: -7948306795275507057
+    second: SansamoGloomy_Burrow_Sheet_11
+  - first:
+      213: -4248044718394151848
+    second: SansamoGloomy_Burrow_Sheet_12
+  - first:
+      213: 3052401003953014528
+    second: SansamoGloomy_Burrow_Sheet_13
+  - first:
+      213: -1149903372068185226
+    second: SansamoGloomy_Burrow_Sheet_14
+  - first:
+      213: -8348925693011551503
+    second: SansamoGloomy_Burrow_Sheet_15
+  - first:
+      213: -1869709639790309396
+    second: SansamoGloomy_Burrow_Sheet_16
+  - first:
+      213: 8458226138370735079
+    second: SansamoGloomy_Burrow_Sheet_17
+  - first:
+      213: 2999406290611998153
+    second: SansamoGloomy_Burrow_Sheet_18
+  - first:
+      213: -7542796699568539483
+    second: SansamoGloomy_Burrow_Sheet_19
+  - first:
+      213: 8264814735317303244
+    second: SansamoGloomy_Burrow_Sheet_20
+  - first:
+      213: -1200701486781551466
+    second: SansamoGloomy_Burrow_Sheet_21
+  - first:
+      213: 8933165969209662630
+    second: SansamoGloomy_Burrow_Sheet_22
+  - first:
+      213: -9061317175643128155
+    second: SansamoGloomy_Burrow_Sheet_23
+  - first:
+      213: -7365605613008757685
+    second: SansamoGloomy_Burrow_Sheet_24
+  - first:
+      213: -1751965477007032510
+    second: SansamoGloomy_Burrow_Sheet_25
+  - first:
+      213: -8662636646504786472
+    second: SansamoGloomy_Burrow_Sheet_26
+  - first:
+      213: 801172691559174748
+    second: SansamoGloomy_Burrow_Sheet_27
+  - first:
+      213: -6660152041630831207
+    second: SansamoGloomy_Burrow_Sheet_28
+  - first:
+      213: 7736950771743126085
+    second: SansamoGloomy_Burrow_Sheet_29
+  - first:
+      213: 6791368635914877863
+    second: SansamoGloomy_Burrow_Sheet_30
+  - first:
+      213: 8288950616705591468
+    second: SansamoGloomy_Burrow_Sheet_31
+  - first:
+      213: -3368340630275433799
+    second: SansamoGloomy_Burrow_Sheet_32
+  - first:
+      213: -7421233281692378166
+    second: SansamoGloomy_Burrow_Sheet_33
+  - first:
+      213: 1364925309526859510
+    second: SansamoGloomy_Burrow_Sheet_34
+  - first:
+      213: -3764344804037759240
+    second: SansamoGloomy_Burrow_Sheet_35
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 564
+        height: 501
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 687bef58f51d97e50800000000000000
+      internalID: 6807702519947376518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 563
+        y: 11
+        width: 474
+        height: 448
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2258eafb390b88270800000000000000
+      internalID: 8253040465779000610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 905
+        y: 441
+        width: 6
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82686b783d49eedf0800000000000000
+      internalID: -149018101420751320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 912
+        y: 438
+        width: 71
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7781e54a81016a70800000000000000
+      internalID: 8818331238757664635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 1073
+        y: 24
+        width: 367
+        height: 488
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a618a63a11d454240800000000000000
+      internalID: 4775307718047727978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 1844
+        y: 438
+        width: 19
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e50372a306a8bc10800000000000000
+      internalID: 2069586563317302759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 649
+        y: 420
+        width: 12
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6717c02be3e6c08d0800000000000000
+      internalID: -2878804846242401930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 658
+        y: 427
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24bcff38d038e6d00800000000000000
+      internalID: 967855064003627842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 659
+        y: 420
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af78b4b6f33b4e8f0800000000000000
+      internalID: -512087372648970246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 1432
+        y: 0
+        width: 599
+        height: 440
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e42a0f9c89a053970800000000000000
+      internalID: 8733898703694242382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 1657
+        y: 427
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4fb7ab52cd216b60800000000000000
+      internalID: 7737515947583848266
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 1667
+        y: 425
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8aa7c5e411f1b190800000000000000
+      internalID: -7948306795275507057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 1929
+        y: 345
+        width: 27
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85c6422f5d9eb05c0800000000000000
+      internalID: -4248044718394151848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 1957
+        y: 293
+        width: 89
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0074aa07a8e4c5a20800000000000000
+      internalID: 3052401003953014528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 556
+        y: 204
+        width: 22
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67b1addb9f8ba00f0800000000000000
+      internalID: -1149903372068185226
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 1947
+        y: 255
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fa1ae31158a22c80800000000000000
+      internalID: -8348925693011551503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 1955
+        y: 253
+        width: 41
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cefcc2f1df47d06e0800000000000000
+      internalID: -1869709639790309396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 1955
+        y: 253
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ebf287fbd7a16570800000000000000
+      internalID: 8458226138370735079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 1389
+        y: 177
+        width: 16
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9cd0009312800a920800000000000000
+      internalID: 2999406290611998153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 1434
+        y: 167
+        width: 11
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a87a3d7d5a925790800000000000000
+      internalID: -7542796699568539483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 1934
+        y: 220
+        width: 19
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccf7001863582b270800000000000000
+      internalID: 8264814735317303244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 1982
+        y: 186
+        width: 35
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69c2a1ffb50465fe0800000000000000
+      internalID: -1200701486781551466
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 134
+        width: 27
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ac995a7e1bf8fb70800000000000000
+      internalID: 8933165969209662630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 1404
+        y: 162
+        width: 6
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ae35a4a90cbf3280800000000000000
+      internalID: -9061317175643128155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 1418
+        y: 160
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4c5df838bc18c990800000000000000
+      internalID: -7365605613008757685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 1427
+        y: 162
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24f7f345ea4cfa7e0800000000000000
+      internalID: -1751965477007032510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 1432
+        y: 122
+        width: 20
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d51dcaddd128c780800000000000000
+      internalID: -8662636646504786472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 1423
+        y: 113
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c52d02471565e1b00800000000000000
+      internalID: 801172691559174748
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 1409
+        y: 90
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99d608051036293a0800000000000000
+      internalID: -6660152041630831207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 502
+        y: 43
+        width: 6
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 542fe6a1cbb2f5b60800000000000000
+      internalID: 7736950771743126085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 547
+        y: 55
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ab7f6acac9cf3e50800000000000000
+      internalID: 6791368635914877863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 37
+        width: 14
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca8ed7d4ba4480370800000000000000
+      internalID: 8288950616705591468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_32
+      rect:
+        serializedVersion: 2
+        x: 1982
+        y: 46
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9badae10b004141d0800000000000000
+      internalID: -3368340630275433799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_33
+      rect:
+        serializedVersion: 2
+        x: 502
+        y: 37
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: acb5b6156ab720990800000000000000
+      internalID: -7421233281692378166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_34
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 0
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fed94b565031f210800000000000000
+      internalID: 1364925309526859510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SansamoGloomy_Burrow_Sheet_35
+      rect:
+        serializedVersion: 2
+        x: 375
+        y: 0
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8feed37585c52cbc0800000000000000
+      internalID: -3764344804037759240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SansamoGloomy_Burrow_Sheet_0: 6807702519947376518
+      SansamoGloomy_Burrow_Sheet_1: 8253040465779000610
+      SansamoGloomy_Burrow_Sheet_10: 7737515947583848266
+      SansamoGloomy_Burrow_Sheet_11: -7948306795275507057
+      SansamoGloomy_Burrow_Sheet_12: -4248044718394151848
+      SansamoGloomy_Burrow_Sheet_13: 3052401003953014528
+      SansamoGloomy_Burrow_Sheet_14: -1149903372068185226
+      SansamoGloomy_Burrow_Sheet_15: -8348925693011551503
+      SansamoGloomy_Burrow_Sheet_16: -1869709639790309396
+      SansamoGloomy_Burrow_Sheet_17: 8458226138370735079
+      SansamoGloomy_Burrow_Sheet_18: 2999406290611998153
+      SansamoGloomy_Burrow_Sheet_19: -7542796699568539483
+      SansamoGloomy_Burrow_Sheet_2: -149018101420751320
+      SansamoGloomy_Burrow_Sheet_20: 8264814735317303244
+      SansamoGloomy_Burrow_Sheet_21: -1200701486781551466
+      SansamoGloomy_Burrow_Sheet_22: 8933165969209662630
+      SansamoGloomy_Burrow_Sheet_23: -9061317175643128155
+      SansamoGloomy_Burrow_Sheet_24: -7365605613008757685
+      SansamoGloomy_Burrow_Sheet_25: -1751965477007032510
+      SansamoGloomy_Burrow_Sheet_26: -8662636646504786472
+      SansamoGloomy_Burrow_Sheet_27: 801172691559174748
+      SansamoGloomy_Burrow_Sheet_28: -6660152041630831207
+      SansamoGloomy_Burrow_Sheet_29: 7736950771743126085
+      SansamoGloomy_Burrow_Sheet_3: 8818331238757664635
+      SansamoGloomy_Burrow_Sheet_30: 6791368635914877863
+      SansamoGloomy_Burrow_Sheet_31: 8288950616705591468
+      SansamoGloomy_Burrow_Sheet_32: -3368340630275433799
+      SansamoGloomy_Burrow_Sheet_33: -7421233281692378166
+      SansamoGloomy_Burrow_Sheet_34: 1364925309526859510
+      SansamoGloomy_Burrow_Sheet_35: -3764344804037759240
+      SansamoGloomy_Burrow_Sheet_4: 4775307718047727978
+      SansamoGloomy_Burrow_Sheet_5: 2069586563317302759
+      SansamoGloomy_Burrow_Sheet_6: -2878804846242401930
+      SansamoGloomy_Burrow_Sheet_7: 967855064003627842
+      SansamoGloomy_Burrow_Sheet_8: -512087372648970246
+      SansamoGloomy_Burrow_Sheet_9: 8733898703694242382
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
