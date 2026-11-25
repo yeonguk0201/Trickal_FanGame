@@ -783,6 +783,30 @@ Claude는 녹음도 음원 생성 모델도 없지만 효과음은 파라미터�
 - Unity `RoomLayoutImporterVerification.VerifyWithRegressionsBatch` 통과: 기존 52개 방, 신규 장벽 허용/거부, Trap-1 및 Encounter·지형·상자·장애물 회귀. 로그 `tmp/room-layout-traversal-verification.log`: `Room Layout regression verification passed.`, 종료 코드 0. 실제 Play 검수는 미실시.
 
 
+### 방 웨이브·몬스터 지정 (Layout-Wave, 2026-11-24)
+
+- 사용자 요청: 방마다 웨이브 수와 웨이브별 몬스터를 지정하고, 지정하지 않으면 이전 규칙(방 크기별 Encounter)을 그대로 쓴다.
+- 형식: 방 파일 머리말 `wave1`~`wave6`. `auto`는 방이 뽑은 Encounter의 같은 순번 웨이브(부족하면 반복), 직접 지정은
+  `chaser*3, sniper|ranged*2`. 31번 §2.3.
+- 런타임: `RoomTemplateDefinition.layoutWaves`, `TryApplyLayoutWaves`. 고정 웨이브는 `EncounterDefinition.TryResolveRules`로
+  Encounter와 같은 SpawnPoint 역할·문 안전 거리·층별 등장 규칙을 따른다. 방 점수와 등급은 실제 웨이브로 다시 계산한다.
+- 임포터: 방의 모든 층·문 조합에서 고정 웨이브가 놓이는지, 층보다 늦게 나오는 몬스터만 남는 항목이 없는지 검사한다.
+- 편집기: 오른쪽 **웨이브 · 몬스터**. 자동/직접 지정, 몬스터 후보(또는)·마리 수, 순서 이동·삭제, 이전 규칙으로 되돌리기,
+  스폰 자리·돌진 자리·등장 층 사전 검사. 내보내기·가져오기·JSON·자동 저장 왕복.
+- 검증: Unity `RoomLayoutWaveVerification.Verify`(형식·편집기 몬스터 ID와 등장 층 대조·Template 적용·실제 층 생성),
+  `RoomLayoutImporterVerification.VerifyWithRegressionsBatch`, `Week19Spawn2Verification` 통과. 브라우저 `test.cjs` 통과.
+  Play 확인 대기.
+- Layout-Wave-2 (2026-11-25, 사용자 요청 "1,2,3 해보자"):
+  - 변형 지정 `!elite` 등: `RoomLayoutWaveEntry.Variant`, `EnemyVariantRules.ApplyLayoutVariants`(굴린 변형을 덮어씀, 지정
+    엘리트가 있으면 굴린 엘리트 제거).
+  - 자리 지정 `@5/6`: `RoomLayoutWaveEntry.SpawnPoints`, `RoomTemplateDefinition.TryResolveLayoutWave`(자리 지정 항목 먼저),
+    `EncounterDefinition.TryResolveRules`의 `ruleSpawnPoints`.
+  - 편집기: 항목마다 변형 선택·자리 입력, 마우스를 올리면 격자에 지정 자리 표시, 없는 자리·역할 불일치·자리 부족 검사.
+  - F1 개발 패널 `— Room —`: `Wave n/m alive k (Layout waves)`, 다음 웨이브 구성(역할·변형·자리), **Skip to last wave**.
+  - 검증: `RoomLayoutWaveVerification.Verify`(변형·자리 파싱 왕복·거부, 자리 고정 배치, 변형 덮어쓰기, 생성 방의 챔피언
+    지정) 통과, 브라우저 `test.cjs` 통과. Play 확인 대기.
+
+
 ### 클로버 보상 UI 적용·검토 메뉴 (2026-11-17)
 
 - 목적: 기존 보상 로직을 유지하며 개별 원화와 Menu 공용 컴포넌트를 재실행 가능한 Editor 구성으로 연결한다.

@@ -897,6 +897,45 @@ namespace TrickalFanGame.Run
             return chest != null;
         }
 
+        // Layout-Wave-2 (2026-11-25): which wave is running, who comes next, and a skip to the last wave, to check a
+        // room's authored waves quickly (— Layout — Force <id>, then here).
+        private void DrawWaveStatus(RoomController controller, GeneratedRoomNode node)
+        {
+            if (controller == null || controller.WaveCount == 0) return;
+            string source = node?.Template != null && node.Template.HasLayoutWaves ? "  (Layout waves)" : string.Empty;
+            GUILayout.Label($"Wave {controller.CurrentWaveNumber}/{controller.WaveCount}  alive " +
+                            $"{controller.AliveEnemyCount}{source}");
+            var waves = node?.ResolvedEncounterWaves;
+            int next = controller.CurrentWaveNumber;
+            GUILayout.Label(waves != null && next < waves.Count
+                ? $"Next wave {next + 1}: {DescribeWave(waves[next])}"
+                : "Next wave: none (last wave)");
+            if (controller.CurrentWaveNumber >= 1 && controller.CurrentWaveNumber < controller.WaveCount &&
+                AssistedButton("Skip to last wave"))
+            {
+                int killed = 0;
+                for (int guard = 0; guard < 32 && controller.CurrentWaveNumber < controller.WaveCount; guard++)
+                {
+                    int killedNow = controller.KillAliveEnemiesForDevelopment();
+                    killed += killedNow;
+                    if (killedNow == 0) break;
+                }
+
+                status = $"Killed {killed} enemies; now wave {controller.CurrentWaveNumber}/{controller.WaveCount}.";
+            }
+        }
+
+        private static string DescribeWave(ResolvedEncounterSpawn[] wave) =>
+            wave == null || wave.Length == 0
+                ? "-"
+                : string.Join(", ", wave.GroupBy(spawn => (spawn.Role, spawn.Variant))
+                    .Select(group => $"{group.Key.Role}" +
+                                     (group.Key.Variant != TrickalFanGame.Enemy.EnemyVariantKind.None
+                                         ? $"({group.Key.Variant})"
+                                         : string.Empty) +
+                                     (group.Count() > 1 ? $"×{group.Count()}" : string.Empty) +
+                                     $"@{string.Join("/", group.Select(spawn => spawn.SpawnPointIndex + 1))}"));
+
         private void DrawRoomSection(RoomGraphAssembler assembler)
         {
             GUILayout.Label("— Room —");
@@ -930,6 +969,7 @@ namespace TrickalFanGame.Run
                                 ? $"  score {node.Difficulty.Score} {node.Difficulty.Tier}"
                                 : string.Empty) +
                             (eliteThreat > 0 ? $"  +variants {eliteThreat}" : string.Empty));
+            DrawWaveStatus(controller, node);
             DrawEliteControls(assembler, room, controller, node);
             DrawChampionControls(assembler, controller, node);
             GUILayout.Label("Death blasts pending " +

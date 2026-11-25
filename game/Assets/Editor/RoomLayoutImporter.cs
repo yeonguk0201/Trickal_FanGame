@@ -376,11 +376,21 @@ namespace TrickalFanGame.Editor
                         GeneratedRoomConnection[] connections = directions
                             .Where((_, index) => (mask & (1 << index)) != 0)
                             .Select(direction => new GeneratedRoomConnection(direction, "layout-import")).ToArray();
-                        if (encounter.TryValidateFor(template, floor, connections, out error)) continue;
-                        error = $"Encounter '{encounter.EncounterId}' cannot be placed with doors " +
-                                $"{string.Join("+", connections.Select(connection => connection.Direction))} on " +
-                                $"floor {floor}. {error}";
-                        return false;
+                        string doors = string.Join("+", connections.Select(connection => connection.Direction));
+                        if (!encounter.TryValidateFor(template, floor, connections, out error))
+                        {
+                            error = $"Encounter '{encounter.EncounterId}' cannot be placed with doors {doors} on " +
+                                    $"floor {floor}. {error}";
+                            return false;
+                        }
+
+                        // Layout-Wave: the room's fixed waves must fit with every door set on every floor it allows.
+                        if (!TryValidateLayoutWaves(template, encounter, floor, connections, out error))
+                        {
+                            error = $"The room's fixed waves cannot be placed with doors {doors} on floor {floor}. " +
+                                    error;
+                            return false;
+                        }
                     }
                 }
             }
@@ -389,6 +399,38 @@ namespace TrickalFanGame.Editor
             {
                 error = $"No Encounter supports profile '{template.Profile.ProfileId}' on the room's floors.";
                 return false;
+            }
+
+            error = null;
+            return true;
+        }
+
+        public static bool TryValidateLayoutWaves(RoomTemplateDefinition template, EncounterDefinition encounter,
+            int floor, IReadOnlyList<GeneratedRoomConnection> connections, out string error)
+        {
+            for (int index = 0; index < template.LayoutWaves.Count; index++)
+            {
+                RoomLayoutWave wave = template.LayoutWaves[index];
+                if (wave.IsAuto) continue;
+                EncounterEnemyRole[] early = wave.SpawnRules
+                    .Where(rule => rule.Candidates.All(candidate =>
+                        !EncounterEnemyFloorPool.IsAvailable(candidate.EnemyRole, floor)))
+                    .SelectMany(rule => rule.Candidates.Select(candidate => candidate.EnemyRole)).ToArray();
+                if (early.Length > 0)
+                {
+                    error = $"wave{index + 1}: " + string.Join(", ", early.Select(role =>
+                                $"{RoomLayoutFormat.EnemyId(role)} appears from floor " +
+                                EncounterEnemyFloorPool.IntroductionFloor(role))) +
+                            ". Add 'floors:' or another enemy with '|'.";
+                    return false;
+                }
+
+                if (!template.TryResolveLayoutWave(index, floor, connections, 0, encounter.MinimumPlayerDistance,
+                        encounter.MinimumDoorDistance, out _, out _, out error))
+                {
+                    error = $"wave{index + 1}: {error}";
+                    return false;
+                }
             }
 
             error = null;
@@ -425,6 +467,7 @@ namespace TrickalFanGame.Editor
             template.ConfigureAuthoredChests(document.CellsOf(RoomLayoutCellKind.Chest)
                 .Select(cell => new RoomTemplateChest(cell.Id(ChestIdPrefix), cell.Symbol.ChestKind, cell.Center))
                 .ToArray());
+            template.ConfigureLayoutWaves(document.Waves);
             EditorUtility.SetDirty(template);
             AssetDatabase.SaveAssetIfDirty(template);
             return template;

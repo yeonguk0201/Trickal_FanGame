@@ -312,7 +312,10 @@ namespace TrickalFanGame.Editor
                            WaveSignature(room.ResolvedEncounterWaves) ==
                            WaveSignature(repeated.ResolvedEncounterWaves),
                         $"Seed {seed} room '{room.RoomId}' did not persist the same candidate selection.");
-                    Assert(room.ResolvedEncounterWaves.Count == room.Encounter.Waves.Count,
+                    // Layout-Wave: a room Layout with its own waves stores that many instead.
+                    Assert(room.ResolvedEncounterWaves.Count == (room.Template.HasLayoutWaves
+                               ? room.Template.LayoutWaves.Count
+                               : room.Encounter.Waves.Count),
                         $"Seed {seed} room '{room.RoomId}' did not store every resolved wave.");
                     foreach (ResolvedEncounterSpawn spawn in room.ResolvedEncounterWaves.SelectMany(wave => wave))
                     {
