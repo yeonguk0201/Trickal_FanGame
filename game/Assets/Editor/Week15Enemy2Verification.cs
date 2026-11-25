@@ -64,9 +64,10 @@ namespace TrickalFanGame.Editor
 
             Assert(slowChase.MoveSpeed < fastChase.MoveSpeed,
                 "Bulhyojason must move slower than Sansamo.");
-            Assert(strongContact.DamageTier > weakContact.DamageTier &&
+            // Balance-1: 불효자손-광기's touch came down to one heart, the same as Sansamo's; its swing still hits harder.
+            Assert(strongContact.DamageTier >= weakContact.DamageTier &&
                    strongMelee.DamageTier > weakMelee.DamageTier,
-                "Bulhyojason contact and melee damage must exceed Sansamo damage.");
+                "Bulhyojason contact damage must not fall below Sansamo's, and its melee must exceed it.");
             Assert(Mathf.Approximately(strongMelee.AttackRange, weakMelee.AttackRange) &&
                    Mathf.Approximately(strongMelee.TelegraphDuration, weakMelee.TelegraphDuration) &&
                    Mathf.Approximately(strongMelee.RecoveryDuration, weakMelee.RecoveryDuration),

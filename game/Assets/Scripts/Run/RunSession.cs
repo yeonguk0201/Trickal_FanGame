@@ -413,6 +413,7 @@ namespace TrickalFanGame.Run
                 gameOverSequence.TryBegin(playerHealth != null ? playerHealth.transform : null, OnGameOverConfirmed))
             {
                 LocalPendingRunStorage.Save(pendingRequest);
+                BeginPresentationWork();
                 statusMessage = "Run ended. GAME OVER.";
                 return;
             }
@@ -424,6 +425,7 @@ namespace TrickalFanGame.Run
                     OnGameOverConfirmed))
             {
                 LocalPendingRunStorage.Save(pendingRequest);
+                BeginPresentationWork();
                 statusMessage = "Run cleared. VICTORY.";
                 return;
             }
@@ -452,6 +454,15 @@ namespace TrickalFanGame.Run
                 yield return null;
             }
             OpenResult();
+        }
+
+        // Balance-1: while GAME OVER or VICTORY plays, the result scene loads and the Run's save is sent, so the
+        // confirm opens a result that is ready to show.
+        private void BeginPresentationWork()
+        {
+            if (resultTransition != null) resultTransition.PreloadResult();
+            RunSubmission.BeginEarly(GetValidApiClient(), pendingRequest,
+                playerProgressClient != null ? playerProgressClient.UserNickname : null);
         }
 
         private void OnGameOverConfirmed()
@@ -550,6 +561,7 @@ namespace TrickalFanGame.Run
 
             isSaveInFlight = true;
             canRetrySave = false;
+            if (RunSubmission.TryAttachEarly(pendingRequest.clientRunId, OnSaveSuccess, OnSaveFailure)) return;
             RunSubmission.Post(client, pendingRequest,
                 playerProgressClient != null ? playerProgressClient.UserNickname : null, OnSaveSuccess, OnSaveFailure);
         }

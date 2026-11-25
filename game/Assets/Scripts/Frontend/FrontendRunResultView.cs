@@ -161,9 +161,21 @@ namespace TrickalFanGame.Frontend
 
             submissionInFlight = true;
             saveStatus.text = "";
+            // Balance-1: the save started during GAME OVER; its answer is usually here already.
+            if (RunSubmission.TryAttachEarly(payload.Request.clientRunId, OnSaveSuccess, ShowSaveFailure))
+            {
+                if (submissionInFlight) ShowSaveWaiting();
+                return;
+            }
+
+            ShowSaveWaiting();
+            RunSubmission.Post(client, payload.Request, LocalProfile.Nickname, OnSaveSuccess, ShowSaveFailure);
+        }
+
+        private void ShowSaveWaiting()
+        {
             stageTitle.text = "결과를 정리하고 있어요";
             stageBody.text = "잠시만 기다려 주세요...";
-            RunSubmission.Post(client, payload.Request, LocalProfile.Nickname, OnSaveSuccess, ShowSaveFailure);
         }
 
         private void OnSaveSuccess(CreateRunResponse response)

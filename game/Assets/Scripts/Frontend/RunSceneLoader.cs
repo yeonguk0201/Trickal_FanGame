@@ -13,6 +13,10 @@ namespace TrickalFanGame.Frontend
         public const float MinimumVisibleSeconds = 0.6f;
         public const float CompletedVisibleSeconds = 0.15f;
         private static RunSceneLoader instance;
+        // Balance-1: a scene loaded ahead in the background (the result scene during GAME OVER), held before
+        // activation. Unity queues every later async load behind a held one, so only the same scene may load next.
+        private static AsyncOperation preload;
+        private static int preloadIndex = -1;
         private RunLoadingScreenView view;
         private float previousTimeScale;
         private GameObject previousSelection;
@@ -25,10 +29,44 @@ namespace TrickalFanGame.Frontend
         private bool eventsWereEnabled;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() => instance = null;
+        private static void ResetStatics()
+        {
+            instance = null;
+            preload = null;
+            preloadIndex = -1;
+        }
+
+        public static bool IsPreloading => preload != null;
+        public static int PreloadedBuildIndex => preload != null ? preloadIndex : -1;
+        // The held scene has finished loading and only waits for activation.
+        public static bool IsPreloadReady => preload != null && preload.progress >= 0.9f;
 
         public static bool CanLoad(int buildIndex) => !IsLoading && buildIndex >= 0 &&
-            buildIndex < SceneManager.sceneCountInBuildSettings;
+            buildIndex < SceneManager.sceneCountInBuildSettings &&
+            (preload == null || preloadIndex == buildIndex);
+
+        // Starts loading a scene in the background without showing anything or activating it. A later TryLoad of
+        // the same scene activates it and skips the loading screen when it is ready. Returns whether that scene is
+        // now preloading.
+        public static bool Preload(int buildIndex)
+        {
+            if (preload != null) return preloadIndex == buildIndex;
+            if (!Application.isPlaying || !CanLoad(buildIndex)) return false;
+            try
+            {
+                AsyncOperation operation = SceneManager.LoadSceneAsync(buildIndex, LoadSceneMode.Single);
+                if (operation == null) return false;
+                operation.allowSceneActivation = false;
+                preload = operation;
+                preloadIndex = buildIndex;
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+                return false;
+            }
+        }
 
         public static bool TryLoad(int buildIndex, float completedTimeScale = 1f, Action onFailure = null)
         {
@@ -47,11 +85,16 @@ namespace TrickalFanGame.Frontend
                     ? EventSystem.current.currentSelectedGameObject : null;
                 instance.failed = onFailure;
                 instance.busy = true;
-                instance.view.SetVisible(true);
+                AsyncOperation preloaded = preload;
+                preload = null;
+                preloadIndex = -1;
+                // A finished preload switches straight over; the loading screen shows only while loading remains.
+                bool quiet = preloaded != null && preloaded.progress >= 0.9f;
+                instance.view.SetVisible(!quiet);
                 instance.view.SetProgress(0f);
                 Time.timeScale = 0f;
                 instance.BlockEvents();
-                instance.StartCoroutine(instance.Load(buildIndex, completedTimeScale));
+                instance.StartCoroutine(instance.Load(buildIndex, completedTimeScale, preloaded, quiet));
                 return true;
             }
             catch (Exception exception)
@@ -105,36 +148,44 @@ namespace TrickalFanGame.Frontend
             blockedEvents = null;
         }
 
-        private IEnumerator Load(int buildIndex, float completedTimeScale)
+        private IEnumerator Load(int buildIndex, float completedTimeScale, AsyncOperation preloaded, bool quiet)
         {
-            // Give the overlay a rendered frame before any heavy scene deserialization starts.
-            yield return null;
-            yield return null;
-            float started = Time.realtimeSinceStartup;
-            AsyncOperation operation = null;
-            Exception error = null;
-            try { operation = SceneManager.LoadSceneAsync(buildIndex, LoadSceneMode.Single); }
-            catch (Exception exception) { error = exception; }
-            if (error != null || operation == null)
+            AsyncOperation operation = preloaded;
+            if (operation == null)
             {
-                Debug.LogError($"[RunSceneLoader] Scene load failed: {error?.Message ?? "no operation"}");
-                Fail();
-                yield break;
+                // Give the overlay a rendered frame before any heavy scene deserialization starts.
+                yield return null;
+                yield return null;
+                Exception error = null;
+                try { operation = SceneManager.LoadSceneAsync(buildIndex, LoadSceneMode.Single); }
+                catch (Exception exception) { error = exception; }
+                if (error != null || operation == null)
+                {
+                    Debug.LogError($"[RunSceneLoader] Scene load failed: {error?.Message ?? "no operation"}");
+                    Fail();
+                    yield break;
+                }
+
+                operation.allowSceneActivation = false;
             }
 
-            operation.allowSceneActivation = false;
-            while (operation.progress < 0.9f || Time.realtimeSinceStartup - started < MinimumVisibleSeconds)
+            float started = Time.realtimeSinceStartup;
+            while (operation.progress < 0.9f ||
+                   (!quiet && Time.realtimeSinceStartup - started < MinimumVisibleSeconds))
             {
                 view.SetProgress(Mathf.Min(0.9f, operation.progress));
                 yield return null;
             }
             operation.allowSceneActivation = true;
             while (!operation.isDone) yield return null;
-            // Awake, OnEnable and Start all run behind the overlay before it reaches 100%.
+            // Awake, OnEnable and Start all run behind the overlay (or the last frame) before it reaches 100%.
             yield return null;
-            view.SetProgress(1f);
-            float completed = Time.realtimeSinceStartup;
-            while (Time.realtimeSinceStartup - completed < CompletedVisibleSeconds) yield return null;
+            if (!quiet)
+            {
+                view.SetProgress(1f);
+                float completed = Time.realtimeSinceStartup;
+                while (Time.realtimeSinceStartup - completed < CompletedVisibleSeconds) yield return null;
+            }
             failed = null;
             busy = false;
             view.SetVisible(false);

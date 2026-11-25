@@ -12,7 +12,9 @@ namespace TrickalFanGame.Editor
     {
         // D2 (2026-10-05): §3.1 allows 20~30% for the golden special reward; a diamond chest always holds one spell,
         // which is a jjangsem spell 25% of the time once one is implemented.
-        public const float GoldenSpecialRewardChance = 0.25f;
+        // Balance-1 (2026-11-24): a golden chest always holds an artifact, falling back to the treasure pool when no
+        // golden exclusive one is left (ChestContentTable.ResolveArtifact).
+        public const float GoldenSpecialRewardChance = 1f;
         public const float DiamondSpellChance = 1f;
         public const float DiamondJjangsemShare = 0.25f;
 

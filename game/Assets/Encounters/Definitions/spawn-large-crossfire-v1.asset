@@ -40,7 +40,7 @@ MonoBehaviour:
       - enemyRole: 16
         weight: 20
     - enemyRole: 0
-      count: 2
+      count: 1
       spawnPointId: 
       spawnGroupId: all
       candidates:
@@ -64,7 +64,7 @@ MonoBehaviour:
       - enemyRole: 2
         weight: 100
     - enemyRole: 0
-      count: 4
+      count: 2
       spawnPointId: 
       spawnGroupId: all
       candidates:
@@ -77,7 +77,7 @@ MonoBehaviour:
       - enemyRole: 14
         weight: 20
     - enemyRole: 1
-      count: 2
+      count: 1
       spawnPointId: 
       spawnGroupId: all
       candidates:
@@ -96,7 +96,7 @@ MonoBehaviour:
     completionCondition: 0
     spawnRules:
     - enemyRole: 1
-      count: 4
+      count: 3
       spawnPointId: 
       spawnGroupId: all
       candidates:
@@ -111,7 +111,7 @@ MonoBehaviour:
       - enemyRole: 16
         weight: 20
     - enemyRole: 0
-      count: 3
+      count: 2
       spawnPointId: 
       spawnGroupId: all
       candidates:
@@ -124,5 +124,5 @@ MonoBehaviour:
       - enemyRole: 14
         weight: 20
   clearCondition: 0
-  declaredMinimumThreat: 52
-  declaredMaximumThreat: 71
+  declaredMinimumThreat: 38
+  declaredMaximumThreat: 51

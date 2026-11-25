@@ -26,7 +26,8 @@ namespace TrickalFanGame.Editor
         // scripts/split-attribute-enemies.py: ground 8 px above the canvas bottom, 580 px tall idle body.
         public const float RootPixelsAboveCanvasBottom = 8f + 290f;
 
-        public const float MadnessBulhyojasonHealth = 45f;
+        // Balance-1: 45 → 35.
+        public const float MadnessBulhyojasonHealth = 35f;
         public const float PureHealth = 50f;
         public const float LivelyHealth = 40f;
         public const float GloomyBulhyojasonHealth = 25f;

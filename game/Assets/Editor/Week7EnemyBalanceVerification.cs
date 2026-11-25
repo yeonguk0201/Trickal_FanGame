@@ -20,12 +20,13 @@ namespace TrickalFanGame.Editor
             EnemyProfile ranged = ReadRanged();
             EnemyProfile charging = ReadCharging();
 
-            Assert(Mathf.Approximately(chaser.Health, EnemyAttribute0Setup.MadnessBulhyojasonHealth) && chaser.Damage == EnemyDamageTier.Heavy &&
-                   Mathf.Approximately(chaser.Speed, 2.25f),
-                "Enemy-2 chaser must use the Attribute-0 HP, heavy contact damage, and move speed 2.25.");
+            // Balance-1 (2026-11-24): 불효자손-광기 touches for one heart, swings for two and walks at 2.
+            Assert(Mathf.Approximately(chaser.Health, EnemyAttribute0Setup.MadnessBulhyojasonHealth) && chaser.Damage == EnemyDamageTier.Light &&
+                   Mathf.Approximately(chaser.Speed, 2f),
+                "Enemy-2 chaser must use the Attribute-0 HP, light contact damage, and move speed 2.");
             Assert(Require<MeleeEnemyAttack>(LoadPrefab(ChaserPrefabPath), ChaserPrefabPath).DamageTier ==
-                   EnemyDamageTier.Critical,
-                "Enemy-2 chaser must use critical melee damage.");
+                   EnemyDamageTier.Heavy,
+                "Enemy-2 chaser must use heavy melee damage.");
             Assert(ranged.Health == 30 && ranged.Damage == EnemyDamageTier.Heavy &&
                    Mathf.Approximately(ranged.Speed, 1.5f),
                 "Ranged must use HP 30, heavy projectile damage, and move speed 1.5.");
@@ -36,10 +37,11 @@ namespace TrickalFanGame.Editor
             HashSet<float> speedValues = new() { chaser.Speed, ranged.Speed, charging.Speed };
             Assert(speedValues.Count == 3,
                 "All three normal monster roles must retain distinct movement speeds.");
+            // Balance-1: 불효자손-광기's touch is one heart now, below the ranged shot; its swing carries its threat.
             Assert(ranged.Health < chaser.Health && chaser.Health < charging.Health &&
                    ranged.Speed < chaser.Speed && chaser.Speed < charging.Speed &&
-                   ranged.Damage <= chaser.Damage && chaser.Damage <= charging.Damage,
-                "Enemy profiles must preserve fragile ranged, strong chaser contact, and durable charging roles.");
+                   chaser.Damage <= charging.Damage,
+                "Enemy profiles must preserve fragile ranged, mid chaser, and durable charging roles.");
 
             Debug.Log(
                 "Phase E-4 enemy balance verification passed: all three enemy prefabs preserve their " +

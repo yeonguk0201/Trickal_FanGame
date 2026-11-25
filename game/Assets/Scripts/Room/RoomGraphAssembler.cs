@@ -54,6 +54,11 @@ namespace TrickalFanGame.Room
         public GameObject CurrentFloorRoot => currentFloorRoot;
         public ItemRewardSelectionSession RewardSelectionSession => rewardSelectionSession;
         public IReadOnlyList<ItemDefinition> SelectionRewardPool => selectionRewardPool;
+
+        // Balance-1: a chest's artifact comes from the Run's selection pool, and the Run's floor count picks the
+        // chest reward rates.
+        public RoomChestSite WithChestRewards(RoomChestSite site) =>
+            site?.WithRewards(selectionRewardPool, generator != null ? generator.FloorCount : 0);
         public ShopRoom ShopRoomPrefab => shopRoomPrefab;
         public ShopCatalog ShopCatalog => shopCatalog;
         public ShopSession ShopSession => shopSession;
@@ -726,9 +731,9 @@ namespace TrickalFanGame.Room
                     RoomClearRewardSpawner rewardSpawner = controller.GetComponent<RoomClearRewardSpawner>();
                     if (rewardSpawner == null)
                         rewardSpawner = controller.gameObject.AddComponent<RoomClearRewardSpawner>();
-                    RoomChestSite chestSite = new(instance, node.Template, state, runProgress,
-                        graph != null && graph.Player != null ? graph.Player.transform : null,
-                        generatedGraph?.FindFloor(node.FloorNumber)?.IsKeyFree == true);
+                    RoomChestSite chestSite = WithChestRewards(new RoomChestSite(instance, node.Template, state,
+                        runProgress, graph != null && graph.Player != null ? graph.Player.transform : null,
+                        generatedGraph?.FindFloor(node.FloorNumber)?.IsKeyFree == true));
                     rewardSpawner.ConfigureChest(chestContentTable, chestSite,
                         RoomClearRewardSpawner.DeriveChestSeed(node.ContentSeed));
                     controller.ConfigureClearReward(rewardSpawner);

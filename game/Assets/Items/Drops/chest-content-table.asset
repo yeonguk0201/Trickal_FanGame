@@ -26,7 +26,7 @@ MonoBehaviour:
     minimumCount: 2
     countWeights: 010000000100000001000000
     spellChance: 0
-    specialRewardChance: 0.25
+    specialRewardChance: 1
     jjangsemShare: 0
   - kind: 2
     weight: 5
@@ -80,3 +80,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 511629b64eee78b4cb4e9d612de6361a, type: 2}
   - {fileID: 11400000, guid: f24753196dcec374f93b83e5cff3f9ca, type: 2}
   - {fileID: 11400000, guid: 72bdd72ecffd68a439efb990fe42f98e, type: 2}
+  rewardRates:
+  - floorCount: 3
+    normalArtifactChance: 0.2
+    normalSpellChance: 0.2
+    itemPityClears: 3

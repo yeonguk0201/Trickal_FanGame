@@ -9,7 +9,8 @@ namespace TrickalFanGame.Editor
     public static class Week22MeleeLungeSetup
     {
         public const float TriggerRange = 1.9f;
-        public const float Distance = 1.5f;
+        // Balance-1: 1.5 → 1.2, so the reach (lunge + forward offset + hit radius) is 2.25 instead of 2.55.
+        public const float Distance = 1.2f;
         public const float AimLockLeadTime = 0.12f;
         public const float HitForwardOffset = 0.3f;
         public const float HitRadius = 0.75f;

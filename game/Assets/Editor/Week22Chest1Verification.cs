@@ -333,8 +333,10 @@ namespace TrickalFanGame.Editor
                     "A floor rebuild must restore the closed chest where it was.");
 
                 // Opening drops the seeded contents once around the chest.
+                // Balance-1: a room chest rolls with the Run length's reward rates and its recorded item pity.
                 ChestContents expected = table.RollContents(RoomClearRewardSpawner.DeriveChestSeed(chestNode.ContentSeed),
-                    kind);
+                    kind, table.RatesFor(assembler.Generator.FloorCount),
+                    state.GetChest(RoomClearRewardSpawner.ClearChestId).ForcesItem);
                 // Chests open only in the room the player is in, whose content is shown.
                 Room(assembler, chestNode.RoomId).Node.SetVisible(true);
                 Open(restored, assembler.Progress, player);

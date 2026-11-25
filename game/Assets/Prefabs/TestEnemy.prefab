@@ -262,7 +262,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdb1c78837978314e9a5aafe3914eb68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Combat.Health
-  maxHealth: 45
+  maxHealth: 35
   currentShield: 0
   useHealthUnits: 0
 --- !u!114 &5840264429905698585
@@ -291,7 +291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5727621293629a34595d45d3f5763b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.ContactDamage
-  damageTier: 2
+  damageTier: 0
   cooldown: 1
   halfHeartDamage: 0
 --- !u!114 &8647675937649764220
@@ -306,7 +306,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f54127202aaa284d837f6e0e8434051, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Enemy.EnemyChase
-  moveSpeed: 2.25
+  moveSpeed: 2
   detectionRange: 6
   stopDistance: 0.8
   target: {fileID: 0}
@@ -371,9 +371,9 @@ MonoBehaviour:
   activeDuration: 0.12
   recoveryDuration: 0.65
   attackCooldown: 0.2
-  damageTier: 3
+  damageTier: 2
   lungeTriggerRange: 1.9
-  lungeDistance: 1.5
+  lungeDistance: 1.2
   aimLockLeadTime: 0.12
   lungeHitForwardOffset: 0.3
   lungeHitRadius: 0.75

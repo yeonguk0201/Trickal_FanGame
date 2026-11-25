@@ -15,6 +15,9 @@ namespace TrickalFanGame.Editor
         // Raised from 7; the final value is tuned by play feel.
         public const float SniperProjectileSpeed = 11f;
         public const float PreviousSniperProjectileSpeed = 7f;
+        // Balance-1: a longer stationary window after each shot (0.65 → 0.85 s) and a smaller onion.
+        public const float SniperRecoveryDuration = 0.85f;
+        public const float SniperProjectileScale = ProjectileSizing.SniperShotScale;
         // Slightly raised from 8; dash distance stays below half of the 24-unit Large room.
         public const float ChargingDashSpeed = 9.5f;
         public const float PreviousChargingDashSpeed = 8f;
@@ -70,6 +73,8 @@ namespace TrickalFanGame.Editor
 
                 SerializedObject serializedSniper = new(sniper);
                 serializedSniper.FindProperty("projectileSpeed").floatValue = SniperProjectileSpeed;
+                serializedSniper.FindProperty("recoveryDuration").floatValue = SniperRecoveryDuration;
+                serializedSniper.FindProperty("projectileScale").floatValue = SniperProjectileScale;
                 serializedSniper.ApplyModifiedPropertiesWithoutUndo();
                 Save(root, Week15Enemy4Setup.SniperPrefabPath);
             }

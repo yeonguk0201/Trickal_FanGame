@@ -18,16 +18,19 @@ namespace TrickalFanGame.Editor
         public const string DefinitionPath = "Assets/Shop/shop-decor-definition.asset";
         public const string BasicDropTablePath = "Assets/Items/Drops/obstacle-basic-drop-table.asset";
         // Each kind of piece has its own table with the basic obstacle's candidates, never a secret pit.
+        // Balance-1 (2026-11-24): a piece that drops leaves 2~3 pickups (ShopDecorDefinition.PieceMinimumDrops..
+        // PieceMaximumDrops), so the chances came down. Breaking a whole shop gives about 6 pickups at 시스트 and
+        // about 10 at 골디, as before the stall drops for certain.
         public static readonly IReadOnlyDictionary<string, float> DropChances = new Dictionary<string, float>
         {
             ["sist-sign"] = 0f,
-            ["sist-crate-potion"] = 0.14f,
-            ["sist-crates"] = 0.2f,
+            ["sist-crate-potion"] = 0.07f,
+            ["sist-crates"] = 0.1f,
             ["sist-stall"] = 1f,
-            ["goldi-barrel"] = 0.3f,
-            ["goldi-crate-gold"] = 0.3f,
-            ["goldi-treasure"] = 0.8f,
-            ["goldi-pedestal"] = 0.5f,
+            ["goldi-barrel"] = 0.1f,
+            ["goldi-crate-gold"] = 0.1f,
+            ["goldi-treasure"] = 0.27f,
+            ["goldi-pedestal"] = 0.17f,
             ["goldi-stall"] = 1f,
         };
         public const string ExcludedDropId = "pit";

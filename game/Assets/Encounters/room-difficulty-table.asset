@@ -169,23 +169,23 @@ MonoBehaviour:
       maximumScore: 55
   - profileId: large
     minimumRoomEnemies: 2
-    maximumRoomEnemies: 20
+    maximumRoomEnemies: 14
     maximumWaveEnemies: 8
     maximumWaveRearFiring: 5
     tierBands:
     - tier: 0
       minimumScore: 0
     - tier: 1
-      minimumScore: 47
+      minimumScore: 33
     - tier: 2
-      minimumScore: 62
+      minimumScore: 44
     floorRanges:
     - floorNumber: 1
       minimumScore: 0
-      maximumScore: 70
+      maximumScore: 50
     - floorNumber: 2
       minimumScore: 0
-      maximumScore: 78
+      maximumScore: 55
     - floorNumber: 3
       minimumScore: 0
-      maximumScore: 86
+      maximumScore: 61

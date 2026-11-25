@@ -11,6 +11,9 @@ namespace TrickalFanGame.Shop
     public sealed class ShopDecorDefinition : ScriptableObject
     {
         public const int PieceRequiredHits = 3;
+        // Balance-1: a piece that drops leaves this many pickups (seeded per piece), unlike a plain rock's one.
+        public const int PieceMinimumDrops = 2;
+        public const int PieceMaximumDrops = 3;
         public const int StageCount = 3;
         // The share of a piece's art that is its solid ground footprint.
         public const float FootprintWidth = 0.8f;

@@ -17,6 +17,7 @@ namespace TrickalFanGame.Editor
             ValidatePrefabRoles();
             ValidateSniperCycleAndDistanceRules();
             ValidateBlockingAndCancellation();
+            ValidateShotMustReach();
             Week15Enemy1Verification.Verify();
             Week7EnemyBalanceVerification.Verify();
             Debug.Log(
@@ -86,6 +87,13 @@ namespace TrickalFanGame.Editor
                 Assert(sniper.State == LongRangeSniperState.Aiming && body.linearVelocity == Vector2.zero &&
                        locked.x > 0.99f && presentation.Phase == EnemyAttackPhase.Telegraph && path.enabled,
                     "The sniper must stop and expose a non-color-only locked aim before firing.");
+                float aimLength = Vector2.Distance(path.GetPosition(0), path.GetPosition(1));
+                float shotWidth = sniper.ShotRadius * 2f;
+                Assert(Mathf.Abs(aimLength - sniper.ShotReach) < 0.01f &&
+                       Mathf.Abs(path.startWidth - shotWidth) < 0.001f &&
+                       Mathf.Abs(path.endWidth - shotWidth) < 0.001f,
+                    $"The aim line must span the shot's real reach ({sniper.ShotReach}) and width ({shotWidth}), " +
+                    $"not {aimLength} × {path.startWidth}.");
 
                 player.transform.position = Vector2.left;
                 sniper.TickBehavior(1.49f);
@@ -182,6 +190,61 @@ namespace TrickalFanGame.Editor
                 Assert(sniper.State == LongRangeSniperState.Idle && body.linearVelocity == Vector2.zero &&
                        !enemy.GetComponent<LineRenderer>().enabled,
                     "Room disable must clear movement, aim direction, and presentation.");
+            }
+            finally
+            {
+                ClearProjectiles();
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        // Balance-1: the sniper aims and fires only when its shot, at full width and within its range, reaches the
+        // player. An obstacle that only grazes the shot's edge passes the thin line-of-fire probe but must still
+        // keep the sniper relocating.
+        private static void ValidateShotMustReach()
+        {
+            GameObject root = new("Enemy-4 Reach Verification");
+            GameObject player = CreatePlayer(root.transform, out _);
+            GameObject enemy = CreateSniper(root.transform, out _, out LongRangeSniperController sniper, out _);
+            GameObject wall = new("Enemy-4 Grazing Wall");
+            wall.transform.SetParent(root.transform);
+            wall.layer = LayerMask.NameToLayer("Environment");
+            try
+            {
+                sniper.Configure(2.5f, 14f, 8f, 1f, 1f, 0.3f, 0.5f, 0.1f, 0.5f, 7f, EnemyDamageTier.Heavy, 5f);
+                player.transform.position = Vector2.right * 8f;
+                sniper.SetTarget(player.transform);
+                float shotRadius = sniper.ShotRadius;
+                float probeRadius = EnemyObstacleNavigator.ProjectileClearanceRadius;
+                Assert(shotRadius > probeRadius + 0.02f,
+                    "Reach verification needs a shot wider than the line-of-fire probe.");
+                // The wall's lower edge lies between the probe's edge and the shot's edge.
+                BoxCollider2D box = wall.AddComponent<BoxCollider2D>();
+                box.size = new Vector2(1f, 0.2f);
+                wall.transform.position = new Vector2(4f, (probeRadius + shotRadius) * 0.5f + 0.1f);
+                Physics2D.SyncTransforms();
+                Assert(EnemyObstacleNavigator.HasLineOfFire(enemy.transform.position, player.transform.position) &&
+                       !sniper.AimReachesTarget(),
+                    "A wall grazing the shot's edge must block the shot-wide aim but not the thin probe.");
+
+                sniper.TickBehavior(0f);
+                sniper.TickBehavior(1.05f);
+                Assert(sniper.State == LongRangeSniperState.Relocating,
+                    "The sniper must keep relocating instead of aiming while its shot would hit the wall.");
+
+                UnityEngine.Object.DestroyImmediate(wall);
+                Physics2D.SyncTransforms();
+                sniper.TickBehavior(1.1f);
+                Assert(sniper.State == LongRangeSniperState.Aiming && sniper.AimReachesTarget(),
+                    "With the line clear the sniper must start aiming.");
+
+                sniper.Configure(2.5f, 14f, 8f, 1f, 1f, 0.3f, 0.5f, 0.1f, 0.5f, 7f, EnemyDamageTier.Heavy, 1f);
+                Assert(sniper.ShotReach < 8f && !sniper.AimReachesTarget(),
+                    "A player beyond the shot's reach must not count as reachable.");
+                sniper.TickBehavior(2f);
+                sniper.TickBehavior(3.05f);
+                Assert(sniper.State == LongRangeSniperState.Relocating,
+                    "The sniper must not aim at a player beyond its shot's reach.");
             }
             finally
             {

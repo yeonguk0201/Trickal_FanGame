@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31c07cd820c95894f86f90494aa4b27b, type: 3}
   m_Name: obstacle-shop-decor-goldi-treasure-drop-table
   m_EditorClassIdentifier: Assembly-CSharp::TrickalFanGame.Resource.ResourceDropTable
-  dropChance: 0.8
+  dropChance: 0.27
   entries:
   - dropId: heart
     prefab: {fileID: 303849290133622444, guid: fe735d51964ab6243baf43f8c7221f9a, type: 3}

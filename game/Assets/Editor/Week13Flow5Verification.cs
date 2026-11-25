@@ -262,6 +262,12 @@ namespace TrickalFanGame.Editor
                 GameOverSequence gameOver = Object.FindFirstObjectByType<GameOverSequence>();
                 if (gameOver != null && gameOver.IsActive && gameOver.CurrentPhase != GameOverSequence.Phase.Confirmed)
                 {
+                    // Balance-1: the save and the result scene both start while GAME OVER plays.
+                    Week13Flow5Verification.Assert(apiClient.PostRunCount == 1 &&
+                        apiClient.Requests[0].clientRunId == endedClientRunId &&
+                        RunSceneLoader.PreloadedBuildIndex ==
+                        SceneUtility.GetBuildIndexByScenePath(Week13FrontendSetup.ScenePath),
+                        "GAME OVER must send the Run save and preload the result scene before the confirm.");
                     gameOver.SkipToConfirm();
                     gameOver.Confirm();
                 }

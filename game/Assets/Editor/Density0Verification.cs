@@ -298,8 +298,14 @@ namespace TrickalFanGame.Editor
                 }
                 else if (spec.ProfileId == Week14Room6Setup.LargeProfileId)
                 {
-                    Assert(waveCounts.Length == 3 && waveCounts.Sum() <= 20,
-                        $"Large '{pattern}' must be three waves of at most 20 enemies (user decision 2026-11-23).");
+                    Assert(waveCounts.Length >= Density0Setup.LargeMinimumWaves &&
+                           waveCounts.Length <= Density0Setup.LargeMaximumWaves &&
+                           waveCounts.Sum() >= Density0Setup.LargeMinimumEnemies &&
+                           waveCounts.Sum() <= Density0Setup.LargeMaximumEnemies,
+                        $"Large '{pattern}' must be {Density0Setup.LargeMinimumWaves}~" +
+                        $"{Density0Setup.LargeMaximumWaves} waves of " +
+                        $"{Density0Setup.LargeMinimumEnemies}~{Density0Setup.LargeMaximumEnemies} enemies " +
+                        $"(Balance-1, 2026-11-24), found {string.Join("+", waveCounts)}.");
                 }
                 else if (spec.ProfileId != Week14Room1Setup.BasicProfileId)
                 {

@@ -101,6 +101,14 @@ namespace TrickalFanGame.Editor
                       $"{PermanentElif.ConversionChance:P1}.");
         }
 
+        // Balance-1 (2026-11-24): chest item rates per Run length. The 3-floor beta: a normal chest holds an artifact
+        // 20% and a spell 20% of the time, and three combat clears in a row without a chest item guarantee one on
+        // the next. Longer Runs (6, 9, 12 floors) add their own rows when they ship.
+        public static readonly ChestRewardRates[] ChestItemRates =
+        {
+            new(3, 0.2f, 0.2f, 3),
+        };
+
         // Keeps every Chest-1/Chest-2 setting (spells, prefabs, special rewards) and rewrites the rates only.
         private static void ConfigureChestTable(ChestContentTable table)
         {
@@ -109,6 +117,7 @@ namespace TrickalFanGame.Editor
             Undo.RecordObject(table, "Configure Drop-0 chest rates");
             table.Configure(ClearChestChance, Week22Chest1Setup.BuildKindRules(), consumables, table.Spells.ToArray(),
                 table.ChestPrefab, table.SpellPickupPrefab);
+            table.ConfigureRewardRates(ChestItemRates);
             if (!table.TryValidate(out string error))
                 throw new InvalidOperationException($"Drop-0 built an invalid chest content table. {error}");
             EditorUtility.SetDirty(table);

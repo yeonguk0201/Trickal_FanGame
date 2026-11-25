@@ -124,6 +124,8 @@ namespace TrickalFanGame.Shop
             DestructibleObstacle obstacle = pieceObject.AddComponent<DestructibleObstacle>();
             obstacle.Configure(piece.pieceId, ShopDecorDefinition.PieceRequiredHits, piece.dropTable, visual);
             obstacle.ConfigureFixedKind(PieceVariantId, Color.white, Color.white, false, 0, Color.white);
+            obstacle.ConfigureDropCountRange(ShopDecorDefinition.PieceMinimumDrops,
+                ShopDecorDefinition.PieceMaximumDrops);
             obstacle.Bind(state, contentSeed, dropParent, progress, null, node, controller);
             pieceObject.AddComponent<ShopDecorPiece>().Configure(obstacle, visual, piece.stages);
             if (!obstacle.IsBroken) pieceObject.SetActive(true);

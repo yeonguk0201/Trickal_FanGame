@@ -982,7 +982,11 @@ namespace TrickalFanGame.Item
             {
                 roomSeed = generated.ContentSeed;
                 if (chestContentTable != null && generated.Template != null && room != null && state != null)
+                {
                     site = new RoomChestSite(room, generated.Template, state, progress, transform);
+                    RoomGraphAssembler assembler = ResolveRoomAssembler();
+                    if (assembler != null) assembler.WithChestRewards(site);
+                }
             }
 
             reason = string.Empty;

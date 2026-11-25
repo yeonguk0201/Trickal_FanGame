@@ -133,8 +133,12 @@ namespace TrickalFanGame.Editor
                        state.GetChest(RoomClearRewardSpawner.ClearChestId)?.Kind == ChestKind.Normal,
                     $"Floor-1 room {floorOneRoom} rolled golden and must place and record a normal chest.");
                 TreasureChest chest = spawner.LastSpawnedChest;
-                ChestContents normal = table.RollContents(spawner.ChestSeed, ChestKind.Normal);
-                int expected = normal.Consumables.Count + (normal.Spell != null ? 1 : 0);
+                // Balance-1: a room chest rolls with the Run length's reward rates and its recorded item pity; its
+                // artifact (or the fallback spell) is one more pickup.
+                ChestContents normal = table.RollContents(spawner.ChestSeed, ChestKind.Normal,
+                    table.RatesFor(assembler.Generator.FloorCount),
+                    state.GetChest(RoomClearRewardSpawner.ClearChestId).ForcesItem);
+                int expected = normal.Consumables.Count + (normal.HasItem ? 1 : 0);
                 Room(assembler, floorOneRoom).Node.SetVisible(true);
                 int before = ContentChildren(assembler, floorOneRoom);
                 Assert(progress.GetResourceCount(RunResourceType.Key) == 0 && chest.TryOpenByTouch(player) &&

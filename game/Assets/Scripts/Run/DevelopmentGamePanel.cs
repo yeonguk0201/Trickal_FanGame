@@ -92,7 +92,7 @@ namespace TrickalFanGame.Run
             DrawSpellSlotSection(assembler);
             DrawPowerSection(assembler);
             DrawArtifactSection(assembler);
-            DrawResourceSection(progress);
+            DrawResourceSection(assembler, progress);
             DrawElifSection(assembler, progress);
             DrawChestSection(assembler);
             DrawObstacleSection(assembler);
@@ -519,7 +519,7 @@ namespace TrickalFanGame.Run
                                     : string.Empty));
         }
 
-        private void DrawResourceSection(RunProgress progress)
+        private void DrawResourceSection(RoomGraphAssembler assembler, RunProgress progress)
         {
             GUILayout.Label($"— Resources — bomb {progress.GetResourceCount(RunResourceType.Bomb)}  " +
                             $"key {progress.GetResourceCount(RunResourceType.Key)}  " +
@@ -533,6 +533,16 @@ namespace TrickalFanGame.Run
             ResourcePity pity = progress.Pity;
             GUILayout.Label($"Pity key {pity.KeyDroughtClears}/{ResourcePity.KeyThreshold}  " +
                             $"bomb {pity.BombDroughtClears}/{ResourcePity.BombThreshold}  (next clear guarantees at the threshold)");
+            // Balance-1: the chest item pity and the reward rates of this Run's length.
+            ChestRewardRates chestRates = assembler.ChestContentTable != null
+                ? assembler.ChestContentTable.RatesFor(assembler.Generator != null ? assembler.Generator.FloorCount : 0)
+                : null;
+            GUILayout.Label(chestRates != null
+                ? $"Chest item pity {pity.ItemDroughtClears}/{chestRates.ItemPityClears}  normal chest artifact " +
+                  $"{chestRates.NormalArtifactChance:P0} spell {chestRates.NormalSpellChance:P0} ({chestRates.FloorCount}F rates)"
+                : "Chest item pity: no reward rates");
+            if (chestRates != null && AssistedButton("Chest item pity on next clear"))
+                pity.SetItemDroughtForDevelopment(chestRates.ItemPityClears);
             GUILayout.BeginHorizontal();
             if (AssistedButton("Key pity on next clear"))
                 pity.SetDroughtForDevelopment(RunResourceType.Key, ResourcePity.KeyThreshold);
@@ -653,8 +663,8 @@ namespace TrickalFanGame.Run
             RoomPrefab room = CurrentRoom(assembler);
             GeneratedRoomNode node = assembler.GeneratedGraph.FindFloor(room.Node.FloorNumber).Nodes
                 .First(candidate => candidate.RoomId == room.Node.RoomId);
-            RoomChestSite site = new(room, node.Template, assembler.Progress.GetRoomState(room.Node.RoomId),
-                assembler.Progress, player.transform);
+            RoomChestSite site = assembler.WithChestRewards(new RoomChestSite(room, node.Template,
+                assembler.Progress.GetRoomState(room.Node.RoomId), assembler.Progress, player.transform));
             TreasureChest chest = site.Parent.GetComponentsInChildren<TreasureChest>(false)
                 .Where(candidate => candidate.ChestId.StartsWith(RoomChestSpawner.DevelopmentChestPrefix,
                     System.StringComparison.Ordinal))
@@ -880,8 +890,8 @@ namespace TrickalFanGame.Run
             }
 
             TreasureChest chest = RoomChestSpawner.SpawnDevelopmentChest(assembler.ChestContentTable,
-                new RoomChestSite(room, node.Template, state, assembler.Progress,
-                    assembler.Graph.Player != null ? assembler.Graph.Player.transform : null), node.ContentSeed, kind,
+                assembler.WithChestRewards(new RoomChestSite(room, node.Template, state, assembler.Progress,
+                    assembler.Graph.Player != null ? assembler.Graph.Player.transform : null)), node.ContentSeed, kind,
                 out string error);
             message = chest != null ? $"Placed {kind} chest {chest.ChestId}." : error;
             return chest != null;
@@ -1414,6 +1424,13 @@ namespace TrickalFanGame.Run
 
         private static void RestartWithSeed(int seed)
         {
+            // Balance-1: after GAME OVER the result scene is held half-loaded, and Unity queues any other load
+            // behind it. Confirm GAME OVER and restart from the result screen instead.
+            if (TrickalFanGame.Frontend.RunSceneLoader.IsPreloading)
+            {
+                Debug.LogWarning("[DevelopmentGamePanel] Restart is unavailable while the result scene preloads.");
+                return;
+            }
             RunSession.DevelopmentSeedOverride = seed;
             RunSession session = FindFirstObjectByType<RunSession>();
             if (session != null && session.TryRestartRun()) return;

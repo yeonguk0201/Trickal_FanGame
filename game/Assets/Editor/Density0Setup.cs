@@ -23,6 +23,8 @@ namespace TrickalFanGame.Editor
     public static class Density0Setup
     {
         public const int EncounterContentVersion = 24;
+        // Balance-1: the two-wave large rooms. Density-0 owns the wave layouts, so re-running it stamps this version.
+        public const int Balance1EncounterContentVersion = 27;
 
         private const SpawnPointPlacementRole MeleeRear =
             SpawnPointPlacementRole.MeleePressure | SpawnPointPlacementRole.RearFiring;
@@ -95,6 +97,14 @@ namespace TrickalFanGame.Editor
         private static Slot[] W(params Slot[] slots) => slots;
         private static Slot[][] Repeat(int waves, Slot[] wave) => Enumerable.Repeat(wave, waves).ToArray();
 
+        // Balance-1 (2026-11-24): a large room is two or three waves of 10~14 enemies in all, down from three waves
+        // of up to 20, so a long fight no longer drains the player before the floor's boss. Crossfire and the nest
+        // keep three smaller waves; the others are two.
+        public const int LargeMinimumWaves = 2;
+        public const int LargeMaximumWaves = 3;
+        public const int LargeMinimumEnemies = 10;
+        public const int LargeMaximumEnemies = 14;
+
         // Small keeps the waves it had before Density-0, in the same rule order. A charger comes first in its
         // wave so it claims the charge lane before a rear-firing enemy can.
         public static Slot[][] Layout(string profileId, string pattern)
@@ -109,8 +119,7 @@ namespace TrickalFanGame.Editor
                 "pressure" when large => new[]
                 {
                     W(S(SlotKind.PressureMelee, 4), S(SlotKind.PressureRear, 2)),
-                    W(S(SlotKind.PressureMelee, 4), S(SlotKind.PressureRear, 2)),
-                    W(S(SlotKind.PressureMelee, 5), S(SlotKind.PressureRear, 3)),
+                    W(S(SlotKind.PressureMelee, 4), S(SlotKind.PressureRear, 3)),
                 },
                 "pressure" => new[]
                 {
@@ -124,9 +133,9 @@ namespace TrickalFanGame.Editor
                     { W(S(SlotKind.CrossfireRear, 3)), W(S(SlotKind.Charger, 1), S(SlotKind.Chaser, 2)) },
                 "crossfire" when large => new[]
                 {
-                    W(S(SlotKind.CrossfireRear, 4), S(SlotKind.Chaser, 2)),
-                    W(S(SlotKind.Charger, 1), S(SlotKind.Chaser, 4), S(SlotKind.CrossfireRear, 2)),
-                    W(S(SlotKind.CrossfireRear, 4), S(SlotKind.Chaser, 3)),
+                    W(S(SlotKind.CrossfireRear, 4), S(SlotKind.Chaser, 1)),
+                    W(S(SlotKind.Charger, 1), S(SlotKind.Chaser, 2), S(SlotKind.CrossfireRear, 1)),
+                    W(S(SlotKind.CrossfireRear, 3), S(SlotKind.Chaser, 2)),
                 },
                 "crossfire" => new[]
                 {
@@ -137,7 +146,7 @@ namespace TrickalFanGame.Editor
 
                 "swarm" when small => Repeat(2, W(S(SlotKind.SwarmMelee, 3))),
                 "swarm" when basic => Repeat(2, W(S(SlotKind.SwarmMelee, 4))),
-                "swarm" when large => Repeat(3, W(S(SlotKind.SwarmMelee, 6))),
+                "swarm" when large => Repeat(2, W(S(SlotKind.SwarmMelee, 7))),
                 "swarm" => Repeat(2, W(S(SlotKind.SwarmMelee, 6))),
 
                 "elite-pair" when small => new[] { W(S(SlotKind.Charger, 1), S(SlotKind.Sniper, 1)) },
@@ -147,7 +156,6 @@ namespace TrickalFanGame.Editor
                 {
                     W(S(SlotKind.Charger, 1), S(SlotKind.Sniper, 1), S(SlotKind.Chaser, 3)),
                     W(S(SlotKind.Charger, 1), S(SlotKind.Sniper, 2), S(SlotKind.Chaser, 3)),
-                    W(S(SlotKind.Charger, 1), S(SlotKind.Sniper, 2), S(SlotKind.Chaser, 4)),
                 },
                 "elite-pair" => new[]
                 {
@@ -157,7 +165,7 @@ namespace TrickalFanGame.Editor
 
                 "jyubi-swarm" when small => Repeat(2, W(S(SlotKind.Jyubi, 3))),
                 "jyubi-swarm" when basic => Repeat(2, W(S(SlotKind.Jyubi, 4))),
-                "jyubi-swarm" when large => Repeat(3, W(S(SlotKind.Jyubi, 6))),
+                "jyubi-swarm" when large => Repeat(2, W(S(SlotKind.Jyubi, 7))),
                 "jyubi-swarm" => Repeat(2, W(S(SlotKind.Jyubi, 6))),
 
                 "jyubi-nest" when small => new[]
@@ -166,9 +174,9 @@ namespace TrickalFanGame.Editor
                     { W(S(SlotKind.JyubiKing, 1), S(SlotKind.Jyubi, 3)), W(S(SlotKind.Chaser, 4)) },
                 "jyubi-nest" when large => new[]
                 {
-                    W(S(SlotKind.JyubiKing, 1), S(SlotKind.Jyubi, 4)),
-                    W(S(SlotKind.Chaser, 6)),
-                    W(S(SlotKind.JyubiKing, 1), S(SlotKind.Jyubi, 3), S(SlotKind.Chaser, 4)),
+                    W(S(SlotKind.JyubiKing, 1), S(SlotKind.Jyubi, 3)),
+                    W(S(SlotKind.Chaser, 4)),
+                    W(S(SlotKind.JyubiKing, 1), S(SlotKind.Jyubi, 2), S(SlotKind.Chaser, 3)),
                 },
                 "jyubi-nest" => new[]
                 {
@@ -429,7 +437,7 @@ namespace TrickalFanGame.Editor
             }
 
             Undo.RecordObject(generator, "Configure Density-0 Encounters");
-            generator.ConfigureEncounters(Math.Max(EncounterContentVersion, generator.EncounterContentVersion),
+            generator.ConfigureEncounters(Math.Max(Balance1EncounterContentVersion, generator.EncounterContentVersion),
                 definitions);
             EditorUtility.SetDirty(generator);
             AssetDatabase.SaveAssets();

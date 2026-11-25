@@ -32,6 +32,7 @@ namespace TrickalFanGame.Room
         public const string TreeVariantId = "tree";
         public const uint DropSeedSalt = 0x27D4EB2Fu;
         public const uint ExtraDropSeedSalt = 0x51ED270Bu;
+        public const uint DropCountSeedSalt = 0x2F6B9A1Du;
         public const uint RareItemSeedSalt = 0x6A09E667u;
         public const uint ExplosionSeedSalt = 0x1F83D9ABu;
         public const uint EnemySeedSalt = 0x5BE0CD19u;
@@ -55,6 +56,8 @@ namespace TrickalFanGame.Room
 
         private RoomRunState runState;
         private RunProgress runProgress;
+        private int dropCountMinimum;
+        private int dropCountMaximum;
         private SecretRoomLink secretLink;
         private RoomNode sourceNode;
         private RoomController sourceRoom;
@@ -91,7 +94,27 @@ namespace TrickalFanGame.Room
         public ResourceDropTable DropTable => dropTable;
         public int DropSeed => dropSeed;
         public ObstacleBreakRule BreakRule => variant != null ? variant.BreakRule : ObstacleBreakRule.Hits;
-        public int DropCount => variant != null ? variant.DropCount : 1;
+        public int DropCount
+        {
+            get
+            {
+                // Balance-1: a seeded count within an explicit range (shop decor) instead of the variant's count.
+                if (dropCountMaximum > 0) return ResolveDropCount(dropSeed, dropCountMinimum, dropCountMaximum);
+                return variant != null ? variant.DropCount : 1;
+            }
+        }
+
+        public static int ResolveDropCount(int seed, int minimum, int maximum)
+        {
+            minimum = Mathf.Max(1, minimum);
+            int span = Mathf.Max(minimum, maximum) - minimum + 1;
+            uint roll = unchecked((uint)FloorGenerator.DeriveSeed(seed, 0, DropCountSeedSalt));
+            return minimum + (int)(roll % (uint)span);
+        }
+
+        public bool HasDropCountRange => dropCountMaximum > 0;
+        public int DropCountMinimum => dropCountMinimum;
+        public int DropCountMaximum => dropCountMaximum;
         // The first pickup of the last break; LastDrops holds all of them, a rare item last.
         public GameObject LastDrop { get; private set; }
         public IReadOnlyList<GameObject> LastDrops => lastDrops;
@@ -119,6 +142,13 @@ namespace TrickalFanGame.Room
             requiredHits = Mathf.Max(1, configuredRequiredHits);
             dropTable = configuredTable;
             visual = configuredVisual;
+        }
+
+        // Balance-1: every drop of this obstacle leaves minimum..maximum pickups, picked from its drop seed.
+        public void ConfigureDropCountRange(int minimum, int maximum)
+        {
+            dropCountMinimum = Mathf.Max(1, minimum);
+            dropCountMaximum = Mathf.Max(dropCountMinimum, maximum);
         }
 
         // Trap-0: a placed copy of an obstacle trap Prefab takes its own ID and keeps the Prefab's kind.

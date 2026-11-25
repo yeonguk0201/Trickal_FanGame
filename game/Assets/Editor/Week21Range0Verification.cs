@@ -27,7 +27,7 @@ namespace TrickalFanGame.Editor
             (Week19Spawn2Setup.QuickRangedPrefabPath, typeof(MobileRangedEnemyController),
                 Week21Range0Setup.QuickRangedProjectileLifetime, 9.1f),
             (Week15Enemy4Setup.SniperPrefabPath, typeof(LongRangeSniperController),
-                Week21Range0Setup.SniperProjectileLifetime, 14.3f),
+                Week21Range0Setup.SniperProjectileLifetime, Week21Range0Setup.SniperRange),
             (Week21Range0Setup.ArcherPrefabPath, typeof(LongRangeSniperController),
                 Week21Range0Setup.ArcherProjectileLifetime, 11.9f),
             (Week21Range0Setup.MagePrefabPath, typeof(LongRangeSniperController),

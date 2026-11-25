@@ -58,6 +58,7 @@ namespace TrickalFanGame.Editor
 
             ValidateGoldiWallPieces(goldi);
             ValidateDrops(definition);
+            ValidateDropAmounts(sist, goldi);
             // The sign never drops, so the break test leaves no pickup behind.
             ValidateThreeHitBreak(sist.pieces.First(piece => piece.stages[0].name == "sist-sign-1"));
             Debug.Log("Shop decor verification passed.");
@@ -92,6 +93,23 @@ namespace TrickalFanGame.Editor
                 if (piece.center.x <= -ShopDecorSetup.WallColumnX)
                     Assert(solid.xMin <= -FloorHalfWidth, $"The player can pass behind {piece.pieceId}.");
             }
+        }
+
+        // Balance-1: a dropping piece leaves 2~3 pickups; a whole shop gives about 6 (시스트) or 10 (골디).
+        private static void ValidateDropAmounts(ShopDecorDefinition.Theme sist, ShopDecorDefinition.Theme goldi)
+        {
+            int[] counts = Enumerable.Range(0, 256).Select(seed => DestructibleObstacle.ResolveDropCount(seed,
+                ShopDecorDefinition.PieceMinimumDrops, ShopDecorDefinition.PieceMaximumDrops)).ToArray();
+            Assert(ShopDecorDefinition.PieceMinimumDrops == 2 && ShopDecorDefinition.PieceMaximumDrops == 3 &&
+                   counts.All(count => count is 2 or 3) && counts.Contains(2) && counts.Contains(3),
+                "A shop piece that drops must leave 2 or 3 pickups, both possible.");
+            float perDrop = (ShopDecorDefinition.PieceMinimumDrops + ShopDecorDefinition.PieceMaximumDrops) * 0.5f;
+            float Expected(ShopDecorDefinition.Theme theme) =>
+                theme.pieces.Sum(piece => piece.dropTable.DropChance) * perDrop;
+            float sistTotal = Expected(sist), goldiTotal = Expected(goldi);
+            Assert(sistTotal >= 5f && sistTotal <= 7f && goldiTotal >= 9f && goldiTotal <= 11f,
+                $"A broken shop must give about 6 (시스트) and 10 (골디) pickups, found {sistTotal:0.0} and " +
+                $"{goldiTotal:0.0}.");
         }
 
         private static void ValidateDrops(ShopDecorDefinition definition)
