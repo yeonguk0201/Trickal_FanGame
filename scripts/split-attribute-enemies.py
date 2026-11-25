@@ -4,7 +4,8 @@
 #   - Each frame sits on a canvas centred on its feet with the ground PAD px from the bottom, so swapping frames never
 #     moves the feet. Heights in a sheet are kept, so the jump sheet's rise stays in the drawing.
 #   - Pieces are grouped by connected component into the sheet's four cells, so a long ribbon or a slash that crosses
-#     a cell boundary stays with its frame.
+#     a cell boundary stays with its frame. A body broken into big pieces counts as one body (불효자손 순수 패배's
+#     third frame), so its debris does not move to the neighbouring frame.
 # Usage: python -I scripts/split-attribute-enemies.py [downloads folder]
 import shutil
 import sys
@@ -21,6 +22,11 @@ ALPHA = 16
 IDLE_HEIGHT = 580
 PAD = 8
 GRID = 4  # components are found on a 1/4 size mask
+# A piece at least this share of its cell's largest piece is part of the body, not debris.
+BODY_SHARE = 0.2
+# A piece smaller than this (in 1/4 mask cells) and farther than this many pixels from every body is dropped.
+SPECK_COUNT = 10
+SPECK_DISTANCE = 120
 
 # Key: (Korean name, frame prefix). `reference` is the frame in which the whole standing body is visible.
 CHARACTERS = {
@@ -62,26 +68,38 @@ def split_cells(path):
     sheet = np.array(Image.open(path).convert('RGBA'))
     labels, boxes = components(sheet[..., 3])
     cell = sheet.shape[1] / 4
-    # The biggest piece of each cell is that frame's body; every other piece (sparks, debris) joins the nearest body,
-    # because a spark drawn beside a frame can cross the cell line.
+    # The big pieces of each cell are that frame's body (a broken body falls apart into several); every other piece
+    # (sparks, debris) joins the nearest body, because a spark drawn beside a frame can cross the cell line.
     pieces = [box for box in boxes if box[1] >= 3]
     bodies = []
     for index in range(4):
         inside = [box for box in pieces if min(3, int(box[2] // cell)) == index]
         if not inside:
             raise SystemExit(f'{path.name}: cell {index} is empty')
-        bodies.append(max(inside, key=lambda box: box[1]))
+        largest = max(box[1] for box in inside)
+        bodies.append([box for box in inside if box[1] >= largest * BODY_SHARE])
 
     def gap(box, body):
         # Horizontal distance to the body at the piece's own height, so a spark under a neighbour's raised head goes
-        # to the frame it is actually drawn beside.
+        # to the frame it is actually drawn beside. A piece beside no part of a body measures the straight distance
+        # to the body's rows and columns instead.
+        body_labels = [part[0] for part in body]
         rows = np.nonzero((labels == box[0]).any(1))[0]
-        columns = np.nonzero((labels[rows.min():rows.max() + 1] == body[0]).any(0))[0]
+        columns = np.nonzero(np.isin(labels[rows.min():rows.max() + 1], body_labels).any(0))[0]
         if columns.size == 0:
-            return max(body[3] - box[4], box[3] - body[4], 0) + labels.shape[1] * GRID
+            body_rows = np.nonzero(np.isin(labels, body_labels).any(1))[0]
+            dx = max(min(part[3] for part in body) - box[4], box[3] - max(part[4] for part in body), 0)
+            dy = max(body_rows.min() - rows.max() - 1, rows.min() - body_rows.max() - 1, 0) * GRID
+            return float(np.hypot(dx, dy))
         return max(columns.min() * GRID - box[4], box[3] - (columns.max() + 1) * GRID, 0)
 
-    owners = [min(range(4), key=lambda index: gap(box, bodies[index])) for box in pieces]
+    owners = []
+    for box in pieces:
+        gaps = [gap(box, bodies[index]) for index in range(4)]
+        owner = int(np.argmin(gaps))
+        # A speck far from every body is a stray mark in the drawing, not debris; it would widen its frame's box and
+        # shift the frame off its feet.
+        owners.append(None if box[1] < SPECK_COUNT and gaps[owner] > SPECK_DISTANCE else owner)
     frames = []
     for index in range(4):
         keep = [box[0] for box, owner in zip(pieces, owners) if owner == index]

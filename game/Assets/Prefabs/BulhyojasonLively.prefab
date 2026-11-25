@@ -314,7 +314,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8b326d0053e810c4e999ed8743141673, type: 3}
   - {fileID: 21300000, guid: 85d1ba36ff92cce4581978ffd4e13ce7, type: 3}
   - {fileID: 21300000, guid: 308e9ef5467818f4ab58d68b4ac5ec6d, type: 3}
-  sizeMultiplier: 1.0191145
+  sizeMultiplier: 1.0171162
   knockScale: 1
 --- !u!114 &5127859201557616691
 MonoBehaviour:
