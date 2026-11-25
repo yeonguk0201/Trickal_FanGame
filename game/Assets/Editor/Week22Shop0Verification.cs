@@ -331,6 +331,15 @@ namespace TrickalFanGame.Editor
                    progress.GetResourceCount(RunResourceType.Gold) == budget - item.Price - consumable.Price,
                 "Buying a consumable must drop its floor pickup in front of the shopkeeper.");
 
+            // A cell that last showed a spell card must not keep the card's black square and rarity frame for a
+            // consumable's pickup art.
+            ShopOfferCellView reused = view.Cells[consumable.SlotIndex];
+            reused.Icon.material = UserArtwork.ItemMaterial(true, false, ItemRarity.Rare);
+            reused.Bind(consumable.SlotIndex, consumable, ShopOfferStatus.Available, consumable.Price, false);
+            Assert(reused.Icon.material == reused.Icon.defaultMaterial,
+                "A consumable cell must drop the item artwork material a previous offer left on its icon.");
+            view.Refresh();
+
             // Closing gives control back; reopening shows the same stock on the first offer still on sale.
             view.Close();
             Assert(!session.IsOpen && !view.IsVisible && view.Overlay.alpha == 0f && !view.Overlay.blocksRaycasts &&
