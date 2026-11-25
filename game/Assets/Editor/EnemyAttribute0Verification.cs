@@ -49,6 +49,13 @@ namespace TrickalFanGame.Editor
             }
 
             float pure = Load(EnemyAttribute0Setup.PurePrefab).GetComponent<Health>().MaxHealth;
+            GameObject lasher = Load(EnemyAttribute0Setup.PurePrefab);
+            Sprite tail = lasher.GetComponent<EnemyRibbonLashController>().TailSprite;
+            Sprite lashBody = lasher.GetComponent<EnemyAttackArtwork>().GetFrame((int)EnemyAttackPhase.Active);
+            Assert(lashBody != null && lashBody.name == "BulhyojasonPure_LashBody" &&
+                   tail != null && tail.name == "BulhyojasonPure_LashTail" &&
+                   Vector2.Distance(tail.pivot, tail.rect.size * 0.5f) < 1f,
+                "The lash needs a separate body and a center-pivoted directional tail.");
             Assert(pure > EnemyAttribute0Setup.MadnessBulhyojasonHealth, "순수 must outlast 광기.");
             Assert(Load(EnemyAttribute0Setup.GloomyBulhyojasonPrefab).GetComponent<Health>().MaxHealth <
                    EnemyAttribute0Setup.LivelyHealth, "우울 must be frailer than 활발.");

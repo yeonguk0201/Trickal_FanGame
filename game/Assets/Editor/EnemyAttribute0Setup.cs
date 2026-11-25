@@ -34,7 +34,7 @@ namespace TrickalFanGame.Editor
         public const float ColdSansamoHealth = 30f;
         public const float GloomySansamoHealth = 25f;
 
-        // The ribbon's drawn tip is 1.79 units from the feet in BulhyojasonPure_Attack_2.
+        // The warning, lash endpoint and hit test share this reach.
         public const float RibbonReach = 1.8f;
         public const float RibbonHeight = 0.29f;
         public const float RibbonHalfWidth = 0.4f;
@@ -175,7 +175,8 @@ namespace TrickalFanGame.Editor
         private static void BuildPure() => Build(PurePrefab, PureHealth, false, "Attack", root =>
         {
             root.AddComponent<EnemyRibbonLashController>().Configure(2.4f, 12f, RibbonReach, RibbonHeight,
-                RibbonHalfWidth, 0.5f, 0.16f, 0.5f, 0.5f, EnemyDamageTier.Light);
+                RibbonHalfWidth, 0.5f, 0.16f, 0.5f, 0.5f, EnemyDamageTier.Light,
+                ImportSprite($"{ArtFolder}/{PurePrefab}_LashTail.png", centered: true));
             SetContact(root, EnemyDamageTier.Light, false);
         });
 
@@ -277,9 +278,11 @@ namespace TrickalFanGame.Editor
         }
 
         private static Sprite[] Frames(string prefab, string kind) => Enumerable.Range(0, 4)
-            .Select(index => ImportSprite($"{ArtFolder}/{prefab}_{kind}_{index}.png")).ToArray();
+            .Select(index => prefab == PurePrefab && kind == "Attack" && index == (int)EnemyAttackPhase.Active
+                ? ImportSprite($"{ArtFolder}/{prefab}_LashBody.png")
+                : ImportSprite($"{ArtFolder}/{prefab}_{kind}_{index}.png")).ToArray();
 
-        private static Sprite ImportSprite(string path)
+        private static Sprite ImportSprite(string path, bool centered = false)
         {
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
             TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
@@ -305,7 +308,7 @@ namespace TrickalFanGame.Editor
             TextureImporterSettings settings = new();
             importer.ReadTextureSettings(settings);
             settings.spriteAlignment = (int)SpriteAlignment.Custom;
-            settings.spritePivot = new Vector2(0.5f, RootPixelsAboveCanvasBottom / height);
+            settings.spritePivot = new Vector2(0.5f, centered ? 0.5f : RootPixelsAboveCanvasBottom / height);
             importer.SetTextureSettings(settings);
             importer.SaveAndReimport();
             Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);

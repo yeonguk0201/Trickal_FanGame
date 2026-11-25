@@ -10,6 +10,7 @@ namespace TrickalFanGame.Enemy
     /// locks when the wind-up starts, so stepping out of the warning band dodges it.
     /// </summary>
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(100)] // Position the tail after the movement animator sets the pose and facing.
     [RequireComponent(typeof(Rigidbody2D), typeof(Health), typeof(KnockbackReceiver))]
     [RequireComponent(typeof(EnemyBehaviorContext), typeof(EnemyAttackPresentation))]
     public sealed class EnemyRibbonLashController : MonoBehaviour, IKnockbackPushBlocker
@@ -19,6 +20,7 @@ namespace TrickalFanGame.Enemy
         [SerializeField, Min(0.1f)] private float reach = 1.8f;
         // The ribbon is drawn at head height, above the body's root.
         [SerializeField] private float ribbonHeight = 0.29f;
+        [SerializeField] private Sprite tailSprite;
         [SerializeField, Min(0.05f)] private float hitHalfWidth = 0.4f;
         [SerializeField, Min(0.01f)] private float telegraphDuration = 0.5f;
         [SerializeField, Min(0.01f)] private float activeDuration = 0.16f;
@@ -32,6 +34,9 @@ namespace TrickalFanGame.Enemy
         private EnemyBehaviorContext behavior;
         private EnemyAttackPresentation presentation;
         private EnemyAttackArtwork artwork;
+        private SpriteRenderer source;
+        private SpriteRenderer tail;
+        private float phaseStartedAt;
         private LineRenderer band;
         private MeleeWarningVisual warning;
         private readonly EnemyObstacleNavigator navigator = new();
@@ -45,13 +50,15 @@ namespace TrickalFanGame.Enemy
         public float Reach => reach;
         public float RibbonHeight => ribbonHeight;
         public float HitHalfWidth => hitHalfWidth;
+        public Sprite TailSprite => tailSprite;
         public EnemyDamageTier DamageTier => damageTier;
         public EnemyAttackPhase Phase => phase;
         public Vector2 Aim => aim;
         public bool BlocksKnockbackPush => phase == EnemyAttackPhase.Active;
 
         public void Configure(float speed, float detection, float configuredReach, float height, float halfWidth,
-            float telegraph, float active, float recovery, float configuredCooldown, EnemyDamageTier tier)
+            float telegraph, float active, float recovery, float configuredCooldown, EnemyDamageTier tier,
+            Sprite ribbonTail = null)
         {
             moveSpeed = Mathf.Max(0f, speed);
             detectionRange = Mathf.Max(0f, detection);
@@ -63,6 +70,7 @@ namespace TrickalFanGame.Enemy
             recoveryDuration = Mathf.Max(0f, recovery);
             cooldown = Mathf.Max(0f, configuredCooldown);
             damageTier = tier;
+            tailSprite = ribbonTail;
         }
 
         // True when a point (relative to the body's root) is on the ribbon whipped along direction from head height.
@@ -82,10 +90,52 @@ namespace TrickalFanGame.Enemy
             behavior.Initialize();
             presentation = GetComponent<EnemyAttackPresentation>();
             artwork = GetComponent<EnemyAttackArtwork>();
+            source = GetComponent<SpriteRenderer>();
             terrain = EnemyObstacleNavigator.ResolveFootprint(gameObject);
         }
 
-        private void OnDisable() => Cancel();
+        private void OnDisable()
+        {
+            Cancel();
+            if (tail != null) tail.enabled = false;
+        }
+
+        private void LateUpdate()
+        {
+            bool recovering = phase == EnemyAttackPhase.Recovery;
+            float extension = recovering ? 1f - Mathf.Clamp01((Time.time - phaseStartedAt) / 0.1f) : 1f;
+            if ((phase != EnemyAttackPhase.Active && !recovering) || tailSprite == null || extension <= 0f ||
+                !source.enabled || source.forceRenderingOff || artwork == null || artwork.FrameCount != 4 ||
+                source.sprite != artwork.GetFrame((int)phase))
+            {
+                if (tail != null) tail.enabled = false;
+                return;
+            }
+
+            if (tail == null)
+            {
+                GameObject child = new("Ribbon Tail");
+                child.layer = gameObject.layer;
+                child.transform.SetParent(transform, false);
+                tail = child.AddComponent<SpriteRenderer>();
+                tail.sprite = tailSprite;
+                tail.sharedMaterial = source.sharedMaterial;
+            }
+
+            // Knot centers measured from each pose's sprite pivot, in local units.
+            Vector2 knot = recovering ? new Vector2(0.11f, 0.38f) : new Vector2(0.16f, 0.33f);
+            if (source.flipX) knot.x = -knot.x;
+            Vector2 worldTip = (Vector2)transform.position + Vector2.up * ribbonHeight + aim * reach;
+            Vector2 target = transform.InverseTransformPoint(worldTip);
+            Vector2 span = (target - knot) * extension;
+            tail.transform.localPosition = knot + span * 0.5f;
+            tail.transform.localRotation = Quaternion.Euler(0f, 0f, Vector2.SignedAngle(Vector2.left, span));
+            tail.transform.localScale = new Vector3(span.magnitude * tailSprite.pixelsPerUnit / tailSprite.rect.width, 1f, 1f);
+            tail.sortingLayerID = source.sortingLayerID;
+            tail.sortingOrder = source.sortingOrder + (aim.y > 0.01f ? -1 : 1);
+            tail.color = source.color;
+            tail.enabled = true;
+        }
 
         private void FixedUpdate()
         {
@@ -188,6 +238,7 @@ namespace TrickalFanGame.Enemy
         private void SetPhase(EnemyAttackPhase next, float endsAt)
         {
             phase = next;
+            phaseStartedAt = Time.time;
             phaseEndsAt = endsAt;
             presentation.SetPhase(next);
         }

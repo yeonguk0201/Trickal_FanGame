@@ -289,7 +289,7 @@ MonoBehaviour:
   frames:
   - {fileID: 21300000, guid: f35cbb2700755cd4a931f17ef3ede9a8, type: 3}
   - {fileID: 21300000, guid: 3ed642c0fda4370478b9f5314ef520e3, type: 3}
-  - {fileID: 21300000, guid: 13538ba637c94144e87587b1612e0216, type: 3}
+  - {fileID: 21300000, guid: e6c21302ffbc4d6b849b764541b7646a, type: 3}
   - {fileID: 21300000, guid: e6930ae7173b2194b9522651b830237f, type: 3}
   projectileSprite: {fileID: 0}
 --- !u!114 &5516819172166646981
@@ -346,6 +346,7 @@ MonoBehaviour:
   detectionRange: 12
   reach: 1.8
   ribbonHeight: 0.29
+  tailSprite: {fileID: 21300000, guid: 7e23c48fdc204a60b598031dc714c8ae, type: 3}
   hitHalfWidth: 0.4
   telegraphDuration: 0.5
   activeDuration: 0.16
