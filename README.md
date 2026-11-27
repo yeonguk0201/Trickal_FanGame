@@ -8,11 +8,21 @@ Unity로 만든 게임에서 한 판(Run)이 끝나면 결과가 REST API를 거
 |---|---|
 | 개발 인원 | 1인 |
 | 개발 기간 | 2026.08 ~ 진행 중 |
-| 상태 | **베타 공개 준비 중** — Backend·DB·Web은 운영 배포를 마쳤고, 게임 빌드 배포와 시연 영상은 아직 없습니다 ([진행 상황](#진행-상황)) |
+| 상태 | **베타 공개 준비 중** — Backend·DB·Web은 운영 배포를 마쳤고, 게임 빌드 배포를 준비 중입니다 ([진행 상황](#진행-상황)) |
 | 전적 웹 | [trickal-fan-game.vercel.app](https://trickal-fan-game.vercel.app) |
 | API | [trickal-fan-game-api.onrender.com/api/health](https://trickal-fan-game-api.onrender.com/api/health) (무료 플랜이라 첫 요청은 깨어나는 데 최대 1분) |
 
-<!-- TODO: 플레이 GIF와 웹 전적 화면 스크린샷 추가 -->
+## 플레이 미리보기
+
+**1층 보스전 · 에르핀 vs 부스러기**
+
+![부스러기 등장 연출과 에르핀의 첫 교전](docs/media/gameplay/crumb-boss.gif)
+
+| 일반 방 전투 | 캐릭터 선택과 1층 입장 |
+|---|---|
+| ![폭발에 휘말린 적들을 에르핀이 공격하는 장면](docs/media/gameplay/room-combat.gif) | ![타이틀에서 에르핀을 선택해 1층에 입장하는 장면](docs/media/gameplay/character-select.gif) |
+
+<!-- TODO: 웹 전적 화면 스크린샷 추가 -->
 
 ## 구성
 
@@ -114,7 +124,7 @@ flowchart LR
 | Phase 7 | Frontend·HUD, 방 Layout, 층별 보스, 상자·스펠·상점, 함정·신규 적·권능 | 완료 |
 | Phase 7 | 기기 키 인증, 오프라인 플레이, Backend·DB·Web 운영 배포 | 완료 |
 | Phase 7 | 밸런스·경제 측정, 여러 seed 실제 Run 검증, 게임 빌드, 베타 공개 | 진행 중 |
-| Phase 8 | 시연 영상, 회고 | 예정 |
+| Phase 8 | 전체 시연 영상, 회고 | 예정 |
 
 함정·신규 적·교주의 권능을 다룬 [일곱째 달 계획](docs/26-seventh-month-plan.md)의 콘텐츠 조각을 마쳤고, 지금은 밸런스 조정과 실제 빌드 검증을 거쳐 베타를 공개하는 [베타 공개 전 작업 계획](docs/30-beta-release-plan.md)을 진행하고 있습니다. 전체 계획은 [로드맵](docs/02-roadmap.md)에 있습니다.
 
